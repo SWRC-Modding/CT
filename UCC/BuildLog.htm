@@ -1,0 +1,66 @@
+<html>
+<head>
+<META HTTP-EQUIV="Content-Type" content="text/html; charset=Windows-1252">
+</head>
+<body>
+<pre>
+<table width=100% bgcolor=#CFCFE5><tr> <td> <font face=arial size=+3>
+Build Log
+</font></table><table width=* cellspacing=0 cellpadding=0><tr><td width=0 bgcolor=#EDEDF5>&nbsp;</td><td width=0 bgcolor=#FFFFFF>&nbsp;</td><td width=*><pre>
+<h3>------- Build started: Project: UCC, Configuration: Release|Win32 -------
+</h3>
+</pre></table><table width=100% bgcolor=#DFDFE5><tr><td><font face=arial size=+2>
+Command Lines
+</font></table><table width=* cellspacing=0 cellpadding=0><tr><td width=0 bgcolor=#EDEDF5>&nbsp;</td><td width=0 bgcolor=#FFFFFF>&nbsp;</td><td width=*><pre>Creating temporary file "c:\Users\Leon\Documents\Visual Studio Projects\Ucc\Ucc\Release\RSP000001.rsp" with contents
+[
+/O2 /FD /EHsc /Fo"Release/" /Fd"Release/vc70.pdb" /c /TP
+".\ucc.cpp"
+]
+Creating command line "cl.exe @"c:\Users\Leon\Documents\Visual Studio Projects\Ucc\Ucc\Release\RSP000001.rsp" /nologo"
+Creating temporary file "c:\Users\Leon\Documents\Visual Studio Projects\Ucc\Ucc\Release\RSP000002.rsp" with contents
+[
+/OUT:"./UCC.exe" /NOLOGO  kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib
+".\release\ucc.obj"
+]
+Creating command line "link.exe @"c:\Users\Leon\Documents\Visual Studio Projects\Ucc\Ucc\Release\RSP000002.rsp""
+</pre></table><table width=100% bgcolor=#DFDFE5><tr><td><font face=arial size=+2>
+Output Window
+</font></table><table width=* cellspacing=0 cellpadding=0><tr><td width=0 bgcolor=#EDEDF5>&nbsp;</td><td width=0 bgcolor=#FFFFFF>&nbsp;</td><td width=*><pre>Compiling...
+ucc.cpp
+Linking...
+   Creating library ./UCC.lib and object ./UCC.exp
+ucc.obj : error LNK2019: unresolved external symbol "__declspec(dllimport) char const * __cdecl appTimestamp(bool,bool)" (__imp_?appTimestamp@@YAPBD_N0@Z) referenced in function "public: __thiscall FOutputDeviceFile::~FOutputDeviceFile(void)" (??1FOutputDeviceFile@@QAE@XZ)
+ucc.obj : error LNK2019: unresolved external symbol "__declspec(dllimport) void __cdecl appRequestExit(int)" (__imp_?appRequestExit@@YAXH@Z) referenced in function "public: virtual void __thiscall FOutputDeviceAnsiError::Serialize(char const *,enum EName)" (?Serialize@FOutputDeviceAnsiError@@UAEXPBDW4EName@@@Z)
+ucc.obj : error LNK2019: unresolved external symbol "__declspec(dllimport) char const * __cdecl LocalizeError(char const *,char const *,char const *)" (__imp_?LocalizeError@@YAPBDPBD00@Z) referenced in function "public: virtual void __thiscall FOutputDeviceAnsiError::Serialize(char const *,enum EName)" (?Serialize@FOutputDeviceAnsiError@@UAEXPBDW4EName@@@Z)
+ucc.obj : error LNK2019: unresolved external symbol "__declspec(dllimport) int __cdecl appStrlen(char const *)" (__imp_?appStrlen@@YAHPBD@Z) referenced in function "public: virtual void __thiscall FOutputDeviceAnsiError::Serialize(char const *,enum EName)" (?Serialize@FOutputDeviceAnsiError@@UAEXPBDW4EName@@@Z)
+ucc.obj : error LNK2019: unresolved external symbol "__declspec(dllimport) char * __cdecl appStrncat(char *,char const *,int)" (__imp_?appStrncat@@YAPADPADPBDH@Z) referenced in function "public: virtual void __thiscall FOutputDeviceAnsiError::Serialize(char const *,enum EName)" (?Serialize@FOutputDeviceAnsiError@@UAEXPBDW4EName@@@Z)
+ucc.obj : error LNK2019: unresolved external symbol "__declspec(dllimport) char * __cdecl appStrncpy(char *,char const *,int)" (__imp_?appStrncpy@@YAPADPADPBDH@Z) referenced in function "public: virtual void __thiscall FOutputDeviceAnsiError::Serialize(char const *,enum EName)" (?Serialize@FOutputDeviceAnsiError@@UAEXPBDW4EName@@@Z)
+ucc.obj : error LNK2019: unresolved external symbol "__declspec(dllimport) public: static void __cdecl UObject::StaticShutdownAfterError(void)" (__imp_?StaticShutdownAfterError@UObject@@SAXXZ) referenced in function "public: virtual void __thiscall FOutputDeviceAnsiError::Serialize(char const *,enum EName)" (?Serialize@FOutputDeviceAnsiError@@UAEXPBDW4EName@@@Z)
+ucc.obj : error LNK2019: unresolved external symbol "__declspec(dllimport) int __cdecl ParseParam(char const *,char const *)" (__imp_?ParseParam@@YAHPBD0@Z) referenced in function "public: virtual int __cdecl FFeedbackContextAnsi::YesNof(char const *,...)" (?YesNof@FFeedbackContextAnsi@@UAAHPBDZZ)
+ucc.obj : error LNK2019: unresolved external symbol "__declspec(dllimport) int __cdecl appGetVarArgs(char *,int,char const * &)" (__imp_?appGetVarArgs@@YAHPADHAAPBD@Z) referenced in function "public: virtual int __cdecl FFeedbackContextAnsi::YesNof(char const *,...)" (?YesNof@FFeedbackContextAnsi@@UAAHPBDZZ)
+ucc.obj : error LNK2019: unresolved external symbol "__declspec(dllimport) public: static char const * __cdecl FName::SafeString(enum EName)" (__imp_?SafeString@FName@@SAPBDW4EName@@@Z) referenced in function $L72020
+ucc.obj : error LNK2019: unresolved external symbol "__declspec(dllimport) char * __cdecl appStrcat(char *,char const *)" (__imp_?appStrcat@@YAPADPADPBD@Z) referenced in function $L72020
+ucc.obj : error LNK2019: unresolved external symbol "__declspec(dllimport) char const * __cdecl appPackage(void)" (__imp_?appPackage@@YAPBDXZ) referenced in function $L72020
+ucc.obj : error LNK2019: unresolved external symbol "__declspec(dllimport) int __cdecl Parse(char const *,char const *,char *,int)" (__imp_?Parse@@YAHPBD0PADH@Z) referenced in function $L72020
+ucc.obj : error LNK2019: unresolved external symbol "__declspec(dllimport) char * __cdecl appStrcpy(char *,char const *)" (__imp_?appStrcpy@@YAPADPADPBD@Z) referenced in function $L72020
+ucc.obj : error LNK2019: unresolved external symbol "__declspec(dllimport) char const * __cdecl appBaseDir(void)" (__imp_?appBaseDir@@YAPBDXZ) referenced in function $L72020
+ucc.obj : error LNK2019: unresolved external symbol "__declspec(dllimport) public: static bool __cdecl FName::SafeSuppressed(enum EName)" (__imp_?SafeSuppressed@FName@@SA_NW4EName@@@Z) referenced in function $L72020
+ucc.obj : error LNK2019: unresolved external symbol "__declspec(dllimport) char * __cdecl appStrchr(char const *,int)" (__imp_?appStrchr@@YAPADPBDH@Z) referenced in function "private: int __thiscall FFileManagerGeneric::IsDrive(char const *)" (?IsDrive@FFileManagerGeneric@@AAEHPBD@Z)
+ucc.obj : error LNK2019: unresolved external symbol "__declspec(dllimport) int __cdecl appStricmp(char const *,char const *)" (__imp_?appStricmp@@YAHPBD0@Z) referenced in function "private: int __thiscall FFileManagerGeneric::IsDrive(char const *)" (?IsDrive@FFileManagerGeneric@@AAEHPBD@Z)
+ucc.obj : error LNK2019: unresolved external symbol "__declspec(dllimport) char const * __cdecl appGetSystemErrorMessage(int)" (__imp_?appGetSystemErrorMessage@@YAPBDH@Z) referenced in function "public: virtual void __thiscall FArchiveFileReader::Seek(int)" (?Seek@FArchiveFileReader@@UAEXH@Z)
+ucc.obj : error LNK2019: unresolved external symbol "__declspec(dllimport) char const * __cdecl appFromAnsi(char const *,char *)" (__imp_?appFromAnsi@@YAPBDPBDPAD@Z) referenced in function "public: virtual class FString __thiscall FFileManagerWindows::GetDefaultDirectory(void)" (?GetDefaultDirectory@FFileManagerWindows@@UAE?AVFString@@XZ)
+ucc.obj : error LNK2019: unresolved external symbol "__declspec(dllimport) char * __cdecl appStaticString1024(void)" (__imp_?appStaticString1024@@YAPADXZ) referenced in function "public: virtual char const * __thiscall FConfigCacheIni::GetStr(char const *,char const *,char const *)" (?GetStr@FConfigCacheIni@@UAEPBDPBD00@Z)
+ucc.obj : error LNK2019: unresolved external symbol "__declspec(dllimport) float __cdecl appAtof(char const *)" (__imp_?appAtof@@YAMPBD@Z) referenced in function "public: virtual int __thiscall FConfigCacheIni::GetFloat(char const *,char const *,float &,char const *)" (?GetFloat@FConfigCacheIni@@UAEHPBD0AAM0@Z)
+ucc.obj : error LNK2019: unresolved external symbol "__declspec(dllimport) int __cdecl appSaveStringToFile(class FString const &,char const *,class FFileManager *)" (__imp_?appSaveStringToFile@@YAHABVFString@@PBDPAVFFileManager@@@Z) referenced in function "public: int __thiscall FConfigFile::Write(char const *)" (?Write@FConfigFile@@QAEHPBD@Z)
+ucc.obj : error LNK2019: unresolved external symbol "__declspec(dllimport) char * __cdecl appStrstr(char const *,char const *)" (__imp_?appStrstr@@YAPADPBD0@Z) referenced in function "public: void __thiscall FConfigFile::Read(char const *)" (?Read@FConfigFile@@QAEXPBD@Z)
+ucc.obj : error LNK2019: unresolved external symbol "__declspec(dllimport) int __cdecl appLoadFileToString(class FString &,char const *,class FFileManager *)" (__imp_?appLoadFileToString@@YAHAAVFString@@PBDPAVFFileManager@@@Z) referenced in function "public: void __thiscall FConfigFile::Read(char const *)" (?Read@FConfigFile@@QAEXPBD@Z)
+ucc.obj : error LNK2019: unresolved external symbol "__declspec(dllimport) int __cdecl appStrcmp(char const *,char const *)" (__imp_?appStrcmp@@YAHPBD0@Z) referenced in function "public: virtual void __thiscall FConfigCacheIni::SetString(char const *,char const *,char const *,char const *)" (?SetString@FConfigCacheIni@@UAEXPBD000@Z)
+ucc.obj : error LNK2019: unresolved external symbol "__declspec(dllimport) public: static void __cdecl UObject::SetLanguage(char const *)" (__imp_?SetLanguage@UObject@@SAXPBD@Z) referenced in function _main
+ucc.obj : error LNK2019: unresolved external symbol "__declspec(dllimport) void __cdecl appInit(char const *,char const *,class FOutputDevice *,class FOutputDeviceError *,class FFeedbackContext *,class FConfigCache * (__cdecl*)(void),int)" (__imp_?appInit@@YAXPBD0PAVFOutputDevice@@PAVFOutputDeviceError@@PAVFFeedbackContext@@P6APAVFConfigCache@@XZH@Z) referenced in function _main
+./UCC.exe : fatal error LNK1120: 28 unresolved externals
+</pre></table><table width=100% bgcolor=#DFDFE5><tr><td><font face=arial size=+2>
+Results
+</font></table><table width=* cellspacing=0 cellpadding=0><tr><td width=0 bgcolor=#EDEDF5>&nbsp;</td><td width=0 bgcolor=#FFFFFF>&nbsp;</td><td width=*><pre>
+Build log was saved at "file://c:\Users\Leon\Documents\Visual Studio Projects\Ucc\Ucc\\BuildLog.htm"
+UCC - 29 error(s), 0 warning(s)</pre></table><table   width=100% height=20 bgcolor=#CFCFE5><tr><td><font face=arial size=+2>
+</font></table></body></html>

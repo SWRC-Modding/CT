@@ -32,6 +32,7 @@ public:
 	class AProp* PropToDestroy;
 	BYTE ExplosionStimulus;
 	BITFIELD bExplodeOnTimer:1;
+
 	DECLARE_CLASS(AExplosiveCharge,AActivateItem,0,CTMarkers)
 	NO_DEFAULT_CONSTRUCTOR(AExplosiveCharge)
 };
@@ -43,7 +44,9 @@ public:
 class CTMARKERS_API AMarkerDemolitionNative : public ACTMarker{
 public:
 	FName PlaceEvent;
+
 	DECLARE_CLASS(AMarkerDemolitionNative,ACTMarker,0,CTMarkers)
+
 	//UBOOL Initiate(APawn* Instigator);
 	UBOOL Update();
 	virtual UBOOL FinishMarker();
@@ -57,7 +60,9 @@ public:
 class CTMARKERS_API AMarkerDisarmTrapNative : public ACTMarker{
 public:
 	FName RemoveEvent;
+
 	DECLARE_CLASS(AMarkerDisarmTrapNative,ACTMarker,0,CTMarkers)
+
 	UBOOL Initiate(APawn* Instigator);
 	UBOOL Update();
 	virtual void ParticipantResume(APawn *Member, UGoalObject *CurrentGoal);
@@ -75,7 +80,9 @@ public:
 	FName TossGrenadeEvent;
 	class UClass* GrenadeClass;
 	class AActor* GrenadeTarget;
+
 	DECLARE_CLASS(AMarkerDoorBreachNative,ACTMarker,0,CTMarkers)
+
 	UBOOL Initiate(APawn* Instigator);
 	UBOOL Update();
 	virtual void ParticipantResume(APawn *Member, UGoalObject *CurrentGoal);
@@ -89,6 +96,7 @@ public:
 class CTMARKERS_API AMarkerHackDoorNative : public ACTMarker{
 public:
 	DECLARE_CLASS(AMarkerHackDoorNative,ACTMarker,0,CTMarkers)
+
 	UBOOL Update();
 	virtual UBOOL FinishMarker();
 	virtual void OnCancel(APawn *Instigator);
@@ -101,6 +109,7 @@ public:
 class CTMARKERS_API AMarkerHackTerminalNative : public ACTMarker{
 public:
 	DECLARE_CLASS(AMarkerHackTerminalNative,ACTMarker,0,CTMarkers)
+
 	UBOOL Update();
 	virtual UBOOL FinishMarker();
 	virtual void OnCancel(APawn *Instigator);
@@ -114,7 +123,9 @@ class CTMARKERS_API AMarkerSetProximityMineNative : public ACTMarker{
 public:
 	FName PlaceEvent;
 	FName ArmEvent;
+
 	DECLARE_CLASS(AMarkerSetProximityMineNative,ACTMarker,0,CTMarkers)
+
 	//UBOOL Initiate(APawn* Instigator);
 	virtual UBOOL Update();
 };
@@ -128,7 +139,9 @@ public:
 	FName CancelUntriggerEvent;
 	FName CancelTriggerEvent;
 	class AActor* DirectTrigger;
+
 	DECLARE_CLASS(AMarkerTriggerLoop,ACTMarker,0,CTMarkers)
+
 	UBOOL Update();
 	virtual UBOOL FinishMarker();
 	virtual UBOOL CanInitiateFor(APawn *Pawn);
@@ -142,6 +155,7 @@ public:
 class CTMARKERS_API AMarkerTurretNative : public ACTMarker{
 public:
 	DECLARE_CLASS(AMarkerTurretNative,ACTMarker,0,CTMarkers)
+
 	UBOOL Initiate(APawn* Instigator);
 	UBOOL Update();
 	virtual UBOOL FinishMarker();
@@ -170,7 +184,9 @@ public:
 	BYTE CompleteCue;
 	class UStaticMesh* LocationPreviewMesh;
 	class AActor* LocationPreviewActor;
+
 	DECLARE_CLASS(AMarkerWeapon,ACTMarker,0,CTMarkers)
+
 	virtual UBOOL Initiate(APawn* Instigator);
 	virtual UBOOL Update();
 	virtual UBOOL FinishMarker();
@@ -190,8 +206,8 @@ public:
 	FRotator StartRotation;
 	FVector StartLocation;
 	BITFIELD bNormalRifle:1;
+
 	DECLARE_CLASS(UStateMarkerAttack,UStateAbstractAttack,0,CTMarkers)
-	NO_DEFAULT_CONSTRUCTOR(UStateMarkerAttack)
 };
 
 #if SUPPORTS_PRAGMA_PACK

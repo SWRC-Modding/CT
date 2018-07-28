@@ -27,5 +27,6 @@
 *.ipdb
 *.exp
 *.dll
+*.lib
 *.exe
 *.htm

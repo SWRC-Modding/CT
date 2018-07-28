@@ -28,7 +28,7 @@
 #endif
 
 //Used to automatically link the proper lib for the dlls whose headers are currently included
-#define LINK_LIB(name) __pragma (comment(lib, HEADER_DIRECTORY#name"/lib/"#name".lib"))
+#define LINK_LIB(name) __pragma(comment(lib, HEADER_DIRECTORY#name"/lib/"#name".lib"))
 //=============================================================================================================================
 
 LINK_LIB(Core)

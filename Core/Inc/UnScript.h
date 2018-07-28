@@ -27,8 +27,11 @@ struct FNativeEntry{
 	INT Num;
 };
 
+#define DECLARE_NATIVES(cls) \
+	static FNativeEntry<cls> StaticNativeMap[];
+
 #define MAP_NATIVE(func, num) \
-	{&ThisClass::exec##func,num},
+	{&ThisClass::exec##func, num},
 
 template<typename T>
 struct FNativeInitializer{
@@ -41,6 +44,9 @@ struct FNativeInitializer{
 		}
 	}
 };
+
+#define LINK_NATIVES(cls) \
+	FNativeInitializer<cls> cls##NativeInitializer;
 
 /*-----------------------------------------------------------------------------
 	Macros.

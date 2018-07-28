@@ -344,12 +344,6 @@ public: \
 	DLL_EXPORT TCHAR GPackage[] = TEXT(#pkg); \
 	IMPLEMENT_PACKAGE_PLATFORM(pkg)
 
-#define DECLARE_NATIVES(cls) \
-	static FNativeEntry<cls> StaticNativeMap[];
-
-#define LINK_NATIVES(cls) \
-	FNativeInitializer<cls> cls##NativeInitializer;
-
 /*-----------------------------------------------------------------------------
 	UObject.
 -----------------------------------------------------------------------------*/

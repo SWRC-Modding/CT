@@ -17,6 +17,8 @@
 
 # Visual Studio
 /.vs
+*.suo
+*.ncb
 *.idb
 *.pdb
 *.tlog

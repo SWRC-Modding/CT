@@ -31,6 +31,7 @@ public:
 
 	void Serialize(const TCHAR* V, EName Event){
 		guard(FFeedbackContextAnsi::Serialize);
+
 		TCHAR Buffer[1024]= "";
 		const TCHAR* Temp = V;
 
@@ -45,7 +46,7 @@ public:
 			V = Buffer; //So that the log file also contains the formatted string
 		}else if(Event == NAME_Warning || Event == NAME_ExecWarning || Event == NAME_ScriptWarning){
 			if(Context)
-				appSprintf(Buffer, "%s: %s, %s", Context->GetContext(), *FName(Event), V);
+				appSprintf(Buffer, "%s: %s, %s", *Context->GetContext(), *FName(Event), V);
 			else
 				appSprintf(Buffer, "%s: %s", *FName(Event), V);
 
@@ -54,7 +55,7 @@ public:
 			Temp = Buffer;
 		}else if(Event == NAME_Error || Event == NAME_Critical){
 			if(Context)
-				appSprintf(Buffer, "%s: %s, %s", Context->GetContext(), *FName(Event), V);
+				appSprintf(Buffer, "%s: %s, %s", *Context->GetContext(), *FName(Event), V);
 			else
 				appSprintf(Buffer, "%s: %s", *FName(Event), V);
 

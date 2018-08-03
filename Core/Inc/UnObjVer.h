@@ -8,21 +8,20 @@
 -----------------------------------------------------------------------------*/
 
 // Earliest engine build that is network compatible with this one.
-#define ENGINE_MIN_NET_VERSION 400
+CORE_API INT ENGINE_MIN_NET_VERSION;
 
 // Engine build number, for displaying to end users.
-#define ENGINE_VERSION 430
+CORE_API INT ENGINE_VERSION;
 
 // Base protocol version to negotiate in network play.
-#define ENGINE_NEGOTIATION_VERSION 400
+CORE_API INT ENGINE_NEGOTIATION_VERSION;
 
 // Prevents incorrect files from being loaded.
-#define PACKAGE_FILE_TAG 0x9E2A83C1
+CORE_API INT PACKAGE_FILE_TAG;
 
 // The current Unrealfile version.
-#define PACKAGE_FILE_VERSION 69
+CORE_API INT PACKAGE_FILE_VERSION;
 
-#if 1 //LVer added by Legend on 4/12/2000
 //
 // Licensee Version Number
 // by Paul Du Bois, Infinite Machine
@@ -30,14 +29,16 @@
 // Uses the upper two words of the VersionNum DWORD to encode a licensee-specific
 // version WORD.
 //
-#define PACKAGE_FILE_VERSION_LICENSEE	0x00
+CORE_API INT PACKAGE_FILE_VERSION_LICENSEE;
 
-#define VERSION_ENGINE_ONLY				0x00
-#endif
+CORE_API INT VERSION_ENGINE_ONLY;
 
 // The earliest file version which we can load with complete
 // backwards compatibility. Must be at least PACKAGE_FILE_VERSION.
-#define PACKAGE_MIN_VERSION 60
+CORE_API INT PACKAGE_MIN_VERSION;
+
+CORE_API INT BUILD_VERSION;
+CORE_API TCHAR* BUILD_DATE;
 
 /*-----------------------------------------------------------------------------
 	The End.

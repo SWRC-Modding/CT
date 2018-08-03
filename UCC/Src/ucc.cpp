@@ -113,10 +113,7 @@ void ShowBanner(){
 	Warn.Log("=======================================\n");
 }
 
-//int main(int argc, char** argv){
-#define argc __argc
-#define argv __argv
-__declspec(dllexport) void uccInit(const TCHAR*, const TCHAR*, FOutputDevice*, FOutputDeviceError*, FFeedbackContext*, FConfigCache*(*ConfigFactory)(), UBOOL){
+int main(int argc, char** argv){
 	GIsStarted = 1;
 
 	try{
@@ -228,5 +225,4 @@ __declspec(dllexport) void uccInit(const TCHAR*, const TCHAR*, FOutputDevice*, F
 	}
 
 	appExit();
-	appRequestExit(1);
 }

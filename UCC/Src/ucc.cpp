@@ -215,7 +215,10 @@ int main(int argc, char** argv){
 			Warn.Log("    ucc CommandletName <parameters>");
 		}
 
-		appPreExit();
+		//For some reason this results in an infinite loop during garbage collection when there are compile errors with ucc make
+		//Hopefully only a temporary fix...
+		if(Warn.ErrorCount == 0)
+			appPreExit();
 
 		GIsGuarded = 0;
 	}catch(...){

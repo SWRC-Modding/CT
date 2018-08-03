@@ -27,8 +27,8 @@ public:
 	virtual void Preload(UObject*){}
 	virtual void CountBytes(char, const struct FMemCount&);
 	virtual void CountBytes(void*, unsigned long);
-	virtual FArchive& operator<<(UObject*&);
 	virtual FArchive& operator<<(FName&);
+	virtual FArchive& operator<<(UObject*&);
 	virtual int MapName(FName*);
 	virtual int MapObject(UObject*);
 	virtual int Tell();

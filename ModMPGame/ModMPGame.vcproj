@@ -79,6 +79,19 @@
 				RelativePath=".\Src\ModMPGamePrivate.h">
 			</File>
 		</Filter>
+		<Filter
+			Name="Classes"
+			Filter="">
+			<File
+				RelativePath=".\Classes\BotSupport.uc">
+			</File>
+			<File
+				RelativePath=".\Classes\BotSupportBroadcastHandler.uc">
+			</File>
+			<File
+				RelativePath=".\Classes\MPBot.uc">
+			</File>
+		</Filter>
 	</Files>
 	<Globals>
 	</Globals>

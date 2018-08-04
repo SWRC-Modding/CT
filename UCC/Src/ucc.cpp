@@ -95,7 +95,7 @@ int main(int argc, char** argv){
 				GIsServer = Default->IsServer;
 				GLazyLoad = Default->LazyLoad;
 
-				//Contains only the command-line options that are passed to the commandlet to avoid problems with some commandlets
+				//Contains only the command-line options that are passed to the commandlet
 				FString CommandletCmdLine;
 
 				for(int i = 2; i < argc; i++)
@@ -131,7 +131,7 @@ int main(int argc, char** argv){
 			Warn.Log("    ucc CommandletName <parameters>");
 		}
 
-		//For some reason this results in an infinite loop during garbage collection when there are compile errors with ucc make
+		//This prevents an infinite loop during garbage collection when there are compile errors with ucc make
 		//Hopefully only a temporary fix...
 		if(Warn.ErrorCount == 0)
 			appPreExit();

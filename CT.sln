@@ -17,24 +17,15 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ModMPGame", "ModMPGame\ModM
 EndProject
 Global
 	GlobalSection(SolutionConfiguration) = preSolution
-		Debug = Debug
 		Release = Release
 	EndGlobalSection
 	GlobalSection(ProjectConfiguration) = postSolution
-		{DC67B7B8-5827-41B6-B7BE-52CC410F72EC}.Debug.ActiveCfg = Release|Win32
-		{DC67B7B8-5827-41B6-B7BE-52CC410F72EC}.Debug.Build.0 = Release|Win32
 		{DC67B7B8-5827-41B6-B7BE-52CC410F72EC}.Release.ActiveCfg = Release|Win32
 		{DC67B7B8-5827-41B6-B7BE-52CC410F72EC}.Release.Build.0 = Release|Win32
-		{DC67B7B8-5827-41B6-B7BE-52CC410F72EC}.Debug.ActiveCfg = Release|Win32
-		{DC67B7B8-5827-41B6-B7BE-52CC410F72EC}.Debug.Build.0 = Release|Win32
 		{DC67B7B8-5827-41B6-B7BE-52CC410F72EC}.Release.ActiveCfg = Release|Win32
 		{DC67B7B8-5827-41B6-B7BE-52CC410F72EC}.Release.Build.0 = Release|Win32
-		{DC67B7B8-5827-41B6-B7BE-52CC410F72EC}.Debug.ActiveCfg = Release|Win32
-		{DC67B7B8-5827-41B6-B7BE-52CC410F72EC}.Debug.Build.0 = Release|Win32
 		{DC67B7B8-5827-41B6-B7BE-52CC410F72EC}.Release.ActiveCfg = Release|Win32
 		{DC67B7B8-5827-41B6-B7BE-52CC410F72EC}.Release.Build.0 = Release|Win32
-		{DC67B7B8-5827-41B6-B7BE-52CC410F72EC}.Debug.ActiveCfg = Release|Win32
-		{DC67B7B8-5827-41B6-B7BE-52CC410F72EC}.Debug.Build.0 = Release|Win32
 		{DC67B7B8-5827-41B6-B7BE-52CC410F72EC}.Release.ActiveCfg = Release|Win32
 		{DC67B7B8-5827-41B6-B7BE-52CC410F72EC}.Release.Build.0 = Release|Win32
 	EndGlobalSection

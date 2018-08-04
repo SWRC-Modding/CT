@@ -59,6 +59,9 @@
 	</References>
 	<Files>
 		<File
+			RelativePath=".\Src\ServerCommandlet.cpp">
+		</File>
+		<File
 			RelativePath=".\src\ucc.cpp">
 		</File>
 	</Files>

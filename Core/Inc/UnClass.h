@@ -378,26 +378,36 @@ class CORE_API UClass : public UState{
 	UClass(EStaticConstructor, DWORD InSize, DWORD InClassFlags, FGuid InGuid, const TCHAR* InNameStr, const TCHAR* InPackageName, const TCHAR* InClassConfigName, DWORD InFlags, void(*InClassConstructor)(void*), void(UObject::*InClassStaticConstructor)());
 
 	//UObject interface.
-	void Serialize(FArchive& Ar);
-	void PostLoad();
-	void Destroy();
-	void Register();
-	bool IsDefaultValue(const struct FPropertyInstance&);
+	virtual void Serialize(FArchive& Ar);
+	virtual void PostLoad();
+	virtual void Destroy();
+	virtual void Register();
+	virtual bool IsDefaultValue(const struct FPropertyInstance&);
 
 	//UField interface.
-	void Bind();
+	virtual void Bind();
 
 	//UStruct interface.
-	UBOOL MergeBools();
-	UStruct* GetInheritanceSuper();
-	TCHAR* GetNameCPP() const;
-	void Link(FArchive& Ar, UBOOL Props);
+	virtual UBOOL MergeBools();
+	virtual UStruct* GetInheritanceSuper();
+	virtual TCHAR* GetNameCPP() const;
+	virtual void Link(FArchive& Ar, UBOOL Props);
 
 	//UClass interface.
 	void AddDependency(UClass* InClass, UBOOL InDeep);
-	UClass* GetSuperClass() const;
-	UObject* GetDefaultObject() const;
+	void AddSubclass(UClass*);
+	void EditDefaultProps();
+	Native FindNativeFunc(const TCHAR*, int);
+	DWORD GetClassCRC();
 	class AActor* GetDefaultActor() const;
+	UObject* GetDefaultObject() const;
+	unsigned char* GetDefaults() const;
+	UClass* GetSuperClass() const;
+	bool HasNativesToExport();
+	bool IsDefaultsOverride() const;
+	bool IsUselessName(const TCHAR*) const;
+	void PropagateNewValue(const struct FPropertyInstance&, unsigned char*);
+	void RegisterNatives();
 
 private:
 	//Hide IsA because calling IsA on a class almost always indicates

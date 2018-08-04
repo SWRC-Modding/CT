@@ -407,9 +407,9 @@ extern "C" DLL_EXPORT TCHAR GPackage[];
 #include "UnObjBas.h"		//Object base class.
 #include "UnCoreNet.h"		//Core networking.
 #include "UnCorObj.h"		//Core object class definitions.
+#include "UnScript.h"		//Script class.
 #include "UnClass.h"		//Class definition.
 #include "UnType.h"			//Base property type.
-#include "UnScript.h"		//Script class.
 #include "UFactory.h"		//Factory definition.
 #include "UExporter.h"		//Exporter definition.
 #include "UnCache.h"		//Cache based memory management.

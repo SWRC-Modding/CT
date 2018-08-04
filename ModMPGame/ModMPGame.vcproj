@@ -3,7 +3,8 @@
 	ProjectType="Visual C++"
 	Version="7.10"
 	Name="ModMPGame"
-	ProjectGUID="{DC67B7B8-5827-41B6-B7BE-52CC410F72EC}">
+	ProjectGUID="{DC67B7B8-5827-41B6-B7BE-52CC410F72EC}"
+	RootNamespace="ModMPGame">
 	<Platforms>
 		<Platform
 			Name="Win32"/>
@@ -54,12 +55,23 @@
 	<References>
 	</References>
 	<Files>
-		<File
-			RelativePath=".\src\ModMPGameClasses.cpp">
-		</File>
-		<File
-			RelativePath=".\inc\ModMPGameClasses.h">
-		</File>
+		<Filter
+			Name="Inc"
+			Filter="">
+			<File
+				RelativePath=".\Inc\ModMPGame.h">
+			</File>
+			<File
+				RelativePath=".\inc\ModMPGameClasses.h">
+			</File>
+		</Filter>
+		<Filter
+			Name="Src"
+			Filter="">
+			<File
+				RelativePath=".\src\ModMPGameClasses.cpp">
+			</File>
+		</Filter>
 	</Files>
 	<Globals>
 	</Globals>

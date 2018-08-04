@@ -12,7 +12,7 @@
 	<Configurations>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="lib"
+			OutputDirectory="$(SolutionDir)/../GameData/System"
 			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="2"
 			CharacterSet="0">
@@ -29,6 +29,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
+				ImportLibrary="$(ProjectDir)/lib/$(TargetName).lib"
 				FixedBaseAddress="0"/>
 			<Tool
 				Name="VCMIDLTool"/>
@@ -69,7 +70,13 @@
 			Name="Src"
 			Filter="">
 			<File
+				RelativePath=".\Src\ModMPGame.cpp">
+			</File>
+			<File
 				RelativePath=".\src\ModMPGameClasses.cpp">
+			</File>
+			<File
+				RelativePath=".\Src\ModMPGamePrivate.h">
 			</File>
 		</Filter>
 	</Files>

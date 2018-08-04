@@ -7,42 +7,39 @@
 #ifndef MOD_NATIVE_DEFS
 #define MOD_NATIVE_DEFS
 
-#include "../../Engine/Inc/Engine.h"
-#include "../../D3DDrv/Inc/D3DDrv.h"
-
 #if SUPPORTS_PRAGMA_PACK
 #pragma pack (push,4)
 #endif
 
 #ifndef MOD_API
 #define MOD_API DLL_IMPORT
-LINK_LIB(Mod)
 #endif
 
-class MOD_API UModGameEngine : public UGameEngine{
+
+
+class MOD_API UModGameEngine : public UGameEngine
+{
 public:
-	DECLARE_CLASS(UModGameEngine,UGameEngine,CLASS_Transient|CLASS_Config,Mod)
-
-	//Variables
-	FLOAT CustomTickRate;
-
+    FLOAT CustomTickRate;
+    DECLARE_CLASS(UModGameEngine,UGameEngine,0|CLASS_Transient|CLASS_Config,Mod)
 	//Overrides
 	virtual UBOOL Exec(const char* Cmd, FOutputDevice& Ar);
 	virtual void Tick(float DeltaTime);
 	virtual float GetMaxTickRate();
 };
 
-class MOD_API UModRenderDevice : public UD3DRenderDevice{
-public:
-	DECLARE_CLASS(UModRenderDevice,UD3DRenderDevice,CLASS_Config,Mod)
-	virtual int Init(){
-		MessageBox(NULL, "", "", MB_OK);
-		return Super::Init();
-	}
-};
+
 
 #if SUPPORTS_PRAGMA_PACK
 #pragma pack (pop)
 #endif
 
-#endif //MOD_NATIVE_DEFS
+#if __STATIC_LINK
+
+#define AUTO_INITIALIZE_REGISTRANTS_MOD \
+	UModGameEngine::StaticClass(); \
+	UModRenderDevice::StaticClass(); \
+
+#endif // __STATIC_LINK
+
+#endif // CORE_NATIVE_DEFS

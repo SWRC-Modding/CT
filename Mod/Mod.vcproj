@@ -67,7 +67,13 @@
 			Name="Src"
 			Filter="">
 			<File
+				RelativePath=".\Src\Mod.cpp">
+			</File>
+			<File
 				RelativePath=".\src\ModClasses.cpp">
+			</File>
+			<File
+				RelativePath=".\Src\ModPrivate.h">
 			</File>
 		</Filter>
 		<Filter

@@ -36,6 +36,7 @@ function PostNetBeginPlay(){
 		break;
 
 	ImportPaths(Mid(Left(Level, InStr(Level, ".")), Len(Level.Game.MapPrefix) + 1)$"_Paths");
+	SetTimer(2.0f, true);
 }
 
 function Timer(){

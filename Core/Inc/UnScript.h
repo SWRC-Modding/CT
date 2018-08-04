@@ -23,6 +23,7 @@ BYTE CORE_API GRegisterNative(INT iNative, const Native& Func);
 
 template<typename T>
 struct FNativeEntry{
+	const TCHAR* name;
 	void(T::*Func)(FFrame&, void*);
 	INT Num;
 };
@@ -31,17 +32,14 @@ struct FNativeEntry{
 	static FNativeEntry<cls> StaticNativeMap[];
 
 #define MAP_NATIVE(func, num) \
-	{&ThisClass::exec##func, num},
+	{#func,&ThisClass::exec##func,num},
 
 template<typename T>
 struct FNativeInitializer{
 	FNativeInitializer(){
-		FNativeEntry<T>* entry = T::StaticNativeMap;
-
-		while(entry->Func){
-			GRegisterNative(entry->Num, (Native)entry->Func);
-			++entry;
-		}
+		//Very hacky but since I don't know the actual variables there's not that much I can do about it...
+		*reinterpret_cast<FNativeEntry<T>**>(reinterpret_cast<char*>(T::StaticClass()) + 0xFC) = T::StaticNativeMap;
+		T::StaticClass()->RegisterNatives();
 	}
 };
 

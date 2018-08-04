@@ -12,8 +12,7 @@ IMPLEMENT_PACKAGE(ModMPGame)
 
 IMPLEMENT_CLASS(ABotSupport);
 FNativeEntry<ABotSupport> ABotSupport::StaticNativeMap[] = {
-	MAP_NATIVE(TestNativeFunc,0)
-	MAP_NATIVE(ImportPaths,1024)
+	MAP_NATIVE(ImportPaths,0)
 	{NULL,NULL}
 };
 LINK_NATIVES(ABotSupport);

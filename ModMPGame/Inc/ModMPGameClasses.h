@@ -28,7 +28,6 @@ public:
     TArrayNoInit<class AMPBot*> Bots;
     TArrayNoInit<FPoints> SpawnPointsByTeam;
     class AScriptedSequence* BotScript;
-    void execTestNativeFunc(FFrame& Stack, void* Result);
     void execImportPaths(FFrame& Stack, void* Result);
     DECLARE_CLASS(ABotSupport,AActor,0,ModMPGame)
     NO_DEFAULT_CONSTRUCTOR(ABotSupport)

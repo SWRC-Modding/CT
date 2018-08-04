@@ -7,14 +7,13 @@ var array<MPBot> Bots;
 var array<struct Points{var array<PlayerStart> SpawnPoints;}> SpawnPointsByTeam;
 var ScriptedSequence BotScript;
 
-native final function TestNativeFunc();
 /*
 *	Imports paths from map specified so that bots can move around without having
 *	to distribute a modified version of the default maps to the client
 *	The specified map should obviously be the same as the one that is currently loaded
 *	with the only difference that it contains paths for AI
 */
-native(1024) final function ImportPaths(string MapName);
+native final function ImportPaths(string MapName);
 
 function PostNetBeginPlay(){
 	local PlayerStart SpawnPoint;
@@ -28,7 +27,7 @@ function PostNetBeginPlay(){
 	foreach AllActors(class'PlayerStart', SpawnPoint){
 		if(SpawnPointsByTeam.Length <= SpawnPoint.TeamNumber)
 			SpawnPointsByTeam.Length = SpawnPoint.TeamNumber + 1;
-TestNativeFunc();
+
 		//Ugly as fuck, but whatever...
 		SpawnPointsByTeam[SpawnPoint.TeamNumber].SpawnPoints[SpawnPointsByTeam[SpawnPoint.TeamNumber].SpawnPoints.Length] = SpawnPoint;
 	}
@@ -36,7 +35,6 @@ TestNativeFunc();
 	foreach AllActors(class'ScriptedSequence', BotScript, 'BotScript')
 		break;
 
-	SetTimer(2.0f, true);
 	ImportPaths(Mid(Left(Level, InStr(Level, ".")), Len(Level.Game.MapPrefix) + 1)$"_Paths");
 }
 

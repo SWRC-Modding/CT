@@ -3,7 +3,8 @@
 	ProjectType="Visual C++"
 	Version="7.10"
 	Name="Mod"
-	ProjectGUID="{DC67B7B8-5827-41B6-B7BE-52CC410F72EC}">
+	ProjectGUID="{DC67B7B8-5827-41B6-B7BE-52CC410F72EC}"
+	RootNamespace="Mod">
 	<Platforms>
 		<Platform
 			Name="Win32"/>
@@ -11,7 +12,7 @@
 	<Configurations>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="lib"
+			OutputDirectory="$(SolutionDir)/../GameData/System"
 			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="2"
 			CharacterSet="0">
@@ -28,6 +29,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
+				ImportLibrary="$(ProjectDir)/lib/$(TargetName).lib"
 				FixedBaseAddress="0"/>
 			<Tool
 				Name="VCMIDLTool"/>

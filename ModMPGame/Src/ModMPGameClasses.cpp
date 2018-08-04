@@ -4,51 +4,16 @@
     DO NOT modify this manually! Edit the corresponding .uc files instead!
 ===========================================================================*/
 
-#include "../Inc/ModMPGameClasses.h"
+#include "ModMPGamePrivate.h"
 
 IMPLEMENT_PACKAGE(ModMPGame)
 
+
+
 IMPLEMENT_CLASS(ABotSupport);
-
 FNativeEntry<ABotSupport> ABotSupport::StaticNativeMap[] = {
-    MAP_NATIVE(ImportPaths,1024)
-    {NULL,NULL}
+	MAP_NATIVE(TestNativeFunc,0)
+	MAP_NATIVE(ImportPaths,1024)
+	{NULL,NULL}
 };
-
 LINK_NATIVES(ABotSupport);
-
-void ABotSupport::execImportPaths(FFrame& Stack , void* Result){
-	P_GET_STR(MapName);
-	P_FINISH;
-
-	UPackage* Map = LoadPackage(NULL, *MapName, LOAD_Quiet);
-
-	if(!Map){
-		GLog->Logf(NAME_Warning, "Couldn't open map '%s' to import paths from", *MapName);
-
-		return;
-	}
-
-	GIsEditor = 1;
-
-	//Finding all PathNodes
-	for(TObjectIterator<APathNode> It; It; ++It){
-		if(It->IsIn(Map))
-			GetLevel()->SpawnActor(APathNode::StaticClass(), It->GetFName(), It->Location, It->Rotation);
-	}
-
-	//Finding all CoverPoints 
-	for(TObjectIterator<ACoverPoint> It; It; ++It){
-		if(It->IsIn(Map))
-			GetLevel()->SpawnActor(ACoverPoint::StaticClass(), It->GetFName(), It->Location, It->Rotation);
-	}
-
-	FPathBuilder PathBuilder;
-Level->bBegunPlay = 0;
-check(Level->bBegunPlay == 0);
-GetLevel()->SpawnActor(AScout::StaticClass());
-check(Level->bBegunPlay == 0);
-	PathBuilder.definePaths(GetLevel());
-
-	GIsEditor = 0;
-}

@@ -2,37 +2,39 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="7.10"
-	Name="UCC"
-	ProjectGUID="{DC67B7B8-5827-41B6-B7BE-52CC410F72EC}"
-	RootNamespace="UCC">
+	Name="RunUCC"
+	ProjectGUID="{699E1A25-D4BB-4225-97CE-4B202C100DCF}"
+	RootNamespace="RunUCC"
+	Keyword="ManagedCProj">
 	<Platforms>
 		<Platform
 			Name="Win32"/>
 	</Platforms>
 	<Configurations>
 		<Configuration
-			Name="Release|Win32"
+			Name="Debug|Win32"
 			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="1"
-			CharacterSet="0">
+			CharacterSet="2"
+			ManagedExtensions="TRUE">
 			<Tool
 				Name="VCCLCompilerTool"
-				Optimization="3"
-				GlobalOptimizations="TRUE"
-				InlineFunctionExpansion="2"
-				ExceptionHandling="TRUE"
-				RuntimeLibrary="2"
-				StructMemberAlignment="3"
-				EnableEnhancedInstructionSet="2"
-				DisableLanguageExtensions="FALSE"
-				WarningLevel="2"
-				CallingConvention="1"/>
+				Optimization="0"
+				PreprocessorDefinitions="WIN32;_DEBUG"
+				MinimalRebuild="FALSE"
+				BasicRuntimeChecks="0"
+				RuntimeLibrary="1"
+				WarningLevel="3"
+				DebugInformationFormat="3"/>
 			<Tool
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				FixedBaseAddress="0"/>
+				OutputFile="$(OutDir)\$(ProjectName).exe"
+				LinkIncremental="2"
+				GenerateDebugInformation="TRUE"
+				AssemblyDebug="1"/>
 			<Tool
 				Name="VCMIDLTool"/>
 			<Tool
@@ -54,20 +56,27 @@
 			<Tool
 				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
 		</Configuration>
+		<Configuration
+			Name="Release|Win32"
+			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
+			IntermediateDirectory="$(ConfigurationName)"
+			ConfigurationType="10"
+			CharacterSet="2"
+			ManagedExtensions="TRUE">
+			<Tool
+				Name="VCCustomBuildTool"/>
+			<Tool
+				Name="VCMIDLTool"/>
+			<Tool
+				Name="VCPostBuildEventTool"/>
+			<Tool
+				Name="VCPreBuildEventTool"
+				CommandLine="&quot;$(SolutionDir)\..\GameData\System\UCC.exe&quot; make -ini=ucc.ini -Silent"/>
+		</Configuration>
 	</Configurations>
 	<References>
 	</References>
 	<Files>
-		<Filter
-			Name="Src"
-			Filter="">
-			<File
-				RelativePath=".\Src\ServerCommandlet.cpp">
-			</File>
-			<File
-				RelativePath=".\src\ucc.cpp">
-			</File>
-		</Filter>
 	</Files>
 	<Globals>
 	</Globals>

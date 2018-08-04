@@ -7,36 +7,45 @@
 #ifndef MODMPGAME_NATIVE_DEFS
 #define MODMPGAME_NATIVE_DEFS
 
-#include "../../Engine/Inc/Engine.h"
-
 #if SUPPORTS_PRAGMA_PACK
 #pragma pack (push,4)
 #endif
 
 #ifndef MODMPGAME_API
 #define MODMPGAME_API DLL_IMPORT
-LINK_LIB(ModMPGame)
 #endif
 
-struct FPoints{
-	TArrayNoInit<class APlayerStart*> SpawnPoints;
+
+struct MODMPGAME_API FPoints
+{
+    TArrayNoInit<class APlayerStart*> SpawnPoints;
 };
 
-class MODMPGAME_API ABotSupport : public AActor{
+
+class MODMPGAME_API ABotSupport : public AActor
+{
 public:
-	TArrayNoInit<class AMPBot*> Bots;
-	TArrayNoInit<FPoints> SpawnPointsByTeam;
-	class AScriptedSequence* BotScript;
-
-	void execImportPaths(FFrame& Stack, void* Result);
-
-	DECLARE_CLASS(ABotSupport,AActor,0,ModMPGame)
-	NO_DEFAULT_CONSTRUCTOR(ABotSupport)
-	DECLARE_NATIVES(ABotSupport)
+    TArrayNoInit<class AMPBot*> Bots;
+    TArrayNoInit<FPoints> SpawnPointsByTeam;
+    class AScriptedSequence* BotScript;
+    void execTestNativeFunc(FFrame& Stack, void* Result);
+    void execImportPaths(FFrame& Stack, void* Result);
+    DECLARE_CLASS(ABotSupport,AActor,0,ModMPGame)
+    NO_DEFAULT_CONSTRUCTOR(ABotSupport)
+    DECLARE_NATIVES(ABotSupport)
 };
+
+
 
 #if SUPPORTS_PRAGMA_PACK
 #pragma pack (pop)
 #endif
 
-#endif //MODMPGAME_NATIVE_DEFS
+#if __STATIC_LINK
+
+#define AUTO_INITIALIZE_REGISTRANTS_MODMPGAME \
+	ABotSupport::StaticClass(); \
+
+#endif // __STATIC_LINK
+
+#endif // CORE_NATIVE_DEFS

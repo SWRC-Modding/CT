@@ -54,12 +54,30 @@
 	<References>
 	</References>
 	<Files>
-		<File
-			RelativePath=".\src\ModClasses.cpp">
-		</File>
-		<File
-			RelativePath=".\inc\ModClasses.h">
-		</File>
+		<Filter
+			Name="Inc"
+			Filter="">
+			<File
+				RelativePath=".\inc\ModClasses.h">
+			</File>
+		</Filter>
+		<Filter
+			Name="Src"
+			Filter="">
+			<File
+				RelativePath=".\src\ModClasses.cpp">
+			</File>
+		</Filter>
+		<Filter
+			Name="Classes"
+			Filter="">
+			<File
+				RelativePath=".\Classes\ModCTPlayer.uc">
+			</File>
+			<File
+				RelativePath=".\Classes\ModGameEngine.uc">
+			</File>
+		</Filter>
 	</Files>
 	<Globals>
 	</Globals>

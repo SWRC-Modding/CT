@@ -52,9 +52,13 @@
 	<References>
 	</References>
 	<Files>
-		<File
-			RelativePath=".\src\Launch.cpp">
-		</File>
+		<Filter
+			Name="Src"
+			Filter="">
+			<File
+				RelativePath=".\src\Launch.cpp">
+			</File>
+		</Filter>
 	</Files>
 	<Globals>
 	</Globals>

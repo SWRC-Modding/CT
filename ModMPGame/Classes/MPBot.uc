@@ -14,4 +14,5 @@ defaultproperties
 	RequiredStates(2)=Class'CTGame.StateIdle'
 	RequiredStates(3)=Class'CTGame.StatePatrol'
 	bCanGesture=false
+	NetPriority=3
 }

@@ -1,8 +1,4 @@
 Microsoft Visual Studio Solution File, Format Version 8.00
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Debug", "Debug\Debug.vcproj", "{DC67B7B8-5827-41B6-B7BE-52CC410F72EC}"
-	ProjectSection(ProjectDependencies) = postProject
-	EndProjectSection
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "UCC", "UCC\ucc.vcproj", "{DC67B7B8-5827-41B6-B7BE-52CC410F72EC}"
 	ProjectSection(ProjectDependencies) = postProject
 	EndProjectSection
@@ -14,7 +10,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Mod", "Mod\Mod.vcproj", "{D
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ModMPGame", "ModMPGame\ModMPGame.vcproj", "{DC67B7B8-5827-41B6-B7BE-52CC410F72EC}"
 	ProjectSection(ProjectDependencies) = postProject
-		{699E1A25-D4BB-4225-97CE-4B202C100DCF} = {699E1A25-D4BB-4225-97CE-4B202C100DCF}
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RunUCC", "RunUCC\RunUCC.vcproj", "{699E1A25-D4BB-4225-97CE-4B202C100DCF}"
@@ -27,10 +22,6 @@ Global
 		Release = Release
 	EndGlobalSection
 	GlobalSection(ProjectConfiguration) = postSolution
-		{DC67B7B8-5827-41B6-B7BE-52CC410F72EC}.Debug.ActiveCfg = Release|Win32
-		{DC67B7B8-5827-41B6-B7BE-52CC410F72EC}.Debug.Build.0 = Release|Win32
-		{DC67B7B8-5827-41B6-B7BE-52CC410F72EC}.Release.ActiveCfg = Release|Win32
-		{DC67B7B8-5827-41B6-B7BE-52CC410F72EC}.Release.Build.0 = Release|Win32
 		{DC67B7B8-5827-41B6-B7BE-52CC410F72EC}.Debug.ActiveCfg = Release|Win32
 		{DC67B7B8-5827-41B6-B7BE-52CC410F72EC}.Debug.Build.0 = Release|Win32
 		{DC67B7B8-5827-41B6-B7BE-52CC410F72EC}.Release.ActiveCfg = Release|Win32

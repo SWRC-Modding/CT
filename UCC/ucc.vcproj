@@ -36,7 +36,8 @@
 			<Tool
 				Name="VCMIDLTool"/>
 			<Tool
-				Name="VCPostBuildEventTool"/>
+				Name="VCPostBuildEventTool"
+				CommandLine="&quot;$(SolutionDir)\..\GameData\System\UCC.exe&quot; make -ini=ucc.ini -Silent"/>
 			<Tool
 				Name="VCPreBuildEventTool"/>
 			<Tool

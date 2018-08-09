@@ -54,6 +54,9 @@
 		</Configuration>
 	</Configurations>
 	<References>
+		<ProjectReference
+			ReferencedProjectIdentifier="{DC67B7B8-5827-41B6-B7BE-52CC410F72EC}"
+			Name="UCC"/>
 	</References>
 	<Files>
 		<Filter

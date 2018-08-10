@@ -63,6 +63,9 @@
 			Name="Inc"
 			Filter="">
 			<File
+				RelativePath=".\Inc\Mod.h">
+			</File>
+			<File
 				RelativePath=".\inc\ModClasses.h">
 			</File>
 		</Filter>

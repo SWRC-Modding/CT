@@ -9,14 +9,13 @@
 
 #include "../../Engine/Inc/Engine.h"
 
-LINK_LIB(Gameplay)
-
 #if SUPPORTS_PRAGMA_PACK
 #pragma pack (push,4)
 #endif
 
 #ifndef GAMEPLAY_API
 #define GAMEPLAY_API DLL_IMPORT
+LINK_LIB(Gameplay)
 #endif
 
 /*

@@ -9,14 +9,13 @@
 
 #include "../../Gameplay/Inc/Gameplay.h"
 
-LINK_LIB(CTGame)
-
 #if SUPPORTS_PRAGMA_PACK
 #pragma pack (push,4)
 #endif
 
 #ifndef CTGAME_API
 #define CTGAME_API DLL_IMPORT
+LINK_LIB(CTGame)
 #endif
 
 /*

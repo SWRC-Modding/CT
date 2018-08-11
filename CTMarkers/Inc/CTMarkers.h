@@ -9,14 +9,13 @@
 
 #include "../../CTGame/Inc/CTGame.h"
 
-LINK_LIB(CTMarkers)
-
 #if SUPPORTS_PRAGMA_PACK
 #pragma pack (push,4)
 #endif
 
 #ifndef CTMARKERS_API
 #define CTMARKERS_API DLL_IMPORT
+LINK_LIB(CTMarkers)
 #endif
 
 /*

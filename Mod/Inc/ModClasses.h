@@ -38,7 +38,6 @@ public:
 
 #define AUTO_INITIALIZE_REGISTRANTS_MOD \
 	UModGameEngine::StaticClass(); \
-	UModRenderDevice::StaticClass(); \
 
 #endif // __STATIC_LINK
 

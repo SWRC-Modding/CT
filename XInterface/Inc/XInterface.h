@@ -10,14 +10,13 @@
 #include "../../Engine/Inc/Engine.h"
 #include "../../XGame/Inc/XGame.h"
 
-LINK_LIB(XInterface)
-
 #if SUPPORTS_PRAGMA_PACK
 #pragma pack (push,4)
 #endif
 
 #ifndef XINTERFACE_API
 #define XINTERFACE_API DLL_IMPORT
+LINK_LIB(XInterface)
 #endif
 
 /*

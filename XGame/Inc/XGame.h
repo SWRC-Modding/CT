@@ -9,14 +9,13 @@
 
 #include "../../Core/Inc/Core.h"
 
-LINK_LIB(XGame)
-
 #if SUPPORTS_PRAGMA_PACK
 #pragma pack (push,4)
 #endif
 
 #ifndef XGAME_API
 #define XGAME_API DLL_IMPORT
+LINK_LIB(XGame)
 #endif
 
 /*

@@ -3,14 +3,13 @@
 
 #include "../../Engine/Inc/Engine.h"
 
-LINK_LIB(D3DDrv)
-
 #if SUPPORTS_PRAGMA_PACK
 #pragma pack (push,4)
 #endif
 
 #ifndef D3DDRV_API
 #define D3DDRV_API DLL_IMPORT
+LINK_LIB(D3DDrv)
 #endif
 
 class D3DDRV_API UD3DRenderDevice : public URenderDevice{

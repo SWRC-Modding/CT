@@ -9,14 +9,13 @@
 
 #include "../../Core/Inc/Core.h"
 
-LINK_LIB(Window)
-
 #if SUPPORTS_PRAGMA_PACK
 #pragma pack (push,4)
 #endif
 
 #ifndef WINDOW_API
 #define WINDOW_API DLL_IMPORT
+LINK_LIB(Window)
 #endif
 
 class WINDOW_API UWindowManager : public UObject{

@@ -9,14 +9,13 @@
 
 #include "../../Engine/Inc/Engine.h"
 
-LINK_LIB(Editor)
-
 #if SUPPORTS_PRAGMA_PACK
 #pragma pack (push,4)
 #endif
 
 #ifndef EDITOR_API
 #define EDITOR_API DLL_IMPORT
+LINK_LIB(Editor)
 #endif
 
 /*

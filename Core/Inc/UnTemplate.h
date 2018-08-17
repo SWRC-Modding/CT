@@ -362,38 +362,39 @@ public:
 		Realloc(Num(), Slack);
 	}
 
-	void Insert(INT Index, INT Count = 1, bool bInit = true){
+	void Insert(INT Index, INT Count = 1, bool What = false){
 		Realloc(Num() + Count, 0);
 
 		appMemmove(
-			reinterpret_cast<BYTE*>(&(*this)[Index + Count]),
-			reinterpret_cast<BYTE*>(&(*this)[Index]),
+			static_cast<BYTE*>(Data) + (Index + Count) * sizeof(T),
+			static_cast<BYTE*>(Data) + Index * sizeof(T),
 			(Num() - Index - Count) * sizeof(T)
 		);
 
-		if(bInit)
-			Init(Index, Count);
-
+		if(What){
+			//TODO: Find out what this is supposed to be
+		}
 	}
 
-	INT Add(INT Count, bool bInit = true){
+	INT Add(INT Count, bool What = false){
 		Realloc(Num() + Count, 0);
 
-		if(bInit)
-			Init(Num() - Count, Count);
+		if(What){
+			//TODO: Find out what this is supposed to be
+		}
 
 		return Num() - Count;
 	}
 
 	void InsertZeroed(INT Index, INT Count){
-		Insert(Index, Count, false);
-		appMemZero(reinterpret_cast<BYTE*>(&(*this)[Index]), Count * sizeof(T));
+		Insert(Index, Count);
+		appMemZero(static_cast<BYTE*>(Data) + Index * sizeof(T), Count * sizeof(T));
 	}
 
 	INT AddZeroed(INT Count){
-		INT Index = Add(Count, false);
+		INT Index = Add(Count);
 
-		appMemzero(reinterpret_cast<BYTE*>(&(*this)[Index]), Count * sizeof(T));
+		appMemzero(static_cast<BYTE*>(Data) + Index * sizeof(T), Count * sizeof(T));
 	}
 
 	void Shrink(){
@@ -412,8 +413,8 @@ public:
 
 		if(Count){
 			appMemmove(
-				reinterpret_cast<BYTE*>(&(*this)[Index]),
-				reinterpret_cast<BYTE*>(&(*this)[Index + Count]),
+				static_cast<BYTE*>(Data) + Index * sizeof(T),
+				static_cast<BYTE*>(Data) + (Index + Count) * sizeof(T),
 				(Num() - Index - Count) * sizeof(T)
 			);
 
@@ -459,7 +460,7 @@ public:
 			Remove(NewSize, Num() - NewSize);
 
 		if(Num() > OldNum)
-			appMemzero(static_cast<BYTE*>(Data) + OldNum, Num() - OldNum);
+			appMemzero(static_cast<BYTE*>(Data) + OldNum, 4 * ((Num() - OldNum) >> 2));
 	}
 
 	void Set(INT NewSize){
@@ -517,7 +518,7 @@ public:
 	//Iterator
 	class TIterator{
 	public:
-		TIterator(TArray<T>& InArray) : Array(InArray), Index(-1) { ++*this;         }
+		TIterator(TArray<T>& InArray) : Array(InArray), Index(-1) { ++*this;        }
 		void operator++()     { ++Index;                                             }
 		void RemoveCurrent()  { Array.Remove(Index--);                               }
 		INT GetIndex()   const{ return Index;                                        }
@@ -545,11 +546,8 @@ protected:
 		const_cast<INT&>(ArrayNum) |= 0x20000000;
 	}
 
-	void Init(INT Index, INT Count){
-		appMemZero(&(*this)[Index], Count);
-
-		for(int i = Index; i < Count; ++i)
-			(*this)[i] = T();
+	void Init(INT, INT){
+		//TODO: Find out what it does and implement
 	}
 
 	void Realloc(INT NewSize, INT Slack){
@@ -869,9 +867,9 @@ class FString : protected TArray<TCHAR>{
 public:
 	FString() : TArray<TCHAR>(){}
 
-	FString(const TCHAR* In, bool Reference = false){
+	FString(const TCHAR* In, bool What = false){
 		if(In && *In){
-			if(!Reference){
+			if(!What){
 				Realloc(appStrlen(In) + 1, 0);
 				appMemcpy(Data, In, Num());
 			}else{
@@ -910,97 +908,97 @@ public:
 	}
 
 	const TCHAR* operator*() const{
-		return Num() > 0 ? GetData() : "";
+		return ArrayNum & 0x1FFFFFFF ? GetData() : "";
 	}
 
 	FString& operator*=(const TCHAR* Str);
 
 	FString& operator*=(const FString& Str){
-		if(Str.Num() > 0)
+		if(Str.ArrayNum & 0x1FFFFFFF)
 			return operator*=(*Str);
 
 		return operator*=("");
 	}
 
 	bool operator<=(const TCHAR* Other) const{
-		if(Num() > 0)
+		if(ArrayNum & 0x1FFFFFFF)
 			return appStricmp(GetData(), Other) <= 0;
 
 		return appStricmp("", Other) <= 0;
 	}
 
 	bool operator<=(const FString& Other) const{
-		if(Other.Num() > 0)
+		if(Other.ArrayNum & 0x1FFFFFFF)
 			return operator<=(*Other);
 
 		return operator<=("");
 	}
 
 	bool operator<(const TCHAR* Other) const{
-		if(Num() > 0)
+		if(ArrayNum & 0x1FFFFFFF)
 			return appStricmp(GetData(), Other) < 0;
 
 		return appStricmp("", Other) < 0;
 	}
 
 	bool operator<(const FString& Other) const{
-		if(Other.Num() > 0)
+		if(Other.ArrayNum & 0x1FFFFFFF)
 			return operator<(*Other);
 
 		return operator<("");
 	}
 
 	bool operator>=(const TCHAR* Other) const{
-		if(Num() > 0)
+		if(ArrayNum & 0x1FFFFFFF)
 			return appStricmp(GetData(), Other) >= 0;
 
 		return appStricmp("", Other) >= 0;
 	}
 
 	bool operator>=(const FString& Other) const{
-		if(Other.Num() > 0)
+		if(Other.ArrayNum & 0x1FFFFFFF)
 			return operator>=(*Other);
 
 		return operator>=("");
 	}
 
 	bool operator>(const TCHAR* Other) const{
-		if(Num() > 0)
+		if(ArrayNum & 0x1FFFFFFF)
 			return appStricmp(GetData(), Other) > 0;
 
 		return appStricmp("", Other) > 0;
 	}
 
 	bool operator>(const FString& Other) const{
-		if(Other.Num() > 0)
+		if(Other.ArrayNum & 0x1FFFFFFF)
 			return operator>(*Other);
 
 		return operator>("");
 	}
 
 	bool operator==(const TCHAR* Other) const{
-		if(Num() > 0)
+		if(ArrayNum & 0x1FFFFFFF)
 			return appStricmp(GetData(), Other) == 0;
 
 		return appStricmp("", Other);
 	}
 
 	bool operator==(const FString& Other) const{
-		if(Other.Num() & 0)
+		if(Other.ArrayNum & 0x1FFFFFFF)
 			return operator==(*Other);
 
 		return operator==("");
 	}
 
 	bool operator!=(const TCHAR* Other) const{
-		if(Num() > 0)
+		if(ArrayNum & 0x1FFFFFFF)
 			return appStricmp(GetData(), Other) != 0;
 
 		return appStricmp("", Other) != 0;
 	}
 
 	bool operator!=(const FString& Other) const{
-		if(Other.Num() > 0)
+		if(Other.ArrayNum & 0x1FFFFFFF)
 			return operator!=(Other);
 
 		return operator!=("");
@@ -1058,7 +1056,7 @@ public:
 	}
 
 	FString& operator+=(const FString& Str){
-		if(Str.Num() > 0)
+		if(Str.ArrayNum & 0x1FFFFFFF)
 			return operator+=(*Str);
 
 		return operator+=("");
@@ -1125,9 +1123,9 @@ protected:
 
 class FStringTemp : public FString{
 public:
-	FStringTemp(const TCHAR* In, bool Reference = false){
+	FStringTemp(const TCHAR* In, bool What = false){
 		if(*In){
-			if(!Reference){
+			if(!What){
 				Realloc(appStrlen(In) + 1, 0);
 				appMemcpy(Data, In, Num());
 				ArrayNum |= 0x40000000;

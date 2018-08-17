@@ -37,7 +37,7 @@
 				Name="VCMIDLTool"/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="&quot;$(SolutionDir)\..\GameData\System\UCC.exe&quot; make -ini=ucc.ini -Silent"/>
+				CommandLine="&quot;$(SolutionDir)\..\GameData\System\UCC.exe&quot; make -ini=../../Code/UCC/ucc.ini -Silent"/>
 			<Tool
 				Name="VCPreBuildEventTool"/>
 			<Tool
@@ -70,7 +70,7 @@
 			</File>
 		</Filter>
 		<File
-			RelativePath="..\..\GameData\System\UCC.ini">
+			RelativePath=".\UCC.ini">
 		</File>
 	</Files>
 	<Globals>

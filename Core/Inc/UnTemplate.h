@@ -362,7 +362,7 @@ public:
 		Realloc(Num(), Slack);
 	}
 
-	void Insert(INT Index, INT Count = 1, bool What = false){
+	void Insert(INT Index, INT Count = 1, bool bInit = false){
 		Realloc(Num() + Count, 0);
 
 		appMemmove(
@@ -371,17 +371,15 @@ public:
 			(Num() - Index - Count) * sizeof(T)
 		);
 
-		if(What){
-			//TODO: Find out what this is supposed to be
-		}
+		if(bInit)
+			Init(Index, Count)
 	}
 
-	INT Add(INT Count, bool What = false){
+	INT Add(INT Count, bool bInit = false){
 		Realloc(Num() + Count, 0);
 
-		if(What){
-			//TODO: Find out what this is supposed to be
-		}
+		if(bInit)
+			Init(Num() - Count, Count);
 
 		return Num() - Count;
 	}
@@ -518,7 +516,7 @@ public:
 	//Iterator
 	class TIterator{
 	public:
-		TIterator(TArray<T>& InArray) : Array(InArray), Index(-1) { ++*this;        }
+		TIterator(TArray<T>& InArray) : Array(InArray), Index(-1) { ++*this;         }
 		void operator++()     { ++Index;                                             }
 		void RemoveCurrent()  { Array.Remove(Index--);                               }
 		INT GetIndex()   const{ return Index;                                        }
@@ -547,7 +545,21 @@ protected:
 	}
 
 	void Init(INT, INT){
-		//TODO: Find out what it does and implement
+		//TODO: Find out how this is implemented
+		/*
+			void *v3; // edi@1
+			int result; // eax@1
+			int v5; // edi@1
+			int i; // ecx@1
+
+			v3 = (void *)(a2 + *(_DWORD *)this);
+			result = 0;
+			memset(v3, 0, 4 * (a3 >> 2));
+			v5 = (int)((char *)v3 + 4 * (a3 >> 2));
+			for ( i = a3 & 3; i; --i )
+			*(_BYTE *)v5++ = 0;
+			return result;
+		*/
 	}
 
 	void Realloc(INT NewSize, INT Slack){
@@ -904,101 +916,101 @@ public:
 	}
 
 	TArray<TCHAR>& GetCharArray(){
-		return *static_cast<TArray<TCHAR>*>(this);
+		return static_cast<TArray<TCHAR>&>(*this);
 	}
 
 	const TCHAR* operator*() const{
-		return ArrayNum & 0x1FFFFFFF ? GetData() : "";
+		return Num() > 0 ? GetData() : "";
 	}
 
 	FString& operator*=(const TCHAR* Str);
 
 	FString& operator*=(const FString& Str){
-		if(Str.ArrayNum & 0x1FFFFFFF)
+		if(Str.Num() > 0)
 			return operator*=(*Str);
 
 		return operator*=("");
 	}
 
 	bool operator<=(const TCHAR* Other) const{
-		if(ArrayNum & 0x1FFFFFFF)
+		if(Num() > 0)
 			return appStricmp(GetData(), Other) <= 0;
 
 		return appStricmp("", Other) <= 0;
 	}
 
 	bool operator<=(const FString& Other) const{
-		if(Other.ArrayNum & 0x1FFFFFFF)
+		if(Other.Num() > 0)
 			return operator<=(*Other);
 
 		return operator<=("");
 	}
 
 	bool operator<(const TCHAR* Other) const{
-		if(ArrayNum & 0x1FFFFFFF)
+		if(Num() > 0)
 			return appStricmp(GetData(), Other) < 0;
 
 		return appStricmp("", Other) < 0;
 	}
 
 	bool operator<(const FString& Other) const{
-		if(Other.ArrayNum & 0x1FFFFFFF)
+		if(Other.Num() > 0)
 			return operator<(*Other);
 
 		return operator<("");
 	}
 
 	bool operator>=(const TCHAR* Other) const{
-		if(ArrayNum & 0x1FFFFFFF)
+		if(Num() > 0)
 			return appStricmp(GetData(), Other) >= 0;
 
 		return appStricmp("", Other) >= 0;
 	}
 
 	bool operator>=(const FString& Other) const{
-		if(Other.ArrayNum & 0x1FFFFFFF)
+		if(Other.Num() > 0)
 			return operator>=(*Other);
 
 		return operator>=("");
 	}
 
 	bool operator>(const TCHAR* Other) const{
-		if(ArrayNum & 0x1FFFFFFF)
+		if(Num() > 0)
 			return appStricmp(GetData(), Other) > 0;
 
 		return appStricmp("", Other) > 0;
 	}
 
 	bool operator>(const FString& Other) const{
-		if(Other.ArrayNum & 0x1FFFFFFF)
+		if(Other.Num() > 0)
 			return operator>(*Other);
 
 		return operator>("");
 	}
 
 	bool operator==(const TCHAR* Other) const{
-		if(ArrayNum & 0x1FFFFFFF)
+		if(Num() > 0)
 			return appStricmp(GetData(), Other) == 0;
 
 		return appStricmp("", Other);
 	}
 
 	bool operator==(const FString& Other) const{
-		if(Other.ArrayNum & 0x1FFFFFFF)
+		if(Other.Num() > 0)
 			return operator==(*Other);
 
 		return operator==("");
 	}
 
 	bool operator!=(const TCHAR* Other) const{
-		if(ArrayNum & 0x1FFFFFFF)
+		if(Num() > 0)
 			return appStricmp(GetData(), Other) != 0;
 
 		return appStricmp("", Other) != 0;
 	}
 
 	bool operator!=(const FString& Other) const{
-		if(Other.ArrayNum & 0x1FFFFFFF)
+		if(Other.Num() > 0)
 			return operator!=(Other);
 
 		return operator!=("");
@@ -1056,7 +1068,7 @@ public:
 	}
 
 	FString& operator+=(const FString& Str){
-		if(Str.ArrayNum & 0x1FFFFFFF)
+		if(Str.Num() > 0)
 			return operator+=(*Str);
 
 		return operator+=("");
@@ -1110,7 +1122,7 @@ protected:
 		if(Size)
 			Set(Size, Size);
 
-		if(ArrayNum & 0x1FFFFFFF)
+		if(Num() > 0)
 			appStrncpy(GetData(), InSrc, InCount + 1);
 	}
 

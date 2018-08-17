@@ -98,9 +98,9 @@ public:
 	CORE_API FName(const FString& Name, EFindName FindType);
 
 	/*
-	*	Creating an FString with "None" produces an invalid name when
+	*	Creating an FString with "None" produces an invalid name entry when
 	*	using the constructor from Core.dll which in turn leads to crashes
-	*	when it it used so this constructor exists to circumvent the issue
+	*	when it is used so this constructor exists to circumvent the issue
 	*	by checking the input string first.
 	*	This is only necessary because there's an ini entry called "None"
 	*	that gets converted to an FName when reading the ini file

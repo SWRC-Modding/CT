@@ -463,7 +463,7 @@ public:
 
 		TCHAR Buffer[1024];
 
-		appSprintf(Buffer, "%s.%s", UObject::GetLanguage(), Filename);
+		appSprintf(Buffer, "%s.%s", Filename, UObject::GetLanguage());
 		UnloadFile(Buffer);
 
 		unguard;

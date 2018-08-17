@@ -30,6 +30,8 @@ void ShowBanner(){
 }
 
 int main(int argc, char** argv){
+	int ExitCode = EXIT_SUCCESS;
+
 	GIsStarted = 1;
 
 	try{
@@ -139,8 +141,11 @@ int main(int argc, char** argv){
 	}catch(...){
 		GIsGuarded = 0;
 		GLog = &Log;
+		ExitCode = EXIT_FAILURE;
 		Error.HandleError();
 	}
 
 	appExit();
+
+	return ExitCode;
 }

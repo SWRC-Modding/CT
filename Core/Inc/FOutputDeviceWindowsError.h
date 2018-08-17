@@ -54,19 +54,22 @@ public:
 	}
 
 	void HandleError(){
-		GIsGuarded = 0;
-		GIsRunning = 0;
-		GIsCriticalError = 1;
-		GErrorHist[ErrorType == NAME_FriendlyError ? ErrorPos : ARRAY_COUNT(GErrorHist) - 1] = 0;
+		try{
+			GIsGuarded = 0;
+			GIsRunning = 0;
+			GIsCriticalError = 1;
+			GLogHook = NULL;
 
-		FString Error = GErrorHist;	//UObject::StaticShutdownAfterError Generates usless errors that should not show up in the message box
+			UObject::StaticShutdownAfterError();
 
-		GLog->Log(NAME_Critical, Error);
-		GLog->Flush();
+			GErrorHist[ErrorType == NAME_FriendlyError ? ErrorPos : ARRAY_COUNT(GErrorHist) - 1] = 0;
 
-		UObject::StaticShutdownAfterError();
-		MessageBox(NULL, *Error, "Critical Error", MB_OK | MB_ICONERROR | MB_TASKMODAL);
-		appRequestExit(1);
+			GLog->Log(NAME_Critical, GErrorHist);
+			GLog->Flush();
+
+			if(GIsClient || GIsEditor || !GIsStarted)
+				MessageBox(NULL, GErrorHist, "Critical Error", MB_OK | MB_ICONERROR | MB_TASKMODAL);
+		}catch(...){}
 	}
 };
 

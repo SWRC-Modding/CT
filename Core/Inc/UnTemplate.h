@@ -1229,7 +1229,7 @@ public:
 
 	//Returns the text following the last period.
 	FString GetExtension() const{
-		INT Pos = GetLastPathSeparator();
+		INT Pos = InStr(".", true);
 
 		if(Pos != -1)
 			return Mid(Pos + 1, Len() - Pos - 1);

@@ -32,7 +32,7 @@ public:
 			TCHAR* Ptr = const_cast<TCHAR*>(*Text);
 			FConfigSection* CurrentSection = NULL;
 
-			UBOOL Done = 0;
+			bool Done = false;
 
 			while(!Done){
 				while(*Ptr == '\r' || *Ptr == '\n')
@@ -44,11 +44,15 @@ public:
 					Ptr++;
 
 				if(*Ptr == 0)
-					Done = 1;
+					Done = true;
 
 				*Ptr++ = 0;
 
-				if(*Start == '[' && Start[appStrlen(Start) - 1] == ']'){
+				//Ignore comments
+				if(Start[0] == ';')
+					continue;
+
+				if(Start[0] == '[' && Start[appStrlen(Start) - 1] == ']'){
 					Start++;
 					Start[appStrlen(Start) - 1] = 0;
 					CurrentSection = Find(Start);

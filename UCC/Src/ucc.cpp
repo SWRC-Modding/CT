@@ -136,6 +136,8 @@ int main(int argc, char** argv){
 		//This prevents an infinite loop during garbage collection when there are compile errors with ucc make
 		if(Warn.ErrorCount == 0)
 			appPreExit();
+		else
+			ExitCode = EXIT_FAILURE;
 
 		GIsGuarded = 0;
 	}catch(...){

@@ -1133,6 +1133,11 @@ protected:
 	}
 };
 
+/*
+*	No idea what this class is for. The only difference to FString seems
+*	to be a different binary flag used in the constructor (0x40000000)
+*	RC is the only Unreal game that has this...
+*/
 class FStringTemp : public FString{
 public:
 	FStringTemp(const TCHAR* In, bool What = false){
@@ -1209,6 +1214,67 @@ inline void ExchangeString(FString& A, FString& B){
 	unguardSlow;
 }
 
+/*-----------------------------------------------------------------------------
+	FFilename.
+
+	Utility class for quick inquiries against filenames.
+-----------------------------------------------------------------------------*/
+
+struct FFilename : public FString{
+public:
+	FFilename() : FString(){}
+	FFilename(const FString& Other) : FString(Other){}
+	FFilename(const TCHAR* In) : FString(In){}
+	FFilename(ENoInit) : FString(E_NoInit){}
+
+	//Returns the text following the last period.
+	FString GetExtension() const{
+		INT Pos = GetLastPathSeparator();
+
+		if(Pos != -1)
+			return Mid(Pos + 1, Len() - Pos - 1);
+
+		return "";
+	}
+
+	//Returns the base filename, minus any path information.
+	FString GetCleanFilename() const{
+		INT Pos = GetLastPathSeparator();
+
+		if(Pos != -1)
+			return Mid(Pos + 1, Len() - Pos - 1);
+
+		return *this;
+	}
+
+	//Returns the same thing as GetCleanFilename, but without the extension
+	FString GetBaseFilename() const{
+		FString Wk = GetCleanFilename();
+
+		INT Pos = GetLastPathSeparator();
+
+		if(Pos != -1)
+			return Wk.Left(Pos);
+
+		return Wk;
+	}
+
+	//Returns the path in front of the filename
+	FString GetPath() const{
+		INT Pos = GetLastPathSeparator();
+
+		if(Pos != -1)
+			return Left(Pos);
+
+		return *this;
+	}
+
+private:
+	INT GetLastPathSeparator() const{
+		return Max(InStr("\\", true), InStr("/", true));
+	}
+};
+
 /*----------------------------------------------------------------------------
 	Special archivers.
 ----------------------------------------------------------------------------*/
@@ -1218,7 +1284,7 @@ inline void ExchangeString(FString& A, FString& B){
 //
 class FStringOutputDevice : public FString, public FOutputDevice{
 public:
-	FStringOutputDevice(const TCHAR* InStr=TEXT(""))
+	FStringOutputDevice(const TCHAR* InStr = "")
 	: FString(InStr)
 	{}
 	void Serialize(const TCHAR* Data, EName Event)

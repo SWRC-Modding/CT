@@ -1251,7 +1251,7 @@ public:
 	FString GetBaseFilename() const{
 		FString Wk = GetCleanFilename();
 
-		INT Pos = GetLastPathSeparator();
+		INT Pos = Wk.InStr(".", true);
 
 		if(Pos != -1)
 			return Wk.Left(Pos);

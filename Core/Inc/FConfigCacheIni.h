@@ -76,7 +76,6 @@ public:
 						CurrentSection->Add(Start, Value);
 					}
 				}
-
 			}
 		}
 
@@ -124,10 +123,6 @@ public:
 			Text += "\r\n";
 		}
 
-		//Only save ini files to the save directory
-		if(FString(Filename).Right(4) == ".ini")
-			return appSaveStringToFile(Text, *(GGlobalSettingsPath + Filename));
-
 		return appSaveStringToFile(Text, Filename);
 
 		unguard;
@@ -147,26 +142,24 @@ public:
 		guard(FConfigCacheIni::Find);
 
 		//If filename not specified, use default.
-		TCHAR Filename[256];
-		appStrcpy(Filename, InFilename ? InFilename : *SystemIni);
+		FFilename Filename(InFilename ? InFilename : SystemIni);
 
 		//Add .ini extension.
-		INT Len = appStrlen(Filename);
-		if(Len < 5 || (Filename[Len - 4] != '.' && Filename[Len - 5] != '.'))
-			appStrcat(Filename, ".ini");
+		if(Filename.GetExtension() == "")
+			Filename += ".ini";
 
 		//Automatically translate generic filenames.
-		if(appStricmp(Filename, "User.ini") == 0)
-			appStrcpy(Filename, *UserIni);
-		else if(appStricmp(Filename, "System.ini") == 0)
-			appStrcpy(Filename, *SystemIni);
+		if(Filename == "User.ini")
+			Filename = UserIni;
+		else if(Filename == "System.ini")
+			Filename = SystemIni;
 
 		//Get file.
-		FConfigFile* Result = TMap<FString, FConfigFile>::Find(Filename);
+		FConfigFile* Result = TMap<FString, FConfigFile>::Find(Filename.GetCleanFilename());
 
-		if(!Result && (CreateIfNotFound || GFileManager->FileSize(Filename)>=0)){
-			Result = &Set(Filename, FConfigFile());
-			Result->Read(Filename);
+		if(!Result && (CreateIfNotFound || GFileManager->FileSize(*Filename) >= 0)){
+			Result = &Set(*Filename.GetCleanFilename(), FConfigFile());
+			Result->Read(*Filename);
 		}
 
 		return Result;

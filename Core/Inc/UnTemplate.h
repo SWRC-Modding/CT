@@ -992,7 +992,7 @@ public:
 		if(Num() > 0)
 			return appStricmp(GetData(), Other) == 0;
 
-		return appStricmp("", Other);
+		return appStricmp("", Other) == 0;
 	}
 
 	bool operator==(const FString& Other) const{

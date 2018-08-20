@@ -193,7 +193,7 @@ class TAllocator{};
 -----------------------------------------------------------------------------*/
 
 //
-// Former dynamic array base. All functionality has been moved to TArray.
+// Dynamic array base. All functionality has been moved to TArray.
 // This class only exists for FTransactionBase::SaveArray
 //
 class FArray{
@@ -206,7 +206,7 @@ protected:
 // Template dynamic array
 //
 template<typename T>
-class TArray{
+class TArray : protected FArray{
 public:
 	TArray() : Data(NULL),
 			   ArrayNum(0){}
@@ -533,9 +533,6 @@ public:
 	};
 
 protected:
-	void* Data;
-	INT ArrayNum;
-
 	INT Capacity() const{
 		return GetMaxSize();
 	}
@@ -875,222 +872,44 @@ class FStringTemp;
 //
 // A dynamically sizeable string.
 //
-class FString : protected TArray<TCHAR>{
+class CORE_API FString : protected TArray<TCHAR>{
 public:
-	FString() : TArray<TCHAR>(){}
-
-	FString(const TCHAR* In, bool What = false){
-		if(In && *In){
-			if(!What){
-				Realloc(appStrlen(In) + 1, 0);
-				appMemcpy(Data, In, Num());
-			}else{
-				Data = const_cast<TCHAR*>(In);
-				ArrayNum = (appStrlen(In) + 1) & 0x1FFFFFFF | 0x20000000;
-			}
-		}
-	}
-
-	FString(ENoInit) : TArray<TCHAR>(E_NoInit){}
-
-	FString(const FString& Other){
-		TArray<TCHAR>::operator=(Other);
-	}
-
+	FString();
+	FString(const TCHAR* In, bool What = false);
+	FString(ENoInit);
+	FString(const FString& Other);
 	FString(const FStringTemp& Other);
+	~FString();
 
-	~FString(){
-		if(IsAllocated())
-			appFree(Data);
-
-		Data = NULL;
-		ArrayNum &= 0xE0000000;
-	}
-
-	TCHAR& operator[](INT Index){
-		return TArray<TCHAR>::operator[](Index);
-	}
-
-	const TCHAR& operator[](INT Index) const{
-		return TArray<TCHAR>::operator[](Index);
-	}
-
-	TArray<TCHAR>& GetCharArray(){
-		return static_cast<TArray<TCHAR>&>(*this);
-	}
-
-	const TCHAR* operator*() const{
-		return Num() > 0 ? GetData() : "";
-	}
-
+	TCHAR& operator[](INT Index);
+	const TCHAR& operator[](INT Index) const;
+	TArray<TCHAR>& GetCharArray();
+	const TCHAR* operator*() const;
 	FString& operator*=(const TCHAR* Str);
-
-	FString& operator*=(const FString& Str){
-		if(Str.Num() > 0)
-			return operator*=(*Str);
-
-		return operator*=("");
-	}
-
-	bool operator<=(const TCHAR* Other) const{
-		if(Num() > 0)
-			return appStricmp(GetData(), Other) <= 0;
-
-		return appStricmp("", Other) <= 0;
-	}
-
-	bool operator<=(const FString& Other) const{
-		if(Other.Num() > 0)
-			return operator<=(*Other);
-
-		return operator<=("");
-	}
-
-	bool operator<(const TCHAR* Other) const{
-		if(Num() > 0)
-			return appStricmp(GetData(), Other) < 0;
-
-		return appStricmp("", Other) < 0;
-	}
-
-	bool operator<(const FString& Other) const{
-		if(Other.Num() > 0)
-			return operator<(*Other);
-
-		return operator<("");
-	}
-
-	bool operator>=(const TCHAR* Other) const{
-		if(Num() > 0)
-			return appStricmp(GetData(), Other) >= 0;
-
-		return appStricmp("", Other) >= 0;
-	}
-
-	bool operator>=(const FString& Other) const{
-		if(Other.Num() > 0)
-			return operator>=(*Other);
-
-		return operator>=("");
-	}
-
-	bool operator>(const TCHAR* Other) const{
-		if(Num() > 0)
-			return appStricmp(GetData(), Other) > 0;
-
-		return appStricmp("", Other) > 0;
-	}
-
-	bool operator>(const FString& Other) const{
-		if(Other.Num() > 0)
-			return operator>(*Other);
-
-		return operator>("");
-	}
-
-	bool operator==(const TCHAR* Other) const{
-		if(Num() > 0)
-			return appStricmp(GetData(), Other) == 0;
-
-		return appStricmp("", Other) == 0;
-	}
-
-	bool operator==(const FString& Other) const{
-		if(Other.Num() > 0)
-			return operator==(*Other);
-
-		return operator==("");
-	}
-
-	bool operator!=(const TCHAR* Other) const{
-		if(Num() > 0)
-			return appStricmp(GetData(), Other) != 0;
-
-		return appStricmp("", Other) != 0;
-	}
-
-	bool operator!=(const FString& Other) const{
-		if(Other.Num() > 0)
-			return operator!=(Other);
-
-		return operator!=("");
-	}
-
-	INT Len() const{
-		return Num() ? Num() - 1 : 0;
-	}
-
-	INT InStr(const TCHAR* SubStr, bool Right = false) const;/*{
-		//TODO: Implement
-	}*/
-
-	INT InStr(const FString& SubStr, bool Right = false) const{
-		return InStr(*SubStr, Right);
-	}
-
-	TCHAR* MakeCharArray(){
-		TCHAR* Result = static_cast<TCHAR*>(appMalloc(Len() + 1));
-
-		for(int i = 0; i < Len(); i++){
-			if(static_cast<_WORD>((*this)[i]) < 256)
-				Result[i] = (*this)[i];
-			else
-				Result[i] = 127;
-		}
-
-		Result[Len()] = '\0';
-	}
-
+	FString& operator*=(const FString& Str);
+	bool operator<=(const TCHAR* Other) const;
+	bool operator<=(const FString& Other) const;
+	bool operator<(const TCHAR* Other) const;
+	bool operator<(const FString& Other) const;
+	bool operator>=(const TCHAR* Other) const;
+	bool operator>=(const FString& Other) const;
+	bool operator>(const TCHAR* Other) const;
+	bool operator>(const FString& Other) const;
+	bool operator==(const TCHAR* Other) const;
+	bool operator==(const FString& Other) const;
+	bool operator!=(const TCHAR* Other) const;
+	bool operator!=(const FString& Other) const;
+	INT Len() const;
+	INT InStr(const TCHAR* SubStr, bool Right = false) const;
+	INT InStr(const FString& SubStr, bool Right = false) const;
+	TCHAR* MakeCharArray();
 	FStringTemp Right(INT Count) const;
-
-	void Empty(){
-		TArray<TCHAR>::Empty(0);
-	}
-
-	void Shrink(){
-		TArray<TCHAR>::Shrink();
-	}
-
-	FString& operator+=(const TCHAR* Str){
-		if(*Str != '\0'){
-		    if(Num()){
-			    INT Index = Num() - 1;
-
-			    Add(appStrlen(Str));
-			    appStrcpy(&(*this)[Index], Str);
-		    }else if(*Str){
-			    Add(appStrlen(Str) + 1);
-			    appStrcpy(&(*this)[0], Str);
-		    }
-		}
-
-		return *this;
-	}
-
-	FString& operator+=(const FString& Str){
-		if(Str.Num() > 0)
-			return operator+=(*Str);
-
-		return operator+=("");
-	}
-
-	FString& operator=(const TCHAR* Other){
-		if(Other && *Other != '\0'){
-			Realloc(appStrlen(Other) + 1, 0);
-			appMemcpy(Data, Other, Num());
-		}else{
-			Realloc(0, 0);
-		}
-
-		return *this;
-	}
-
-	FString& operator=(const FString& Other){
-		TArray<TCHAR>::operator=(Other);
-
-		return *this;
-	}
-
+	void Empty();
+	void Shrink();
+	FString& operator+=(const TCHAR* Str);
+	FString& operator+=(const FString& Str);
+	FString& operator=(const TCHAR* Other);
+	FString& operator=(const FString& Other);
 	FString& operator=(const FStringTemp&);
 	FStringTemp Left(INT Count) const;
 	FStringTemp LeftChop(INT Count) const;
@@ -1110,21 +929,12 @@ public:
 	FStringTemp Substitute(const FString&, const FString&) const;
 	FStringTemp Substitute(const FString&) const;
 
+	static FStringTemp VARARGS Printf(const TCHAR* fmt, ...);
+	static FStringTemp Chr(TCHAR);
+
 protected:
-	FString(INT Size){
-		if(Size)
-			Set(Size, Size);
-	}
-
-	FString(INT InCount, const TCHAR* InSrc){
-		INT Size = InCount ? InCount + 1 : 0;
-
-		if(Size)
-			Set(Size, Size);
-
-		if(Num() > 0)
-			appStrncpy(GetData(), InSrc, InCount + 1);
-	}
+	FString(INT Size);
+	FString(INT InCount, const TCHAR* InSrc);
 
 	friend FArchive& operator<<(FArchive& Ar, FString& String){
 		String.Serialize(Ar);
@@ -1135,55 +945,22 @@ protected:
 
 /*
 *	No idea what this class is for. The only difference to FString seems
-*	to be a different binary flag used in the constructor (0x40000000)
+*	to be a different binary flag used in various places (0x40000000)
 *	RC is the only Unreal game that has this...
 */
-class FStringTemp : public FString{
+class CORE_API FStringTemp : public FString{
 public:
-	FStringTemp(const TCHAR* In, bool What = false){
-		if(*In){
-			if(!What){
-				Realloc(appStrlen(In) + 1, 0);
-				appMemcpy(Data, In, Num());
-				ArrayNum |= 0x40000000;
-			}else{
-				Data = const_cast<TCHAR*>(In);
-				ArrayNum = (appStrlen(In) + 1) & 0x1FFFFFFF | 0x20000000;
-			}
-		}
-	}
+	FStringTemp(const TCHAR* In, bool What = false);
+	FStringTemp(INT Count);
+	FStringTemp(INT Count, const TCHAR* In) : FString(Count, In);
+	FStringTemp(const FStringTemp& Other);
+	FStringTemp(const FString& Other);
+	~FStringTemp();
 
-	FStringTemp(INT Count){
-		if(Count)
-			Set(Count, Count);
-
-		ArrayNum |= 0x40000000;
-	}
-
-	FStringTemp(INT Count, const TCHAR* In) : FString(Count, In){
-		ArrayNum |= 0x40000000;
-	}
-
-	FStringTemp(const FStringTemp& Other){
-		TArray<TCHAR>::operator=(Other);
-		ArrayNum |= 0x40000000;
-	}
-
-	FStringTemp(const FString& Other){
-		TArray<TCHAR>::operator=(Other);
-		ArrayNum |= 0x40000000;
-	}
-
-	~FStringTemp(){
-		if(IsAllocated())
-			appFree(Data);
-
-		Data = NULL;
-		ArrayNum &= 0xE0000000;
-	}
+	FStringTemp& operator=(FStringTemp const&);
 };
 
-struct FStringNoInit : public FString{
+struct CORE_API FStringNoInit : public FString{
 public:
 	FStringNoInit(const FStringNoInit&);
 	FStringNoInit();

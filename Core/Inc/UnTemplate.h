@@ -206,7 +206,7 @@ protected:
 // Template dynamic array
 //
 template<typename T>
-class TArray : protected FArray{
+class TArray{
 public:
 	TArray() : Data(NULL),
 			   ArrayNum(0){}
@@ -533,6 +533,9 @@ public:
 	};
 
 protected:
+	void* Data;
+	INT ArrayNum;
+
 	INT Capacity() const{
 		return GetMaxSize();
 	}
@@ -952,7 +955,7 @@ class CORE_API FStringTemp : public FString{
 public:
 	FStringTemp(const TCHAR* In, bool What = false);
 	FStringTemp(INT Count);
-	FStringTemp(INT Count, const TCHAR* In) : FString(Count, In);
+	FStringTemp(INT Count, const TCHAR* In);
 	FStringTemp(const FStringTemp& Other);
 	FStringTemp(const FString& Other);
 	~FStringTemp();

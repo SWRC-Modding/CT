@@ -193,7 +193,7 @@ class TAllocator{};
 -----------------------------------------------------------------------------*/
 
 //
-// Former dynamic array base. All functionality has been moved to TArray.
+// Dynamic array base. All functionality has been moved to TArray.
 // This class only exists for FTransactionBase::SaveArray
 //
 class FArray{
@@ -206,7 +206,7 @@ protected:
 // Template dynamic array
 //
 template<typename T>
-class TArray{
+class TArray : protected FArray{
 public:
 	TArray() : Data(NULL),
 			   ArrayNum(0){}
@@ -533,9 +533,6 @@ public:
 	};
 
 protected:
-	void* Data;
-	INT ArrayNum;
-
 	INT Capacity() const{
 		return GetMaxSize();
 	}

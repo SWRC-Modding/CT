@@ -242,11 +242,11 @@ public:
 	}
 
 	T* GetData(){
-		return Data;
+		return static_cast<T*>(Data);
 	}
 
 	const T* GetData() const{
-		return Data;
+		return static_cast<T*>(Data);
 	}
 
 	bool IsValidIndex(INT Index) const{
@@ -503,12 +503,12 @@ public:
 	}
 
 	TArray<T> Segment(INT Index, INT Count){
-		TArray<T> Temp, Result;
+		TArray<T> Result;
 
-		Temp.Data = &(*this)[Index];
-		Temp.ArrayNum = Count & 0x1FFFFFFF | 0x20000000;
+		Result.Data = &(*this)[Index];
+		Result.ArrayNum = Count & 0x1FFFFFFF | 0x20000000;
 
-		return Result = Temp;
+		return Result;
 	}
 
 	//Iterator
@@ -546,7 +546,7 @@ protected:
 	}
 
 	void Unreference() const{
-		ArrayNum |= 0x20000000; //Setting bit 29
+		const_cast<INT&>(ArrayNum) |= 0x20000000; //Setting bit 29
 	}
 
 	void Init(INT a2, INT a3){
@@ -564,11 +564,7 @@ protected:
 		*(_BYTE *)v5++ = 0;
 		return result;*/
 
-		appMemzero(static_cast<BYTE>(Data) + a2 * sizeof(T), (a3 & 0x3FFFFFFF) * sizeof(T)); //Clearing bit 30 and 31 from a3 for some reason
-
-		T* end = (*this)[a2 + (a3 & 0x3FFFFFFF)];
-
-
+		appMemzero(static_cast<BYTE*>(Data) + a2 * sizeof(T), (a3 & 0x3FFFFFFF) * sizeof(T)); //Clearing bit 30 and 31 from a3 for some reason
 	}
 
 	void Realloc(INT NewSize, INT Slack){
@@ -580,7 +576,7 @@ protected:
 				Data = appRealloc(Data, NewSize * sizeof(T), Slack * sizeof(T));
 			}
 		}else{
-			if(Size > 0 || Slack > 0){
+			if(NewSize > 0 || Slack > 0){
 				void* Temp = appMalloc((NewSize >= Slack ? NewSize : Slack) * sizeof(T));
 
 				if(Data)
@@ -593,6 +589,12 @@ protected:
 		}
 
 		ArrayNum ^= (NewSize ^ ArrayNum) & 0x1FFFFFFF; //Assigning NewSize while preserving bit flags???
+	}
+
+	friend FArchive& operator<<(FArchive& Ar, TArray<T>& Array){
+		Array.Serialize(Ar);
+
+		return Ar;
 	}
 };
 

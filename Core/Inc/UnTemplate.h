@@ -502,9 +502,14 @@ public:
 		return *this;
 	}
 
-	TArray<T> Segment(INT Index, INT Count);/*{
-		//TODO: Implement
-	}*/
+	TArray<T> Segment(INT Index, INT Count){
+		TArray<T> Temp, Result;
+
+		Temp.Data = &(*this)[Index];
+		Temp.ArrayNum = Count & 0x1FFFFFFF | 0x20000000;
+
+		return Result = Temp;
+	}
 
 	//Iterator
 	class TIterator{
@@ -513,7 +518,7 @@ public:
 		void operator++()     { ++Index;                                             }
 		void RemoveCurrent()  { Array.Remove(Index--);                               }
 		INT GetIndex()   const{ return Index;                                        }
-		operator UBOOL() const{ return Index < Array.Num();                          }
+		operator bool()  const{ return Index < Array.Num();                          }
 		T& operator*()   const{ return Array[Index];                                 }
 		T* operator->()  const{ return &Array[Index];                                }
 		T& GetCurrent()  const{ return Array[Index];                                 }
@@ -532,6 +537,7 @@ protected:
 	//Just a guess...
 	enum EArrayFlags{
 		ARRAY_Static = 0x20000000,
+		ARRAY_Idk = 0x40000000, //Only used in FStringTemp, no idea what it means
 		ARRAY_NoShrink = 0x80000000
 	};
 

@@ -114,7 +114,7 @@ int main(int argc, char** argv){
 				if(ClassName == "Engine.ServerCommandlet")
 					UServerCommandletMain(); //The ServerCommandlet has a special Main function
 				else
-					Commandlet->Main(CommandletCmdLine);
+					ExitCode = Commandlet->Main(CommandletCmdLine);
 
 				if(Default->ShowErrorCount)
 					Warn.Logf("\n%s - %i error(s), %i warning(s)", Warn.ErrorCount == 0 ? "Success" : "Failure", Warn.ErrorCount, Warn.WarningCount);

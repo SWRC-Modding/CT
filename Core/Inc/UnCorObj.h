@@ -74,12 +74,13 @@ class CORE_API UCommandlet : public UObject{
 	virtual INT Main(const TCHAR* Parms);
 
 	/*
-	*	For some reason LucasArts renamed this to 'Main' which
-	*	results in infinite recursion when calling UCommandlet::Main(const TCHAR*)
-	*	of a Commandlet that is written in UnrealScript.
-	*	This Rewritten main function checks for a UnrealScript main function and
-	*	calls it if found. If not it calls the virtual main function above.
-	*	forceinline because otherwise the function from the dll gets called which is bad...
+	*	For some reason LucasArts removed the 'event' prefix
+	*	from functions that call UnrealScript events.
+	*	This results in UCommandlet::Main calling itself recursively.
+	*	This rewritten main function checks for an UnrealScript function
+	*	called main and calls it if found. Else it calls the virtual main function.
+	*	It needs to be forceinline because otherwise the function from the dll is
+	*	called which is bad...
 	*/
 	__forceinline INT Main(const FString& InParms){
 		UCommandlet_eventMain_Parms Parms;

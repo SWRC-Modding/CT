@@ -540,7 +540,7 @@ protected:
 		ARRAY_Idk = 0x40000000, //Only used in FStringTemp, no idea what it means
 		ARRAY_NoShrink = 0x80000000,
 
-		ARRAY_AllFlags = ARRAY_Unreferenced | ARRAY_Idk | ARRAY_NoShrink;
+		ARRAY_AllFlags = ARRAY_Unreferenced | ARRAY_Idk | ARRAY_NoShrink
 	};
 
 	INT Capacity() const{

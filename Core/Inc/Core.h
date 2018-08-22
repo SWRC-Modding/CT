@@ -18,18 +18,10 @@
 #define CORE_API DLL_IMPORT
 #endif
 
-//=============================================================================================================================
-/*
-*	Can be defined if the headers (the whole folders like 'Core' or 'Engine') are not in the same folder as the source code
-*	to help find the appropriate .lib file
-*/
-#ifndef HEADER_DIRECTORY
-#define HEADER_DIRECTORY "../"
-#endif
-
+//===========================================================================================
 //Used to automatically link the proper lib for the dlls whose headers are currently included
-#define LINK_LIB(name) __pragma(comment(lib, HEADER_DIRECTORY#name"/lib/"#name".lib"))
-//=============================================================================================================================
+#define LINK_LIB(name) __pragma(comment(lib, "../"#name"/lib/"#name".lib"))
+//===========================================================================================
 
 LINK_LIB(Core)
 

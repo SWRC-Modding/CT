@@ -343,7 +343,7 @@ public:
 CORE_API extern FMemStack				GMem;
 CORE_API extern FOutputDevice*			GLog;
 CORE_API extern FOutputDevice*			GNull;
-CORE_API extern FOutputDevice*		    GThrow;
+CORE_API extern FOutputDevice*			GThrow;
 CORE_API extern FOutputDeviceError*		GError;
 CORE_API extern FFeedbackContext*		GWarn;
 CORE_API extern FConfigCache*			GConfig;
@@ -356,42 +356,50 @@ CORE_API extern USystem*				GSys;
 CORE_API extern UProperty*				GProperty;
 CORE_API extern BYTE*					GPropAddr;
 CORE_API extern USubsystem*				GWindowManager;
-CORE_API extern TCHAR				    GErrorHist[4096];
-CORE_API extern TCHAR                   GTrue[64], GFalse[64], GYes[64], GNo[64], GNone[64];
+CORE_API extern TCHAR					GErrorHist[4096];
+CORE_API extern TCHAR					GTrue[64], GFalse[64], GYes[64], GNo[64], GNone[64];
 CORE_API extern TCHAR					GCdPath[];
 CORE_API extern	DOUBLE					GSecondsPerCycle;
-CORE_API extern	FTime					GTempTime;
+CORE_API extern DOUBLE					GLastFNamePurgeTime;
+CORE_API extern DOUBLE					GTempDouble;
 CORE_API extern void					(*GTempFunc)(void*);
 CORE_API extern SQWORD					GTicks;
-CORE_API extern INT                     GScriptCycles;
 CORE_API extern DWORD					GPageSize;
 CORE_API extern DWORD					GProcessorCount;
 CORE_API extern DWORD					GPhysicalMemory;
-CORE_API extern DWORD                   GUglyHackFlags;
-CORE_API extern UBOOL					GIsScriptable;
-CORE_API extern UBOOL					GIsEditor;
-CORE_API extern UBOOL					GIsUCC;
+CORE_API extern DWORD					GUglyHackFlags;
 CORE_API extern UBOOL					GIsBenchmarking;
 CORE_API extern UBOOL					GIsClient;
-CORE_API extern UBOOL					GIsServer;
 CORE_API extern UBOOL					GIsCriticalError;
-CORE_API extern UBOOL					GIsStarted;
-CORE_API extern UBOOL					GIsRunning;
-CORE_API extern UBOOL					GIsSlowTask;
+CORE_API extern UBOOL					GIsEditor;
+CORE_API extern UBOOL					GIsGarbageCollecting;
 CORE_API extern UBOOL					GIsGuarded;
+CORE_API extern UBOOL					GIsLoadingLevel;
+CORE_API extern UBOOL					GIsOpenGL;
+CORE_API extern UBOOL					GIsPixomatic;
+CORE_API extern UBOOL					GIsPurgingFNames;
 CORE_API extern UBOOL					GIsRequestingExit;
+CORE_API extern UBOOL					GIsRunning;
+CORE_API extern UBOOL					GIsScriptable;
+CORE_API extern UBOOL					GIsServer;
+CORE_API extern UBOOL					GIsSlowTask;
+CORE_API extern UBOOL					GIsStarted;
 CORE_API extern UBOOL					GIsStrict;
-CORE_API extern UBOOL                   GScriptEntryTag;
-CORE_API extern UBOOL                   GLazyLoad;
-CORE_API extern UBOOL					GUnicode;
-CORE_API extern UBOOL					GUnicodeOS;
+CORE_API extern UBOOL					GIsUCC;
+CORE_API extern UBOOL					GIsUTracing;
+CORE_API extern UBOOL					GScriptEntryTag;
+CORE_API extern UBOOL					GLazyLoad;
+CORE_API extern UBOOL					GUseSmallPools;
 CORE_API extern UBOOL					GUseFrontEnd;
+CORE_API extern UBOOL					GEdSelectionLock;
+CORE_API extern UBOOL					GEdShowFogInViewports;
+CORE_API extern UBOOL					GBuildingScripts;
 CORE_API extern class FGlobalMath		GMath;
-CORE_API extern class FArchive*         GDummySave;
-CORE_API extern DWORD					GCurrentViewport;
+CORE_API extern class FArchive*			GDummySave;
 CORE_API extern FString					GSavePath;
 CORE_API extern FString					GGlobalSettingsPath;
 CORE_API extern FString					GGlobalSettingsSaveName;
+CORE_API extern FLOAT					GAudioMaxRadiusMultiplier;
 
 
 //Per module globals.
@@ -401,7 +409,7 @@ extern "C" DLL_EXPORT TCHAR GPackage[];
 #include "UnFile.h"			//Low level utility code.
 #include "UnObjVer.h"		//Object version info.
 #include "UnArc.h"			//Archive class.
-#include "UnTemplate.h"     //Dynamic arrays.
+#include "UnTemplate.h"		//Dynamic arrays.
 #include "UnName.h"			//Global name subsystem.
 #include "UnStack.h"		//Script stack definition.
 #include "UnObjBas.h"		//Object base class.
@@ -414,9 +422,9 @@ extern "C" DLL_EXPORT TCHAR GPackage[];
 #include "UExporter.h"		//Exporter definition.
 #include "UnCache.h"		//Cache based memory management.
 #include "UnMem.h"			//Stack based memory management.
-#include "UnCId.h"          //Cache ID's.
-#include "UnBits.h"         //Bitstream archiver.
-#include "UnMath.h"         //Vector math functions.
+#include "UnCId.h"			//Cache ID's.
+#include "UnBits.h"			//Bitstream archiver.
+#include "UnMath.h"			//Vector math functions.
 
 /*-----------------------------------------------------------------------------
 	The End.

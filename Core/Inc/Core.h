@@ -50,7 +50,7 @@ public:
 	FTime&	operator=  (const FTime& t) { v=t.v; return *this; }
 
 private:
-	FTime(TIMETYP i) : v{i}{}
+	FTime(TIMETYP i) : v(i){}
 	TIMETYP v;
 };
 

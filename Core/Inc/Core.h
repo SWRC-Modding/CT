@@ -31,26 +31,26 @@ LINK_LIB(Core)
 //Time.
 #define FIXTIME 4294967296.f
 class FTime{
-#define TIMETYP __int64
+typedef __int64 TIMETYP;
 public:
+			FTime      ()				{ v = 0; }
+			FTime      (float f)		{ v=(TIMETYP)(f*FIXTIME); }
+			FTime      (double d)		{ v=(TIMETYP)(d*FIXTIME); }
+	float	GetFloat   ()				{ return v/FIXTIME; }
+	FTime	operator+  (float f) const	{ return FTime(v+(TIMETYP)(f*FIXTIME)); }
+	float	operator-  (FTime t) const	{ return (v-t.v)/FIXTIME; }
+	FTime	operator*  (float f) const	{ return FTime(v*f); }
+	FTime	operator/  (float f) const	{ return FTime(v/f); }
+	FTime&	operator+= (float f)		{ v=v+(TIMETYP)(f*FIXTIME); return *this; }
+	FTime&	operator*= (float f)		{ v=(TIMETYP)(v*f); return *this; }
+	FTime&	operator/= (float f)		{ v=(TIMETYP)(v/f); return *this; }
+	int		operator== (FTime t)		{ return v==t.v; }
+	int		operator!= (FTime t)		{ return v!=t.v; }
+	int		operator>  (FTime t)		{ return v>t.v; }
+	FTime&	operator=  (const FTime& t) { v=t.v; return *this; }
 
-	        FTime      ()               {v = 0;}
-	        FTime      (float f)        {v=(TIMETYP)(f*FIXTIME);}
-	        FTime      (double d)       {v=(TIMETYP)(d*FIXTIME);}
-	float   GetFloat   ()               {return v/FIXTIME;}
-	FTime   operator+  (float f) const  {return FTime(v+(TIMETYP)(f*FIXTIME));}
-	float   operator-  (FTime t) const  {return (v-t.v)/FIXTIME;}
-	FTime   operator*  (float f) const  {return FTime(v*f);}
-	FTime   operator/  (float f) const  {return FTime(v/f);}
-	FTime&  operator+= (float f)        {v=v+(TIMETYP)(f*FIXTIME); return *this;}
-	FTime&  operator*= (float f)        {v=(TIMETYP)(v*f); return *this;}
-	FTime&  operator/= (float f)        {v=(TIMETYP)(v/f); return *this;}
-	int     operator== (FTime t)        {return v==t.v;}
-	int     operator!= (FTime t)        {return v!=t.v;}
-	int     operator>  (FTime t)        {return v>t.v;}
-	FTime&  operator=  (const FTime& t) {v=t.v; return *this;}
 private:
-	FTime (TIMETYP i) {v=i;}
+	FTime(TIMETYP i) : v{i}{}
 	TIMETYP v;
 };
 
@@ -58,30 +58,30 @@ private:
 #include "UnVcWin32.h"
 
 //Global constants.
-enum{MAXBYTE		= 0xff       };
-enum{MAXWORD		= 0xffffU    };
-enum{MAXDWORD		= 0xffffffffU};
-enum{MAXSBYTE		= 0x7f       };
-enum{MAXSWORD		= 0x7fff     };
-enum{MAXINT		= 0x7fffffff };
-enum{INDEX_NONE	= -1         };
-enum{UNICODE_BOM   = 0xfeff     };
-enum ENoInit{E_NoInit = 0};
+enum{ MAXBYTE		= 0xff		  };
+enum{ MAXWORD		= 0xffffU	  };
+enum{ MAXDWORD		= 0xffffffffU };
+enum{ MAXSBYTE		= 0x7f		  };
+enum{ MAXSWORD		= 0x7fff	  };
+enum{ MAXINT		= 0x7fffffff  };
+enum{ INDEX_NONE	= -1		  };
+enum{ UNICODE_BOM	= 0xfeff	  };
 
-//Single byte character set mappings. No unicode in Republic Commando...
-#undef _TCHAR_DEFINED
-#ifndef _TCHAR_DEFINED
-	typedef ANSICHAR  TCHAR;
-	typedef ANSICHARU TCHARU;
-#endif
+enum ENoInit{ E_NoInit = 0 };
+
+//Character set mappings. No wchar_t in Republic Commando...
+typedef ANSICHAR  TCHAR;
+typedef ANSICHARU TCHARU;
+
 #undef TEXT
 #define TEXT(s) s
 #undef US
 #define US FString("")
-inline TCHAR    FromAnsi   (ANSICHAR In) { return In;                              }
-inline TCHAR    FromUnicode(UNICHAR In) { return (_WORD)In<0x100 ? In : MAXSBYTE; }
-inline ANSICHAR ToAnsi     (TCHAR In  ) { return (_WORD)In<0x100 ? In : MAXSBYTE; }
-inline UNICHAR  ToUnicode  (TCHAR In  ) { return (BYTE)In;                        }
+
+inline TCHAR	FromAnsi   (ANSICHAR In){ return In;                                }
+inline TCHAR	FromUnicode(UNICHAR In) { return (_WORD)In < 0x100 ? In : MAXSBYTE; }
+inline ANSICHAR	ToAnsi     (TCHAR In  ) { return (_WORD)In < 0x100 ? In : MAXSBYTE; }
+inline UNICHAR	ToUnicode  (TCHAR In  ) { return (BYTE)In;                          }
 
 /*----------------------------------------------------------------------------
 	Forward declarations.
@@ -103,8 +103,8 @@ class				UObjectProperty;
 class					UClassProperty;
 class				UNameProperty;
 class				UStructProperty;
-class               UStrProperty;
-class               UArrayProperty;
+class				UStrProperty;
+class				UArrayProperty;
 class			UStruct;
 class				UFunction;
 class				UState;
@@ -292,16 +292,16 @@ enum EFileTimes{
 };
 
 enum EFileWrite{
-	FILEWRITE_NoFail            = 0x01,
-	FILEWRITE_NoReplaceExisting = 0x02,
-	FILEWRITE_EvenIfReadOnly    = 0x04,
-	FILEWRITE_Unbuffered        = 0x08,
+	FILEWRITE_NoFail			= 0x01,
+	FILEWRITE_NoReplaceExisting	= 0x02,
+	FILEWRITE_EvenIfReadOnly	= 0x04,
+	FILEWRITE_Unbuffered		= 0x08,
 	FILEWRITE_Append			= 0x10,
-	FILEWRITE_AllowRead         = 0x20,
+	FILEWRITE_AllowRead			= 0x20,
 };
 
 enum EFileRead{
-	FILEREAD_NoFail             = 0x01,
+	FILEREAD_NoFail				= 0x01,
 };
 
 class CORE_API FFileManager{

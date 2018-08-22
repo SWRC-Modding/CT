@@ -29,6 +29,8 @@ LINK_LIB(Engine)
 ENGINE_API extern class UEngine*	GEngine;
 ENGINE_API extern class FMemStack	GEngineMem;
 ENGINE_API extern class FMemCache	GCache;
+ENGINE_API extern FLOAT 			GEngineDeltaTime;
+ENGINE_API extern FLOAT 			GEngineTime;
 
 /*-----------------------------------------------------------------------------
 	Engine public includes.
@@ -57,6 +59,16 @@ ENGINE_API extern class FMemCache	GCache;
 #include "UnRenderIteratorSupport.h"
 #include "UnRenDev.h"
 #include "UnPath.h"
+
+ENGINE_API extern class UCubemapManager* 		GCubemapManager;
+ENGINE_API extern class FEngineStats 			GEngineStats;
+ENGINE_API extern class UGlobalTempObjects* 	GGlobalTempObjects;
+ENGINE_API extern class FMatineeTools 			GMatineeTools;
+ENGINE_API extern class FPathBuilder 			GPathBuilder;
+ENGINE_API extern class FRebuildTools 			GRebuildTools;
+ENGINE_API extern class FStatGraph* 			GStatGraph;
+ENGINE_API extern class FTempLineBatcher* 		GTempLineBatcher;
+ENGINE_API extern class FTerrainTools 			GTerrainTools;
 
 /*-----------------------------------------------------------------------------
 	The End.

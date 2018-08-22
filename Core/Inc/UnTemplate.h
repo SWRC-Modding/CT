@@ -212,7 +212,9 @@ public:
 
 	TArray(T* Src, INT Count){
 		Data = Src;
-		ArrayNum = (Count & 0x1FFFFFFF) | 0x20000000; //Clearing bits 29, 30, 31 and then setting 29
+		ArrayNum = Count;
+
+		Unreference();
 	}
 
 	TArray(ENoInit){}
@@ -233,12 +235,12 @@ public:
 			appFree(Data);
 
 		Data = NULL;
-		ArrayNum &= 0xE0000000; //Preserve bits 29, 30, 31 if they're set and clear the rest
+		ArrayNum &= ARRAY_AllFlags; //Preserve bits 29, 30, 31 if they're set and clear the rest
 	}
 
 	void Set(T* Src, INT Count){
 		Data = Src;
-		ArrayNum = ((Count ^ ArrayNum) & 0x1FFFFFFF) ^ ArrayNum; //???
+		ArrayNum ^= (Count ^ ArrayNum) & ~ARRAY_AllFlags; //Assigning ArrayNum while preserving bitflags???
 	}
 
 	T* GetData(){
@@ -254,7 +256,7 @@ public:
 	}
 
 	INT Num() const{
-		return ArrayNum & 0x1FFFFFFF; //Clearing bits that could be set as flags
+		return ArrayNum & ~ARRAY_AllFlags;
 	}
 
 	INT Size() const{
@@ -262,7 +264,7 @@ public:
 	}
 
 	bool IsAllocated() const{
-		return Data != NULL && (ArrayNum & 0x20000000) == 0; //Returns true if Data is not NULL and bit 29 is not set
+		return Data != NULL && (ArrayNum & ARRAY_Unreferenced) == 0; //Returns true if Data is not NULL and bit 29 is not set
 	}
 
 	T& operator[](INT Index){
@@ -300,7 +302,10 @@ public:
 	}
 
 	void SetNoShrink(bool NoShrink){
-		ArrayNum = (ArrayNum & 0x7FFFFFFF) | (NoShrink << 31); //Clearing bit 31 and setting it if NoShrink is true
+		if(NoShrink)
+			ArrayNum |= ARRAY_NoShrink;
+		else
+			ArrayNum &= ~ARRAY_NoShrink;
 	}
 
 	void CountBytes(FArchive& Ar){
@@ -308,10 +313,7 @@ public:
 	}
 
 	INT GetMaxSize() const{
-		if(IsAllocated())
-			return GMalloc->GetAllocationSize(Data) / sizeof(T);
-		else
-			return 0;
+		return Capacity();
 	}
 
 	void Serialize(FArchive& Ar){
@@ -337,14 +339,14 @@ public:
 
 			Empty(NewNum);
 
-			for(INT i = 0; i < NewNum; i++)
+			for(INT i = 0; i < NewNum; ++i)
 				Ar << *new(*this)T;
 		}else{
 			//Save array.
 			INT TempNum = Num();
 			Ar << AR_INDEX(TempNum);
 
-			for(INT i = 0; i < Num(); i++)
+			for(INT i = 0; i < Num(); ++i)
 				Ar << (*this)[i];
 		}
 	}
@@ -355,7 +357,7 @@ public:
 		Realloc(Num(), CurrentSize < Size ? Size : CurrentSize);
 	}
 
-		void Insert(INT Index, INT Count = 1, bool bInit = false){
+	void Insert(INT Index, INT Count = 1, bool bInit = false){
 		Realloc(Num() + Count, 0);
 
 		appMemmove(
@@ -398,7 +400,7 @@ public:
 
 	void Remove(INT Index, INT Count = 1){
 		if(TTypeInfo<T>::NeedsDestructor()){
-			for(INT i = Index; i < Index + Count; i++)
+			for(INT i = Index; i < Index + Count; ++i)
 				(&(*this)[i])->~T();
 		}
 
@@ -415,11 +417,10 @@ public:
 
 	INT RemoveItem(const T& Item){
 		INT OldNum = Num();
+		INT Index = FindItemIndex(Item);
 
-		for(INT Index = 0; Index < Num(); Index++){
-			if((*this)[Index] == Item)
-				Remove(Index--);
-		}
+		if(Index != INDEX_NONE)
+			Remove(Index);
 
 		return OldNum - Num();
 	}
@@ -436,8 +437,8 @@ public:
 		Realloc(0, 0);
 
 		Data = Src.Data;
-		ArrayNum = (ArrayNum ^ Src.Num()) & 0x1FFFFFFF ^ ArrayNum; //???
-		ArrayNum = ArrayNum ^ (ArrayNum ^ (Src.ArrayNum & 0x3FFFFFFF)) & 0x20000000; //???
+		ArrayNum ^= (ArrayNum ^ Src.Num()) & ~ARRAY_AllFlags; //Assigning ArrayNum while preserving bitflags???
+		ArrayNum ^= (ArrayNum ^ (Src.ArrayNum & ~(ARRAY_Idk | ARRAY_NoShrink))) & ARRAY_Unreferenced; //???
 
 		Src.Unreference();
 	}
@@ -451,7 +452,7 @@ public:
 			Remove(NewSize, Num() - NewSize);
 
 		if(Num() > OldNum)
-			appMemzero(static_cast<BYTE*>(Data) + OldNum, ((Num() - OldNum) & 0x3FFFFFFF));
+			appMemzero(static_cast<BYTE*>(Data) + OldNum, Num() - OldNum);
 	}
 
 	void Set(INT NewSize){
@@ -460,7 +461,7 @@ public:
 
 	TArray<T>& operator+(const TArray<T>& Other){
 		if(this != &Other){
-			for(INT i = 0; i < Other.Num(); i++)
+			for(INT i = 0; i < Other.Num(); ++i)
 				new(*this) T(Other[i]);
 		}
 
@@ -481,17 +482,14 @@ public:
 	}
 
 	INT AddUniqueItem(const T& Item){
-		for(INT Index = 0; Index < Num(); Index++){
-			if((*this)[Index] == Item)
-				return Index;
-		}
+		INT Index = FindItemIndex(Item);
 
-		return AddItem(Item);
+		return Index != INDEX_NONE ? Index : AddItem(Item);
 	}
 
 	TArray<T>& operator=(const TArray<T>& Other){
 		if(this != &Other){
-			if(!(Other.ArrayNum & 0x60000000)){
+			if(!(Other.ArrayNum & (ARRAY_Unreferenced | ARRAY_Idk))){
 				Realloc(Other.Num(), 0);
 				appMemcpy(Data, Other.Data, Other.Num());
 			}else{
@@ -506,7 +504,9 @@ public:
 		TArray<T> Result;
 
 		Result.Data = &(*this)[Index];
-		Result.ArrayNum = Count & 0x1FFFFFFF | 0x20000000;
+		Result.ArrayNum = Count;
+
+		Result.Unreference();
 
 		return Result;
 	}
@@ -514,16 +514,16 @@ public:
 	//Iterator
 	class TIterator{
 	public:
-		TIterator(TArray<T>& InArray) : Array(InArray), Index(-1) { ++*this;         }
-		void operator++()     { ++Index;                                             }
-		void RemoveCurrent()  { Array.Remove(Index--);                               }
-		INT GetIndex()   const{ return Index;                                        }
-		operator bool()  const{ return Index < Array.Num();                          }
-		T& operator*()   const{ return Array[Index];                                 }
-		T* operator->()  const{ return &Array[Index];                                }
-		T& GetCurrent()  const{ return Array[Index];                                 }
-		T& GetPrev()     const{ return Array[Index ? Index - 1 : Array.Num() - 1 ];  }
-		T& GetNext()     const{ return Array[Index<Array.Num() - 1 ? Index + 1 : 0]; }
+		TIterator(TArray<T>& InArray) : Array(InArray), Index(-1) { ++*this;           }
+		void operator++()     { ++Index;                                               }
+		void RemoveCurrent()  { Array.Remove(Index--);                                 }
+		INT GetIndex()   const{ return Index;                                          }
+		operator bool()  const{ return Index < Array.Num();                            }
+		T& operator*()   const{ return Array[Index];                                   }
+		T* operator->()  const{ return &Array[Index];                                  }
+		T& GetCurrent()  const{ return Array[Index];                                   }
+		T& GetPrev()     const{ return Array[Index ? Index - 1 : Array.Num() - 1 ];    }
+		T& GetNext()     const{ return Array[Index < Array.Num() - 1 ? Index + 1 : 0]; }
 
 	private:
 		TArray<T>& Array;
@@ -536,20 +536,25 @@ protected:
 
 	//Just a guess...
 	enum EArrayFlags{
-		ARRAY_Static = 0x20000000,
+		ARRAY_Unreferenced = 0x20000000, //Array doesn't own the data it points to and thus is not allowed to free it
 		ARRAY_Idk = 0x40000000, //Only used in FStringTemp, no idea what it means
-		ARRAY_NoShrink = 0x80000000
+		ARRAY_NoShrink = 0x80000000,
+
+		ARRAY_AllFlags = ARRAY_Unreferenced | ARRAY_Idk | ARRAY_NoShrink;
 	};
 
 	INT Capacity() const{
-		return GetMaxSize();
+		if(IsAllocated())
+			return GMalloc->GetAllocationSize(Data) / sizeof(T);
+
+		return 0;
 	}
 
 	void Unreference() const{
-		const_cast<INT&>(ArrayNum) |= 0x20000000; //Setting bit 29
+		const_cast<INT&>(ArrayNum) |= ARRAY_Unreferenced; //Setting bit 29
 	}
 
-	void Init(INT a2, INT a3){
+	void Init(INT Index, INT Count){
 		//TODO: find out how this is implemented
 		/*void *v3; // edi@1
 		int result; // eax@1
@@ -564,7 +569,7 @@ protected:
 		*(_BYTE *)v5++ = 0;
 		return result;*/
 
-		appMemzero(static_cast<BYTE*>(Data) + a2 * sizeof(T), (a3 & 0x3FFFFFFF) * sizeof(T)); //Clearing bit 30 and 31 from a3 for some reason
+		appMemzero(static_cast<BYTE*>(Data) + Index * sizeof(T), (Count & ~(ARRAY_Idk | ARRAY_NoShrink)) * sizeof(T)); //Clearing bit 30 and 31 from a3 for some reason
 	}
 
 	void Realloc(INT NewSize, INT Slack){
@@ -583,12 +588,16 @@ protected:
 					appMemcpy(Temp, Data, (Num() > NewSize ? NewSize : Num()) * sizeof(T));
 
 				Data = Temp;
+				ArrayNum &= ~ARRAY_Unreferenced; //To make sure the memory isn't leaked.
+												 //This doesn't exist in the original code which means that either
+												 //the developers made a mistake or I'm missing something else about
+												 //how these flags are used...
 			}else{
 				Data = NULL;
 			}
 		}
 
-		ArrayNum ^= (NewSize ^ ArrayNum) & 0x1FFFFFFF; //Assigning NewSize while preserving bit flags???
+		ArrayNum ^= (NewSize ^ ArrayNum) & ~ARRAY_AllFlags; //Assigning NewSize while preserving bit flags???
 	}
 
 	friend FArchive& operator<<(FArchive& Ar, TArray<T>& Array){

@@ -171,7 +171,7 @@ CORE_API extern class FOutputDevice* GNull;
 -----------------------------------------------------------------------------*/
 
 //An output device.
-class FOutputDevice{
+class CORE_API FOutputDevice{
 public:
 	//FOutputDevice interface.
 	virtual void Serialize(const TCHAR* V, EName Event) = 0;
@@ -267,7 +267,7 @@ public:
 };
 
 //A context for displaying modal warning messages.
-class CORE_API FFeedbackContext : public FOutputDevice{
+class FFeedbackContext : public FOutputDevice{
 public:
 	virtual UBOOL VARARGS YesNof(const TCHAR* Fmt, ...) = 0;
 	virtual void BeginSlowTask(const TCHAR* Task, UBOOL StatusWindow) = 0;
@@ -417,8 +417,6 @@ extern "C" DLL_EXPORT TCHAR GPackage[];
 #include "UnCId.h"          //Cache ID's.
 #include "UnBits.h"         //Bitstream archiver.
 #include "UnMath.h"         //Vector math functions.
-
-#include "Core.inl"
 
 /*-----------------------------------------------------------------------------
 	The End.

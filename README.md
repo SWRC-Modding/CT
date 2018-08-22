@@ -2,21 +2,21 @@
 This repository contains the C++ headers for Star Wars Republic Commando that enable modders to write native code.
 This could be native functions that are callable from UnrealScript but also pure native classes that do everything in C++.
 
-##### Visual Studio .NET 2003
+#### Visual Studio .NET 2003
 In order to write native code for Republic Commando you first need Visual Studio .NET 2003 which can be found [here](https://wiki.swrc-modding.net/index.php?title=MS_Visual_Studio_2003).
 Newer versions could potentially work but probably don't, so just use this one for maximum compatibility.
 
-##### Why write native code?
+#### Why write native code?
 Native classes can either be implemented in both UnrealScript and C++ but also purely in C++. There are two reasons for
 writing native code:
-###### 1. It's faster:
+##### 1. It's faster:
 UnrealScript, according to Epic, is about 20 times slower than C++. That means functions that do heavy processing definitely
 benefit from being implemented in native code.
-###### 2. It gives access to features that UnrealScript doesn't have
+##### 2. It gives access to features that UnrealScript doesn't have
 UnrealScript is meant for gameplay programming. While it is quite good at that, it doesn't really provide any means to access
 more advanced engine features or other low-level functionality like for example file I/O.
 
-##### Getting started
+#### Getting started
 Clone this repository into your Star Wars Republic Commando folder next to GameData with
 > git clone https://github.com/Leon280698/CT.git Code
 
@@ -28,7 +28,7 @@ packages and to generate headers and source files for native classes.
 The others are my personal projects that I store in this repository for convenience. You can use them as a reference or just
 ignore/delete them if you want.
 
-#####  Creating a new project
+####  Creating a new project
 In order to create a new native coding project, right click the solution 'CT' in the solution explorer to the left.
 Select 'Add' -> 'New Project' and create a new 'Empty Project (.NET)'. We're actually not going to use .NET but this old version
 of Visual Studio has problems on newer versions of windows where the create project wizard is broken. The empty .NET project
@@ -55,7 +55,7 @@ The UCC project is configured in such a way that it automatically compiles the U
 Selecting UCC as a reference makes sure that the UCC.exe is built before your project so that it can generate the headers and sources that
 your own project needs.
 
-##### Writing code
+#### Writing code
 Now that the project setup is out of the way, it's finally time to write some code. Open windows explorer and navigate to the folder
 that contains your Visual Studio project. That should be in '(...)\\Star Wars Republic Commando\\Code\\MyPackge'.
 In there create three folders called 'Classes', 'Inc' and 'Src'. It is very important that you create them manually since the ucc will not be
@@ -89,8 +89,8 @@ Look for the lines that say 'EditPackages+=SomePackageName' under '[Editor.Edito
 In visual studio hit F7 or right click the solution and select 'Build'. If there are no errors in your script, the ucc should have generated
 the files 'MyPackageClasses.h' and 'MyPackageClasses.cpp' in the Inc and Src folders respectively.
 Drag and drop those onto your visual studio project so that they become a part of it and are recognized by the compiler.
-The content should look like this:
-###### MyPackageClasses.h
+Their content should look like this:
+##### MyPackageClasses.h
 ```C++
 /*===========================================================================
     C++ class definitions exported from UnrealScript.
@@ -132,7 +132,7 @@ public:
 
 #endif // CORE_NATIVE_DEFS
 ```
-###### MyPackageClasses.cpp
+##### MyPackageClasses.cpp
 ```C++
 /*===========================================================================
     C++ class definitions exported from UnrealScript.

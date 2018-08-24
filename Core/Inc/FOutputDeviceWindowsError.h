@@ -67,7 +67,7 @@ public:
 			GLog->Log(NAME_Critical, GErrorHist);
 			GLog->Flush();
 
-			if(GIsClient || GIsEditor || !GIsStarted)
+			if(!GIsServer)
 				MessageBox(NULL, GErrorHist, "Critical Error", MB_OK | MB_ICONERROR | MB_TASKMODAL);
 		}catch(...){}
 	}

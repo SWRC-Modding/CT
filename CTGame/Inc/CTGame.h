@@ -152,7 +152,7 @@ public:
 	DECLARE_CLASS(ACTPlayer,APlayerController,CLASS_Config,CTGame)
 
 	//Overrides
-	virtual bool CrossesMyFire(const FVector&, FVector&);
+	virtual bool CrossesMyFire(const FVector&, const FVector&);
 	virtual void Destroy();
 	virtual void Spawned();
 

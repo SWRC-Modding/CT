@@ -288,7 +288,7 @@ enum ETextureFormat{
 class ENGINE_API UBitmap : public UObject
 {
 	DECLARE_ABSTRACT_CLASS(UBitmap,UObject,0,Engine)
-
+	
 	// General bitmap information.
 	BYTE		Format;				// ETextureFormat.
 	UPalette*	Palette;			// Palette if 8-bit palettized.
@@ -313,9 +313,7 @@ class ENGINE_API UBitmap : public UObject
 	void SetLastUpdateTime(FTime T) {appMemcpy(&__LastUpdateTime,&T,sizeof(FTime));}
 };
 
-//
-// A complex material texture.
-//
+
 class ENGINE_API UTexture : public UBitmap
 {
 	DECLARE_CLASS(UTexture,UBitmap,CLASS_SafeReplace,Engine)
@@ -374,11 +372,11 @@ class ENGINE_API UTexture : public UBitmap
 	// UBitmap interface.
 	DWORD GetColorsIndex()
 	{
-		return Palette->GetIndex();
+		//return Palette->GetIndex();
 	}
 	FColor* GetColors()
 	{
-		return Palette ? &Palette->Colors[0] : NULL;
+		//return Palette ? &Palette->Colors[0] : NULL;
 	}
 	INT GetNumMips()
 	{
@@ -416,6 +414,7 @@ class ENGINE_API UTexture : public UBitmap
 		return AnimCur ? AnimCur : this;
 	}
 };
+
 
 //
 // Information about a locked texture. Used for ease of rendering.
@@ -471,19 +470,23 @@ struct ENGINE_API FFontCharacter
 	// Variables.
 	INT StartU, StartV;
 	INT USize, VSize;
+	//BYTE TextureIndex;
 
 	// Serializer.
+	/*
 	friend FArchive& operator<<( FArchive& Ar, FFontCharacter& Ch )
 	{
 		guard(FFontCharacter<<);
 		return Ar << Ch.StartU << Ch.StartV << Ch.USize << Ch.VSize;
 		unguard;
 	}
+	*/
 };
 
 //
 // A font page.
 //
+/*
 struct ENGINE_API FFontPage
 {
 	// Variables.
@@ -491,13 +494,18 @@ struct ENGINE_API FFontPage
 	TArray<FFontCharacter> Characters;
 
 	// Serializer.
-	friend FArchive& operator<<( FArchive& Ar, FFontPage& Ch );
-	/*{
+	
+	friend FArchive& operator<<( FArchive& Ar, FFontPage& Ch )
+	{
 		guard(FFontCharacter<<);
 		return Ar << Ch.Texture << Ch.Characters;
 		unguard;
-	}*/
+	}
+	
+	
+	struct FFontPage& operator=(struct FFontCharacter const &);
 };
+*/
 
 //
 // A font object, containing information about a set of glyphs.
@@ -505,32 +513,46 @@ struct ENGINE_API FFontPage
 // the font database only contains the coordinates of the individual
 // glyph.
 //
-class ENGINE_API UFont : public UObject{
+class ENGINE_API UFont : public UObject
+{
 	DECLARE_CLASS(UFont,UObject,0,Engine)
 
 	// Variables.
 	TArray<FFontCharacter> Characters;
-	TArray<class UTexture2D*> Textures;	
+	TArray<class UTexture*> Textures;	
 	TMap<TCHAR, TCHAR> CharRemap;
 	UBOOL IsRemapped;
-    INT Kerning;
+	
+	// Found in UT2003, IDK what gam means
+	INT Kerning; // gam
 
 	// Constructors.
 	UFont();
+	
+	// Found in IDA
+	UFont(UFont const &);
+	
 
 	// UObject interface.
-	void Serialize(FArchive& Ar);
+	void Serialize( FArchive& Ar );
 
 	// UFont interface
-	TCHAR RemapChar(TCHAR ch){
+	TCHAR RemapChar(TCHAR ch)
+	{
 		TCHAR *p;
-		if(!IsRemapped)
+		if( !IsRemapped )
 			return ch;
-
 		p = CharRemap.Find(ch);
-
 		return p ? *p : 32; // return space if not found.
 	}
+	
+	// Found in IDA
+	void GetCharSize(UFont* Font, TCHAR InCh, INT& Width, INT& Height );
+	
+	// Also found in IDA
+	UFont& operator=(class UFont const &);
+
+	
 };
 
 /*----------------------------------------------------------------------------

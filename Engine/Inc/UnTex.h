@@ -505,29 +505,30 @@ struct ENGINE_API FFontPage
 // the font database only contains the coordinates of the individual
 // glyph.
 //
-class ENGINE_API UFont : public UObject
-{
+class ENGINE_API UFont : public UObject{
 	DECLARE_CLASS(UFont,UObject,0,Engine)
 
 	// Variables.
-	INT CharactersPerPage;
-	TArray<FFontPage> Pages;
-	TMap<TCHAR,TCHAR> CharRemap;
+	TArray<FFontCharacter> Characters;
+	TArray<class UTexture2D*> Textures;	
+	TMap<TCHAR, TCHAR> CharRemap;
 	UBOOL IsRemapped;
+    INT Kerning;
 
 	// Constructors.
 	UFont();
 
 	// UObject interface.
-	void Serialize( FArchive& Ar );
+	void Serialize(FArchive& Ar);
 
 	// UFont interface
-	TCHAR RemapChar(TCHAR ch)
-	{
+	TCHAR RemapChar(TCHAR ch){
 		TCHAR *p;
-		if( !IsRemapped )
+		if(!IsRemapped)
 			return ch;
+
 		p = CharRemap.Find(ch);
+
 		return p ? *p : 32; // return space if not found.
 	}
 };

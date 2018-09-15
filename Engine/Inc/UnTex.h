@@ -290,16 +290,16 @@ class ENGINE_API UBitmap : public UObject
 	DECLARE_ABSTRACT_CLASS(UBitmap,UObject,0,Engine)
 	
 	// General bitmap information.
-	BYTE		Format;					// ETextureFormat.
-	UPalette*	Palette;			// Palette if 8-bit palettized.
-	INT			Padding[13];		// Pad for 52 bytes
-	BYTE		Pad1;				// 1 More bytes
+	UPalette*	Palette;				// Palette if 8-bit palettized.
+	INT			Padding[13];			// Pad for 52 bytes
+	BYTE		Pad1;					// 1 More bytes
 	// I have a hunch that this goes here...
+	BYTE		Format;					// ETextureFormat.
 	BYTE		UClampMode, VClampMode; // ETexClampMode
-	BYTE		UBits, VBits;		// # of bits in USize, i.e. 8 for 256.
-	BYTE		Pad;				// Padding byte
-	INT			USize, VSize;		// Size, must be power of 2.
-	INT			UClamp, VClamp;		// Clamped width, must be <= size.
+	BYTE		UBits, VBits;			// # of bits in USize, i.e. 8 for 256.
+	BYTE		Pad;					// Padding byte
+	INT			USize, VSize;			// Size, must be power of 2.
+	INT			UClamp, VClamp;			// Clamped width, must be <= size.
 	// Somewhere in here goes DontCache
 	// BITFIELD DontCache:1 GCC_PACK(4)
 	FColor		MipZero;			// Overall average color of texture.

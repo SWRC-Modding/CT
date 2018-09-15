@@ -379,11 +379,11 @@ class ENGINE_API UTexture : public UBitmap
 	// UBitmap interface.
 	DWORD GetColorsIndex()
 	{
-		//return Palette->GetIndex();
+		return Palette->GetIndex();
 	}
 	FColor* GetColors()
 	{
-		//return Palette ? &Palette->Colors[0] : NULL;
+		return Palette ? &Palette->Colors[0] : NULL;
 	}
 	INT GetNumMips()
 	{

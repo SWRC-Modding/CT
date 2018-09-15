@@ -475,14 +475,14 @@ struct ENGINE_API FFontCharacter
 	//BYTE TextureIndex;
 
 	// Serializer.
-	/*
+	
 	friend FArchive& operator<<( FArchive& Ar, FFontCharacter& Ch )
 	{
 		guard(FFontCharacter<<);
 		return Ar << Ch.StartU << Ch.StartV << Ch.USize << Ch.VSize;
 		unguard;
 	}
-	*/
+	
 };
 
 //

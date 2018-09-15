@@ -288,16 +288,33 @@ enum ETextureFormat{
 class ENGINE_API UBitmap : public UObject
 {
 	DECLARE_ABSTRACT_CLASS(UBitmap,UObject,0,Engine)
-
+	
 	// General bitmap information.
-	BYTE		Format;				// ETextureFormat.
-	UPalette*	Palette;			// Palette if 8-bit palettized.
-	BYTE		UBits, VBits;		// # of bits in USize, i.e. 8 for 256.
-	INT			USize, VSize;		// Size, must be power of 2.
-	INT			UClamp, VClamp;		// Clamped width, must be <= size.
+	// I believe lastUpdateTime goes here as the first block of memory changes every run
+	INT			__LastUpdateTime[2];// Last time texture was locked for rendering.
+
+	// I don't think this is used in UE2...
+	UPalette*	Palette;				// Palette if 8-bit palettized.
+	INT			Padding[12];			// Pad for 48 bytes
+	//BYTE		Pad1, Pad2, Pad3;		// 3 More bytes
+
+	// I have a hunch that this goes here...
+	BYTE		Format;					// ETextureFormat.
+	BYTE		UClampMode, VClampMode; // ETexClampMode
+	BYTE		UBits, VBits;			// # of bits in USize, i.e. 8 for 256.
+	// Huh, this isn't needed anymore
+	//BYTE		Pad;					// Padding byte
+	INT			USize, VSize;			// Size, must be power of 2.
+	INT			UClamp, VClamp;			// Clamped width, must be <= size.
+
+	// Somewhere in here goes DontCache
+	// It's padded two bytes over
+	// So i'm just going to pad it over
+	BYTE		Pad4, Pad5;
+	BITFIELD	DontCache:1;
 	FColor		MipZero;			// Overall average color of texture.
 	FColor		MaxColor;			// Maximum color for normalization.
-	INT			__LastUpdateTime[2];// Last time texture was locked for rendering.
+	
 
 	// Static.
 	static class UClient* __Client;
@@ -313,8 +330,8 @@ class ENGINE_API UBitmap : public UObject
 	void SetLastUpdateTime(FTime T) {appMemcpy(&__LastUpdateTime,&T,sizeof(FTime));}
 };
 
-//
-// A complex material texture.
+//	
+// A complex material texture.	
 //
 class ENGINE_API UTexture : public UBitmap
 {
@@ -417,6 +434,7 @@ class ENGINE_API UTexture : public UBitmap
 	}
 };
 
+
 //
 // Information about a locked texture. Used for ease of rendering.
 //
@@ -471,19 +489,23 @@ struct ENGINE_API FFontCharacter
 	// Variables.
 	INT StartU, StartV;
 	INT USize, VSize;
+	//BYTE TextureIndex;
 
 	// Serializer.
+	
 	friend FArchive& operator<<( FArchive& Ar, FFontCharacter& Ch )
 	{
 		guard(FFontCharacter<<);
 		return Ar << Ch.StartU << Ch.StartV << Ch.USize << Ch.VSize;
 		unguard;
 	}
+	
 };
 
 //
 // A font page.
 //
+/*
 struct ENGINE_API FFontPage
 {
 	// Variables.
@@ -491,13 +513,18 @@ struct ENGINE_API FFontPage
 	TArray<FFontCharacter> Characters;
 
 	// Serializer.
-	friend FArchive& operator<<( FArchive& Ar, FFontPage& Ch );
-	/*{
+	
+	friend FArchive& operator<<( FArchive& Ar, FFontPage& Ch )
+	{
 		guard(FFontCharacter<<);
 		return Ar << Ch.Texture << Ch.Characters;
 		unguard;
-	}*/
+	}
+	
+	
+	struct FFontPage& operator=(struct FFontCharacter const &);
 };
+*/
 
 //
 // A font object, containing information about a set of glyphs.
@@ -505,32 +532,46 @@ struct ENGINE_API FFontPage
 // the font database only contains the coordinates of the individual
 // glyph.
 //
-class ENGINE_API UFont : public UObject{
+class ENGINE_API UFont : public UObject
+{
 	DECLARE_CLASS(UFont,UObject,0,Engine)
 
 	// Variables.
 	TArray<FFontCharacter> Characters;
-	TArray<class UTexture2D*> Textures;	
+	TArray<class UTexture*> Textures;	
 	TMap<TCHAR, TCHAR> CharRemap;
 	UBOOL IsRemapped;
-    INT Kerning;
+	
+	// Found in UT2003, IDK what gam means, probably the signature
+	INT Kerning; // gam
 
 	// Constructors.
 	UFont();
+	
+	// Found in IDA
+	UFont(UFont const &);
+	
 
 	// UObject interface.
-	void Serialize(FArchive& Ar);
+	void Serialize( FArchive& Ar );
 
 	// UFont interface
-	TCHAR RemapChar(TCHAR ch){
+	TCHAR RemapChar(TCHAR ch)
+	{
 		TCHAR *p;
-		if(!IsRemapped)
+		if( !IsRemapped )
 			return ch;
-
 		p = CharRemap.Find(ch);
-
 		return p ? *p : 32; // return space if not found.
 	}
+	
+	// Found in IDA
+	void GetCharSize(UFont* Font, TCHAR InCh, INT& Width, INT& Height );
+	
+	// Also found in IDA
+	UFont& operator=(class UFont const &);
+
+	
 };
 
 /*----------------------------------------------------------------------------

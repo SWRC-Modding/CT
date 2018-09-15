@@ -290,11 +290,18 @@ class ENGINE_API UBitmap : public UObject
 	DECLARE_ABSTRACT_CLASS(UBitmap,UObject,0,Engine)
 	
 	// General bitmap information.
-	BYTE		Format;				// ETextureFormat.
+	BYTE		Format;					// ETextureFormat.
 	UPalette*	Palette;			// Palette if 8-bit palettized.
+	INT			Padding[13];		// Pad for 52 bytes
+	BYTE		Pad1;				// 1 More bytes
+	// I have a hunch that this goes here...
+	BYTE		UClampMode, VClampMode; // ETexClampMode
 	BYTE		UBits, VBits;		// # of bits in USize, i.e. 8 for 256.
+	BYTE		Pad;				// Padding byte
 	INT			USize, VSize;		// Size, must be power of 2.
 	INT			UClamp, VClamp;		// Clamped width, must be <= size.
+	// Somewhere in here goes DontCache
+	// BITFIELD DontCache:1 GCC_PACK(4)
 	FColor		MipZero;			// Overall average color of texture.
 	FColor		MaxColor;			// Maximum color for normalization.
 	INT			__LastUpdateTime[2];// Last time texture was locked for rendering.
@@ -313,9 +320,7 @@ class ENGINE_API UBitmap : public UObject
 	void SetLastUpdateTime(FTime T) {appMemcpy(&__LastUpdateTime,&T,sizeof(FTime));}
 };
 
-//	
-// A complex material texture.	
-//
+
 class ENGINE_API UTexture : public UBitmap
 {
 	DECLARE_CLASS(UTexture,UBitmap,CLASS_SafeReplace,Engine)
@@ -374,11 +379,11 @@ class ENGINE_API UTexture : public UBitmap
 	// UBitmap interface.
 	DWORD GetColorsIndex()
 	{
-		return Palette->GetIndex();
+		//return Palette->GetIndex();
 	}
 	FColor* GetColors()
 	{
-		return Palette ? &Palette->Colors[0] : NULL;
+		//return Palette ? &Palette->Colors[0] : NULL;
 	}
 	INT GetNumMips()
 	{
@@ -475,14 +480,14 @@ struct ENGINE_API FFontCharacter
 	//BYTE TextureIndex;
 
 	// Serializer.
-	
+	/*
 	friend FArchive& operator<<( FArchive& Ar, FFontCharacter& Ch )
 	{
 		guard(FFontCharacter<<);
 		return Ar << Ch.StartU << Ch.StartV << Ch.USize << Ch.VSize;
 		unguard;
 	}
-	
+	*/
 };
 
 //

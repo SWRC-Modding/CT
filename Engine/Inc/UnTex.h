@@ -320,7 +320,9 @@ class ENGINE_API UBitmap : public UObject
 	void SetLastUpdateTime(FTime T) {appMemcpy(&__LastUpdateTime,&T,sizeof(FTime));}
 };
 
-
+//	
+// A complex material texture.	
+//
 class ENGINE_API UTexture : public UBitmap
 {
 	DECLARE_CLASS(UTexture,UBitmap,CLASS_SafeReplace,Engine)

@@ -290,21 +290,31 @@ class ENGINE_API UBitmap : public UObject
 	DECLARE_ABSTRACT_CLASS(UBitmap,UObject,0,Engine)
 	
 	// General bitmap information.
+	// I believe lastUpdateTime goes here as the first block of memory changes every run
+	INT			__LastUpdateTime[2];// Last time texture was locked for rendering.
+
+	// I don't think this is used in UE2...
 	UPalette*	Palette;				// Palette if 8-bit palettized.
-	INT			Padding[13];			// Pad for 52 bytes
-	BYTE		Pad1;					// 1 More bytes
+	INT			Padding[12];			// Pad for 48 bytes
+	//BYTE		Pad1, Pad2, Pad3;		// 3 More bytes
+
 	// I have a hunch that this goes here...
 	BYTE		Format;					// ETextureFormat.
 	BYTE		UClampMode, VClampMode; // ETexClampMode
 	BYTE		UBits, VBits;			// # of bits in USize, i.e. 8 for 256.
-	BYTE		Pad;					// Padding byte
+	// Huh, this isn't needed anymore
+	//BYTE		Pad;					// Padding byte
 	INT			USize, VSize;			// Size, must be power of 2.
 	INT			UClamp, VClamp;			// Clamped width, must be <= size.
+
 	// Somewhere in here goes DontCache
-	// BITFIELD DontCache:1 GCC_PACK(4)
+	// It's padded two bytes over
+	// So i'm just going to pad it over
+	BYTE		Pad4, Pad5;
+	BITFIELD	DontCache:1;
 	FColor		MipZero;			// Overall average color of texture.
 	FColor		MaxColor;			// Maximum color for normalization.
-	INT			__LastUpdateTime[2];// Last time texture was locked for rendering.
+	
 
 	// Static.
 	static class UClient* __Client;

@@ -313,7 +313,9 @@ class ENGINE_API UBitmap : public UObject
 	void SetLastUpdateTime(FTime T) {appMemcpy(&__LastUpdateTime,&T,sizeof(FTime));}
 };
 
-
+//	
+// A complex material texture.	
+//
 class ENGINE_API UTexture : public UBitmap
 {
 	DECLARE_CLASS(UTexture,UBitmap,CLASS_SafeReplace,Engine)
@@ -372,11 +374,11 @@ class ENGINE_API UTexture : public UBitmap
 	// UBitmap interface.
 	DWORD GetColorsIndex()
 	{
-		//return Palette->GetIndex();
+		return Palette->GetIndex();
 	}
 	FColor* GetColors()
 	{
-		//return Palette ? &Palette->Colors[0] : NULL;
+		return Palette ? &Palette->Colors[0] : NULL;
 	}
 	INT GetNumMips()
 	{

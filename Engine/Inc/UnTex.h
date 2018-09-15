@@ -482,14 +482,14 @@ struct ENGINE_API FFontCharacter
 	//BYTE TextureIndex;
 
 	// Serializer.
-	/*
+	
 	friend FArchive& operator<<( FArchive& Ar, FFontCharacter& Ch )
 	{
 		guard(FFontCharacter<<);
 		return Ar << Ch.StartU << Ch.StartV << Ch.USize << Ch.VSize;
 		unguard;
 	}
-	*/
+	
 };
 
 //
@@ -532,7 +532,7 @@ class ENGINE_API UFont : public UObject
 	TMap<TCHAR, TCHAR> CharRemap;
 	UBOOL IsRemapped;
 	
-	// Found in UT2003, IDK what gam means
+	// Found in UT2003, IDK what gam means, probably the signature
 	INT Kerning; // gam
 
 	// Constructors.

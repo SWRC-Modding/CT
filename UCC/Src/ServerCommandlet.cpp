@@ -1,8 +1,6 @@
 #include "../../Engine/Inc/Engine.h"
 #include "../../Core/Inc/FFeedbackContextAnsi.h"
 
-extern FFeedbackContextAnsi Warn; //Defined in ucc.cpp
-
 //Variables for ServerCommandlet
 
 FString CurrentCmd; //Contains the next command that is to be passed to UEngine::Exec and is gathered by the input thread
@@ -63,8 +61,8 @@ void UServerCommandletMain(){
 		if(CurrentCmd.Len() > 0){
 			if(CurrentCmd == "CLS") //In case user wants to clear screen. Can be useful for testing.
 				system("cls"); //Hate using system but it's ok here
-			else if(!GEngine->Exec(*CurrentCmd, Warn))
-				Warn.Log(LocalizeError("Exec", "Core"));
+			else if(!GEngine->Exec(*CurrentCmd, *GWarn))
+				GWarn->Log(LocalizeError("Exec", "Core"));
 
 			CurrentCmd.Empty();
 		}

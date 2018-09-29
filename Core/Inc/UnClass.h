@@ -97,7 +97,7 @@ class CORE_API UField : public UObject{
 	enum {HASH_COUNT = 256};
 
 	//Variables.
-	UField*			SuperField;
+	UField*			Next;
 
 	//Constructors.
 	UField(ENativeConstructor, UClass* InClass, const TCHAR* InName, const TCHAR* InPackageName, DWORD InFlags);
@@ -186,9 +186,11 @@ class CORE_API UStruct : public UField{
 	NO_DEFAULT_CONSTRUCTOR(UStruct)
 	
 	//Variables.
+	char				Pad1[4]; //Padding
+	UField*				SuperField;
 	UTextBuffer*		ScriptText;
+	char				Pad2[4]; //Padding
 	UField*				Children;
-	char				Pad1[8]; //Padding
 	TArray<BYTE>		Defaults;
 	INT					PropertiesSize;
 	INT					PropertiesAlign;
@@ -196,7 +198,6 @@ class CORE_API UStruct : public UField{
 	TArray<BYTE>		Script;
 	INT					TextPos;
 	INT					Line;
-	char				Pad2[4]; //Padding
 	//In memory only.
 	UObjectProperty*	RefLink;
 	UStructProperty*	StructLink;
@@ -210,26 +211,26 @@ class CORE_API UStruct : public UField{
 	UStruct(UStruct* InSuperStruct);
 
 	//UObject interface.
-	void Serialize(FArchive& Ar);
-	void PostLoad();
-	void Destroy();
-	void Register();
+	virtual void Serialize(FArchive& Ar);
+	virtual void PostLoad();
+	virtual void Destroy();
+	virtual void Register();
 
 	//UField interface.
-	void AddCppProperty(UProperty* Property);
-	INT GetPropertiesSize();
+	virtual void AddCppProperty(UProperty* Property);
+	virtual INT GetPropertiesSize();
 
 	//UStruct interface.
 	virtual UStruct* GetInheritanceSuper();
 	virtual void Link(FArchive& Ar, UBOOL Props);
-	virtual void SerializeBin(FArchive& Ar, BYTE* Data, int);
-	virtual void SerializeTaggedProperties(FArchive& Ar, BYTE* Data, UClass* DefaultsClass, int);
+	virtual void SerializeBin(FArchive& Ar, BYTE* Data, INT MaxReadBytes);
+	virtual void SerializeTaggedProperties(FArchive& Ar, BYTE* Data, UClass* DefaultsClass, INT);
 	virtual void CleanupDestroyed(BYTE* Data);
 	virtual EExprToken SerializeExpr(INT& iCode, FArchive& Ar);
 	virtual TCHAR* GetNameCPP() const;
 
 	FString FunctionMD5();
-	int GetPropertiesAlign();
+	INT GetPropertiesAlign();
 	void SetPropertiesSize(INT NewSize);
 	bool IsChildOf(const UStruct* SomeBase) const;
 	UStruct* GetSuperStruct() const;
@@ -264,16 +265,16 @@ class CORE_API UFunction : public UStruct{
 	UFunction(UFunction* InSuperFunction);
 
 	//UObject interface.
-	void Serialize(FArchive& Ar);
-	void PostLoad();
+	virtual void Serialize(FArchive& Ar);
+	virtual void PostLoad();
 
 	//UField interface.
-	void Bind();
+	virtual void Bind();
 
 	//UStruct interface.
-	UBOOL MergeBools(){ return 0; }
-	UStruct* GetInheritanceSuper(){ return NULL; }
-	void Link(FArchive& Ar, UBOOL Props);
+	virtual UBOOL MergeBools(){ return 0; }
+	virtual UStruct* GetInheritanceSuper(){ return NULL; }
+	virtual void Link(FArchive& Ar, UBOOL Props);
 
 	//UFunction interface.
 	UFunction* GetSuperFunction() const;
@@ -304,13 +305,13 @@ class CORE_API UState : public UStruct{
 	UState(UState* InSuperState);
 
 	//UObject interface.
-	void Serialize(FArchive& Ar);
-	void Destroy();
+	virtual void Serialize(FArchive& Ar);
+	virtual void Destroy();
 
 	//UStruct interface.
-	UBOOL MergeBools() {return 1;}
-	UStruct* GetInheritanceSuper() {return GetSuperState();}
-	void Link(FArchive& Ar, UBOOL Props);
+	virtual UBOOL MergeBools() {return 1;}
+	virtual UStruct* GetInheritanceSuper() {return GetSuperState();}
+	virtual void Link(FArchive& Ar, UBOOL Props);
 
 	//UState interface.
 	UState* GetSuperState() const;
@@ -335,7 +336,7 @@ class CORE_API UEnum : public UField{
 	UEnum(UEnum* InSuperEnum);
 
 	//UObject interface.
-	void Serialize(FArchive& Ar);
+	virtual void Serialize(FArchive& Ar);
 
 	//UEnum interface.
 	UEnum* GetSuperEnum() const;
@@ -434,7 +435,7 @@ class CORE_API UConst : public UField{
 	UConst(UConst* InSuperConst, const TCHAR* InValue);
 
 	//UObject interface.
-	void Serialize(FArchive& Ar);
+	virtual void Serialize(FArchive& Ar);
 
 	//UConst interface.
 	UConst* GetSuperConst() const;

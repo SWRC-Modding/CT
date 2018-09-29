@@ -454,8 +454,8 @@ public:
 	virtual FString GetDescription() const;
 	virtual void DebugOutput(FOutputDevice&);
 	virtual void DebugOutputSelf(FOutputDevice&);
-	virtual void DebugWindowSizeGet(int&, int&) const;
-	virtual void Rename(const char*, UObject*);
+	virtual void DebugWindowSizeGet(INT&, INT&) const;
+	virtual void Rename(const TCHAR*, UObject*);
 	virtual void NetDirty(UProperty*);
 	virtual bool IsRuntimeStatic();
 	virtual bool IsDefaultValue(const struct FPropertyInstance&);
@@ -542,8 +542,7 @@ public:
 };
 
 #define DECLARE_NAME(name) static FName N##name(#name);
-
-//#define DECLARE_FUNCTION(func) void func(FFrame& Stack, RESULT_DECL);
+#define DECLARE_FUNCTION(func) void func(FFrame& Stack, RESULT_DECL);
 
 /*----------------------------------------------------------------------------
 	Core templates.
@@ -557,25 +556,25 @@ inline DWORD GetTypeHash(const UObject* A){
 //Parse an object name in the input stream.
 template<typename T>
 UBOOL ParseObject(const TCHAR* Stream, const TCHAR* Match, T*& Obj, UObject* Outer){
-	return ParseObject(Stream, Match, T::StaticClass(), *(UObject **)&Obj, Outer);
+	return ParseObject(Stream, Match, T::StaticClass(), *reinterpret_cast<UObject**>(&Obj), Outer);
 }
 
 //Find an optional object.
 template<typename T>
 T* FindObject(UObject* Outer, const TCHAR* Name, UBOOL ExactClass = 0){
-	return (T*)UObject::StaticFindObject(T::StaticClass(), Outer, Name, ExactClass);
+	return static_cast<T*>(UObject::StaticFindObject(T::StaticClass(), Outer, Name, ExactClass));
 }
 
 //Find an object, no failure allowed.
 template<typename T>
 T* FindObjectChecked(UObject* Outer, const TCHAR* Name, UBOOL ExactClass = 0){
-	return (T*)UObject::StaticFindObjectChecked(T::StaticClass(), Outer, Name, ExactClass);
+	return static_cast<T*>(UObject::StaticFindObjectChecked(T::StaticClass(), Outer, Name, ExactClass));
 }
 
 //Dynamically cast an object type-safely.
 template<typename T>
 T* Cast(UObject* Src){
-	return Src && Src->IsA(T::StaticClass()) ? (T*)Src : NULL;
+	return Src && Src->IsA(T::StaticClass()) ? static_cast<T*>(Src) : NULL;
 }
 
 template<typename T, typename U>
@@ -583,24 +582,24 @@ T* CastChecked(U* Src){
 	if(!Src || !Src->IsA(T::StaticClass()))
 		appErrorf("Cast of %s to %s failed", Src ? Src->GetFullName() : "NULL", T::StaticClass()->GetName());
 
-	return (T*)Src;
+	return static_cast<T*>(Src);
 }
 
 //Construct an object of a particular class.
 template<typename T>
-T* ConstructObject(UClass* Class, UObject* Outer=(UObject*)-1, FName Name=NAME_None, DWORD SetFlags = 0){
+T* ConstructObject(UClass* Class, UObject* Outer = reinterpret_cast<UObject*>(-1), FName Name = NAME_None, DWORD SetFlags = 0){
 	check(Class->IsChildOf(T::StaticClass()));
 
-	if(Outer==(UObject*)-1)
+	if(Outer == reinterpret_cast<UObject*>(-1))
 		Outer = UObject::GetTransientPackage();
 
-	return (T*)UObject::StaticConstructObject(Class, Outer, Name, SetFlags);
+	return static_cast<T*>(UObject::StaticConstructObject(Class, Outer, Name, SetFlags));
 }
 
 //Load an object.
 template<typename T>
 T* LoadObject(UObject* Outer, const TCHAR* Name, const TCHAR* Filename, DWORD LoadFlags, UPackageMap* Sandbox){
-	return (T*)UObject::StaticLoadObject(T::StaticClass(), Outer, Name, Filename, LoadFlags, Sandbox);
+	return static_cast<T*>(UObject::StaticLoadObject(T::StaticClass(), Outer, Name, Filename, LoadFlags, Sandbox));
 }
 
 //Load a class object.
@@ -612,7 +611,7 @@ UClass* LoadClass(UObject* Outer, const TCHAR* Name, const TCHAR* Filename, DWOR
 //Get default object of a class.
 template<typename T>
 T* GetDefault(){
-	return (T*)&T::StaticClass()->Defaults(0);
+	return static_cast<T*>(&T::StaticClass()->Defaults[0]);
 }
 
 /*----------------------------------------------------------------------------
@@ -624,11 +623,12 @@ T* GetDefault(){
 //
 class FObjectIterator{
 public:
-	FObjectIterator(UClass* InClass=UObject::StaticClass())
-	:	Class(InClass), Index(-1){
+	FObjectIterator(UClass* InClass = UObject::StaticClass()) : Class(InClass),
+																Index(-1){
 		check(Class);
 		++*this;
 	}
+
 	void operator++(){
 		while(++Index < UObject::GObjObjects.Num() && (!UObject::GObjObjects[Index] || !UObject::GObjObjects[Index]->IsA(Class)));
 	}
@@ -657,16 +657,14 @@ protected:
 template<typename T>
 class TObjectIterator : public FObjectIterator{
 public:
-	TObjectIterator()
-	:	FObjectIterator(T::StaticClass())
-	{}
+	TObjectIterator() : FObjectIterator(T::StaticClass()){}
 
 	T* operator*(){
-		return (T*)FObjectIterator::operator*();
+		return static_cast<T*>(FObjectIterator::operator*());
 	}
 
 	T* operator->(){
-		return (T*)FObjectIterator::operator->();
+		return static_cast<T*>(FObjectIterator::operator->());
 	}
 };
 

@@ -536,8 +536,8 @@ class CORE_API UStructProperty : public UProperty
 //
 // See if this object belongs to the specified class.
 //
-__forceinline UBOOL UObject::IsA( class UClass* SomeBase ) const{
-	for(UClass* TempClass = Class; TempClass; TempClass = (UClass*)TempClass->SuperField){
+inline UBOOL UObject::IsA(class UClass* SomeBase) const{
+	for(UClass* TempClass = Class; TempClass; TempClass = static_cast<UClass*>(TempClass->SuperField)){
 		if(TempClass == SomeBase)
 			return 1;
 	}
@@ -548,7 +548,7 @@ __forceinline UBOOL UObject::IsA( class UClass* SomeBase ) const{
 //
 // See if this object is in a certain package.
 //
-__forceinline UBOOL UObject::IsIn( class UObject* SomeOuter ) const{
+inline UBOOL UObject::IsIn(class UObject* SomeOuter) const{
 	for(UObject* It = GetOuter(); It; It = It->GetOuter()){
 		if(It == SomeOuter)
 			return 1;

@@ -75,8 +75,8 @@ class CORE_API UCommandlet : public UObject{
 
 	/*
 	*	For some reason LucasArts removed the 'event' prefix
-	*	from functions that call UnrealScript events.
-	*	This results in UCommandlet::Main calling itself recursively.
+	*	from functions that call UnrealScript events which
+	*	results in UCommandlet::Main calling itself recursively.
 	*	This rewritten main function checks for an UnrealScript function
 	*	called main and calls it if found. Else it calls the virtual main function.
 	*	It needs to be forceinline because otherwise the function from the dll is

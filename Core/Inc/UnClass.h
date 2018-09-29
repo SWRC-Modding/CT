@@ -125,9 +125,8 @@ class CORE_API UField : public UObject{
 //
 template <class T> class TFieldIterator{
 public:
-	TFieldIterator(UStruct* InStruct)
-	: Struct(InStruct)
-	, Field(InStruct ? InStruct->Children : NULL){
+	TFieldIterator(UStruct* InStruct) : Struct(InStruct),
+										Field(InStruct ? InStruct->Children : NULL){
 		IterateToNext();
 	}
 
@@ -136,30 +135,33 @@ public:
 	}
 
 	void operator++(){
-		checkSlow(Field);
 		Field = Field->Next;
+
 		IterateToNext();
 	}
 
 	T* operator*(){
-		checkSlow(Field);
-		return (T*)Field;
+		return static_cast<T*>(Field);
 	}
 
 	T* operator->(){
-		checkSlow(Field);
-		return (T*)Field;
+		return static_cast<T*>(Field);
 	}
 
 	UStruct* GetStruct(){
 		return Struct;
 	}
+
 protected:
+	UStruct* Struct;
+	UField* Field;
+
 	void IterateToNext(){
 		while(Struct){
 			while(Field){
 				if(Field->IsA(T::StaticClass()))
 					return;
+
 				Field = Field->Next;
 			}
 
@@ -169,9 +171,6 @@ protected:
 				Field = Struct->Children;
 		}
 	}
-
-	UStruct* Struct;
-	UField* Field;
 };
 
 /*-----------------------------------------------------------------------------

@@ -39,7 +39,7 @@ int main(int argc, char** argv){
 
 		FString CmdLine;
 
-		for(int i = 1; i < argc; i++)
+		for(int i = 1; i < argc; ++i)
 			CmdLine += FString(argv[i]) + " ";
 
 		appInit("SWRepublicCommando", *CmdLine, &Log, &Error, &Warn, FConfigCacheIni::Factory, 1);
@@ -54,7 +54,7 @@ int main(int argc, char** argv){
 
 			UObject::GetRegistryObjects(List, UClass::StaticClass(), UCommandlet::StaticClass(), 0); //Loading list of commandlets declared in .int files
 
-			for(int i = 0; i < List.Num(); i++){ //Looking Token up in list and autocompleting class name if found
+			for(int i = 0; i < List.Num(); ++i){ //Looking Token up in list and autocompleting class name if found
 				FString Str = List[i].Object;
 
 				if(ClassName == Str || ClassName + "Commandlet" == Str){ //Checking against "PackageName.ClassName (+ Commandlet)"
@@ -85,7 +85,7 @@ int main(int argc, char** argv){
 
 			if(Class){
 				UCommandlet* Commandlet = ConstructObject<UCommandlet>(Class);
-				UCommandlet* Default = static_cast<UCommandlet*>(Class->GetDefaultObject());
+				UCommandlet* Default = Cast<UCommandlet>(Class->GetDefaultObject());
 
 				if(Default->ShowBanner)
 					ShowBanner();
@@ -100,7 +100,7 @@ int main(int argc, char** argv){
 				//Contains only the command-line options that are passed to the commandlet
 				FString CommandletCmdLine;
 
-				for(int i = 2; i < argc; i++)
+				for(int i = 2; i < argc; ++i)
 					CommandletCmdLine += FString(argv[i]) + " ";
 
 				Commandlet->InitExecution();

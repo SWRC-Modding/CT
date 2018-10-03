@@ -37,8 +37,7 @@ struct FNativeEntry{
 template<typename T>
 struct FNativeInitializer{
 	FNativeInitializer(){
-		//Very hacky but since I don't know the actual variables there's not that much I can do about it...
-		*reinterpret_cast<FNativeEntry<T>**>(reinterpret_cast<char*>(T::StaticClass()) + 0xFC) = T::StaticNativeMap;
+		T::StaticClass()->NativeEntries = T::StaticNativeMap;
 		T::StaticClass()->RegisterNatives();
 	}
 };
@@ -80,7 +79,7 @@ struct FNativeInitializer{
 
 #define P_GET_SKIP_OFFSET(var)        _WORD var; {checkSlow(*Stack.Code==EX_Skip); Stack.Code++; var=*(_WORD*)Stack.Code; Stack.Code+=2; }
 
-#define P_FINISH                      Stack.Code++; if (*Stack.Code == EX_DebugInfo) Stack.Step(Stack.Object, NULL);
+#define P_FINISH                      Stack.Code++; if(*Stack.Code == EX_DebugInfo) Stack.Step(Stack.Object, NULL);
 
 //
 //Convenience macros.
@@ -127,10 +126,8 @@ struct FNativeInitializer{
 ,	Locals		((BYTE*)InLocals)
 {}*/
 __forceinline void FFrame::Step(UObject* Context, RESULT_DECL){
-	guardSlow(FFrame::Step);
 	INT B = *Code++;
 	(Context->*GNatives[B])(*this, Result);
-	unguardfSlow(("(%s @ %s : %04X)", Object->GetFullName(), Node->GetFullName(), Code - &Node->Script(0)));
 }
 /*inline INT FFrame::ReadInt()
 {

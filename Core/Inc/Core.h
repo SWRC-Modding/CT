@@ -29,7 +29,7 @@ LINK_LIB(Core)
 #include "UnBuild.h"
 
 //Time.
-#define FIXTIME 4294967296.f
+#define FIXTIME 4294967296.0f
 class FTime{
 typedef __int64 TIMETYP;
 public:
@@ -392,7 +392,6 @@ CORE_API extern FString					GSavePath;
 CORE_API extern FString					GGlobalSettingsPath;
 CORE_API extern FString					GGlobalSettingsSaveName;
 CORE_API extern FLOAT					GAudioMaxRadiusMultiplier;
-
 
 //Per module globals.
 extern "C" DLL_EXPORT TCHAR GPackage[];

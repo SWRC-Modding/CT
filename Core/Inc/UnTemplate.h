@@ -86,37 +86,37 @@ struct TTypeInfo<UObject*> : public TTypeInfoBase<UObject*>{
 
 template<typename T>
 inline T Abs(const T A){
-	return (A>=(T)0) ? A : -A;
+	return (A >= static_cast<T>(0)) ? A : -A;
 }
 
 template<typename T>
 inline T Sgn(const T A){
-	return (A>0) ? 1 : ((A<0) ? -1 : 0);
+	return (A > 0) ? 1 : ((A < 0) ? -1 : 0);
 }
 
 template<typename T>
 inline T Max(const T A, const T B){
-	return (A>=B) ? A : B;
+	return (A >= B) ? A : B;
 }
 
 template<typename T>
 inline T Min(const T A, const T B){
-	return (A<=B) ? A : B;
+	return (A <= B) ? A : B;
 }
 
 template<typename T>
 inline T Square(const T A){
-	return A*A;
+	return A * A;
 }
 
 template<typename T>
 inline T Clamp(const T X, const T Min, const T Max){
-	return X<Min ? Min : X<Max ? X : Max;
+	return X < Min ? Min : X < Max ? X : Max;
 }
 
 template<typename T>
 inline T Align(const T Ptr, INT Alignment){
-	return (T)(((DWORD)Ptr + Alignment - 1) & ~(Alignment-1));
+	return (T)(((DWORD)Ptr + Alignment - 1) & ~(Alignment - 1));
 }
 
 template<typename T>
@@ -128,7 +128,7 @@ inline void Exchange(T& A, T& B){
 
 template<typename T>
 T Lerp(T& A, T& B, FLOAT Alpha){
-	return A + Alpha * (B-A);
+	return A + Alpha * (B - A);
 }
 
 inline DWORD GetTypeHash(const BYTE A){
@@ -156,11 +156,11 @@ inline DWORD GetTypeHash(const DWORD A){
 }
 
 inline DWORD GetTypeHash(const QWORD A){
-	return (DWORD)A+((DWORD)(A>>32) * 23);
+	return (DWORD)A + ((DWORD)(A >> 32) * 23);
 }
 
 inline DWORD GetTypeHash(const SQWORD A){
-	return (DWORD)A+((DWORD)(A>>32) * 23);
+	return (DWORD)A + ((DWORD)(A >> 32) * 23);
 }
 
 inline DWORD GetTypeHash(const TCHAR* S){
@@ -193,7 +193,7 @@ class TAllocator{};
 -----------------------------------------------------------------------------*/
 
 //
-// Dynamic array base. All functionality has been moved to TArray.
+// Former dynamic array base. All functionality has been moved to TArray.
 // This class only exists for FTransactionBase::SaveArray
 //
 class FArray{
@@ -1078,49 +1078,47 @@ private:
 //
 class FStringOutputDevice : public FString, public FOutputDevice{
 public:
-	FStringOutputDevice(const TCHAR* InStr = "")
-	: FString(InStr)
-	{}
-	void Serialize(const TCHAR* Data, EName Event)
-	{
-		*this += (TCHAR*)Data;
+	FStringOutputDevice(const TCHAR* InStr = "") : FString(InStr){}
+
+	void Serialize(const TCHAR* Data, EName Event){
+		*this += Data;
 	}
 };
 
 //
 // Buffer writer.
 //
-class FBufferWriter : public FArchive
-{
+class FBufferWriter : public FArchive{
 public:
-	FBufferWriter(TArray<BYTE>& InBytes)
-	: Bytes(InBytes)
-	, Pos(0)
-	{
+	FBufferWriter(TArray<BYTE>& InBytes) : Bytes(InBytes),
+										   Pos(0){
 		ArIsSaving = 1;
 	}
-	void Serialize(void* InData, INT Length)
-	{
+
+	void Serialize(void* InData, INT Length){
 		if(Pos+Length>Bytes.Num())
 			Bytes.Add(Pos+Length-Bytes.Num());
+
 		if(Length == 1)
 			Bytes[Pos] = ((BYTE*)InData)[0];
 		else
 			appMemcpy(&Bytes[Pos], InData, Length);
+
 		Pos += Length;
 	}
-	INT Tell()
-	{
+
+	INT Tell(){
 		return Pos;
 	}
-	void Seek(INT InPos)
-	{
+
+	void Seek(INT InPos){
 		Pos = InPos;
 	}
-	INT TotalSize()
-	{
+
+	INT TotalSize(){
 		return Bytes.Num();
 	}
+
 private:
 	TArray<BYTE>& Bytes;
 	INT Pos;
@@ -1171,6 +1169,7 @@ public:
 	UBOOL AtEnd(){
 		return Pos>=Bytes.Num();
 	}
+
 private:
 	const TArray<BYTE>& Bytes;
 	INT Pos;
@@ -1192,6 +1191,9 @@ protected:
 		TK Key;
 		TI Value;
 		void* Null; //Seems to be a pointer but no idea what it stores
+					//It's null most of the time
+					//When passing a TMap to the original code this value is not used
+					//so further investigating it is just a waste of time...
 
 		TPair(typename TTypeInfo<TK>::ConstInitType InKey, typename TTypeInfo<TI>::ConstInitType InValue) : Key(InKey),
 																											Value(InValue){}
@@ -1204,24 +1206,26 @@ protected:
 
 	void Rehash(){
 		INT* NewHash = new INT[HashCount];
-		{for(INT i = 0; i<HashCount; i++)
-		{
+
+		for(INT i = 0; i < HashCount; ++i)
 			NewHash[i] = INDEX_NONE;
-		}}
-		{for(INT i = 0; i<Pairs.Num(); i++)
-		{
+
+		for(INT i = 0; i < Pairs.Num(); ++i){
 			TPair& Pair    = Pairs[i];
-			INT    iHash   = (GetTypeHash(Pair.Key) & (HashCount-1));
+			INT    iHash   = (GetTypeHash(Pair.Key) & (HashCount - 1));
+
 			Pair.HashNext  = NewHash[iHash];
 			NewHash[iHash] = i;
-		}}
+		}
+
 		if(Hash)
 			appFree(Hash);
+
 		Hash = NewHash;
 	}
 
 	void Relax(){
-		while(HashCount>Pairs.Num()*2+8)
+		while(HashCount > Pairs.Num() * 2 + 8)
 			HashCount /= 2;
 
 		Rehash();
@@ -1230,10 +1234,11 @@ protected:
 	TI& Add(typename TTypeInfo<TK>::ConstInitType InKey, typename TTypeInfo<TI>::ConstInitType InValue){
 		TPair& Pair   = *new(Pairs)TPair(InKey, InValue);
 		INT    iHash  = (GetTypeHash(Pair.Key) & (HashCount-1));
+
 		Pair.HashNext = Hash[iHash];
 		Hash[iHash]   = Pairs.Num()-1;
 
-		if(HashCount*2+8 < Pairs.Num()){
+		if(HashCount * 2 + 8 < Pairs.Num()){
 			HashCount *= 2;
 			Rehash();
 		}
@@ -1250,6 +1255,7 @@ public:
 				 HashCount(8){
 		Rehash();
 	}
+
 	TMapBase(const TMapBase& Other) : Pairs(Other.Pairs),
 									  HashCount(Other.HashCount),
 									  Hash(NULL){
@@ -1279,18 +1285,22 @@ public:
 	}
 
 	TI& Set(typename TTypeInfo<TK>::ConstInitType InKey, typename TTypeInfo<TI>::ConstInitType InValue){
-		for(INT i = Hash[(GetTypeHash(InKey) & (HashCount-1))]; i != INDEX_NONE; i = Pairs[i].HashNext)
+		for(INT i = Hash[(GetTypeHash(InKey) & (HashCount - 1))]; i != INDEX_NONE; i = Pairs[i].HashNext){
 			if(Pairs[i].Key == InKey)
-				{Pairs[i].Value = InValue; return Pairs[i].Value;}
+				Pairs[i].Value = InValue; return Pairs[i].Value;
+		}
 
 		return Add(InKey, InValue);
 	}
 
 	INT Remove(typename TTypeInfo<TK>::ConstInitType InKey){
 		INT Count = 0;
-		for(INT i=Pairs.Num()-1; i >= 0; i--){
-			if(Pairs[i].Key==InKey)
-				Pairs.Remove(i); Count++;
+
+		for(INT i = Pairs.Num() - 1; i >= 0; --i){
+			if(Pairs[i].Key == InKey){
+				Pairs.Remove(i);
+				++Count;
+			}
 		}
 
 		if(Count)
@@ -1300,15 +1310,16 @@ public:
 	}
 
 	TI* Find(const TK& Key){
-		for(INT i = Hash[(GetTypeHash(Key) & (HashCount-1))]; i != INDEX_NONE; i = Pairs[i].HashNext)
+		for(INT i = Hash[(GetTypeHash(Key) & (HashCount - 1))]; i != INDEX_NONE; i = Pairs[i].HashNext){
 			if(Pairs[i].Key == Key)
 				return &Pairs[i].Value;
+		}
 
 		return NULL;
 	}
 
 	TI FindRef(const TK& Key){
-		for(INT i = Hash[(GetTypeHash(Key) & (HashCount-1))]; i != INDEX_NONE; i = Pairs[i].HashNext){
+		for(INT i = Hash[(GetTypeHash(Key) & (HashCount - 1))]; i != INDEX_NONE; i = Pairs[i].HashNext){
 			if(Pairs[i].Key == Key)
 				return Pairs[i].Value;
 		}
@@ -1317,7 +1328,7 @@ public:
 	}
 
 	const TI* Find(const TK& Key) const{
-		for(INT i = Hash[(GetTypeHash(Key) & (HashCount-1))]; i != INDEX_NONE; i = Pairs[i].HashNext){
+		for(INT i = Hash[(GetTypeHash(Key) & (HashCount - 1))]; i != INDEX_NONE; i = Pairs[i].HashNext){
 			if(Pairs[i].Key == Key)
 				return &Pairs[i].Value;
 		}
@@ -1338,14 +1349,18 @@ public:
 
 	void Dump(FOutputDevice& Ar){
 		guard(TMapBase::Dump);
-		Ar.Logf(TEXT("TMapBase: %i items, %i hash slots"), Pairs.Num(), HashCount);
-		for(INT i = 0; i<HashCount; i++)
-		{
+
+		Ar.Logf("TMapBase: %i items, %i hash slots", Pairs.Num(), HashCount);
+
+		for(INT i = 0; i < HashCount; ++i){
 			INT c = 0;
-			for(INT j=Hash[i]; j!=INDEX_NONE; j=Pairs[j].HashNext)
+
+			for(INT j = Hash[i]; j != INDEX_NONE; j = Pairs[j].HashNext)
 				c++;
-			Ar.Logf(TEXT("   Hash[%i] = %i"), i, c);
+
+			Ar.Logf("   Hash[%i] = %i", i, c);
 		}
+
 		unguard;
 	}
 
@@ -1375,7 +1390,7 @@ public:
 		return *this;
 	}
 
-	int Num(){
+	int Num() const{
 		return Pairs.Num();
 	}
 };
@@ -1389,11 +1404,10 @@ public:
 	}
 
 	void MultiFind(const TK& Key, TArray<TI>& Values){
-		guardSlow(TMap::MultiFind);
-		for(INT i=Hash[(GetTypeHash(Key) & (HashCount-1))]; i!=INDEX_NONE; i=Pairs[i].HashNext)
-			if(Pairs[i].Key==Key)
-				new(Values)TI(Pairs[i].Value);
-		unguardSlow;
+		for(INT i = Hash[(GetTypeHash(Key) & (HashCount - 1))]; i != INDEX_NONE; i = Pairs[i].HashNext){
+			if(Pairs[i].Key == Key)
+				new(Values) TI(Pairs[i].Value);
+		}
 	}
 
 	TI& Add(typename TTypeInfo<TK>::ConstInitType InKey, typename TTypeInfo<TI>::ConstInitType InValue){
@@ -1401,31 +1415,37 @@ public:
 	}
 
 	TI& AddUnique(typename TTypeInfo<TK>::ConstInitType InKey, typename TTypeInfo<TI>::ConstInitType InValue){
-		for(INT i=Hash[(GetTypeHash(InKey) & (HashCount-1))]; i!=INDEX_NONE; i=Pairs[i].HashNext)
-			if(Pairs[i].Key==InKey && Pairs[i].Value==InValue)
+		for(INT i = Hash[(GetTypeHash(InKey) & (HashCount - 1))]; i != INDEX_NONE; i = Pairs[i].HashNext){
+			if(Pairs[i].Key == InKey && Pairs[i].Value == InValue)
 				return Pairs[i].Value;
+		}
+
 		return Add(InKey, InValue);
 	}
 
 	INT RemovePair(typename TTypeInfo<TK>::ConstInitType InKey, typename TTypeInfo<TI>::ConstInitType InValue){
-		guardSlow(TMap::Remove);
 		INT Count = 0;
-		for(INT i=Pairs.Num()-1; i >= 0; i--)
-			if(Pairs[i].Key==InKey && Pairs[i].Value==InValue)
-				{Pairs.Remove(i); Count++;}
+
+		for(INT i = Pairs.Num() - 1; i >= 0; --i){
+			if(Pairs[i].Key==InKey && Pairs[i].Value==InValue){
+				Pairs.Remove(i);
+				++Count;
+			}
+		}
+
 		if(Count)
 			Relax();
+
 		return Count;
-		unguardSlow;
 	}
 
 	TI* FindPair(const TK& Key, const TK& Value){
-		guardSlow(TMap::Find);
-		for(INT i=Hash[(GetTypeHash(Key) & (HashCount-1))]; i!=INDEX_NONE; i=Pairs[i].HashNext)
-			if(Pairs[i].Key==Key && Pairs[i].Value==Value)
+		for(INT i = Hash[(GetTypeHash(Key) & (HashCount - 1))]; i != INDEX_NONE; i = Pairs[i].HashNext){
+			if(Pairs[i].Key == Key && Pairs[i].Value == Value)
 				return &Pairs[i].Value;
+		}
+
 		return NULL;
-		unguardSlow;
 	}
 };
 

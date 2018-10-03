@@ -123,7 +123,8 @@ class CORE_API UField : public UObject{
 //
 //For iterating through a linked list of fields.
 //
-template <class T> class TFieldIterator{
+template<typename T>
+class TFieldIterator{
 public:
 	TFieldIterator(UStruct* InStruct) : Struct(InStruct),
 										Field(InStruct ? InStruct->Children : NULL){
@@ -352,7 +353,9 @@ class CORE_API UClass : public UState{
 	DECLARE_CLASS(UClass,UState,0,Core)
 	DECLARE_WITHIN(UPackage)
 
-	char Padding[128];
+	char Padding1[104];
+	void* NativeEntries;
+	char Padding2[20];
 
 	/*//Variables.
 	DWORD				ClassFlags;

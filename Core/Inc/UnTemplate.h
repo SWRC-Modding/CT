@@ -1286,8 +1286,11 @@ public:
 
 	TI& Set(typename TTypeInfo<TK>::ConstInitType InKey, typename TTypeInfo<TI>::ConstInitType InValue){
 		for(INT i = Hash[(GetTypeHash(InKey) & (HashCount - 1))]; i != INDEX_NONE; i = Pairs[i].HashNext){
-			if(Pairs[i].Key == InKey)
-				Pairs[i].Value = InValue; return Pairs[i].Value;
+			if(Pairs[i].Key == InKey){
+				Pairs[i].Value = InValue;
+
+				return Pairs[i].Value;
+			}
 		}
 
 		return Add(InKey, InValue);

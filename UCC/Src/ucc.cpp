@@ -55,18 +55,14 @@ int main(int argc, char** argv){
 			UObject::GetRegistryObjects(List, UClass::StaticClass(), UCommandlet::StaticClass(), 0); //Loading list of commandlets declared in .int files
 
 			for(int i = 0; i < List.Num(); ++i){ //Looking Token up in list and autocompleting class name if found
-				FString Str = List[i].Object;
+				FString FullName = List[i].Object;
+				FString ShortName = FullName;
 
-				if(ClassName == Str || ClassName + "Commandlet" == Str){ //Checking against "PackageName.ClassName (+ Commandlet)"
-					ClassName = List[i].Object;
+				while(ShortName.InStr(".") >= 0) //Removing package name so that only class name remains
+					ShortName = ShortName.Mid(ShortName.InStr(".") + 1);
 
-					break;
-				}
-
-				while(Str.InStr(".") >= 0) //Removing package name so that only class name remains
-					Str = Str.Mid(Str.InStr(".") + 1);
-
-				if(ClassName == Str || ClassName + "Commandlet" == Str){ //Checking against "ClassName (+ Commandlet)" and adding "PackageName"
+				if(ClassName == FullName || ClassName + "Commandlet" == FullName ||  //Checking against "PackageName.ClassName (+ Commandlet)"
+				   ClassName == ShortName || ClassName + "Commandlet" == ShortName){ //Checking against "ClassName (+ Commandlet)"
 					ClassName = List[i].Object;
 
 					break;

@@ -26,7 +26,8 @@ void ShowBanner(){
 	Warn.Log("=======================================");
 	Warn.Log("ucc.exe for Star Wars Republic Commando");
 	Warn.Log("made by Leon0628");
-	Warn.Log("=======================================\n");
+	Warn.Log("=======================================");
+	Warn.Log("");
 }
 
 int main(int argc, char** argv){
@@ -86,7 +87,8 @@ int main(int argc, char** argv){
 				if(Default->ShowBanner)
 					ShowBanner();
 
-				Warn.Logf("Executing %s\n", Class->GetFullName());
+				Warn.Logf("Executing %s", Class->GetFullName());
+				Warn.Log("");
 
 				GIsClient = Default->IsClient;
 				GIsEditor = Default->IsEditor;
@@ -112,8 +114,10 @@ int main(int argc, char** argv){
 				else
 					ExitCode = Commandlet->Main(CommandletCmdLine);
 
-				if(Default->ShowErrorCount)
-					Warn.Logf("\n%s - %i error(s), %i warning(s)", Warn.ErrorCount == 0 ? "Success" : "Failure", Warn.ErrorCount, Warn.WarningCount);
+				if(Default->ShowErrorCount){
+					Warn.Log("");
+					Warn.Logf("%s - %i error(s), %i warning(s)", Warn.ErrorCount == 0 ? "Success" : "Failure", Warn.ErrorCount, Warn.WarningCount);
+				}
 
 				if(Default->LogToStdout){
 					Warn.AuxOut = NULL;
@@ -126,7 +130,7 @@ int main(int argc, char** argv){
 		}else{
 			ShowBanner();
 			Warn.Log("Usage:");
-			Warn.Log("    ucc CommandletName <parameters>");
+			Warn.Log("    ucc <command> <parameters>");
 		}
 
 		//This prevents an infinite loop during garbage collection when there are compile errors with ucc make

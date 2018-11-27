@@ -53,7 +53,7 @@ public:
 -----------------------------------------------------------------------------*/
 
 //
-//A tagged linked list of replicatable variables.
+// A tagged linked list of replicatable variables.
 //
 class FRepLink{
 public:
@@ -70,7 +70,7 @@ public:
 -----------------------------------------------------------------------------*/
 
 //
-//Entry in a state's label table.
+// Entry in a state's label table.
 //
 struct CORE_API FLabelEntry{
 	//Variables.
@@ -87,7 +87,7 @@ struct CORE_API FLabelEntry{
 -----------------------------------------------------------------------------*/
 
 //
-//Base class of UnrealScript language objects.
+// Base class of UnrealScript language objects.
 //
 class CORE_API UField : public UObject{
 	DECLARE_ABSTRACT_CLASS(UField,UObject,0,Core)
@@ -121,7 +121,7 @@ class CORE_API UField : public UObject{
 -----------------------------------------------------------------------------*/
 
 //
-//For iterating through a linked list of fields.
+// For iterating through a linked list of fields.
 //
 template<typename T>
 class TFieldIterator{
@@ -179,7 +179,7 @@ protected:
 -----------------------------------------------------------------------------*/
 
 //
-//An UnrealScript structure definition.
+// An UnrealScript structure definition.
 //
 class CORE_API UStruct : public UField{
 	DECLARE_CLASS(UStruct,UField,0,Core)
@@ -196,6 +196,8 @@ class CORE_API UStruct : public UField{
 	INT					PropertiesAlign;
 	FName				FriendlyName;
 	TArray<BYTE>		Script;
+
+	// Compiler info.
 	INT					TextPos;
 	INT					Line;
 	//In memory only.
@@ -242,7 +244,7 @@ class CORE_API UStruct : public UField{
 -----------------------------------------------------------------------------*/
 
 //
-//An UnrealScript function.
+// An UnrealScript function.
 //
 class CORE_API UFunction : public UStruct{
 	DECLARE_CLASS(UFunction,UStruct,0,Core)
@@ -286,7 +288,7 @@ class CORE_API UFunction : public UStruct{
 -----------------------------------------------------------------------------*/
 
 //
-//An UnrealScript state.
+// An UnrealScript state.
 //
 class CORE_API UState : public UStruct{
 	DECLARE_CLASS(UState,UStruct,0,Core)
@@ -322,7 +324,7 @@ class CORE_API UState : public UStruct{
 -----------------------------------------------------------------------------*/
 
 //
-//An enumeration, a list of names usable by UnrealScript.
+// An enumeration, a list of names usable by UnrealScript.
 //
 class CORE_API UEnum : public UField{
 	DECLARE_CLASS(UEnum,UField,0,Core)
@@ -347,17 +349,13 @@ class CORE_API UEnum : public UField{
 -----------------------------------------------------------------------------*/
 
 //
-//An object class.
+// An object class.
 //
 class CORE_API UClass : public UState{
 	DECLARE_CLASS(UClass,UState,0,Core)
 	DECLARE_WITHIN(UPackage)
 
-	char Padding1[104];
-	void* NativeEntries;
-	char Padding2[20];
-
-	/*//Variables.
+	// Variables.
 	DWORD				ClassFlags;
 	INT					ClassUnique;
 	FGuid				ClassGuid;
@@ -368,11 +366,15 @@ class CORE_API UClass : public UState{
 	TArray<FDependency> Dependencies;
 	TArray<FName>		PackageImports;
 	TArray<BYTE>		Defaults;
+	TArray<FName>		HideCategories;
+	TArray<FName>       DependentOn; //amb,gam
 	void(*ClassConstructor)(void*);
 	void(UObject::*ClassStaticConstructor)();
 
-	//In memory only.
-	FString				DefaultPropText;*/
+	// In memory only.
+	FString				DefaultPropText;
+	void* NativeEntries;
+	char Padding[20];
 
 	//Constructors.
 	UClass();
@@ -423,7 +425,7 @@ private:
 -----------------------------------------------------------------------------*/
 
 //
-//An UnrealScript constant.
+// An UnrealScript constant.
 //
 class CORE_API UConst : public UField{
 	DECLARE_CLASS(UConst,UField,0,Core)

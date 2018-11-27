@@ -92,7 +92,7 @@ enum EClassFlags{
 	CLASS_HideDropDown		= 0x02000000,	//Class not shown in editor drop down for class selection
 
 	CLASS_Exported			= 0x04000000,	//Class has been exported to a header file
-		
+
 
 	//Flags to inherit from base class.
 	CLASS_Inherit           = CLASS_Transient | CLASS_Config | CLASS_Localized | CLASS_SafeReplace | CLASS_RuntimeStatic | CLASS_PerObjectConfig | CLASS_Placeable | CLASS_IsAUProperty | CLASS_IsAUObjectProperty | CLASS_IsAUBoolProperty | CLASS_IsAUState | CLASS_IsAUFunction | CLASS_HasComponents | CLASS_Deprecated,
@@ -104,34 +104,44 @@ enum EClassFlags{
 //Flags associated with each property in a class, overriding the
 //property's default behavior.
 //
-enum EPropertyFlags{
-	//Regular flags.
-	CPF_Edit		 = 0x00000001, //Property is user-settable in the editor.
-	CPF_Const		 = 0x00000002, //Actor's property always matches class's default actor property.
-	CPF_Input		 = 0x00000004, //Variable is writable by the input system.
-	CPF_ExportObject = 0x00000008, //Object can be exported with actor.
-	CPF_OptionalParm = 0x00000010, //Optional parameter (if CPF_Param is set).
-	CPF_Net			 = 0x00000020, //Property is relevant to network replication.
-	CPF_ConstRef     = 0x00000040, //Reference to a constant object.
-	CPF_Parm		 = 0x00000080, //Function/When call parameter.
-	CPF_OutParm		 = 0x00000100, //Value is copied out after function call.
-	CPF_SkipParm	 = 0x00000200, //Property is a short-circuitable evaluation function parm.
-	CPF_ReturnParm	 = 0x00000400, //Return value.
-	CPF_CoerceParm	 = 0x00000800, //Coerce args into this function parameter.
-	CPF_Native       = 0x00001000, //Property is native: C++ code is responsible for serializing it.
-	CPF_Transient    = 0x00002000, //Property is transient: shouldn't be saved, zero-filled at load time.
-	CPF_Config       = 0x00004000, //Property should be loaded/saved as permanent profile.
-	CPF_Localized    = 0x00008000, //Property should be loaded as localizable text.
-	CPF_Travel       = 0x00010000, //Property travels across levels/servers.
-	CPF_EditConst    = 0x00020000, //Property is uneditable in the editor.
-	CPF_GlobalConfig = 0x00040000, //Load config from base class, not subclass.
-	CPF_OnDemand     = 0x00100000, //Object or dynamic array loaded on demand only.
-	CPF_New			 = 0x00200000, //Automatically create inner object.
-	CPF_NeedCtorLink = 0x00400000, //Fields need construction/destruction.
+enum EPropertyFlags
+{
+	// Regular flags.
+	CPF_Edit		 = 0x00000001, // Property is user-settable in the editor.
+	CPF_Const		 = 0x00000002, // Actor's property always matches class's default actor property.
+	CPF_Input		 = 0x00000004, // Variable is writable by the input system.
+	CPF_ExportObject = 0x00000008, // Object can be exported with actor.
+	CPF_OptionalParm = 0x00000010, // Optional parameter (if CPF_Param is set).
+	CPF_Net			 = 0x00000020, // Property is relevant to network replication.
+	CPF_EditConstArray		= 0x00000040,// Prevent adding/removing of items from dynamic a array in the editor.
+	CPF_Parm		 = 0x00000080, // Function/When call parameter.
+	CPF_OutParm		 = 0x00000100, // Value is copied out after function call.
+	CPF_SkipParm	 = 0x00000200, // Property is a short-circuitable evaluation function parm.
+	CPF_ReturnParm	 = 0x00000400, // Return value.
+	CPF_CoerceParm	 = 0x00000800, // Coerce args into this function parameter.
+	CPF_Native       = 0x00001000, // Property is native: C++ code is responsible for serializing it.
+	CPF_Transient    = 0x00002000, // Property is transient: shouldn't be saved, zero-filled at load time.
+	CPF_Config       = 0x00004000, // Property should be loaded/saved as permanent profile.
+	CPF_Localized    = 0x00008000, // Property should be loaded as localizable text.
+	CPF_Travel       = 0x00010000, // Property travels across levels/servers.
+	CPF_EditConst    = 0x00020000, // Property is uneditable in the editor.
+	CPF_GlobalConfig = 0x00040000, // Load config from base class, not subclass.
+	CPF_OnDemand     = 0x00100000, // Object or dynamic array loaded on demand only.
+	CPF_New			 = 0x00200000, // Automatically create inner object.
+	CPF_NeedCtorLink = 0x00400000, // Fields need construction/destruction.
+	CPF_NoExport     = 0x00800000, // Property should not be exported to the native class header file.
+	CPF_Button       = 0x01000000, // String that has "Go" button which allows it to call functions from UEd.
+	CPF_CommentString= 0x02000000, // Property has a comment string visible via the property browser
+	CPF_EditInline	 = 0x04000000, // Edit this object reference inline.
+	CPF_EdFindable	 = 0x08000000, // References are set by clicking on actors in the editor viewports.
+	CPF_EditInlineUse= 0x10000000, // EditInline with Use button.
+	CPF_Deprecated  		= 0x20000000, // Property is deprecated.  Read it from an archive, but don't save it.
+	CPF_EditInlineNotify	= 0x40000000, // EditInline, notify outer object on editor change.
 
-	//Combinations of flags.
-	CPF_ParmFlags           = CPF_OptionalParm | CPF_Parm | CPF_OutParm | CPF_SkipParm | CPF_ReturnParm | CPF_CoerceParm,
-	CPF_PropagateFromStruct = CPF_Const | CPF_Native | CPF_Transient,
+	// Combinations of flags.
+	CPF_ParmFlags				= CPF_OptionalParm | CPF_Parm | CPF_OutParm | CPF_SkipParm | CPF_ReturnParm | CPF_CoerceParm,
+	CPF_PropagateFromStruct		= CPF_Const | CPF_Native | CPF_Transient,
+	CPF_PropagateToArrayInner	= CPF_ExportObject | CPF_EditInline | CPF_EditInlineUse | CPF_EditInlineNotify | CPF_Localized, // gam
 };
 
 //

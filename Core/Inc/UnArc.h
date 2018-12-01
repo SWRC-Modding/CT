@@ -136,14 +136,20 @@ protected:
 	INT ArVer;
 	INT ArNetVer;
 	INT ArLicenseeVer;
-	UBOOL ArIsLoading;
-	UBOOL ArIsSaving;
-	UBOOL ArIsTrans;
-	UBOOL ArIsPersistent;
-	UBOOL ArForEdit;
-	UBOOL ArForClient;
-	UBOOL ArForServer;
-	UBOOL ArIsError;
+	bool ArIsLoading;
+	bool ArIsSaving;
+	bool ArIsGarbageCollecting;
+	bool ArIsCountingMem;
+	bool ArIsTrans;
+	bool ArIsPersistent;
+	bool ArIsLinear;
+	bool ArIsSkipping;
+	bool ArForEdit;
+	bool ArForClient;
+	bool ArForServer;
+	bool ArIsError;
+	bool ArIsCriticalError;
+	bool ArContainsCode;
 };
 
 /*-----------------------------------------------------------------------------
@@ -170,8 +176,8 @@ public:
 //
 // Archive constructor.
 //
-template
-<typename T> T Arctor(FArchive& Ar){
+template<typename T>
+T Arctor(FArchive& Ar){
 	T Tmp;
 	Ar << Tmp;
 

@@ -355,6 +355,18 @@ public: \
 	IMPLEMENT_PACKAGE_PLATFORM(pkg)
 
 /*-----------------------------------------------------------------------------
+	FScriptDelegate.
+-----------------------------------------------------------------------------*/
+struct CORE_API FScriptDelegate{
+	UObject* Object;
+	FName FunctionName;
+
+	friend FArchive& operator<<(FArchive& Ar, FScriptDelegate& D){
+		return Ar << D.Object << D.FunctionName;
+	}
+};
+
+/*-----------------------------------------------------------------------------
 	UObject.
 -----------------------------------------------------------------------------*/
 
@@ -441,7 +453,7 @@ public:
 
 	//UObject interface.
 	virtual void ProcessEvent(UFunction* Function, void* Parms, void* Result = NULL);
-	virtual void ProcessDelegate(FName, struct FScriptDelegate *, void *, void *);
+	virtual void ProcessDelegate(FName, FScriptDelegate*, void* Parms, void* Result = NULL);
 	virtual void ProcessState(FLOAT DeltaSeconds);
 	virtual UBOOL ProcessRemoteFunction(UFunction* Function, void* Parms, FFrame* Stack);
 	virtual void Modify();
@@ -449,7 +461,7 @@ public:
 	virtual void Destroy();
 	virtual void Serialize(FArchive& Ar);
 	virtual UBOOL IsPendingKill();
-	virtual INT IsInState(FName);
+	virtual UBOOL IsInState(FName State);
 	virtual EGotoState GotoState(FName State);
 	virtual INT GotoLabel(FName Label);
 	virtual void InitExecution();
@@ -465,8 +477,8 @@ public:
 	virtual void DebugOutput(FOutputDevice&);
 	virtual void DebugOutputSelf(FOutputDevice&);
 	virtual void DebugWindowSizeGet(INT&, INT&) const;
-	virtual void Rename(const TCHAR*, UObject*);
-	virtual void NetDirty(UProperty*);
+	virtual void Rename(const TCHAR* NewName = NULL, UObject* NewOuter = NULL);
+	virtual void NetDirty(UProperty* property);
 	virtual bool IsRuntimeStatic();
 	virtual bool IsDefaultValue(const struct FPropertyInstance&);
 

@@ -274,15 +274,15 @@ public:
 	protected: cls() {} public:
 
 //Guard macros.
-#define unguardobjSlow		unguardfSlow((TEXT("(%s)"), GetFullName()))
-#define unguardobj			unguardf((TEXT("(%s)"), GetFullName()))
+#define unguardobjSlow		unguardfSlow(("(%s)", GetFullName()))
+#define unguardobj			unguardf(("(%s)", GetFullName()))
 
 //Verify the a class definition and C++ definition match up.
 #define VERIFY_CLASS_OFFSET(Pre,ClassName,Member) \
-	{for(TFieldIterator<UProperty> It(FindObjectChecked<UClass>(Pre##ClassName::StaticClass()->GetOuter(), TEXT(#ClassName))); It; ++It) \
-		if(appStricmp(It->GetName(),TEXT(#Member))= = 0) \
+	{for(TFieldIterator<UProperty> It(FindObjectChecked<UClass>(Pre##ClassName::StaticClass()->GetOuter(), #ClassName)); It; ++It) \
+		if(appStricmp(It->GetName(),#Member)= = 0) \
 			if(It->Offset != STRUCT_OFFSET(Pre##ClassName,Member)) \
-				appErrorf(TEXT("Class %s Member %s problem: Script=%i C++=%i"), TEXT(#ClassName), TEXT(#Member), It->Offset, STRUCT_OFFSET(Pre##ClassName,Member));}
+				appErrorf("Class %s Member %s problem: Script=%i C++=%i", #ClassName, #Member, It->Offset, STRUCT_OFFSET(Pre##ClassName,Member));}
 
 //Verify that C++ and script code agree on the size of a class.
 #define VERIFY_CLASS_SIZE(ClassName) \
@@ -338,7 +338,7 @@ public: \
 		TClass::Super::StaticClass(), \
 		TClass::WithinClass::StaticClass(), \
 		FGuid(TClass::GUID1,TClass::GUID2,TClass::GUID3,TClass::GUID4), \
-		TEXT(#TClass)+1, \
+		#TClass + 1, \
 		GPackage, \
 		StaticConfigName(), \
 		RF_Public | RF_Standalone | RF_Transient | RF_Native, \
@@ -351,7 +351,7 @@ public: \
 //Define the package of the current DLL being compiled.
 #define IMPLEMENT_PACKAGE(pkg) \
 	extern "C" DLL_EXPORT TCHAR GPackage[]; \
-	DLL_EXPORT TCHAR GPackage[] = TEXT(#pkg); \
+	DLL_EXPORT TCHAR GPackage[] = #pkg; \
 	IMPLEMENT_PACKAGE_PLATFORM(pkg)
 
 /*-----------------------------------------------------------------------------
@@ -536,7 +536,18 @@ public:
 	void ParseParms(const TCHAR* Parms);
 	void ProcessEvent(FName Event, void* Parms, void* UnusedResult = NULL);
 
+	// By-name arbitrary field accessors.
+
+	UBOOL FindArrayProperty(FString Name, FArray** Array, INT* ElementSize);
+	UBOOL FindStructProperty(FString Name, UStruct** Struct);
+	UBOOL FindObjectProperty(FString Name, UObject** Object);
+	UBOOL FindFloatProperty(FString Name, FLOAT* FloatVar);
+	UBOOL FindIntProperty(FString Name, INT* IntVar);
+	UBOOL FindBoolProperty(FString Name, UBOOL* BoolVar);
+	UBOOL FindFNameProperty(FString Name, FName* FNameVar);
+
 	//Accessors.
+
 	__forceinline UClass* GetClass() const{ return Class; }
 	__forceinline void SetClass(UClass* NewClass){ Class = NewClass; }
 	__forceinline DWORD GetFlags() const{ return ObjectFlags; }

@@ -178,6 +178,12 @@ protected:
 	UStruct
 -----------------------------------------------------------------------------*/
 
+enum EStructFlags{
+	// State flags.
+	STRUCT_Native = 0x00000001,
+	STRUCT_Export = 0x00000002
+};
+
 //
 // An UnrealScript structure definition.
 //
@@ -189,10 +195,10 @@ class CORE_API UStruct : public UField{
 	char				Pad1[4]; //Padding
 	UField*				SuperField;
 	UTextBuffer*		ScriptText;
-	char				Pad2[4]; //Padding
+	UTextBuffer*		CppText;
 	UField*				Children;
-	TArray<BYTE>		Defaults;
 	INT					PropertiesSize;
+	char				Pad2[4]; //Padding
 	INT					PropertiesAlign;
 	FName				FriendlyName;
 	TArray<BYTE>		Script;
@@ -200,12 +206,9 @@ class CORE_API UStruct : public UField{
 	// Compiler info.
 	INT					TextPos;
 	INT					Line;
-	//In memory only.
-	UObjectProperty*	RefLink;
-	UStructProperty*	StructLink;
-	UProperty*			PropertyLink;
-	UProperty*			ConfigLink;
-	UProperty*			ConstructorLink;
+	DWORD				StructFlags;
+
+	char				Pad3[4]; //Padding
 
 	//Constructors.
 	UStruct(ENativeConstructor, INT InSize, const TCHAR* InName, const TCHAR* InPackageName, DWORD InFlags, UStruct* InSuperStruct);
@@ -237,6 +240,11 @@ class CORE_API UStruct : public UField{
 	bool IsChildOf(const UStruct* SomeBase) const;
 	UStruct* GetSuperStruct() const;
 	bool StructCompare(const void* A, const void* B);
+
+protected:
+	// Cheat Protection
+
+	BYTE FunctionMD5Digest[16];		// Holds a MD5 digest for this function
 };
 
 /*-----------------------------------------------------------------------------
@@ -359,22 +367,24 @@ class CORE_API UClass : public UState{
 	DWORD				ClassFlags;
 	INT					ClassUnique;
 	FGuid				ClassGuid;
+	char 				Pad1[4]; // Something with CRC...
 	UClass*				ClassWithin;
 	FName				ClassConfigName;
+	char 				Pad2[4]; // Padding
 	TArray<FRepRecord>	ClassReps;
 	TArray<UField*>		NetFields;
 	TArray<FDependency> Dependencies;
 	TArray<FName>		PackageImports;
 	TArray<BYTE>		Defaults;
 	TArray<FName>		HideCategories;
-	TArray<FName>       DependentOn; //amb,gam
+	TArray<FName>       DependentOn; // amb,gam
+	char 				Pad3[12]; // Padding
 	void(*ClassConstructor)(void*);
 	void(UObject::*ClassStaticConstructor)();
 
 	// In memory only.
 	FString				DefaultPropText;
 	void* NativeEntries;
-	char Padding[20];
 
 	//Constructors.
 	UClass();

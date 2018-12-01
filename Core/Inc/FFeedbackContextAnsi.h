@@ -47,22 +47,16 @@ public:
 
 			Temp = Buffer;
 			V = Buffer; //So that the log file also contains the formatted string
-		}else if(Event == NAME_Warning || Event == NAME_ExecWarning || Event == NAME_ScriptWarning){
+		}else if(Event == NAME_Warning || Event == NAME_ExecWarning || Event == NAME_ScriptWarning || Event == NAME_Error || Event == NAME_Critical){
 			if(Context)
 				appSprintf(Buffer, "%s: %s, %s", *Context->GetContext(), *FName(Event), V);
 			else
 				appSprintf(Buffer, "%s: %s", *FName(Event), V);
 
-			WarningCount++;
-
-			Temp = Buffer;
-		}else if(Event == NAME_Error || Event == NAME_Critical){
-			if(Context)
-				appSprintf(Buffer, "%s: %s, %s", *Context->GetContext(), *FName(Event), V);
+			if(Event == NAME_Error || Event == NAME_Critical)
+				++ErrorCount;
 			else
-				appSprintf(Buffer, "%s: %s", *FName(Event), V);
-
-			ErrorCount++;
+				++WarningCount;
 
 			Temp = Buffer;
 		}

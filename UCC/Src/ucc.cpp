@@ -11,7 +11,7 @@
 #include "../../Core/Inc/Core.h"
 #include "../../Core/Inc/FOutputDeviceFile.h"
 #include "../../Core/Inc/FOutputDeviceWindowsError.h"
-#include "../../Core/Inc/FFeedbackContextAnsi.h"
+#include "../../Core/Inc/FFeedbackContextUCC.h"
 #include "../../Core/Inc/FConfigCacheIni.h"
 
 void UServerCommandletMain(); //Defined in ServerCommandlet.cpp
@@ -20,7 +20,7 @@ void UServerCommandletMain(); //Defined in ServerCommandlet.cpp
 
 FOutputDeviceFile Log;
 FOutputDeviceWindowsError Error;
-FFeedbackContextAnsi Warn;
+FFeedbackContextUCC Warn;
 
 void ShowBanner(){
 	Warn.Log("=======================================");

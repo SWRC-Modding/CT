@@ -1,5 +1,5 @@
+#include <cstdio>
 #include "../../Engine/Inc/Engine.h"
-#include "../../Core/Inc/FFeedbackContextAnsi.h"
 
 //Variables for ServerCommandlet
 
@@ -15,7 +15,7 @@ DWORD WINAPI UpdateServerConsoleInput(PVOID){
 	TCHAR Cmd[1024];
 
 	while(GIsRunning && !GIsRequestingExit){
-		if(fgets(Cmd, sizeof(Cmd), stdin)){
+		if(std::fgets(Cmd, sizeof(Cmd), stdin)){
 			Cmd[appStrlen(Cmd) - 1] = '\0'; //Removing newline added by fgets
 			CurrentCmd = Cmd; //Updating CurrentCmd so that it can be executed by the main thread
 							  //Nothing has been done in terms of thread safety as so far there haven't been any issues...

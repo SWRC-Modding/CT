@@ -39,6 +39,8 @@ ENGINE_API extern FLOAT 			GEngineTime;
 #include "UnObj.h"				// Standard object definitions.
 #include "UnPrim.h"				// Primitive class.
 #include "UnModel.h"			// Model class.
+#include "UnRenderResource.h"
+#include "UnMaterial.h"
 #include "UnTex.h"				// Texture and palette.
 #include "UnAnim.h"
 #include "EngineClasses.h"		// All actor classes.

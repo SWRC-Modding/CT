@@ -89,10 +89,6 @@ enum ERunningOS{
 };
 
 // Single byte character set mappings. No wchar_t in Republic Commando...
-#ifdef _UNICODE
-	#error Cannot use Unicode
-#endif // _UNICODE
-
 typedef ANSICHAR  TCHAR;
 typedef ANSICHARU TCHARU;
 

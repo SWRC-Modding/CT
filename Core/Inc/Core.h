@@ -13,7 +13,7 @@
 	Low level includes.
 ----------------------------------------------------------------------------*/
 
-//API definition.
+// API definition.
 #ifndef CORE_API
 #define CORE_API DLL_IMPORT
 #endif
@@ -25,39 +25,45 @@
 
 LINK_LIB(Core)
 
-//Build options.
+// Build options.
 #include "UnBuild.h"
 
-//Time.
+// Time.
 #define FIXTIME 4294967296.0f
 class FTime{
-typedef __int64 TIMETYP;
+	typedef __int64 TIMETYP;
 public:
 			FTime      ()				{ v = 0; }
-			FTime      (float f)		{ v=(TIMETYP)(f*FIXTIME); }
-			FTime      (double d)		{ v=(TIMETYP)(d*FIXTIME); }
-	float	GetFloat   ()				{ return v/FIXTIME; }
-	FTime	operator+  (float f) const	{ return FTime(v+(TIMETYP)(f*FIXTIME)); }
-	float	operator-  (FTime t) const	{ return (v-t.v)/FIXTIME; }
-	FTime	operator*  (float f) const	{ return FTime(v*f); }
-	FTime	operator/  (float f) const	{ return FTime(v/f); }
-	FTime&	operator+= (float f)		{ v=v+(TIMETYP)(f*FIXTIME); return *this; }
-	FTime&	operator*= (float f)		{ v=(TIMETYP)(v*f); return *this; }
-	FTime&	operator/= (float f)		{ v=(TIMETYP)(v/f); return *this; }
-	int		operator== (FTime t)		{ return v==t.v; }
-	int		operator!= (FTime t)		{ return v!=t.v; }
-	int		operator>  (FTime t)		{ return v>t.v; }
+			FTime      (float f)		{ v = (TIMETYP)(f * FIXTIME); }
+			FTime      (double d)		{ v = (TIMETYP)(d * FIXTIME); }
+	float	GetFloat   ()				{ return v / FIXTIME; }
+	FTime	operator+  (float f) const	{ return FTime(v + (TIMETYP)(f * FIXTIME)); }
+	float	operator-  (FTime t) const	{ return (v - t.v) / FIXTIME; }
+	FTime	operator*  (float f) const	{ return FTime(v * f); }
+	FTime	operator/  (float f) const	{ return FTime(v / f); }
+	FTime&	operator+= (float f)		{ v = v + (TIMETYP)(f * FIXTIME); return *this; }
+	FTime&	operator*= (float f)		{ v = (TIMETYP)(v * f); return *this; }
+	FTime&	operator/= (float f)		{ v = (TIMETYP)(v / f); return *this; }
+	int		operator== (FTime t)		{ return v == t.v; }
+	int		operator!= (FTime t)		{ return v != t.v; }
+	int		operator>  (FTime t)		{ return v > t.v; }
 	FTime&	operator=  (const FTime& t) { v=t.v; return *this; }
 
 private:
-	FTime(TIMETYP i) : v(i){}
 	TIMETYP v;
+
+	FTime(TIMETYP i) : v(i){}
 };
 
-//Compiler specific include. Can't use a different compiler anyway...
-#include "UnVcWin32.h"
+// Compiler specific include.
+#ifdef _MSC_VER
+	#define SUPPORTS_PRAGMA_PACK 1
+	#include "UnVcWin32.h"
+#else
+	#error Must use Visual Studio (Ideally .NET 2003)
+#endif
 
-//Global constants.
+// Global constants.
 enum{ MAXBYTE		= 0xff		  };
 enum{ MAXWORD		= 0xffffU	  };
 enum{ MAXDWORD		= 0xffffffffU };
@@ -66,10 +72,27 @@ enum{ MAXSWORD		= 0x7fff	  };
 enum{ MAXINT		= 0x7fffffff  };
 enum{ INDEX_NONE	= -1		  };
 enum{ UNICODE_BOM	= 0xfeff	  };
-
 enum ENoInit{ E_NoInit = 0 };
 
-//Character set mappings. No wchar_t in Republic Commando...
+enum ERunningOS{
+	OS_WIN95,
+	OS_WIN98,
+	OS_WINME,
+	OS_WIN2K,
+	OS_WINXP,
+	OS_WINNT,
+	OS_LINUX_X86,
+	OS_FREEBSD_X86,
+	OS_LINUX_X86_64,
+	OS_MAC_OSX_PPC,
+	OS_UNKNOWN	= 255
+};
+
+// Single byte character set mappings. No wchar_t in Republic Commando...
+#ifdef _UNICODE
+	#error Cannot use Unicode
+#endif // _UNICODE
+
 typedef ANSICHAR  TCHAR;
 typedef ANSICHARU TCHARU;
 
@@ -87,7 +110,7 @@ inline UNICHAR	ToUnicode  (TCHAR In  ) { return (BYTE)In;                       
 	Forward declarations.
 ----------------------------------------------------------------------------*/
 
-//Objects.
+// Objects.
 class	UObject;
 class		UExporter;
 class		UFactory;
@@ -103,8 +126,9 @@ class				UObjectProperty;
 class					UClassProperty;
 class				UNameProperty;
 class				UStructProperty;
-class				UStrProperty;
-class				UArrayProperty;
+class					UStrProperty;
+class					UArrayProperty;
+class				UDelegateProperty;
 class			UStruct;
 class				UFunction;
 class				UState;
@@ -116,10 +140,11 @@ class		UPackage;
 class		USubsystem;
 class			USystem;
 class		UTextBuffer;
-class       URenderDevice;
+class		 URenderDevice;
 class		UPackageMap;
+class		UDebugger; //DEBUGGER
 
-//Structs.
+// Structs.
 class FName;
 class FArchive;
 class FCompactIndex;
@@ -136,40 +161,37 @@ class FLazyLoader;
 class FString;
 class FMalloc;
 
+// Templates.
 //Templates.
 template<typename T>
 class TArray;
-
 template<typename T>
 class TTransArray;
-
 template<typename T>
 class TLazyArray;
-
 template<typename TK, typename TI>
 class TMap;
-
 template<typename TK, typename TI>
 class TMultiMap;
 
-//Globals.
+// Globals.
 CORE_API extern class FOutputDevice* GNull;
 
-//EName definition.
+// EName definition.
 #include "UnNames.h"
 
 /*-----------------------------------------------------------------------------
 	Abstract interfaces.
 -----------------------------------------------------------------------------*/
 
-//An output device.
+// An output device.
 class CORE_API FOutputDevice{
 public:
-	//FOutputDevice interface.
+	// FOutputDevice interface.
 	virtual void Serialize(const TCHAR* V, EName Event) = 0;
 	virtual void Flush(){}
 
-	//Simple text printing.
+	// Simple text printing.
 	void Log(EName Event, const TCHAR* Str);
 	void Log(const TCHAR* Str);
 	void Log(const FString& S);
@@ -178,14 +200,14 @@ public:
 	void Logf(const TCHAR* Fmt, ...);
 };
 
-//Error device.
-class FOutputDeviceError : public FOutputDevice{
+// Error device.
+class CORE_API FOutputDeviceError : public FOutputDevice{
 public:
 	virtual void HandleError() = 0;
 };
 
-//Memory allocator.
-class FMalloc{
+// Memory allocator.
+class /*CORE_API*/ FMalloc{
 public:
 	virtual void Init(){}
 	virtual void* Malloc(DWORD) = 0;
@@ -205,12 +227,12 @@ public:
 	virtual void DecrementWatermark(){}
 	virtual void SetAuxMalloc(FMalloc*){}
 	virtual void LockMem(void*, unsigned long, bool){}
-	virtual void vtpad1(){}
-	virtual void vtpad2(){}
+	virtual void vtpad1() = 0;
+	virtual void vtpad2() = 0;
 	virtual void Tick(){}
 };
 
-//Configuration database cache.
+// Configuration database cache.
 class FConfigCache{
 public:
 	virtual UBOOL GetBool(const TCHAR* Section, const TCHAR* Key, UBOOL& Value, const TCHAR* Filename = NULL) = 0;
@@ -237,13 +259,13 @@ public:
 	virtual ~FConfigCache(){}
 };
 
-//Any object that is capable of taking commands.
+// Any object that is capable of taking commands.
 class CORE_API FExec{
 public:
 	virtual UBOOL Exec(const TCHAR* Cmd, FOutputDevice& Ar) = 0;
 };
 
-//Notification hook.
+// Notification hook.
 class CORE_API FNotifyHook{
 public:
 	virtual void NotifyDestroy(void* Src){}
@@ -252,13 +274,13 @@ public:
 	virtual void NotifyExec(void* Src, const TCHAR* Cmd){}
 };
 
-//Interface for returning a context string.
+// Interface for returning a context string.
 class FContextSupplier{
 public:
 	virtual FString GetContext() = 0;
 };
 
-//A context for displaying modal warning messages.
+// A context for displaying modal warning messages.
 class FFeedbackContext : public FOutputDevice{
 public:
 	virtual UBOOL VARARGS YesNof(const TCHAR* Fmt, ...) = 0;
@@ -274,7 +296,7 @@ public:
 	virtual void MapCheck_Add(INT InType, void* InActor, const TCHAR* InMessage){}
 };
 
-//Class for handling undo/redo transactions among objects.
+// Class for handling undo/redo transactions among objects.
 typedef void(*STRUCT_AR)(FArchive& Ar, void* TPtr);
 typedef void(*STRUCT_DTOR)(void* TPtr);
 class CORE_API FTransactionBase{
@@ -284,7 +306,7 @@ public:
 	virtual void Apply() = 0;
 };
 
-//File manager.
+// File manager.
 enum EFileTimes{
 	FILETIME_Create,
 	FILETIME_LastAccess,
@@ -303,6 +325,30 @@ enum EFileWrite{
 enum EFileRead{
 	FILEREAD_NoFail				= 0x01,
 };
+
+enum ECopyCompress{
+	FILECOPY_Normal				= 0x00,
+	FILECOPY_Compress			= 0x01,
+	FILECOPY_Decompress			= 0x02,
+};
+
+enum ECopyResult{
+	COPY_OK						= 0x00,
+	COPY_MiscFail				= 0x01,
+	COPY_ReadFail				= 0x02,
+	COPY_WriteFail				= 0x03,
+	COPY_CompFail				= 0x04,
+	COPY_DecompFail				= 0x05,
+	COPY_Canceled				= 0x06,
+};
+
+#define COMPRESSED_EXTENSION	".uz2"
+
+struct FCopyProgress{
+	virtual UBOOL Poll(FLOAT Fraction) = 0;
+};
+
+CORE_API const TCHAR* appBaseDir();
 
 class CORE_API FFileManager{
 public:
@@ -327,11 +373,65 @@ public:
 	virtual struct FFileStats GetStats(bool);
 };
 
+//
+// File Streaming.
+//
+
+enum EFileStreamType{
+	ST_Regular,
+	ST_Ogg,
+	ST_OggLooping
+};
+
+struct FStream{
+	void*	Data;
+	void*	Handle;
+	void*	TDD;		// type dependent data
+	INT		FileSeek;
+	INT		ChunkSize;
+	INT		ChunksRequested;
+	INT		Locked;
+	INT		Used;
+	INT		EndOfFile;
+	EFileStreamType	Type;
+};
+
+class CORE_API FFileStream{
+public:
+	static FFileStream* Init(INT MaxStreams);
+	static void Destroy();
+
+	// Interface functions.
+	INT CreateStream(const TCHAR* Filename, INT ChunkSize, INT InitialChunks, void* Data, EFileStreamType Type, void* TDD);
+	void RequestChunks(INT StreamId, INT Chunks, void* Data);
+	UBOOL QueryStream(INT StreamId, INT& ChunksQueued);
+	void DestroyStream(INT StreamId, UBOOL ReadQueuedChunks);
+
+	// Only use the below functions in the thread's main loop.
+	UBOOL Read(INT StreamId, INT Bytes);
+	UBOOL Create(INT StreamId, const TCHAR* Filename);
+	UBOOL Destroy(INT StreamId);
+	void Enter(INT StreamId);
+	void Leave(INT StreamId);
+
+	static FFileStream* Instance;
+	static INT StreamIndex;
+	static INT MaxStreams;
+	static FStream* Streams;
+	static INT Destroyed;
+
+private:
+	FFileStream(){}
+	~FFileStream(){}
+};
+
+class FEdLoadError;
+
 /*----------------------------------------------------------------------------
 	Global variables.
 ----------------------------------------------------------------------------*/
 
-//Core globals.
+// Core globals.
 CORE_API extern FMemStack				GMem;
 CORE_API extern FOutputDevice*			GLog;
 CORE_API extern FOutputDevice*			GNull;
@@ -347,6 +447,8 @@ CORE_API extern FFileManager*			GFileManager;
 CORE_API extern USystem*				GSys;
 CORE_API extern UProperty*				GProperty;
 CORE_API extern BYTE*					GPropAddr;
+CORE_API extern UObject*				GPropObject;
+CORE_API extern DWORD					GRuntimeUCFlags;
 CORE_API extern USubsystem*				GWindowManager;
 CORE_API extern TCHAR					GErrorHist[4096];
 CORE_API extern TCHAR					GTrue[64], GFalse[64], GYes[64], GNo[64], GNone[64];
@@ -376,46 +478,143 @@ CORE_API extern UBOOL					GIsScriptable;
 CORE_API extern UBOOL					GIsServer;
 CORE_API extern UBOOL					GIsSlowTask;
 CORE_API extern UBOOL					GIsStarted;
-CORE_API extern UBOOL					GIsStrict;
-CORE_API extern UBOOL					GIsUCC;
-CORE_API extern UBOOL					GIsUTracing;
 CORE_API extern UBOOL					GScriptEntryTag;
+CORE_API extern UBOOL					GIsStrict;
 CORE_API extern UBOOL					GLazyLoad;
+CORE_API extern UBOOL					GIsUCC;
 CORE_API extern UBOOL					GUseSmallPools;
 CORE_API extern UBOOL					GUseFrontEnd;
 CORE_API extern UBOOL					GEdSelectionLock;
 CORE_API extern UBOOL					GEdShowFogInViewports;
 CORE_API extern UBOOL					GBuildingScripts;
 CORE_API extern class FGlobalMath		GMath;
-CORE_API extern class FArchive*			GDummySave;
+CORE_API extern class FArchive*			GIsUTracingGDummySave;
+CORE_API extern FFileStream*			GFileStream;
+CORE_API extern FLOAT					GAudioMaxRadiusMultiplier;
+CORE_API extern FLOAT					GAudioDefaultRadius;
+CORE_API extern TArray<FEdLoadError>	GEdLoadErrors;
+CORE_API extern	UDebugger*				GDebugger; //DEBUGGER
+CORE_API extern QWORD					GMakeCacheIDIndex;
+CORE_API extern FString					GBuildLabel;
+CORE_API extern FString					GMachineOS;
+CORE_API extern FString					GMachineCPU;
+CORE_API extern FString					GMachineVideo;
 CORE_API extern FString					GSavePath;
 CORE_API extern FString					GGlobalSettingsPath;
 CORE_API extern FString					GGlobalSettingsSaveName;
-CORE_API extern FLOAT					GAudioMaxRadiusMultiplier;
+CORE_API extern FLOAT					NEAR_CLIPPING_PLANE;
+CORE_API extern FLOAT					FAR_CLIPPING_PLANE;
+CORE_API extern ERunningOS				GRunningOS;
 
-//Per module globals.
+// Per module globals.
 extern "C" DLL_EXPORT TCHAR GPackage[];
 
-//Normal includes.
-#include "UnFile.h"			//Low level utility code.
-#include "UnObjVer.h"		//Object version info.
-#include "UnArc.h"			//Archive class.
-#include "UnTemplate.h"		//Dynamic arrays.
-#include "UnName.h"			//Global name subsystem.
-#include "UnStack.h"		//Script stack definition.
-#include "UnObjBas.h"		//Object base class.
-#include "UnCoreNet.h"		//Core networking.
-#include "UnCorObj.h"		//Core object class definitions.
-#include "UnScript.h"		//Script class.
-#include "UnClass.h"		//Class definition.
-#include "UnType.h"			//Base property type.
-#include "UFactory.h"		//Factory definition.
-#include "UExporter.h"		//Exporter definition.
-#include "UnCache.h"		//Cache based memory management.
-#include "UnMem.h"			//Stack based memory management.
-#include "UnCId.h"			//Cache ID's.
-#include "UnBits.h"			//Bitstream archiver.
-#include "UnMath.h"			//Vector math functions.
+// Normal includes.
+#include "UnFile.h"			// Low level utility code.
+#include "UnObjVer.h"		// Object version info.
+#include "UnArc.h"			// Archive class.
+#include "UnTemplate.h"	  	// Dynamic arrays.
+#include "UnName.h"			// Global name subsystem.
+#include "UnStack.h"		// Script stack definition.
+#include "UnObjBas.h"		// Object base class.
+#include "UnCoreNet.h"		// Core networking.
+#include "UnCorObj.h"		// Core object class definitions.
+#include "UnScript.h"		// Script class.
+#include "UnClass.h"		// Class definition.
+#include "UnType.h"			// Base property type.
+#include "UFactory.h"		// Factory definition.
+#include "UExporter.h"		// Exporter definition.
+#include "UnCache.h"		// Cache based memory management.
+#include "UnMem.h"			// Stack based memory management.
+#include "UnCId.h"			// Cache ID's.
+#include "UnBits.h"			// Bitstream archiver.
+#include "UnMath.h"			// Vector math functions.
+
+// Worker class for tracking loading errors in the editor
+class CORE_API FEdLoadError{
+public:
+	FEdLoadError(){}
+
+	FEdLoadError(INT InType, TCHAR* InDesc){
+		Type = InType;
+		Desc = InDesc;
+	}
+
+	~FEdLoadError(){}
+
+	// The types of things that could be missing.
+	enum{
+		TYPE_FILE,		// A totally missing file
+		TYPE_RESOURCE	// Texture/Sound/StaticMesh/etc
+	};
+
+	INT Type;		// TYPE_
+	FString Desc;	// Description of the error
+
+	UBOOL operator==( const FEdLoadError& LE ) const{
+		return Type==LE.Type && Desc==LE.Desc;
+	}
+
+	FEdLoadError& operator=(const FEdLoadError Other){
+		Type = Other.Type;
+		Desc = Other.Desc;
+
+		return *this;
+	}
+};
+
+//
+// Archive for counting memory usage.
+//
+class CORE_API FArchiveCountMem : public FArchive{
+public:
+	FArchiveCountMem( UObject* Src ) : Num(0),
+									   Max(0){
+		Src->Serialize(*this);
+	}
+
+	SIZE_T GetNum(){
+		return Num;
+	}
+
+	SIZE_T GetMax(){
+		return Max;
+	}
+
+	void CountBytes(SIZE_T InNum, SIZE_T InMax){
+		Num += InNum;
+		Max += InMax;
+	}
+
+protected:
+	SIZE_T Num, Max;
+};
+
+enum{
+	MCTYPE_ERROR,
+	MCTYPE_WARNING,
+	MCTYPE_NOTE
+};
+
+typedef struct{
+	INT Type;
+	AActor* Actor;
+	FString Message;
+} MAPCHECK;
+
+// A convenience to allow referring to axis' by name instead of number
+enum EAxis{
+	AXIS_X,
+	AXIS_Y,
+	AXIS_Z,
+};
+
+// Very basic abstract debugger class.
+class UDebugger{ //DEBUGGER
+public:
+	virtual void DebugInfo(UObject* Debugee, FFrame* Stack, FString InfoType, int LineNumber, int InputPos) = 0;
+	virtual void NotifyAccessedNone() = 0;
+};
 
 /*-----------------------------------------------------------------------------
 	The End.

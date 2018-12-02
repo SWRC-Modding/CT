@@ -72,6 +72,11 @@
 #define DEMOVERSION 0
 #endif
 
+// Whether certain mesh export and conversion restrictions apply.
+#ifndef RESTRICTEXPORT
+#define RESTRICTEXPORT 1
+#endif
+
 /*-----------------------------------------------------------------------------
 	The End.
 -----------------------------------------------------------------------------*/

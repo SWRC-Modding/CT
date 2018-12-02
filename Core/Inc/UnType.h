@@ -18,24 +18,17 @@ enum EPropertyPortFlags{
 // An UnrealScript variable.
 //
 class CORE_API UProperty : public UField{
-	DECLARE_ABSTRACT_CLASS(UProperty,UField,0,Core)
+	DECLARE_ABSTRACT_CLASS(UProperty,UField,CLASS_IsAUProperty,Core)
 	DECLARE_WITHIN(UField)
 
 	// Persistent variables.
-	INT			ArrayDim;
-	INT			ElementSize;
 	DWORD		PropertyFlags;
 	FName		Category;
 	_WORD		RepOffset;
 	_WORD		RepIndex;
-
-	//TODO: Figure out if the variables below exist somehow in RC
-	// In memory variables.
-	/*INT			Offset;
-	UProperty*	PropertyLinkNext;
-	UProperty*	ConfigLinkNext;
-	UProperty*	ConstructorLinkNext;
-	UProperty*	RepOwner;*/
+	_WORD		ArrayDim;
+	_WORD		Offset;
+	INT			ElementSize; // Not sure whether this is correct here but it seems to fit...
 
 	// Constructors.
 	UProperty();
@@ -93,7 +86,7 @@ class CORE_API UProperty : public UField{
 // Describes an unsigned byte value or 255-value enumeration variable.
 //
 class CORE_API UByteProperty : public UProperty{
-	DECLARE_CLASS(UByteProperty,UProperty,0,Core)
+	DECLARE_CLASS(UByteProperty,UProperty,CLASS_IsAUProperty,Core)
 
 	// Variables.
 	UEnum* Enum;
@@ -126,7 +119,7 @@ class CORE_API UByteProperty : public UProperty{
 // Describes a 32-bit signed integer variable.
 //
 class CORE_API UIntProperty : public UProperty{
-	DECLARE_CLASS(UIntProperty,UProperty,0,Core)
+	DECLARE_CLASS(UIntProperty,UProperty,CLASS_IsAUProperty,Core)
 
 	// Constructors.
 	UIntProperty(){}
@@ -152,7 +145,7 @@ class CORE_API UIntProperty : public UProperty{
 // Describes a single bit flag variable residing in a 32-bit unsigned double word.
 //
 class CORE_API UBoolProperty : public UProperty{
-	DECLARE_CLASS(UBoolProperty,UProperty,0,Core)
+	DECLARE_CLASS(UBoolProperty,UProperty,CLASS_IsAUProperty,Core)
 
 	// Variables.
 	BITFIELD BitMask;
@@ -184,7 +177,7 @@ class CORE_API UBoolProperty : public UProperty{
 // Describes an IEEE 32-bit floating point variable.
 //
 class CORE_API UFloatProperty : public UProperty{
-	DECLARE_CLASS(UFloatProperty,UProperty,0,Core)
+	DECLARE_CLASS(UFloatProperty,UProperty,CLASS_IsAUProperty,Core)
 
 	// Constructors.
 	UFloatProperty(){}
@@ -210,7 +203,7 @@ class CORE_API UFloatProperty : public UProperty{
 // Describes a reference variable to another object which may be nil.
 //
 class CORE_API UObjectProperty : public UProperty{
-	DECLARE_CLASS(UObjectProperty,UProperty,0,Core)
+	DECLARE_CLASS(UObjectProperty,UProperty,CLASS_IsAUProperty,Core)
 
 	// Variables.
 	class UClass* PropertyClass;
@@ -274,7 +267,7 @@ class CORE_API UClassProperty : public UObjectProperty{
 // Describes a name variable pointing into the global name table.
 //
 class CORE_API UNameProperty : public UProperty{
-	DECLARE_CLASS(UNameProperty,UProperty,0,Core)
+	DECLARE_CLASS(UNameProperty,UProperty,CLASS_IsAUProperty,Core)
 
 	// Constructors.
 	UNameProperty(){}
@@ -299,7 +292,7 @@ class CORE_API UNameProperty : public UProperty{
 // Describes a dynamic string variable.
 //
 class CORE_API UStrProperty : public UProperty{
-	DECLARE_CLASS(UStrProperty,UProperty,0,Core)
+	DECLARE_CLASS(UStrProperty,UProperty,CLASS_IsAUProperty,Core)
 
 	// Constructors.
 	UStrProperty(){}
@@ -327,7 +320,7 @@ class CORE_API UStrProperty : public UProperty{
 // Describes a dynamic array.
 //
 class CORE_API UArrayProperty : public UProperty{
-	DECLARE_CLASS(UArrayProperty,UProperty,0,Core)
+	DECLARE_CLASS(UArrayProperty,UProperty,CLASS_IsAUProperty,Core)
 
 	// Variables.
 	UProperty* Inner;
@@ -365,7 +358,7 @@ class CORE_API UArrayProperty : public UProperty{
 // Describes a dynamic map.
 //
 class CORE_API UMapProperty : public UProperty{
-	DECLARE_CLASS(UMapProperty,UProperty,0,Core)
+	DECLARE_CLASS(UMapProperty,UProperty,CLASS_IsAUProperty,Core)
 
 	// Variables.
 	UProperty* Key;
@@ -399,7 +392,7 @@ class CORE_API UMapProperty : public UProperty{
 // an object.
 //
 class CORE_API UStructProperty : public UProperty{
-	DECLARE_CLASS(UStructProperty,UProperty,0,Core)
+	DECLARE_CLASS(UStructProperty,UProperty,CLASS_IsAUProperty,Core)
 
 	// Variables.
 	class UStruct* Struct;
@@ -434,7 +427,6 @@ class CORE_API UStructProperty : public UProperty{
 // Describes a pointer to a function bound to an Object
 //
 class CORE_API UDelegateProperty : public UProperty{
-	//TODO: Verify whether CLASS_IsAUProperty exists in RC
 	DECLARE_CLASS(UDelegateProperty,UProperty,CLASS_IsAUProperty,Core)
 
 	UFunction* Function;

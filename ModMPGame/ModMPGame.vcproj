@@ -23,7 +23,7 @@
 				ExceptionHandling="TRUE"
 				RuntimeLibrary="2"
 				StructMemberAlignment="3"
-				WarningLevel="2"
+				WarningLevel="4"
 				CallingConvention="1"/>
 			<Tool
 				Name="VCCustomBuildTool"/>

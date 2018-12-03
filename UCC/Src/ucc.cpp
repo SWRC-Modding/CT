@@ -30,7 +30,7 @@ void ShowBanner(){
 	Warn.Log("");
 }
 
-int main(int argc, char** argv){
+int __cdecl main(int argc, char** argv){
 	int ExitCode = EXIT_SUCCESS;
 
 	GIsStarted = 1;

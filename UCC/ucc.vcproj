@@ -26,7 +26,7 @@
 				StructMemberAlignment="3"
 				EnableEnhancedInstructionSet="2"
 				DisableLanguageExtensions="FALSE"
-				WarningLevel="2"
+				WarningLevel="4"
 				CallingConvention="1"/>
 			<Tool
 				Name="VCCustomBuildTool"/>

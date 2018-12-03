@@ -111,20 +111,21 @@ typedef unsigned long	   BITFIELD;	// For bitfields.
 #pragma warning(disable : 4711) /* function selected for autmatic inlining								*/
 #pragma warning(disable : 4725) /* Pentium fdiv bug														*/
 #pragma warning(disable : 4127) /* Conditional expression is constant									*/
-#pragma warning(disable : 4512) /* assignment operator could not be generated						   */
-#pragma warning(disable : 4530) /* C++ exception handler used, but unwind semantics are not enabled	 */
+#pragma warning(disable : 4512) /* assignment operator could not be generated							*/
+#pragma warning(disable : 4530) /* C++ exception handler used, but unwind semantics are not enabled	 	*/
 #pragma warning(disable : 4245) /* conversion from 'enum ' to 'unsigned long', signed/unsigned mismatch */
-#pragma warning(disable : 4389) /* signed/unsigned mismatch (gam)									   */
-#pragma warning(disable : 4238) /* nonstandard extension used : class rvalue used as lvalue			 */
+#pragma warning(disable : 4389) /* signed/unsigned mismatch											   	*/
+#pragma warning(disable : 4238) /* nonstandard extension used : class rvalue used as lvalue			 	*/
 #pragma warning(disable : 4251) /* needs to have dll-interface to be used by clients of class 'ULinker' */
-#pragma warning(disable : 4275) /* non dll-interface class used as base for dll-interface class		 */
-#pragma warning(disable : 4511) /* copy constructor could not be generated							  */
-#pragma warning(disable : 4284) /* return type is not a UDT or reference to a UDT					   */
-#pragma warning(disable : 4355) /* this used in base initializer list								   */
+#pragma warning(disable : 4275) /* non dll-interface class used as base for dll-interface class		 	*/
+#pragma warning(disable : 4511) /* copy constructor could not be generated							  	*/
+#pragma warning(disable : 4284) /* return type is not a UDT or reference to a UDT					   	*/
+#pragma warning(disable : 4355) /* this used in base initializer list								   	*/
 #pragma warning(disable : 4097) /* typedef-name '' used as synonym for class-name ''					*/
 #pragma warning(disable : 4291) /* typedef-name '' used as synonym for class-name ''					*/
 #pragma warning(disable : 4731) /* frame pointer register 'ebp' modified by inline assembly code		*/
-#pragma warning(disable : 4718) /* recursive call has no side effects, deleting (gam)				   */
+#pragma warning(disable : 4718) /* recursive call has no side effects, deleting			   				*/
+#pragma warning(disable : 4239) /* nonstandard extension used											*/
 
 // If C++ exception handling is disabled, force guarding to be off.
 #ifndef _CPPUNWIND

@@ -37,7 +37,7 @@ struct FNativeEntry{
 template<typename T>
 struct FNativeInitializer{
 	FNativeInitializer(){
-		T::StaticClass()->NativeEntries = T::StaticNativeMap;
+		T::StaticClass()->NativeFunctions = reinterpret_cast<FNativeEntry<UObject>*>(T::StaticNativeMap);
 		T::StaticClass()->RegisterNatives();
 	}
 };

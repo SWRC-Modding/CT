@@ -63,67 +63,41 @@ class FName{
 public:
 	//Accessors
 	const TCHAR* operator*() const{ return Entry->Name; }
-
-	NAME_INDEX GetIndex() const{
-		checkName(Index < Names.Num());
-		checkName(Names[Index]);
-		return Entry->Index;
-	}
-
-	DWORD GetFlags() const{
-		checkName(Index < Names.Num());
-		checkName(Names[Index]);
-		return Entry->Flags;
-	}
-
-	void SetFlags(DWORD Set) const{
-		checkName(Index < Names.Num());
-		checkName(Names[Index]);
-		Entry->Flags |= Set;
-	}
-
-	void ClearFlags(DWORD Clear) const{
-		checkName(Index < Names.Num());
-		checkName(Names[Index]);
-		Entry->Flags &= ~Clear;
-	}
+	NAME_INDEX GetIndex() const{ return Entry->Index; }
+	DWORD GetFlags() const{ return Entry->Flags; }
+	void SetFlags(DWORD Set) const{ Entry->Flags |= Set; }
+	void ClearFlags(DWORD Clear) const{ Entry->Flags &= ~Clear; }
 
 	bool operator==(const FName& Other) const{ return Entry == Other.Entry; }
 	bool operator!=(const FName& Other) const{ return Entry != Other.Entry; }
 
 	//Constructors
-	FName(){}
+	FName() : Entry(Names[NAME_None]){}
 	FName(EName N) : Entry(Names[N]){}
 	CORE_API FName(const TCHAR* Name, EFindName FindType);
 	CORE_API FName(const FString& Name, EFindName FindType);
 
-	/*
-	*	Creating an FString with "None" produces an invalid name entry when
-	*	using the constructor from Core.dll which in turn leads to crashes
-	*	when it is used so this constructor exists to circumvent the issue
-	*	by checking the input string first.
-	*	This is only necessary because there's an ini entry called "None"
-	*	that gets converted to an FName when reading the ini file
-	*/
 	FName(const TCHAR* Name){
-		if(appStricmp(Name, "None") != 0)
-			*this = FName(Name, FNAME_Add);
-		else
+		*this = FName(Name, FNAME_Add);
+
+		if(!Entry)
 			Entry = Names[NAME_None];
 	}
+
+	FName(const FString& Name){ *this = FName(*Name); }
 
 	//Name subsystem.
 	CORE_API static void StaticInit();
 	CORE_API static void StaticExit();
-	CORE_API static void DeleteEntry(int i);
+	CORE_API static void DeleteEntry(INT i);
 	CORE_API static void DisplayHash(class FOutputDevice& Ar);
 	CORE_API static void Hardcode(FNameEntry* AutoName);
 
 	//Name subsystem accessors
 	static const TCHAR* SafeString(EName Index){ return Initialized ? Names[Index]->Name : "Uninitialized"; }
 	static bool SafeSuppressed(EName Index){ return Initialized && ((Names[Index]->Flags & 0x00001000) != 0); }
-	static int GetMaxNames(){ return Names.Num(); }
-	static FNameEntry* GetEntry(int i){ return Names[i]; }
+	static INT GetMaxNames(){ return Names.Num(); }
+	static FNameEntry* GetEntry(INT i){ return Names[i]; }
 	static UBOOL GetInitialized(){ return Initialized; }
 
 private:

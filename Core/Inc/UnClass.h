@@ -363,34 +363,38 @@ class CORE_API UClass : public UState{
 	DECLARE_CLASS(UClass,UState,0,Core)
 	DECLARE_WITHIN(UPackage)
 
+	typedef void(*Constructor)(void*);
+	typedef void(UObject::*StaticConstructor)();
+	
 	// Variables.
-	DWORD				ClassFlags;
-	INT					ClassUnique;
-	FGuid				ClassGuid;
-	char 				Pad1[4]; // Something with CRC...
-	UClass*				ClassWithin;
-	FName				ClassConfigName;
-	char 				Pad2[4]; // Padding
-	TArray<FRepRecord>	ClassReps;
-	TArray<UField*>		NetFields;
-	TArray<FDependency> Dependencies;
-	TArray<FName>		PackageImports;
-	TArray<BYTE>		Defaults;
-	TArray<FName>		HideCategories;
-	TArray<FName>       DependentOn; // amb,gam
-	char 				Pad3[12]; // Padding
-	void(*ClassConstructor)(void*);
-	void(UObject::*ClassStaticConstructor)();
+	DWORD					ClassFlags;
+	INT						ClassUnique;
+	FGuid					ClassGuid;
+	char 					Pad1[4]; // Something with CRC...
+	UClass*					ClassWithin;
+	FName					ClassConfigName;
+	char 					Pad2[4]; // Padding
+	TArray<FRepRecord>		ClassReps;
+	TArray<UField*>			NetFields;
+	TArray<FDependency> 	Dependencies;
+	TArray<FName>			PackageImports;
+	TArray<BYTE>			Defaults;
+	TArray<FName>			HideCategories;
+	TArray<FName>       	DependentOn; // amb,gam
+	char 					Pad3[8]; // Padding
+	FNativeEntry<UObject>*	NativeFunctions;
+	Constructor				ClassConstructor;
+	StaticConstructor		ClassStaticConstructor;
 
 	// In memory only.
-	FString				DefaultPropText;
-	void* NativeEntries;
+	FString					DefaultPropText;
+	UClass*					Self;
 
 	//Constructors.
 	UClass();
 	UClass(UClass* InSuperClass);
-	UClass(ENativeConstructor, DWORD InSize, DWORD InClassFlags, UClass* InBaseClass, UClass* InWithinClass, FGuid InGuid, const TCHAR* InNameStr, const TCHAR* InPackageName, const TCHAR* InClassConfigName, DWORD InFlags, void(*InClassConstructor)(void*), void(UObject::*InClassStaticConstructor)());
-	UClass(EStaticConstructor, DWORD InSize, DWORD InClassFlags, FGuid InGuid, const TCHAR* InNameStr, const TCHAR* InPackageName, const TCHAR* InClassConfigName, DWORD InFlags, void(*InClassConstructor)(void*), void(UObject::*InClassStaticConstructor)());
+	UClass(ENativeConstructor, DWORD InSize, DWORD InClassFlags, UClass* InBaseClass, UClass* InWithinClass, FGuid InGuid, const TCHAR* InNameStr, const TCHAR* InPackageName, const TCHAR* InClassConfigName, DWORD InFlags, Constructor InClassConstructor, StaticConstructor InClassStaticConstructor);
+	UClass(EStaticConstructor, DWORD InSize, DWORD InClassFlags, FGuid InGuid, const TCHAR* InNameStr, const TCHAR* InPackageName, const TCHAR* InClassConfigName, DWORD InFlags, Constructor InClassConstructor, StaticConstructor InClassStaticConstructor);
 
 	//UObject interface.
 	virtual void Serialize(FArchive& Ar);

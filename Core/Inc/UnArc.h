@@ -14,123 +14,83 @@
 // Archive class. Used for loading, saving, and garbage collecting
 // in a byte order neutral way.
 //
-class CORE_API FArchive{
+class /*CORE_API*/ FArchive{
+	// Friend archivers.
+	friend FArchive& operator<<(FArchive& Ar, ANSICHAR& C);
+	friend FArchive& operator<<(FArchive& Ar, BYTE& B);
+	friend FArchive& operator<<(FArchive& Ar, SBYTE& B);
+	friend FArchive& operator<<(FArchive& Ar, _WORD& W);
+	friend FArchive& operator<<(FArchive& Ar, SWORD& S);
+	friend FArchive& operator<<(FArchive& Ar, DWORD& D);
+	friend FArchive& operator<<(FArchive& Ar, INT& I);
+	friend FArchive& operator<<(FArchive& Ar, FLOAT& F);
+	friend FArchive& operator<<(FArchive &Ar, QWORD& Q);
+	friend FArchive& operator<<(FArchive& Ar, SQWORD& S);
+	friend FArchive& operator<<(FArchive& Ar, FTime& F);
 public:
 	// FArchive interface.
 	virtual ~FArchive(){}
+	virtual void Serialize(void* V, INT Length){}
+	virtual void SerializeBits(void* V, INT LengthBits){
+		Serialize(V, (LengthBits + 7) / 8);
 
-	virtual void Serialize(void*, int) = 0;
-	virtual void SerializeBits(void*, int);
-	virtual void SerializeInt(unsigned long&, unsigned long);
+		if(IsLoading())
+			((BYTE*)V)[LengthBits / 8] &= ((1 << (LengthBits & 7)) - 1);
+	}
+	virtual void SerializeInt(DWORD& Value, DWORD Max){
+		*this << *(DWORD*)Value;
+	}
 	virtual void SerializeText(char const*);
 	virtual void SerializeText(FString const&);
 	virtual void Preload(UObject*){}
 	virtual void CountBytes(char, const struct FMemCount&);
 	virtual void CountBytes(void*, unsigned long);
-	virtual FArchive& operator<<(FName&);
-	virtual FArchive& operator<<(UObject*&);
-	virtual int MapName(FName*);
-	virtual int MapObject(UObject*);
-	virtual int Tell();
-	virtual int TotalSize();
-	virtual int AtEnd();
-	virtual void Seek(int);	
-	virtual void AttachLazyLoader(FLazyLoader*);
-	virtual void DetachLazyLoader(FLazyLoader*);
-	virtual void Precache(int);
-	virtual void Flush();
-	virtual int Close();	
-	virtual int GetError();
-	virtual int GetMaxSerializeSize();
-	virtual UObject* GetResourceObject();
+	virtual FArchive& operator<<(FName& N){ return *this; }
+	virtual FArchive& operator<<(UObject*& Res){ return *this; }
+	virtual INT MapName(FName*){ return 0; }
+	virtual INT MapObject(UObject*){ return 0; }
+	virtual INT Tell(){ return INDEX_NONE; }
+	virtual INT TotalSize(){ return INDEX_NONE; }
+	virtual UBOOL AtEnd(){
+		INT Pos = Tell();
+
+		return Pos != INDEX_NONE && Pos >= TotalSize();
+	}
+	virtual void Seek(INT InPos){}
+	virtual void AttachLazyLoader(FLazyLoader* LazyLoader){}
+	virtual void DetachLazyLoader(FLazyLoader* LazyLoader){}
+	virtual void Precache(INT HintCount){}
+	virtual void Flush(){}
+	virtual UBOOL Close(){ return !ArIsError; }
+	virtual UBOOL GetError(){ return ArIsError; }
+	virtual INT GetMaxSerializeSize(){ return 0; }
+	virtual UObject* GetResourceObject(){ return NULL; }
 
 	// Constructor.
 	FArchive();
 
 	// Status accessors.
-	bool ContainsCode();
-	bool ForClient();
-	bool ForEdit();
-	bool ForServer();
-	bool IsCountingMem();
-	bool IsCriticalError();
-	bool IsError();
-	bool IsGarbageCollecting();
-	bool IsLinear();
-	bool IsLoading();
-	bool IsNet();
-	bool IsPersistent();
-	bool IsSaving();
-	bool IsSkipping();
-	bool IsTrans();
-	int LicenseeVer();
-	int NetVer();
-	void Skip(bool);
-	void ThisContainsCode();
-	int Ver();
+	bool ContainsCode(){ return ArContainsCode; }
+	bool ForClient(){ return ArForClient; }
+	bool ForEdit(){ return ArForEdit; }
+	bool ForServer(){ return ArForServer; }
+	bool IsCountingMem(){ return ArIsCountingMem; }
+	bool IsCriticalError(){ return ArIsCriticalError; }
+	bool IsError(){ return ArIsError; }
+	bool IsGarbageCollecting(){ return ArIsGarbageCollecting; }
+	bool IsLinear(){ return ArIsLinear; }
+	bool IsLoading(){ return ArIsLoading; }
+	bool IsNet(){ return (ArNetVer & 0x80000000) != 0 ; }
+	bool IsPersistent(){ return ArIsPersistent; }
+	bool IsSaving(){ return ArIsSaving; }
+	bool IsSkipping(){ return ArIsSkipping; }
+	bool IsTrans(){ return ArIsTrans; }
+	int LicenseeVer(){ return ArLicenseeVer; }
+	int NetVer(){ return ArNetVer & 0x7fffffff; }
+	void Skip(bool bSkip){ ArIsSkipping = bSkip; }
+	void ThisContainsCode(){ ArContainsCode = true; }
+	int Ver(){ return ArVer; }
 
-	// Friend archivers.
-	friend FArchive& operator<<(FArchive& Ar, ANSICHAR& C){
-		Ar.Serialize(&C, 1);
-
-		return Ar;
-	}
-
-	friend FArchive& operator<<(FArchive& Ar, BYTE& B){
-		Ar.Serialize(&B, 1);
-
-		return Ar;
-	}
-
-	friend FArchive& operator<<(FArchive& Ar, SBYTE& B){
-		Ar.Serialize(&B, 1);
-
-		return Ar;
-	}
-
-	friend FArchive& operator<<(FArchive& Ar, _WORD& W){
-		Ar.Serialize(&W, sizeof(W));
-
-		return Ar;
-	}
-
-	friend FArchive& operator<<(FArchive& Ar, SWORD& S){
-		Ar.Serialize(&S, sizeof(S));
-
-		return Ar;
-	}
-
-	friend FArchive& operator<<(FArchive& Ar, DWORD& D){
-		Ar.Serialize(&D, sizeof(D));
-
-		return Ar;
-	}
-
-	friend FArchive& operator<<(FArchive& Ar, INT& I){
-		Ar.Serialize(&I, sizeof(I));
-
-		return Ar;
-	}
-
-	friend FArchive& operator<<(FArchive& Ar, FLOAT& F){
-		Ar.Serialize(&F, sizeof(F));
-
-		return Ar;
-	}
-
-	friend FArchive& operator<<(FArchive &Ar, QWORD& Q){
-		Ar.Serialize(&Q, sizeof(Q));
-
-		return Ar;
-	}
-
-	friend FArchive& operator<<(FArchive& Ar, SQWORD& S){
-		Ar.Serialize(&S, sizeof(S));
-
-		return Ar;
-	}
-
-	friend FArchive& operator<<(FArchive& Ar, FTime& F);
 protected:
 	// Status variables.
 	INT ArVer;
@@ -151,6 +111,68 @@ protected:
 	bool ArIsCriticalError;
 	bool ArContainsCode;
 };
+
+inline FArchive& operator<<(FArchive& Ar, ANSICHAR& C){
+	Ar.Serialize(&C, 1);
+
+	return Ar;
+}
+
+inline FArchive& operator<<(FArchive& Ar, BYTE& B){
+	Ar.Serialize(&B, 1);
+
+	return Ar;
+}
+
+inline FArchive& operator<<(FArchive& Ar, SBYTE& B){
+	Ar.Serialize(&B, 1);
+
+	return Ar;
+}
+
+inline FArchive& operator<<(FArchive& Ar, _WORD& W){
+	Ar.Serialize(&W, sizeof(W));
+
+	return Ar;
+}
+
+inline FArchive& operator<<(FArchive& Ar, SWORD& S){
+	Ar.Serialize(&S, sizeof(S));
+
+	return Ar;
+}
+
+inline FArchive& operator<<(FArchive& Ar, DWORD& D){
+	Ar.Serialize(&D, sizeof(D));
+
+	return Ar;
+}
+
+inline FArchive& operator<<(FArchive& Ar, INT& I){
+	Ar.Serialize(&I, sizeof(I));
+
+	return Ar;
+}
+
+inline FArchive& operator<<(FArchive& Ar, FLOAT& F){
+	Ar.Serialize(&F, sizeof(F));
+
+	return Ar;
+}
+
+inline FArchive& operator<<(FArchive &Ar, QWORD& Q){
+	Ar.Serialize(&Q, sizeof(Q));
+
+	return Ar;
+}
+
+inline FArchive& operator<<(FArchive& Ar, SQWORD& S){
+	Ar.Serialize(&S, sizeof(S));
+
+	return Ar;
+}
+
+FArchive& operator<<(FArchive& Ar, FTime& F);
 
 /*-----------------------------------------------------------------------------
 	FArchive macros.

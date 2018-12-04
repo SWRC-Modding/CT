@@ -564,26 +564,19 @@ public:
 //
 class CORE_API FArchiveCountMem : public FArchive{
 public:
-	FArchiveCountMem( UObject* Src ) : Num(0),
-									   Max(0){
-		Src->Serialize(*this);
-	}
+	FArchiveCountMem(UObject* Src);
 
-	SIZE_T GetNum(){
-		return Num;
-	}
+	// Overrides
+	virtual void CountBytes(char, const FMemCount&);
+	virtual void CountBytes(void*, unsigned long);
+	virtual UObject* GetResourceObject(){ return ResourceObject; }
 
-	SIZE_T GetMax(){
-		return Max;
-	}
-
-	void CountBytes(SIZE_T InNum, SIZE_T InMax){
-		Num += InNum;
-		Max += InMax;
-	}
+	FMemCount TotalMem() const;
 
 protected:
-	SIZE_T Num, Max;
+	FMemCount Count;
+	char Padding2[84];
+	UObject* ResourceObject;
 };
 
 enum{

@@ -6,12 +6,6 @@
 		* Created by Tim Sweeney
 =============================================================================*/
 
-//TODO: Find out size of structure
-//Just here because I have no idea where else to put it...
-struct FMemCount{
-	INT count;
-};
-
 /*-----------------------------------------------------------------------------
 	Globals.
 -----------------------------------------------------------------------------*/

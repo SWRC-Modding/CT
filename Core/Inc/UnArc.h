@@ -10,6 +10,12 @@
 	Archive.
 -----------------------------------------------------------------------------*/
 
+struct FMemCount{
+	DWORD Allocations;
+	DWORD Used;
+	DWORD Reserved;
+};
+
 //
 // Archive class. Used for loading, saving, and garbage collecting
 // in a byte order neutral way.

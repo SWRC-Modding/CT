@@ -10,24 +10,24 @@
 //
 // A package.
 //
-class CORE_API UPackage : public UObject
-{
+class CORE_API UPackage : public UObject{
 	DECLARE_CLASS(UPackage,UObject,0,Core)
 
 	// Variables.
 	void* DllHandle;
 	UBOOL AttemptedBind;
 	DWORD PackageFlags;
+	UBOOL bDirty; // Used by the editor to determine if a package has been changed
 
 	// Constructors.
 	UPackage();
 
 	// UObject interface.
-	void Destroy();
-	void Serialize( FArchive& Ar );
+	virtual void Destroy();
+	virtual void Serialize(FArchive& Ar);
 
 	// UPackage interface.
-	void* GetDllExport( const TCHAR* ExportName, UBOOL Checked );
+	void* GetDllExport(const TCHAR* ExportName, UBOOL Checked);
 };
 
 /*-----------------------------------------------------------------------------
@@ -61,6 +61,7 @@ struct UCommandlet_eventMain_Parms{
 };
 class CORE_API UCommandlet : public UObject{
 	DECLARE_CLASS(UCommandlet,UObject,CLASS_Transient|CLASS_Abstract|CLASS_Localized,Core)
+
 	FString HelpCmd, HelpOneLiner, HelpUsage, HelpWebLink;
 	FStringNoInit HelpParm[16], HelpDesc[16];
 	BITFIELD LogToStdout   :1;
@@ -105,10 +106,10 @@ class CORE_API UCommandlet : public UObject{
 //
 // A language (special case placeholder class).
 //
-class CORE_API ULanguage : public UObject
-{
+class CORE_API ULanguage : public UObject{
 	DECLARE_ABSTRACT_CLASS(ULanguage,UObject,CLASS_Transient,Core)
 	NO_DEFAULT_CONSTRUCTOR(ULanguage)
+
 	ULanguage* SuperLanguage;
 };
 
@@ -120,8 +121,7 @@ class CORE_API ULanguage : public UObject
 // An object that holds a bunch of text.  The text is contiguous and, if
 // of nonzero length, is terminated by a NULL at the very last position.
 //
-class CORE_API UTextBuffer : public UObject, public FOutputDevice
-{
+class CORE_API UTextBuffer : public UObject, public FOutputDevice{
 	DECLARE_CLASS(UTextBuffer,UObject,0,Core)
 
 	// Variables.
@@ -129,46 +129,38 @@ class CORE_API UTextBuffer : public UObject, public FOutputDevice
 	FString Text;
 
 	// Constructors.
-	UTextBuffer( const TCHAR* Str=TEXT("") );
+	UTextBuffer(const TCHAR* Str = "");
 
 	// UObject interface.
-	void Serialize( FArchive& Ar );
+	virtual void Serialize(FArchive& Ar);
 
 	// FOutputDevice interface.
-	void Serialize( const TCHAR* Data, EName Event );
+	virtual void Serialize(const TCHAR* Data, EName Event);
 };
 
 /*----------------------------------------------------------------------------
 	USystem.
 ----------------------------------------------------------------------------*/
 
-class CORE_API USystem : public USubsystem
-{
+class CORE_API USystem : public USubsystem{
 	DECLARE_CLASS(USystem,USubsystem,CLASS_Config,Core)
 
 	// Variables.
-#if 1 //LMode added by Legend on 4/12/2000
-	//
-	// a licensee configurable INI setting that can be used to augment
-	// the behavior of LicenseeVer -- especially useful in supporting
-	// the transition from "before LiceseeVer" to the new build; for
-	// salvaging maps that have licensee-specific data.
-	//
 	INT LicenseeMode; 
-#endif
 	INT PurgeCacheDays;
 	FString SavePath;
 	FString CachePath;
 	FString CacheExt;
 	TArray<FString> Paths;
 	TArray<FName> Suppress;
+	char Padding[16]; // Padding
 
 	// Constructors.
 	void StaticConstructor();
 	USystem();
 
 	// FExec interface.
-	UBOOL Exec( const TCHAR* Cmd, FOutputDevice& Ar=*GLog );
+	virtual UBOOL Exec(const TCHAR* Cmd, FOutputDevice& Ar = *GLog);
 };
 
 /*----------------------------------------------------------------------------

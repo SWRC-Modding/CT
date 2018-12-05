@@ -310,7 +310,9 @@ public:
 
 // Verify that C++ and script code agree on the size of a class.
 #define VERIFY_CLASS_SIZE(ClassName) \
-	check(sizeof(ClassName) == ClassName::StaticClass()->GetPropertiesSize());
+	{if(sizeof(ClassName) != ClassName::StaticClass()->GetPropertiesSize()) \
+		appErrorf("Class %s size mismatch: Script=%i C++=%i", #ClassName, ClassName::StaticClass()->GetPropertiesSize(), sizeof(ClassName));}
+	//check(sizeof(ClassName) == ClassName::StaticClass()->GetPropertiesSize());
 
 // Declare the base UObject class.
 

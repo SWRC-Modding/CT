@@ -107,38 +107,38 @@ inline UNICHAR	ToUnicode  (TCHAR In  ) { return (BYTE)In;                       
 ----------------------------------------------------------------------------*/
 
 // Objects.
-class	UObject;
-class		UExporter;
-class		UFactory;
-class		UField;
-class			UConst;
-class			UEnum;
-class			UProperty;
-class				UByteProperty;
-class				UIntProperty;
-class				UBoolProperty;
-class				UFloatProperty;
-class				UObjectProperty;
-class					UClassProperty;
-class				UNameProperty;
-class				UStructProperty;
-class					UStrProperty;
-class					UArrayProperty;
-class				UDelegateProperty;
-class			UStruct;
-class				UFunction;
-class				UState;
-class					UClass;
-class		ULinker;
-class			ULinkerLoad;
-class			ULinkerSave;
-class		UPackage;
-class		USubsystem;
-class			USystem;
-class		UTextBuffer;
-class		 URenderDevice;
-class		UPackageMap;
-class		UDebugger; //DEBUGGER
+class UObject;
+class	UExporter;
+class	UFactory;
+class	UField;
+class		UConst;
+class		UEnum;
+class		UProperty;
+class			UByteProperty;
+class			UIntProperty;
+class			UBoolProperty;
+class			UFloatProperty;
+class			UObjectProperty;
+class				UClassProperty;
+class			UNameProperty;
+class			UStructProperty;
+class				UStrProperty;
+class				UArrayProperty;
+class			UDelegateProperty;
+class		UStruct;
+class			UFunction;
+class			UState;
+class				UClass;
+class	ULinker;
+class		ULinkerLoad;
+class		ULinkerSave;
+class	UPackage;
+class	USubsystem;
+class		USystem;
+class	UTextBuffer;
+class	 URenderDevice;
+class	UPackageMap;
+class	UDebugger; //DEBUGGER
 
 // Structs.
 class FName;
@@ -156,6 +156,10 @@ class FArray;
 class FLazyLoader;
 class FString;
 class FMalloc;
+struct FFrame;
+
+// Native function.
+typedef void(UObject::*Native)(FFrame& TheStack, void* const Result);
 
 // Templates.
 //Templates.
@@ -515,9 +519,9 @@ extern "C" DLL_EXPORT TCHAR GPackage[];
 #include "UnObjBas.h"		// Object base class.
 #include "UnCoreNet.h"		// Core networking.
 #include "UnCorObj.h"		// Core object class definitions.
-#include "UnScript.h"		// Script class.
 #include "UnClass.h"		// Class definition.
 #include "UnType.h"			// Base property type.
+#include "UnScript.h"		// Script class.
 #include "UFactory.h"		// Factory definition.
 #include "UExporter.h"		// Exporter definition.
 #include "UnCache.h"		// Cache based memory management.

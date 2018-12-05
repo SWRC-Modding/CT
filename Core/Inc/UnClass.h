@@ -381,7 +381,7 @@ class CORE_API UClass : public UState{
 	TArray<FName>			HideCategories;
 	TArray<FName>       	DependentOn;
 	FString					ClassHeaderFilename; // Just a guess, but it fits here... (Can't verify since it's always empty)
-	FNativeEntry<UObject>*	NativeFunctions;
+	void*					NativeFunctions;
 	Constructor				ClassConstructor;
 	StaticConstructor		ClassStaticConstructor;
 

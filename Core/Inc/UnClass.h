@@ -381,13 +381,13 @@ class CORE_API UClass : public UState{
 	TArray<FName>			HideCategories;
 	TArray<FName>       	DependentOn;
 	FString					ClassHeaderFilename; // Just a guess, but it fits here... (Can't verify since it's always empty)
-	void*					NativeFunctions;
+	FNativeEntry<UObject>*	NativeFunctions;
 	Constructor				ClassConstructor;
 	StaticConstructor		ClassStaticConstructor;
 
 	// In memory only.
 	FString					DefaultPropText;
-	UClass*					DefaultClass; // Just a guess... Gets the value of 'this' in UClass::UClass
+	UClass*					DefaultClass; // Just a guess... Is initialized with 'this' in UClass::UClass
 
 	// Constructors.
 	UClass();

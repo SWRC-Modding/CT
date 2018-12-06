@@ -161,6 +161,14 @@ struct FFrame;
 // Native function.
 typedef void(UObject::*Native)(FFrame& TheStack, void* const Result);
 
+// Single entry in a UClass' native funtion table.
+template<typename T>
+struct FNativeEntry{
+	const TCHAR* name;
+	void(T::*Func)(FFrame&, void*);
+	INT Num;
+};
+
 // Templates.
 //Templates.
 template<typename T>

@@ -23,6 +23,7 @@ enum { PROPERTY_ALIGNMENT = 4 };
 struct FRepRecord{
 	UProperty* Property;
 	INT Index;
+
 	FRepRecord(UProperty* InProperty,INT InIndex) : Property(InProperty),
 													Index(InIndex){}
 };
@@ -59,10 +60,9 @@ class FRepLink{
 public:
 	UProperty*	Property;		// Replicated property.
 	FRepLink*	Next;			// Next replicated link per class.
-	FRepLink(UProperty* InProperty, FRepLink* InNext)
-	:	Property	(InProperty)
-	,	Next		(InNext)
-	{}
+
+	FRepLink(UProperty* InProperty, FRepLink* InNext) : Property(InProperty),
+														Next(InNext){}
 };
 
 /*-----------------------------------------------------------------------------
@@ -94,7 +94,7 @@ class CORE_API UField : public UObject{
 	NO_DEFAULT_CONSTRUCTOR(UField)
 
 	// Constants.
-	enum {HASH_COUNT = 256};
+	enum{ HASH_COUNT = 256 };
 
 	// Variables.
 	UField*			Next;
@@ -131,27 +131,16 @@ public:
 		IterateToNext();
 	}
 
-	operator UBOOL(){
-		return Field != NULL;
-	}
-
 	void operator++(){
 		Field = Field->Next;
 
 		IterateToNext();
 	}
 
-	T* operator*(){
-		return static_cast<T*>(Field);
-	}
-
-	T* operator->(){
-		return static_cast<T*>(Field);
-	}
-
-	UStruct* GetStruct(){
-		return Struct;
-	}
+	T* operator*(){ return static_cast<T*>(Field); }
+	T* operator->(){ return static_cast<T*>(Field); }
+	operator bool(){ return Field != NULL; }
+	UStruct* GetStruct(){ return Struct; }
 
 protected:
 	UStruct* Struct;
@@ -174,14 +163,56 @@ protected:
 	}
 };
 
+template<typename T, EClassFlags Flag>
+class TFieldFlagIterator{
+public:
+	TFieldFlagIterator(UStruct* InStruct) : Struct(InStruct),
+											Field(InStruct ? InStruct->Children : NULL){
+		IterateToNext();
+	}
+
+	inline void operator++(){
+		Field = Field->Next;
+
+		IterateToNext();
+	}
+
+	inline operator bool(){ return Field != NULL; }
+	inline T* operator*(){ return (T*)Field; }
+	inline T* operator->(){ return (T*)Field; }
+	inline UStruct* GetStruct(){ return Struct; }
+
+protected:
+	UStruct* Struct;
+	UField* Field;
+
+	inline void IterateToNext(){
+		while(Struct){
+			while(Field){
+                if(Field->GetClass()->ClassFlags & Flag)
+                    return;
+
+				Field = Field->Next;
+			}
+
+			Struct = Struct->GetInheritanceSuper();
+
+			if(Struct)
+				Field = Struct->Children;
+		}
+	}
+};
+
 /*-----------------------------------------------------------------------------
 	UStruct
 -----------------------------------------------------------------------------*/
 
 enum EStructFlags{
 	// State flags.
-	STRUCT_Native = 0x00000001,
-	STRUCT_Export = 0x00000002
+	STRUCT_Native  = 0x00000001,
+	STRUCT_Export  = 0x00000002,
+	STRUCT_Long	   = 0x00000004, // will get shown as "..." in editactor until expanded.
+	STRUCT_Inherit = STRUCT_Long,
 };
 
 //
@@ -198,8 +229,8 @@ class CORE_API UStruct : public UField{
 	UTextBuffer*		CppText;
 	UField*				Children;
 	INT					PropertiesSize;
-	char				Pad2[4]; // Possibly MinAlignment
-	INT					PropertiesAlign; // This could also be MinAlignment since it is initizlized to 1 (It's just named after the GetPropertiesAlign function which returns it)
+	char				Pad2[4]; // Padding
+	INT					MinAlignment;
 	FName				FriendlyName;
 	TArray<BYTE>		Script;
 
@@ -207,7 +238,7 @@ class CORE_API UStruct : public UField{
 	INT					TextPos;
 	INT					Line;
 	DWORD				StructFlags;
-	char				Pad3[4]; // In UE3 this is MinAlignment, but this value is initialized to 0 which doesn't match
+	char				Pad3[4]; // Padding
 
 	// Constructors.
 	UStruct(ENativeConstructor, INT InSize, const TCHAR* InName, const TCHAR* InPackageName, DWORD InFlags, UStruct* InSuperStruct);
@@ -268,7 +299,7 @@ class CORE_API UFunction : public UStruct{
 	BYTE  NumParms;
 	_WORD ParmsSize;
 	_WORD ReturnValueOffset;
-	void (UObject::*Func)(FFrame& TheStack, RESULT_DECL);
+	Native Func;
 
 	// Constructors.
 	UFunction(UFunction* InSuperFunction);
@@ -346,9 +377,6 @@ class CORE_API UEnum : public UField{
 
 	// UObject interface.
 	virtual void Serialize(FArchive& Ar);
-
-	// UEnum interface.
-	UEnum* GetSuperEnum() const;
 };
 
 /*-----------------------------------------------------------------------------
@@ -453,9 +481,6 @@ class CORE_API UConst : public UField{
 
 	// UObject interface.
 	virtual void Serialize(FArchive& Ar);
-
-	// UConst interface.
-	UConst* GetSuperConst() const;
 };
 
 /*-----------------------------------------------------------------------------

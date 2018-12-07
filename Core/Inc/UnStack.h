@@ -219,9 +219,11 @@ struct CORE_API FFrame : public FOutputDevice{
 	FFrame(UObject* InObject);
 	FFrame(UObject* InObject, UStruct* InNode, INT CodeOffset, void* InLocals);
 
+	// FOutputDevice interface.
+	virtual void Serialize(const TCHAR* V, EName Event);
+
 	// Functions.
 	void Step(UObject* Context, RESULT_DECL);
-	void Serialize(const TCHAR* V, EName Event);
 	INT ReadInt();
 	UObject* ReadObject();
 	FLOAT ReadFloat();

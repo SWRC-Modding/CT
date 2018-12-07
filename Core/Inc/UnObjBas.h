@@ -105,8 +105,7 @@ enum EClassFlags{
 // Flags associated with each property in a class, overriding the
 // property's default behavior.
 //
-enum EPropertyFlags
-{
+enum EPropertyFlags{
 	// Regular flags.
 	CPF_Edit			 = 0x00000001, // Property is user-settable in the editor.
 	CPF_Const			 = 0x00000002, // Actor's property always matches class's default actor property.

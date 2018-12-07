@@ -121,6 +121,7 @@ inline FFrame::FFrame(UObject* InObject, UStruct* InNode, INT CodeOffset, void* 
 
 FORCEINLINE void FFrame::Step(UObject* Context, RESULT_DECL){
 	INT B = *Code++;
+
 	(Context->*GNatives[B])(*this, Result);
 }
 

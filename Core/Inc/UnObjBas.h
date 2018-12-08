@@ -10,6 +10,8 @@
 	Core enumerations.
 -----------------------------------------------------------------------------*/
 
+// TODO: Check each flag since e.g CPF_Native has a different value in RC (0x10 instead of 0x1000)
+
 //
 // Flags for loading objects.
 //

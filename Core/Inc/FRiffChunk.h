@@ -37,7 +37,7 @@ struct FRiffChunk
 	{
 		guard(FRiffChunk::~FRiffChunk);
 		for( INT i=0; i<SubChunks.Num(); i++ )
-			delete SubChunks( i );
+			delete SubChunks[i];
 		unguard;
 	}
 	virtual void SerializeChunk( FArchive& Ar, INT Size )
@@ -45,7 +45,7 @@ struct FRiffChunk
 		guard(FRiffChunk::SerializeChunk);
 		if( Ar.IsLoading() )
 			Unknown = TArray<BYTE>( Size );
-		Ar.Serialize( &Unknown(0), Size );
+		Ar.Serialize( &Unknown[0], Size );
 		unguard;
 	}
 	virtual FRiffChunk* CreateSubChunk( DWORD FourCC )
@@ -63,7 +63,7 @@ struct FRiffChunk
 
 		TArray<BYTE> SubChunkData;
 		SubChunkData = TArray<BYTE>( Size + DataPos - Ar.Tell() );
-		Ar.Serialize( &SubChunkData(0), SubChunkData.Num() );
+		Ar.Serialize( &SubChunkData[0], SubChunkData.Num() );
 		FBufferReader SubAr( SubChunkData );
 		while( !SubAr.AtEnd() )
 		{
@@ -88,7 +88,7 @@ struct FRiffChunk
 		Ar << Size;
 		SerializeChunk( Ar, 0 );
 		for( INT i=0; i<SubChunks.Num(); i++ )
-			SubChunks(i)->Save( Ar );
+			SubChunks[i]->Save( Ar );
 		INT EndPos = Ar.Tell();
 		Size = EndPos - StartPos - sizeof(INT);
 		Ar.Seek( StartPos );
@@ -155,7 +155,7 @@ struct FRiffChunk_data : public FRiffChunk
 	{
 		if( Ar.IsLoading() )
 			Bits = TArray<BYTE>( Size );
-		Ar.Serialize( &Bits(0), Bits.Num() );
+		Ar.Serialize( &Bits[0], Bits.Num() );
 	}
 	TArray<BYTE> Bits;
 };
@@ -222,3 +222,4 @@ UBOOL SaveRiffFile( FRiffChunk* RootChunk, const TCHAR* Filename, FFileManager* 
 /*-----------------------------------------------------------------------------
 	The End.
 -----------------------------------------------------------------------------*/
+

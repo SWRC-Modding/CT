@@ -3,34 +3,87 @@
 	ProjectType="Visual C++"
 	Version="7.10"
 	Name="ModMPGame"
-	ProjectGUID="{DC67B7B8-5827-41B6-B7BE-52CC410F72EC}"
-	RootNamespace="ModMPGame">
+	ProjectGUID="{CC43C26F-33FB-43F8-911D-B77E1E667229}"
+	RootNamespace="ModMPGame"
+	Keyword="ManagedCProj">
 	<Platforms>
 		<Platform
 			Name="Win32"/>
 	</Platforms>
 	<Configurations>
 		<Configuration
-			Name="Release|Win32"
-			OutputDirectory="$(SolutionDir)/../GameData/System"
+			Name="Debug|Win32"
+			OutputDirectory="$(SolutionDir)../GameData/System"
 			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="2"
-			CharacterSet="0">
+			CharacterSet="2"
+			ManagedExtensions="FALSE">
 			<Tool
 				Name="VCCLCompilerTool"
-				Optimization="2"
-				PreprocessorDefinitions="MODMPGAME_API=DLL_EXPORT"
-				ExceptionHandling="TRUE"
-				RuntimeLibrary="2"
+				Optimization="0"
+				PreprocessorDefinitions="MODMPGAME_API=DLL_EXPORT;_REALLY_WANT_DEBUG"
+				MinimalRebuild="FALSE"
+				BasicRuntimeChecks="0"
+				RuntimeLibrary="1"
 				StructMemberAlignment="3"
 				WarningLevel="4"
+				DebugInformationFormat="3"
 				CallingConvention="1"/>
 			<Tool
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				ImportLibrary="$(ProjectDir)/lib/$(TargetName).lib"
-				FixedBaseAddress="0"/>
+				OutputFile="$(OutDir)\$(ProjectName).dll"
+				LinkIncremental="1"
+				GenerateDebugInformation="TRUE"
+				AssemblyDebug="1"
+				ProgramDatabaseFile="$(ProjectDir)lib/$(ProjectName).pdb"
+				ImportLibrary="$(ProjectDir)/lib/$(TargetName).lib"/>
+			<Tool
+				Name="VCMIDLTool"/>
+			<Tool
+				Name="VCPostBuildEventTool"/>
+			<Tool
+				Name="VCPreBuildEventTool"/>
+			<Tool
+				Name="VCPreLinkEventTool"/>
+			<Tool
+				Name="VCResourceCompilerTool"/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"/>
+			<Tool
+				Name="VCWebDeploymentTool"/>
+			<Tool
+				Name="VCManagedWrapperGeneratorTool"/>
+			<Tool
+				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
+		</Configuration>
+		<Configuration
+			Name="Release|Win32"
+			OutputDirectory="$(SolutionDir)../GameData/System"
+			IntermediateDirectory="$(ConfigurationName)"
+			ConfigurationType="2"
+			CharacterSet="2"
+			ManagedExtensions="FALSE">
+			<Tool
+				Name="VCCLCompilerTool"
+				PreprocessorDefinitions="MODMPGAME_API=DLL_EXPORT"
+				MinimalRebuild="FALSE"
+				RuntimeLibrary="0"
+				StructMemberAlignment="3"
+				WarningLevel="4"
+				DebugInformationFormat="3"
+				CallingConvention="1"/>
+			<Tool
+				Name="VCCustomBuildTool"/>
+			<Tool
+				Name="VCLinkerTool"
+				OutputFile="$(OutDir)\$(ProjectName).dll"
+				LinkIncremental="1"
+				GenerateDebugInformation="TRUE"
+				ImportLibrary="$(ProjectDir)/lib/$(TargetName).lib"/>
 			<Tool
 				Name="VCMIDLTool"/>
 			<Tool
@@ -54,29 +107,28 @@
 		</Configuration>
 	</Configurations>
 	<References>
-		<ProjectReference
-			ReferencedProjectIdentifier="{DC67B7B8-5827-41B6-B7BE-52CC410F72EC}"
-			Name="UCC"/>
 	</References>
 	<Files>
 		<Filter
 			Name="Inc"
-			Filter="">
+			Filter="h;hpp;hxx;hm;inl;inc;xsd"
+			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}">
 			<File
 				RelativePath=".\Inc\ModMPGame.h">
 			</File>
 			<File
-				RelativePath=".\inc\ModMPGameClasses.h">
+				RelativePath=".\Inc\ModMPGameClasses.h">
 			</File>
 		</Filter>
 		<Filter
 			Name="Src"
-			Filter="">
+			Filter="cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx"
+			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}">
 			<File
 				RelativePath=".\Src\ModMPGame.cpp">
 			</File>
 			<File
-				RelativePath=".\src\ModMPGameClasses.cpp">
+				RelativePath=".\Src\ModMPGameClasses.cpp">
 			</File>
 			<File
 				RelativePath=".\Src\ModMPGamePrivate.h">

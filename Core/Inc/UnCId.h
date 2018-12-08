@@ -13,8 +13,7 @@
 //
 // 8-bit base Cache ID's.
 //
-enum ECacheIDBase
-{
+enum ECacheIDBase{
 	CID_ShadowMap			= 0x15,
 	CID_IlluminationMap		= 0x16,
 	CID_LightPalette		= 0x17,
@@ -41,6 +40,9 @@ enum ECacheIDBase
 	CID_BumpNormals         = 0x33,
 	CID_SkeletalData        = 0x34,
 	CID_RenderTexture		= 0xE0,
+	CID_RenderVertices		= 0xE1,
+	CID_RenderIndices		= 0xE2,
+	CID_CollisionData		= 0xE3,
 	CID_MAX					= 0xff,
 };
 
@@ -48,29 +50,28 @@ enum ECacheIDBase
 	Functions.
 ----------------------------------------------------------------------------*/
 
-inline QWORD MakeCacheID( ECacheIDBase Base, UObject* Frame )
-{
-	return (Base) + ((Frame?(QWORD)Frame->GetIndex():(QWORD)0) << 8);
+inline QWORD MakeCacheID(ECacheIDBase Base, UObject* Frame){
+	return (Base) + ((Frame ? (QWORD)Frame->GetIndex() : (QWORD)0) << 8);
 }
 
-inline QWORD MakeCacheID( ECacheIDBase Base, UObject* Obj, UObject* Frame )
-{
-	return (Base) + ((Obj?Obj->GetIndex():0) << 8) + ((Frame?(QWORD)Frame->GetIndex():(QWORD)0) << 32);
+inline QWORD MakeCacheID(ECacheIDBase Base, UObject* Obj, UObject* Frame){
+	return (Base) + ((Obj ? Obj->GetIndex() : 0) << 8) + ((Frame ? (QWORD)Frame->GetIndex() : (QWORD)0) << 32);
 }
 
-inline QWORD MakeCacheID( ECacheIDBase Base, DWORD Word, DWORD Byte, UObject* Frame )
-{
-	return (Base) + (Byte<<8) + (Word<<16) + ((Frame?(QWORD)Frame->GetIndex():(QWORD)0) << 32);
+inline QWORD MakeCacheID(ECacheIDBase Base, DWORD Word, DWORD Byte, UObject* Frame){
+	return (Base) + (Byte << 8) + (Word << 16) + ((Frame ? (QWORD)Frame->GetIndex() : (QWORD)0) << 32);
 }
 
-inline QWORD MakeCacheID( ECacheIDBase Base, DWORD ByteA, DWORD ByteB, DWORD ByteC, UObject* Frame )
-{
-	return (Base) + (ByteA<<8) + (ByteB<<16) + (ByteC<<24) + ((Frame?(QWORD)Frame->GetIndex():(QWORD)0) << 32);
+inline QWORD MakeCacheID(ECacheIDBase Base, DWORD ByteA, DWORD ByteB, DWORD ByteC, UObject* Frame){
+	return (Base) + (ByteA << 8) + (ByteB << 16) + (ByteC << 24) + ((Frame ? (QWORD)Frame->GetIndex() : (QWORD)0) << 32);
 }
 
-inline QWORD MakeCacheID( ECacheIDBase Base, QWORD Q )
-{
+inline QWORD MakeCacheID(ECacheIDBase Base, QWORD Q){
 	return Base + (Q & ~(QWORD)CID_MAX);
+}
+
+inline QWORD MakeCacheID(ECacheIDBase Base){
+	return Base + ((GMakeCacheIDIndex++) << 8);
 }
 
 /*-----------------------------------------------------------------------------

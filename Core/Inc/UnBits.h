@@ -13,20 +13,23 @@
 //
 // Writes bitstreams.
 //
-struct CORE_API FBitWriter : public FArchive
-{
+struct CORE_API FBitWriter : public FArchive{
 	friend struct FBitWriterMark;
 public:
-	FBitWriter( INT InMaxBits );
-	void SerializeBits( void* Src, INT LengthBits );
-	void SerializeInt( DWORD& Value, DWORD Max );
-	void WriteInt( DWORD Result, DWORD Max );
-	void WriteBit( BYTE In );
-	void Serialize( void* Src, INT LengthBytes );
+	FBitWriter(INT InMaxBits);
+
+	// FArchive interface.
+	virtual void Serialize(void* Src, INT LengthBytes);
+	virtual void SerializeBits(void* Src, INT LengthBits);
+	virtual void SerializeInt(DWORD& Value, DWORD Max);
+
+	void WriteInt(DWORD Result, DWORD Max);
+	void WriteBit(BYTE In);
 	BYTE* GetData();
 	INT GetNumBytes();
 	INT GetNumBits();
 	void SetOverflowed();
+
 private:
 	TArray<BYTE> Buffer;
 	INT   Num;
@@ -36,21 +39,15 @@ private:
 //
 // For pushing and popping FBitWriter positions.
 //
-struct CORE_API FBitWriterMark
-{
+struct CORE_API FBitWriterMark{
 public:
-	FBitWriterMark()
-	:	Num         ( 0 )
-	{}
-	FBitWriterMark( FBitWriter& Writer )
-	:	Overflowed	( Writer.ArIsError )
-	,	Num			( Writer.Num )
-	{}
-	INT GetNumBits()
-	{
-		return Num;
-	}
-	void Pop( FBitWriter& Writer );
+	FBitWriterMark() : Num(0){}
+	FBitWriterMark(FBitWriter& Writer) : Overflowed(Writer.ArIsError),
+										 Num(Writer.Num){}
+
+	INT GetNumBits(){ return Num; }
+	void Pop(FBitWriter& Writer);
+
 private:
 	UBOOL			Overflowed;
 	INT				Num;
@@ -63,22 +60,25 @@ private:
 //
 // Reads bitstreams.
 //
-struct CORE_API FBitReader : public FArchive
-{
+struct CORE_API FBitReader : public FArchive{
 public:
-	FBitReader( BYTE* Src=NULL, INT CountBits=0 );
-	void SetData( FBitReader& Src, INT CountBits );
-	void SerializeBits( void* Dest, INT LengthBits );
-	void SerializeInt( DWORD& Value, DWORD Max );
-	DWORD ReadInt( DWORD Max );
+	FBitReader(BYTE* Src = NULL, INT CountBits = 0);
+
+	// FArchive interface.
+	virtual void Serialize(void* Dest, INT LengthBytes);
+	virtual void SerializeBits(void* Dest, INT LengthBits);
+	virtual void SerializeInt(DWORD& Value, DWORD Max);
+
+	void SetData(FBitReader& Src, INT CountBits);
+	DWORD ReadInt(DWORD Max);
 	BYTE ReadBit();
-	void Serialize( void* Dest, INT LengthBytes );
 	BYTE* GetData();
 	UBOOL AtEnd();
 	void SetOverflowed();
 	INT GetNumBytes();
 	INT GetNumBits();
 	INT GetPosBits();
+
 private:
 	TArray<BYTE> Buffer;
 	INT   Num;

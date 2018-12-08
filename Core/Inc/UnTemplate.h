@@ -367,7 +367,7 @@ public:
 		);
 
 		if(bInit)
-			Init(Index, Count)
+			Init(Index, Count);
 	}
 
 	INT Add(INT Count, bool bInit = false){
@@ -394,7 +394,7 @@ public:
 		Realloc(Num(), Num());
 	}
 
-	void Empty(INT Slack){
+	void Empty(INT Slack = 0){
 		Realloc(0, Slack);
 	}
 

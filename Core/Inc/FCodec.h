@@ -9,6 +9,8 @@ Revision history:
 /*-----------------------------------------------------------------------------
 	Coder/decoder base class.
 -----------------------------------------------------------------------------*/
+#ifndef FCODEC_H
+#define FCODEC_H
 
 class FCodec
 {
@@ -48,23 +50,23 @@ public:
 		guard(FCodecBWT::Encode);
 		TArray<BYTE> CompressBufferArray(MAX_BUFFER_SIZE);
 		TArray<INT>  CompressPosition   (MAX_BUFFER_SIZE+1);
-		CompressBuffer = &CompressBufferArray(0);
+		CompressBuffer = &CompressBufferArray[0];
 		INT i, First=0, Last=0;
 		while( !In.AtEnd() )
 		{
 			CompressLength = Min<INT>( In.TotalSize()-In.Tell(), MAX_BUFFER_SIZE );
 			In.Serialize( CompressBuffer, CompressLength );
 			for( i=0; i<CompressLength+1; i++ )
-				CompressPosition(i) = i;
-			appQsort( &CompressPosition(0), CompressLength+1, sizeof(INT), (QSORT_COMPARE)ClampedBufferCompare );
+				CompressPosition[i] = i;
+			appQsort( &CompressPosition[0], CompressLength+1, sizeof(INT), (QSORT_COMPARE)ClampedBufferCompare );
 			for( i=0; i<CompressLength+1; i++ )
-				if( CompressPosition(i)==1 )
+				if( CompressPosition[i]==1 )
 					First = i;
-				else if( CompressPosition(i)==0 )
+				else if( CompressPosition[i]==0 )
 					Last = i;
 			Out << CompressLength << First << Last;
 			for( i=0; i<CompressLength+1; i++ )
-				Out << CompressBuffer[CompressPosition(i)?CompressPosition(i)-1:0];
+				Out << CompressBuffer[CompressPosition[i]?CompressPosition[i]-1:0];
 			//GWarn->Logf(TEXT("Compression table"));
 			//for( i=0; i<CompressLength+1; i++ )
 			//	GWarn->Logf(TEXT("    %03i: %s"),CompressPosition(i)?CompressBuffer[CompressPosition(i)-1]:-1,appFromAnsi((ANSICHAR*)CompressBuffer+CompressPosition(i)));
@@ -84,11 +86,11 @@ public:
 			In << DecompressLength << First << Last;
 			check(DecompressLength<=MAX_BUFFER_SIZE+1);
 			check(DecompressLength<=In.TotalSize()-In.Tell());
-			In.Serialize( &DecompressBuffer(0), ++DecompressLength );
+			In.Serialize( &DecompressBuffer[0], ++DecompressLength );
 			for( i=0; i<257; i++ )
 				DecompressCount[ i ]=0;
 			for( i=0; i<DecompressLength; i++ )
-				DecompressCount[ i!=Last ? DecompressBuffer(i) : 256 ]++;
+				DecompressCount[ i!=Last ? DecompressBuffer[i] : 256 ]++;
 			INT Sum = 0;
 			for( i=0; i<257; i++ )
 			{
@@ -98,16 +100,17 @@ public:
 			}
 			for( i=0; i<DecompressLength; i++ )
 			{
-				INT Index = i!=Last ? DecompressBuffer(i) : 256;
-				Temp(RunningTotal[Index] + DecompressCount[Index]++) = i;
+				INT Index = i!=Last ? DecompressBuffer[i] : 256;
+				Temp[RunningTotal[Index] + DecompressCount[Index]++] = i;
 			}
-			for( i=First,j=0 ; j<DecompressLength-1; i=Temp(i),j++ )
-				Out << DecompressBuffer(i);
+			for( i=First,j=0 ; j<DecompressLength-1; i=Temp[i],j++ )
+				Out << DecompressBuffer[i];
 		}
 		return 1;
 		unguard;
 	}
 };
+
 BYTE* FCodecBWT::CompressBuffer;
 INT   FCodecBWT::CompressLength;
 
@@ -119,13 +122,12 @@ class FCodecRLE : public FCodec
 {
 private:
 	enum {RLE_LEAD=5};
-	UBOOL EncodeEmitRun( FArchive& Out, BYTE Char, BYTE Count )
+	void EncodeEmitRun( FArchive& Out, BYTE Char, BYTE Count )
 	{
 		for( INT Down=Min<INT>(Count,RLE_LEAD); Down>0; Down-- )
 			Out << Char;
 		if( Count>=RLE_LEAD )
 			Out << Count;
-		return 1;
 	}
 public:
 	UBOOL Encode( FArchive& In, FArchive& Out )
@@ -194,21 +196,21 @@ private:
 		~FHuffman()
 		{
 			for( INT i=0; i<Child.Num(); i++ )
-				delete Child( i );
+				delete Child[i];
 		}
 		void PrependBit( BYTE B )
 		{
 			Bits.Insert( 0 );
-			Bits(0) = B;
+			Bits[0] = B;
 			for( INT i=0; i<Child.Num(); i++ )
-				Child(i)->PrependBit( B );
+				Child[i]->PrependBit( B );
 		}
 		void WriteTable( FBitWriter& Writer )
 		{
 			Writer.WriteBit( Child.Num()!=0 );
 			if( Child.Num() )
 				for( INT i=0; i<Child.Num(); i++ )
-					Child(i)->WriteTable( Writer );
+					Child[i]->WriteTable( Writer );
 			else
 			{
 				BYTE B = Ch;
@@ -222,8 +224,8 @@ private:
 				Child.Add( 2 );
 				for( INT i=0; i<Child.Num(); i++ )
 				{
-					Child( i ) = new FHuffman( -1 );
-					Child( i )->ReadTable( Reader );
+					Child[i] = new FHuffman( -1 );
+					Child[i]->ReadTable( Reader );
 				}
 			}
 			else Ch = Arctor<BYTE>( Reader );
@@ -243,10 +245,10 @@ public:
 		// Compute character frequencies.
 		TArray<FHuffman*> Huff(256);
 		for( i=0; i<256; i++ )
-			Huff(i) = new FHuffman(i);
+			Huff[i] = new FHuffman(i);
 		TArray<FHuffman*> Index = Huff;
 		while( !In.AtEnd() )
-			Huff(Arctor<BYTE>(In))->Count++, Total++;
+			Huff[Arctor<BYTE>(In)]->Count++, Total++;
 		In.Seek( SavedPos );
 		Out << Total;
 
@@ -260,22 +262,22 @@ public:
 			Node->Child.Add( 2 );
 			for( i=0; i<Node->Child.Num(); i++ )
 			{
-				Node->Child(i) = Huff.Pop();
-				Node->Child(i)->PrependBit(i);
-				Node->Count += Node->Child(i)->Count;
+				Node->Child[i] = Huff.Pop();
+				Node->Child[i]->PrependBit(i);
+				Node->Count += Node->Child[i]->Count;
 			}
 			for( i=0; i<Huff.Num(); i++ )
-				if( Huff(i)->Count < Node->Count )
+				if( Huff[i]->Count < Node->Count )
 					break;
 			Huff.Insert( i );
-			Huff( i ) = Node;
+			Huff[i] = Node;
 			BitCount++;
 		}
 		FHuffman* Root = Huff.Pop();
 
 		// Calc stats.
 		while( !In.AtEnd() )
-			BitCount += Index(Arctor<BYTE>(In))->Bits.Num();
+			BitCount += Index[Arctor<BYTE>(In)]->Bits.Num();
 		In.Seek( SavedPos );
 
 		// Save table and bitstream.
@@ -283,9 +285,9 @@ public:
 		Root->WriteTable( Writer );
 		while( !In.AtEnd() )
 		{
-			FHuffman* P = Index(Arctor<BYTE>(In));
+			FHuffman* P = Index[Arctor<BYTE>(In)];
 			for( INT i=0; i<P->Bits.Num(); i++ )
-				Writer.WriteBit( P->Bits(i) );
+				Writer.WriteBit( P->Bits[i] );
 		}
 		check(!Writer.IsError());
 		check(Writer.GetNumBits()==BitCount);
@@ -303,14 +305,16 @@ public:
 		INT Total;
 		In << Total;
 		TArray<BYTE> InArray( In.TotalSize()-In.Tell() );
-		In.Serialize( &InArray(0), InArray.Num() );
-		FBitReader Reader( &InArray(0), InArray.Num()*8 );
+		In.Serialize( &InArray[0], InArray.Num() );
+		FBitReader Reader( &InArray[0], InArray.Num()*8 );
 		FHuffman Root(-1);
 		Root.ReadTable( Reader );
 		while( Total-- > 0 )
 		{
 			check(!Reader.AtEnd());
-			for( FHuffman* Node=&Root; Node->Ch==-1; Node=Node->Child(Reader.ReadBit()) );
+			FHuffman* Node = &Root;
+			while( Node->Ch==-1 )
+				Node = Node->Child[Reader.ReadBit()];
 			BYTE B = Node->Ch;
 			Out << B;
 		}
@@ -384,24 +388,17 @@ private:
 	{
 		guard(FCodecFull::Code);
 		TArray<BYTE> InData, OutData;
-		FLOAT TotalTime=0.f;
 		for( INT i=0; i<Codecs.Num(); i++ )
 		{
 			FBufferReader Reader(InData);
 			FBufferWriter Writer(OutData);
-			FTime StartTime, EndTime;
-			StartTime = appSeconds();
-			(Codecs(First + Step*i)->*Func)( *(i ? &Reader : &In), *(i<Codecs.Num()-1 ? &Writer : &Out) );
-			EndTime = appSeconds() - StartTime;
-			TotalTime += EndTime.GetFloat();
-			GWarn->Logf(TEXT("stage %d: %f secs"), i, EndTime.GetFloat() );
+			(Codecs[First + Step*i]->*Func)( *(i ? &Reader : &In), *(i<Codecs.Num()-1 ? &Writer : &Out) );
 			if( i<Codecs.Num()-1 )
 			{
 				InData = OutData;
 				OutData.Empty();
 			}
 		}
-		GWarn->Logf(TEXT("Total: %f secs"), TotalTime );
 		unguard;
 	}
 public:
@@ -429,11 +426,11 @@ public:
 	{
 		guard(FCodecFull::~FCodecFull);
 		for( INT i=0; i<Codecs.Num(); i++ )
-			delete Codecs( i );
+			delete Codecs[i];
 		unguard;
 	}
 };
-
+#endif
 /*-----------------------------------------------------------------------------
 	The End.
 -----------------------------------------------------------------------------*/

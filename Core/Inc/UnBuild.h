@@ -3,7 +3,12 @@
 	Copyright 1997-1999 Epic Games, Inc. All Rights Reserved.
 =============================================================================*/
 
-#if defined(_DEBUG) && !defined(_REALLY_WANT_DEBUG)
+#ifdef _DEBUG
+	#error "Debug configuration is incompatible with Republic Commando which causes crashes at runtime. Make a release build!"
+#endif
+
+#if 0
+//#if defined(_DEBUG) && !defined(_REALLY_WANT_DEBUG)
 #error "Your active configuration is set to DEBUG.  Click here for important information!"
 //
 // ** IMPORTANT INFORMATION **

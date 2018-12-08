@@ -52,14 +52,9 @@ following settings:
 
 In case you have an issue where the properties don't show up and there is just a blank gray area, you can fix it by installing .NET Framework 1.0.
 
-Also under your project you have an item called 'References'. Right click, select 'Add Reference' and choose the 'UCC' project.
-The UCC project is configured in such a way that it automatically compiles the UnrealScript code whenever you compile your native code.
-Selecting UCC as a reference makes sure that the UCC.exe is built before your project so that it can generate the headers and sources that
-your own project needs.
-
 #### Writing code
 Now that the project setup is out of the way, it's finally time to write some code. Open windows explorer and navigate to the folder
-that contains your Visual Studio project. That should be in '(...)\\Star Wars Republic Commando\\Code\\MyPackge'.
+that contains your Visual Studio project. That should be in '(...)\\Star Wars Republic Commando\\Code\\ModPackage'.
 In there create three folders called 'Classes', 'Inc' and 'Src'. It is very important that you create them manually since the ucc will not be
 able to generate the native implementations for your classes if the Inc and Src folders don't exist.
 The Classes folder is going to contain your UnrealScript source code. As an example I'm creating a very simple and quite useless class
@@ -88,8 +83,10 @@ C++ header and source file for your project. In order to do this, expand the 'UC
 Look for the lines that say 'EditPackages+=SomePackageName' under '[Editor.EditorEngine]' and add your package like so:
 > EditPackages+=ModPackage
 
-In visual studio hit F7 or right click the solution and select 'Build'. If there are no errors in your script, the ucc should have generated
-the files 'ModPackageClasses.h' and 'ModPackageClasses.cpp' in the Inc and Src folders respectively.
+The next step is to compile your UnrealScript code and generate a C++ header and source file with the implementation of your native class:
+Go to the 'GameData/System' folder and open a command prompt by hitting 'Alt-D' and typing 'cmd'. Next run 'ucc make -ini=../../Code/UCC/UCC.ini'
+(You can of course use your own custom ini file).
+If there are no errors in your script, the ucc should have generated the files 'ModPackageClasses.h' and 'ModPackageClasses.cpp' in the Inc and Src folders respectively.
 Drag and drop those onto your visual studio project so that they become a part of it and are recognized by the compiler.
 Their content should look like this:
 ##### ModPackageClasses.h

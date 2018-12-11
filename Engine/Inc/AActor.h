@@ -731,7 +731,7 @@ public:
 	FVector GetCylinderExtent() const{ return FVector(CollisionRadius, CollisionRadius, CollisionHeight); }
 	AActor* GetHitActor(){ return this; }
 	unsigned char GetLastTouchedMaterialType() const;
-	__forceinline class ULevel* GetLevel() const{ return XLevel; }
+	FORCEINLINE class ULevel* GetLevel() const{ return XLevel; }
 	class FDynamicLight* GetLightRenderData();
 	FVector GetMarkerSpotLocation(int);
 	void GetNetBuoyancy(FLOAT& NetBuoyancy, FLOAT& NetFluidFriction);
@@ -762,7 +762,7 @@ public:
 	int KIsRagdollAvailable();
 	void KMakeRagdollAvailable();
 	void KWake();
-	__forceinline FLOAT LifeFraction(){ return Clamp(1.0f - LifeSpan / GetClass()->GetDefaultActor()->LifeSpan, 0.0f, 1.0f); }
+	FORCEINLINE FLOAT LifeFraction(){ return Clamp(1.0f - LifeSpan / GetClass()->GetDefaultActor()->LifeSpan, 0.0f, 1.0f); }
 	void PlayReplicatedAnim(int);
 	class UStimulus* PostStimulusToIndividual(EStimulusType, AActor*);
 	class UStimulus* PostStimulusToWorld(EStimulusType);

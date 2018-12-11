@@ -721,7 +721,7 @@ inline void appMemzero( void* Dest, INT Count )
 
 #if ASM
 #define DEFINED_appDebugBreak
-__forceinline void appDebugBreak()
+FORCEINLINE void appDebugBreak()
 {
 	__asm
 	{

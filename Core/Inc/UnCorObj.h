@@ -83,7 +83,7 @@ class CORE_API UCommandlet : public UObject{
 	*	It needs to be forceinline because otherwise the function from the dll is
 	*	called which is bad...
 	*/
-	__forceinline INT Main(const FString& InParms){
+	FORCEINLINE INT Main(const FString& InParms){
 		UCommandlet_eventMain_Parms Parms;
 
 		Parms.InParms = InParms;

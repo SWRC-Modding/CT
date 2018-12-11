@@ -569,7 +569,7 @@ public:
 	UState* FindState(FName InName);
 	void SaveConfig(DWORD Flags=CPF_Config, const TCHAR* Filename = NULL, const char* IDONTKNOWWHATTHISIS = NULL);
 	void LoadConfig(UBOOL Propagate = 0, UClass* Class = NULL, const TCHAR* Filename = NULL);
-	void LoadLocalized(UBOOL Propagate = 0, UClass* Class = NULL);
+	void LoadLocalized();
 	void InitClassDefaultObject(UClass* InClass);
 	void ProcessInternal(FFrame& TheStack, void* const Result);
 	void ParseParms(const TCHAR* Parms);
@@ -587,18 +587,18 @@ public:
 
 	// Accessors.
 
-	__forceinline UClass* GetClass() const{ return Class; }
-	__forceinline void SetClass(UClass* NewClass){ Class = NewClass; }
-	__forceinline DWORD GetFlags() const{ return ObjectFlags; }
-	__forceinline void SetFlags(DWORD NewFlags){ ObjectFlags |= NewFlags; }
-	__forceinline void ClearFlags(DWORD NewFlags){ ObjectFlags &= ~NewFlags; }
-	__forceinline const TCHAR* GetName() const{ return *Name; }
-	__forceinline const FName GetFName() const{ return Name; }
-	__forceinline UObject* GetOuter() const{ return Outer; }
-	__forceinline DWORD GetIndex() const{ return Index; }
-	__forceinline ULinkerLoad* GetLinker(){ return _Linker; }
-	__forceinline INT GetLinkerIndex(){ return _LinkerIndex; }
-	__forceinline FStateFrame* GetStateFrame(){ return StateFrame; }
+	FORCEINLINE UClass* GetClass() const{ return Class; }
+	FORCEINLINE void SetClass(UClass* NewClass){ Class = NewClass; }
+	FORCEINLINE DWORD GetFlags() const{ return ObjectFlags; }
+	FORCEINLINE void SetFlags(DWORD NewFlags){ ObjectFlags |= NewFlags; }
+	FORCEINLINE void ClearFlags(DWORD NewFlags){ ObjectFlags &= ~NewFlags; }
+	FORCEINLINE const TCHAR* GetName() const{ return *Name; }
+	FORCEINLINE const FName GetFName() const{ return Name; }
+	FORCEINLINE UObject* GetOuter() const{ return Outer; }
+	FORCEINLINE DWORD GetIndex() const{ return Index; }
+	FORCEINLINE ULinkerLoad* GetLinker(){ return _Linker; }
+	FORCEINLINE INT GetLinkerIndex(){ return _LinkerIndex; }
+	FORCEINLINE FStateFrame* GetStateFrame(){ return StateFrame; }
 };
 
 #define DECLARE_NAME(name) static FName N##name(#name);

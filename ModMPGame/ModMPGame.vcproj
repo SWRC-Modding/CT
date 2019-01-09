@@ -73,6 +73,7 @@
 				MinimalRebuild="FALSE"
 				RuntimeLibrary="0"
 				StructMemberAlignment="3"
+				RuntimeTypeInfo="FALSE"
 				WarningLevel="4"
 				DebugInformationFormat="3"
 				CallingConvention="1"/>
@@ -82,7 +83,7 @@
 				Name="VCLinkerTool"
 				OutputFile="$(OutDir)\$(ProjectName).dll"
 				LinkIncremental="1"
-				GenerateDebugInformation="TRUE"
+				GenerateDebugInformation="FALSE"
 				ImportLibrary="$(ProjectDir)/lib/$(TargetName).lib"/>
 			<Tool
 				Name="VCMIDLTool"/>

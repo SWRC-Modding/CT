@@ -24,6 +24,7 @@
 				MinimalRebuild="FALSE"
 				RuntimeLibrary="2"
 				StructMemberAlignment="3"
+				RuntimeTypeInfo="FALSE"
 				WarningLevel="4"
 				DebugInformationFormat="3"
 				CallingConvention="1"/>

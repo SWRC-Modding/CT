@@ -64,7 +64,7 @@ public:
 
 			GErrorHist[ErrorType == NAME_FriendlyError ? ErrorPos : ARRAY_COUNT(GErrorHist) - 1] = 0;
 
-			GLog->Log(NAME_Critical, GErrorHist);
+			GWarn->Log(NAME_Critical, GErrorHist);
 			GLog->Flush();
 
 			if(!GIsServer)

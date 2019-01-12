@@ -13,15 +13,14 @@ var ScriptedSequence BotScript;
 *	The specified map should obviously be the same as the one that is currently loaded
 *	with the only difference that it contains paths for AI
 */
-native final function ImportPaths(string MapName);
+native final function bool ImportPaths(string MapName);
 
 function PostNetBeginPlay(){
 	local PlayerStart SpawnPoint;
 
 	Super.PostNetBeginPlay();
-
+	ImportPaths(Mid(Left(Level, InStr(Level, ".")), Len(Level.Game.MapPrefix) + 1)$"_PATHS");
 	Level.Game.BroadcastHandler.Destroy();
-
 	Level.Game.BroadcastHandler = spawn(class'BotSupportBroadcastHandler', self);
 
 	foreach AllActors(class'PlayerStart', SpawnPoint){
@@ -35,7 +34,6 @@ function PostNetBeginPlay(){
 	foreach AllActors(class'ScriptedSequence', BotScript, 'BotScript')
 		break;
 
-	ImportPaths(Mid(Left(Level, InStr(Level, ".")), Len(Level.Game.MapPrefix) + 1)$"_Paths");
 	SetTimer(2.0f, true);
 }
 
@@ -46,8 +44,10 @@ function Timer(){
 		if(Bots[i].Pawn == None)
 			SpawnBotPawn(Bots[i]);
 
-		if(BotScript != None && StateIdle(Bots[i].CurrentState) != None && Bots[i].Pawn != None)
+		if(BotScript != None && StateIdle(Bots[i].CurrentState) != None && Bots[i].Pawn != None){
+			Log("Assigning BotScript to"@Bots[i].Name);
 			Bots[i].SetNewScript(BotScript);
+		}
 	}
 }
 

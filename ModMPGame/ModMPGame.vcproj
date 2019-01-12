@@ -71,7 +71,7 @@
 				Name="VCCLCompilerTool"
 				PreprocessorDefinitions="MODMPGAME_API=DLL_EXPORT"
 				MinimalRebuild="FALSE"
-				RuntimeLibrary="0"
+				RuntimeLibrary="2"
 				StructMemberAlignment="3"
 				WarningLevel="4"
 				DebugInformationFormat="3"
@@ -82,7 +82,7 @@
 				Name="VCLinkerTool"
 				OutputFile="$(OutDir)\$(ProjectName).dll"
 				LinkIncremental="1"
-				GenerateDebugInformation="TRUE"
+				GenerateDebugInformation="FALSE"
 				ImportLibrary="$(ProjectDir)/lib/$(TargetName).lib"/>
 			<Tool
 				Name="VCMIDLTool"/>

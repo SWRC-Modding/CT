@@ -71,7 +71,7 @@
 				Name="VCCLCompilerTool"
 				PreprocessorDefinitions="MOD_API=DLL_EXPORT"
 				MinimalRebuild="FALSE"
-				RuntimeLibrary="0"
+				RuntimeLibrary="2"
 				StructMemberAlignment="3"
 				WarningLevel="4"
 				DebugInformationFormat="3"

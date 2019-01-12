@@ -70,7 +70,7 @@
 				Name="VCCLCompilerTool"
 				PreprocessorDefinitions="WIN32;NDEBUG"
 				MinimalRebuild="FALSE"
-				RuntimeLibrary="0"
+				RuntimeLibrary="2"
 				StructMemberAlignment="3"
 				WarningLevel="4"
 				DebugInformationFormat="3"

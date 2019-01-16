@@ -9,19 +9,19 @@
 	virtual void InitExecution();
 	virtual int IsPendingKill();
 	virtual bool IsRuntimeStatic();
-	virtual void NetDirty(class UProperty*);
+	virtual void NetDirty(class UProperty* property);
 	virtual void PostEditChange();
 	virtual void PostEditUndo();
 	virtual void PostLoad();
 	virtual void PreEditUndo();
 	virtual void ProcessEvent(class UFunction*, void*, void*);
-	virtual int ProcessRemoteFunction(class UFunction*, void*, struct FFrame*);
-	virtual void ProcessState(float);
+	virtual int ProcessRemoteFunction(class UFunction* Function, void* Parms, struct FFrame* Stack);
+	virtual void ProcessState(FLOAT DeltaSeconds);
 	virtual void Serialize(class FArchive&);
 
 	//Virtual functions
 	virtual int Tick(FLOAT DeltaTime, enum ELevelTick TickType);
-	virtual int* GetOptimizedRepList(BYTE* InDefault, FPropertyRetirement* Retire, INT* Ptr, UPackageMap* Map, class UActorChannel*);
+	virtual int* GetOptimizedRepList(BYTE* InDefault, FPropertyRetirement* Retire, INT* Ptr, UPackageMap* Map, class UActorChannel* Channel);
 	virtual void PostEditPaste();
 	virtual FVector LOSTestLocation() const;
 	virtual class ANavigationPoint* GetAnchor();
@@ -44,7 +44,7 @@
 	virtual class UMaterial* GetSkin(int);
 	virtual int ShouldTickInEntry();
 	virtual void PostNetSend();
-	virtual void PostRender(class FLevelSceneNode*, class FRenderInterface*);
+	virtual void PostRender(class FLevelSceneNode* SceneNode, class FRenderInterface* RI);
 	virtual FCoords ToLocal() const;
 	virtual FCoords ToWorld() const;
 	virtual FMatrix LocalToWorld() const;
@@ -53,16 +53,16 @@
 	virtual int ShouldTrace(AActor*, unsigned long);
 	virtual UPrimitive* GetPrimitive();
 	virtual void NotifyBumpEx(AActor*);
-	virtual void SetBase(AActor*, const FVector&, int);
-	virtual void NotifyAnimEnd(int);
-	virtual void UpdateAnimation(float);
+	virtual void SetBase(AActor* NewBase, const FVector& NewFloor = FVector(0.0f, 0.0f, 1.0f), int bNotifyActor = 1);
+	virtual void NotifyAnimEnd(int Channel);
+	virtual void UpdateAnimation(FLOAT DeltaSeconds);
 	virtual void StartAnimPoll();
-	virtual int CheckAnimFinished(int);
-	virtual void TickAuthoritative(float);
-	virtual void TickSimulated(float);
-	virtual void TickSpecial(float);
+	virtual int CheckAnimFinished(int Channel);
+	virtual void TickAuthoritative(FLOAT DeltaSeconds);
+	virtual void TickSimulated(FLOAT DeltaSeconds);
+	virtual void TickSpecial(FLOAT DeltaSeconds);
 	virtual bool PlayerControlled() const;
-	virtual int IsNetRelevantFor(class APlayerController*, AActor*, const FVector&);
+	virtual int IsNetRelevantFor(class APlayerController* RealViewer, AActor* Viewer, const FVector& SrcLocation);
 	virtual int DelayScriptReplication(float);
 	virtual void RenderEditorInfo(class FLevelSceneNode*, class FRenderInterface*, class FDynamicActor*);
 	virtual void RenderEditorSelected(class FLevelSceneNode*, class FRenderInterface*, class FDynamicActor*);
@@ -70,21 +70,21 @@
 	virtual void PlayOwnedSound(class USound*, int);
 	virtual void PlayFootstepSound(unsigned char, unsigned char, class USound*);
 	virtual void PlayOwnedFootstepSound(unsigned char, unsigned char, class USound*);
-	virtual void SetZone(int, int);
+	virtual void SetZone(UBOOL bTest, UBOOL bForceRefresh);
 	virtual void SetVolumes();
 	virtual void PostBeginPlayEx();
 	virtual void PostLoadBeginPlayEx();
-	virtual void setPhysics(unsigned char, AActor*, const FVector&);
-	virtual void performPhysics(float);
+	virtual void setPhysics(BYTE NewPhysics, AActor* NewFloor = NULL, const FVector& NewFloorV = FVector(0.0f, 0.0f, 1.0f));
+	virtual void performPhysics(FLOAT DeltaSeconds);
 	virtual void BoundProjectileVelocity();
-	virtual void processHitWall(const FVector&, AActor*, unsigned char);
-	virtual void processLanded(const FVector&, AActor*, float, int);
-	virtual void physFalling(float, int);
-	virtual int physRootMotion(float);
-	virtual FRotator FindSlopeRotation(const FVector&, const FRotator&);
-	virtual void SmoothHitWall(const FVector&, AActor*, unsigned char);
+	virtual void processHitWall(const FVector& HitNormal, AActor* HitActor, unsigned char);
+	virtual void processLanded(const FVector& HitNormal, AActor* HitActor, FLOAT RemainingTime, INT Iterations);
+	virtual void physFalling(FLOAT deltaTime, INT Iterations);
+	virtual int physRootMotion(FLOAT DeltaTime);
+	virtual FRotator FindSlopeRotation(const FVector& FloorNormal, const FRotator& NewRotation);
+	virtual void SmoothHitWall(const FVector& HitNormal, AActor* HitActor, unsigned char);
 	virtual void stepUp(const FVector&, const FVector&, const FVector&, struct FCheckResult&);
-	virtual int ShrinkCollision(AActor*);
+	virtual UBOOL ShrinkCollision(AActor* HitActor);
 	virtual struct _McdModel* getKModel() const;
 	virtual void physKarma(float);
 	virtual void preKarmaStep(float);
@@ -141,13 +141,13 @@ public:
 		UObject::ProcessEvent(NAnimEnd, &Parms);
 	}
 
-	class AActor* SpawnAttachment(FName BoneName, class UClass* ActorClass, class UStaticMesh* Mesh){
+	AActor* SpawnAttachment(FName BoneName, class UClass* ActorClass, class UStaticMesh* Mesh){
 		DECLARE_NAME(SpawnAttachment);
 		struct{
 			FName BoneName;
 			class UClass* ActorClass;
 			class UStaticMesh* Mesh;
-			class AActor* ReturnValue;
+			AActor* ReturnValue;
 		} Parms;
 		Parms.BoneName=BoneName;
 		Parms.ActorClass=ActorClass;
@@ -166,10 +166,10 @@ public:
 		UObject::ProcessEvent(NDestroyAttachment, &Parms);
 	}
 
-	void KImpact(class AActor* Other, const FVector& pos, const FVector& impactVel, const FVector& impactNorm, BYTE MaterialHit){
+	void KImpact(AActor* Other, const FVector& pos, const FVector& impactVel, const FVector& impactNorm, BYTE MaterialHit){
 		DECLARE_NAME(KImpact);
 		struct{
-			class AActor* Other;
+			AActor* Other;
 			FVector pos;
 			FVector impactVel;
 			FVector impactNorm;
@@ -231,23 +231,23 @@ public:
 		UObject::ProcessEvent(NDestroyed, NULL);
 	}
 
-	void GainedChild(class AActor* Other){
+	void GainedChild(AActor* Other){
 		FName NGainedChild(NAME_GainedChild);
 		if(!IsProbing(NGainedChild))
 			return;
 		struct{
-			class AActor* Other;
+			AActor* Other;
 		} Parms;
 		Parms.Other=Other;
 		UObject::ProcessEvent(NGainedChild, &Parms);
 	}
 
-	void LostChild(class AActor* Other){
+	void LostChild(AActor* Other){
 		FName NLostChild(NAME_LostChild);
 		if(!IsProbing(NLostChild))
 			return;
 		struct{
-			class AActor* Other;
+			AActor* Other;
 		} Parms;
 		Parms.Other=Other;
 		UObject::ProcessEvent(NLostChild, &Parms);
@@ -269,12 +269,12 @@ public:
 		UObject::ProcessEvent(NPostNetworkReceive, NULL);
 	}
 
-	void Trigger(class AActor* Other, class APawn* EventInstigator){
+	void Trigger(AActor* Other, class APawn* EventInstigator){
 		FName NTrigger(NAME_Trigger);
 		if(!IsProbing(NTrigger))
 			return;
 		struct{
-			class AActor* Other;
+			AActor* Other;
 			class APawn* EventInstigator;
 		} Parms;
 		Parms.Other=Other;
@@ -282,12 +282,12 @@ public:
 		UObject::ProcessEvent(NTrigger, &Parms);
 	}
 
-	void UnTrigger(class AActor* Other, class APawn* EventInstigator){
+	void UnTrigger(AActor* Other, class APawn* EventInstigator){
 		FName NUnTrigger(NAME_UnTrigger);
 		if(!IsProbing(NUnTrigger))
 			return;
 		struct{
-			class AActor* Other;
+			AActor* Other;
 			class APawn* EventInstigator;
 		} Parms;
 		Parms.Other=Other;
@@ -312,13 +312,13 @@ public:
 		UObject::ProcessEvent(NTimer, NULL);
 	}
 
-	void HitWall(const FVector& HitNormal, class AActor* HitWall, BYTE KindOfMaterial){
+	void HitWall(const FVector& HitNormal, AActor* HitWall, BYTE KindOfMaterial){
 		FName NHitWall(NAME_HitWall);
 		if(!IsProbing(NHitWall))
 			return;
 		struct{
 			FVector HitNormal;
-			class AActor* HitWall;
+			AActor* HitWall;
 			BYTE KindOfMaterial;
 		} Parms;
 		Parms.HitNormal=HitNormal;
@@ -345,12 +345,12 @@ public:
 		UObject::ProcessEvent(NLanded, &Parms);
 	}
 
-	void ZoneChange(class AZoneInfo* NewZone){
+	void ZoneChange(AZoneInfo* NewZone){
 		FName NZoneChange(NAME_ZoneChange);
 		if(!IsProbing(NZoneChange))
 			return;
 		struct{
-			class AZoneInfo* NewZone;
+			AZoneInfo* NewZone;
 		} Parms;
 		Parms.NewZone=NewZone;
 		UObject::ProcessEvent(NZoneChange, &Parms);
@@ -367,45 +367,45 @@ public:
 		UObject::ProcessEvent(NPhysicsVolumeChange, &Parms);
 	}
 
-	void Touch(class AActor* Other){
+	void Touch(AActor* Other){
 		FName NTouch(NAME_Touch);
 		if(!IsProbing(NTouch))
 			return;
 		struct{
-			class AActor* Other;
+			AActor* Other;
 		} Parms;
 		Parms.Other=Other;
 		UObject::ProcessEvent(NTouch, &Parms);
 	}
 
-	void PostTouch(class AActor* Other){
+	void PostTouch(AActor* Other){
 		FName NPostTouch(NAME_PostTouch);
 		if(!IsProbing(NPostTouch))
 			return;
 		struct{
-			class AActor* Other;
+			AActor* Other;
 		} Parms;
 		Parms.Other=Other;
 		UObject::ProcessEvent(NPostTouch, &Parms);
 	}
 
-	void UnTouch(class AActor* Other){
+	void UnTouch(AActor* Other){
 		FName NUnTouch(NAME_UnTouch);
 		if(!IsProbing(NUnTouch))
 			return;
 		struct{
-			class AActor* Other;
+			AActor* Other;
 		} Parms;
 		Parms.Other=Other;
 		UObject::ProcessEvent(NUnTouch, &Parms);
 	}
 
-	void Bump(class AActor* Other){
+	void Bump(AActor* Other){
 		FName NBump(NAME_Bump);
 		if(!IsProbing(NBump))
 			return;
 		struct{
-			class AActor* Other;
+			AActor* Other;
 		} Parms;
 		Parms.Other=Other;
 		UObject::ProcessEvent(NBump, &Parms);
@@ -418,34 +418,34 @@ public:
 		UObject::ProcessEvent(NBaseChange, NULL);
 	}
 
-	void Attach(class AActor* Other){
+	void Attach(AActor* Other){
 		FName NAttach(NAME_Attach);
 		if(!IsProbing(NAttach))
 			return;
 		struct{
-			class AActor* Other;
+			AActor* Other;
 		} Parms;
 		Parms.Other=Other;
 		UObject::ProcessEvent(NAttach, &Parms);
 	}
 
-	void Detach(class AActor* Other){
+	void Detach(AActor* Other){
 		FName NDetach(NAME_Detach);
 		if(!IsProbing(NDetach))
 			return;
 		struct{
-			class AActor* Other;
+			AActor* Other;
 		} Parms;
 		Parms.Other=Other;
 		UObject::ProcessEvent(NDetach, &Parms);
 	}
 
-	UBOOL EncroachingOn(class AActor* Other){
+	UBOOL EncroachingOn(AActor* Other){
 		FName NEncroachingOn(NAME_EncroachingOn);
 		if(!IsProbing(NEncroachingOn))
 			return 0;
 		struct{
-			class AActor* Other;
+			AActor* Other;
 			UBOOL ReturnValue;
 		} Parms;
 		Parms.Other=Other;
@@ -454,12 +454,12 @@ public:
 		return Parms.ReturnValue;
 	}
 
-	void EncroachedBy(class AActor* Other){
+	void EncroachedBy(AActor* Other){
 		FName NEncroachedBy(NAME_EncroachedBy);
 		if(!IsProbing(NEncroachedBy))
 			return;
 		struct{
-			class AActor* Other;
+			AActor* Other;
 		} Parms;
 		Parms.Other=Other;
 		UObject::ProcessEvent(NEncroachedBy, &Parms);
@@ -620,7 +620,7 @@ public:
 		UObject::ProcessEvent(NPostNetBeginPlay, NULL);
 	}
 
-	void HurtRadius(FLOAT DamageAmount, FLOAT DamageRadius, class UClass* DamageType, FLOAT Momentum, const FVector& HitLocation, class AActor* ExcludedActor){
+	void HurtRadius(FLOAT DamageAmount, FLOAT DamageRadius, class UClass* DamageType, FLOAT Momentum, const FVector& HitLocation, AActor* ExcludedActor){
 		DECLARE_NAME(HurtRadius);
 		struct{
 			FLOAT DamageAmount;
@@ -628,7 +628,7 @@ public:
 			class UClass* DamageType;
 			FLOAT Momentum;
 			FVector HitLocation;
-			class AActor* ExcludedActor;
+			AActor* ExcludedActor;
 		} Parms;
 		Parms.DamageAmount=DamageAmount;
 		Parms.DamageRadius=DamageRadius;
@@ -661,11 +661,11 @@ public:
 		return Parms.ReturnValue;
 	}
 
-	void TriggerEvent(FName EventName, class AActor* Other, class APawn* EventInstigator){
+	void TriggerEvent(FName EventName, AActor* Other, class APawn* EventInstigator){
 		DECLARE_NAME(TriggerEvent);
 		struct{
 			FName EventName;
-			class AActor* Other;
+			AActor* Other;
 			class APawn* EventInstigator;
 		} Parms;
 		Parms.EventName=EventName;
@@ -712,47 +712,47 @@ public:
 
 	//Functions
 	FVector AimLocation() const;
-	void AttachProjector(class AProjector*);
-	int AttachToBone(class AActor*, FName);
-	void BeginTouch(class AActor*);
+	void AttachProjector(class AProjector* Projector);
+	UBOOL AttachToBone(AActor* Attachment, FName BoneName);
+	void BeginTouch(AActor* Other);
 	void ClearOctreeData();
 	void ClearRenderData();
-	int DetachFromBone(class AActor*);
-	void DetachProjector(class AProjector*);
+	UBOOL DetachFromBone(AActor* Attachment);
+	void DetachProjector(class AProjector* Projector);
 	int EditorContainsPartialEvent(const FString&);
 	int EditorContainsPartialTag(const FString&);
-	void EndTouch(class AActor*, int);
+	void EndTouch(AActor* Other, UBOOL NoNotifySelf);
 	void FindBase();
 	class FDynamicActor* GetActorRenderData();
-	class AActor* GetAmbientLightingActor();
+	AActor* GetAmbientLightingActor();
 	FVector GetAnimRootTranslation(const FName&);
 	FVector GetBoneLocation(FName, enum ESpace);
 	FRotator GetBoneRotation(FName, enum ESpace);
 	FVector GetCylinderExtent() const{ return FVector(CollisionRadius, CollisionRadius, CollisionHeight); }
-	class AActor* GetHitActor(){ return this; }
+	AActor* GetHitActor(){ return this; }
 	unsigned char GetLastTouchedMaterialType() const;
-	__forceinline class ULevel* GetLevel() const{ return XLevel; }
+	FORCEINLINE class ULevel* GetLevel() const{ return XLevel; }
 	class FDynamicLight* GetLightRenderData();
 	FVector GetMarkerSpotLocation(int);
-	void GetNetBuoyancy(float&, float&);
-	class AActor* GetTopOwner();
+	void GetNetBuoyancy(FLOAT& NetBuoyancy, FLOAT& NetFluidFriction);
+	AActor* GetTopOwner();
 	FRotator GetViewRotation();
-	int IsAnimating(int) const;
-	int IsBasedOn(class AActor const*) const;
-	int IsBlockedBy(class AActor const*) const;
-	int IsBrush() const;
-	int IsEncroacher() const;
+	UBOOL IsAnimating(int Channel = 0) const;
+	UBOOL IsBasedOn(const AActor* Other) const;
+	UBOOL IsBlockedBy(const AActor* Other) const;
+	UBOOL IsBrush() const;
+	UBOOL IsEncroacher() const;
 	bool IsHiddenEd();
-	int IsInOctree();
-	int IsInZone(class AZoneInfo const*) const;
-	int IsJoinedTo(class AActor const*) const;
-	int IsMovingBrush() const;
-	int IsOverlapping(class AActor*, struct FCheckResult*);
-	int IsOwnedBy(class AActor const*) const;
+	UBOOL IsInOctree();
+	UBOOL IsInZone(const AZoneInfo* Other) const;
+	UBOOL IsJoinedTo(const AActor* Other) const;
+	UBOOL IsMovingBrush() const;
+	UBOOL IsOverlapping(AActor* Other, FCheckResult* Hit = NULL);
+	UBOOL IsOwnedBy(const AActor* TestOwner) const;
 	bool IsPlayingAnim(const FName&, const FName&);
-	int IsStaticBrush() const;
-	int IsValidEnemy() const;
-	int IsVolumeBrush() const;
+	UBOOL IsStaticBrush() const;
+	UBOOL IsValidEnemy() const;
+	UBOOL IsVolumeBrush() const;
 	void KAddForces(const FVector&, const FVector&);
 	void KDestroyJointChain(int);
 	void KDrawRigidBodyState(struct FKRigidBodyState*, int);
@@ -762,34 +762,34 @@ public:
 	int KIsRagdollAvailable();
 	void KMakeRagdollAvailable();
 	void KWake();
-	float LifeFraction();
+	FORCEINLINE FLOAT LifeFraction(){ return Clamp(1.0f - LifeSpan / GetClass()->GetDefaultActor()->LifeSpan, 0.0f, 1.0f); }
 	void PlayReplicatedAnim(int);
-	class UStimulus* PostStimulusToIndividual(enum EStimulusType, class AActor*);
-	class UStimulus* PostStimulusToWorld(enum EStimulusType);
-	class UStimulus* PostStimulusToWorld(enum EStimulusType, FVector&);
-	void ProcessDemoRecFunction(class UFunction*, void*, struct FFrame*);
+	class UStimulus* PostStimulusToIndividual(EStimulusType, AActor*);
+	class UStimulus* PostStimulusToWorld(EStimulusType);
+	class UStimulus* PostStimulusToWorld(EStimulusType, FVector&);
+	void ProcessDemoRecFunction(UFunction* Function, void* Parms, FFrame* Stack);
 	void ReplicateAnim(int, int, const struct FAnimChannel&, bool);
-	void SetCollision(int, int, int);
-	void SetCollisionSize(float, float);
-	void SetDrawScale3D(const FVector&);
-	void SetDrawScale(float);
-	void SetDrawType(enum EDrawType);
+	void SetCollision(UBOOL NewCollideActors, UBOOL NewBlockActors, UBOOL NewBlockPlayers);
+	void SetCollisionSize(FLOAT NewRadius, FLOAT NewHeight);
+	void SetDrawScale3D(const FVector& NewScale3D);
+	void SetDrawScale(FLOAT NewScale);
+	void SetDrawType(EDrawType NewDrawType);
 	int SetLocation(const FVector&, int);
-	void SetOwner(class AActor*);
+	void SetOwner(AActor* Owner);
 	int SetRotation(const FRotator&);
-	void SetStaticMesh(class UStaticMesh*);
+	void SetStaticMesh(class UStaticMesh* NewStaticMesh);
 	void StopAnimating(int);
-	FVector SuggestFallVelocity(const FVector&, const FVector&, float, float, float, float);
-	int TestCanSeeMe(class APlayerController*);
-	void TwoWallAdjust(const FVector&, FVector&, FVector&, FVector&, float);
+	FVector SuggestFallVelocity(const FVector& Dest, const FVector& Start, FLOAT XYSpeed, FLOAT BaseZ, FLOAT JumpZ, FLOAT MaxXYSpeed);
+	int TestCanSeeMe(class APlayerController* Viewer);
+	void TwoWallAdjust(const FVector& DesiredDir, FVector& Delta, FVector& HitNormal, FVector& OldHitNormal, FLOAT HitTime);
 	void UpdateRelativeRotation();
 	void UpdateRenderData();
-	void UpdateTimers(float);
-	int fixedTurn(int, int, int);
-	int moveSmooth(const FVector&);
-	void physKarmaRagDoll(float);
-	void physProjectile(float, int);
-	void physTrailer(float);
-	void physicsRotation(float);
+	void UpdateTimers(FLOAT DeltaSeconds);
+	int fixedTurn(int current, int desired, int deltaRate);
+	int moveSmooth(const FVector& Delta);
+	void physKarmaRagDoll(FLOAT DeltaTime);
+	void physProjectile(FLOAT deltaTime, INT Iterations);
+	void physTrailer(FLOAT DeltaTime);
+	void physicsRotation(FLOAT DeltaTime);
 	void postKarmaStep_skeletal();
-	void preKarmaStep_skeletal(float);
+	void preKarmaStep_skeletal(FLOAT DeltaTime);

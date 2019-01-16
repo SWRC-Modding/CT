@@ -1,7 +1,5 @@
+#include <cstdio>
 #include "../../Engine/Inc/Engine.h"
-#include "../../Core/Inc/FFeedbackContextAnsi.h"
-
-extern FFeedbackContextAnsi Warn; //Defined in ucc.cpp
 
 //Variables for ServerCommandlet
 
@@ -17,7 +15,7 @@ DWORD WINAPI UpdateServerConsoleInput(PVOID){
 	TCHAR Cmd[1024];
 
 	while(GIsRunning && !GIsRequestingExit){
-		if(fgets(Cmd, sizeof(Cmd), stdin)){
+		if(std::fgets(Cmd, sizeof(Cmd), stdin)){
 			Cmd[appStrlen(Cmd) - 1] = '\0'; //Removing newline added by fgets
 			CurrentCmd = Cmd; //Updating CurrentCmd so that it can be executed by the main thread
 							  //Nothing has been done in terms of thread safety as so far there haven't been any issues...
@@ -63,8 +61,8 @@ void UServerCommandletMain(){
 		if(CurrentCmd.Len() > 0){
 			if(CurrentCmd == "CLS") //In case user wants to clear screen. Can be useful for testing.
 				system("cls"); //Hate using system but it's ok here
-			else if(!GEngine->Exec(*CurrentCmd, Warn))
-				Warn.Log(LocalizeError("Exec", "Core"));
+			else if(!GEngine->Exec(*CurrentCmd, *GWarn))
+				GWarn->Log(LocalizeError("Exec", "Core"));
 
 			CurrentCmd.Empty();
 		}

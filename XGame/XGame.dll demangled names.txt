@@ -25,14 +25,6 @@ public: virtual __thiscall UCacheGameTypes::~UCacheGameTypes()
 public: virtual __thiscall UCacheMaps::~UCacheMaps()
 public: virtual __thiscall UDecoText::~UDecoText()
 public: virtual __thiscall UxUtil::~UxUtil()
-public: static void* __fastcall UCacheGameTypes::operator new(unsigned int,class UObject*,class FName,unsigned long)
-public: static void* __fastcall UCacheGameTypes::operator new(unsigned int,enum EInternal*)
-public: static void* __fastcall UCacheMaps::operator new(unsigned int,class UObject*,class FName,unsigned long)
-public: static void* __fastcall UCacheMaps::operator new(unsigned int,enum EInternal*)
-public: static void* __fastcall UDecoText::operator new(unsigned int,class UObject*,class FName,unsigned long)
-public: static void* __fastcall UDecoText::operator new(unsigned int,enum EInternal*)
-public: static void* __fastcall UxUtil::operator new(unsigned int,class UObject*,class FName,unsigned long)
-public: static void* __fastcall UxUtil::operator new(unsigned int,enum EInternal*)
 public: struct FGameTypeRecord& __thiscall FGameTypeRecord::operator=(struct FGameTypeRecord const&)
 public: struct FMapRecord& __thiscall FMapRecord::operator=(struct FMapRecord const&)
 public: struct FMutatorRecord& __thiscall FMutatorRecord::operator=(struct FMutatorRecord const&)
@@ -42,58 +34,14 @@ public: class UCacheGameTypes& __thiscall UCacheGameTypes::operator=(class UCach
 public: class UCacheMaps& __thiscall UCacheMaps::operator=(class UCacheMaps const&)
 public: class UDecoText& __thiscall UDecoText::operator=(class UDecoText const&)
 public: class UxUtil& __thiscall UxUtil::operator=(class UxUtil const&)
-const UCacheGameTypes::`vftable'
-const UCacheMaps::`vftable'
-const UDecoText::`vftable'
-const UxUtil::`vftable'
 public: static void __fastcall UxUtil::GenerateGameList(char const*)
-public: static void __fastcall UxUtil::GenerateMapList(char const*,char const*)
+public: static void __fastcall UxUtil::GenerateMapList(char const*, char const*)
 public: static void __fastcall UxUtil::GenerateMutatorList(char const*)
 public: static void __fastcall UxUtil::GenerateWeaponList(char const*)
 public: void __thiscall UxUtil::GetPlayerList()
-public: static void __fastcall UCacheGameTypes::InternalConstructor(void*)
-public: static void __fastcall UCacheMaps::InternalConstructor(void*)
-public: static void __fastcall UDecoText::InternalConstructor(void*)
-public: static void __fastcall UxUtil::InternalConstructor(void*)
 public: virtual void __thiscall UxUtil::LanguageChange()
-public: class UDecoText* __thiscall UxUtil::LoadDecoText(char const*,int)
+public: class UDecoText* __thiscall UxUtil::LoadDecoText(char const*, int)
 public: void __thiscall UxUtil::LoadMutatorList()
 public: void __thiscall UxUtil::LoadWeaponList()
-private: static class UClass UCacheGameTypes::PrivateStaticClass
-private: static class UClass UCacheMaps::PrivateStaticClass
-private: static class UClass UDecoText::PrivateStaticClass
-private: static class UClass UxUtil::PrivateStaticClass
 public: void __thiscall UxUtil::SortPlayerList()
-public: static class UClass* __fastcall UCacheGameTypes::StaticClass()
-public: static class UClass* __fastcall UCacheMaps::StaticClass()
-public: static class UClass* __fastcall UDecoText::StaticClass()
-public: static class UClass* __fastcall UxUtil::StaticClass()
-public: static struct FNativeEntry<class UxUtil>* UxUtil::StaticNativeMap
-public: static char const* __fastcall UCacheGameTypes::StaticPackageName()
-public: static char const* __fastcall UCacheMaps::StaticPackageName()
-public: static char const* __fastcall UDecoText::StaticPackageName()
-public: static char const* __fastcall UxUtil::StaticPackageName()
-public: void __thiscall UxUtil::execCheckLoadLimits(struct FFrame&,void*)
-public: void __thiscall UxUtil::execClearDamagedContent(struct FFrame&,void*)
-public: void __thiscall UxUtil::execFindPlayerRecord(struct FFrame&,void*)
-public: void __thiscall UxUtil::execGetDamagedContentCount(struct FFrame&,void*)
-public: void __thiscall UxUtil::execGetDamagedContentName(struct FFrame&,void*)
-public: void __thiscall UxUtil::execGetGameTypeList(struct FFrame&,void*)
-public: void __thiscall UxUtil::execGetGameTypeRecord(struct FFrame&,void*)
-public: void __thiscall UxUtil::execGetMapList(struct FFrame&,void*)
-public: void __thiscall UxUtil::execGetMapRecord(struct FFrame&,void*)
-public: void __thiscall UxUtil::execGetMutatorList(struct FFrame&,void*)
-public: void __thiscall UxUtil::execGetPlayerList(struct FFrame&,void*)
-public: void __thiscall UxUtil::execGetPlayerRecord(struct FFrame&,void*)
-public: void __thiscall UxUtil::execGetRandPlayerRecord(struct FFrame&,void*)
-public: void __thiscall UxUtil::execLoadPlayerRecordResources(struct FFrame&,void*)
 GPackage
-_DllMain@12
-autoclassUCacheGameTypes
-autoclassUCacheMaps
-autoclassUDecoText
-autoclassUDumpGameListCommandlet
-autoclassUDumpMapListCommandlet
-autoclassUDumpMutatorListCommandlet
-autoclassUDumpWeaponListCommandlet
-autoclassUxUtil

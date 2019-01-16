@@ -10,11 +10,10 @@
 	Constants.
 -----------------------------------------------------------------------------*/
 
-enum {NUM_PAL_COLORS=256};	// Number of colors in a standard palette.
+enum{ NUM_PAL_COLORS=256 };	// Number of colors in a standard palette.
 
 // Constants.
-enum
-{
+enum{
 	EHiColor565_R = 0xf800,
 	EHiColor565_G = 0x07e0,
 	EHiColor565_B = 0x001f,
@@ -32,143 +31,13 @@ enum
 	UPalette.
 -----------------------------------------------------------------------------*/
 
-//
-// A truecolor value.
-//
-#define GET_COLOR_DWORD(color) (*(DWORD*)&(color))
-class ENGINE_API FColor{
-public:
-	// Variables.
-	union { struct{ BYTE B,G,R,A; }; DWORD AlignmentDummy; };
-
-	DWORD& DWColor(void) {return *((DWORD*)this);}
-	const DWORD& DWColor(void) const {return *((DWORD*)this);}
-
-	// Constructors.
-	FColor() {}
-	FColor( BYTE InR, BYTE InG, BYTE InB, BYTE InA = 255 )
-		:	R(InR), G(InG), B(InB), A(InA) {}
-	//FColor(const FLinearColor& C);
-	FColor( const FPlane& P )
-			:	R(Clamp(appFloor(P.X*255),0,255))
-			,	G(Clamp(appFloor(P.Y*255),0,255))
-			,	B(Clamp(appFloor(P.Z*255),0,255))
-			,	A(Clamp(appFloor(P.W*255),0,255))
-		{}
-	FColor( DWORD InColor )
-	{ DWColor() = InColor; }
-
-	// Serializer.
-	friend FArchive& operator<< (FArchive &Ar, FColor &Color )
-	{
-		return Ar << Color.R << Color.G << Color.B << Color.A;
-	}
-
-	// Operators.
-	UBOOL operator==( const FColor &C ) const
-	{
-		return DWColor() == C.DWColor();
-	}
-	UBOOL operator!=( const FColor& C ) const
-	{
-		return DWColor() != C.DWColor();
-	}
-	void operator+=(FColor C)
-	{
-#if ASM
-		_asm
-		{
-			mov edi, DWORD PTR [this]
-			mov ebx, DWORD PTR [C]
-			mov eax, DWORD PTR [edi]
-
-			xor ecx, ecx
-			add al, bl
-			adc ecx, 0xffffffff
-			not ecx
-			or al, cl
-			mov BYTE PTR [edi], al
-			inc edi
-			shr eax, 8
-			shr ebx, 8
-
-			xor ecx, ecx
-			add al, bl
-			adc ecx, 0xffffffff
-			not ecx
-			or al, cl
-			mov BYTE PTR [edi], al
-			inc edi
-			shr eax, 8
-			shr ebx, 8
-
-			xor ecx, ecx
-			add al, bl
-			adc ecx, 0xffffffff
-			not ecx
-			or al, cl
-			mov BYTE PTR [edi], al
-			inc edi
-			shr eax, 8
-			shr ebx, 8
-
-			xor ecx, ecx
-			add al, bl
-			adc ecx, 0xffffffff
-			not ecx
-			or al, cl
-			mov BYTE PTR [edi], al
-		}
-#else
-		R = (BYTE) Min((INT) R + (INT) C.R,255);
-		G = (BYTE) Min((INT) G + (INT) C.G,255);
-		B = (BYTE) Min((INT) B + (INT) C.B,255);
-		A = (BYTE) Min((INT) A + (INT) C.A,255);
-#endif
-	}
-	INT Brightness() const
-	{
-		return (2*(INT)R + 3*(INT)G + 1*(INT)B)>>3;
-	}
-	FLOAT FBrightness() const
-	{
-		return (2.f*R + 3.f*G + 1.f*B)/(6.f*256.f);
-	}
-	FPlane Plane() const
-	{
-		return FPlane(R/255.f,G/255.f,B/255.f,A/255.f);
-	}
-	FColor Brighten( INT Amount )
-	{
-		return FColor( Plane() * (1.f - Amount/24.f) );
-	}
-	FColor RenderColor()
-	{
-		return *this;
-	}
-	//FLinearColor FromRGBE() const;
-	operator FPlane() const
-	{
-		return FPlane(R/255.f,G/255.f,B/255.f,A/255.f);
-	}
-	operator FVector() const
-	{
-		return FVector(R/255.f, G/255.f, B/255.f);
-	}
-	operator DWORD() const 
-	{ 
-		return DWColor(); 
-	}
-};
-
-extern ENGINE_API FPlane FGetHSV( BYTE H, BYTE S, BYTE V );
+extern ENGINE_API FPlane FGetHSV(BYTE H, BYTE S, BYTE V);
 
 //
 // A palette object.  Holds NUM_PAL_COLORS unique FColor values, 
 // forming a 256-color palette which can be referenced by textures.
 //
-class ENGINE_API UPalette : public UObject
-{
+class ENGINE_API UPalette : public UObject{
 	DECLARE_CLASS(UPalette,UObject,CLASS_SafeReplace,Engine)
 
 	// Variables.
@@ -178,10 +47,10 @@ class ENGINE_API UPalette : public UObject
 	UPalette();
 
 	// UObject interface.
-	void Serialize( FArchive& Ar );
+	void Serialize(FArchive& Ar);
 
 	// UPalette interface.
-	BYTE BestMatch( FColor Color, INT First );
+	BYTE BestMatch(FColor Color, INT First);
 	UPalette* ReplaceWithExisting();
 	void FixPalette();
 };
@@ -191,26 +60,27 @@ class ENGINE_API UPalette : public UObject
 -----------------------------------------------------------------------------*/
 
 // Texture level-of-detail sets.
-enum ELODSet
-{
-	LODSET_None  = 0,  // No level of detail mipmap tossing.
-	LODSET_World = 1,  // World level-of-detail set.
-	LODSET_Skin  = 2,  // Skin level-of-detail set.
-	LODSET_MAX   = 8,  // Maximum.
+enum ELODSet{
+	LODSET_None        = 0,
+	LODSET_World       = 1,
+	LODSET_PlayerSkin  = 2,
+	LODSET_WeaponSkin  = 3,
+	LODSET_Terrain     = 4,
+	LODSET_Interface   = 5,
+	LODSET_RenderMap   = 6,
+	LODSET_Lightmap    = 7,
+	LODSET_MAX         = 8,
 };
-
-enum {MAX_TEXTURE_LOD=4};
 
 //
 // Base mipmap.
 //
-struct ENGINE_API FMipmapBase
-{
+struct ENGINE_API FMipmapBase{
 public:
 	BYTE*			DataPtr;		// Pointer to data, valid only when locked.
 	INT				USize,  VSize;	// Power of two tile dimensions.
 	BYTE			UBits,  VBits;	// Power of two tile bits.
-	FMipmapBase( BYTE InUBits, BYTE InVBits )
+	FMipmapBase(BYTE InUBits, BYTE InVBits)
 	:	DataPtr		(0)
 	,	USize		(1<<InUBits)
 	,	VSize		(1<<InVBits)
@@ -224,32 +94,32 @@ public:
 //
 // Texture mipmap.
 //
-struct ENGINE_API FMipmap : public FMipmapBase
-{
+struct ENGINE_API FMipmap : public FMipmapBase{
 public:
 	TLazyArray<BYTE> DataArray; // Data.
-	FMipmap()
-	{}
-	FMipmap( BYTE InUBits, BYTE InVBits )
-	:	FMipmapBase( InUBits, InVBits )
-	,	DataArray( USize * VSize )
-	{}
-	FMipmap( BYTE InUBits, BYTE InVBits, INT InSize )
-	:	FMipmapBase( InUBits, InVBits )
-	,	DataArray( InSize )
-	{}
-	void Clear()
-	{
+
+	FMipmap(){}
+
+	FMipmap(BYTE InUBits, BYTE InVBits) : FMipmapBase(InUBits, InVBits),
+										  DataArray(USize * VSize){}
+
+	FMipmap(BYTE InUBits, BYTE InVBits, INT InSize) : FMipmapBase(InUBits, InVBits),
+													  DataArray(InSize){}
+
+	void Clear(){
 		guard(FMipmap::Clear);
-		appMemzero( &DataArray[0], DataArray.Num() );
+		appMemzero(&DataArray[0], DataArray.Num());
 		unguard;
 	}
-	friend FArchive& operator<<( FArchive& Ar, FMipmap& M )
-	{
+
+	friend FArchive& operator<<(FArchive& Ar, FMipmap& M){
 		guard(FMipmap<<);
+
 		Ar << M.DataArray;
 		Ar << M.USize << M.VSize << M.UBits << M.VBits;
+
 		return Ar;
+
 		unguard;
 	}
 };
@@ -257,126 +127,117 @@ public:
 //
 // Texture clearing flags.
 //
-enum ETextureClear
-{
+enum ETextureClear{
 	TCLEAR_Temporal	= 1,	// Clear temporal texture effects.
 	TCLEAR_Bitmap   = 2,    // Clear the immediate bitmap.
 };
 
-//
-// Texture formats.
-//
-enum ETextureFormat{
-	TEXF_P8,
-	TEXF_RGBA7,
-	TEXF_RGB16,
-	TEXF_DXT1,
-	TEXF_RGB8,
-	TEXF_RGBA8,
-	TEXF_NODATA,
-	TEXF_DXT3,
-	TEXF_DXT5,
-	TEXF_L8,
-	TEXF_G16,
-	TEXF_RRRGGGBBB,
-	TEXF_MAX
+enum EEnvMapTransformType{
+	EMTT_ViewSpace		= 0x00,
+	EMTT_WorldSpace		= 0x01,
+	EMTT_LightSpace		= 0x02,
 };
 
 //
-// A low-level bitmap.
+//	FStaticTexture
 //
-class ENGINE_API UBitmap : public UObject
-{
-	DECLARE_ABSTRACT_CLASS(UBitmap,UObject,0,Engine)
+class ENGINE_API FStaticTexture : public FTexture{
+private:
+	QWORD			CacheId;
+	class UTexture*	Texture;
+	INT				LastRevision;
+
+public:
+	FStaticTexture(UTexture* InTexture);
+
+	virtual QWORD GetCacheId();
+	virtual INT GetRevision();
+
+	virtual INT GetWidth();
+	virtual INT GetHeight();
+	virtual INT GetFirstMip();
+	virtual INT GetNumMips();
+	virtual ETextureFormat GetFormat();
+
+	virtual ETexClampMode GetUClamp();
+	virtual ETexClampMode GetVClamp();
+
+	virtual void* GetRawTextureData(INT MipIndex);
+	virtual void UnloadRawTextureData( INT MipIndex );
+	virtual void GetTextureData(INT MipIndex,void* Dest,INT DestStride,ETextureFormat DestFormat,UBOOL ColoredMips=0);
+	virtual UTexture* GetUTexture();
+};
+
+enum ETextureArithOp{
+	TAO_Assign					= 0,
+	TAO_Add						= 1,
+	TAO_Subtract				= 2,
+	TAO_Multiply				= 3,
+	TAO_AssignAlpha				= 4,
+	TAO_MultiplyOneMinusAlpha	= 5,
+	TAO_AssignLtoR				= 6,
+	TAO_AssignLtoG				= 7,
+	TAO_AssignLtoB				= 8,
+	TAO_AssignLtoA				= 9,
+};
+
+//
+// A complex material texture.
+//
+class ENGINE_API UTexture : public UBitmapMaterial{
+	DECLARE_CLASS(UTexture,UBitmapMaterial,CLASS_SafeReplace,Engine)
+
+	UPalette*	Palette;					// Palette if 8-bit palettized.
+	UMaterial*	Detail;						// Detail texture to apply.
+	FLOAT		DetailScale;				// Detail texture scale.
+	FColor		MipZero;					// Overall average color of texture.
+	FColor		MaxColor;					// Maximum color for normalization.
+	DOUBLE		LastUpdateTime;				// Last time texture was locked for rendering.
+
+	// Deprecated stuff.
+	UTexture*	OLDDetailTexture;			// Detail texture to apply.
+	UTexture*	OLDEnvironmentMap;			// Environment map.
+	BYTE		OLDEnvMapTransformType;		// Transform type for environment map.
+	FLOAT		OLDSpecular;				// Diffuse lighting coefficient (0.f-1.f).
+
+	// Flags.
+	BITFIELD	bMasked:1;					// Texture is masked.
+	BITFIELD	bAlphaTexture:1;			// Texture is an alphatexture.
+	BITFIELD	bTwoSided:1;				// Texture should be rendered two sided when placed directly on a surface.
+	BITFIELD	bHighColorQuality:1;		// High color quality hint.
+	BITFIELD	bHighTextureQuality:1;		// High color quality hint.
+	BITFIELD	bRealtime:1;				// Texture changes in realtime.
+	BITFIELD	bParametric:1;				// Texture data need not be stored.
+	BITFIELD	bRealtimeChanged:1;			// Changed since last render.
+	BITFIELD    OLDbHasComp:1;				//!!OLDVER Compressed version included?
+	BITFIELD    bNoRawData:1;				// Texture has no raw data (i.e; updated directly...such as MovieTexture)
 	
-	// General bitmap information.
-	// I believe lastUpdateTime goes here as the first block of memory changes every run
-	INT			__LastUpdateTime[2];// Last time texture was locked for rendering.
+	BYTE        LODSet;						// Level of detail type.
+    INT         NormalLOD, MinLOD, MaxLOD;
 
-	// I don't think this is used in UE2...
-	UPalette*	Palette;				// Palette if 8-bit palettized.
-	INT			Padding[12];			// Pad for 48 bytes
-	//BYTE		Pad1, Pad2, Pad3;		// 3 More bytes
+	// Animation related.
+	UTexture*	AnimNext;					// Next texture in looped animation sequence.
+	UTexture*	AnimCur;					// Current animation frame.
+	BYTE		PrimeCount;					// Priming total for algorithmic textures.
+	BYTE		PrimeCurrent;				// Priming current for algorithmic textures.
+	FLOAT		MinFrameRate;				// Minimum animation rate in fps.
+	FLOAT		MaxFrameRate;				// Maximum animation rate in fps.
+	FLOAT		Accumulator;				// Frame accumulator.
 
-	// I have a hunch that this goes here...
-	BYTE		Format;					// ETextureFormat.
-	BYTE		UClampMode, VClampMode; // ETexClampMode
-	BYTE		UBits, VBits;			// # of bits in USize, i.e. 8 for 256.
-	// Huh, this isn't needed anymore
-	//BYTE		Pad;					// Padding byte
-	INT			USize, VSize;			// Size, must be power of 2.
-	INT			UClamp, VClamp;			// Clamped width, must be <= size.
+	// Table of mipmaps.
+	TArray<FMipmap> Mips;					// Mipmaps in native format.
+	BYTE            OLDCompFormat;			//!!OLDVER Compressed texture format.
 
-	// Somewhere in here goes DontCache
-	// It's padded two bytes over
-	// So i'm just going to pad it over
-	BYTE		Pad4, Pad5;
-	BITFIELD	DontCache:1;
-	FColor		MipZero;			// Overall average color of texture.
-	FColor		MaxColor;			// Maximum color for normalization.
-	
+	BYTE		PS2FirstMip;				// using part of the pad space
+	BYTE		PS2NumMips;					// using part of the pad space
+
+	// SL: Made this a pointer because the QWORD in the RenderInterface was screwing up alignment on the PS2 somethin' fierce
+	FStaticTexture*	RenderInterface;		// The interface used to render this texture.
+
+	DOUBLE		__LastUpdateTime;		// Last time texture was locked for rendering.
 
 	// Static.
 	static class UClient* __Client;
-
-	// Constructor.
-	UBitmap();
-
-	// UBitmap interface.
-	virtual void Lock( FTextureInfo& TextureInfo, FTime Time, INT LOD, URenderDevice* RenDev )=0;
-	virtual void Unlock( FTextureInfo& TextureInfo )=0;
-	virtual FMipmapBase* GetMip( INT i )=0;
-	FTime GetLastUpdateTime() {FTime T; appMemcpy(&T,&__LastUpdateTime,sizeof(FTime)); return T;}
-	void SetLastUpdateTime(FTime T) {appMemcpy(&__LastUpdateTime,&T,sizeof(FTime));}
-};
-
-//	
-// A complex material texture.	
-//
-class ENGINE_API UTexture : public UBitmap
-{
-	DECLARE_CLASS(UTexture,UBitmap,CLASS_SafeReplace,Engine)
-
-	// Subtextures.
-	UTexture*	BumpMap;			// Bump map to illuminate this texture with.
-	UTexture*	DetailTexture;		// Detail texture to apply.
-	UTexture*	MacroTexture;		// Macrotexture to apply, not currently used.
-
-	// Surface properties.
-	FLOAT		Diffuse;			// Diffuse lighting coefficient (0.f-1.f).
-	FLOAT		Specular;			// Specular lighting coefficient (0.f-1.f).
-	FLOAT		Alpha;				// Reflectivity (0.f-0.1f).
-	FLOAT       Scale;              // Scaling relative to parent, 1.f=normal.
-	FLOAT		Friction;			// Surface friction coefficient, 1.f=none, 0.95f=some.
-	FLOAT		MipMult;			// Mipmap multiplier.
-
-	// Sounds.
-	USound*		FootstepSound;		// Footstep sound.
-	USound*		HitSound;			// Sound when the texture is hit with a projectile.
-
-	// Flags.
-	DWORD		PolyFlags;			// Polygon flags to be applied to Bsp polys with texture (See PF_*).
-	BITFIELD	bHighColorQuality:1; // High color quality hint.
-	BITFIELD	bHighTextureQuality:1; // High color quality hint.
-	BITFIELD	bRealtime:1;        // Texture changes in realtime.
-	BITFIELD	bParametric:1;      // Texture data need not be stored.
-	BITFIELD	bRealtimeChanged:1; // Changed since last render.
-	BITFIELD    bHasComp:1;         // Compressed version included?
-	BYTE        LODSet; // Level of detail type.
-
-	// Animation related.
-	UTexture*	AnimNext;			// Next texture in looped animation sequence.
-	UTexture*	AnimCur;			// Current animation frame.
-	BYTE		PrimeCount;			// Priming total for algorithmic textures.
-	BYTE		PrimeCurrent;		// Priming current for algorithmic textures.
-	FLOAT		MinFrameRate;		// Minimum animation rate in fps.
-	FLOAT		MaxFrameRate;		// Maximum animation rate in fps.
-	FLOAT		Accumulator;		// Frame accumulator.
-
-	// Table of mipmaps.
-	TArray<FMipmap> Mips;			// Mipmaps in native format.
-	TArray<FMipmap> CompMips;		// Mipmaps in requested format.
-	BYTE            CompFormat;     // Decompressed texture format.
 
 	// Constructor.
 	UTexture();
@@ -387,7 +248,8 @@ class ENGINE_API UTexture : public UBitmap
 	void Export( FArchive& Ar, const TCHAR* FileType, INT Indent );
 	void PostLoad();
 	void Destroy();
-
+	void PostEditChange(); // gam
+	
 	// UBitmap interface.
 	DWORD GetColorsIndex()
 	{
@@ -405,8 +267,26 @@ class ENGINE_API UTexture : public UBitmap
 	{
 		return &Mips[i];
 	}
-	void Lock( FTextureInfo& TextureInfo, FTime Time, INT LOD, URenderDevice* RenDev );
-	void Unlock( FTextureInfo& TextureInfo );
+	FString GetFormatDesc()
+	{
+		switch( Format )
+		{
+			case TEXF_P8:		return TEXT("P8");
+			case TEXF_RGBA7:	return TEXT("RGBA7");
+			case TEXF_RGB16:	return TEXT("RGB16");
+			case TEXF_DXT1:		return TEXT("DXT1");
+			case TEXF_RGB8:		return TEXT("RGB8");
+			case TEXF_RGBA8:	return TEXT("RGBA8");
+			case TEXF_DXT3:		return TEXT("DXT3");
+			case TEXF_DXT5:		return TEXT("DXT5");
+			case TEXF_G16:		return TEXT("G16");
+			case TEXF_RRRGGGBBB:return TEXT("RRRGGGBBB");
+			case TEXF_L8:		return TEXT("L8");
+			break;
+		}
+
+		return TEXT("?");
+	}
 
 	// UTexture interface.
 	virtual void Clear( DWORD ClearFlags );
@@ -417,20 +297,38 @@ class ENGINE_API UTexture : public UBitmap
 	virtual void Click( DWORD Buttons, FLOAT X, FLOAT Y ) {}
 	virtual void Update( FTime Time );
 	virtual void Prime();
+	virtual void Clear( FColor TexelColor );
+	virtual void ArithOp( UTexture* Operand, ETextureArithOp Operation );
+	inline FColor GetTexel( FLOAT u1, FLOAT v1, FLOAT u2, FLOAT v2 );
 
 	// UTexture functions.
 	void BuildRemapIndex( UBOOL Masked );
 	void CreateMips( UBOOL FullMips, UBOOL Downsample );
 	void CreateColorRange();
-	UBOOL Compress( ETextureFormat Format, UBOOL Mipmap );
+	UBOOL Compress( ETextureFormat Format, UBOOL Mipmaps = 1, struct FDXTCompressionOptions* Options = NULL );
 	UBOOL Decompress( ETextureFormat Format );
+	ETextureFormat ConvertDXT();
+	ETextureFormat ConvertDXT( INT Miplevel, UBOOL ForceRGBA, UBOOL Use4444, BYTE** Data );
 	INT DefaultLOD();
+	DOUBLE GetLastUpdateTime() { return __LastUpdateTime; }
+	void SetLastUpdateTime(DOUBLE T) { __LastUpdateTime = T; }
 
-	// UTexture accessors.
-	UTexture* Get( FTime Time )
+	// UBitmapMaterial interface.
+	virtual FBaseTexture* GetRenderInterface() { return RenderInterface; }
+	virtual UBitmapMaterial* Get( FTime Time, UViewport* Viewport )
 	{
 		Update( Time );
 		return AnimCur ? AnimCur : this;
+	}
+
+	// UMaterial interface
+	virtual UBOOL RequiresSorting()
+	{
+		return bAlphaTexture;
+	}
+	virtual UBOOL IsTransparent()
+	{
+		return bAlphaTexture || bMasked;
 	}
 };
 
@@ -439,8 +337,7 @@ class ENGINE_API UTexture : public UBitmap
 // Information about a locked texture. Used for ease of rendering.
 //
 enum {MAX_MIPS=12};
-struct ENGINE_API FTextureInfo
-{
+struct ENGINE_API FTextureInfo{
 	friend class UBitmap;
 	friend class UTexture;
 
@@ -484,8 +381,7 @@ enum {NUM_FONT_CHARS=256};
 //
 // Information about one font glyph which resides in a texture.
 //
-struct ENGINE_API FFontCharacter
-{
+struct ENGINE_API FFontCharacter{
 	// Variables.
 	INT StartU, StartV;
 	INT USize, VSize;
@@ -493,7 +389,7 @@ struct ENGINE_API FFontCharacter
 
 	// Serializer.
 	
-	friend FArchive& operator<<( FArchive& Ar, FFontCharacter& Ch )
+	friend FArchive& operator<<(FArchive& Ar, FFontCharacter& Ch)
 	{
 		guard(FFontCharacter<<);
 		return Ar << Ch.StartU << Ch.StartV << Ch.USize << Ch.VSize;
@@ -506,15 +402,14 @@ struct ENGINE_API FFontCharacter
 // A font page.
 //
 /*
-struct ENGINE_API FFontPage
-{
+struct ENGINE_API FFontPage{
 	// Variables.
 	UTexture* Texture;
 	TArray<FFontCharacter> Characters;
 
 	// Serializer.
 	
-	friend FArchive& operator<<( FArchive& Ar, FFontPage& Ch )
+	friend FArchive& operator<<(FArchive& Ar, FFontPage& Ch)
 	{
 		guard(FFontCharacter<<);
 		return Ar << Ch.Texture << Ch.Characters;
@@ -532,8 +427,7 @@ struct ENGINE_API FFontPage
 // the font database only contains the coordinates of the individual
 // glyph.
 //
-class ENGINE_API UFont : public UObject
-{
+class ENGINE_API UFont : public UObject{
 	DECLARE_CLASS(UFont,UObject,0,Engine)
 
 	// Variables.
@@ -553,20 +447,20 @@ class ENGINE_API UFont : public UObject
 	
 
 	// UObject interface.
-	void Serialize( FArchive& Ar );
+	void Serialize(FArchive& Ar);
 
 	// UFont interface
 	TCHAR RemapChar(TCHAR ch)
 	{
 		TCHAR *p;
-		if( !IsRemapped )
+		if(!IsRemapped)
 			return ch;
 		p = CharRemap.Find(ch);
 		return p ? *p : 32; // return space if not found.
 	}
 	
 	// Found in IDA
-	void GetCharSize(UFont* Font, TCHAR InCh, INT& Width, INT& Height );
+	void GetCharSize(UFont* Font, TCHAR InCh, INT& Width, INT& Height);
 	
 	// Also found in IDA
 	UFont& operator=(class UFont const &);

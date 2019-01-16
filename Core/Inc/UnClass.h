@@ -10,7 +10,7 @@
 	Constants
 -----------------------------------------------------------------------------*/
 
-//Boundary to align class properties on.
+// Boundary to align class properties on.
 enum { PROPERTY_ALIGNMENT = 4 };
 
 /*-----------------------------------------------------------------------------
@@ -18,11 +18,12 @@ enum { PROPERTY_ALIGNMENT = 4 };
 -----------------------------------------------------------------------------*/
 
 //
-//Information about a property to replicate.
+// Information about a property to replicate.
 //
 struct FRepRecord{
 	UProperty* Property;
 	INT Index;
+
 	FRepRecord(UProperty* InProperty,INT InIndex) : Property(InProperty),
 													Index(InIndex){}
 };
@@ -32,16 +33,16 @@ struct FRepRecord{
 -----------------------------------------------------------------------------*/
 
 //
-//One dependency record, for incremental compilation.
+// One dependency record, for incremental compilation.
 //
 class CORE_API FDependency{
 public:
-	//Variables.
+	// Variables.
 	UClass*		Class;
 	UBOOL		Deep;
 	DWORD		ScriptTextCRC;
 
-	//Functions.
+	// Functions.
 	FDependency();
 	FDependency(UClass* InClass, UBOOL InDeep);
 	UBOOL IsUpToDate();
@@ -53,16 +54,15 @@ public:
 -----------------------------------------------------------------------------*/
 
 //
-//A tagged linked list of replicatable variables.
+// A tagged linked list of replicatable variables.
 //
 class FRepLink{
 public:
-	UProperty*	Property;		//Replicated property.
-	FRepLink*	Next;			//Next replicated link per class.
-	FRepLink(UProperty* InProperty, FRepLink* InNext)
-	:	Property	(InProperty)
-	,	Next		(InNext)
-	{}
+	UProperty*	Property;		// Replicated property.
+	FRepLink*	Next;			// Next replicated link per class.
+
+	FRepLink(UProperty* InProperty, FRepLink* InNext) : Property(InProperty),
+														Next(InNext){}
 };
 
 /*-----------------------------------------------------------------------------
@@ -70,14 +70,14 @@ public:
 -----------------------------------------------------------------------------*/
 
 //
-//Entry in a state's label table.
+// Entry in a state's label table.
 //
 struct CORE_API FLabelEntry{
-	//Variables.
+	// Variables.
 	FName	Name;
 	INT		iCode;
 
-	//Functions.
+	// Functions.
 	FLabelEntry(FName InName, INT iInCode);
 	CORE_API friend FArchive& operator<<(FArchive& Ar, FLabelEntry &Label);
 };
@@ -87,28 +87,28 @@ struct CORE_API FLabelEntry{
 -----------------------------------------------------------------------------*/
 
 //
-//Base class of UnrealScript language objects.
+// Base class of UnrealScript language objects.
 //
 class CORE_API UField : public UObject{
 	DECLARE_ABSTRACT_CLASS(UField,UObject,0,Core)
 	NO_DEFAULT_CONSTRUCTOR(UField)
 
-	//Constants.
-	enum {HASH_COUNT = 256};
+	// Constants.
+	enum{ HASH_COUNT = 256 };
 
-	//Variables.
-	UField*			SuperField;
+	// Variables.
+	UField*			Next;
 
-	//Constructors.
+	// Constructors.
 	UField(ENativeConstructor, UClass* InClass, const TCHAR* InName, const TCHAR* InPackageName, DWORD InFlags);
 	UField(EStaticConstructor, const TCHAR* InName, const TCHAR* InPackageName, DWORD InFlags);
 
-	//UObject interface.
+	// UObject interface.
 	void Serialize(FArchive& Ar);
 	void PostLoad();
 	void Register();
 
-	//UField interface.
+	// UField interface.
 	virtual void AddCppProperty(UProperty* Property);
 	virtual UBOOL MergeBools();
 	virtual void Bind();
@@ -121,45 +121,37 @@ class CORE_API UField : public UObject{
 -----------------------------------------------------------------------------*/
 
 //
-//For iterating through a linked list of fields.
+// For iterating through a linked list of fields.
 //
-template <class T> class TFieldIterator{
+template<typename T>
+class TFieldIterator{
 public:
-	TFieldIterator(UStruct* InStruct)
-	: Struct(InStruct)
-	, Field(InStruct ? InStruct->Children : NULL){
+	TFieldIterator(UStruct* InStruct) : Struct(InStruct),
+										Field(InStruct ? InStruct->Children : NULL){
 		IterateToNext();
-	}
-
-	operator UBOOL(){
-		return Field != NULL;
 	}
 
 	void operator++(){
-		checkSlow(Field);
 		Field = Field->Next;
+
 		IterateToNext();
 	}
 
-	T* operator*(){
-		checkSlow(Field);
-		return (T*)Field;
-	}
+	T* operator*(){ return static_cast<T*>(Field); }
+	T* operator->(){ return static_cast<T*>(Field); }
+	operator bool(){ return Field != NULL; }
+	UStruct* GetStruct(){ return Struct; }
 
-	T* operator->(){
-		checkSlow(Field);
-		return (T*)Field;
-	}
-
-	UStruct* GetStruct(){
-		return Struct;
-	}
 protected:
+	UStruct* Struct;
+	UField* Field;
+
 	void IterateToNext(){
 		while(Struct){
 			while(Field){
 				if(Field->IsA(T::StaticClass()))
 					return;
+
 				Field = Field->Next;
 			}
 
@@ -169,71 +161,120 @@ protected:
 				Field = Struct->Children;
 		}
 	}
+};
 
+template<typename T, EClassFlags Flag>
+class TFieldFlagIterator{
+public:
+	TFieldFlagIterator(UStruct* InStruct) : Struct(InStruct),
+											Field(InStruct ? InStruct->Children : NULL){
+		IterateToNext();
+	}
+
+	inline void operator++(){
+		Field = Field->Next;
+
+		IterateToNext();
+	}
+
+	inline operator bool(){ return Field != NULL; }
+	inline T* operator*(){ return (T*)Field; }
+	inline T* operator->(){ return (T*)Field; }
+	inline UStruct* GetStruct(){ return Struct; }
+
+protected:
 	UStruct* Struct;
 	UField* Field;
+
+	inline void IterateToNext(){
+		while(Struct){
+			while(Field){
+                if(Field->GetClass()->ClassFlags & Flag)
+                    return;
+
+				Field = Field->Next;
+			}
+
+			Struct = Struct->GetInheritanceSuper();
+
+			if(Struct)
+				Field = Struct->Children;
+		}
+	}
 };
 
 /*-----------------------------------------------------------------------------
 	UStruct
 -----------------------------------------------------------------------------*/
 
+enum EStructFlags{
+	// State flags.
+	STRUCT_Native  = 0x00000001,
+	STRUCT_Export  = 0x00000002,
+	STRUCT_Long	   = 0x00000004, // will get shown as "..." in editactor until expanded.
+	STRUCT_Inherit = STRUCT_Long,
+};
+
 //
-//An UnrealScript structure definition.
+// An UnrealScript structure definition.
 //
 class CORE_API UStruct : public UField{
 	DECLARE_CLASS(UStruct,UField,0,Core)
 	NO_DEFAULT_CONSTRUCTOR(UStruct)
-	
-	//Variables.
+
+	// Variables.
+	char				Pad1[4]; // Padding
+	UField*				SuperField;
 	UTextBuffer*		ScriptText;
+	UTextBuffer*		CppText;
 	UField*				Children;
-	char				Pad1[8]; //Padding
-	TArray<BYTE>		Defaults;
 	INT					PropertiesSize;
-	INT					PropertiesAlign;
+	char				Pad2[4]; // Padding
+	INT					MinAlignment;
 	FName				FriendlyName;
 	TArray<BYTE>		Script;
+
+	// Compiler info.
 	INT					TextPos;
 	INT					Line;
-	char				Pad2[4]; //Padding
-	//In memory only.
-	UObjectProperty*	RefLink;
-	UStructProperty*	StructLink;
-	UProperty*			PropertyLink;
-	UProperty*			ConfigLink;
-	UProperty*			ConstructorLink;
+	DWORD				StructFlags;
+	char				Pad3[4]; // Padding
 
-	//Constructors.
+	// Constructors.
 	UStruct(ENativeConstructor, INT InSize, const TCHAR* InName, const TCHAR* InPackageName, DWORD InFlags, UStruct* InSuperStruct);
 	UStruct(EStaticConstructor, INT InSize, const TCHAR* InName, const TCHAR* InPackageName, DWORD InFlags);
 	UStruct(UStruct* InSuperStruct);
 
-	//UObject interface.
-	void Serialize(FArchive& Ar);
-	void PostLoad();
-	void Destroy();
-	void Register();
+	// UObject interface.
+	virtual void Serialize(FArchive& Ar);
+	virtual void PostLoad();
+	virtual void Destroy();
+	virtual void Register();
 
-	//UField interface.
-	void AddCppProperty(UProperty* Property);
-	INT GetPropertiesSize();
+	// UField interface.
+	virtual void AddCppProperty(UProperty* Property);
+	virtual INT GetPropertiesSize();
 
-	//UStruct interface.
+	// UStruct interface.
 	virtual UStruct* GetInheritanceSuper();
 	virtual void Link(FArchive& Ar, UBOOL Props);
-	virtual void SerializeBin(FArchive& Ar, BYTE* Data, int);
-	virtual void SerializeTaggedProperties(FArchive& Ar, BYTE* Data, UClass* DefaultsClass, int);
+	virtual void SerializeBin(FArchive& Ar, BYTE* Data, INT MaxReadBytes);
+	virtual void SerializeTaggedProperties(FArchive& Ar, BYTE* Data, UClass* DefaultsClass, INT);
 	virtual void CleanupDestroyed(BYTE* Data);
 	virtual EExprToken SerializeExpr(INT& iCode, FArchive& Ar);
 	virtual TCHAR* GetNameCPP() const;
 
 	FString FunctionMD5();
-	int GetPropertiesAlign();
+	INT GetPropertiesAlign();
 	void SetPropertiesSize(INT NewSize);
 	bool IsChildOf(const UStruct* SomeBase) const;
 	UStruct* GetSuperStruct() const;
 	bool StructCompare(const void* A, const void* B);
+
+protected:
+	// Cheat Protection
+
+	BYTE FunctionMD5Digest[16]; // Holds a MD5 digest for this function
 };
 
 /*-----------------------------------------------------------------------------
@@ -241,41 +282,41 @@ class CORE_API UStruct : public UField{
 -----------------------------------------------------------------------------*/
 
 //
-//An UnrealScript function.
+// An UnrealScript function.
 //
 class CORE_API UFunction : public UStruct{
 	DECLARE_CLASS(UFunction,UStruct,0,Core)
 	DECLARE_WITHIN(UState)
 	NO_DEFAULT_CONSTRUCTOR(UFunction)
 
-	//Persistent variables.
+	// Persistent variables.
 	DWORD FunctionFlags;
 	_WORD iNative;
 	_WORD RepOffset;
 	BYTE  OperPrecedence;
 
-	//Variables in memory only.
+	// Variables in memory only.
 	BYTE  NumParms;
 	_WORD ParmsSize;
 	_WORD ReturnValueOffset;
-	void (UObject::*Func)(FFrame& TheStack, RESULT_DECL);
+	Native Func;
 
-	//Constructors.
+	// Constructors.
 	UFunction(UFunction* InSuperFunction);
 
-	//UObject interface.
-	void Serialize(FArchive& Ar);
-	void PostLoad();
+	// UObject interface.
+	virtual void Serialize(FArchive& Ar);
+	virtual void PostLoad();
 
-	//UField interface.
-	void Bind();
+	// UField interface.
+	virtual void Bind();
 
-	//UStruct interface.
-	UBOOL MergeBools(){ return 0; }
-	UStruct* GetInheritanceSuper(){ return NULL; }
-	void Link(FArchive& Ar, UBOOL Props);
+	// UStruct interface.
+	virtual UBOOL MergeBools(){ return 0; }
+	virtual UStruct* GetInheritanceSuper(){ return NULL; }
+	virtual void Link(FArchive& Ar, UBOOL Props);
 
-	//UFunction interface.
+	// UFunction interface.
 	UFunction* GetSuperFunction() const;
 	UProperty* GetReturnProperty();
 };
@@ -285,34 +326,34 @@ class CORE_API UFunction : public UStruct{
 -----------------------------------------------------------------------------*/
 
 //
-//An UnrealScript state.
+// An UnrealScript state.
 //
 class CORE_API UState : public UStruct{
 	DECLARE_CLASS(UState,UStruct,0,Core)
 	NO_DEFAULT_CONSTRUCTOR(UState)
 
-	//Variables.
+	// Variables.
 	QWORD ProbeMask;
 	QWORD IgnoreMask;
 	DWORD StateFlags;
 	_WORD LabelTableOffset;
 	UField* VfHash;
 
-	//Constructors.
+	// Constructors.
 	UState(ENativeConstructor, INT InSize, const TCHAR* InName, const TCHAR* InPackageName, DWORD InFlags, UState* InSuperState);
 	UState(EStaticConstructor, INT InSize, const TCHAR* InName, const TCHAR* InPackageName, DWORD InFlags);
 	UState(UState* InSuperState);
 
-	//UObject interface.
-	void Serialize(FArchive& Ar);
-	void Destroy();
+	// UObject interface.
+	virtual void Serialize(FArchive& Ar);
+	virtual void Destroy();
 
-	//UStruct interface.
-	UBOOL MergeBools() {return 1;}
-	UStruct* GetInheritanceSuper() {return GetSuperState();}
-	void Link(FArchive& Ar, UBOOL Props);
+	// UStruct interface.
+	virtual UBOOL MergeBools() {return 1;}
+	virtual UStruct* GetInheritanceSuper() {return GetSuperState();}
+	virtual void Link(FArchive& Ar, UBOOL Props);
 
-	//UState interface.
+	// UState interface.
 	UState* GetSuperState() const;
 };
 
@@ -321,24 +362,21 @@ class CORE_API UState : public UStruct{
 -----------------------------------------------------------------------------*/
 
 //
-//An enumeration, a list of names usable by UnrealScript.
+// An enumeration, a list of names usable by UnrealScript.
 //
 class CORE_API UEnum : public UField{
 	DECLARE_CLASS(UEnum,UField,0,Core)
 	DECLARE_WITHIN(UStruct)
 	NO_DEFAULT_CONSTRUCTOR(UEnum)
 
-	//Variables.
+	// Variables.
 	TArray<FName> Names;
 
-	//Constructors.
+	// Constructors.
 	UEnum(UEnum* InSuperEnum);
 
-	//UObject interface.
-	void Serialize(FArchive& Ar);
-
-	//UEnum interface.
-	UEnum* GetSuperEnum() const;
+	// UObject interface.
+	virtual void Serialize(FArchive& Ar);
 };
 
 /*-----------------------------------------------------------------------------
@@ -346,54 +384,62 @@ class CORE_API UEnum : public UField{
 -----------------------------------------------------------------------------*/
 
 //
-//An object class.
+// An object class.
 //
 class CORE_API UClass : public UState{
 	DECLARE_CLASS(UClass,UState,0,Core)
 	DECLARE_WITHIN(UPackage)
 
-	char Padding[128];
+	typedef void(*Constructor)(void*);
+	typedef void(UObject::*StaticConstructor)();
 
-	/*//Variables.
-	DWORD				ClassFlags;
-	INT					ClassUnique;
-	FGuid				ClassGuid;
-	UClass*				ClassWithin;
-	FName				ClassConfigName;
-	TArray<FRepRecord>	ClassReps;
-	TArray<UField*>		NetFields;
-	TArray<FDependency> Dependencies;
-	TArray<FName>		PackageImports;
-	TArray<BYTE>		Defaults;
-	void(*ClassConstructor)(void*);
-	void(UObject::*ClassStaticConstructor)();
+	// Variables.
+	DWORD					ClassFlags;
+	INT						ClassUnique;
+	FGuid					ClassGuid;
+	DWORD					ClassCRC;
+	UClass*					ClassWithin;
+	FName					ClassConfigName;
+	INT 					ScriptPropertiesSize;
+	TArray<FRepRecord>		ClassReps;
+	TArray<UField*>			NetFields;
+	TArray<FDependency> 	Dependencies;
+	TArray<FName>			PackageImports;
+	TArray<BYTE>			Defaults;
+	TArray<FName>			HideCategories;
+	TArray<FName>       	DependentOn;
+	FString					ClassHeaderFilename; // Just a guess, but it fits here... (Can't verify since it's always empty)
+	FNativeEntry<UObject>*	NativeFunctions;
+	Constructor				ClassConstructor;
+	StaticConstructor		ClassStaticConstructor;
 
-	//In memory only.
-	FString				DefaultPropText;*/
+	// In memory only.
+	FString					DefaultPropText;
+	UClass*					DefaultClass; // Just a guess... Is initialized with 'this' in UClass::UClass
 
-	//Constructors.
+	// Constructors.
 	UClass();
 	UClass(UClass* InSuperClass);
-	UClass(ENativeConstructor, DWORD InSize, DWORD InClassFlags, UClass* InBaseClass, UClass* InWithinClass, FGuid InGuid, const TCHAR* InNameStr, const TCHAR* InPackageName, const TCHAR* InClassConfigName, DWORD InFlags, void(*InClassConstructor)(void*), void(UObject::*InClassStaticConstructor)());
-	UClass(EStaticConstructor, DWORD InSize, DWORD InClassFlags, FGuid InGuid, const TCHAR* InNameStr, const TCHAR* InPackageName, const TCHAR* InClassConfigName, DWORD InFlags, void(*InClassConstructor)(void*), void(UObject::*InClassStaticConstructor)());
+	UClass(ENativeConstructor, DWORD InSize, DWORD InClassFlags, UClass* InBaseClass, UClass* InWithinClass, FGuid InGuid, const TCHAR* InNameStr, const TCHAR* InPackageName, const TCHAR* InClassConfigName, DWORD InFlags, Constructor InClassConstructor, StaticConstructor InClassStaticConstructor);
+	UClass(EStaticConstructor, DWORD InSize, DWORD InClassFlags, FGuid InGuid, const TCHAR* InNameStr, const TCHAR* InPackageName, const TCHAR* InClassConfigName, DWORD InFlags, Constructor InClassConstructor, StaticConstructor InClassStaticConstructor);
 
-	//UObject interface.
+	// UObject interface.
 	virtual void Serialize(FArchive& Ar);
 	virtual void PostLoad();
 	virtual void Destroy();
 	virtual void Register();
 	virtual bool IsDefaultValue(const struct FPropertyInstance&);
 
-	//UField interface.
+	// UField interface.
 	virtual void Bind();
 
-	//UStruct interface.
+	// UStruct interface.
 	virtual UBOOL MergeBools();
 	virtual UStruct* GetInheritanceSuper();
 	virtual TCHAR* GetNameCPP() const;
 	virtual void Link(FArchive& Ar, UBOOL Props);
 
-	//UClass interface.
+	// UClass interface.
 	void AddDependency(UClass* InClass, UBOOL InDeep);
 	void AddSubclass(UClass*);
 	void EditDefaultProps();
@@ -401,7 +447,7 @@ class CORE_API UClass : public UState{
 	DWORD GetClassCRC();
 	class AActor* GetDefaultActor() const;
 	UObject* GetDefaultObject() const;
-	unsigned char* GetDefaults() const;
+	BYTE* GetDefaults() const;
 	UClass* GetSuperClass() const;
 	bool HasNativesToExport();
 	bool IsDefaultsOverride() const;
@@ -410,9 +456,9 @@ class CORE_API UClass : public UState{
 	void RegisterNatives();
 
 private:
-	//Hide IsA because calling IsA on a class almost always indicates
-	//an error where the caller should use IsChildOf.
-	UBOOL IsA(UClass* Parent) const {return UObject::IsA(Parent);}
+	// Hide IsA because calling IsA on a class almost always indicates
+	// an error where the caller should use IsChildOf.
+	UBOOL IsA(UClass* Parent) const{ return UObject::IsA(Parent); }
 };
 
 /*-----------------------------------------------------------------------------
@@ -420,24 +466,21 @@ private:
 -----------------------------------------------------------------------------*/
 
 //
-//An UnrealScript constant.
+// An UnrealScript constant.
 //
 class CORE_API UConst : public UField{
 	DECLARE_CLASS(UConst,UField,0,Core)
 	DECLARE_WITHIN(UStruct)
 	NO_DEFAULT_CONSTRUCTOR(UConst)
 
-	//Variables.
+	// Variables.
 	FString Value;
 
-	//Constructors.
+	// Constructors.
 	UConst(UConst* InSuperConst, const TCHAR* InValue);
 
-	//UObject interface.
-	void Serialize(FArchive& Ar);
-
-	//UConst interface.
-	UConst* GetSuperConst() const;
+	// UObject interface.
+	virtual void Serialize(FArchive& Ar);
 };
 
 /*-----------------------------------------------------------------------------

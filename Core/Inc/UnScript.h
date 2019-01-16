@@ -11,34 +11,29 @@
 -----------------------------------------------------------------------------*/
 
 //
-//Native function table.
+// Native function table.
 //
-typedef void (UObject::*Native)(FFrame& TheStack, RESULT_DECL);
+
 extern CORE_API Native GNatives[];
 BYTE CORE_API GRegisterNative(INT iNative, const Native& Func);
 
-//
-//Registering a native function.
-//
+extern CORE_API Native GCasts[];
+BYTE CORE_API GRegisterCast(INT CastCode, const Native& Func);
 
-template<typename T>
-struct FNativeEntry{
-	const TCHAR* name;
-	void(T::*Func)(FFrame&, void*);
-	INT Num;
-};
+//
+// Registering a native function.
+//
 
 #define DECLARE_NATIVES(cls) \
 	static FNativeEntry<cls> StaticNativeMap[];
 
 #define MAP_NATIVE(func, num) \
-	{#func,&ThisClass::exec##func,num},
+	{#func, &ThisClass::exec##func, num},
 
 template<typename T>
 struct FNativeInitializer{
 	FNativeInitializer(){
-		//Very hacky but since I don't know the actual variables there's not that much I can do about it...
-		*reinterpret_cast<FNativeEntry<T>**>(reinterpret_cast<char*>(T::StaticClass()) + 0xFC) = T::StaticNativeMap;
+		T::StaticClass()->NativeFunctions = reinterpret_cast<FNativeEntry<UObject>*>(T::StaticNativeMap);
 		T::StaticClass()->RegisterNatives();
 	}
 };
@@ -51,7 +46,7 @@ struct FNativeInitializer{
 -----------------------------------------------------------------------------*/
 
 //
-//Macros for grabbing parameters for native functions.
+// Macros for grabbing parameters for native functions.
 //
 #define P_GET_UBOOL(var)              DWORD var=0;                         Stack.Step(Stack.Object, &var   );
 #define P_GET_UBOOL_OPTX(var,def)     DWORD var=def;                       Stack.Step(Stack.Object, &var   );
@@ -78,12 +73,12 @@ struct FNativeInitializer{
 #define P_GET_OBJECT_REF(cls,var)     cls*  var##T=NULL; GPropAddr=0;      Stack.Step(Stack.Object, &var##T); cls**    var = GPropAddr ? (cls   **)GPropAddr:&var##T;
 #define P_GET_ARRAY_REF(typ,var)      typ   var##T[256]; GPropAddr=0;      Stack.Step(Stack.Object,  var##T); typ*     var = GPropAddr ? (typ    *)GPropAddr: var##T;
 
-#define P_GET_SKIP_OFFSET(var)        _WORD var; {checkSlow(*Stack.Code==EX_Skip); Stack.Code++; var=*(_WORD*)Stack.Code; Stack.Code+=2; }
+#define P_GET_SKIP_OFFSET(var)        _WORD var; { Stack.Code++; var=*(_WORD*)Stack.Code; Stack.Code+=2; }
 
-#define P_FINISH                      Stack.Code++; if (*Stack.Code == EX_DebugInfo) Stack.Step(Stack.Object, NULL);
+#define P_FINISH                      Stack.Code++; if(*Stack.Code == EX_DebugInfo) Stack.Step(Stack.Object, NULL);
 
 //
-//Convenience macros.
+// Convenience macros.
 //
 #define P_GET_VECTOR(var)           P_GET_STRUCT(FVector,var)
 #define P_GET_VECTOR_OPTX(var,def)  P_GET_STRUCT_OPTX(FVector,var,def)
@@ -96,17 +91,17 @@ struct FNativeInitializer{
 #define P_GET_ACTOR_REF(var)        P_GET_OBJECT_REF(AActor,var)
 
 //
-//Iterator macros.
+// Iterator macros.
 //
 #define PRE_ITERATOR \
 	INT wEndOffset = Stack.ReadWord(); \
-	BYTE B=0, Buffer[MAX_CONST_SIZE]; \
+	BYTE B = 0, Buffer[MAX_CONST_SIZE]; \
 	BYTE *StartCode = Stack.Code; \
 	do {
 #define POST_ITERATOR \
-		while((B=*Stack.Code)!=EX_IteratorPop && B!=EX_IteratorNext) \
+		while((B = *Stack.Code) != EX_IteratorPop && B != EX_IteratorNext) \
 			Stack.Step(Stack.Object, Buffer); \
-		if(*Stack.Code++==EX_IteratorNext) \
+		if(*Stack.Code++ == EX_IteratorNext) \
 			Stack.Code = StartCode; \
 	} while(B != EX_IteratorPop);
 
@@ -114,81 +109,61 @@ struct FNativeInitializer{
 	FFrame implementation.
 -----------------------------------------------------------------------------*/
 
-/*inline FFrame::FFrame(UObject* InObject)
-:	Node		(InObject ? InObject->GetClass() : NULL)
-,	Object		(InObject)
-,	Code		(NULL)
-,	Locals		(NULL)
-{}*/
-/*inline FFrame::FFrame(UObject* InObject, UStruct* InNode, INT CodeOffset, void* InLocals)
-:	Node		(InNode)
-,	Object		(InObject)
-,	Code		(&InNode->Script(CodeOffset))
-,	Locals		((BYTE*)InLocals)
-{}*/
-__forceinline void FFrame::Step(UObject* Context, RESULT_DECL){
-	guardSlow(FFrame::Step);
+inline FFrame::FFrame(UObject* InObject) : Node(InObject ? InObject->GetClass() : NULL),
+										   Object(InObject),
+										   Code(NULL),
+										   Locals(NULL){}
+
+inline FFrame::FFrame(UObject* InObject, UStruct* InNode, INT CodeOffset, void* InLocals) : Node(InNode),
+																							Object(InObject),
+																							Code(&InNode->Script[CodeOffset]),
+																							Locals((BYTE*)InLocals){}
+
+FORCEINLINE void FFrame::Step(UObject* Context, RESULT_DECL){
 	INT B = *Code++;
+
 	(Context->*GNatives[B])(*this, Result);
-	unguardfSlow(("(%s @ %s : %04X)", Object->GetFullName(), Node->GetFullName(), Code - &Node->Script(0)));
 }
-/*inline INT FFrame::ReadInt()
-{
-	INT Result;
-	#if __PSX2_EE__
-	appMemcpy(&Result, Code, sizeof(INT));
-	#else
-	Result = *(INT*)Code;
-	#endif
+
+FORCEINLINE INT FFrame::ReadInt(){
+	INT Result = *(INT*)Code;
+
 	Code += sizeof(INT);
+
 	return Result;
-}*/
-/*inline UObject* FFrame::ReadObject()
-{
-	UObject* Result;
-	#if __PSX2_EE__
-	appMemcpy(&Result, Code, sizeof(INT));
-	#else
-	Result = *(UObject**)Code;
-	#endif
+}
+
+FORCEINLINE UObject* FFrame::ReadObject(){
+	UObject* Result = *(UObject**)Code;
+
 	Code += sizeof(INT);
+
 	return Result;
-}*/
-/*inline FLOAT FFrame::ReadFloat()
-{
-	FLOAT Result;
-	#if __PSX2_EE__
-	appMemcpy(&Result, Code, sizeof(FLOAT));
-	#else
-	Result = *(FLOAT*)Code;
-	#endif
+}
+
+FORCEINLINE FLOAT FFrame::ReadFloat(){
+	FLOAT Result = *(FLOAT*)Code;
+
 	Code += sizeof(FLOAT);
+
 	return Result;
-}*/
-/*inline INT FFrame::ReadWord()
-{
-	INT Result;
-	#if __PSX2_EE__
-	_WORD Temporary;
-	appMemcpy(&Temporary, Code, sizeof(_WORD));
-	Result = Temporary;
-	#else
-	Result = *(_WORD*)Code;
-	#endif
+}
+
+FORCEINLINE INT FFrame::ReadWord(){
+	INT Result = *(_WORD*)Code;
+
 	Code += sizeof(_WORD);
+
 	return Result;
-}*/
-/*inline FName FFrame::ReadName()
-{
-	FName Result;
-	#if __PSX2_EE__
-	appMemcpy(&Result, Code, sizeof(FName));
-	#else
-	Result = *(FName*)Code;
-	#endif
+}
+
+FORCEINLINE FName FFrame::ReadName(){
+	FName Result = *(FName*)Code;
+
 	Code += sizeof(FName);
+
 	return Result;
-}*/
+}
 
 CORE_API void GInitRunaway();
 
@@ -196,15 +171,14 @@ CORE_API void GInitRunaway();
 	FStateFrame implementation.
 -----------------------------------------------------------------------------*/
 
-/*inline FStateFrame::FStateFrame(UObject* InObject)
-:	FFrame		(InObject)
-,	CurrentFrame(NULL)
-,	StateNode	(InObject->GetClass())
-,	ProbeMask	(~(QWORD)0)
-{}
-inline const TCHAR* FStateFrame::Describe(){
-	return Node ? Node->GetFullName() : TEXT("None");
-}*/
+inline FStateFrame::FStateFrame(UObject* InObject) : FFrame(InObject),
+													 CurrentFrame(NULL),
+													 StateNode(InObject->GetClass()),
+													 ProbeMask(~(QWORD)0){}
+
+FORCEINLINE const TCHAR* FStateFrame::Describe(){
+	return Node ? Node->GetFullName() : "None";
+}
 
 /*-----------------------------------------------------------------------------
 	The End.

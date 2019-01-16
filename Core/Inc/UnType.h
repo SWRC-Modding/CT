@@ -8,82 +8,68 @@
 -----------------------------------------------------------------------------*/
 
 // Property exporting flags.
-enum EPropertyPortFlags
-{
+enum EPropertyPortFlags{
 	PPF_Localized = 1,
 	PPF_Delimited = 2,
+	PPF_CheckReferences = 4, // gam
 };
 
 //
 // An UnrealScript variable.
 //
-class CORE_API UProperty : public UField
-{
-	DECLARE_ABSTRACT_CLASS(UProperty,UField,0,Core)
+class CORE_API UProperty : public UField{
+	DECLARE_ABSTRACT_CLASS(UProperty,UField,CLASS_IsAUProperty,Core)
 	DECLARE_WITHIN(UField)
 
-	char Padding[20];
-
-	/*// Persistent variables.
-	INT			ArrayDim;
-	INT			ElementSize;
+	// Persistent variables.
 	DWORD		PropertyFlags;
 	FName		Category;
 	_WORD		RepOffset;
 	_WORD		RepIndex;
-
-	// In memory variables.
-	INT			Offset;
-	UProperty*	PropertyLinkNext;
-	UProperty*	ConfigLinkNext;
-	UProperty*	ConstructorLinkNext;
-	UProperty*	RepOwner;*/
+	_WORD		ArrayDim;
+	_WORD		Offset;
+	char		Padding[4]; // Padding
 
 	// Constructors.
 	UProperty();
-	UProperty( ECppProperty, INT InOffset, const TCHAR* InCategory, DWORD InFlags );
+	UProperty(ECppProperty, INT InOffset, const TCHAR* InCategory, DWORD InFlags);
 
 	// UObject interface.
-	void Serialize( FArchive& Ar );
+	virtual void Serialize(FArchive& Ar);
 
 	// UProperty interface.
-	virtual void Link( FArchive& Ar, UProperty* Prev );
-	virtual UBOOL Identical( const void* A, const void* B ) const=0;
-	virtual void ExportCpp( FOutputDevice& Out, UBOOL IsLocal, UBOOL IsParm ) const;
-	virtual void ExportCppItem( FOutputDevice& Out ) const=0;
-	virtual void SerializeItem( FArchive& Ar, void* Value ) const=0;
-	virtual UBOOL NetSerializeItem( FArchive& Ar, UPackageMap* Map, void* Data ) const;
-	virtual void ExportTextItem( TCHAR* ValueStr, BYTE* PropertyValue, BYTE* DefaultValue, INT PortFlags ) const=0;
-	virtual const TCHAR* ImportText( const TCHAR* Buffer, BYTE* Data, INT PortFlags ) const=0;
-	virtual UBOOL ExportText( INT ArrayElement, TCHAR* ValueStr, BYTE* Data, BYTE* Delta, INT PortFlags ) const;
-	virtual void CopySingleValue( void* Dest, void* Src ) const;
-	virtual void CopyCompleteValue( void* Dest, void* Src ) const;
-	virtual void DestroyValue( void* Dest ) const;
+	virtual INT GetElementSize() const = 0;
+	virtual INT GetAlign() const;
+	virtual void CleanupDestroyed(BYTE* Data) const;
+	virtual void Link(FArchive& Ar, UProperty* Prev);
+	virtual UBOOL Identical(const void* A, const void* B) const = 0;
+	virtual BYTE* GetAddress(const void* Data, INT ArrayIndex) const;
+	virtual void ExportCpp(FOutputDevice& Out, UBOOL IsLocal, UBOOL IsParm, UBOOL IsEvent, UBOOL IsStruct) const;
+	virtual void ExportCppItem(FOutputDevice& Out, UBOOL IsEvent = 0) const = 0;
+	virtual void SerializeItem(FArchive& Ar, void* Value, INT MaxReadBytes = 0, INT IDONTKNOWWHATTHISIS = 0) const = 0; // TODO: Find out what the last parameter is
+	virtual UBOOL NetSerializeItem(FArchive& Ar, UPackageMap* Map, void* Data) const;
+	virtual void ExportTextItem(TCHAR* ValueStr, BYTE* PropertyValue, BYTE* DefaultValue, INT PortFlags) const = 0;
+	virtual const TCHAR* ImportText(const TCHAR* Buffer, BYTE* Data, INT PortFlags) const = 0;
+	virtual UBOOL ExportText(INT ArrayElement, TCHAR* ValueStr, BYTE* Data, BYTE* Delta, INT PortFlags) const;
+	virtual void CopySingleValue(void* Dest, void* Src, UObject* SuperObject = NULL) const;
+	virtual void CopyCompleteValue(void* Dest, void* Src, UObject* SuperObject = NULL) const;
+	virtual void DestroyValue(void* Dest) const;
 	virtual UBOOL Port() const;
 	virtual BYTE GetID() const;
 
-	// Inlines.
-	UBOOL Matches( const void* A, const void* B, INT ArrayIndex ) const;
-	/*{
-		guardSlow(UProperty::Matches);
-		INT Ofs = Offset + ArrayIndex * ElementSize;
-		return Identical( (BYTE*)A + Ofs, B ? (BYTE*)B + Ofs : NULL );
-		unguardobjSlow;
-	}*/
-	INT GetSize() const;
-	/*{
-		guardSlow(UProperty::GetSize);
-		return ArrayDim * ElementSize;
-		unguardobjSlow;
-	}*/
-	UBOOL ShouldSerializeValue( FArchive& Ar ) const;
-	/*{
-		guardSlow(UProperty::ShouldSerializeValue);
-		UBOOL Skip
-		=	((PropertyFlags & CPF_Native   )                      )
-		||	((PropertyFlags & CPF_Transient) && Ar.IsPersistent() );
+	UField* GetOuterField() const{ return static_cast<UField*>(GetOuter()); }
+	INT GetSize() const{ return ArrayDim * GetElementSize(); }
+	INT DataOffset(INT ArrayIndex) const{ return Offset + ArrayIndex * GetElementSize(); }
+	BYTE* DataAddr(void* Data, INT ArrayIndex) const{ return static_cast<BYTE*>(Data) + DataOffset(ArrayIndex); }
+	bool Matches(const void* A, const void* B, INT ArrayIndex) const{
+		INT Ofs = DataOffset(ArrayIndex);
+
+		return Identical(static_cast<const BYTE*>(A) + Ofs, B ? (static_cast<const BYTE*>(B) + Ofs) : NULL) != 0;
+	}
+	bool ShouldSerializeValue(FArchive& Ar) const;/*{
+		bool Skip = ((PropertyFlags & CPF_Native) != 0) || ((PropertyFlags & CPF_Transient) != 0 && Ar.IsPersistent());
+
 		return !Skip;
-		unguardobjSlow;
 	}*/
 };
 
@@ -94,34 +80,31 @@ class CORE_API UProperty : public UField
 //
 // Describes an unsigned byte value or 255-value enumeration variable.
 //
-class CORE_API UByteProperty : public UProperty
-{
-	DECLARE_CLASS(UByteProperty,UProperty,0,Core)
+class CORE_API UByteProperty : public UProperty{
+	DECLARE_CLASS(UByteProperty,UProperty,CLASS_IsAUProperty,Core)
 
 	// Variables.
 	UEnum* Enum;
 
 	// Constructors.
-	UByteProperty()
-	{}
-	UByteProperty( ECppProperty, INT InOffset, const TCHAR* InCategory, DWORD InFlags, UEnum* InEnum=NULL )
-	:	UProperty( EC_CppProperty, InOffset, InCategory, InFlags )
-	,	Enum( InEnum )
-	{}
+	UByteProperty(){}
+	UByteProperty(ECppProperty, INT InOffset, const TCHAR* InCategory, DWORD InFlags, UEnum* InEnum = NULL) : UProperty(EC_CppProperty, InOffset, InCategory, InFlags),
+																											  Enum(InEnum){}
 
 	// UObject interface.
-	void Serialize( FArchive& Ar );
+	virtual void Serialize(FArchive& Ar);
 
 	// UProperty interface.
-	void Link( FArchive& Ar, UProperty* Prev );
-	UBOOL Identical( const void* A, const void* B ) const;
-	void SerializeItem( FArchive& Ar, void* Value ) const;
-	UBOOL NetSerializeItem( FArchive& Ar, UPackageMap* Map, void* Data ) const;
-	void ExportCppItem( FOutputDevice& Out ) const;
-	void ExportTextItem( TCHAR* ValueStr, BYTE* PropertyValue, BYTE* DefaultValue, INT PortFlags ) const;
-	const TCHAR* ImportText( const TCHAR* Buffer, BYTE* Data, INT PortFlags ) const;
-	void CopySingleValue( void* Dest, void* Src ) const;
-	void CopyCompleteValue( void* Dest, void* Src ) const;
+	virtual INT GetElementSize() const;
+	virtual void Link(FArchive& Ar, UProperty* Prev);
+	virtual UBOOL Identical(const void* A, const void* B) const;
+	virtual void ExportCppItem(FOutputDevice& Out, UBOOL IsEvent) const;
+	virtual void SerializeItem(FArchive& Ar, void* Value, INT MaxReadBytes, INT IDONTKNOWWHATTHISIS) const;
+	virtual UBOOL NetSerializeItem(FArchive& Ar, UPackageMap* Map, void* Data) const;
+	virtual void ExportTextItem(TCHAR* ValueStr, BYTE* PropertyValue, BYTE* DefaultValue, INT PortFlags) const;
+	virtual const TCHAR* ImportText(const TCHAR* Buffer, BYTE* Data, INT PortFlags) const;
+	virtual void CopySingleValue(void* Dest, void* Src, UObject* SuperObject) const;
+	virtual void CopyCompleteValue(void* Dest, void* Src, UObject* SuperObject) const;
 };
 
 /*-----------------------------------------------------------------------------
@@ -131,27 +114,24 @@ class CORE_API UByteProperty : public UProperty
 //
 // Describes a 32-bit signed integer variable.
 //
-class CORE_API UIntProperty : public UProperty
-{
-	DECLARE_CLASS(UIntProperty,UProperty,0,Core)
+class CORE_API UIntProperty : public UProperty{
+	DECLARE_CLASS(UIntProperty,UProperty,CLASS_IsAUProperty,Core)
 
 	// Constructors.
-	UIntProperty()
-	{}
-	UIntProperty( ECppProperty, INT InOffset, const TCHAR* InCategory, DWORD InFlags )
-	:	UProperty( EC_CppProperty, InOffset, InCategory, InFlags )
-	{}
+	UIntProperty(){}
+	UIntProperty(ECppProperty, INT InOffset, const TCHAR* InCategory, DWORD InFlags) : UProperty(EC_CppProperty, InOffset, InCategory, InFlags){}
 
 	// UProperty interface.
-	void Link( FArchive& Ar, UProperty* Prev );
-	UBOOL Identical( const void* A, const void* B ) const;
-	void SerializeItem( FArchive& Ar, void* Value ) const;
-	UBOOL NetSerializeItem( FArchive& Ar, UPackageMap* Map, void* Data ) const;
-	void ExportCppItem( FOutputDevice& Out ) const;
-	void ExportTextItem( TCHAR* ValueStr, BYTE* PropertyValue, BYTE* DefaultValue, INT PortFlags ) const;
-	const TCHAR* ImportText( const TCHAR* Buffer, BYTE* Data, INT PortFlags ) const;
-	void CopySingleValue( void* Dest, void* Src ) const;
-	void CopyCompleteValue( void* Dest, void* Src ) const;
+	virtual INT GetElementSize() const;
+	virtual void Link(FArchive& Ar, UProperty* Prev);
+	virtual UBOOL Identical(const void* A, const void* B) const;
+	virtual void ExportCppItem(FOutputDevice& Out, UBOOL IsEvent) const;
+	virtual void SerializeItem(FArchive& Ar, void* Value, INT MaxReadBytes, INT IDONTKNOWWHATTHISIS) const;
+	virtual UBOOL NetSerializeItem(FArchive& Ar, UPackageMap* Map, void* Data) const;
+	virtual void ExportTextItem(TCHAR* ValueStr, BYTE* PropertyValue, BYTE* DefaultValue, INT PortFlags) const;
+	virtual const TCHAR* ImportText(const TCHAR* Buffer, BYTE* Data, INT PortFlags) const;
+	virtual void CopySingleValue(void* Dest, void* Src, UObject* SuperObject) const;
+	virtual void CopyCompleteValue(void* Dest, void* Src, UObject* SuperObject) const;
 };
 
 /*-----------------------------------------------------------------------------
@@ -161,33 +141,30 @@ class CORE_API UIntProperty : public UProperty
 //
 // Describes a single bit flag variable residing in a 32-bit unsigned double word.
 //
-class CORE_API UBoolProperty : public UProperty
-{
-	DECLARE_CLASS(UBoolProperty,UProperty,0,Core)
+class CORE_API UBoolProperty : public UProperty{
+	DECLARE_CLASS(UBoolProperty,UProperty,CLASS_IsAUProperty,Core)
 
 	// Variables.
 	BITFIELD BitMask;
 
 	// Constructors.
-	UBoolProperty()
-	{}
-	UBoolProperty( ECppProperty, INT InOffset, const TCHAR* InCategory, DWORD InFlags )
-	:	UProperty( EC_CppProperty, InOffset, InCategory, InFlags )
-	,	BitMask( 1 )
-	{}
+	UBoolProperty(){}
+	UBoolProperty(ECppProperty, INT InOffset, const TCHAR* InCategory, DWORD InFlags) : UProperty(EC_CppProperty, InOffset, InCategory, InFlags),
+																						BitMask(1){}
 
 	// UObject interface.
-	void Serialize( FArchive& Ar );
+	virtual void Serialize(FArchive& Ar);
 
 	// UProperty interface.
-	void Link( FArchive& Ar, UProperty* Prev );
-	UBOOL Identical( const void* A, const void* B ) const;
-	void SerializeItem( FArchive& Ar, void* Value ) const;
-	UBOOL NetSerializeItem( FArchive& Ar, UPackageMap* Map, void* Data ) const;
-	void ExportCppItem( FOutputDevice& Out ) const;
-	void ExportTextItem( TCHAR* ValueStr, BYTE* PropertyValue, BYTE* DefaultValue, INT PortFlags ) const;
-	const TCHAR* ImportText( const TCHAR* Buffer, BYTE* Data, INT PortFlags ) const;
-	void CopySingleValue( void* Dest, void* Src ) const;
+	virtual INT GetElementSize() const;
+	virtual void Link(FArchive& Ar, UProperty* Prev);
+	virtual UBOOL Identical(const void* A, const void* B) const;
+	virtual void ExportCppItem(FOutputDevice& Out, UBOOL IsEvent) const;
+	virtual void SerializeItem(FArchive& Ar, void* Value, INT MaxReadBytes, INT IDONTKNOWWHATTHISIS) const;
+	virtual UBOOL NetSerializeItem(FArchive& Ar, UPackageMap* Map, void* Data) const;
+	virtual void ExportTextItem(TCHAR* ValueStr, BYTE* PropertyValue, BYTE* DefaultValue, INT PortFlags) const;
+	virtual const TCHAR* ImportText(const TCHAR* Buffer, BYTE* Data, INT PortFlags) const;
+	virtual void CopySingleValue(void* Dest, void* Src, UObject* SuperObject) const;
 };
 
 /*-----------------------------------------------------------------------------
@@ -197,27 +174,24 @@ class CORE_API UBoolProperty : public UProperty
 //
 // Describes an IEEE 32-bit floating point variable.
 //
-class CORE_API UFloatProperty : public UProperty
-{
-	DECLARE_CLASS(UFloatProperty,UProperty,0,Core)
+class CORE_API UFloatProperty : public UProperty{
+	DECLARE_CLASS(UFloatProperty,UProperty,CLASS_IsAUProperty,Core)
 
 	// Constructors.
-	UFloatProperty()
-	{}
-	UFloatProperty( ECppProperty, INT InOffset, const TCHAR* InCategory, DWORD InFlags )
-	:	UProperty( EC_CppProperty, InOffset, InCategory, InFlags )
-	{}
+	UFloatProperty(){}
+	UFloatProperty(ECppProperty, INT InOffset, const TCHAR* InCategory, DWORD InFlags) : UProperty(EC_CppProperty, InOffset, InCategory, InFlags){}
 
 	// UProperty interface.
-	void Link( FArchive& Ar, UProperty* Prev );
-	UBOOL Identical( const void* A, const void* B ) const;
-	void SerializeItem( FArchive& Ar, void* Value ) const;
-	UBOOL NetSerializeItem( FArchive& Ar, UPackageMap* Map, void* Data ) const;
-	void ExportCppItem( FOutputDevice& Out ) const;
-	void ExportTextItem( TCHAR* ValueStr, BYTE* PropertyValue, BYTE* DefaultValue, INT PortFlags ) const;
-	const TCHAR* ImportText( const TCHAR* Buffer, BYTE* Data, INT PortFlags ) const;
-	void CopySingleValue( void* Dest, void* Src ) const;
-	void CopyCompleteValue( void* Dest, void* Src ) const;
+	virtual INT GetElementSize() const;
+	virtual void Link(FArchive& Ar, UProperty* Prev);
+	virtual UBOOL Identical(const void* A, const void* B) const;
+	virtual void ExportCppItem(FOutputDevice& Out, UBOOL IsEvent) const;
+	virtual void SerializeItem(FArchive& Ar, void* Value, INT MaxReadBytes, INT IDONTKNOWWHATTHISIS) const;
+	virtual UBOOL NetSerializeItem(FArchive& Ar, UPackageMap* Map, void* Data) const;
+	virtual void ExportTextItem(TCHAR* ValueStr, BYTE* PropertyValue, BYTE* DefaultValue, INT PortFlags) const;
+	virtual const TCHAR* ImportText(const TCHAR* Buffer, BYTE* Data, INT PortFlags) const;
+	virtual void CopySingleValue(void* Dest, void* Src, UObject* SuperObject) const;
+	virtual void CopyCompleteValue(void* Dest, void* Src, UObject* SuperObject) const;
 };
 
 /*-----------------------------------------------------------------------------
@@ -227,37 +201,34 @@ class CORE_API UFloatProperty : public UProperty
 //
 // Describes a reference variable to another object which may be nil.
 //
-class CORE_API UObjectProperty : public UProperty
-{
-	DECLARE_CLASS(UObjectProperty,UProperty,0,Core)
-
-	char Padding[4];
+class CORE_API UObjectProperty : public UProperty{
+	DECLARE_CLASS(UObjectProperty,UProperty,CLASS_IsAUProperty,Core)
 
 	// Variables.
-	//class UClass* PropertyClass;
-	//UObjectProperty* NextReference;
+	class UClass* PropertyClass;
 
 	// Constructors.
-	UObjectProperty()
-	{}
-	UObjectProperty( ECppProperty, INT InOffset, const TCHAR* InCategory, DWORD InFlags, UClass* InClass );
-	//:	UProperty( EC_CppProperty, InOffset, InCategory, InFlags )
-	//,	PropertyClass( InClass )
+	UObjectProperty(){}
+	UObjectProperty(ECppProperty, INT InOffset, const TCHAR* InCategory, DWORD InFlags, UClass* InClass);
+	//:	UProperty(EC_CppProperty, InOffset, InCategory, InFlags)
+	//,	PropertyClass(InClass)
 	//{}
 
 	// UObject interface.
-	void Serialize( FArchive& Ar );
+	virtual void Serialize(FArchive& Ar);
 
 	// UProperty interface.
-	void Link( FArchive& Ar, UProperty* Prev );
-	UBOOL Identical( const void* A, const void* B ) const;
-	void SerializeItem( FArchive& Ar, void* Value ) const;
-	UBOOL NetSerializeItem( FArchive& Ar, UPackageMap* Map, void* Data ) const;
-	void ExportCppItem( FOutputDevice& Out ) const;
-	void ExportTextItem( TCHAR* ValueStr, BYTE* PropertyValue, BYTE* DefaultValue, INT PortFlags ) const;
-	const TCHAR* ImportText( const TCHAR* Buffer, BYTE* Data, INT PortFlags ) const;
-	void CopySingleValue( void* Dest, void* Src ) const;
-	void CopyCompleteValue( void* Dest, void* Src ) const;
+	virtual INT GetElementSize() const;
+	virtual void CleanupDestroyed(BYTE* Data) const;
+	virtual void Link(FArchive& Ar, UProperty* Prev);
+	virtual UBOOL Identical(const void* A, const void* B) const;
+	virtual void ExportCppItem(FOutputDevice& Out, UBOOL IsEvent) const;
+	virtual void SerializeItem(FArchive& Ar, void* Value, INT MaxReadBytes, INT IDONTKNOWWHATTHISIS) const;
+	virtual UBOOL NetSerializeItem(FArchive& Ar, UPackageMap* Map, void* Data) const;
+	virtual void ExportTextItem(TCHAR* ValueStr, BYTE* PropertyValue, BYTE* DefaultValue, INT PortFlags) const;
+	virtual const TCHAR* ImportText(const TCHAR* Buffer, BYTE* Data, INT PortFlags) const;
+	virtual void CopySingleValue(void* Dest, void* Src, UObject* SuperObject) const;
+	virtual void CopyCompleteValue(void* Dest, void* Src, UObject* SuperObject) const;
 };
 
 /*-----------------------------------------------------------------------------
@@ -267,30 +238,23 @@ class CORE_API UObjectProperty : public UProperty
 //
 // Describes a reference variable to another object which may be nil.
 //
-class CORE_API UClassProperty : public UObjectProperty
-{
+class CORE_API UClassProperty : public UObjectProperty{
 	DECLARE_CLASS(UClassProperty,UObjectProperty,0,Core)
 
 	// Variables.
 	class UClass* MetaClass;
 
 	// Constructors.
-	UClassProperty()
-	{}
-	UClassProperty( ECppProperty, INT InOffset, const TCHAR* InCategory, DWORD InFlags, UClass* InMetaClass )
-	:	UObjectProperty( EC_CppProperty, InOffset, InCategory, InFlags, UClass::StaticClass() )
-	,	MetaClass( InMetaClass )
-	{}
+	UClassProperty(){}
+	UClassProperty(ECppProperty, INT InOffset, const TCHAR* InCategory, DWORD InFlags, UClass* InMetaClass) : UObjectProperty(EC_CppProperty, InOffset, InCategory, InFlags, UClass::StaticClass()),
+																											  MetaClass(InMetaClass){}
 
 	// UObject interface.
-	void Serialize( FArchive& Ar );
+	virtual void Serialize(FArchive& Ar);
 
 	// UProperty interface.
-	const TCHAR* ImportText( const TCHAR* Buffer, BYTE* Data, INT PortFlags ) const;
-	BYTE GetID() const
-	{
-		return NAME_ObjectProperty;
-	}
+	virtual const TCHAR* ImportText(const TCHAR* Buffer, BYTE* Data, INT PortFlags) const;
+	virtual BYTE GetID() const;
 };
 
 /*-----------------------------------------------------------------------------
@@ -300,26 +264,23 @@ class CORE_API UClassProperty : public UObjectProperty
 //
 // Describes a name variable pointing into the global name table.
 //
-class CORE_API UNameProperty : public UProperty
-{
-	DECLARE_CLASS(UNameProperty,UProperty,0,Core)
+class CORE_API UNameProperty : public UProperty{
+	DECLARE_CLASS(UNameProperty,UProperty,CLASS_IsAUProperty,Core)
 
 	// Constructors.
-	UNameProperty()
-	{}
-	UNameProperty( ECppProperty, INT InOffset, const TCHAR* InCategory, DWORD InFlags )
-	:	UProperty( EC_CppProperty, InOffset, InCategory, InFlags )
-	{}
+	UNameProperty(){}
+	UNameProperty(ECppProperty, INT InOffset, const TCHAR* InCategory, DWORD InFlags) : UProperty(EC_CppProperty, InOffset, InCategory, InFlags){}
 
 	// UProperty interface.
-	void Link( FArchive& Ar, UProperty* Prev );
-	UBOOL Identical( const void* A, const void* B ) const;
-	void SerializeItem( FArchive& Ar, void* Value ) const;
-	void ExportCppItem( FOutputDevice& Out ) const;
-	void ExportTextItem( TCHAR* ValueStr, BYTE* PropertyValue, BYTE* DefaultValue, INT PortFlags ) const;
-	const TCHAR* ImportText( const TCHAR* Buffer, BYTE* Data, INT PortFlags ) const;
-	void CopySingleValue( void* Dest, void* Src ) const;
-	void CopyCompleteValue( void* Dest, void* Src ) const;
+	virtual INT GetElementSize() const;
+	virtual void Link(FArchive& Ar, UProperty* Prev);
+	virtual UBOOL Identical(const void* A, const void* B) const;
+	virtual void ExportCppItem(FOutputDevice& Out, UBOOL IsEvent) const;
+	virtual void SerializeItem(FArchive& Ar, void* Value, INT MaxReadBytes, INT IDONTKNOWWHATTHISIS) const;
+	virtual void ExportTextItem(TCHAR* ValueStr, BYTE* PropertyValue, BYTE* DefaultValue, INT PortFlags) const;
+	virtual const TCHAR* ImportText(const TCHAR* Buffer, BYTE* Data, INT PortFlags) const;
+	virtual void CopySingleValue(void* Dest, void* Src, UObject* SuperObject) const;
+	virtual void CopyCompleteValue(void* Dest, void* Src, UObject* SuperObject) const;
 };
 
 /*-----------------------------------------------------------------------------
@@ -329,71 +290,27 @@ class CORE_API UNameProperty : public UProperty
 //
 // Describes a dynamic string variable.
 //
-class CORE_API UStrProperty : public UProperty
-{
-	DECLARE_CLASS(UStrProperty,UProperty,0,Core)
+class CORE_API UStrProperty : public UProperty{
+	DECLARE_CLASS(UStrProperty,UProperty,CLASS_IsAUProperty,Core)
 
 	// Constructors.
-	UStrProperty()
-	{}
-	UStrProperty( ECppProperty, INT InOffset, const TCHAR* InCategory, DWORD InFlags )
-	:	UProperty( EC_CppProperty, InOffset, InCategory, InFlags )
-	{}
+	UStrProperty(){}
+	UStrProperty(ECppProperty, INT InOffset, const TCHAR* InCategory, DWORD InFlags) : UProperty(EC_CppProperty, InOffset, InCategory, InFlags){}
 
 	// UObject interface.
-	void Serialize( FArchive& Ar );
+	virtual void Serialize(FArchive& Ar);
 
 	// UProperty interface.
-	void Link( FArchive& Ar, UProperty* Prev );
-	UBOOL Identical( const void* A, const void* B ) const;
-	void SerializeItem( FArchive& Ar, void* Value ) const;
-	void ExportCppItem( FOutputDevice& Out ) const;
-	void ExportTextItem( TCHAR* ValueStr, BYTE* PropertyValue, BYTE* DefaultValue, INT PortFlags ) const;
-	const TCHAR* ImportText( const TCHAR* Buffer, BYTE* Data, INT PortFlags ) const;
-	void CopySingleValue( void* Dest, void* Src ) const;
-	void DestroyValue( void* Dest ) const;
+	virtual INT GetElementSize() const;
+	virtual void Link(FArchive& Ar, UProperty* Prev);
+	virtual UBOOL Identical(const void* A, const void* B) const;
+	virtual void ExportCppItem(FOutputDevice& Out, UBOOL IsEvent) const;
+	virtual void SerializeItem(FArchive& Ar, void* Value, INT MaxReadBytes, INT IDONTKNOWWHATTHISIS) const;
+	virtual void ExportTextItem(TCHAR* ValueStr, BYTE* PropertyValue, BYTE* DefaultValue, INT PortFlags) const;
+	virtual const TCHAR* ImportText(const TCHAR* Buffer, BYTE* Data, INT PortFlags) const;
+	virtual void CopySingleValue(void* Dest, void* Src, UObject* SuperObject) const;
+	virtual void DestroyValue(void* Dest) const;
 };
-
-
-/*-----------------------------------------------------------------------------
-	UFixedArrayProperty.
------------------------------------------------------------------------------*/
-/*	Does not exist in RC
-//
-// Describes a fixed length array.
-//
-class CORE_API UFixedArrayProperty : public UProperty
-{
-	DECLARE_CLASS(UFixedArrayProperty,UProperty,0,Core)
-
-	// Variables.
-	UProperty* Inner;
-	INT Count;
-
-	// Constructors.
-	UFixedArrayProperty()
-	{}
-	UFixedArrayProperty( ECppProperty, INT InOffset, const TCHAR* InCategory, DWORD InFlags )
-	:	UProperty( EC_CppProperty, InOffset, InCategory, InFlags )
-	{}
-
-	// UObject interface.
-	void Serialize( FArchive& Ar );
-
-	// UProperty interface.
-	void Link( FArchive& Ar, UProperty* Prev );
-	UBOOL Identical( const void* A, const void* B ) const;
-	void SerializeItem( FArchive& Ar, void* Value ) const;
-	UBOOL NetSerializeItem( FArchive& Ar, UPackageMap* Map, void* Data ) const;
-	void ExportCppItem( FOutputDevice& Out ) const;
-	void ExportTextItem( TCHAR* ValueStr, BYTE* PropertyValue, BYTE* DefaultValue, INT PortFlags ) const;
-	const TCHAR* ImportText( const TCHAR* Buffer, BYTE* Data, INT PortFlags ) const;
-	void CopySingleValue( void* Dest, void* Src ) const;
-	void DestroyValue( void* Dest ) const;
-
-	// UFixedArrayProperty interface.
-	void AddCppProperty( UProperty* Property, INT Count );
-};*/
 
 /*-----------------------------------------------------------------------------
 	UArrayProperty.
@@ -402,9 +319,8 @@ class CORE_API UFixedArrayProperty : public UProperty
 //
 // Describes a dynamic array.
 //
-class CORE_API UArrayProperty : public UProperty
-{
-	DECLARE_CLASS(UArrayProperty,UProperty,0,Core)
+class CORE_API UArrayProperty : public UProperty{
+	DECLARE_CLASS(UArrayProperty,UProperty,CLASS_IsAUProperty,Core)
 
 	// Variables.
 	UProperty* Inner;
@@ -412,26 +328,29 @@ class CORE_API UArrayProperty : public UProperty
 	// Constructors.
 	UArrayProperty()
 	{}
-	UArrayProperty( ECppProperty, INT InOffset, const TCHAR* InCategory, DWORD InFlags )
-	:	UProperty( EC_CppProperty, InOffset, InCategory, InFlags )
+	UArrayProperty(ECppProperty, INT InOffset, const TCHAR* InCategory, DWORD InFlags)
+	:	UProperty(EC_CppProperty, InOffset, InCategory, InFlags)
 	{}
 
 	// UObject interface.
-	void Serialize( FArchive& Ar );
+	virtual void Serialize(FArchive& Ar);
 
 	// UProperty interface.
-	void Link( FArchive& Ar, UProperty* Prev );
-	UBOOL Identical( const void* A, const void* B ) const;
-	void SerializeItem( FArchive& Ar, void* Value ) const;
-	UBOOL NetSerializeItem( FArchive& Ar, UPackageMap* Map, void* Data ) const;
-	void ExportCppItem( FOutputDevice& Out ) const;
-	void ExportTextItem( TCHAR* ValueStr, BYTE* PropertyValue, BYTE* DefaultValue, INT PortFlags ) const;
-	const TCHAR* ImportText( const TCHAR* Buffer, BYTE* Data, INT PortFlags ) const;
-	void CopySingleValue( void* Dest, void* Src ) const;
-	void DestroyValue( void* Dest ) const;
+	virtual INT GetElementSize() const;
+	virtual void CleanupDestroyed(BYTE* Data) const;
+	virtual void Link(FArchive& Ar, UProperty* Prev);
+	virtual UBOOL Identical(const void* A, const void* B) const;
+	virtual BYTE* GetAddress(const void* Data, INT ArrayIndex) const;
+	virtual void ExportCppItem(FOutputDevice& Out, UBOOL IsEvent) const;
+	virtual void SerializeItem(FArchive& Ar, void* Value, INT MaxReadBytes, INT IDONTKNOWWHATTHISIS) const;
+	virtual UBOOL NetSerializeItem(FArchive& Ar, UPackageMap* Map, void* Data) const;
+	virtual void ExportTextItem(TCHAR* ValueStr, BYTE* PropertyValue, BYTE* DefaultValue, INT PortFlags) const;
+	virtual const TCHAR* ImportText(const TCHAR* Buffer, BYTE* Data, INT PortFlags) const;
+	virtual void CopyCompleteValue(void* Dest, void* Src, UObject* SuperObject) const;
+	virtual void DestroyValue(void* Dest) const;
 
 	// UArrayProperty interface.
-	void AddCppProperty( UProperty* Property );
+	void AddCppProperty(UProperty* Property);
 };
 
 /*-----------------------------------------------------------------------------
@@ -441,34 +360,31 @@ class CORE_API UArrayProperty : public UProperty
 //
 // Describes a dynamic map.
 //
-class CORE_API UMapProperty : public UProperty
-{
-	DECLARE_CLASS(UMapProperty,UProperty,0,Core)
+class CORE_API UMapProperty : public UProperty{
+	DECLARE_CLASS(UMapProperty,UProperty,CLASS_IsAUProperty,Core)
 
 	// Variables.
 	UProperty* Key;
 	UProperty* Value;
 
 	// Constructors.
-	UMapProperty()
-	{}
-	UMapProperty( ECppProperty, INT InOffset, const TCHAR* InCategory, DWORD InFlags )
-	:	UProperty( EC_CppProperty, InOffset, InCategory, InFlags )
-	{}
+	UMapProperty(){}
+	UMapProperty(ECppProperty, INT InOffset, const TCHAR* InCategory, DWORD InFlags) : UProperty(EC_CppProperty, InOffset, InCategory, InFlags){}
 
 	// UObject interface.
-	void Serialize( FArchive& Ar );
+	virtual void Serialize(FArchive& Ar);
 
 	// UProperty interface.
-	void Link( FArchive& Ar, UProperty* Prev );
-	UBOOL Identical( const void* A, const void* B ) const;
-	void SerializeItem( FArchive& Ar, void* Value ) const;
-	UBOOL NetSerializeItem( FArchive& Ar, UPackageMap* Map, void* Data ) const;
-	void ExportCppItem( FOutputDevice& Out ) const;
-	void ExportTextItem( TCHAR* ValueStr, BYTE* PropertyValue, BYTE* DefaultValue, INT PortFlags ) const;
-	const TCHAR* ImportText( const TCHAR* Buffer, BYTE* Data, INT PortFlags ) const;
-	void CopySingleValue( void* Dest, void* Src ) const;
-	void DestroyValue( void* Dest ) const;
+	virtual INT GetElementSize() const;
+	virtual void Link(FArchive& Ar, UProperty* Prev);
+	virtual UBOOL Identical(const void* A, const void* B) const;
+	virtual void ExportCppItem(FOutputDevice& Out, UBOOL IsEvent) const;
+	virtual void SerializeItem(FArchive& Ar, void* Value, INT MaxReadBytes, INT IDONTKNOWWHATTHISIS) const;
+	virtual UBOOL NetSerializeItem(FArchive& Ar, UPackageMap* Map, void* Data) const;
+	virtual void ExportTextItem(TCHAR* ValueStr, BYTE* PropertyValue, BYTE* DefaultValue, INT PortFlags) const;
+	virtual const TCHAR* ImportText(const TCHAR* Buffer, BYTE* Data, INT PortFlags) const;
+	virtual void CopySingleValue(void* Dest, void* Src, UObject* SuperObject) const;
+	virtual void DestroyValue(void* Dest) const;
 };
 
 /*-----------------------------------------------------------------------------
@@ -476,40 +392,71 @@ class CORE_API UMapProperty : public UProperty
 -----------------------------------------------------------------------------*/
 
 //
-// Describes a structure variable embedded in (as opposed to referenced by) 
+// Describes a structure variable embedded in (as opposed to referenced by)
 // an object.
 //
-class CORE_API UStructProperty : public UProperty
-{
-	DECLARE_CLASS(UStructProperty,UProperty,0,Core)
-
-	char Padding[4];
+class CORE_API UStructProperty : public UProperty{
+	DECLARE_CLASS(UStructProperty,UProperty,CLASS_IsAUProperty,Core)
 
 	// Variables.
-	//class UStruct* Struct;
-	//UStructProperty* NextStruct;
+	class UStruct* Struct;
 
 	// Constructors.
-	UStructProperty()
-	{}
-	UStructProperty( ECppProperty, INT InOffset, const TCHAR* InCategory, DWORD InFlags, UStruct* InStruct );
-	//:	UProperty( EC_CppProperty, InOffset, InCategory, InFlags )
-	//,	Struct( InStruct )
+	UStructProperty(){}
+	UStructProperty(ECppProperty, INT InOffset, const TCHAR* InCategory, DWORD InFlags, UStruct* InStruct);
+	//:	UProperty(EC_CppProperty, InOffset, InCategory, InFlags)
+	//,	Struct(InStruct)
 	//{}
 
 	// UObject interface.
-	void Serialize( FArchive& Ar );
+	virtual void Serialize(FArchive& Ar);
 
 	// UProperty interface.
-	void Link( FArchive& Ar, UProperty* Prev );
-	UBOOL Identical( const void* A, const void* B ) const;
-	void SerializeItem( FArchive& Ar, void* Value ) const;
-	UBOOL NetSerializeItem( FArchive& Ar, UPackageMap* Map, void* Data ) const;
-	void ExportCppItem( FOutputDevice& Out ) const;
-	void ExportTextItem( TCHAR* ValueStr, BYTE* PropertyValue, BYTE* DefaultValue, INT PortFlags ) const;
-	const TCHAR* ImportText( const TCHAR* Buffer, BYTE* Data, INT PortFlags ) const;
-	void CopySingleValue( void* Dest, void* Src ) const;
-	void DestroyValue( void* Dest ) const;
+	virtual INT GetElementSize() const;
+	virtual INT GetAlign() const;
+	virtual void CleanupDestroyed(BYTE* Data) const;
+	virtual void Link(FArchive& Ar, UProperty* Prev);
+	virtual UBOOL Identical(const void* A, const void* B) const;
+	virtual void ExportCppItem(FOutputDevice& Out, UBOOL IsEvent) const;
+	virtual void SerializeItem(FArchive& Ar, void* Value, INT MaxReadBytes, INT IDONTKNOWWHATTHISIS) const;
+	virtual UBOOL NetSerializeItem(FArchive& Ar, UPackageMap* Map, void* Data) const;
+	virtual void ExportTextItem(TCHAR* ValueStr, BYTE* PropertyValue, BYTE* DefaultValue, INT PortFlags) const;
+	virtual const TCHAR* ImportText(const TCHAR* Buffer, BYTE* Data, INT PortFlags) const;
+	virtual void CopySingleValue(void* Dest, void* Src, UObject* SuperObject) const;
+	virtual void DestroyValue(void* Dest) const;
+};
+
+/*-----------------------------------------------------------------------------
+	UDelegateProperty.
+-----------------------------------------------------------------------------*/
+
+//
+// Describes a pointer to a function bound to an Object
+//
+class CORE_API UDelegateProperty : public UProperty{
+	DECLARE_CLASS(UDelegateProperty,UProperty,CLASS_IsAUProperty,Core)
+
+	UFunction* Function;
+
+	// Constructors.
+	UDelegateProperty(){}
+	UDelegateProperty(ECppProperty, INT InOffset, const TCHAR* InCategory, DWORD InFlags) : UProperty(EC_CppProperty, InOffset, InCategory, InFlags){}
+
+	// UObject interface.
+	virtual void Serialize(FArchive& Ar);
+
+	// UProperty interface.
+	virtual INT GetElementSize() const;
+	virtual void CleanupDestroyed(BYTE* Data) const;
+	virtual void Link(FArchive& Ar, UProperty* Prev);
+	virtual UBOOL Identical(const void* A, const void* B) const;
+	virtual void ExportCppItem(FOutputDevice& Out, UBOOL IsEvent) const;
+	virtual void SerializeItem(FArchive& Ar, void* Value, INT MaxReadBytes, INT IDONTKNOWWHATTHISIS) const;
+	virtual UBOOL NetSerializeItem(FArchive& Ar, UPackageMap* Map, void* Data) const;
+	virtual void ExportTextItem(TCHAR* ValueStr, BYTE* PropertyValue, BYTE* DefaultValue, INT PortFlags) const;
+	virtual const TCHAR* ImportText(const TCHAR* Buffer, BYTE* Data, INT PortFlags) const;
+	virtual void CopySingleValue(void* Dest, void* Src, UObject* SuperObject) const;
+	virtual void CopyCompleteValue(void* Dest, void* Src, UObject* SuperObject) const;
 };
 
 /*-----------------------------------------------------------------------------
@@ -519,15 +466,19 @@ class CORE_API UStructProperty : public UProperty
 //
 // Find a typed field in a struct.
 //
-/*template <class T> T* FindField( UStruct* Owner, const TCHAR* FieldName )
-{
+template<typename T>
+T* FindField(UStruct* Owner, const TCHAR* FieldName){
 	guard(FindField);
-	for( TFieldIterator<T>It( Owner ); It; ++It )
-		if( appStricmp( It->GetName(), FieldName )==0 )
+
+	for(TFieldIterator<T> It(Owner); It; ++It){
+		if(appStricmp(It->GetName(), FieldName) == 0)
 			return *It;
+	}
+
 	return NULL;
+
 	unguard;
-}*/
+}
 
 /*-----------------------------------------------------------------------------
 	UObject accessors that depend on UClass.
@@ -536,8 +487,8 @@ class CORE_API UStructProperty : public UProperty
 //
 // See if this object belongs to the specified class.
 //
-__forceinline UBOOL UObject::IsA( class UClass* SomeBase ) const{
-	for(UClass* TempClass = Class; TempClass; TempClass = (UClass*)TempClass->SuperField){
+inline UBOOL UObject::IsA(UClass* SomeBase) const{
+	for(UClass* TempClass = Class; TempClass; TempClass = static_cast<UClass*>(TempClass->SuperField)){
 		if(TempClass == SomeBase)
 			return 1;
 	}
@@ -548,7 +499,7 @@ __forceinline UBOOL UObject::IsA( class UClass* SomeBase ) const{
 //
 // See if this object is in a certain package.
 //
-__forceinline UBOOL UObject::IsIn( class UObject* SomeOuter ) const{
+inline UBOOL UObject::IsIn(UObject* SomeOuter) const{
 	for(UObject* It = GetOuter(); It; It = It->GetOuter()){
 		if(It == SomeOuter)
 			return 1;
@@ -564,14 +515,14 @@ __forceinline UBOOL UObject::IsIn( class UObject* SomeOuter ) const{
 //
 // UStruct inline comparer.
 //
-/*inline UBOOL UStruct::StructCompare( const void* A, const void* B )
-{
-	guardSlow(UStruct::StructCompare);
-	for( TFieldIterator<UProperty> It(this); It; ++It )
-		for( INT i=0; i<It->ArrayDim; i++ )
-			if( !It->Matches(A,B,i) )
+/*inline bool UStruct::StructCompare(const void* A, const void* B){
+	for(TFieldIterator<UProperty> It(this); It; ++It){
+		for(INT i = 0; i < It->ArrayDim; ++i){
+			if(!It->Matches(A, B, i))
 				return 0;
-	unguardobjSlow;
+		}
+	}
+
 	return 1;
 }*/
 

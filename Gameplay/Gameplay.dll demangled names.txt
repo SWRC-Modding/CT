@@ -25,24 +25,6 @@ public: virtual __thiscall UACTION_TriggerEvent::~UACTION_TriggerEvent()
 public: virtual __thiscall UACTION_WaitForEvent::~UACTION_WaitForEvent()
 public: virtual __thiscall ULatentScriptedAction::~ULatentScriptedAction()
 public: virtual __thiscall UScriptedAction::~UScriptedAction()
-public: static void* __fastcall AScriptedController::operator new(unsigned int,class UObject*,class FName,unsigned long)
-public: static void* __fastcall AScriptedController::operator new(unsigned int,enum EInternal*)
-public: static void* __fastcall AScriptedSequence::operator new(unsigned int,class UObject*,class FName,unsigned long)
-public: static void* __fastcall AScriptedSequence::operator new(unsigned int,enum EInternal*)
-public: static void* __fastcall UACTION_EnableAIVoice::operator new(unsigned int,class UObject*,class FName,unsigned long)
-public: static void* __fastcall UACTION_EnableAIVoice::operator new(unsigned int,enum EInternal*)
-public: static void* __fastcall UACTION_SetViewTarget::operator new(unsigned int,class UObject*,class FName,unsigned long)
-public: static void* __fastcall UACTION_SetViewTarget::operator new(unsigned int,enum EInternal*)
-public: static void* __fastcall UACTION_TeleportToPoint::operator new(unsigned int,class UObject*,class FName,unsigned long)
-public: static void* __fastcall UACTION_TeleportToPoint::operator new(unsigned int,enum EInternal*)
-public: static void* __fastcall UACTION_TriggerEvent::operator new(unsigned int,class UObject*,class FName,unsigned long)
-public: static void* __fastcall UACTION_TriggerEvent::operator new(unsigned int,enum EInternal*)
-public: static void* __fastcall UACTION_WaitForEvent::operator new(unsigned int,class UObject*,class FName,unsigned long)
-public: static void* __fastcall UACTION_WaitForEvent::operator new(unsigned int,enum EInternal*)
-public: static void* __fastcall ULatentScriptedAction::operator new(unsigned int,class UObject*,class FName,unsigned long)
-public: static void* __fastcall ULatentScriptedAction::operator new(unsigned int,enum EInternal*)
-public: static void* __fastcall UScriptedAction::operator new(unsigned int,class UObject*,class FName,unsigned long)
-public: static void* __fastcall UScriptedAction::operator new(unsigned int,enum EInternal*)
 public: class AScriptedController& __thiscall AScriptedController::operator=(class AScriptedController const&)
 public: class AScriptedSequence& __thiscall AScriptedSequence::operator=(class AScriptedSequence const&)
 public: class UACTION_EnableAIVoice& __thiscall UACTION_EnableAIVoice::operator=(class UACTION_EnableAIVoice const&)
@@ -52,69 +34,8 @@ public: class UACTION_TriggerEvent& __thiscall UACTION_TriggerEvent::operator=(c
 public: class UACTION_WaitForEvent& __thiscall UACTION_WaitForEvent::operator=(class UACTION_WaitForEvent const&)
 public: class ULatentScriptedAction& __thiscall ULatentScriptedAction::operator=(class ULatentScriptedAction const&)
 public: class UScriptedAction& __thiscall UScriptedAction::operator=(class UScriptedAction const&)
-const AScriptedController::`vftable'
-const AScriptedSequence::`vftable'
-const UACTION_EnableAIVoice::`vftable'
-const UACTION_SetViewTarget::`vftable'
-const UACTION_TeleportToPoint::`vftable'
-const UACTION_TriggerEvent::`vftable'
-const UACTION_WaitForEvent::`vftable'
-const ULatentScriptedAction::`vftable'
-const UScriptedAction::`vftable'
-`public: class AActor* __thiscall UScriptedAction::GetActionActor()'::`2'::`local static guard'{2}'
-`public: int __thiscall UScriptedAction::InitActionFor(class AScriptedController*)'::`2'::`local static guard'{2}'
 public: class AActor* __thiscall UScriptedAction::GetActionActor()
-public: virtual class FString __thiscall UScriptedAction::GetDescription()const 
+public: virtual class FString __thiscall UScriptedAction::GetDescription() const 
 public: int __thiscall UScriptedAction::InitActionFor(class AScriptedController*)
-public: static void __fastcall AScriptedController::InternalConstructor(void*)
-public: static void __fastcall AScriptedSequence::InternalConstructor(void*)
-public: static void __fastcall UACTION_EnableAIVoice::InternalConstructor(void*)
-public: static void __fastcall UACTION_SetViewTarget::InternalConstructor(void*)
-public: static void __fastcall UACTION_TeleportToPoint::InternalConstructor(void*)
-public: static void __fastcall UACTION_TriggerEvent::InternalConstructor(void*)
-public: static void __fastcall UACTION_WaitForEvent::InternalConstructor(void*)
-public: static void __fastcall ULatentScriptedAction::InternalConstructor(void*)
-public: static void __fastcall UScriptedAction::InternalConstructor(void*)
-class FName `public: class AActor* __thiscall UScriptedAction::GetActionActor()'::`2'::NGetActionActor
-class FName `public: int __thiscall UScriptedAction::InitActionFor(class AScriptedController*)'::`2'::NInitActionFor
-private: static class UClass AScriptedController::PrivateStaticClass
-private: static class UClass AScriptedSequence::PrivateStaticClass
-private: static class UClass UACTION_EnableAIVoice::PrivateStaticClass
-private: static class UClass UACTION_SetViewTarget::PrivateStaticClass
-private: static class UClass UACTION_TeleportToPoint::PrivateStaticClass
-private: static class UClass UACTION_TriggerEvent::PrivateStaticClass
-private: static class UClass UACTION_WaitForEvent::PrivateStaticClass
-private: static class UClass ULatentScriptedAction::PrivateStaticClass
-private: static class UClass UScriptedAction::PrivateStaticClass
-public: virtual void __thiscall AScriptedSequence::RenderEditorSelected(class FLevelSceneNode*,class FRenderInterface*,class FDynamicActor*)
-public: static class UClass* __fastcall AScriptedController::StaticClass()
-public: static class UClass* __fastcall AScriptedSequence::StaticClass()
-public: static class UClass* __fastcall UACTION_EnableAIVoice::StaticClass()
-public: static class UClass* __fastcall UACTION_SetViewTarget::StaticClass()
-public: static class UClass* __fastcall UACTION_TeleportToPoint::StaticClass()
-public: static class UClass* __fastcall UACTION_TriggerEvent::StaticClass()
-public: static class UClass* __fastcall UACTION_WaitForEvent::StaticClass()
-public: static class UClass* __fastcall ULatentScriptedAction::StaticClass()
-public: static class UClass* __fastcall UScriptedAction::StaticClass()
-public: static struct FNativeEntry<class UACTION_EnableAIVoice>* UACTION_EnableAIVoice::StaticNativeMap
-public: static char const* __fastcall AScriptedController::StaticPackageName()
-public: static char const* __fastcall AScriptedSequence::StaticPackageName()
-public: static char const* __fastcall UACTION_EnableAIVoice::StaticPackageName()
-public: static char const* __fastcall UACTION_SetViewTarget::StaticPackageName()
-public: static char const* __fastcall UACTION_TeleportToPoint::StaticPackageName()
-public: static char const* __fastcall UACTION_TriggerEvent::StaticPackageName()
-public: static char const* __fastcall UACTION_WaitForEvent::StaticPackageName()
-public: static char const* __fastcall ULatentScriptedAction::StaticPackageName()
-public: static char const* __fastcall UScriptedAction::StaticPackageName()
-public: void __thiscall UACTION_EnableAIVoice::execInitActionFor(struct FFrame&,void*)
+public: virtual void __thiscall AScriptedSequence::RenderEditorSelected(class FLevelSceneNode*, class FRenderInterface*, class FDynamicActor*)
 GPackage
-_DllMain@12
-autoclassAScriptedController
-autoclassAScriptedSequence
-autoclassUACTION_EnableAIVoice
-autoclassUACTION_SetViewTarget
-autoclassUACTION_TeleportToPoint
-autoclassUACTION_TriggerEvent
-autoclassUACTION_WaitForEvent
-autoclassULatentScriptedAction
-autoclassUScriptedAction

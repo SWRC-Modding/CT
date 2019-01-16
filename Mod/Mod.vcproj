@@ -3,8 +3,9 @@
 	ProjectType="Visual C++"
 	Version="7.10"
 	Name="Mod"
-	ProjectGUID="{DC67B7B8-5827-41B6-B7BE-52CC410F72EC}"
-	RootNamespace="Mod">
+	ProjectGUID="{77944068-6E08-4233-8486-42D2B8DFFAEA}"
+	RootNamespace="Mod"
+	Keyword="ManagedCProj">
 	<Platforms>
 		<Platform
 			Name="Win32"/>
@@ -12,25 +13,28 @@
 	<Configurations>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="$(SolutionDir)/../GameData/System"
+			OutputDirectory="$(SolutionDir)../GameData/System"
 			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="2"
-			CharacterSet="0">
+			CharacterSet="2"
+			ManagedExtensions="FALSE">
 			<Tool
 				Name="VCCLCompilerTool"
-				Optimization="2"
 				PreprocessorDefinitions="MOD_API=DLL_EXPORT"
-				ExceptionHandling="TRUE"
+				MinimalRebuild="FALSE"
 				RuntimeLibrary="2"
 				StructMemberAlignment="3"
-				WarningLevel="2"
+				WarningLevel="4"
+				DebugInformationFormat="3"
 				CallingConvention="1"/>
 			<Tool
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				ImportLibrary="$(ProjectDir)/lib/$(TargetName).lib"
-				FixedBaseAddress="0"/>
+				OutputFile="$(OutDir)/$(ProjectName).dll"
+				LinkIncremental="1"
+				GenerateDebugInformation="FALSE"
+				ImportLibrary="$(ProjectDir)/lib/$(TargetName).lib"/>
 			<Tool
 				Name="VCMIDLTool"/>
 			<Tool
@@ -54,29 +58,28 @@
 		</Configuration>
 	</Configurations>
 	<References>
-		<ProjectReference
-			ReferencedProjectIdentifier="{DC67B7B8-5827-41B6-B7BE-52CC410F72EC}"
-			Name="UCC"/>
 	</References>
 	<Files>
 		<Filter
 			Name="Inc"
-			Filter="">
+			Filter="h;hpp;hxx;hm;inl;inc;xsd"
+			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}">
 			<File
 				RelativePath=".\Inc\Mod.h">
 			</File>
 			<File
-				RelativePath=".\inc\ModClasses.h">
+				RelativePath=".\Inc\ModClasses.h">
 			</File>
 		</Filter>
 		<Filter
 			Name="Src"
-			Filter="">
+			Filter="cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx"
+			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}">
 			<File
 				RelativePath=".\Src\Mod.cpp">
 			</File>
 			<File
-				RelativePath=".\src\ModClasses.cpp">
+				RelativePath=".\Src\ModClasses.cpp">
 			</File>
 			<File
 				RelativePath=".\Src\ModPrivate.h">

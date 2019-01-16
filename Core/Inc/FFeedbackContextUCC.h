@@ -1,5 +1,5 @@
 /*=============================================================================
-	FFeedbackContextAnsi.h: Unreal Ansi user interface interaction.
+	FFeedbackContextUCC.h: Command line user interface interaction.
 	Copyright 1997-1999 Epic Games, Inc. All Rights Reserved.
 
 	Revision history:
@@ -7,15 +7,15 @@
 =============================================================================*/
 
 /*-----------------------------------------------------------------------------
-	FFeedbackContextAnsi.
+	FFeedbackContextUCC.
 -----------------------------------------------------------------------------*/
 
-#include <stdio.h>
+#include <cstdio>
 
 //
 // Feedback context.
 //
-class FFeedbackContextAnsi : public FFeedbackContext{
+class FFeedbackContextUCC : public FFeedbackContext{
 public:
 	//Variables
 	INT SlowTaskCount;
@@ -24,16 +24,16 @@ public:
 	FOutputDevice* AuxOut;
 
 	//Constructor
-	FFeedbackContextAnsi() : SlowTaskCount(0),
-							 WarningCount(0),
-							 ErrorCount(0),
-							 Context(NULL),
-							 AuxOut(NULL){}
+	FFeedbackContextUCC() : SlowTaskCount(0),
+							WarningCount(0),
+							ErrorCount(0),
+							Context(NULL),
+							AuxOut(NULL){}
 
 	//Functions
 
 	void Serialize(const TCHAR* V, EName Event){
-		guard(FFeedbackContextAnsi::Serialize);
+		guard(FFeedbackContextUCC::Serialize);
 
 		TCHAR Buffer[1024]= "";
 		const TCHAR* Temp = V;
@@ -43,31 +43,25 @@ public:
 
 			return; //Prevents the server from spamming the player count to the log
 		}else if(Event == NAME_Heading){
-			appSprintf(Buffer, "\n--------------------%s--------------------", V);
+			appSprintf(Buffer, "--------------------%s--------------------", V);
 
 			Temp = Buffer;
 			V = Buffer; //So that the log file also contains the formatted string
-		}else if(Event == NAME_Warning || Event == NAME_ExecWarning || Event == NAME_ScriptWarning){
+		}else if(Event == NAME_Warning || Event == NAME_ExecWarning || Event == NAME_ScriptWarning || Event == NAME_Error || Event == NAME_Critical){
 			if(Context)
 				appSprintf(Buffer, "%s: %s, %s", *Context->GetContext(), *FName(Event), V);
 			else
 				appSprintf(Buffer, "%s: %s", *FName(Event), V);
 
-			WarningCount++;
-
-			Temp = Buffer;
-		}else if(Event == NAME_Error || Event == NAME_Critical){
-			if(Context)
-				appSprintf(Buffer, "%s: %s, %s", *Context->GetContext(), *FName(Event), V);
+			if(Event == NAME_Error || Event == NAME_Critical)
+				++ErrorCount;
 			else
-				appSprintf(Buffer, "%s: %s", *FName(Event), V);
-
-			ErrorCount++;
+				++WarningCount;
 
 			Temp = Buffer;
 		}
 
-		puts(Temp);
+		std::puts(Temp);
 		
 		if(GLog != this)
 			GLog->Log(Event, V);
@@ -79,21 +73,21 @@ public:
 	}
 
 	void Flush(){
-		fflush(stdout);
+		std::fflush(stdout);
 	}
 
 	UBOOL YesNof(const TCHAR* Fmt, ...){
 		TCHAR TempStr[4096];
 		GET_VARARGS(TempStr, ARRAY_COUNT(TempStr), Fmt);
 
-		guard(FFeedbackContextAnsi::YesNof);
+		guard(FFeedbackContextUCC::YesNof);
 
 		if((GIsClient || GIsEditor) && !ParseParam(appCmdLine(), "Silent")){
-			printf("%s %s", TempStr, "(Y/N): ");
+			std::printf("%s %s", TempStr, "(Y/N): ");
 
-			INT Ch = getchar();
+			INT Ch = std::getchar();
 
-			getchar(); //Removing newline from input stream
+			std::getchar(); //Removing newline from input stream
 
 			return Ch == 'Y' || Ch == 'y';
 		}else{
@@ -104,7 +98,7 @@ public:
 	}
 
 	void BeginSlowTask(const TCHAR* Task, UBOOL StatusWindow){
-		guard(FFeedbackContextAnsi::BeginSlowTask);
+		guard(FFeedbackContextUCC::BeginSlowTask);
 
 		GIsSlowTask = ++SlowTaskCount > 0;
 
@@ -112,7 +106,7 @@ public:
 	}
 
 	void EndSlowTask(){
-		guard(FFeedbackContextAnsi::EndSlowTask);
+		guard(FFeedbackContextUCC::EndSlowTask);
 
 		check(SlowTaskCount>0);
 
@@ -121,7 +115,7 @@ public:
 		unguard;
 	}
 
-	UBOOL VARARGS StatusUpdatef( INT Numerator, INT Denominator, const TCHAR* Fmt, ... ){
+	UBOOL VARARGS StatusUpdatef(INT Numerator, INT Denominator, const TCHAR* Fmt, ...){
 		return 1;
 	}
 

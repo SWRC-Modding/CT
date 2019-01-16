@@ -5662,30 +5662,6 @@ public:
 };
 
 /*
-*	Material
-*/
-
-class ENGINE_API UMaterial : public UObject{
-public:
-	class UMaterial* FallbackMaterial;
-	class UMaterial* DefaultMaterial;
-	BYTE NumPassesCached;
-	INT CachedMaterialPasses[8];
-	INT MaterialCacheFlags;
-	INT CachedType;
-	BYTE TypeOfMaterial;
-	BITFIELD UseFallback:1;
-	BITFIELD Validated:1;
-	
-	DECLARE_CLASS(UMaterial,UObject,0,Engine)
-
-	//TODO: Adjust vtables for material classes
-	virtual INT MaterialUSize();
-	virtual INT MaterialVSize();
-	virtual UBOOL RequiresSorting();
-};
-
-/*
 *	Combiner
 */
 
@@ -5750,41 +5726,6 @@ public:
 };
 
 /*
-*	RenderedMaterial
-*/
-
-class ENGINE_API URenderedMaterial : public UMaterial{
-public:
-	DECLARE_CLASS(URenderedMaterial,UMaterial,0,Engine)
-};
-
-/*
-*	BitmapMaterial
-*/
-
-enum ETexClampMode{
-	TC_Wrap,
-	TC_Clamp,
-	TC_MAX
-};
-
-class ENGINE_API UBitmapMaterial : public URenderedMaterial{
-public:
-	BYTE Format;
-	BYTE UClampMode;
-	BYTE VClampMode;
-	BYTE UBits;
-	BYTE VBits;
-	INT USize;
-	INT VSize;
-	INT UClamp;
-	INT VClamp;
-	BITFIELD DontCache:1;
-	
-	DECLARE_CLASS(UBitmapMaterial,URenderedMaterial,0,Engine)
-};
-
-/*
 *	HardwareShader
 */
 
@@ -5825,24 +5766,6 @@ enum SConstant{
 	EVC_EyePositionObjectSpace,
 	EVC_2DRotator,
 	EVC_MAX
-};
-
-enum EFixedVertexFunction{
-	FVF_Position,
-	FVF_Normal,
-	FVF_Diffuse,
-	FVF_Specular,
-	FVF_TexCoord0,
-	FVF_TexCoord1,
-	FVF_TexCoord2,
-	FVF_TexCoord3,
-	FVF_TexCoord4,
-	FVF_TexCoord5,
-	FVF_TexCoord6,
-	FVF_TexCoord7,
-	FVF_Tangent,
-	FVF_Binormal,
-	FVF_MAX
 };
 
 enum ED3DBLEND{

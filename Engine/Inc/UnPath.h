@@ -30,9 +30,10 @@ public:
 	void undefinePaths(class ULevel*);
 
 private:
-	char Padding[32];
+	char Padding[128]; // Seems to be more like 78 but just to make sure...
 
 	void GenerateAllRegions();
 	void SetPathCollision(int);
 };
 
+extern ENGINE_API FPathBuilder GPathBuilder;

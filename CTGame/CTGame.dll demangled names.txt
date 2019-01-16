@@ -46,13 +46,13 @@ protected: __thiscall UFootstepInfo::UFootstepInfo()
 public: __thiscall UFootstepInfo::UFootstepInfo(class UFootstepInfo const&)
 private: __thiscall UGOAL_ChangeAimTurn::UGOAL_ChangeAimTurn()
 public: __thiscall UGOAL_ChangeAimTurn::UGOAL_ChangeAimTurn(class UGOAL_ChangeAimTurn const&)
-public: __thiscall UGOAL_ChangeAimTurn::UGOAL_ChangeAimTurn(class FRotator const&,int,int,int,int)
-public: __thiscall UGOAL_ChangeAimTurn::UGOAL_ChangeAimTurn(class FVector const&,int,int,int,int)
-public: __thiscall UGOAL_ChangeAimTurn::UGOAL_ChangeAimTurn(class AActor*,int,int,int,int)
+public: __thiscall UGOAL_ChangeAimTurn::UGOAL_ChangeAimTurn(class FRotator const&, int, int, int, int)
+public: __thiscall UGOAL_ChangeAimTurn::UGOAL_ChangeAimTurn(class FVector const&, int, int, int, int)
+public: __thiscall UGOAL_ChangeAimTurn::UGOAL_ChangeAimTurn(class AActor*, int, int, int, int)
 private: __thiscall UGOAL_ChangePhysics::UGOAL_ChangePhysics()
 public: __thiscall UGOAL_ChangePhysics::UGOAL_ChangePhysics(class UGOAL_ChangePhysics const&)
 public: __thiscall UGOAL_ChangePhysics::UGOAL_ChangePhysics(int)
-public: __thiscall UGOAL_ChangePhysics::UGOAL_ChangePhysics(int,struct FPhysicsData&)
+public: __thiscall UGOAL_ChangePhysics::UGOAL_ChangePhysics(int, struct FPhysicsData&)
 public: __thiscall UGOAL_ChangePhysics::UGOAL_ChangePhysics(enum EIdleState)
 public: __thiscall UGOAL_ChangePhysics::UGOAL_ChangePhysics(enum EPhysics)
 private: __thiscall UGOAL_ChangeWeapon::UGOAL_ChangeWeapon()
@@ -67,16 +67,16 @@ public: __thiscall UGOAL_Crouch::UGOAL_Crouch(class UGOAL_Crouch const&)
 public: __thiscall UGOAL_Crouch::UGOAL_Crouch(bool)
 private: __thiscall UGOAL_ExecuteMarker::UGOAL_ExecuteMarker()
 public: __thiscall UGOAL_ExecuteMarker::UGOAL_ExecuteMarker(class UGOAL_ExecuteMarker const&)
-public: __thiscall UGOAL_ExecuteMarker::UGOAL_ExecuteMarker(class ASquadMarker*,float)
+public: __thiscall UGOAL_ExecuteMarker::UGOAL_ExecuteMarker(class ASquadMarker*, float)
 protected: __thiscall UGOAL_FinishingMove::UGOAL_FinishingMove()
 public: __thiscall UGOAL_FinishingMove::UGOAL_FinishingMove(class UGOAL_FinishingMove const&)
 public: __thiscall UGOAL_FinishingMove::UGOAL_FinishingMove(class ACTPawn*)
 protected: __thiscall UGOAL_Follow::UGOAL_Follow()
 public: __thiscall UGOAL_Follow::UGOAL_Follow(class UGOAL_Follow const&)
-public: __thiscall UGOAL_Follow::UGOAL_Follow(class AActor*,float,int)
-public: __thiscall UGOAL_Follow::UGOAL_Follow(class AActor*,float,float)
+public: __thiscall UGOAL_Follow::UGOAL_Follow(class AActor*, float, int)
+public: __thiscall UGOAL_Follow::UGOAL_Follow(class AActor*, float, float)
 public: __thiscall UGOAL_FollowLink::UGOAL_FollowLink(class UGOAL_FollowLink const&)
-public: __thiscall UGOAL_FollowLink::UGOAL_FollowLink(class UReachSpec*,bool)
+public: __thiscall UGOAL_FollowLink::UGOAL_FollowLink(class UReachSpec*, bool)
 public: __thiscall UGOAL_FollowLink::UGOAL_FollowLink()
 private: __thiscall UGOAL_GetBacta::UGOAL_GetBacta()
 public: __thiscall UGOAL_GetBacta::UGOAL_GetBacta(class UGOAL_GetBacta const&)
@@ -86,20 +86,20 @@ public: __thiscall UGOAL_GoThroughDoor::UGOAL_GoThroughDoor(class UGOAL_GoThroug
 public: __thiscall UGOAL_GoThroughDoor::UGOAL_GoThroughDoor(class UReachSpec*)
 private: __thiscall UGOAL_Goto::UGOAL_Goto()
 public: __thiscall UGOAL_Goto::UGOAL_Goto(class UGOAL_Goto const&)
-public: __thiscall UGOAL_Goto::UGOAL_Goto(class FVector const&,float)
-public: __thiscall UGOAL_Goto::UGOAL_Goto(class ANavigationPoint*,float)
-public: __thiscall UGOAL_Goto::UGOAL_Goto(class ANavigationPoint*,bool)
+public: __thiscall UGOAL_Goto::UGOAL_Goto(class FVector const&, float)
+public: __thiscall UGOAL_Goto::UGOAL_Goto(class ANavigationPoint*, float)
+public: __thiscall UGOAL_Goto::UGOAL_Goto(class ANavigationPoint*, bool)
 private: __thiscall UGOAL_GotoCautious::UGOAL_GotoCautious()
 public: __thiscall UGOAL_GotoCautious::UGOAL_GotoCautious(class UGOAL_GotoCautious const&)
-public: __thiscall UGOAL_GotoCautious::UGOAL_GotoCautious(class FVector const&,float)
-public: __thiscall UGOAL_GotoCautious::UGOAL_GotoCautious(class ANavigationPoint*,float)
-public: __thiscall UGOAL_GotoCautious::UGOAL_GotoCautious(class ANavigationPoint*,bool)
+public: __thiscall UGOAL_GotoCautious::UGOAL_GotoCautious(class FVector const&, float)
+public: __thiscall UGOAL_GotoCautious::UGOAL_GotoCautious(class ANavigationPoint*, float)
+public: __thiscall UGOAL_GotoCautious::UGOAL_GotoCautious(class ANavigationPoint*, bool)
 private: __thiscall UGOAL_GotoPointBlind::UGOAL_GotoPointBlind()
 public: __thiscall UGOAL_GotoPointBlind::UGOAL_GotoPointBlind(class UGOAL_GotoPointBlind const&)
-public: __thiscall UGOAL_GotoPointBlind::UGOAL_GotoPointBlind(class FVector const&,float,int)
+public: __thiscall UGOAL_GotoPointBlind::UGOAL_GotoPointBlind(class FVector const&, float, int)
 private: __thiscall UGOAL_GotoSpecial::UGOAL_GotoSpecial()
 public: __thiscall UGOAL_GotoSpecial::UGOAL_GotoSpecial(class UGOAL_GotoSpecial const&)
-public: __thiscall UGOAL_GotoSpecial::UGOAL_GotoSpecial(class ANavigationPoint*,float)
+public: __thiscall UGOAL_GotoSpecial::UGOAL_GotoSpecial(class ANavigationPoint*, float)
 private: __thiscall UGOAL_HealOther::UGOAL_HealOther()
 public: __thiscall UGOAL_HealOther::UGOAL_HealOther(class UGOAL_HealOther const&)
 public: __thiscall UGOAL_HealOther::UGOAL_HealOther(class APawn*)
@@ -111,45 +111,45 @@ public: __thiscall UGOAL_LaunchMissiles::UGOAL_LaunchMissiles(class UGOAL_Launch
 public: __thiscall UGOAL_LaunchMissiles::UGOAL_LaunchMissiles()
 protected: __thiscall UGOAL_ManTurret::UGOAL_ManTurret()
 public: __thiscall UGOAL_ManTurret::UGOAL_ManTurret(class UGOAL_ManTurret const&)
-public: __thiscall UGOAL_ManTurret::UGOAL_ManTurret(class ATurret*,int)
+public: __thiscall UGOAL_ManTurret::UGOAL_ManTurret(class ATurret*, int)
 protected: __thiscall UGOAL_MeleeAttack::UGOAL_MeleeAttack()
 public: __thiscall UGOAL_MeleeAttack::UGOAL_MeleeAttack(class UGOAL_MeleeAttack const&)
-public: __thiscall UGOAL_MeleeAttack::UGOAL_MeleeAttack(class AActor*,int,float)
+public: __thiscall UGOAL_MeleeAttack::UGOAL_MeleeAttack(class AActor*, int, float)
 private: __thiscall UGOAL_MoveAndRotate::UGOAL_MoveAndRotate()
 public: __thiscall UGOAL_MoveAndRotate::UGOAL_MoveAndRotate(class UGOAL_MoveAndRotate const&)
-public: __thiscall UGOAL_MoveAndRotate::UGOAL_MoveAndRotate(class FVector const&,class FVector const&,bool)
-public: __thiscall UGOAL_MoveAndRotate::UGOAL_MoveAndRotate(class FVector const&,class FRotator const&,bool)
+public: __thiscall UGOAL_MoveAndRotate::UGOAL_MoveAndRotate(class FVector const&, class FVector const&, bool)
+public: __thiscall UGOAL_MoveAndRotate::UGOAL_MoveAndRotate(class FVector const&, class FRotator const&, bool)
 protected: __thiscall UGOAL_PlayAnim::UGOAL_PlayAnim()
 public: __thiscall UGOAL_PlayAnim::UGOAL_PlayAnim(class UGOAL_PlayAnim const&)
-public: __thiscall UGOAL_PlayAnim::UGOAL_PlayAnim(class FName,class FName,bool,float,bool,int)
+public: __thiscall UGOAL_PlayAnim::UGOAL_PlayAnim(class FName, class FName, bool, float, bool, int)
 protected: __thiscall UGOAL_PlaySound::UGOAL_PlaySound()
 public: __thiscall UGOAL_PlaySound::UGOAL_PlaySound(class UGOAL_PlaySound const&)
-public: __thiscall UGOAL_PlaySound::UGOAL_PlaySound(class USound*,bool)
-public: __thiscall UGOAL_PlaySound::UGOAL_PlaySound(enum EPawnAudioEvent,float,bool)
-public: __thiscall UGOAL_PlaySound::UGOAL_PlaySound(enum EPawnAudioEvent,class AActor*,float,float)
+public: __thiscall UGOAL_PlaySound::UGOAL_PlaySound(class USound*, bool)
+public: __thiscall UGOAL_PlaySound::UGOAL_PlaySound(enum EPawnAudioEvent, float, bool)
+public: __thiscall UGOAL_PlaySound::UGOAL_PlaySound(enum EPawnAudioEvent, class AActor*, float, float)
 private: __thiscall UGOAL_Shoot::UGOAL_Shoot()
 public: __thiscall UGOAL_Shoot::UGOAL_Shoot(class UGOAL_Shoot const&)
 public: __thiscall UGOAL_Shoot::UGOAL_Shoot(float)
-public: __thiscall UGOAL_Shoot::UGOAL_Shoot(float,int)
+public: __thiscall UGOAL_Shoot::UGOAL_Shoot(float, int)
 public: __thiscall UGOAL_Shoot::UGOAL_Shoot(enum UGOAL_Shoot::EShootDirective)
 private: __thiscall UGOAL_Sleep::UGOAL_Sleep()
 public: __thiscall UGOAL_Sleep::UGOAL_Sleep(class UGOAL_Sleep const&)
 public: __thiscall UGOAL_Sleep::UGOAL_Sleep(float)
-public: __thiscall UGOAL_Sleep::UGOAL_Sleep(float,float)
+public: __thiscall UGOAL_Sleep::UGOAL_Sleep(float, float)
 protected: __thiscall UGOAL_SquadFollow::UGOAL_SquadFollow()
 public: __thiscall UGOAL_SquadFollow::UGOAL_SquadFollow(class UGOAL_SquadFollow const&)
-public: __thiscall UGOAL_SquadFollow::UGOAL_SquadFollow(class AActor*,float,float)
+public: __thiscall UGOAL_SquadFollow::UGOAL_SquadFollow(class AActor*, float, float)
 public: __thiscall UGOAL_ThrowGrenade::UGOAL_ThrowGrenade(class UGOAL_ThrowGrenade const&)
-public: __thiscall UGOAL_ThrowGrenade::UGOAL_ThrowGrenade(class UClass*,class FName)
+public: __thiscall UGOAL_ThrowGrenade::UGOAL_ThrowGrenade(class UClass*, class FName)
 public: __thiscall UGOAL_ThrowGrenade::UGOAL_ThrowGrenade(class FName)
 private: __thiscall UGOAL_Trigger::UGOAL_Trigger()
 public: __thiscall UGOAL_Trigger::UGOAL_Trigger(class UGOAL_Trigger const&)
 public: __thiscall UGOAL_Trigger::UGOAL_Trigger(class AActor*)
 private: __thiscall UGOAL_TurnTo::UGOAL_TurnTo()
 public: __thiscall UGOAL_TurnTo::UGOAL_TurnTo(class UGOAL_TurnTo const&)
-public: __thiscall UGOAL_TurnTo::UGOAL_TurnTo(class FRotator const&,bool)
-public: __thiscall UGOAL_TurnTo::UGOAL_TurnTo(class FVector const&,bool)
-public: __thiscall UGOAL_TurnTo::UGOAL_TurnTo(class AActor*,bool)
+public: __thiscall UGOAL_TurnTo::UGOAL_TurnTo(class FRotator const&, bool)
+public: __thiscall UGOAL_TurnTo::UGOAL_TurnTo(class FVector const&, bool)
+public: __thiscall UGOAL_TurnTo::UGOAL_TurnTo(class AActor*, bool)
 private: __thiscall UGOAL_UseActor::UGOAL_UseActor()
 public: __thiscall UGOAL_UseActor::UGOAL_UseActor(class UGOAL_UseActor const&)
 public: __thiscall UGOAL_UseActor::UGOAL_UseActor(class AActor*)
@@ -159,10 +159,10 @@ public: __thiscall UGOAL_WaitForEvent::UGOAL_WaitForEvent()
 public: __thiscall UGOAL_WaitForLanding::UGOAL_WaitForLanding(class UGOAL_WaitForLanding const&)
 public: __thiscall UGOAL_WaitForLanding::UGOAL_WaitForLanding()
 public: __thiscall UGOAL_WaitForScriptState::UGOAL_WaitForScriptState(class UGOAL_WaitForScriptState const&)
-public: __thiscall UGOAL_WaitForScriptState::UGOAL_WaitForScriptState(class AActor*,class FName)
+public: __thiscall UGOAL_WaitForScriptState::UGOAL_WaitForScriptState(class AActor*, class FName)
 public: __thiscall UGOAL_WaitForScriptState::UGOAL_WaitForScriptState()
 public: __thiscall UGOAL_WaitUntilNear::UGOAL_WaitUntilNear(class UGOAL_WaitUntilNear const&)
-public: __thiscall UGOAL_WaitUntilNear::UGOAL_WaitUntilNear(class AActor*,float)
+public: __thiscall UGOAL_WaitUntilNear::UGOAL_WaitUntilNear(class AActor*, float)
 public: __thiscall UGOAL_WaitUntilNear::UGOAL_WaitUntilNear()
 public: __thiscall UGoalObject::UGoalObject(class UGoalObject const&)
 public: __thiscall UGoalObject::UGoalObject()
@@ -355,206 +355,6 @@ public: virtual __thiscall UStateTrandoshanAttack::~UStateTrandoshanAttack()
 public: virtual __thiscall UStateTurretAttack::~UStateTurretAttack()
 public: virtual __thiscall UStateWander::~UStateWander()
 public: virtual __thiscall UStateWookieeAttack::~UStateWookieeAttack()
-public: static void* __fastcall AActivateDoor::operator new(unsigned int,class UObject*,class FName,unsigned long)
-public: static void* __fastcall AActivateDoor::operator new(unsigned int,enum EInternal*)
-public: static void* __fastcall AActivateTrap::operator new(unsigned int,class UObject*,class FName,unsigned long)
-public: static void* __fastcall AActivateTrap::operator new(unsigned int,enum EInternal*)
-public: static void* __fastcall ABactaDispenser::operator new(unsigned int,class UObject*,class FName,unsigned long)
-public: static void* __fastcall ABactaDispenser::operator new(unsigned int,enum EInternal*)
-public: static void* __fastcall ACTBot::operator new(unsigned int,class UObject*,class FName,unsigned long)
-public: static void* __fastcall ACTBot::operator new(unsigned int,enum EInternal*)
-public: static void* __fastcall ACTGameInfo::operator new(unsigned int,class UObject*,class FName,unsigned long)
-public: static void* __fastcall ACTGameInfo::operator new(unsigned int,enum EInternal*)
-public: static void* __fastcall ACTMarker::operator new(unsigned int,class UObject*,class FName,unsigned long)
-public: static void* __fastcall ACTMarker::operator new(unsigned int,enum EInternal*)
-public: static void* __fastcall ACTPawn::operator new(unsigned int,class UObject*,class FName,unsigned long)
-public: static void* __fastcall ACTPawn::operator new(unsigned int,enum EInternal*)
-public: static void* __fastcall ACTPlayer::operator new(unsigned int,class UObject*,class FName,unsigned long)
-public: static void* __fastcall ACTPlayer::operator new(unsigned int,enum EInternal*)
-public: static void* __fastcall ACTSquadNative::operator new(unsigned int,class UObject*,class FName,unsigned long)
-public: static void* __fastcall ACTSquadNative::operator new(unsigned int,enum EInternal*)
-public: static void* __fastcall ACTTeamInfo::operator new(unsigned int,class UObject*,class FName,unsigned long)
-public: static void* __fastcall ACTTeamInfo::operator new(unsigned int,enum EInternal*)
-public: static void* __fastcall AFactory::operator new(unsigned int,class UObject*,class FName,unsigned long)
-public: static void* __fastcall AFactory::operator new(unsigned int,enum EInternal*)
-public: static void* __fastcall AHackTerminal::operator new(unsigned int,class UObject*,class FName,unsigned long)
-public: static void* __fastcall AHackTerminal::operator new(unsigned int,enum EInternal*)
-public: static void* __fastcall AKnockoverProp::operator new(unsigned int,class UObject*,class FName,unsigned long)
-public: static void* __fastcall AKnockoverProp::operator new(unsigned int,enum EInternal*)
-public: static void* __fastcall AMarkerGetBactaNative::operator new(unsigned int,class UObject*,class FName,unsigned long)
-public: static void* __fastcall AMarkerGetBactaNative::operator new(unsigned int,enum EInternal*)
-public: static void* __fastcall AMarkerReviveOther::operator new(unsigned int,class UObject*,class FName,unsigned long)
-public: static void* __fastcall AMarkerReviveOther::operator new(unsigned int,enum EInternal*)
-public: static void* __fastcall APawnFactory::operator new(unsigned int,class UObject*,class FName,unsigned long)
-public: static void* __fastcall APawnFactory::operator new(unsigned int,enum EInternal*)
-public: static void* __fastcall ASpawnPoint::operator new(unsigned int,class UObject*,class FName,unsigned long)
-public: static void* __fastcall ASpawnPoint::operator new(unsigned int,enum EInternal*)
-public: static void* __fastcall UACTION_MoveToPoint::operator new(unsigned int,class UObject*,class FName,unsigned long)
-public: static void* __fastcall UACTION_MoveToPoint::operator new(unsigned int,enum EInternal*)
-public: static void* __fastcall UCTDamageMelee::operator new(unsigned int,class UObject*,class FName,unsigned long)
-public: static void* __fastcall UCTDamageMelee::operator new(unsigned int,enum EInternal*)
-public: static void* __fastcall UCTDamageType::operator new(unsigned int,class UObject*,class FName,unsigned long)
-public: static void* __fastcall UCTDamageType::operator new(unsigned int,enum EInternal*)
-public: static void* __fastcall UFootstepInfo::operator new(unsigned int,class UObject*,class FName,unsigned long)
-public: static void* __fastcall UFootstepInfo::operator new(unsigned int,enum EInternal*)
-public: static void* __fastcall UGOAL_ChangeAimTurn::operator new(unsigned int,class UObject*,class FName,unsigned long)
-public: static void* __fastcall UGOAL_ChangeAimTurn::operator new(unsigned int,enum EInternal*)
-public: static void* __fastcall UGOAL_ChangePhysics::operator new(unsigned int,class UObject*,class FName,unsigned long)
-public: static void* __fastcall UGOAL_ChangePhysics::operator new(unsigned int,enum EInternal*)
-public: static void* __fastcall UGOAL_ChangeWeapon::operator new(unsigned int,class UObject*,class FName,unsigned long)
-public: static void* __fastcall UGOAL_ChangeWeapon::operator new(unsigned int,enum EInternal*)
-public: static void* __fastcall UGOAL_CheckCorpse::operator new(unsigned int,class UObject*,class FName,unsigned long)
-public: static void* __fastcall UGOAL_CheckCorpse::operator new(unsigned int,enum EInternal*)
-public: static void* __fastcall UGOAL_Crouch::operator new(unsigned int,class UObject*,class FName,unsigned long)
-public: static void* __fastcall UGOAL_Crouch::operator new(unsigned int,enum EInternal*)
-public: static void* __fastcall UGOAL_ExecuteMarker::operator new(unsigned int,class UObject*,class FName,unsigned long)
-public: static void* __fastcall UGOAL_ExecuteMarker::operator new(unsigned int,enum EInternal*)
-public: static void* __fastcall UGOAL_FinishingMove::operator new(unsigned int,class UObject*,class FName,unsigned long)
-public: static void* __fastcall UGOAL_FinishingMove::operator new(unsigned int,enum EInternal*)
-public: static void* __fastcall UGOAL_Follow::operator new(unsigned int,class UObject*,class FName,unsigned long)
-public: static void* __fastcall UGOAL_Follow::operator new(unsigned int,enum EInternal*)
-public: static void* __fastcall UGOAL_FollowLink::operator new(unsigned int,class UObject*,class FName,unsigned long)
-public: static void* __fastcall UGOAL_FollowLink::operator new(unsigned int,enum EInternal*)
-public: static void* __fastcall UGOAL_GetBacta::operator new(unsigned int,class UObject*,class FName,unsigned long)
-public: static void* __fastcall UGOAL_GetBacta::operator new(unsigned int,enum EInternal*)
-public: static void* __fastcall UGOAL_GoThroughDoor::operator new(unsigned int,class UObject*,class FName,unsigned long)
-public: static void* __fastcall UGOAL_GoThroughDoor::operator new(unsigned int,enum EInternal*)
-public: static void* __fastcall UGOAL_Goto::operator new(unsigned int,class UObject*,class FName,unsigned long)
-public: static void* __fastcall UGOAL_Goto::operator new(unsigned int,enum EInternal*)
-public: static void* __fastcall UGOAL_GotoCautious::operator new(unsigned int,class UObject*,class FName,unsigned long)
-public: static void* __fastcall UGOAL_GotoCautious::operator new(unsigned int,enum EInternal*)
-public: static void* __fastcall UGOAL_GotoPointBlind::operator new(unsigned int,class UObject*,class FName,unsigned long)
-public: static void* __fastcall UGOAL_GotoPointBlind::operator new(unsigned int,enum EInternal*)
-public: static void* __fastcall UGOAL_GotoSpecial::operator new(unsigned int,class UObject*,class FName,unsigned long)
-public: static void* __fastcall UGOAL_GotoSpecial::operator new(unsigned int,enum EInternal*)
-public: static void* __fastcall UGOAL_HealOther::operator new(unsigned int,class UObject*,class FName,unsigned long)
-public: static void* __fastcall UGOAL_HealOther::operator new(unsigned int,enum EInternal*)
-public: static void* __fastcall UGOAL_JumpTo::operator new(unsigned int,class UObject*,class FName,unsigned long)
-public: static void* __fastcall UGOAL_JumpTo::operator new(unsigned int,enum EInternal*)
-public: static void* __fastcall UGOAL_LaunchMissiles::operator new(unsigned int,class UObject*,class FName,unsigned long)
-public: static void* __fastcall UGOAL_LaunchMissiles::operator new(unsigned int,enum EInternal*)
-public: static void* __fastcall UGOAL_ManTurret::operator new(unsigned int,class UObject*,class FName,unsigned long)
-public: static void* __fastcall UGOAL_ManTurret::operator new(unsigned int,enum EInternal*)
-public: static void* __fastcall UGOAL_MeleeAttack::operator new(unsigned int,class UObject*,class FName,unsigned long)
-public: static void* __fastcall UGOAL_MeleeAttack::operator new(unsigned int,enum EInternal*)
-public: static void* __fastcall UGOAL_MoveAndRotate::operator new(unsigned int,class UObject*,class FName,unsigned long)
-public: static void* __fastcall UGOAL_MoveAndRotate::operator new(unsigned int,enum EInternal*)
-public: static void* __fastcall UGOAL_PlayAnim::operator new(unsigned int,class UObject*,class FName,unsigned long)
-public: static void* __fastcall UGOAL_PlayAnim::operator new(unsigned int,enum EInternal*)
-public: static void* __fastcall UGOAL_PlaySound::operator new(unsigned int,class UObject*,class FName,unsigned long)
-public: static void* __fastcall UGOAL_PlaySound::operator new(unsigned int,enum EInternal*)
-public: static void* __fastcall UGOAL_Shoot::operator new(unsigned int,class UObject*,class FName,unsigned long)
-public: static void* __fastcall UGOAL_Shoot::operator new(unsigned int,enum EInternal*)
-public: static void* __fastcall UGOAL_Sleep::operator new(unsigned int,class UObject*,class FName,unsigned long)
-public: static void* __fastcall UGOAL_Sleep::operator new(unsigned int,enum EInternal*)
-public: static void* __fastcall UGOAL_SquadFollow::operator new(unsigned int,class UObject*,class FName,unsigned long)
-public: static void* __fastcall UGOAL_SquadFollow::operator new(unsigned int,enum EInternal*)
-public: static void* __fastcall UGOAL_ThrowGrenade::operator new(unsigned int,class UObject*,class FName,unsigned long)
-public: static void* __fastcall UGOAL_ThrowGrenade::operator new(unsigned int,enum EInternal*)
-public: static void* __fastcall UGOAL_Trigger::operator new(unsigned int,class UObject*,class FName,unsigned long)
-public: static void* __fastcall UGOAL_Trigger::operator new(unsigned int,enum EInternal*)
-public: static void* __fastcall UGOAL_TurnTo::operator new(unsigned int,class UObject*,class FName,unsigned long)
-public: static void* __fastcall UGOAL_TurnTo::operator new(unsigned int,enum EInternal*)
-public: static void* __fastcall UGOAL_UseActor::operator new(unsigned int,class UObject*,class FName,unsigned long)
-public: static void* __fastcall UGOAL_UseActor::operator new(unsigned int,enum EInternal*)
-public: static void* __fastcall UGOAL_WaitForEvent::operator new(unsigned int,class UObject*,class FName,unsigned long)
-public: static void* __fastcall UGOAL_WaitForEvent::operator new(unsigned int,enum EInternal*)
-public: static void* __fastcall UGOAL_WaitForLanding::operator new(unsigned int,class UObject*,class FName,unsigned long)
-public: static void* __fastcall UGOAL_WaitForLanding::operator new(unsigned int,enum EInternal*)
-public: static void* __fastcall UGOAL_WaitForScriptState::operator new(unsigned int,class UObject*,class FName,unsigned long)
-public: static void* __fastcall UGOAL_WaitForScriptState::operator new(unsigned int,enum EInternal*)
-public: static void* __fastcall UGOAL_WaitUntilNear::operator new(unsigned int,class UObject*,class FName,unsigned long)
-public: static void* __fastcall UGOAL_WaitUntilNear::operator new(unsigned int,enum EInternal*)
-public: static void* __fastcall UGoalObject::operator new(unsigned int,class UObject*,class FName,unsigned long)
-public: static void* __fastcall UGoalObject::operator new(unsigned int,enum EInternal*)
-public: static void* __fastcall UGoalQueue::operator new(unsigned int,class UObject*,class FName,unsigned long)
-public: static void* __fastcall UGoalQueue::operator new(unsigned int,enum EInternal*)
-public: static void* __fastcall UIdleInfo::operator new(unsigned int,class UObject*,class FName,unsigned long)
-public: static void* __fastcall UIdleInfo::operator new(unsigned int,enum EInternal*)
-public: static void* __fastcall ULocalSituation::operator new(unsigned int,class UObject*,class FName,unsigned long)
-public: static void* __fastcall ULocalSituation::operator new(unsigned int,enum EInternal*)
-public: static void* __fastcall UStanceDefault::operator new(unsigned int,class UObject*,class FName,unsigned long)
-public: static void* __fastcall UStanceDefault::operator new(unsigned int,enum EInternal*)
-public: static void* __fastcall UStanceEngageTarget::operator new(unsigned int,class UObject*,class FName,unsigned long)
-public: static void* __fastcall UStanceEngageTarget::operator new(unsigned int,enum EInternal*)
-public: static void* __fastcall UStanceFormUp::operator new(unsigned int,class UObject*,class FName,unsigned long)
-public: static void* __fastcall UStanceFormUp::operator new(unsigned int,enum EInternal*)
-public: static void* __fastcall UStanceFormUpTight::operator new(unsigned int,class UObject*,class FName,unsigned long)
-public: static void* __fastcall UStanceFormUpTight::operator new(unsigned int,enum EInternal*)
-public: static void* __fastcall UStanceHold::operator new(unsigned int,class UObject*,class FName,unsigned long)
-public: static void* __fastcall UStanceHold::operator new(unsigned int,enum EInternal*)
-public: static void* __fastcall UStanceHoldLoose::operator new(unsigned int,class UObject*,class FName,unsigned long)
-public: static void* __fastcall UStanceHoldLoose::operator new(unsigned int,enum EInternal*)
-public: static void* __fastcall UStancePreviousOrder::operator new(unsigned int,class UObject*,class FName,unsigned long)
-public: static void* __fastcall UStancePreviousOrder::operator new(unsigned int,enum EInternal*)
-public: static void* __fastcall UStanceSearchAndDestroy::operator new(unsigned int,class UObject*,class FName,unsigned long)
-public: static void* __fastcall UStanceSearchAndDestroy::operator new(unsigned int,enum EInternal*)
-public: static void* __fastcall UStanceSecurePosition::operator new(unsigned int,class UObject*,class FName,unsigned long)
-public: static void* __fastcall UStanceSecurePosition::operator new(unsigned int,enum EInternal*)
-public: static void* __fastcall UStateAbstractAttack::operator new(unsigned int,class UObject*,class FName,unsigned long)
-public: static void* __fastcall UStateAbstractAttack::operator new(unsigned int,enum EInternal*)
-public: static void* __fastcall UStateAsleep::operator new(unsigned int,class UObject*,class FName,unsigned long)
-public: static void* __fastcall UStateAsleep::operator new(unsigned int,enum EInternal*)
-public: static void* __fastcall UStateAttack::operator new(unsigned int,class UObject*,class FName,unsigned long)
-public: static void* __fastcall UStateAttack::operator new(unsigned int,enum EInternal*)
-public: static void* __fastcall UStateBattleDroidAttack::operator new(unsigned int,class UObject*,class FName,unsigned long)
-public: static void* __fastcall UStateBattleDroidAttack::operator new(unsigned int,enum EInternal*)
-public: static void* __fastcall UStateBerserk::operator new(unsigned int,class UObject*,class FName,unsigned long)
-public: static void* __fastcall UStateBerserk::operator new(unsigned int,enum EInternal*)
-public: static void* __fastcall UStateDispensing::operator new(unsigned int,class UObject*,class FName,unsigned long)
-public: static void* __fastcall UStateDispensing::operator new(unsigned int,enum EInternal*)
-public: static void* __fastcall UStateDroidekaAttack::operator new(unsigned int,class UObject*,class FName,unsigned long)
-public: static void* __fastcall UStateDroidekaAttack::operator new(unsigned int,enum EInternal*)
-public: static void* __fastcall UStateDroneAttack::operator new(unsigned int,class UObject*,class FName,unsigned long)
-public: static void* __fastcall UStateDroneAttack::operator new(unsigned int,enum EInternal*)
-public: static void* __fastcall UStateFlyingAttack::operator new(unsigned int,class UObject*,class FName,unsigned long)
-public: static void* __fastcall UStateFlyingAttack::operator new(unsigned int,enum EInternal*)
-public: static void* __fastcall UStateFreakOut::operator new(unsigned int,class UObject*,class FName,unsigned long)
-public: static void* __fastcall UStateFreakOut::operator new(unsigned int,enum EInternal*)
-public: static void* __fastcall UStateGeonosianWarriorAttack::operator new(unsigned int,class UObject*,class FName,unsigned long)
-public: static void* __fastcall UStateGeonosianWarriorAttack::operator new(unsigned int,enum EInternal*)
-public: static void* __fastcall UStateHeavyAttack::operator new(unsigned int,class UObject*,class FName,unsigned long)
-public: static void* __fastcall UStateHeavyAttack::operator new(unsigned int,enum EInternal*)
-public: static void* __fastcall UStateIdle::operator new(unsigned int,class UObject*,class FName,unsigned long)
-public: static void* __fastcall UStateIdle::operator new(unsigned int,enum EInternal*)
-public: static void* __fastcall UStateIdleSquad::operator new(unsigned int,class UObject*,class FName,unsigned long)
-public: static void* __fastcall UStateIdleSquad::operator new(unsigned int,enum EInternal*)
-public: static void* __fastcall UStateInvestigate::operator new(unsigned int,class UObject*,class FName,unsigned long)
-public: static void* __fastcall UStateInvestigate::operator new(unsigned int,enum EInternal*)
-public: static void* __fastcall UStateMarker::operator new(unsigned int,class UObject*,class FName,unsigned long)
-public: static void* __fastcall UStateMarker::operator new(unsigned int,enum EInternal*)
-public: static void* __fastcall UStateObject::operator new(unsigned int,class UObject*,class FName,unsigned long)
-public: static void* __fastcall UStateObject::operator new(unsigned int,enum EInternal*)
-public: static void* __fastcall UStatePatrol::operator new(unsigned int,class UObject*,class FName,unsigned long)
-public: static void* __fastcall UStatePatrol::operator new(unsigned int,enum EInternal*)
-public: static void* __fastcall UStatePerched::operator new(unsigned int,class UObject*,class FName,unsigned long)
-public: static void* __fastcall UStatePerched::operator new(unsigned int,enum EInternal*)
-public: static void* __fastcall UStateRetreat::operator new(unsigned int,class UObject*,class FName,unsigned long)
-public: static void* __fastcall UStateRetreat::operator new(unsigned int,enum EInternal*)
-public: static void* __fastcall UStateScriptWrapper::operator new(unsigned int,class UObject*,class FName,unsigned long)
-public: static void* __fastcall UStateScriptWrapper::operator new(unsigned int,enum EInternal*)
-public: static void* __fastcall UStateShutdown::operator new(unsigned int,class UObject*,class FName,unsigned long)
-public: static void* __fastcall UStateShutdown::operator new(unsigned int,enum EInternal*)
-public: static void* __fastcall UStateSimpleAttack::operator new(unsigned int,class UObject*,class FName,unsigned long)
-public: static void* __fastcall UStateSimpleAttack::operator new(unsigned int,enum EInternal*)
-public: static void* __fastcall UStateSpiderDroidAttack::operator new(unsigned int,class UObject*,class FName,unsigned long)
-public: static void* __fastcall UStateSpiderDroidAttack::operator new(unsigned int,enum EInternal*)
-public: static void* __fastcall UStateSquad::operator new(unsigned int,class UObject*,class FName,unsigned long)
-public: static void* __fastcall UStateSquad::operator new(unsigned int,enum EInternal*)
-public: static void* __fastcall UStateSquadAttack::operator new(unsigned int,class UObject*,class FName,unsigned long)
-public: static void* __fastcall UStateSquadAttack::operator new(unsigned int,enum EInternal*)
-public: static void* __fastcall UStateStationaryAttack::operator new(unsigned int,class UObject*,class FName,unsigned long)
-public: static void* __fastcall UStateStationaryAttack::operator new(unsigned int,enum EInternal*)
-public: static void* __fastcall UStateTether::operator new(unsigned int,class UObject*,class FName,unsigned long)
-public: static void* __fastcall UStateTether::operator new(unsigned int,enum EInternal*)
-public: static void* __fastcall UStateTrandoshanAttack::operator new(unsigned int,class UObject*,class FName,unsigned long)
-public: static void* __fastcall UStateTrandoshanAttack::operator new(unsigned int,enum EInternal*)
-public: static void* __fastcall UStateTurretAttack::operator new(unsigned int,class UObject*,class FName,unsigned long)
-public: static void* __fastcall UStateTurretAttack::operator new(unsigned int,enum EInternal*)
-public: static void* __fastcall UStateWander::operator new(unsigned int,class UObject*,class FName,unsigned long)
-public: static void* __fastcall UStateWander::operator new(unsigned int,enum EInternal*)
-public: static void* __fastcall UStateWookieeAttack::operator new(unsigned int,class UObject*,class FName,unsigned long)
-public: static void* __fastcall UStateWookieeAttack::operator new(unsigned int,enum EInternal*)
 public: class AActivateDoor& __thiscall AActivateDoor::operator=(class AActivateDoor const&)
 public: class AActivateTrap& __thiscall AActivateTrap::operator=(class AActivateTrap const&)
 public: class ABactaDispenser& __thiscall ABactaDispenser::operator=(class ABactaDispenser const&)
@@ -660,133 +460,31 @@ public: class UStateTrandoshanAttack& __thiscall UStateTrandoshanAttack::operato
 public: class UStateTurretAttack& __thiscall UStateTurretAttack::operator=(class UStateTurretAttack const&)
 public: class UStateWander& __thiscall UStateWander::operator=(class UStateWander const&)
 public: class UStateWookieeAttack& __thiscall UStateWookieeAttack::operator=(class UStateWookieeAttack const&)
-const AActivateDoor::`vftable'
-const AActivateTrap::`vftable'
-const ABactaDispenser::`vftable'
-const ACTBot::`vftable'
-const ACTGameInfo::`vftable'
-const ACTMarker::`vftable'
-const ACTPawn::`vftable'
-const ACTPlayer::`vftable'
-const ACTSquadNative::`vftable'
-const ACTTeamInfo::`vftable'
-const AFactory::`vftable'
-const AHackTerminal::`vftable'
-const AKnockoverProp::`vftable'
-const AMarkerGetBactaNative::`vftable'
-const AMarkerReviveOther::`vftable'
-const APawnFactory::`vftable'
-const ASpawnPoint::`vftable'
-const UACTION_MoveToPoint::`vftable'
-const UCTDamageMelee::`vftable'
-const UCTDamageType::`vftable'
-const UFootstepInfo::`vftable'
-const UGOAL_ChangeAimTurn::`vftable'
-const UGOAL_ChangePhysics::`vftable'
-const UGOAL_ChangeWeapon::`vftable'
-const UGOAL_CheckCorpse::`vftable'
-const UGOAL_Crouch::`vftable'
-const UGOAL_ExecuteMarker::`vftable'
-const UGOAL_FinishingMove::`vftable'
-const UGOAL_Follow::`vftable'
-const UGOAL_FollowLink::`vftable'
-const UGOAL_GetBacta::`vftable'
-const UGOAL_GoThroughDoor::`vftable'
-const UGOAL_Goto::`vftable'
-const UGOAL_GotoCautious::`vftable'
-const UGOAL_GotoPointBlind::`vftable'
-const UGOAL_GotoSpecial::`vftable'
-const UGOAL_HealOther::`vftable'
-const UGOAL_JumpTo::`vftable'
-const UGOAL_LaunchMissiles::`vftable'
-const UGOAL_ManTurret::`vftable'
-const UGOAL_MeleeAttack::`vftable'
-const UGOAL_MoveAndRotate::`vftable'
-const UGOAL_PlayAnim::`vftable'
-const UGOAL_PlaySound::`vftable'
-const UGOAL_Shoot::`vftable'
-const UGOAL_Sleep::`vftable'
-const UGOAL_SquadFollow::`vftable'
-const UGOAL_ThrowGrenade::`vftable'
-const UGOAL_Trigger::`vftable'
-const UGOAL_TurnTo::`vftable'
-const UGOAL_UseActor::`vftable'
-const UGOAL_WaitForEvent::`vftable'
-const UGOAL_WaitForLanding::`vftable'
-const UGOAL_WaitForScriptState::`vftable'
-const UGOAL_WaitUntilNear::`vftable'
-const UGoalObject::`vftable'
-const UGoalQueue::`vftable'
-const UIdleInfo::`vftable'
-const ULocalSituation::`vftable'
-const UStanceDefault::`vftable'
-const UStanceEngageTarget::`vftable'
-const UStanceFormUp::`vftable'
-const UStanceFormUpTight::`vftable'
-const UStanceHold::`vftable'
-const UStanceHoldLoose::`vftable'
-const UStancePreviousOrder::`vftable'
-const UStanceSearchAndDestroy::`vftable'
-const UStanceSecurePosition::`vftable'
-const UStateAbstractAttack::`vftable'
-const UStateAsleep::`vftable'
-const UStateAttack::`vftable'
-const UStateBattleDroidAttack::`vftable'
-const UStateBerserk::`vftable'
-const UStateDispensing::`vftable'
-const UStateDroidekaAttack::`vftable'
-const UStateDroneAttack::`vftable'
-const UStateFlyingAttack::`vftable'
-const UStateFreakOut::`vftable'
-const UStateGeonosianWarriorAttack::`vftable'
-const UStateHeavyAttack::`vftable'
-const UStateIdle::`vftable'
-const UStateIdleSquad::`vftable'
-const UStateInvestigate::`vftable'
-const UStateMarker::`vftable'
-const UStateObject::`vftable'
-const UStatePatrol::`vftable'
-const UStatePerched::`vftable'
-const UStateRetreat::`vftable'
-const UStateScriptWrapper::`vftable'
-const UStateShutdown::`vftable'
-const UStateSimpleAttack::`vftable'
-const UStateSpiderDroidAttack::`vftable'
-const UStateSquad::`vftable'
-const UStateSquadAttack::`vftable'
-const UStateStationaryAttack::`vftable'
-const UStateTether::`vftable'
-const UStateTrandoshanAttack::`vftable'
-const UStateTurretAttack::`vftable'
-const UStateWander::`vftable'
-const UStateWookieeAttack::`vftable'
-`public: void __thiscall ABactaDispenser::DepleteBacta()'::`2'::`local static guard'{2}'
-`public: void __thiscall ACTPlayer::ServerRevive(class APawn*)'::`2'::`local static guard'{2}'
 public: void __thiscall UGOAL_ThrowGrenade::`default constructor closure'()
 public: void __thiscall UGoalObject::Activate()
 public: int __thiscall UStateObject::Activate()
-protected: struct FSquadAssignment& __thiscall ACTSquadNative::AddAssignment(class APawn*,class UGoalObject*,class UObject*,class UClass*,bool)
+protected: struct FSquadAssignment& __thiscall ACTSquadNative::AddAssignment(class APawn*, class UGoalObject*, class UObject*, class UClass*, bool)
 public: void __thiscall UStateObject::AddGestureGoal(class UGoalObject*)
 public: void __thiscall UGoalQueue::AddGoal(class UGoalObject*)
 public: void __thiscall UStateObject::AddGoal(class UGoalObject*)
 public: void __thiscall UGoalQueue::AddGoalToFront(class UGoalObject*)
-protected: void __thiscall ACTMarker::AddMarkerCue(class APawn*,enum EPawnAudioEvent,float)
-public: class UGoalObject* __thiscall ACTMarker::AddMarkerGoal(class APawn*,float,class UGoalObject*)
-public: class UGoalObject* __thiscall ACTSquadNative::AddMarkerGoal(class APawn*,float,class UGoalObject*,class ASquadMarker*,bool)
+protected: void __thiscall ACTMarker::AddMarkerCue(class APawn*, enum EPawnAudioEvent, float)
+public: class UGoalObject* __thiscall ACTMarker::AddMarkerGoal(class APawn*, float, class UGoalObject*)
+public: class UGoalObject* __thiscall ACTSquadNative::AddMarkerGoal(class APawn*, float, class UGoalObject*, class ASquadMarker*, bool)
 public: virtual int __thiscall AActivateTrap::AddMyMarker(class AActor*)
 public: virtual int __thiscall AKnockoverProp::AddMyMarker(class AActor*)
 protected: void __thiscall ACTBot::AddNextAutoIdleSequence()
-public: class UGoalObject* __thiscall ACTMarker::AddParallelGoal(class APawn*,float,class UGoalObject*)
-public: virtual void __thiscall ACTBot::AddReflexAnimGoal(class FName,class FName,int,float,int)
+public: class UGoalObject* __thiscall ACTMarker::AddParallelGoal(class APawn*, float, class UGoalObject*)
+public: virtual void __thiscall ACTBot::AddReflexAnimGoal(class FName, class FName, int, float, int)
 public: virtual void __thiscall ACTBot::AddReflexSleepGoal(float)
-protected: class UGoalObject* __thiscall ACTSquadNative::AddSquadGoal(class APawn*,float,class UGoalObject*,class UObject*,bool,bool)
+protected: class UGoalObject* __thiscall ACTSquadNative::AddSquadGoal(class APawn*, float, class UGoalObject*, class UObject*, bool, bool)
 public: class UStateObject* __thiscall ACTBot::AddStateObject(class UClass*)
 private: void __thiscall UStateInvestigate::AddStimulusGoals()
 public: class UStateScriptWrapper* __thiscall ACTBot::AddWrapperStateObject(class FName)
 public: class FVector __thiscall UGOAL_Follow::AdjustDesiredPositionForFormation(class FVector&)
 public: bool __thiscall ACTBot::AllowedByPreventTether(class AActor*)
-public: int __thiscall ACTBot::AllowedToFire()const 
-public: void __thiscall ULocalSituation::Assess(class ACTBot*,float)
+public: int __thiscall ACTBot::AllowedToFire() const 
+public: void __thiscall ULocalSituation::Assess(class ACTBot*, float)
 public: void __thiscall ACTSquadNative::AssignIcons()
 public: virtual void __thiscall ACTSquadNative::AssignMovementRoles(bool)
 public: virtual enum ESquadCombatRole __thiscall ACTSquadNative::AssignStackingRole(class APawn*)
@@ -798,19 +496,19 @@ private: void __thiscall UStateIdle::CalculateNextIdle()
 public: int __thiscall ACTBot::CanDodge()
 public: int __thiscall ACTBot::CanJumpTo(class FVector const&)
 public: int __thiscall ACTBot::CanMeleeAttack(class AActor*)
-public: int __thiscall ACTBot::CanMoveTo(class FVector const&,class AActor*)
+public: int __thiscall ACTBot::CanMoveTo(class FVector const&, class AActor*)
 public: int __thiscall ACTBot::CanPathNear(class AActor*)
 public: int __thiscall ACTBot::CanPathTo(class AActor*)
 public: int __thiscall ACTBot::CanSeeEnemy(class AActor*)
 public: int __thiscall ACTBot::CanSeeOrHear(class APawn*)
 public: virtual int __thiscall UStateObject::CanShutdown()
-public: int __thiscall ACTBot::CanStep(enum EDirection,class ACoverPoint*)
+public: int __thiscall ACTBot::CanStep(enum EDirection, class ACoverPoint*)
 public: int __thiscall ACTBot::CanThrowGrenadeTo(class FVector const&)
 public: void __thiscall ACTSquadNative::CancelAllMarkers(class APawn*)
 public: void __thiscall ACTSquadNative::CancelAllOrders(class APawn*)
 public: virtual int __thiscall ACTMarker::CancelMarker(class APawn*)
 public: void __thiscall ACTBot::ChangeSquadTether(class AActor*)
-public: void __thiscall ACTSquadNative::ChangeStance(class UClass*,bool,class AActor*)
+public: void __thiscall ACTSquadNative::ChangeStance(class UClass*, bool, class AActor*)
 protected: bool __thiscall ACTSquadNative::CheckForSquadDeath()
 protected: void __thiscall ACTSquadNative::CheckGotoForCompletion(int)
 public: void __thiscall UGoalQueue::Clear()
@@ -823,10 +521,10 @@ public: int __thiscall ACTSquadNative::ClearanceToFire()
 protected: void __thiscall ACTSquadNative::CompleteGotoObjective(int)
 public: virtual void __thiscall AMarkerReviveOther::CompleteMarker()
 protected: void __thiscall ACTSquadNative::CompleteObjective(int)
-public: float __thiscall ACTBot::ComputeDesiredSpeed(class FVector const&,float,class FVector const&,bool)
+public: float __thiscall ACTBot::ComputeDesiredSpeed(class FVector const&, float, class FVector const&, bool)
 protected: void __thiscall UStateAbstractAttack::ComputeEssentials()
 protected: virtual int __thiscall UStateSquadAttack::ComputeMoveMode(int)
-public: virtual bool __thiscall ACTPlayer::CrossesMyFire(class FVector const&,class FVector const&)
+public: virtual bool __thiscall ACTPlayer::CrossesMyFire(class FVector const&, class FVector const&)
 public: void __thiscall ACTBot::Crouch(bool)
 public: virtual void __thiscall UGOAL_CheckCorpse::Deactivate()
 protected: virtual void __thiscall UGOAL_FinishingMove::Deactivate()
@@ -845,14 +543,14 @@ public: virtual void __thiscall UGOAL_Shoot::Deactivate()
 public: virtual void __thiscall UGOAL_TurnTo::Deactivate()
 private: virtual void __thiscall UGOAL_WaitForEvent::Deactivate()
 public: virtual void __thiscall UGoalObject::Deactivate()
-public: virtual class FColor __thiscall UStateAbstractAttack::DebugColor()const 
-public: virtual class FColor __thiscall UStateAttack::DebugColor()const 
-public: virtual class FColor __thiscall UStateDispensing::DebugColor()const 
-public: virtual class FColor __thiscall UStateObject::DebugColor()const 
-public: virtual class FColor __thiscall UStateShutdown::DebugColor()const 
-public: virtual class FColor __thiscall UStateSquadAttack::DebugColor()const 
-public: virtual class FColor __thiscall UStateStationaryAttack::DebugColor()const 
-public: virtual class FColor __thiscall UStateTether::DebugColor()const 
+public: virtual class FColor __thiscall UStateAbstractAttack::DebugColor() const 
+public: virtual class FColor __thiscall UStateAttack::DebugColor() const 
+public: virtual class FColor __thiscall UStateDispensing::DebugColor() const 
+public: virtual class FColor __thiscall UStateObject::DebugColor() const 
+public: virtual class FColor __thiscall UStateShutdown::DebugColor() const 
+public: virtual class FColor __thiscall UStateSquadAttack::DebugColor() const 
+public: virtual class FColor __thiscall UStateStationaryAttack::DebugColor() const 
+public: virtual class FColor __thiscall UStateTether::DebugColor() const 
 public: virtual void __thiscall ACTBot::DebugDraw(class FLineBatcher&)
 public: virtual void __thiscall UGOAL_FollowLink::DebugDraw(class FLineBatcher&)
 public: virtual void __thiscall UGoalQueue::DebugDraw(class FLineBatcher&)
@@ -884,67 +582,67 @@ public: virtual void __thiscall UStateDispensing::Destroy()
 public: virtual void __thiscall UStateInvestigate::Destroy()
 private: virtual void __thiscall UStateMarker::Destroy()
 public: void __thiscall ACTSquadNative::DetermineBattleStatus()
-protected: class USound* __thiscall ACTPawn::DetermineFootstepSound(unsigned char,unsigned char,class USound*)const 
+protected: class USound* __thiscall ACTPawn::DetermineFootstepSound(unsigned char, unsigned char, class USound*) const 
 public: enum ESquadCombatRole __thiscall ACTBot::DetermineStackRole()
-public: int __thiscall ACTBot::DoBumpResponse(class UStimulus*,class UGoalQueue*)
-public: bool __thiscall ACTBot::DoCornerAndShoot(enum EDirection,class UGoalQueue*)
-public: enum EDirection __thiscall ACTBot::DoCornerOut(enum EDirection,class UGoalQueue*)
-public: void __thiscall ACTBot::DoCornerReturn(enum EDirection,class UGoalQueue*)
+public: int __thiscall ACTBot::DoBumpResponse(class UStimulus*, class UGoalQueue*)
+public: bool __thiscall ACTBot::DoCornerAndShoot(enum EDirection, class UGoalQueue*)
+public: enum EDirection __thiscall ACTBot::DoCornerOut(enum EDirection, class UGoalQueue*)
+public: void __thiscall ACTBot::DoCornerReturn(enum EDirection, class UGoalQueue*)
 private: void __thiscall UStateGeonosianWarriorAttack::DoDefensiveJump()
-public: void __thiscall ACTBot::DoDodgeAndShoot(enum EDirection,class UGoalQueue*)
-public: void __thiscall ACTBot::DoFlyingDodge(class APawn*,class UGoalQueue*)
-public: int __thiscall ACTBot::DoGrenadeReaction(class UStimulus*,class UGoalQueue*)
-public: void __thiscall ACTBot::DoLeanAndShoot(enum EDirection,class UGoalQueue*)
-public: void __thiscall ACTBot::DoMeleeAttack(class AActor*,class UGoalQueue*)
+public: void __thiscall ACTBot::DoDodgeAndShoot(enum EDirection, class UGoalQueue*)
+public: void __thiscall ACTBot::DoFlyingDodge(class APawn*, class UGoalQueue*)
+public: int __thiscall ACTBot::DoGrenadeReaction(class UStimulus*, class UGoalQueue*)
+public: void __thiscall ACTBot::DoLeanAndShoot(enum EDirection, class UGoalQueue*)
+public: void __thiscall ACTBot::DoMeleeAttack(class AActor*, class UGoalQueue*)
 public: void __thiscall ACTBot::DoReload(class UGoalQueue*)
-public: int __thiscall ACTBot::DoShieldReaction(class UStimulus*,class UGoalQueue*)
-public: void __thiscall ACTBot::DoStandingDodge(class APawn*,class UGoalQueue*)
-public: void __thiscall ACTBot::DoStep(enum EDirection,class UGoalQueue*)
-public: void __thiscall ACTBot::DoStepAndShoot(enum EDirection,bool,class UGoalQueue*)
+public: int __thiscall ACTBot::DoShieldReaction(class UStimulus*, class UGoalQueue*)
+public: void __thiscall ACTBot::DoStandingDodge(class APawn*, class UGoalQueue*)
+public: void __thiscall ACTBot::DoStep(enum EDirection, class UGoalQueue*)
+public: void __thiscall ACTBot::DoStepAndShoot(enum EDirection, bool, class UGoalQueue*)
 public: void __thiscall ACTBot::DoThrowGrenade(class UGoalQueue*)
 public: void __thiscall UStateObject::Enable(bool)
 public: void __thiscall ACTBot::EnableBotCombat(bool)
-public: void __thiscall ACTBot::EnableState(class UClass*,int,int)
+public: void __thiscall ACTBot::EnableState(class UClass*, int, int)
 public: int __thiscall ACTSquadNative::EngageLocation(class FVector const&)
 public: void __thiscall ACTSquadNative::EngageTarget(class AActor*)
-private: virtual float __thiscall UStateAbstractAttack::EstimateUtility(class ACTBot*,class ULocalSituation const*)
-private: virtual float __thiscall UStateBerserk::EstimateUtility(class ACTBot*,class ULocalSituation const*)
-private: virtual float __thiscall UStateDispensing::EstimateUtility(class ACTBot*,class ULocalSituation const*)
-private: virtual float __thiscall UStateFreakOut::EstimateUtility(class ACTBot*,class ULocalSituation const*)
-private: virtual float __thiscall UStateIdle::EstimateUtility(class ACTBot*,class ULocalSituation const*)
-private: virtual float __thiscall UStateIdleSquad::EstimateUtility(class ACTBot*,class ULocalSituation const*)
-private: virtual float __thiscall UStateInvestigate::EstimateUtility(class ACTBot*,class ULocalSituation const*)
-private: virtual float __thiscall UStateMarker::EstimateUtility(class ACTBot*,class ULocalSituation const*)
-private: virtual float __thiscall UStateObject::EstimateUtility(class ACTBot*,class ULocalSituation const*)
-private: virtual float __thiscall UStatePatrol::EstimateUtility(class ACTBot*,class ULocalSituation const*)
-private: virtual float __thiscall UStateRetreat::EstimateUtility(class ACTBot*,class ULocalSituation const*)
-private: virtual float __thiscall UStateScriptWrapper::EstimateUtility(class ACTBot*,class ULocalSituation const*)
-private: virtual float __thiscall UStateShutdown::EstimateUtility(class ACTBot*,class ULocalSituation const*)
-private: virtual float __thiscall UStateSquad::EstimateUtility(class ACTBot*,class ULocalSituation const*)
-private: virtual float __thiscall UStateTether::EstimateUtility(class ACTBot*,class ULocalSituation const*)
-private: virtual float __thiscall UStateWander::EstimateUtility(class ACTBot*,class ULocalSituation const*)
+private: virtual float __thiscall UStateAbstractAttack::EstimateUtility(class ACTBot*, class ULocalSituation const*)
+private: virtual float __thiscall UStateBerserk::EstimateUtility(class ACTBot*, class ULocalSituation const*)
+private: virtual float __thiscall UStateDispensing::EstimateUtility(class ACTBot*, class ULocalSituation const*)
+private: virtual float __thiscall UStateFreakOut::EstimateUtility(class ACTBot*, class ULocalSituation const*)
+private: virtual float __thiscall UStateIdle::EstimateUtility(class ACTBot*, class ULocalSituation const*)
+private: virtual float __thiscall UStateIdleSquad::EstimateUtility(class ACTBot*, class ULocalSituation const*)
+private: virtual float __thiscall UStateInvestigate::EstimateUtility(class ACTBot*, class ULocalSituation const*)
+private: virtual float __thiscall UStateMarker::EstimateUtility(class ACTBot*, class ULocalSituation const*)
+private: virtual float __thiscall UStateObject::EstimateUtility(class ACTBot*, class ULocalSituation const*)
+private: virtual float __thiscall UStatePatrol::EstimateUtility(class ACTBot*, class ULocalSituation const*)
+private: virtual float __thiscall UStateRetreat::EstimateUtility(class ACTBot*, class ULocalSituation const*)
+private: virtual float __thiscall UStateScriptWrapper::EstimateUtility(class ACTBot*, class ULocalSituation const*)
+private: virtual float __thiscall UStateShutdown::EstimateUtility(class ACTBot*, class ULocalSituation const*)
+private: virtual float __thiscall UStateSquad::EstimateUtility(class ACTBot*, class ULocalSituation const*)
+private: virtual float __thiscall UStateTether::EstimateUtility(class ACTBot*, class ULocalSituation const*)
+private: virtual float __thiscall UStateWander::EstimateUtility(class ACTBot*, class ULocalSituation const*)
 public: virtual int __thiscall UStateAbstractAttack::ExecuteManeuver(enum UStateAbstractAttack::EManuvers)
 public: virtual int __thiscall ACTMarker::FailMarker(class APawn*)
-protected: int __thiscall ACTSquadNative::FindAssignmentIndex(class APawn const*,int)const 
-protected: int __thiscall ACTSquadNative::FindAssignmentIndex(class APawn const*,class UClass const*,class AActor const*,int)const 
-protected: int __thiscall ACTSquadNative::FindAssignmentIndex(class UClass const*,int)const 
-protected: int __thiscall ACTSquadNative::FindAssignmentIndex(class UClass const*,class AActor const*,int)const 
-protected: int __thiscall ACTSquadNative::FindAssignmentIndex(class UGoalObject const*,int)const 
-protected: int __thiscall ACTSquadNative::FindAssignmentIndexByOwner(class UObject const*,class APawn*,int)const 
-public: class ACoverPoint* __thiscall ACTBot::FindBestCoverpoint(class FVector const&,class FVector const&,float,int,int,int,int,int)
-public: class ACoverPoint* __thiscall ACTBot::FindBestIdleCover(class FVector const&,float,int,int)
-public: class ABactaDispenser* __thiscall ACTBot::FindClosestBactaDispenser(class FVector const&,float)
-public: class ANavigationPoint* __thiscall ACTBot::FindClosestCombatPoint(class FVector const&,class FVector const&,float,int)
-protected: class ANavigationPoint* __thiscall ACTSquadNative::FindEngageLocation(class FVector const&,float)
+protected: int __thiscall ACTSquadNative::FindAssignmentIndex(class APawn const*, int) const 
+protected: int __thiscall ACTSquadNative::FindAssignmentIndex(class APawn const*, class UClass const*, class AActor const*, int) const 
+protected: int __thiscall ACTSquadNative::FindAssignmentIndex(class UClass const*, int) const 
+protected: int __thiscall ACTSquadNative::FindAssignmentIndex(class UClass const*, class AActor const*, int) const 
+protected: int __thiscall ACTSquadNative::FindAssignmentIndex(class UGoalObject const*, int) const 
+protected: int __thiscall ACTSquadNative::FindAssignmentIndexByOwner(class UObject const*, class APawn*, int) const 
+public: class ACoverPoint* __thiscall ACTBot::FindBestCoverpoint(class FVector const&, class FVector const&, float, int, int, int, int, int)
+public: class ACoverPoint* __thiscall ACTBot::FindBestIdleCover(class FVector const&, float, int, int)
+public: class ABactaDispenser* __thiscall ACTBot::FindClosestBactaDispenser(class FVector const&, float)
+public: class ANavigationPoint* __thiscall ACTBot::FindClosestCombatPoint(class FVector const&, class FVector const&, float, int)
+protected: class ANavigationPoint* __thiscall ACTSquadNative::FindEngageLocation(class FVector const&, float)
 public: class ANavigationPoint* __thiscall ACTSquadNative::FindIdleSpot(class ACTBot*)
-public: int __thiscall ACTBot::FindLegalMoveDirectionAway(class FVector const&,class FVector&,float)
+public: int __thiscall ACTBot::FindLegalMoveDirectionAway(class FVector const&, class FVector&, float)
 protected: class AActor* __thiscall ACTBot::FindLocalActorOfInterest()
-public: class ANavigationPoint* __thiscall ACTBot::FindNearestNavNode(class FVector const&,class UClass*,float,int,int,int)
+public: class ANavigationPoint* __thiscall ACTBot::FindNearestNavNode(class FVector const&, class UClass*, float, int, int, int)
 protected: void __thiscall ACTSquadNative::FindObjectivePoints()
-public: class ANavigationPoint* __thiscall ACTBot::FindRandomNavNode(class FVector const&,class UClass*,float,int,int,int)
-public: class ANavigationPoint* __thiscall ACTBot::FindSquadCombatPoint(class FVector const&,class FVector const&)
-public: class ANavigationPoint* __thiscall ACTBot::FindSquadCoverOrCombat(class FVector const&,class FVector const&,class TArray<class ANavigationPoint*> const&,float,int,int,int,int,int)
-public: class ANavigationPoint* __thiscall ACTBot::FindSquadIdleCombatPoint(class FVector const&,float)
+public: class ANavigationPoint* __thiscall ACTBot::FindRandomNavNode(class FVector const&, class UClass*, float, int, int, int)
+public: class ANavigationPoint* __thiscall ACTBot::FindSquadCombatPoint(class FVector const&, class FVector const&)
+public: class ANavigationPoint* __thiscall ACTBot::FindSquadCoverOrCombat(class FVector const&, class FVector const&, class TArray<class ANavigationPoint*> const&, float, int, int, int, int, int)
+public: class ANavigationPoint* __thiscall ACTBot::FindSquadIdleCombatPoint(class FVector const&, float)
 public: virtual int __thiscall ACTMarker::FinishMarker()
 public: virtual void __thiscall ACTBot::FixupSubObjectPointers()
 public: virtual void __thiscall UGoalQueue::FixupSubObjectPointers()
@@ -953,15 +651,15 @@ public: virtual void __thiscall UStateInvestigate::FixupSubObjectPointers()
 public: virtual void __thiscall UStateMarker::FixupSubObjectPointers()
 public: virtual void __thiscall UStateObject::FixupSubObjectPointers()
 public: void __thiscall ACTBot::ForceDecision()
-public: void __thiscall ACTBot::ForceState(class UClass*,int,float)
+public: void __thiscall ACTBot::ForceState(class UClass*, int, float)
 public: class UGoalObject* __thiscall UGoalQueue::Front()
 public: void __thiscall ACTBot::FullStop()
-public: void __thiscall ACTBot::GenerateGoalsFromPath(class TArray<class UReachSpec*> const&,class UGoalQueue*,float,float)
-public: float __thiscall ACTBot::GeneratePathingGoals(class ANavigationPoint*,class ANavigationPoint*,class UGoalQueue*,bool)
+public: void __thiscall ACTBot::GenerateGoalsFromPath(class TArray<class UReachSpec*> const&, class UGoalQueue*, float, float)
+public: float __thiscall ACTBot::GeneratePathingGoals(class ANavigationPoint*, class ANavigationPoint*, class UGoalQueue*, bool)
 public: class UStateObject* __thiscall ACTBot::GetActiveState()
 public: virtual class ANavigationPoint* __thiscall ABactaDispenser::GetAnchor()
 public: class AActor* __thiscall ACTBot::GetBestEnemy()
-public: class ACTBot* __thiscall ACTSquadNative::GetBot(int)const 
+public: class ACTBot* __thiscall ACTSquadNative::GetBot(int) const 
 private: void __thiscall UGOAL_GotoSpecial::GetClose()
 public: class FVector __thiscall UGOAL_Follow::GetDesiredFuturePosition()
 protected: class ANavigationPoint* __thiscall UGOAL_Follow::GetDestinationAnchor(class FVector const&)
@@ -969,199 +667,99 @@ protected: virtual class FVector __thiscall UGOAL_Follow::GetFormationOffset()
 protected: virtual class FVector __thiscall UGOAL_SquadFollow::GetFormationOffset()
 protected: virtual class AActor* __thiscall ACTSquadNative::GetFutureObjective()
 protected: class APawn* __thiscall ACTSquadNative::GetIncapacitatedMember()
-public: class FVector __thiscall ACTBot::GetLocalDirectionToNextObjective()const 
+public: class FVector __thiscall ACTBot::GetLocalDirectionToNextObjective() const 
 protected: bool __thiscall ACTBot::GetLookDirectorGestures()
-protected: struct FSquadVoiceLine __thiscall ACTSquadNative::GetMemberKilledLine(int&,class APawn*,class APawn*,class AController*,class UClass*)
-public: class FVector __thiscall ACTBot::GetModifiedDestination(class ANavigationPoint*)const 
+protected: struct FSquadVoiceLine __thiscall ACTSquadNative::GetMemberKilledLine(int&, class APawn*, class APawn*, class AController*, class UClass*)
+public: class FVector __thiscall ACTBot::GetModifiedDestination(class ANavigationPoint*) const 
 protected: enum EPawnAudioEvent __thiscall ACTSquadNative::GetRefusalCue(class APawn*)
-public: virtual enum ETeamRelationship __thiscall ACTTeamInfo::GetRelationTowards(int)const 
-public: virtual enum ETeamRelationship __thiscall ACTTeamInfo::GetRelationTowards(class ATeamInfo const*)const 
-public: class ANavigationPoint* __thiscall ACTBot::GetReservedCombatNode()const 
-public: class ACoverPoint* __thiscall ACTBot::GetReservedCover()const 
-public: class ANavigationPoint* __thiscall ACTBot::GetReservedNode()const 
-public: class UStateObject* __thiscall ACTBot::GetStateObject(class UClass*,int)
+public: virtual enum ETeamRelationship __thiscall ACTTeamInfo::GetRelationTowards(int) const 
+public: virtual enum ETeamRelationship __thiscall ACTTeamInfo::GetRelationTowards(class ATeamInfo const*) const 
+public: class ANavigationPoint* __thiscall ACTBot::GetReservedCombatNode() const 
+public: class ACoverPoint* __thiscall ACTBot::GetReservedCover() const 
+public: class ANavigationPoint* __thiscall ACTBot::GetReservedNode() const 
+public: class UStateObject* __thiscall ACTBot::GetStateObject(class UClass*, int)
 public: enum EStimulusResponse __thiscall ACTBot::GetStimulusResponse(class UStimulus*)
-public: virtual class AActor* __thiscall UGOAL_CheckCorpse::GetSubject()const 
-public: virtual class AActor* __thiscall UGOAL_ExecuteMarker::GetSubject()const 
-public: virtual class AActor* __thiscall UGOAL_Follow::GetSubject()const 
-public: virtual class AActor* __thiscall UGOAL_FollowLink::GetSubject()const 
-public: virtual class AActor* __thiscall UGOAL_GetBacta::GetSubject()const 
-public: virtual class AActor* __thiscall UGOAL_GoThroughDoor::GetSubject()const 
-public: virtual class AActor* __thiscall UGOAL_Goto::GetSubject()const 
-public: virtual class AActor* __thiscall UGOAL_GotoCautious::GetSubject()const 
-public: virtual class AActor* __thiscall UGOAL_GotoSpecial::GetSubject()const 
-public: virtual class AActor* __thiscall UGOAL_HealOther::GetSubject()const 
-public: virtual class AActor* __thiscall UGOAL_JumpTo::GetSubject()const 
-public: virtual class AActor* __thiscall UGOAL_MoveAndRotate::GetSubject()const 
-public: virtual class AActor* __thiscall UGOAL_Trigger::GetSubject()const 
-public: virtual class AActor* __thiscall UGOAL_TurnTo::GetSubject()const 
-public: virtual class AActor* __thiscall UGOAL_UseActor::GetSubject()const 
-public: virtual class AActor* __thiscall UGOAL_WaitForScriptState::GetSubject()const 
-public: virtual class AActor* __thiscall UGoalObject::GetSubject()const 
-protected: class AActor* __thiscall ACTSquadNative::GetTetherObject(class APawn*,enum EStanceTetherObject)
+public: virtual class AActor* __thiscall UGOAL_CheckCorpse::GetSubject() const 
+public: virtual class AActor* __thiscall UGOAL_ExecuteMarker::GetSubject() const 
+public: virtual class AActor* __thiscall UGOAL_Follow::GetSubject() const 
+public: virtual class AActor* __thiscall UGOAL_FollowLink::GetSubject() const 
+public: virtual class AActor* __thiscall UGOAL_GetBacta::GetSubject() const 
+public: virtual class AActor* __thiscall UGOAL_GoThroughDoor::GetSubject() const 
+public: virtual class AActor* __thiscall UGOAL_Goto::GetSubject() const 
+public: virtual class AActor* __thiscall UGOAL_GotoCautious::GetSubject() const 
+public: virtual class AActor* __thiscall UGOAL_GotoSpecial::GetSubject() const 
+public: virtual class AActor* __thiscall UGOAL_HealOther::GetSubject() const 
+public: virtual class AActor* __thiscall UGOAL_JumpTo::GetSubject() const 
+public: virtual class AActor* __thiscall UGOAL_MoveAndRotate::GetSubject() const 
+public: virtual class AActor* __thiscall UGOAL_Trigger::GetSubject() const 
+public: virtual class AActor* __thiscall UGOAL_TurnTo::GetSubject() const 
+public: virtual class AActor* __thiscall UGOAL_UseActor::GetSubject() const 
+public: virtual class AActor* __thiscall UGOAL_WaitForScriptState::GetSubject() const 
+public: virtual class AActor* __thiscall UGoalObject::GetSubject() const 
+protected: class AActor* __thiscall ACTSquadNative::GetTetherObject(class APawn*, enum EStanceTetherObject)
 protected: class ABactaDispenser* __thiscall UStateIdleSquad::GetValidBacta()
 protected: class APawn* __thiscall ACTSquadNative::GetViableMemberExcluding(class APawn*)
-public: class UStateScriptWrapper* __thiscall ACTBot::GetWrapperStateObject(class FName,int)
+public: class UStateScriptWrapper* __thiscall ACTBot::GetWrapperStateObject(class FName, int)
 public: void __thiscall ACTSquadNative::GoalDeletionCallback(class UGoalObject*)
 public: virtual void __thiscall UGoalQueue::GoalDeletionCallback(class UGoalObject*)
 public: virtual void __thiscall UStateMarker::GoalDeletionCallback(class UGoalObject*)
 public: virtual void __thiscall UStateObject::GoalDeletionCallback(class UGoalObject*)
 public: virtual void __thiscall UStateSquad::GoalDeletionCallback(class UGoalObject*)
-public: bool __thiscall ACTBot::HasReservedNode()const 
+public: bool __thiscall ACTBot::HasReservedNode() const 
 public: virtual void __thiscall ACTSquadNative::IncapMaintainOrders(class APawn*)
 public: virtual void __thiscall ACTSquadNative::IncapReviveSquadLeader(class APawn*)
 public: void __thiscall AActivateTrap::IncrementRadiusTrapReferences()
 public: virtual int __thiscall ACTMarker::Initiate(class APawn*)
-public: virtual void __thiscall ACTSquadNative::InitiateMarker(class ASquadMarker*,class APawn*)
+public: virtual void __thiscall ACTSquadNative::InitiateMarker(class ASquadMarker*, class APawn*)
 public: void __thiscall UGoalQueue::InsertGoalByUtility(class UGoalObject*)
-public: static void __fastcall AActivateDoor::InternalConstructor(void*)
-public: static void __fastcall AActivateTrap::InternalConstructor(void*)
-public: static void __fastcall ABactaDispenser::InternalConstructor(void*)
-public: static void __fastcall ACTBot::InternalConstructor(void*)
-public: static void __fastcall ACTGameInfo::InternalConstructor(void*)
-public: static void __fastcall ACTMarker::InternalConstructor(void*)
-public: static void __fastcall ACTPawn::InternalConstructor(void*)
-public: static void __fastcall ACTPlayer::InternalConstructor(void*)
-public: static void __fastcall ACTSquadNative::InternalConstructor(void*)
-public: static void __fastcall ACTTeamInfo::InternalConstructor(void*)
-public: static void __fastcall AFactory::InternalConstructor(void*)
-public: static void __fastcall AHackTerminal::InternalConstructor(void*)
-public: static void __fastcall AKnockoverProp::InternalConstructor(void*)
-public: static void __fastcall AMarkerGetBactaNative::InternalConstructor(void*)
-public: static void __fastcall AMarkerReviveOther::InternalConstructor(void*)
-public: static void __fastcall APawnFactory::InternalConstructor(void*)
-public: static void __fastcall ASpawnPoint::InternalConstructor(void*)
-public: static void __fastcall UACTION_MoveToPoint::InternalConstructor(void*)
-public: static void __fastcall UCTDamageMelee::InternalConstructor(void*)
-public: static void __fastcall UCTDamageType::InternalConstructor(void*)
-public: static void __fastcall UFootstepInfo::InternalConstructor(void*)
-public: static void __fastcall UGOAL_ChangeAimTurn::InternalConstructor(void*)
-public: static void __fastcall UGOAL_ChangePhysics::InternalConstructor(void*)
-public: static void __fastcall UGOAL_ChangeWeapon::InternalConstructor(void*)
-public: static void __fastcall UGOAL_CheckCorpse::InternalConstructor(void*)
-public: static void __fastcall UGOAL_Crouch::InternalConstructor(void*)
-public: static void __fastcall UGOAL_ExecuteMarker::InternalConstructor(void*)
-public: static void __fastcall UGOAL_FinishingMove::InternalConstructor(void*)
-public: static void __fastcall UGOAL_Follow::InternalConstructor(void*)
-public: static void __fastcall UGOAL_FollowLink::InternalConstructor(void*)
-public: static void __fastcall UGOAL_GetBacta::InternalConstructor(void*)
-public: static void __fastcall UGOAL_GoThroughDoor::InternalConstructor(void*)
-public: static void __fastcall UGOAL_Goto::InternalConstructor(void*)
-public: static void __fastcall UGOAL_GotoCautious::InternalConstructor(void*)
-public: static void __fastcall UGOAL_GotoPointBlind::InternalConstructor(void*)
-public: static void __fastcall UGOAL_GotoSpecial::InternalConstructor(void*)
-public: static void __fastcall UGOAL_HealOther::InternalConstructor(void*)
-public: static void __fastcall UGOAL_JumpTo::InternalConstructor(void*)
-public: static void __fastcall UGOAL_LaunchMissiles::InternalConstructor(void*)
-public: static void __fastcall UGOAL_ManTurret::InternalConstructor(void*)
-public: static void __fastcall UGOAL_MeleeAttack::InternalConstructor(void*)
-public: static void __fastcall UGOAL_MoveAndRotate::InternalConstructor(void*)
-public: static void __fastcall UGOAL_PlayAnim::InternalConstructor(void*)
-public: static void __fastcall UGOAL_PlaySound::InternalConstructor(void*)
-public: static void __fastcall UGOAL_Shoot::InternalConstructor(void*)
-public: static void __fastcall UGOAL_Sleep::InternalConstructor(void*)
-public: static void __fastcall UGOAL_SquadFollow::InternalConstructor(void*)
-public: static void __fastcall UGOAL_ThrowGrenade::InternalConstructor(void*)
-public: static void __fastcall UGOAL_Trigger::InternalConstructor(void*)
-public: static void __fastcall UGOAL_TurnTo::InternalConstructor(void*)
-public: static void __fastcall UGOAL_UseActor::InternalConstructor(void*)
-public: static void __fastcall UGOAL_WaitForEvent::InternalConstructor(void*)
-public: static void __fastcall UGOAL_WaitForLanding::InternalConstructor(void*)
-public: static void __fastcall UGOAL_WaitForScriptState::InternalConstructor(void*)
-public: static void __fastcall UGOAL_WaitUntilNear::InternalConstructor(void*)
-public: static void __fastcall UGoalObject::InternalConstructor(void*)
-public: static void __fastcall UGoalQueue::InternalConstructor(void*)
-public: static void __fastcall UIdleInfo::InternalConstructor(void*)
-public: static void __fastcall ULocalSituation::InternalConstructor(void*)
-public: static void __fastcall UStanceDefault::InternalConstructor(void*)
-public: static void __fastcall UStanceEngageTarget::InternalConstructor(void*)
-public: static void __fastcall UStanceFormUp::InternalConstructor(void*)
-public: static void __fastcall UStanceFormUpTight::InternalConstructor(void*)
-public: static void __fastcall UStanceHold::InternalConstructor(void*)
-public: static void __fastcall UStanceHoldLoose::InternalConstructor(void*)
-public: static void __fastcall UStancePreviousOrder::InternalConstructor(void*)
-public: static void __fastcall UStanceSearchAndDestroy::InternalConstructor(void*)
-public: static void __fastcall UStanceSecurePosition::InternalConstructor(void*)
-public: static void __fastcall UStateAbstractAttack::InternalConstructor(void*)
-public: static void __fastcall UStateAsleep::InternalConstructor(void*)
-public: static void __fastcall UStateAttack::InternalConstructor(void*)
-public: static void __fastcall UStateBattleDroidAttack::InternalConstructor(void*)
-public: static void __fastcall UStateBerserk::InternalConstructor(void*)
-public: static void __fastcall UStateDispensing::InternalConstructor(void*)
-public: static void __fastcall UStateDroidekaAttack::InternalConstructor(void*)
-public: static void __fastcall UStateDroneAttack::InternalConstructor(void*)
-public: static void __fastcall UStateFlyingAttack::InternalConstructor(void*)
-public: static void __fastcall UStateFreakOut::InternalConstructor(void*)
-public: static void __fastcall UStateGeonosianWarriorAttack::InternalConstructor(void*)
-public: static void __fastcall UStateHeavyAttack::InternalConstructor(void*)
-public: static void __fastcall UStateIdle::InternalConstructor(void*)
-public: static void __fastcall UStateIdleSquad::InternalConstructor(void*)
-public: static void __fastcall UStateInvestigate::InternalConstructor(void*)
-public: static void __fastcall UStateMarker::InternalConstructor(void*)
-public: static void __fastcall UStateObject::InternalConstructor(void*)
-public: static void __fastcall UStatePatrol::InternalConstructor(void*)
-public: static void __fastcall UStatePerched::InternalConstructor(void*)
-public: static void __fastcall UStateRetreat::InternalConstructor(void*)
-public: static void __fastcall UStateScriptWrapper::InternalConstructor(void*)
-public: static void __fastcall UStateShutdown::InternalConstructor(void*)
-public: static void __fastcall UStateSimpleAttack::InternalConstructor(void*)
-public: static void __fastcall UStateSpiderDroidAttack::InternalConstructor(void*)
-public: static void __fastcall UStateSquad::InternalConstructor(void*)
-public: static void __fastcall UStateSquadAttack::InternalConstructor(void*)
-public: static void __fastcall UStateStationaryAttack::InternalConstructor(void*)
-public: static void __fastcall UStateTether::InternalConstructor(void*)
-public: static void __fastcall UStateTrandoshanAttack::InternalConstructor(void*)
-public: static void __fastcall UStateTurretAttack::InternalConstructor(void*)
-public: static void __fastcall UStateWander::InternalConstructor(void*)
-public: static void __fastcall UStateWookieeAttack::InternalConstructor(void*)
-public: int __thiscall UStateObject::IsActive()const 
-public: virtual int __thiscall ACTBot::IsAvailable()const 
-public: int __thiscall ACTBot::IsClearBetween(class FVector const&,class FVector const&,bool,bool,class FVector const&,class AActor*)
-public: int __thiscall ACTBot::IsClearTo(class FVector const&,bool,bool,class FVector const&,class AActor*)
-public: int __thiscall UGoalQueue::IsEmpty()const 
-public: int __thiscall UStateObject::IsEnabled()const 
-public: virtual int __thiscall UGoalObject::IsGoal()const 
-public: virtual int __thiscall UGoalQueue::IsGoal()const 
-public: virtual bool __thiscall UGOAL_ChangeAimTurn::IsLatent()const 
-public: virtual bool __thiscall UGOAL_ChangePhysics::IsLatent()const 
-public: virtual bool __thiscall UGOAL_ChangeWeapon::IsLatent()const 
-public: virtual bool __thiscall UGOAL_Crouch::IsLatent()const 
-public: virtual bool __thiscall UGOAL_FollowLink::IsLatent()const 
-public: virtual bool __thiscall UGOAL_GoThroughDoor::IsLatent()const 
-public: virtual bool __thiscall UGOAL_Goto::IsLatent()const 
-public: virtual bool __thiscall UGOAL_GotoCautious::IsLatent()const 
-public: virtual bool __thiscall UGOAL_GotoPointBlind::IsLatent()const 
-public: virtual bool __thiscall UGOAL_GotoSpecial::IsLatent()const 
-public: virtual bool __thiscall UGOAL_JumpTo::IsLatent()const 
-public: virtual bool __thiscall UGOAL_LaunchMissiles::IsLatent()const 
-public: virtual bool __thiscall UGOAL_PlaySound::IsLatent()const 
-public: virtual bool __thiscall UGOAL_Sleep::IsLatent()const 
-public: virtual bool __thiscall UGOAL_ThrowGrenade::IsLatent()const 
-public: virtual bool __thiscall UGOAL_WaitForEvent::IsLatent()const 
-public: virtual bool __thiscall UGOAL_WaitForLanding::IsLatent()const 
-public: virtual bool __thiscall UGOAL_WaitForScriptState::IsLatent()const 
-public: virtual bool __thiscall UGOAL_WaitUntilNear::IsLatent()const 
-public: virtual bool __thiscall UGoalObject::IsLatent()const 
+public: int __thiscall UStateObject::IsActive() const 
+public: virtual int __thiscall ACTBot::IsAvailable() const 
+public: int __thiscall ACTBot::IsClearBetween(class FVector const&, class FVector const&, bool, bool, class FVector const&, class AActor*)
+public: int __thiscall ACTBot::IsClearTo(class FVector const&, bool, bool, class FVector const&, class AActor*)
+public: int __thiscall UGoalQueue::IsEmpty() const 
+public: int __thiscall UStateObject::IsEnabled() const 
+public: virtual int __thiscall UGoalObject::IsGoal() const 
+public: virtual int __thiscall UGoalQueue::IsGoal() const 
+public: virtual bool __thiscall UGOAL_ChangeAimTurn::IsLatent() const 
+public: virtual bool __thiscall UGOAL_ChangePhysics::IsLatent() const 
+public: virtual bool __thiscall UGOAL_ChangeWeapon::IsLatent() const 
+public: virtual bool __thiscall UGOAL_Crouch::IsLatent() const 
+public: virtual bool __thiscall UGOAL_FollowLink::IsLatent() const 
+public: virtual bool __thiscall UGOAL_GoThroughDoor::IsLatent() const 
+public: virtual bool __thiscall UGOAL_Goto::IsLatent() const 
+public: virtual bool __thiscall UGOAL_GotoCautious::IsLatent() const 
+public: virtual bool __thiscall UGOAL_GotoPointBlind::IsLatent() const 
+public: virtual bool __thiscall UGOAL_GotoSpecial::IsLatent() const 
+public: virtual bool __thiscall UGOAL_JumpTo::IsLatent() const 
+public: virtual bool __thiscall UGOAL_LaunchMissiles::IsLatent() const 
+public: virtual bool __thiscall UGOAL_PlaySound::IsLatent() const 
+public: virtual bool __thiscall UGOAL_Sleep::IsLatent() const 
+public: virtual bool __thiscall UGOAL_ThrowGrenade::IsLatent() const 
+public: virtual bool __thiscall UGOAL_WaitForEvent::IsLatent() const 
+public: virtual bool __thiscall UGOAL_WaitForLanding::IsLatent() const 
+public: virtual bool __thiscall UGOAL_WaitForScriptState::IsLatent() const 
+public: virtual bool __thiscall UGOAL_WaitUntilNear::IsLatent() const 
+public: virtual bool __thiscall UGoalObject::IsLatent() const 
 public: virtual int __thiscall AMarkerGetBactaNative::IsRelevantFor(class APawn*)
-public: int __thiscall ACTBot::IsUnderAttack(float)const 
+public: int __thiscall ACTBot::IsUnderAttack(float) const 
 protected: int __thiscall UStateIdleSquad::LookForBacta()
 protected: int __thiscall UStateIdleSquad::LookForCover()
-public: int __thiscall ACTBot::MaintainDistance(class FVector const&,class FVector const&,float,float,bool)
-public: int __thiscall ACTBot::MaintainDistance(class FVector const&,float,float)
-public: int __thiscall ACTBot::MaintainDistance(class AActor const*,float,float,bool)
+public: int __thiscall ACTBot::MaintainDistance(class FVector const&, class FVector const&, float, float, bool)
+public: int __thiscall ACTBot::MaintainDistance(class FVector const&, float, float)
+public: int __thiscall ACTBot::MaintainDistance(class AActor const*, float, float, bool)
 private: void __thiscall ACTBot::MakeDecision()
 public: virtual void __thiscall ACTSquadNative::MakeFreeAgent(class APawn*)
 public: void __thiscall ACTMarker::MakeObsolete()
 public: float __thiscall ACTBot::MaxAimError()
-public: virtual void __thiscall ACTMarker::MemberKilled(class APawn*,class AController*,class UClass*)
-protected: void __thiscall ACTSquadNative::MemberKilled(class APawn*,class AController*,class UClass*)
-public: virtual bool __thiscall UGOAL_GetBacta::ModifySquadActionInfo(int&,int&,class FString&)
-public: virtual bool __thiscall UGOAL_HealOther::ModifySquadActionInfo(int&,int&,class FString&)
-public: virtual bool __thiscall UGOAL_UseActor::ModifySquadActionInfo(int&,int&,class FString&)
-public: virtual bool __thiscall UGoalObject::ModifySquadActionInfo(int&,int&,class FString&)
-public: virtual bool __thiscall UStateMarker::ModifySquadActionInfo(int&,int&,class FString&)
-public: virtual bool __thiscall UStateObject::ModifySquadActionInfo(int&,int&,class FString&)
-public: virtual bool __thiscall UStateTurretAttack::ModifySquadActionInfo(int&,int&,class FString&)
+public: virtual void __thiscall ACTMarker::MemberKilled(class APawn*, class AController*, class UClass*)
+protected: void __thiscall ACTSquadNative::MemberKilled(class APawn*, class AController*, class UClass*)
+public: virtual bool __thiscall UGOAL_GetBacta::ModifySquadActionInfo(int&, int&, class FString&)
+public: virtual bool __thiscall UGOAL_HealOther::ModifySquadActionInfo(int&, int&, class FString&)
+public: virtual bool __thiscall UGOAL_UseActor::ModifySquadActionInfo(int&, int&, class FString&)
+public: virtual bool __thiscall UGoalObject::ModifySquadActionInfo(int&, int&, class FString&)
+public: virtual bool __thiscall UStateMarker::ModifySquadActionInfo(int&, int&, class FString&)
+public: virtual bool __thiscall UStateObject::ModifySquadActionInfo(int&, int&, class FString&)
+public: virtual bool __thiscall UStateTurretAttack::ModifySquadActionInfo(int&, int&, class FString&)
 class FName `public: void __thiscall ABactaDispenser::DepleteBacta()'::`2'::NDepleteBacta
 class FName `public: void __thiscall ACTPlayer::ServerRevive(class APawn*)'::`2'::NServerRevive
 private: virtual void __thiscall UGOAL_ChangeAimTurn::OnActivate()
@@ -1286,12 +884,12 @@ protected: virtual int __thiscall UStateTurretAttack::OnShutdown()
 protected: virtual int __thiscall UStateWander::OnShutdown()
 protected: virtual int __thiscall UStateWookieeAttack::OnShutdown()
 public: bool __thiscall ACTBot::OutsidePreventTether(class AActor*)
-public: bool __thiscall ACTBot::OutsidePreventTether(class AActor*,float)
-public: virtual void __thiscall ACTMarker::ParticipantResume(class APawn*,class UGoalObject*)
+public: bool __thiscall ACTBot::OutsidePreventTether(class AActor*, float)
+public: virtual void __thiscall ACTMarker::ParticipantResume(class APawn*, class UGoalObject*)
 public: void __thiscall ACTBot::PauseShooting(int)
 public: void __thiscall UStateTether::Plan()
-public: virtual void __thiscall ACTPawn::PlayFootstepSound(unsigned char,unsigned char,class USound*)
-public: virtual void __thiscall ACTPawn::PlayOwnedFootstepSound(unsigned char,unsigned char,class USound*)
+public: virtual void __thiscall ACTPawn::PlayFootstepSound(unsigned char, unsigned char, class USound*)
+public: virtual void __thiscall ACTPawn::PlayOwnedFootstepSound(unsigned char, unsigned char, class USound*)
 public: virtual void __thiscall ACTSquadNative::PlayerWentBerserk(class APawn*)
 public: void __thiscall UGoalQueue::PopFront()
 public: virtual void __thiscall ACTSquadNative::PostBeginPlayEx()
@@ -1314,106 +912,6 @@ private: virtual enum EGoalStatus __thiscall UGOAL_UseActor::PreUpdate(float)
 private: virtual enum EGoalStatus __thiscall UGoalObject::PreUpdate(float)
 protected: void __thiscall ACTSquadNative::PrepareObjective()
 public: float __thiscall ACTBot::PreventTetherDistSqr(class AActor*)
-private: static class UClass AActivateDoor::PrivateStaticClass
-private: static class UClass AActivateTrap::PrivateStaticClass
-private: static class UClass ABactaDispenser::PrivateStaticClass
-private: static class UClass ACTBot::PrivateStaticClass
-private: static class UClass ACTGameInfo::PrivateStaticClass
-private: static class UClass ACTMarker::PrivateStaticClass
-private: static class UClass ACTPawn::PrivateStaticClass
-private: static class UClass ACTPlayer::PrivateStaticClass
-private: static class UClass ACTSquadNative::PrivateStaticClass
-private: static class UClass ACTTeamInfo::PrivateStaticClass
-private: static class UClass AFactory::PrivateStaticClass
-private: static class UClass AHackTerminal::PrivateStaticClass
-private: static class UClass AKnockoverProp::PrivateStaticClass
-private: static class UClass AMarkerGetBactaNative::PrivateStaticClass
-private: static class UClass AMarkerReviveOther::PrivateStaticClass
-private: static class UClass APawnFactory::PrivateStaticClass
-private: static class UClass ASpawnPoint::PrivateStaticClass
-private: static class UClass UACTION_MoveToPoint::PrivateStaticClass
-private: static class UClass UCTDamageMelee::PrivateStaticClass
-private: static class UClass UCTDamageType::PrivateStaticClass
-private: static class UClass UFootstepInfo::PrivateStaticClass
-private: static class UClass UGOAL_ChangeAimTurn::PrivateStaticClass
-private: static class UClass UGOAL_ChangePhysics::PrivateStaticClass
-private: static class UClass UGOAL_ChangeWeapon::PrivateStaticClass
-private: static class UClass UGOAL_CheckCorpse::PrivateStaticClass
-private: static class UClass UGOAL_Crouch::PrivateStaticClass
-private: static class UClass UGOAL_ExecuteMarker::PrivateStaticClass
-private: static class UClass UGOAL_FinishingMove::PrivateStaticClass
-private: static class UClass UGOAL_Follow::PrivateStaticClass
-private: static class UClass UGOAL_FollowLink::PrivateStaticClass
-private: static class UClass UGOAL_GetBacta::PrivateStaticClass
-private: static class UClass UGOAL_GoThroughDoor::PrivateStaticClass
-private: static class UClass UGOAL_Goto::PrivateStaticClass
-private: static class UClass UGOAL_GotoCautious::PrivateStaticClass
-private: static class UClass UGOAL_GotoPointBlind::PrivateStaticClass
-private: static class UClass UGOAL_GotoSpecial::PrivateStaticClass
-private: static class UClass UGOAL_HealOther::PrivateStaticClass
-private: static class UClass UGOAL_JumpTo::PrivateStaticClass
-private: static class UClass UGOAL_LaunchMissiles::PrivateStaticClass
-private: static class UClass UGOAL_ManTurret::PrivateStaticClass
-private: static class UClass UGOAL_MeleeAttack::PrivateStaticClass
-private: static class UClass UGOAL_MoveAndRotate::PrivateStaticClass
-private: static class UClass UGOAL_PlayAnim::PrivateStaticClass
-private: static class UClass UGOAL_PlaySound::PrivateStaticClass
-private: static class UClass UGOAL_Shoot::PrivateStaticClass
-private: static class UClass UGOAL_Sleep::PrivateStaticClass
-private: static class UClass UGOAL_SquadFollow::PrivateStaticClass
-private: static class UClass UGOAL_ThrowGrenade::PrivateStaticClass
-private: static class UClass UGOAL_Trigger::PrivateStaticClass
-private: static class UClass UGOAL_TurnTo::PrivateStaticClass
-private: static class UClass UGOAL_UseActor::PrivateStaticClass
-private: static class UClass UGOAL_WaitForEvent::PrivateStaticClass
-private: static class UClass UGOAL_WaitForLanding::PrivateStaticClass
-private: static class UClass UGOAL_WaitForScriptState::PrivateStaticClass
-private: static class UClass UGOAL_WaitUntilNear::PrivateStaticClass
-private: static class UClass UGoalObject::PrivateStaticClass
-private: static class UClass UGoalQueue::PrivateStaticClass
-private: static class UClass UIdleInfo::PrivateStaticClass
-private: static class UClass ULocalSituation::PrivateStaticClass
-private: static class UClass UStanceDefault::PrivateStaticClass
-private: static class UClass UStanceEngageTarget::PrivateStaticClass
-private: static class UClass UStanceFormUp::PrivateStaticClass
-private: static class UClass UStanceFormUpTight::PrivateStaticClass
-private: static class UClass UStanceHold::PrivateStaticClass
-private: static class UClass UStanceHoldLoose::PrivateStaticClass
-private: static class UClass UStancePreviousOrder::PrivateStaticClass
-private: static class UClass UStanceSearchAndDestroy::PrivateStaticClass
-private: static class UClass UStanceSecurePosition::PrivateStaticClass
-private: static class UClass UStateAbstractAttack::PrivateStaticClass
-private: static class UClass UStateAsleep::PrivateStaticClass
-private: static class UClass UStateAttack::PrivateStaticClass
-private: static class UClass UStateBattleDroidAttack::PrivateStaticClass
-private: static class UClass UStateBerserk::PrivateStaticClass
-private: static class UClass UStateDispensing::PrivateStaticClass
-private: static class UClass UStateDroidekaAttack::PrivateStaticClass
-private: static class UClass UStateDroneAttack::PrivateStaticClass
-private: static class UClass UStateFlyingAttack::PrivateStaticClass
-private: static class UClass UStateFreakOut::PrivateStaticClass
-private: static class UClass UStateGeonosianWarriorAttack::PrivateStaticClass
-private: static class UClass UStateHeavyAttack::PrivateStaticClass
-private: static class UClass UStateIdle::PrivateStaticClass
-private: static class UClass UStateIdleSquad::PrivateStaticClass
-private: static class UClass UStateInvestigate::PrivateStaticClass
-private: static class UClass UStateMarker::PrivateStaticClass
-private: static class UClass UStateObject::PrivateStaticClass
-private: static class UClass UStatePatrol::PrivateStaticClass
-private: static class UClass UStatePerched::PrivateStaticClass
-private: static class UClass UStateRetreat::PrivateStaticClass
-private: static class UClass UStateScriptWrapper::PrivateStaticClass
-private: static class UClass UStateShutdown::PrivateStaticClass
-private: static class UClass UStateSimpleAttack::PrivateStaticClass
-private: static class UClass UStateSpiderDroidAttack::PrivateStaticClass
-private: static class UClass UStateSquad::PrivateStaticClass
-private: static class UClass UStateSquadAttack::PrivateStaticClass
-private: static class UClass UStateStationaryAttack::PrivateStaticClass
-private: static class UClass UStateTether::PrivateStaticClass
-private: static class UClass UStateTrandoshanAttack::PrivateStaticClass
-private: static class UClass UStateTurretAttack::PrivateStaticClass
-private: static class UClass UStateWander::PrivateStaticClass
-private: static class UClass UStateWookieeAttack::PrivateStaticClass
 public: int __thiscall ACTBot::ProcessStimulus(class UStimulus*)
 private: virtual int __thiscall UStateAsleep::ProcessStimulus(class UStimulus*)
 private: virtual int __thiscall UStateBattleDroidAttack::ProcessStimulus(class UStimulus*)
@@ -1436,15 +934,15 @@ public: void __thiscall ACTSquadNative::PurgeStanceOrderLines()
 public: void __thiscall ACTSquadNative::Recall(class APawn*)
 public: virtual void __thiscall ACTBot::ReceiveStimulus(class UStimulus*)
 public: virtual void __thiscall ACTSquadNative::ReceiveStimulus(class UStimulus*)
-protected: void __thiscall ACTSquadNative::RemoveAssignment(int,bool)
+protected: void __thiscall ACTSquadNative::RemoveAssignment(int, bool)
 protected: virtual void __thiscall ACTSquadNative::RemoveAssignmentsByMember(class APawn*)
-protected: void __thiscall ACTSquadNative::RemoveAssignmentsByOwner(class UObject*,class APawn*)
+protected: void __thiscall ACTSquadNative::RemoveAssignmentsByOwner(class UObject*, class APawn*)
 public: virtual void __thiscall ACTSquadNative::RemoveFromSquad(class APawn*)
 public: int __thiscall UGoalQueue::RemoveGoal(class UGoalObject*)
 public: virtual void __thiscall ACTMarker::RemoveParticipant(int)
-public: virtual void __thiscall AFactory::RenderEditorSelected(class FLevelSceneNode*,class FRenderInterface*,class FDynamicActor*)
-public: virtual void __thiscall APawnFactory::RenderEditorSelected(class FLevelSceneNode*,class FRenderInterface*,class FDynamicActor*)
-public: virtual void __thiscall ASpawnPoint::RenderEditorSelected(class FLevelSceneNode*,class FRenderInterface*,class FDynamicActor*)
+public: virtual void __thiscall AFactory::RenderEditorSelected(class FLevelSceneNode*, class FRenderInterface*, class FDynamicActor*)
+public: virtual void __thiscall APawnFactory::RenderEditorSelected(class FLevelSceneNode*, class FRenderInterface*, class FDynamicActor*)
+public: virtual void __thiscall ASpawnPoint::RenderEditorSelected(class FLevelSceneNode*, class FRenderInterface*, class FDynamicActor*)
 public: virtual int __thiscall UGOAL_GetBacta::Replan()
 private: virtual int __thiscall UGOAL_GoThroughDoor::Replan()
 private: virtual int __thiscall UGOAL_Goto::Replan()
@@ -1463,8 +961,8 @@ protected: void __thiscall ACTSquadNative::ResetTethers()
 public: void __thiscall UStateObject::Resume()
 public: void __thiscall ACTSquadNative::ReviveOrder(class APawn*)
 public: void __thiscall ACTBot::Run(bool)
-public: virtual int __thiscall ACTBot::SafeToShoot(class AActor*,class FVector const&)
-public: virtual int __thiscall ACTBot::ScriptedGoalsFinished()const 
+public: virtual int __thiscall ACTBot::SafeToShoot(class AActor*, class FVector const&)
+public: virtual int __thiscall ACTBot::ScriptedGoalsFinished() const 
 public: void __thiscall ACTBot::SelectBestWeapon()
 public: unsigned char __thiscall ACTPlayer::SelectTargetType()
 protected: virtual int __thiscall UStateSquadAttack::SelectWeapon()
@@ -1475,242 +973,37 @@ public: void __thiscall ACTBot::SetDesiredSpeed(float)
 public: virtual bool __thiscall ACTBot::SetEnemy(class AActor*)
 public: void __thiscall ACTBot::SetGestureSuite(enum EBotGestureSuite)
 public: void __thiscall ACTMarker::SetMarkerNoGoalPriority(float)
-public: void __thiscall ACTBot::SetMarkerStatePriority(float,int)
+public: void __thiscall ACTBot::SetMarkerStatePriority(float, int)
 protected: void __thiscall UStateAbstractAttack::SetMoveMode(int)
 public: void __thiscall ACTBot::SetPawnIdle(enum EIdleState)
-public: void __thiscall ACTBot::SetPreventTether(class AActor*,float,bool)
-protected: void __thiscall ACTSquadNative::SetRallyLocation(class ANavigationPoint*,bool,class AActor*)
+public: void __thiscall ACTBot::SetPreventTether(class AActor*, float, bool)
+protected: void __thiscall ACTSquadNative::SetRallyLocation(class ANavigationPoint*, bool, class AActor*)
 public: void __thiscall ACTBot::SetScriptingPriority(float)
 public: void __thiscall ACTBot::SetShotCounter(int)
-public: void __thiscall ACTBot::SetSquadStatePriority(float,int)
+public: void __thiscall ACTBot::SetSquadStatePriority(float, int)
 public: void __thiscall UStateObject::Setup(class ACTBot*)
 private: virtual void __thiscall UStateMarker::SetupGoals()
 private: virtual void __thiscall UStateObject::SetupGoals()
 private: virtual void __thiscall UStateScriptWrapper::SetupGoals()
 private: virtual void __thiscall UStateSquad::SetupGoals()
-public: void __thiscall ACTSquadNative::SetupMemberTether(class APawn*,class USquadStance*)
+public: void __thiscall ACTSquadNative::SetupMemberTether(class APawn*, class USquadStance*)
 protected: void __thiscall ACTSquadNative::SetupNextGoto()
 protected: void __thiscall ACTSquadNative::SetupNextTrigger()
-protected: void __thiscall ACTSquadNative::SetupSDIcon(int,class AActor*)
+protected: void __thiscall ACTSquadNative::SetupSDIcon(int, class AActor*)
 public: void __thiscall ACTSquadNative::SetupSearchAndDestroyIcon()
 protected: void __thiscall ACTSquadNative::SetupTethers(class USquadStance*)
-public: int __thiscall ACTBot::ShotsLeft()const 
+public: int __thiscall ACTBot::ShotsLeft() const 
 public: int __thiscall UGOAL_Follow::ShouldMove()
 public: int __thiscall UStateObject::Shutdown()
 protected: void __thiscall UStateAbstractAttack::ShutdownCurrentMode()
-public: void __thiscall ACTMarker::SnapActorToNavPt(class AActor*,class ANavigationPoint*)
+public: void __thiscall ACTMarker::SnapActorToNavPt(class AActor*, class ANavigationPoint*)
 public: void __thiscall ACTBot::SnapRotationTo(class FVector&)
-public: virtual bool __thiscall AMarkerGetBactaNative::SortParticipants(int,int)
+public: virtual bool __thiscall AMarkerGetBactaNative::SortParticipants(int, int)
 public: virtual void __thiscall ACTBot::Spawned()
 public: virtual void __thiscall ACTPlayer::Spawned()
 public: virtual void __thiscall ACTSquadNative::Spawned()
 public: void __thiscall ACTBot::StartShooting(int)
 private: void __thiscall ACTBot::StateChanged()
-public: static class UClass* __fastcall AActivateDoor::StaticClass()
-public: static class UClass* __fastcall AActivateTrap::StaticClass()
-public: static class UClass* __fastcall ABactaDispenser::StaticClass()
-public: static class UClass* __fastcall ACTBot::StaticClass()
-public: static class UClass* __fastcall ACTGameInfo::StaticClass()
-public: static class UClass* __fastcall ACTMarker::StaticClass()
-public: static class UClass* __fastcall ACTPawn::StaticClass()
-public: static class UClass* __fastcall ACTPlayer::StaticClass()
-public: static class UClass* __fastcall ACTSquadNative::StaticClass()
-public: static class UClass* __fastcall ACTTeamInfo::StaticClass()
-public: static class UClass* __fastcall AFactory::StaticClass()
-public: static class UClass* __fastcall AHackTerminal::StaticClass()
-public: static class UClass* __fastcall AKnockoverProp::StaticClass()
-public: static class UClass* __fastcall AMarkerGetBactaNative::StaticClass()
-public: static class UClass* __fastcall AMarkerReviveOther::StaticClass()
-public: static class UClass* __fastcall APawnFactory::StaticClass()
-public: static class UClass* __fastcall ASpawnPoint::StaticClass()
-public: static class UClass* __fastcall UACTION_MoveToPoint::StaticClass()
-public: static class UClass* __fastcall UCTDamageMelee::StaticClass()
-public: static class UClass* __fastcall UCTDamageType::StaticClass()
-public: static class UClass* __fastcall UFootstepInfo::StaticClass()
-public: static class UClass* __fastcall UGOAL_ChangeAimTurn::StaticClass()
-public: static class UClass* __fastcall UGOAL_ChangePhysics::StaticClass()
-public: static class UClass* __fastcall UGOAL_ChangeWeapon::StaticClass()
-public: static class UClass* __fastcall UGOAL_CheckCorpse::StaticClass()
-public: static class UClass* __fastcall UGOAL_Crouch::StaticClass()
-public: static class UClass* __fastcall UGOAL_ExecuteMarker::StaticClass()
-public: static class UClass* __fastcall UGOAL_FinishingMove::StaticClass()
-public: static class UClass* __fastcall UGOAL_Follow::StaticClass()
-public: static class UClass* __fastcall UGOAL_FollowLink::StaticClass()
-public: static class UClass* __fastcall UGOAL_GetBacta::StaticClass()
-public: static class UClass* __fastcall UGOAL_GoThroughDoor::StaticClass()
-public: static class UClass* __fastcall UGOAL_Goto::StaticClass()
-public: static class UClass* __fastcall UGOAL_GotoCautious::StaticClass()
-public: static class UClass* __fastcall UGOAL_GotoPointBlind::StaticClass()
-public: static class UClass* __fastcall UGOAL_GotoSpecial::StaticClass()
-public: static class UClass* __fastcall UGOAL_HealOther::StaticClass()
-public: static class UClass* __fastcall UGOAL_JumpTo::StaticClass()
-public: static class UClass* __fastcall UGOAL_LaunchMissiles::StaticClass()
-public: static class UClass* __fastcall UGOAL_ManTurret::StaticClass()
-public: static class UClass* __fastcall UGOAL_MeleeAttack::StaticClass()
-public: static class UClass* __fastcall UGOAL_MoveAndRotate::StaticClass()
-public: static class UClass* __fastcall UGOAL_PlayAnim::StaticClass()
-public: static class UClass* __fastcall UGOAL_PlaySound::StaticClass()
-public: static class UClass* __fastcall UGOAL_Shoot::StaticClass()
-public: static class UClass* __fastcall UGOAL_Sleep::StaticClass()
-public: static class UClass* __fastcall UGOAL_SquadFollow::StaticClass()
-public: static class UClass* __fastcall UGOAL_ThrowGrenade::StaticClass()
-public: static class UClass* __fastcall UGOAL_Trigger::StaticClass()
-public: static class UClass* __fastcall UGOAL_TurnTo::StaticClass()
-public: static class UClass* __fastcall UGOAL_UseActor::StaticClass()
-public: static class UClass* __fastcall UGOAL_WaitForEvent::StaticClass()
-public: static class UClass* __fastcall UGOAL_WaitForLanding::StaticClass()
-public: static class UClass* __fastcall UGOAL_WaitForScriptState::StaticClass()
-public: static class UClass* __fastcall UGOAL_WaitUntilNear::StaticClass()
-public: static class UClass* __fastcall UGoalObject::StaticClass()
-public: static class UClass* __fastcall UGoalQueue::StaticClass()
-public: static class UClass* __fastcall UIdleInfo::StaticClass()
-public: static class UClass* __fastcall ULocalSituation::StaticClass()
-public: static class UClass* __fastcall UStanceDefault::StaticClass()
-public: static class UClass* __fastcall UStanceEngageTarget::StaticClass()
-public: static class UClass* __fastcall UStanceFormUp::StaticClass()
-public: static class UClass* __fastcall UStanceFormUpTight::StaticClass()
-public: static class UClass* __fastcall UStanceHold::StaticClass()
-public: static class UClass* __fastcall UStanceHoldLoose::StaticClass()
-public: static class UClass* __fastcall UStancePreviousOrder::StaticClass()
-public: static class UClass* __fastcall UStanceSearchAndDestroy::StaticClass()
-public: static class UClass* __fastcall UStanceSecurePosition::StaticClass()
-public: static class UClass* __fastcall UStateAbstractAttack::StaticClass()
-public: static class UClass* __fastcall UStateAsleep::StaticClass()
-public: static class UClass* __fastcall UStateAttack::StaticClass()
-public: static class UClass* __fastcall UStateBattleDroidAttack::StaticClass()
-public: static class UClass* __fastcall UStateBerserk::StaticClass()
-public: static class UClass* __fastcall UStateDispensing::StaticClass()
-public: static class UClass* __fastcall UStateDroidekaAttack::StaticClass()
-public: static class UClass* __fastcall UStateDroneAttack::StaticClass()
-public: static class UClass* __fastcall UStateFlyingAttack::StaticClass()
-public: static class UClass* __fastcall UStateFreakOut::StaticClass()
-public: static class UClass* __fastcall UStateGeonosianWarriorAttack::StaticClass()
-public: static class UClass* __fastcall UStateHeavyAttack::StaticClass()
-public: static class UClass* __fastcall UStateIdle::StaticClass()
-public: static class UClass* __fastcall UStateIdleSquad::StaticClass()
-public: static class UClass* __fastcall UStateInvestigate::StaticClass()
-public: static class UClass* __fastcall UStateMarker::StaticClass()
-public: static class UClass* __fastcall UStateObject::StaticClass()
-public: static class UClass* __fastcall UStatePatrol::StaticClass()
-public: static class UClass* __fastcall UStatePerched::StaticClass()
-public: static class UClass* __fastcall UStateRetreat::StaticClass()
-public: static class UClass* __fastcall UStateScriptWrapper::StaticClass()
-public: static class UClass* __fastcall UStateShutdown::StaticClass()
-public: static class UClass* __fastcall UStateSimpleAttack::StaticClass()
-public: static class UClass* __fastcall UStateSpiderDroidAttack::StaticClass()
-public: static class UClass* __fastcall UStateSquad::StaticClass()
-public: static class UClass* __fastcall UStateSquadAttack::StaticClass()
-public: static class UClass* __fastcall UStateStationaryAttack::StaticClass()
-public: static class UClass* __fastcall UStateTether::StaticClass()
-public: static class UClass* __fastcall UStateTrandoshanAttack::StaticClass()
-public: static class UClass* __fastcall UStateTurretAttack::StaticClass()
-public: static class UClass* __fastcall UStateWander::StaticClass()
-public: static class UClass* __fastcall UStateWookieeAttack::StaticClass()
-public: static struct FNativeEntry<class AActivateTrap>* AActivateTrap::StaticNativeMap
-public: static struct FNativeEntry<class ACTBot>* ACTBot::StaticNativeMap
-public: static struct FNativeEntry<class ACTMarker>* ACTMarker::StaticNativeMap
-public: static struct FNativeEntry<class ACTPlayer>* ACTPlayer::StaticNativeMap
-public: static struct FNativeEntry<class ACTSquadNative>* ACTSquadNative::StaticNativeMap
-public: static struct FNativeEntry<class UGoalQueue>* UGoalQueue::StaticNativeMap
-public: static char const* __fastcall AActivateDoor::StaticPackageName()
-public: static char const* __fastcall AActivateTrap::StaticPackageName()
-public: static char const* __fastcall ABactaDispenser::StaticPackageName()
-public: static char const* __fastcall ACTBot::StaticPackageName()
-public: static char const* __fastcall ACTGameInfo::StaticPackageName()
-public: static char const* __fastcall ACTMarker::StaticPackageName()
-public: static char const* __fastcall ACTPawn::StaticPackageName()
-public: static char const* __fastcall ACTPlayer::StaticPackageName()
-public: static char const* __fastcall ACTSquadNative::StaticPackageName()
-public: static char const* __fastcall ACTTeamInfo::StaticPackageName()
-public: static char const* __fastcall AFactory::StaticPackageName()
-public: static char const* __fastcall AHackTerminal::StaticPackageName()
-public: static char const* __fastcall AKnockoverProp::StaticPackageName()
-public: static char const* __fastcall AMarkerGetBactaNative::StaticPackageName()
-public: static char const* __fastcall AMarkerReviveOther::StaticPackageName()
-public: static char const* __fastcall APawnFactory::StaticPackageName()
-public: static char const* __fastcall ASpawnPoint::StaticPackageName()
-public: static char const* __fastcall UACTION_MoveToPoint::StaticPackageName()
-public: static char const* __fastcall UCTDamageMelee::StaticPackageName()
-public: static char const* __fastcall UCTDamageType::StaticPackageName()
-public: static char const* __fastcall UFootstepInfo::StaticPackageName()
-public: static char const* __fastcall UGOAL_ChangeAimTurn::StaticPackageName()
-public: static char const* __fastcall UGOAL_ChangePhysics::StaticPackageName()
-public: static char const* __fastcall UGOAL_ChangeWeapon::StaticPackageName()
-public: static char const* __fastcall UGOAL_CheckCorpse::StaticPackageName()
-public: static char const* __fastcall UGOAL_Crouch::StaticPackageName()
-public: static char const* __fastcall UGOAL_ExecuteMarker::StaticPackageName()
-public: static char const* __fastcall UGOAL_FinishingMove::StaticPackageName()
-public: static char const* __fastcall UGOAL_Follow::StaticPackageName()
-public: static char const* __fastcall UGOAL_FollowLink::StaticPackageName()
-public: static char const* __fastcall UGOAL_GetBacta::StaticPackageName()
-public: static char const* __fastcall UGOAL_GoThroughDoor::StaticPackageName()
-public: static char const* __fastcall UGOAL_Goto::StaticPackageName()
-public: static char const* __fastcall UGOAL_GotoCautious::StaticPackageName()
-public: static char const* __fastcall UGOAL_GotoPointBlind::StaticPackageName()
-public: static char const* __fastcall UGOAL_GotoSpecial::StaticPackageName()
-public: static char const* __fastcall UGOAL_HealOther::StaticPackageName()
-public: static char const* __fastcall UGOAL_JumpTo::StaticPackageName()
-public: static char const* __fastcall UGOAL_LaunchMissiles::StaticPackageName()
-public: static char const* __fastcall UGOAL_ManTurret::StaticPackageName()
-public: static char const* __fastcall UGOAL_MeleeAttack::StaticPackageName()
-public: static char const* __fastcall UGOAL_MoveAndRotate::StaticPackageName()
-public: static char const* __fastcall UGOAL_PlayAnim::StaticPackageName()
-public: static char const* __fastcall UGOAL_PlaySound::StaticPackageName()
-public: static char const* __fastcall UGOAL_Shoot::StaticPackageName()
-public: static char const* __fastcall UGOAL_Sleep::StaticPackageName()
-public: static char const* __fastcall UGOAL_SquadFollow::StaticPackageName()
-public: static char const* __fastcall UGOAL_ThrowGrenade::StaticPackageName()
-public: static char const* __fastcall UGOAL_Trigger::StaticPackageName()
-public: static char const* __fastcall UGOAL_TurnTo::StaticPackageName()
-public: static char const* __fastcall UGOAL_UseActor::StaticPackageName()
-public: static char const* __fastcall UGOAL_WaitForEvent::StaticPackageName()
-public: static char const* __fastcall UGOAL_WaitForLanding::StaticPackageName()
-public: static char const* __fastcall UGOAL_WaitForScriptState::StaticPackageName()
-public: static char const* __fastcall UGOAL_WaitUntilNear::StaticPackageName()
-public: static char const* __fastcall UGoalObject::StaticPackageName()
-public: static char const* __fastcall UGoalQueue::StaticPackageName()
-public: static char const* __fastcall UIdleInfo::StaticPackageName()
-public: static char const* __fastcall ULocalSituation::StaticPackageName()
-public: static char const* __fastcall UStanceDefault::StaticPackageName()
-public: static char const* __fastcall UStanceEngageTarget::StaticPackageName()
-public: static char const* __fastcall UStanceFormUp::StaticPackageName()
-public: static char const* __fastcall UStanceFormUpTight::StaticPackageName()
-public: static char const* __fastcall UStanceHold::StaticPackageName()
-public: static char const* __fastcall UStanceHoldLoose::StaticPackageName()
-public: static char const* __fastcall UStancePreviousOrder::StaticPackageName()
-public: static char const* __fastcall UStanceSearchAndDestroy::StaticPackageName()
-public: static char const* __fastcall UStanceSecurePosition::StaticPackageName()
-public: static char const* __fastcall UStateAbstractAttack::StaticPackageName()
-public: static char const* __fastcall UStateAsleep::StaticPackageName()
-public: static char const* __fastcall UStateAttack::StaticPackageName()
-public: static char const* __fastcall UStateBattleDroidAttack::StaticPackageName()
-public: static char const* __fastcall UStateBerserk::StaticPackageName()
-public: static char const* __fastcall UStateDispensing::StaticPackageName()
-public: static char const* __fastcall UStateDroidekaAttack::StaticPackageName()
-public: static char const* __fastcall UStateDroneAttack::StaticPackageName()
-public: static char const* __fastcall UStateFlyingAttack::StaticPackageName()
-public: static char const* __fastcall UStateFreakOut::StaticPackageName()
-public: static char const* __fastcall UStateGeonosianWarriorAttack::StaticPackageName()
-public: static char const* __fastcall UStateHeavyAttack::StaticPackageName()
-public: static char const* __fastcall UStateIdle::StaticPackageName()
-public: static char const* __fastcall UStateIdleSquad::StaticPackageName()
-public: static char const* __fastcall UStateInvestigate::StaticPackageName()
-public: static char const* __fastcall UStateMarker::StaticPackageName()
-public: static char const* __fastcall UStateObject::StaticPackageName()
-public: static char const* __fastcall UStatePatrol::StaticPackageName()
-public: static char const* __fastcall UStatePerched::StaticPackageName()
-public: static char const* __fastcall UStateRetreat::StaticPackageName()
-public: static char const* __fastcall UStateScriptWrapper::StaticPackageName()
-public: static char const* __fastcall UStateShutdown::StaticPackageName()
-public: static char const* __fastcall UStateSimpleAttack::StaticPackageName()
-public: static char const* __fastcall UStateSpiderDroidAttack::StaticPackageName()
-public: static char const* __fastcall UStateSquad::StaticPackageName()
-public: static char const* __fastcall UStateSquadAttack::StaticPackageName()
-public: static char const* __fastcall UStateStationaryAttack::StaticPackageName()
-public: static char const* __fastcall UStateTether::StaticPackageName()
-public: static char const* __fastcall UStateTrandoshanAttack::StaticPackageName()
-public: static char const* __fastcall UStateTurretAttack::StaticPackageName()
-public: static char const* __fastcall UStateWander::StaticPackageName()
 public: static char const* __fastcall UStateWookieeAttack::StaticPackageName()
 public: float __thiscall ACTBot::StimulusPriority(class UStimulus*)
 public: void __thiscall ACTBot::Stop()
@@ -1821,144 +1114,8 @@ private: virtual void __thiscall UStateWookieeAttack::UpdateSelf(float)
 public: virtual void __thiscall ACTSquadNative::UpdateSquadActionInfo(class APawn*)
 public: enum EGoalStatus __thiscall UGoalQueue::UpdateSubgoals(float)
 public: void __thiscall ACTSquadNative::UpdateVoice(float)
-public: float __thiscall UStateObject::Utility(class ACTBot*,class ULocalSituation const*)
+public: float __thiscall UStateObject::Utility(class ACTBot*, class ULocalSituation const*)
 public: int __thiscall UStateAbstractAttack::ValidManeuversForCover(class ACoverPoint*)
 public: virtual void __thiscall ACTBot::WeaponFired()
-public: void __thiscall UGoalQueue::execAddGoal(struct FFrame&,void*)
-public: void __thiscall ACTBot::execAddScriptedGotoGoal(struct FFrame&,void*)
-public: void __thiscall ACTBot::execAddScriptedShootGoal(struct FFrame&,void*)
-public: void __thiscall ACTBot::execAdjustAim(struct FFrame&,void*)
-public: void __thiscall ACTPlayer::execAssignSquadMembers(struct FFrame&,void*)
-public: void __thiscall ACTBot::execAssignToSquad(struct FFrame&,void*)
-public: void __thiscall ACTBot::execBeginPawnRevive(struct FFrame&,void*)
-public: void __thiscall ACTSquadNative::execCancelAllMarkers(struct FFrame&,void*)
-public: void __thiscall ACTSquadNative::execCancelAllOrders(struct FFrame&,void*)
-public: void __thiscall UGoalQueue::execClear(struct FFrame&,void*)
-public: void __thiscall ACTSquadNative::execCompleteWaitFor(struct FFrame&,void*)
-public: void __thiscall AActivateTrap::execDecrementRadiusTrapReferences(struct FFrame&,void*)
-public: void __thiscall ACTBot::execEnableState(struct FFrame&,void*)
-public: void __thiscall ACTSquadNative::execEngageLocation(struct FFrame&,void*)
-public: void __thiscall ACTSquadNative::execEngageTarget(struct FFrame&,void*)
-public: void __thiscall ACTBot::execForceState(struct FFrame&,void*)
-public: void __thiscall ACTBot::execFriendlyFireCallback(struct FFrame&,void*)
-public: void __thiscall ACTBot::execGetState(struct FFrame&,void*)
-public: void __thiscall ACTBot::execGetWrapperState(struct FFrame&,void*)
-public: void __thiscall AActivateTrap::execIncrementRadiusTrapReferences(struct FFrame&,void*)
-public: void __thiscall ACTMarker::execMakeObsolete(struct FFrame&,void*)
-public: void __thiscall ACTBot::execMaxAimError(struct FFrame&,void*)
-public: void __thiscall ACTMarker::execMemberKilled(struct FFrame&,void*)
-public: void __thiscall ACTSquadNative::execMemberKilled(struct FFrame&,void*)
-public: void __thiscall ACTSquadNative::execRecall(struct FFrame&,void*)
-public: void __thiscall ACTSquadNative::execReviveOrder(struct FFrame&,void*)
-public: void __thiscall ACTPlayer::execSelectTargetType(struct FFrame&,void*)
-public: void __thiscall ACTSquadNative::execSetCommandedEnemy(struct FFrame&,void*)
-public: void __thiscall ACTBot::execSetScriptingPriority(struct FFrame&,void*)
-public: void __thiscall ACTSquadNative::execSetStance(struct FFrame&,void*)
-public: void __thiscall ACTBot::execSuggestEnemy(struct FFrame&,void*)
-public: void __thiscall ACTSquadNative::execToggleCautious(struct FFrame&,void*)
-public: void __thiscall ACTBot::execUnForceState(struct FFrame&,void*)
-public: void __thiscall ACTSquadNative::execUpdate(struct FFrame&,void*)
-public: void __thiscall ACTSquadNative::execUpdateVoice(struct FFrame&,void*)
 public: static int UGOAL_GotoSpecial::sExistingGoals
 GPackage
-_DllMain@12
-autoclassAActivateDoor
-autoclassAActivateTrap
-autoclassABactaDispenser
-autoclassACTBot
-autoclassACTGameInfo
-autoclassACTMarker
-autoclassACTPawn
-autoclassACTPlayer
-autoclassACTSquadNative
-autoclassACTTeamInfo
-autoclassAFactory
-autoclassAHackTerminal
-autoclassAKnockoverProp
-autoclassAMarkerGetBactaNative
-autoclassAMarkerReviveOther
-autoclassAPawnFactory
-autoclassASpawnPoint
-autoclassUACTION_MoveToPoint
-autoclassUCTDamageMelee
-autoclassUCTDamageType
-autoclassUFootstepInfo
-autoclassUGOAL_ChangeAimTurn
-autoclassUGOAL_ChangePhysics
-autoclassUGOAL_ChangeWeapon
-autoclassUGOAL_CheckCorpse
-autoclassUGOAL_Crouch
-autoclassUGOAL_ExecuteMarker
-autoclassUGOAL_FinishingMove
-autoclassUGOAL_Follow
-autoclassUGOAL_FollowLink
-autoclassUGOAL_GetBacta
-autoclassUGOAL_GoThroughDoor
-autoclassUGOAL_Goto
-autoclassUGOAL_GotoCautious
-autoclassUGOAL_GotoPointBlind
-autoclassUGOAL_GotoSpecial
-autoclassUGOAL_HealOther
-autoclassUGOAL_JumpTo
-autoclassUGOAL_LaunchMissiles
-autoclassUGOAL_ManTurret
-autoclassUGOAL_MeleeAttack
-autoclassUGOAL_MoveAndRotate
-autoclassUGOAL_PlayAnim
-autoclassUGOAL_PlaySound
-autoclassUGOAL_Shoot
-autoclassUGOAL_Sleep
-autoclassUGOAL_SquadFollow
-autoclassUGOAL_ThrowGrenade
-autoclassUGOAL_Trigger
-autoclassUGOAL_TurnTo
-autoclassUGOAL_UseActor
-autoclassUGOAL_WaitForEvent
-autoclassUGOAL_WaitForLanding
-autoclassUGOAL_WaitForScriptState
-autoclassUGOAL_WaitUntilNear
-autoclassUGoalObject
-autoclassUGoalQueue
-autoclassUIdleInfo
-autoclassULocalSituation
-autoclassUStanceDefault
-autoclassUStanceEngageTarget
-autoclassUStanceFormUp
-autoclassUStanceFormUpTight
-autoclassUStanceHold
-autoclassUStanceHoldLoose
-autoclassUStancePreviousOrder
-autoclassUStanceSearchAndDestroy
-autoclassUStanceSecurePosition
-autoclassUStateAbstractAttack
-autoclassUStateAsleep
-autoclassUStateAttack
-autoclassUStateBattleDroidAttack
-autoclassUStateBerserk
-autoclassUStateDispensing
-autoclassUStateDroidekaAttack
-autoclassUStateDroneAttack
-autoclassUStateFlyingAttack
-autoclassUStateFreakOut
-autoclassUStateGeonosianWarriorAttack
-autoclassUStateHeavyAttack
-autoclassUStateIdle
-autoclassUStateIdleSquad
-autoclassUStateInvestigate
-autoclassUStateMarker
-autoclassUStateObject
-autoclassUStatePatrol
-autoclassUStatePerched
-autoclassUStateRetreat
-autoclassUStateScriptWrapper
-autoclassUStateShutdown
-autoclassUStateSimpleAttack
-autoclassUStateSpiderDroidAttack
-autoclassUStateSquad
-autoclassUStateSquadAttack
-autoclassUStateStationaryAttack
-autoclassUStateTether
-autoclassUStateTrandoshanAttack
-autoclassUStateTurretAttack
-autoclassUStateWander
-autoclassUStateWookieeAttack

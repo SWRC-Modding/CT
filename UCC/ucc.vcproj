@@ -3,8 +3,9 @@
 	ProjectType="Visual C++"
 	Version="7.10"
 	Name="UCC"
-	ProjectGUID="{DC67B7B8-5827-41B6-B7BE-52CC410F72EC}"
-	RootNamespace="UCC">
+	ProjectGUID="{D7878929-5402-468A-811D-1591523609F3}"
+	RootNamespace="UCC"
+	Keyword="ManagedCProj">
 	<Platforms>
 		<Platform
 			Name="Win32"/>
@@ -12,32 +13,31 @@
 	<Configurations>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="$(SolutionDir)/../GameData/System"
+			OutputDirectory="$(SolutionDir)../GameData/System"
 			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="1"
-			CharacterSet="0">
+			CharacterSet="2"
+			ManagedExtensions="FALSE">
 			<Tool
 				Name="VCCLCompilerTool"
-				Optimization="3"
-				GlobalOptimizations="TRUE"
-				InlineFunctionExpansion="2"
-				ExceptionHandling="TRUE"
+				PreprocessorDefinitions="WIN32;NDEBUG"
+				MinimalRebuild="FALSE"
 				RuntimeLibrary="2"
 				StructMemberAlignment="3"
-				EnableEnhancedInstructionSet="2"
-				DisableLanguageExtensions="FALSE"
-				WarningLevel="2"
+				WarningLevel="4"
+				DebugInformationFormat="3"
 				CallingConvention="1"/>
 			<Tool
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				FixedBaseAddress="0"/>
+				OutputFile="$(OutDir)\$(ProjectName).exe"
+				LinkIncremental="1"
+				GenerateDebugInformation="FALSE"/>
 			<Tool
 				Name="VCMIDLTool"/>
 			<Tool
-				Name="VCPostBuildEventTool"
-				CommandLine="&quot;$(SolutionDir)\..\GameData\System\UCC.exe&quot; make -ini=../../Code/UCC/ucc.ini -Silent"/>
+				Name="VCPostBuildEventTool"/>
 			<Tool
 				Name="VCPreBuildEventTool"/>
 			<Tool
@@ -61,12 +61,13 @@
 	<Files>
 		<Filter
 			Name="Src"
-			Filter="">
+			Filter="cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx"
+			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}">
 			<File
 				RelativePath=".\Src\ServerCommandlet.cpp">
 			</File>
 			<File
-				RelativePath=".\src\ucc.cpp">
+				RelativePath=".\Src\ucc.cpp">
 			</File>
 		</Filter>
 		<File

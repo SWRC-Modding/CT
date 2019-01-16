@@ -28,11 +28,11 @@ packages and to generate headers and source files for native classes.
 The others are my personal projects that I store in this repository for convenience. You can use them as a reference or just
 ignore/delete them if you want.
 
-####  Creating a new project
+#### Creating a new project
 In order to create a new native coding project, right click the solution 'CT' in the solution explorer to the left.
 Select 'Add' -> 'New Project' and create a new 'Empty Project (.NET)'. We're actually not going to use .NET but this old version
 of Visual Studio has problems on newer versions of windows where the create project wizard is broken. The empty .NET project
-is the only (usable) one that works. From now on I'm going to refer to the new project as 'MyPackage'.
+is the only (usable) one that works. From now on I'm going to refer to the new project as 'ModPackage'.
 Once you have created your new project it should show up in the solution explorer. Right click it, select 'Properties' and adjust the
 following settings:
 * General
@@ -50,14 +50,11 @@ following settings:
   * Advanced
     * Import Library: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; $(ProjectDir)/lib/$(TargetName).lib
 
-Also under your project you have an item called 'References'. Right click, select 'Add Reference' and choose the 'UCC' project.
-The UCC project is configured in such a way that it automatically compiles the UnrealScript code whenever you compile your native code.
-Selecting UCC as a reference makes sure that the UCC.exe is built before your project so that it can generate the headers and sources that
-your own project needs.
+In case you have an issue where the properties don't show up and there is just a blank gray area, you can fix it by installing .NET Framework 1.0.
 
 #### Writing code
 Now that the project setup is out of the way, it's finally time to write some code. Open windows explorer and navigate to the folder
-that contains your Visual Studio project. That should be in '(...)\\Star Wars Republic Commando\\Code\\MyPackge'.
+that contains your Visual Studio project. That should be in '(...)\\Star Wars Republic Commando\\Code\\ModPackage'.
 In there create three folders called 'Classes', 'Inc' and 'Src'. It is very important that you create them manually since the ucc will not be
 able to generate the native implementations for your classes if the Inc and Src folders don't exist.
 The Classes folder is going to contain your UnrealScript source code. As an example I'm creating a very simple and quite useless class
@@ -84,13 +81,15 @@ in UnrealScript, just to demonstrate that both the UnrealScript and C++ class re
 Save this in your projects 'Classes' folder as 'MyClass.uc'. You now have to compile this script to a .u package and generate the
 C++ header and source file for your project. In order to do this, expand the 'UCC' project and open 'ucc.ini'.
 Look for the lines that say 'EditPackages+=SomePackageName' under '[Editor.EditorEngine]' and add your package like so:
-> EditPackages+=MyPackage
+> EditPackages+=ModPackage
 
-In visual studio hit F7 or right click the solution and select 'Build'. If there are no errors in your script, the ucc should have generated
-the files 'MyPackageClasses.h' and 'MyPackageClasses.cpp' in the Inc and Src folders respectively.
+The next step is to compile your UnrealScript code and generate a C++ header and source file with the implementation of your native class:
+Go to the 'GameData/System' folder and open a command prompt by hitting 'Alt-D' and typing 'cmd'. Next run 'ucc make -ini=../../Code/UCC/UCC.ini'
+(You can of course use your own custom ini file).
+If there are no errors in your script, the ucc should have generated the files 'ModPackageClasses.h' and 'ModPackageClasses.cpp' in the Inc and Src folders respectively.
 Drag and drop those onto your visual studio project so that they become a part of it and are recognized by the compiler.
 Their content should look like this:
-##### MyPackageClasses.h
+##### ModPackageClasses.h
 ```C++
 /*===========================================================================
     C++ class definitions exported from UnrealScript.
@@ -98,23 +97,23 @@ Their content should look like this:
     DO NOT modify this manually! Edit the corresponding .uc files instead!
 ===========================================================================*/
 
-#ifndef MYPACKAGE_NATIVE_DEFS
-#define MYPACKAGE_NATIVE_DEFS
+#ifndef ModPackage_NATIVE_DEFS
+#define ModPackage_NATIVE_DEFS
 
 #if SUPPORTS_PRAGMA_PACK
 #pragma pack (push,4)
 #endif
 
-#ifndef MYPACKAGE_API
-#define MYPACKAGE_API DLL_IMPORT
+#ifndef MODPACKAGE_API
+#define MODPACKAGE_API DLL_IMPORT
 #endif
 
-class MYPACKAGE_API AMyClass : public AActor
+class MODPACKAGE_API AMyClass : public AActor
 {
 public:
     INT TestInt;
     void execTestNativeFunc(FFrame& Stack, void* Result);
-    DECLARE_CLASS(AMyClass,AActor,0,MyPackage)
+    DECLARE_CLASS(AMyClass,AActor,0,ModPackage)
     NO_DEFAULT_CONSTRUCTOR(AMyClass)
     DECLARE_NATIVES(AMyClass)
 };
@@ -132,7 +131,7 @@ public:
 
 #endif // CORE_NATIVE_DEFS
 ```
-##### MyPackageClasses.cpp
+##### ModPackageClasses.cpp
 ```C++
 /*===========================================================================
     C++ class definitions exported from UnrealScript.
@@ -140,9 +139,9 @@ public:
     DO NOT modify this manually! Edit the corresponding .uc files instead!
 ===========================================================================*/
 
-#include "MyPackagePrivate.h"
+#include "ModPackagePrivate.h"
 
-IMPLEMENT_PACKAGE(MyPackage)
+IMPLEMENT_PACKAGE(ModPackage)
 
 IMPLEMENT_CLASS(AMyClass);
 FNativeEntry<AMyClass> AMyClass::StaticNativeMap[] = {

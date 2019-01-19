@@ -151,9 +151,11 @@ class CORE_API USystem : public USubsystem{
 	FString SavePath;
 	FString CachePath;
 	FString CacheExt;
+	FString SourcePath;
 	TArray<FString> Paths;
 	TArray<FName> Suppress;
-	char Padding[16]; // Padding
+	UBOOL bLinearLoad;
+	UBOOL bLinearSave;
 
 	// Constructors.
 	void StaticConstructor();

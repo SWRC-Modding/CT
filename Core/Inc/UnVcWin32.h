@@ -169,6 +169,7 @@ typedef unsigned long	   BITFIELD;	// For bitfields.
 // Platform support options.
 #define PLATFORM_NEEDS_ARRAY_NEW 1
 #define FORCE_ANSI_LOG		   1
+#define SUPPORTS_PRAGMA_PACK 1
 
 // OS unicode function calling.
 #define TCHAR_CALL_OS(funcW,funcA) (funcA)

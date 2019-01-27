@@ -384,10 +384,12 @@ public:
 		appMemZero(static_cast<BYTE*>(Data) + Index * sizeof(T), Count * sizeof(T));
 	}
 
-	INT AddZeroed(INT Count){
+	INT AddZeroed(INT Count = 1){
 		INT Index = Add(Count);
 
 		appMemzero(static_cast<BYTE*>(Data) + Index * sizeof(T), Count * sizeof(T));
+
+		return Index;
 	}
 
 	void Shrink(){

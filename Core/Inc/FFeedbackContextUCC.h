@@ -12,25 +12,25 @@
 
 #include <cstdio>
 
-//
-// Feedback context.
-//
+/**
+ * @brief Command line feedback context used by the ucc.
+ */
 class FFeedbackContextUCC : public FFeedbackContext{
 public:
-	//Variables
+	// Variables
 	INT SlowTaskCount;
 	INT WarningCount, ErrorCount;
 	FContextSupplier* Context;
 	FOutputDevice* AuxOut;
 
-	//Constructor
+	// Constructor
 	FFeedbackContextUCC() : SlowTaskCount(0),
 							WarningCount(0),
 							ErrorCount(0),
 							Context(NULL),
 							AuxOut(NULL){}
 
-	//Functions
+	// Functions
 
 	void Serialize(const TCHAR* V, EName Event){
 		guard(FFeedbackContextUCC::Serialize);
@@ -41,12 +41,12 @@ public:
 		if(Event == NAME_Title){
 			SetConsoleTitle(V);
 
-			return; //Prevents the server from spamming the player count to the log
+			return; // Prevents the server from spamming the player count to the log
 		}else if(Event == NAME_Heading){
 			appSprintf(Buffer, "--------------------%s--------------------", V);
 
 			Temp = Buffer;
-			V = Buffer; //So that the log file also contains the formatted string
+			V = Buffer; // So that the log file also contains the formatted string
 		}else if(Event == NAME_Warning || Event == NAME_ExecWarning || Event == NAME_ScriptWarning || Event == NAME_Error || Event == NAME_Critical){
 			if(Context)
 				appSprintf(Buffer, "%s: %s, %s", *Context->GetContext(), *FName(Event), V);
@@ -62,7 +62,7 @@ public:
 		}
 
 		std::puts(Temp);
-		
+
 		if(GLog != this)
 			GLog->Log(Event, V);
 
@@ -87,7 +87,7 @@ public:
 
 			INT Ch = std::getchar();
 
-			std::getchar(); //Removing newline from input stream
+			std::getchar(); // Removing newline from input stream
 
 			return Ch == 'Y' || Ch == 'y';
 		}else{

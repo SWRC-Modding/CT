@@ -10,19 +10,15 @@
 	Native functions.
 -----------------------------------------------------------------------------*/
 
-//
-// Native function table.
-//
-
+//! @brief Native function table.
 extern CORE_API Native GNatives[];
 BYTE CORE_API GRegisterNative(INT iNative, const Native& Func);
 
+//! @brief Native cast table.
 extern CORE_API Native GCasts[];
 BYTE CORE_API GRegisterCast(INT CastCode, const Native& Func);
 
-//
 // Registering a native function.
-//
 
 #define DECLARE_NATIVES(cls) \
 	static FNativeEntry<cls> StaticNativeMap[];
@@ -30,6 +26,9 @@ BYTE CORE_API GRegisterCast(INT CastCode, const Native& Func);
 #define MAP_NATIVE(func, num) \
 	{#func, &ThisClass::exec##func, num},
 
+/**
+ * @brief Initializes all native functions for a class at startup.
+ */
 template<typename T>
 struct FNativeInitializer{
 	FNativeInitializer(){
@@ -45,9 +44,7 @@ struct FNativeInitializer{
 	Macros.
 -----------------------------------------------------------------------------*/
 
-//
 // Macros for grabbing parameters for native functions.
-//
 #define P_GET_UBOOL(var)              DWORD var=0;                         Stack.Step(Stack.Object, &var   );
 #define P_GET_UBOOL_OPTX(var,def)     DWORD var=def;                       Stack.Step(Stack.Object, &var   );
 #define P_GET_STRUCT(typ,var)         typ   var;                           Stack.Step(Stack.Object, &var   );
@@ -78,9 +75,7 @@ struct FNativeInitializer{
 
 #define P_FINISH                      Stack.Code++; if(*Stack.Code == EX_DebugInfo) Stack.Step(Stack.Object, NULL);
 
-//
 // Convenience macros.
-//
 #define P_GET_VECTOR(var)           P_GET_STRUCT(FVector,var)
 #define P_GET_VECTOR_OPTX(var,def)  P_GET_STRUCT_OPTX(FVector,var,def)
 #define P_GET_VECTOR_REF(var)       P_GET_STRUCT_REF(FVector,var)
@@ -91,9 +86,7 @@ struct FNativeInitializer{
 #define P_GET_ACTOR_OPTX(var,def)   P_GET_OBJECT_OPTX(AActor,var,def)
 #define P_GET_ACTOR_REF(var)        P_GET_OBJECT_REF(AActor,var)
 
-//
 // Iterator macros.
-//
 #define PRE_ITERATOR \
 	INT wEndOffset = Stack.ReadWord(); \
 	BYTE B = 0, Buffer[MAX_CONST_SIZE]; \

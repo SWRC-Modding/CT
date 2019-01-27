@@ -16,10 +16,12 @@ struct FMemCount{
 	DWORD Reserved;
 };
 
-//
-// Archive class. Used for loading, saving, and garbage collecting
-// in a byte order neutral way.
-//
+/**
+ * @brief Archive class.
+ *
+ * Used for loading, saving, and garbage collecting
+ * in a byte order neutral way.
+ */
 class /*CORE_API*/ FArchive{
 	// Friend archivers.
 	friend FArchive& operator<<(FArchive& Ar, ANSICHAR& C);
@@ -184,10 +186,10 @@ FArchive& operator<<(FArchive& Ar, FTime& F);
 	FArchive macros.
 -----------------------------------------------------------------------------*/
 
-//
-// Class for serializing objects in a compactly, mapping small values
-// to fewer bytes.
-//
+/**
+ * @brief Class for serializing objects compactly, mapping small values
+ * to fewer bytes.
+ */
 class CORE_API FCompactIndex{
 public:
 	INT Value;
@@ -201,9 +203,7 @@ public:
 	}
 };
 
-//
-// Archive constructor.
-//
+//! @brief Archive constructor.
 template<typename T>
 T Arctor(FArchive& Ar){
 	T Tmp;
@@ -212,7 +212,7 @@ T Arctor(FArchive& Ar){
 	return Tmp;
 }
 
-// Macro to serialize an integer as a compact index.
+//! @brief Macro to serialize an integer as a compact index.
 #define AR_INDEX(intref) \
 	(*(FCompactIndex*)&(intref))
 

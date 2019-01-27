@@ -10,16 +10,16 @@
 	Constants
 -----------------------------------------------------------------------------*/
 
-// Boundary to align class properties on.
+//! Boundary to align class properties on.
 enum { PROPERTY_ALIGNMENT = 4 };
 
 /*-----------------------------------------------------------------------------
 	FRepRecord
 -----------------------------------------------------------------------------*/
 
-//
-// Information about a property to replicate.
-//
+/**
+ * @brief Information about a property to replicate.
+ */
 struct FRepRecord{
 	UProperty* Property;
 	INT Index;
@@ -32,9 +32,9 @@ struct FRepRecord{
 	FDependency
 -----------------------------------------------------------------------------*/
 
-//
-// One dependency record, for incremental compilation.
-//
+/**
+ * @brief One dependency record, for incremental compilation.
+ */
 class CORE_API FDependency{
 public:
 	// Variables.
@@ -53,9 +53,9 @@ public:
 	FRepLink
 -----------------------------------------------------------------------------*/
 
-//
-// A tagged linked list of replicatable variables.
-//
+/**
+ * @brief A tagged linked list of replicatable variables.
+ */
 class FRepLink{
 public:
 	UProperty*	Property;		// Replicated property.
@@ -69,9 +69,9 @@ public:
 	FLabelEntry
 -----------------------------------------------------------------------------*/
 
-//
-// Entry in a state's label table.
-//
+/**
+ * @brief Entry in a state's label table.
+ */
 struct CORE_API FLabelEntry{
 	// Variables.
 	FName	Name;
@@ -86,9 +86,9 @@ struct CORE_API FLabelEntry{
 	UField
 -----------------------------------------------------------------------------*/
 
-//
-// Base class of UnrealScript language objects.
-//
+/**
+ * @brief Base class of UnrealScript language objects.
+ */
 class CORE_API UField : public UObject{
 	DECLARE_ABSTRACT_CLASS(UField,UObject,0,Core)
 	NO_DEFAULT_CONSTRUCTOR(UField)
@@ -120,9 +120,9 @@ class CORE_API UField : public UObject{
 	TFieldIterator
 -----------------------------------------------------------------------------*/
 
-//
-// For iterating through a linked list of fields.
-//
+/**
+ * @brief For iterating through a linked list of fields.
+ */
 template<typename T>
 class TFieldIterator{
 public:
@@ -207,17 +207,19 @@ protected:
 	UStruct
 -----------------------------------------------------------------------------*/
 
+/**
+ * @brief State flags.
+ */
 enum EStructFlags{
-	// State flags.
 	STRUCT_Native  = 0x00000001,
 	STRUCT_Export  = 0x00000002,
-	STRUCT_Long	   = 0x00000004, // will get shown as "..." in editactor until expanded.
+	STRUCT_Long	   = 0x00000004, //!< will get shown as "..." in editactor until expanded.
 	STRUCT_Inherit = STRUCT_Long,
 };
 
-//
-// An UnrealScript structure definition.
-//
+/**
+ * @brief An UnrealScript structure definition.
+ */
 class CORE_API UStruct : public UField{
 	DECLARE_CLASS(UStruct,UField,0,Core)
 	NO_DEFAULT_CONSTRUCTOR(UStruct)
@@ -273,17 +275,16 @@ class CORE_API UStruct : public UField{
 
 protected:
 	// Cheat Protection
-
-	BYTE FunctionMD5Digest[16]; // Holds a MD5 digest for this function
+	BYTE FunctionMD5Digest[16]; //!< Holds a MD5 digest for this function
 };
 
 /*-----------------------------------------------------------------------------
 	UFunction
 -----------------------------------------------------------------------------*/
 
-//
-// An UnrealScript function.
-//
+/**
+ * @brief An UnrealScript function.
+ */
 class CORE_API UFunction : public UStruct{
 	DECLARE_CLASS(UFunction,UStruct,0,Core)
 	DECLARE_WITHIN(UState)
@@ -325,9 +326,9 @@ class CORE_API UFunction : public UStruct{
 	UState
 -----------------------------------------------------------------------------*/
 
-//
-// An UnrealScript state.
-//
+/**
+ * @brief An UnrealScript state.
+ */
 class CORE_API UState : public UStruct{
 	DECLARE_CLASS(UState,UStruct,0,Core)
 	NO_DEFAULT_CONSTRUCTOR(UState)
@@ -361,9 +362,9 @@ class CORE_API UState : public UStruct{
 	UEnum
 -----------------------------------------------------------------------------*/
 
-//
-// An enumeration, a list of names usable by UnrealScript.
-//
+/**
+ * @brief An enumeration, a list of names usable by UnrealScript.
+ */
 class CORE_API UEnum : public UField{
 	DECLARE_CLASS(UEnum,UField,0,Core)
 	DECLARE_WITHIN(UStruct)
@@ -383,9 +384,9 @@ class CORE_API UEnum : public UField{
 	UClass
 -----------------------------------------------------------------------------*/
 
-//
-// An object class.
-//
+/**
+ * @brief An object class.
+ */
 class CORE_API UClass : public UState{
 	DECLARE_CLASS(UClass,UState,0,Core)
 	DECLARE_WITHIN(UPackage)
@@ -465,9 +466,9 @@ private:
 	UConst
 -----------------------------------------------------------------------------*/
 
-//
-// An UnrealScript constant.
-//
+/**
+ * @brief An UnrealScript constant.
+ */
 class CORE_API UConst : public UField{
 	DECLARE_CLASS(UConst,UField,0,Core)
 	DECLARE_WITHIN(UStruct)

@@ -10,9 +10,9 @@
 	Type information.
 -----------------------------------------------------------------------------*/
 
-//
-// Type information for initialization.
-//
+/**
+ * @brief Type information for initialization.
+ */
 template<typename T>
 struct TTypeInfoBase{
 	typedef const T& ConstInitType;
@@ -173,11 +173,11 @@ inline DWORD GetTypeHash(const TCHAR* S){
 	Standard macros.
 ----------------------------------------------------------------------------*/
 
-// Number of elements in an array.
+//! @brief Number of elements in an array.
 #define ARRAY_COUNT(array) \
 	(sizeof(array) / sizeof((array)[0]))
 
-// Offset of a struct member.
+//! @brief Offset of a struct member.
 #define STRUCT_OFFSET(struc, member) \
 	((INT)&((struc*)NULL)->member)
 
@@ -192,19 +192,22 @@ class TAllocator{};
 	Dynamic array template.
 -----------------------------------------------------------------------------*/
 
-//
-// Former dynamic array base. All functionality has been moved to TArray.
-// This class only exists for FTransactionBase::SaveArray
-//
+/**
+ * @brief Former dynamic array base.
+ *
+ * All functionality has been moved to TArray.
+ * This class only exists for FTransactionBase::SaveArray
+ */
 class FArray{
 private:
 	void* Data;
 	INT ArrayNum;
 };
 
-//
-// Template dynamic array
-//
+/**
+ * @brief Template dynamic array
+ * @todo Implement missing functions, figure out how flags are used
+ */
 template<typename T>
 class TArray{
 public:
@@ -772,9 +775,9 @@ private:
 	Lazy loading.
 -----------------------------------------------------------------------------*/
 
-//
-// Lazy loader base class.
-//
+/**
+ * @brief Lazy loader base class.
+ */
 class FLazyLoader{
 	friend class ULinkerLoad;
 protected:
@@ -791,14 +794,14 @@ public:
 	 *
 	 * @return offset in bytes from beginning of file to beginning of data
 	 */
-	virtual DWORD GetOffset(){ 
-		return Abs(SavedPos); 
+	virtual DWORD GetOffset(){
+		return Abs(SavedPos);
 	}
 };
 
-//
-// Lazy-loadable dynamic array.
-//
+/*
+ * @brief Lazy-loadable dynamic array.
+ */
 template<typename T>
 class TLazyArray : public TArray<T>, public FLazyLoader{
 public:
@@ -816,9 +819,9 @@ public:
 	 *
 	 * @return offset in bytes from beginning of file to beginning of data
 	 */
-	virtual DWORD GetOffset(){ 
+	virtual DWORD GetOffset(){
 		// Skips array size being serialized.
-		return Abs(SavedPos) + sizeof(INT); 
+		return Abs(SavedPos) + sizeof(INT);
 	}
 
 	void Load(){
@@ -888,9 +891,9 @@ public:
 //Forward declaration
 class FStringTemp;
 
-//
-// A dynamically sizeable string.
-//
+/**
+ * @brief A dynamically sizeable string.
+ */
 class CORE_API FString : protected TArray<TCHAR>{
 public:
 	FString();
@@ -962,11 +965,13 @@ protected:
 	}
 };
 
-/*
-*	No idea what this class is for. The only difference to FString seems
-*	to be a different binary flag used in various places (0x40000000)
-*	RC is the only Unreal game that has this...
-*/
+/**
+ * @brief Probably some sort of reference to avoid  unnecessary copies
+ *
+ * No idea what this class is for. The only difference to FString seems
+ * to be a different binary flag used in various places (0x40000000)
+ * RC is the only Unreal game that has this...
+ */
 class CORE_API FStringTemp : public FString{
 public:
 	FStringTemp(const TCHAR* In, bool What = false);
@@ -1012,10 +1017,11 @@ inline void ExchangeString(FString& A, FString& B){
 
 /*-----------------------------------------------------------------------------
 	FFilename.
-
-	Utility class for quick inquiries against filenames.
 -----------------------------------------------------------------------------*/
 
+/**
+ * @brief Utility class for quick inquiries against filenames.
+ */
 struct FFilename : public FString{
 public:
 	FFilename() : FString(){}
@@ -1075,9 +1081,9 @@ private:
 	Special archivers.
 ----------------------------------------------------------------------------*/
 
-//
-// String output device.
-//
+/**
+ * @brief String output device.
+ */
 class FStringOutputDevice : public FString, public FOutputDevice{
 public:
 	FStringOutputDevice(const TCHAR* InStr = "") : FString(InStr){}
@@ -1087,9 +1093,9 @@ public:
 	}
 };
 
-//
-// Buffer writer.
-//
+/**
+ * @brief Buffer writer.
+ */
 class FBufferWriter : public FArchive{
 public:
 	FBufferWriter(TArray<BYTE>& InBytes) : Bytes(InBytes),
@@ -1126,24 +1132,24 @@ private:
 	INT Pos;
 };
 
-//
-// Buffer archiver.
-//
+/**
+ * @brief Buffer archiver.
+ */
 class FBufferArchive : public FBufferWriter, public TArray<BYTE>{
 public:
 	FBufferArchive() : FBufferWriter((TArray<BYTE>&)*this){}
 };
 
-//
-// Buffer reader.
-//
+/**
+ * Buffer reader.
+ */
 class CORE_API FBufferReader : public FArchive{
 public:
 	FBufferReader(const TArray<BYTE>& InBytes) : Bytes(InBytes),
 												 Pos(0){
 		ArIsLoading = ArIsTrans = 1;
 	}
-	
+
 	void Serialize(void* Data, INT Num){
 		check(Pos >= 0);
 		check(Pos+Num<=Bytes.Num());
@@ -1181,9 +1187,9 @@ private:
 	TMap.
 ----------------------------------------------------------------------------*/
 
-//
-// Maps unique keys to values.
-//
+/**
+ * @brief Maps unique keys to values.
+ */
 template<typename TK, typename TI>
 class TMapBase{
 protected:
@@ -1194,8 +1200,8 @@ protected:
 		TI Value;
 		void* Null; //Seems to be a pointer but no idea what it stores
 					//It's null most of the time
-					//When passing a TMap to the original code this value is not used
-					//so further investigating it is just a waste of time...
+					//When passing a TMap to the original code this value is not used,
+					//so investigating it any further is just a waste of time...
 
 		TPair(typename TTypeInfo<TK>::ConstInitType InKey, typename TTypeInfo<TI>::ConstInitType InValue) : Key(InKey),
 																											Value(InValue){}
@@ -1458,16 +1464,18 @@ public:
 	Sorting template.
 ----------------------------------------------------------------------------*/
 
-//
-// Sort elements. The sort is unstable, meaning that the ordering of equal 
-// items is not necessarily preserved.
-//
 template<typename T>
 struct TStack{
 	T* Min;
 	T* Max;
 };
 
+/**
+ * @brief Sort elements.
+ *
+ * The sort is unstable, meaning that the ordering of equal
+ * items is not necessarily preserved.
+ */
 template<typename T>
 void Sort(T* First, INT Num){
 	guard(Sort);
@@ -1528,7 +1536,7 @@ void Sort(T* First, INT Num){
 					StackTop->Max = Current.Max;
 					StackTop++;
 				}
-				
+
 				if(Current.Min + 1 < Inner.Max){
 					Current.Max = Inner.Max - 1;
 					goto Loop;
@@ -1543,9 +1551,9 @@ void Sort(T* First, INT Num){
 	TDoubleLinkedList.
 ----------------------------------------------------------------------------*/
 
-//
-// Simple double-linked list template.
-//
+/**
+ * @brief Simple double-linked list template.
+ */
 template<typename T>
 class TDoubleLinkedList : public T{
 public:
@@ -1571,9 +1579,9 @@ public:
 	FRainbowPtr.
 ----------------------------------------------------------------------------*/
 
-//
-// A union of pointers of all base types.
-//
+/**
+ * @brief A union of pointers of all base types.
+ */
 union CORE_API FRainbowPtr{
 	// All pointers.
 	void*  PtrVOID;

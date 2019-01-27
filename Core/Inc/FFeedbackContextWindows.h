@@ -86,7 +86,7 @@ public:
 	// This is the same as MapCheck_Show, except it won't display the error box if there are no errors in it.
 	void MapCheck_ShowConditionally()
 	{
-		
+
 	}
 	void MapCheck_Hide()
 	{
@@ -98,7 +98,7 @@ public:
 	}
 	void MapCheck_Add( INT InType, void* InActor, const TCHAR* InMessage )
 	{
-		
+
 	}
 	void BeginSlowTask( const TCHAR* Task, UBOOL StatusWindow, UBOOL )
 	{

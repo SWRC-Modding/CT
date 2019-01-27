@@ -10,34 +10,36 @@
 	Definitions.
 ----------------------------------------------------------------------------*/
 
-// Maximum size of name
+//! Maximum size of name
 enum{ NAME_SIZE = 64 };
 
-// Name index
+//! Name index
 typedef INT NAME_INDEX;
 
-// Enumeration for finding name
+/**
+ * @brief Enumeration for finding name
+ */
 enum EFindName{
-	FNAME_Find,			// Find a name; return 0 if it doesn't exist.
-	FNAME_Add,			// Find a name or add it if it doesn't exist.
-	FNAME_Intrinsic,	// Find a name or add it intrinsically if it doesn't exist.
+	FNAME_Find,			//!< Find a name; return 0 if it doesn't exist.
+	FNAME_Add,			//!< Find a name or add it if it doesn't exist.
+	FNAME_Intrinsic,	//!< Find a name or add it intrinsically if it doesn't exist.
 };
 
 /*----------------------------------------------------------------------------
 	FNameEntry
 ----------------------------------------------------------------------------*/
 
-//
-// 	A global name, as stored in the global name table.
-//
+/**
+ * @brief A global name, as stored in the global name table.
+ */
 struct FNameEntry{
 	// Variables.
-	NAME_INDEX	Index;				// Index of name in hash.
-	DWORD		Flags;				// RF_TagImp, RF_TagExp, RF_Native.
-	FNameEntry*	HashNext;			// Pointer to the next entry in this hash bin's linked list.
+	NAME_INDEX	Index;				//!< Index of name in hash.
+	DWORD		Flags;				//!< RF_TagImp, RF_TagExp, RF_Native.
+	FNameEntry*	HashNext;			//!< Pointer to the next entry in this hash bin's linked list.
 
 	// The name string.
-	TCHAR		Name[NAME_SIZE];	// Name, variable-sized.
+	TCHAR		Name[NAME_SIZE];	//!< Name, variable-sized.
 
 	// Functions.
 	CORE_API friend FArchive& operator<<(FArchive& Ar, FNameEntry& E);
@@ -53,12 +55,15 @@ struct TTypeInfo<FNameEntry*> : public TTypeInfoBase<FNameEntry*>{
 	FName.
 ----------------------------------------------------------------------------*/
 
-//
-// Public name, available to the world.  Names are stored as WORD indices
-// into the name table and every name in Unreal is stored once
-// and only once in that table.  Names are case-insensitive.
-//
 #define checkName checkSlow
+
+/**
+ * @brief Public name, available to the world.
+ *
+ * Names are stored as WORD indices into the name table and
+ * every name in Unreal is stored once and only once in that table.
+ * Names are case-insensitive.
+ */
 class FName{
 public:
 	// Accessors
@@ -101,8 +106,7 @@ public:
 	static bool GetInitialized(){ return Initialized; }
 
 private:
-	// RC stores a pointer to the name entry instead of an index into the Names array
-	FNameEntry* Entry;
+	FNameEntry* Entry; // Names in RC store a pointer to the name entry instead of an index into the Names array
 
 	FNameEntry* GetEntry() const{ return Entry; }
 

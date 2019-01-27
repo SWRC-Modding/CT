@@ -6,9 +6,9 @@
 		* Created by Tim Sweeney
 =============================================================================*/
 
-//
-// Information about a field.
-//
+/**
+ * @brief Information about a field.
+ */
 class CORE_API FFieldNetCache{
 public:
 	UField* Field;
@@ -22,9 +22,9 @@ public:
 	friend CORE_API FArchive& operator<<(FArchive& Ar, FFieldNetCache& F);
 };
 
-//
-// Information about a class, cached for network coordination.
-//
+/**
+ * @brief Information about a class, cached for network coordination.
+ */
 class CORE_API FClassNetCache{
 	friend class UPackageMap;
 public:
@@ -75,24 +75,24 @@ private:
 	TMap<UObject*, FFieldNetCache*> FieldMap;
 };
 
-//
-// Ordered information of linker file requirements.
-//
+/**
+ * @brief Ordered information of linker file requirements.
+ */
 class CORE_API FPackageInfo{
 public:
 	// Variables.
-	FString			URL;				// URL of the package file we need to request.
-	ULinkerLoad*	Linker;				// Pointer to the linker, if loaded.
-	UObject*		Parent;				// The parent package.
-	FGuid			Guid;				// Package identifier.
-	INT				FileSize;			// File size.
-	INT				ObjectBase;			// Net index of first object.
-	INT				ObjectCount;		// Number of objects, defined by server.
-	INT				NameBase;			// Net index of first name.
-	INT				NameCount;			// Number of names, defined by server.
-	INT				LocalGeneration;	// This machine's generation of the package.
-	INT				RemoteGeneration;	// Remote machine's generation of the package.
-	DWORD			PackageFlags;		// Package flags.
+	FString			URL;				//!< URL of the package file we need to request.
+	ULinkerLoad*	Linker;				//!< Pointer to the linker, if loaded.
+	UObject*		Parent;				//!< The parent package.
+	FGuid			Guid;				//!< Package identifier.
+	INT				FileSize;			//!< File size.
+	INT				ObjectBase;			//!< Net index of first object.
+	INT				ObjectCount;		//!< Number of objects, defined by server.
+	INT				NameBase;			//!< Net index of first name.
+	INT				NameCount;			//!< Number of names, defined by server.
+	INT				LocalGeneration;	//!< This machine's generation of the package.
+	INT				RemoteGeneration;	//!< Remote machine's generation of the package.
+	DWORD			PackageFlags;		//!< Package flags.
 
 	// Functions.
 	FPackageInfo(ULinkerLoad* InLinker = NULL);
@@ -100,9 +100,9 @@ public:
 	CORE_API friend FArchive& operator<<(FArchive& Ar, FPackageInfo& I);
 };
 
-//
-// Maps objects and names to and from indices for network communication.
-//
+/**
+ * @brief Maps objects and names to and from indices for network communication.
+ */
 class CORE_API UPackageMap : public UObject{
 	DECLARE_CLASS(UPackageMap,UObject,CLASS_Transient,Core);
 
@@ -139,14 +139,13 @@ protected:
 
 inline FArchive& operator<<(FArchive& Ar, FClassNetCache*){ return Ar; }
 
-//
-// Information for tracking retirement and retransmission of a property.
-//
-struct FPropertyRetirement
-{
-	INT			InPacketId;		// Packet received on, INDEX_NONE=none.
-	INT			OutPacketId;	// Packet sent on, INDEX_NONE=none.
-	BYTE		Reliable;		// Whether it was sent reliably.
+/**
+ * @brief Information for tracking retirement and retransmission of a property.
+ */
+struct FPropertyRetirement{
+	INT			InPacketId;		//!< Packet received on, INDEX_NONE=none.
+	INT			OutPacketId;	//!< Packet sent on, INDEX_NONE=none.
+	BYTE		Reliable;		//!< Whether it was sent reliably.
 
 	FPropertyRetirement() : OutPacketId(INDEX_NONE),
 							InPacketId(INDEX_NONE){}

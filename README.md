@@ -6,21 +6,11 @@ This could be native functions that are callable from UnrealScript but also pure
 In order to write native code for Republic Commando you first need Visual Studio .NET 2003 which can be found [here](https://wiki.swrc-modding.net/index.php?title=MS_Visual_Studio_2003).
 Newer versions could potentially work but probably don't, so just use this one for maximum compatibility.
 
-#### Why write native code?
-Native classes can either be implemented in both UnrealScript and C++ but also purely in C++. There are two reasons for
-writing native code:
-##### 1. It's faster:
-UnrealScript, according to Epic, is about 20 times slower than C++. That means functions that do heavy processing definitely
-benefit from being implemented in native code.
-##### 2. It gives access to features that UnrealScript doesn't have
-UnrealScript is meant for gameplay programming. While it is quite good at that, it doesn't really provide any means to access
-more advanced engine features or other low-level functionality like for example file I/O.
-
 #### Getting started
 Clone this repository into your Star Wars Republic Commando folder next to GameData with
 > git clone https://github.com/Leon280698/CT.git Code
 
-Alternatively you can also download the zip but make sure to rename the 'CT' folder to 'Code'.
+Alternatively you can also download the zip but make sure to rename the 'CT' folder to 'Code' (Or in System.ini modify 'SourcePath' accordingly).
 
 Now go ahead and open the solution 'CT.sln' in Visual Studio .NET 2003. You will see that it already contains some projects.
 There's 'UCC' which is a command-line tool that, among other things, is used to compile UnrealScript source code into .u
@@ -51,6 +41,7 @@ following settings:
     * Import Library: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; $(ProjectDir)/lib/$(TargetName).lib
 
 In case you have an issue where the properties don't show up and there is just a blank gray area, you can fix it by installing .NET Framework 1.0.
+If you get an error during installation, follow the steps [in this article](https://techjourney.net/install-microsoft-net-framework-1-1-on-windows-10-8-7-vista-fix-regsvcs-exe-error/).
 
 #### Writing code
 Now that the project setup is out of the way, it's finally time to write some code. Open windows explorer and navigate to the folder

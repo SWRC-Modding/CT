@@ -44,6 +44,7 @@ public:
 
 #define AUTO_INITIALIZE_REGISTRANTS_MODMPGAME \
 	ABotSupport::StaticClass(); \
+	UExtractPathsCommandlet::StaticClass(); \
 
 #endif // __STATIC_LINK
 

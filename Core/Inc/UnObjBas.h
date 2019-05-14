@@ -417,35 +417,35 @@ class CORE_API UObject{
 
 private:
 	// Internal per-object variables.
-	INT						Index;				//!< Index of object into table.
-	UObject*				HashNext;			//!< Next object in this hash bin.
-	FStateFrame*			StateFrame;			//!< Main script execution stack.
-	ULinkerLoad*			_Linker;			//!< Linker it came from, or NULL if none.
-	INT						_LinkerIndex;		//!< Index of this object in the linker's export map.
-	UObject*				Outer;				//!< Object this object resides in.
-	DWORD					ObjectFlags;		//!< Private EObjectFlags used by object manager.
-	FName					Name;				//!< Name of the object.
-	UClass*					Class;	  			//!< Class the object belongs to.
+	INT						Index;					// Index of object into table.
+	UObject*				HashNext;				// Next object in this hash bin.
+	FStateFrame*			StateFrame;				// Main script execution stack.
+	ULinkerLoad*			_Linker;				// Linker it came from, or NULL if none.
+	INT						_LinkerIndex;			// Index of this object in the linker's export map.
+	UObject*				Outer;					// Object this object resides in.
+	DWORD					ObjectFlags;			// Private EObjectFlags used by object manager.
+	FName					Name;					// Name of the object.
+	UClass*					Class;	  				// Class the object belongs to.
 
 	// Private systemwide variables.
-	static UBOOL			GObjInitialized;	//!< Whether initialized.
-	static UBOOL			GObjNoRegister;		//!< Registration disable.
-	static INT				GObjBeginLoadCount;	//!< Count for BeginLoad multiple loads.
-	static INT				GObjRegisterCount;  //!< ProcessRegistrants entry counter.
-	static INT				GImportCount;		//!< Imports for EndLoad optimization.
-	static UObject*			GObjHash[4096];		//!< Object hash.
-	static UObject*			GAutoRegister;		//!< Objects to automatically register.
-	static TArray<UObject*> GObjLoaded;			//!< Objects that might need preloading.
-	static TArray<UObject*>	GObjRoot;			//!< Top of active object graph.
-	static TArray<UObject*>	GObjObjects;		//!< List of all objects.
-	static TArray<INT>	  GObjAvailable;		//!< Available object indices.
-	static TArray<UObject*>	GObjLoaders;		//!< Array of loaders.
-	static UPackage*		GObjTransientPkg;	//!< Transient package.
-	static TCHAR			GObjCachedLanguage[32];	//!< Language;
-	static TArray<UObject*> GObjRegistrants;		//!< Registrants during ProcessRegistrants call.
-	static TArray<FPreferencesInfo> GObjPreferences;//!< Prefereces cache.
-	static TArray<FRegistryObjectInfo> GObjDrivers;	//!< Drivers cache.
-	static TMultiMap<FName,FName>* GObjPackageRemap;//!< Remap table for loading renamed packages.
+	static UBOOL			GObjInitialized;		// Whether initialized.
+	static UBOOL			GObjNoRegister;			// Registration disable.
+	static INT				GObjBeginLoadCount;		// Count for BeginLoad multiple loads.
+	static INT				GObjRegisterCount;  	// ProcessRegistrants entry counter.
+	static INT				GImportCount;			// Imports for EndLoad optimization.
+	static UObject*			GObjHash[4096];			// Object hash.
+	static UObject*			GAutoRegister;			// Objects to automatically register.
+	static TArray<UObject*> GObjLoaded;				// Objects that might need preloading.
+	static TArray<UObject*>	GObjRoot;				// Top of active object graph.
+	static TArray<UObject*>	GObjObjects;			// List of all objects.
+	static TArray<INT>	  GObjAvailable;			// Available object indices.
+	static TArray<UObject*>	GObjLoaders;			// Array of loaders.
+	static UPackage*		GObjTransientPkg;		// Transient package.
+	static TCHAR			GObjCachedLanguage[32];	// Language;
+	static TArray<UObject*> GObjRegistrants;		// Registrants during ProcessRegistrants call.
+	static TArray<FPreferencesInfo> GObjPreferences;// Prefereces cache.
+	static TArray<FRegistryObjectInfo> GObjDrivers;	// Drivers cache.
+	static TMultiMap<FName,FName>* GObjPackageRemap;// Remap table for loading renamed packages.
 	static TCHAR GLanguage[64];
 
 	// Private functions.
@@ -479,7 +479,7 @@ public:
 
 	// UObject interface.
 	virtual void ProcessEvent(UFunction* Function, void* Parms, void* Result = NULL);
-	virtual void ProcessDelegate(FName, FScriptDelegate*, void* Parms, void* Result = NULL);
+	virtual void ProcessDelegate(FName DelegateName, FScriptDelegate* Delegate, void* Parms, void* Result = NULL);
 	virtual void ProcessState(FLOAT DeltaSeconds);
 	virtual UBOOL ProcessRemoteFunction(UFunction* Function, void* Parms, FFrame* Stack);
 	virtual void Modify();
@@ -495,7 +495,7 @@ public:
 	virtual void PostEditChange();
 	virtual void PreEditUndo();
 	virtual void PostEditUndo();
-	virtual void CallFunction(FFrame& TheStack, void*, UFunction* Function);
+	virtual void CallFunction(FFrame& TheStack, void* Result, UFunction* Function);
 	virtual UBOOL ScriptConsoleExec(const TCHAR* Cmd, FOutputDevice& Ar, UObject* Executor);
 	virtual void Register();
 	virtual void LanguageChange();

@@ -6,9 +6,8 @@
 FString CurrentCmd; // Contains the next command that is to be passed to UEngine::Exec and is gathered by the input thread
 					// the command is then executed by the main thread to avoid issues
 
-/**
- * @briefAllows user input in the console while running a server.
- *
+/*
+ * Allows user input in the console while running a server.
  * This function runs in a separate thread in order to not having
  * to pause the main loop while waiting for input.
  */
@@ -30,7 +29,7 @@ DWORD WINAPI UpdateServerConsoleInput(PVOID){
 	return 0;
 }
 
-//! @brief Replacement for UServerCommandlet::Main since the one from Engine.dll crashes because it doesn't assign a value to GEngine
+// Replacement for UServerCommandlet::Main since the one from Engine.dll crashes because it doesn't assign a value to GEngine
 void UServerCommandletMain(){
 	FString Language;
 

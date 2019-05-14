@@ -1,5 +1,5 @@
 /*=============================================================================
-	FFeedbackContextUCC.h: Command line user interface interaction.
+	FFeedbackContextCmd.h: Command line user interface interaction.
 	Copyright 1997-1999 Epic Games, Inc. All Rights Reserved.
 
 	Revision history:
@@ -7,15 +7,16 @@
 =============================================================================*/
 
 /*-----------------------------------------------------------------------------
-	FFeedbackContextUCC.
+	FFeedbackContextCmd.
 -----------------------------------------------------------------------------*/
 
 #include <cstdio>
+#include <Windows.h>
 
 /**
- * @brief Command line feedback context used by the ucc.
+ * @brief Windows command prompt feedback context.
  */
-class FFeedbackContextUCC : public FFeedbackContext{
+class FFeedbackContextCmd : public FFeedbackContext{
 public:
 	// Variables
 	INT SlowTaskCount;
@@ -24,7 +25,7 @@ public:
 	FOutputDevice* AuxOut;
 
 	// Constructor
-	FFeedbackContextUCC() : SlowTaskCount(0),
+	FFeedbackContextCmd() : SlowTaskCount(0),
 							WarningCount(0),
 							ErrorCount(0),
 							Context(NULL),
@@ -33,7 +34,7 @@ public:
 	// Functions
 
 	void Serialize(const TCHAR* V, EName Event){
-		guard(FFeedbackContextUCC::Serialize);
+		guard(FFeedbackContextCmd::Serialize);
 
 		TCHAR Buffer[1024]= "";
 		const TCHAR* Temp = V;
@@ -80,7 +81,7 @@ public:
 		TCHAR TempStr[4096];
 		GET_VARARGS(TempStr, ARRAY_COUNT(TempStr), Fmt);
 
-		guard(FFeedbackContextUCC::YesNof);
+		guard(FFeedbackContextCmd::YesNof);
 
 		if((GIsClient || GIsEditor) && !ParseParam(appCmdLine(), "Silent")){
 			std::printf("%s %s", TempStr, "(Y/N): ");
@@ -98,7 +99,7 @@ public:
 	}
 
 	void BeginSlowTask(const TCHAR* Task, UBOOL StatusWindow){
-		guard(FFeedbackContextUCC::BeginSlowTask);
+		guard(FFeedbackContextCmd::BeginSlowTask);
 
 		GIsSlowTask = ++SlowTaskCount > 0;
 
@@ -106,7 +107,7 @@ public:
 	}
 
 	void EndSlowTask(){
-		guard(FFeedbackContextUCC::EndSlowTask);
+		guard(FFeedbackContextCmd::EndSlowTask);
 
 		check(SlowTaskCount>0);
 

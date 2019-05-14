@@ -11,7 +11,7 @@
 #include "../../Core/Inc/Core.h"
 #include "../../Core/Inc/FOutputDeviceFile.h"
 #include "../../Core/Inc/FOutputDeviceWindowsError.h"
-#include "../../Core/Inc/FFeedbackContextUCC.h"
+#include "../../Core/Inc/FFeedbackContextCmd.h"
 #include "../../Core/Inc/FConfigCacheIni.h"
 
 void UServerCommandletMain(); // Defined in ServerCommandlet.cpp
@@ -28,7 +28,7 @@ int __cdecl main(int argc, char** argv){
 	int ExitCode = EXIT_SUCCESS;
 	FOutputDeviceFile Log;
 	FOutputDeviceWindowsError Error;
-	FFeedbackContextUCC Warn;
+	FFeedbackContextCmd Warn;
 
 	GIsStarted = 1;
 

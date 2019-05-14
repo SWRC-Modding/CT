@@ -53,11 +53,11 @@ void UServerCommandletMain(){
 
 	GIsRunning = 1;
 
-	//Main loop
+	// Main loop
 	while(GIsRunning && !GIsRequestingExit){
 		DOUBLE NewTime = appSeconds();
 
-		//Executing console commands that are gathered by UpdateServerConsoleInput in a different thread
+		// Executing console commands that are gathered by UpdateServerConsoleInput in a different thread
 		if(CurrentCmd.Len() > 0){
 			if(CurrentCmd == "CLS") // In case user wants to clear screen. Can be useful for testing.
 				system("cls"); // Hate using system but it's ok here

@@ -1,12 +1,12 @@
 /*
-* This is a custom UCC.exe for Star Wars Republic Commando since the game shipped without one.
-* Everything compiles fine with Visual Studio .NET 2003 which is being used to achieve maximum compatibility
-* since it was also used to compile RC
-* The following settings are required in order to compile everything without errors:
-* - Character Set = Not Set
-* - Struct Member Alignment = 4 Bytes
-* - Calling Convention = __fastcall
-*/
+ * This is a custom UCC.exe for Star Wars Republic Commando since the game shipped without one.
+ * Everything compiles fine with Visual Studio .NET 2003 which is being used to achieve maximum compatibility
+ * since it was also used to compile RC
+ * The following settings are required in order to compile everything without errors:
+ * - Character Set = Not Set
+ * - Struct Member Alignment = 4 Bytes
+ * - Calling Convention = __fastcall
+ */
 
 #include "../../Core/Inc/Core.h"
 #include "../../Core/Inc/FOutputDeviceFile.h"
@@ -16,22 +16,19 @@
 
 void UServerCommandletMain(); // Defined in ServerCommandlet.cpp
 
-// Output devices
-
-FOutputDeviceFile Log;
-FOutputDeviceWindowsError Error;
-FFeedbackContextUCC Warn;
-
-void ShowBanner(){
-	Warn.Log("=======================================");
-	Warn.Log("ucc.exe for Star Wars Republic Commando");
-	Warn.Log("made by Leon0628");
-	Warn.Log("=======================================");
-	Warn.Log("");
+void ShowBanner(FOutputDevice& Out){
+	Out.Log("=======================================");
+	Out.Log("ucc.exe for Star Wars Republic Commando");
+	Out.Log("made by Leon0628");
+	Out.Log("=======================================");
+	Out.Log("");
 }
 
 int __cdecl main(int argc, char** argv){
 	int ExitCode = EXIT_SUCCESS;
+	FOutputDeviceFile Log;
+	FOutputDeviceWindowsError Error;
+	FFeedbackContextUCC Warn;
 
 	GIsStarted = 1;
 
@@ -85,7 +82,7 @@ int __cdecl main(int argc, char** argv){
 				UCommandlet* Default = Cast<UCommandlet>(Class->GetDefaultObject());
 
 				if(Default->ShowBanner)
-					ShowBanner();
+					ShowBanner(Warn);
 
 				Warn.Logf("Executing %s", Class->GetFullName());
 				Warn.Log("");
@@ -124,11 +121,11 @@ int __cdecl main(int argc, char** argv){
 					GLog = &Log;
 				}
 			}else{
-				ShowBanner();
+				ShowBanner(Warn);
 				Warn.Logf("Commandlet %s not found", argv[1]);
 			}
 		}else{
-			ShowBanner();
+			ShowBanner(Warn);
 			Warn.Log("Usage:");
 			Warn.Log("    ucc <command> <parameters>");
 		}

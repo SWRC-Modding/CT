@@ -1,37 +1,34 @@
 /*
-*	This is a custom UCC.exe for Star Wars Republic Commando since the game shipped without one.
-*	Everything compiles fine with Visual Studio .NET 2003 which is being used to achieve maximum compatibility
-*	since it was also used to compile RC
-*	The following settings are required in order to compile everything without errors:
-*		- Character Set = Not Set	//Important as RC does not use unicode
-*		- Struct Member Alignment = 4 Bytes	//Probably not necessary, but just in case...
-*		- Calling Convention = __fastcall	//RC uses __fastcall as default calling convention
-*/
+ * This is a custom UCC.exe for Star Wars Republic Commando since the game shipped without one.
+ * Everything compiles fine with Visual Studio .NET 2003 which is being used to achieve maximum compatibility
+ * since it was also used to compile RC
+ * The following settings are required in order to compile everything without errors:
+ * - Character Set = Not Set
+ * - Struct Member Alignment = 4 Bytes
+ * - Calling Convention = __fastcall
+ */
 
 #include "../../Core/Inc/Core.h"
 #include "../../Core/Inc/FOutputDeviceFile.h"
 #include "../../Core/Inc/FOutputDeviceWindowsError.h"
-#include "../../Core/Inc/FFeedbackContextUCC.h"
+#include "../../Core/Inc/FFeedbackContextCmd.h"
 #include "../../Core/Inc/FConfigCacheIni.h"
 
-void UServerCommandletMain(); //Defined in ServerCommandlet.cpp
+void UServerCommandletMain(); // Defined in ServerCommandlet.cpp
 
-//Output devices
-
-FOutputDeviceFile Log;
-FOutputDeviceWindowsError Error;
-FFeedbackContextUCC Warn;
-
-void ShowBanner(){
-	Warn.Log("=======================================");
-	Warn.Log("ucc.exe for Star Wars Republic Commando");
-	Warn.Log("made by Leon0628");
-	Warn.Log("=======================================");
-	Warn.Log("");
+void ShowBanner(FOutputDevice& Out){
+	Out.Log("=======================================");
+	Out.Log("ucc.exe for Star Wars Republic Commando");
+	Out.Log("made by Leon0628");
+	Out.Log("=======================================");
+	Out.Log("");
 }
 
 int __cdecl main(int argc, char** argv){
 	int ExitCode = EXIT_SUCCESS;
+	FOutputDeviceFile Log;
+	FOutputDeviceWindowsError Error;
+	FFeedbackContextCmd Warn;
 
 	GIsStarted = 1;
 
@@ -47,23 +44,23 @@ int __cdecl main(int argc, char** argv){
 		UObject::SetLanguage("int");
 
 		if(argc > 1){
-			//Initializing global state
+			// Initializing global state
 			GIsUCC = GIsClient = GIsServer = GIsEditor = GIsScriptable = GLazyLoad = 1;
 
 			FString ClassName = argv[1];
 			TArray<FRegistryObjectInfo> List;
 
-			UObject::GetRegistryObjects(List, UClass::StaticClass(), UCommandlet::StaticClass(), 0); //Loading list of commandlets declared in .int files
+			UObject::GetRegistryObjects(List, UClass::StaticClass(), UCommandlet::StaticClass(), 0); // Loading list of commandlets declared in .int files
 
-			for(int i = 0; i < List.Num(); ++i){ //Looking Token up in list and autocompleting class name if found
+			for(int i = 0; i < List.Num(); ++i){ // Looking Token up in list and autocompleting class name if found
 				FString FullName = List[i].Object;
 				FString ShortName = FullName;
 
-				while(ShortName.InStr(".") >= 0) //Removing package name so that only class name remains
+				while(ShortName.InStr(".") >= 0) // Removing package name so that only class name remains
 					ShortName = ShortName.Mid(ShortName.InStr(".") + 1);
 
-				if(ClassName == FullName || ClassName + "Commandlet" == FullName ||  //Checking against "PackageName.ClassName (+ Commandlet)"
-				   ClassName == ShortName || ClassName + "Commandlet" == ShortName){ //Checking against "ClassName (+ Commandlet)"
+				if(ClassName == FullName || ClassName + "Commandlet" == FullName ||  // Checking against "PackageName.ClassName (+ Commandlet)"
+				   ClassName == ShortName || ClassName + "Commandlet" == ShortName){ // Checking against "ClassName (+ Commandlet)"
 					ClassName = List[i].Object;
 
 					break;
@@ -77,7 +74,7 @@ int __cdecl main(int argc, char** argv){
 
 			UClass* Class = LoadClass<UCommandlet>(NULL, *ClassName, NULL, LoadFlags, NULL);
 
-			if(!Class) //If class failed to load appending "Commandlet" and trying again
+			if(!Class) // If class failed to load appending "Commandlet" and trying again
 				Class = LoadClass<UCommandlet>(NULL, *(ClassName + "Commandlet"), NULL, LoadFlags, NULL);
 
 			if(Class){
@@ -85,7 +82,7 @@ int __cdecl main(int argc, char** argv){
 				UCommandlet* Default = Cast<UCommandlet>(Class->GetDefaultObject());
 
 				if(Default->ShowBanner)
-					ShowBanner();
+					ShowBanner(Warn);
 
 				Warn.Logf("Executing %s", Class->GetFullName());
 				Warn.Log("");
@@ -95,7 +92,7 @@ int __cdecl main(int argc, char** argv){
 				GIsServer = Default->IsServer;
 				GLazyLoad = Default->LazyLoad;
 
-				//Contains only the command-line options that are passed to the commandlet
+				// Contains only the command-line options that are passed to the commandlet
 				FString CommandletCmdLine;
 
 				for(int i = 2; i < argc; ++i)
@@ -104,13 +101,13 @@ int __cdecl main(int argc, char** argv){
 				Commandlet->InitExecution();
 				Commandlet->ParseParms(*CommandletCmdLine);
 
-				if(Default->LogToStdout){ //Redirecting commandlet output to console
+				if(Default->LogToStdout){ // Redirecting commandlet output to console
 					Warn.AuxOut = GLog;
 					GLog = &Warn;
 				}
 				
-				if(ClassName == "Engine.ServerCommandlet")
-					UServerCommandletMain(); //The ServerCommandlet has a special Main function
+				if(ClassName == "Engine.Server" || ClassName == "Engine.ServerCommandlet")
+					UServerCommandletMain(); // The ServerCommandlet has a special Main function
 				else
 					ExitCode = Commandlet->Main(CommandletCmdLine);
 
@@ -124,16 +121,16 @@ int __cdecl main(int argc, char** argv){
 					GLog = &Log;
 				}
 			}else{
-				ShowBanner();
+				ShowBanner(Warn);
 				Warn.Logf("Commandlet %s not found", argv[1]);
 			}
 		}else{
-			ShowBanner();
+			ShowBanner(Warn);
 			Warn.Log("Usage:");
 			Warn.Log("    ucc <command> <parameters>");
 		}
 
-		//This prevents an infinite loop during garbage collection when there are compile errors with ucc make
+		// This prevents an infinite loop during garbage collection when there are compile errors with ucc make
 		if(Warn.ErrorCount == 0)
 			appPreExit();
 		else

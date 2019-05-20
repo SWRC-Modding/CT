@@ -19,7 +19,7 @@
 #endif
 
 //===========================================================================================
-//Used to automatically link the proper lib for the dlls whose headers are currently included
+//! @brief Used to automatically link the proper lib for the dlls whose headers are currently included
 #define LINK_LIB(name) __pragma(comment(lib, "../"#name"/lib/"#name".lib"))
 //===========================================================================================
 
@@ -57,7 +57,6 @@ private:
 
 // Compiler specific include.
 #ifdef _MSC_VER
-	#define SUPPORTS_PRAGMA_PACK 1
 	#include "UnVcWin32.h"
 #else
 	#error Must use Visual Studio (Ideally .NET 2003)
@@ -158,10 +157,10 @@ class FString;
 class FMalloc;
 struct FFrame;
 
-// Native function.
+//! @brief Native function.
 typedef void(UObject::*Native)(FFrame& TheStack, void* const Result);
 
-// Single entry in a UClass' native funtion table.
+//! @brief Single entry in a UClass' native funtion table.
 template<typename T>
 struct FNativeEntry{
 	const TCHAR* name;
@@ -170,7 +169,6 @@ struct FNativeEntry{
 };
 
 // Templates.
-//Templates.
 template<typename T>
 class TArray;
 template<typename T>
@@ -192,7 +190,7 @@ CORE_API extern class FOutputDevice* GNull;
 	Abstract interfaces.
 -----------------------------------------------------------------------------*/
 
-// An output device.
+//! @brief An output device.
 class CORE_API FOutputDevice{
 public:
 	// FOutputDevice interface.
@@ -208,13 +206,13 @@ public:
 	void Logf(const TCHAR* Fmt, ...);
 };
 
-// Error device.
+//! @brief Error device.
 class CORE_API FOutputDeviceError : public FOutputDevice{
 public:
 	virtual void HandleError() = 0;
 };
 
-// Memory allocator.
+//! @brief Memory allocator.
 class /*CORE_API*/ FMalloc{
 public:
 	virtual void Init(){}
@@ -240,7 +238,7 @@ public:
 	virtual void Tick(){}
 };
 
-// Configuration database cache.
+//! @brief Configuration database cache.
 class FConfigCache{
 public:
 	virtual UBOOL GetBool(const TCHAR* Section, const TCHAR* Key, UBOOL& Value, const TCHAR* Filename = NULL) = 0;
@@ -267,13 +265,13 @@ public:
 	virtual ~FConfigCache(){}
 };
 
-// Any object that is capable of taking commands.
+//! @brief Any object that is capable of taking commands.
 class CORE_API FExec{
 public:
 	virtual UBOOL Exec(const TCHAR* Cmd, FOutputDevice& Ar) = 0;
 };
 
-// Notification hook.
+//! @brief Notification hook.
 class CORE_API FNotifyHook{
 public:
 	virtual void NotifyDestroy(void* Src){}
@@ -282,13 +280,13 @@ public:
 	virtual void NotifyExec(void* Src, const TCHAR* Cmd){}
 };
 
-// Interface for returning a context string.
+//! @brief Interface for returning a context string.
 class FContextSupplier{
 public:
 	virtual FString GetContext() = 0;
 };
 
-// A context for displaying modal warning messages.
+//! @brief A context for displaying modal warning messages.
 class FFeedbackContext : public FOutputDevice{
 public:
 	virtual UBOOL VARARGS YesNof(const TCHAR* Fmt, ...) = 0;
@@ -371,7 +369,7 @@ public:
 	virtual UBOOL SetGlobalTime(const TCHAR* Filename) = 0;
 	virtual UBOOL MakeDirectory(const TCHAR* Path, UBOOL Tree = 0) = 0;
 	virtual UBOOL DeleteDirectory(const TCHAR* Path, UBOOL RequireExists = 0, UBOOL Tree = 0) = 0;
-	virtual TArray<FString> FindFiles(const TCHAR* Filename, UBOOL Files, UBOOL Directories) = 0;
+	virtual void FindFiles(TArray<FString>& Result, const TCHAR* Filename, UBOOL Files, UBOOL Directories) = 0;
 	virtual UBOOL SetDefaultDirectory(const TCHAR* Filename) = 0;
 	virtual FString GetDefaultDirectory() = 0;
 	virtual const TCHAR* CalcHomeDir();
@@ -440,69 +438,74 @@ class FEdLoadError;
 ----------------------------------------------------------------------------*/
 
 // Core globals.
-CORE_API extern FMemStack				GMem;
-CORE_API extern FOutputDevice*			GLog;
-CORE_API extern FOutputDevice*			GNull;
-CORE_API extern FOutputDevice*			GThrow;
-CORE_API extern FOutputDeviceError*		GError;
-CORE_API extern FFeedbackContext*		GWarn;
-CORE_API extern FConfigCache*			GConfig;
-CORE_API extern FTransactionBase*		GUndo;
-CORE_API extern FOutputDevice*			GLogHook;
-CORE_API extern FExec*					GExec;
-CORE_API extern FMalloc*				GMalloc;
-CORE_API extern FFileManager*			GFileManager;
-CORE_API extern USystem*				GSys;
-CORE_API extern UProperty*				GProperty;
-CORE_API extern BYTE*					GPropAddr;
-CORE_API extern UObject*				GPropObject;
-CORE_API extern DWORD					GRuntimeUCFlags;
-CORE_API extern USubsystem*				GWindowManager;
-CORE_API extern TCHAR					GErrorHist[4096];
-CORE_API extern TCHAR					GTrue[64], GFalse[64], GYes[64], GNo[64], GNone[64];
-CORE_API extern TCHAR					GCdPath[];
-CORE_API extern	DOUBLE					GSecondsPerCycle;
+CORE_API extern FMemStack				GMem;						/*!< @brief Global memory stack */
+CORE_API extern FOutputDevice*			GLog;						/*!< @brief Regular logging */
+CORE_API extern FOutputDeviceError*		GError;						/*!< @brief Critical errors */
+CORE_API extern FOutputDevice*			GNull;						/*!< @brief Log to nowhere */
+CORE_API extern FOutputDevice*			GThrow;						/*!< @brief Exception thrower */
+CORE_API extern FFeedbackContext*		GWarn;						/*!< @brief User interaction and non critical warnings */
+CORE_API extern FConfigCache*			GConfig;					/*!< @brief Configuration database cache */
+CORE_API extern FTransactionBase*		GUndo;						/*!< @brief Transaction tracker, non-NULL when a transaction is in progress */
+CORE_API extern FOutputDevice*			GLogHook;					/*!< @brief Launch log output hook */
+CORE_API extern FExec*					GExec;						/*!< @brief Launch command-line exec hook */
+CORE_API extern FMalloc*				GMalloc;					/*!< @brief Memory allocator */
+CORE_API extern FFileManager*			GFileManager;				/*!< @brief File manager */
+CORE_API extern USystem*				GSys;						/*!< @brief System control code */
+CORE_API extern UProperty*				GProperty;					/*!< @brief Property for UnrealScript interpreter */
+CORE_API extern BYTE*					GPropAddr;					/*!< @brief Property address for UnrealScript interpreter */
+CORE_API extern UObject*				GPropObject;				/*!< @brief Object with Property for UnrealScript interpreter */
+CORE_API extern DWORD					GRuntimeUCFlags;			/*!< @brief Property for storing flags between calls to bytecode functions */
+CORE_API extern USubsystem*				GWindowManager;				/*!< @brief Window update routine called once per tick */
+CORE_API extern TCHAR					GErrorHist[4096];			/*!< @brief For building call stack text dump in guard/unguard mechanism */
+CORE_API extern TCHAR					GYes[64];					/*!< @brief Localized "yes" text */
+CORE_API extern TCHAR					GNo[64];					/*!< @brief Localized "no" text */
+CORE_API extern TCHAR					GTrue[64];					/*!< @brief Localized "true" text */
+CORE_API extern TCHAR					GFalse[64];					/*!< @brief Localized "false" text */
+CORE_API extern TCHAR					GNone[64];					/*!< @brief Localized "none" text */
+CORE_API extern TCHAR					GCdPath[];					/*!< @brief Cd path, if any */
+CORE_API extern	DOUBLE					GSecondsPerCycle;			/*!< @brief Seconds per CPU cycle for this PC */
 CORE_API extern DOUBLE					GLastFNamePurgeTime;
-CORE_API extern DOUBLE					GTempDouble;
-CORE_API extern void					(*GTempFunc)(void*);
-CORE_API extern SQWORD					GTicks;
-CORE_API extern DWORD					GPageSize;
-CORE_API extern DWORD					GProcessorCount;
-CORE_API extern DWORD					GPhysicalMemory;
-CORE_API extern DWORD					GUglyHackFlags;
-CORE_API extern UBOOL					GIsBenchmarking;
-CORE_API extern UBOOL					GIsClient;
-CORE_API extern UBOOL					GIsCriticalError;
-CORE_API extern UBOOL					GIsEditor;
+CORE_API extern DOUBLE					GTempDouble;				/*!< @brief Used during development for timing */
+CORE_API extern void					(*GTempFunc)(void*);		/*!< @brief Used during development for debug hooks */
+CORE_API extern SQWORD					GTicks;						/*!< @brief Number of non-persistent ticks thus far in this level, for profiling */
+CORE_API extern DWORD					GPageSize;					/*!< @brief Operating system page size */
+CORE_API extern DWORD					GProcessorCount;			/*!< @brief Number of CPUs in this PC */
+CORE_API extern DWORD					GPhysicalMemory;			/*!< @brief Bytes of physical memory in this PC */
+CORE_API extern DWORD					GUglyHackFlags;				/*!< @brief Flags for passing around globally hacked stuff */
+CORE_API extern UBOOL					GIsBenchmarking;			/*!< @brief Whether we are in benchmark mode or not */
+CORE_API extern UBOOL					GIsClient;					/*!< @brief Whether engine was launched as a client */
+CORE_API extern UBOOL					GIsCriticalError;			/*!< @brief An appError() has occured */
+CORE_API extern UBOOL					GIsEditor;					/*!< @brief Whether engine was launched for editing */
 CORE_API extern UBOOL					GIsGarbageCollecting;
-CORE_API extern UBOOL					GIsGuarded;
+CORE_API extern UBOOL					GIsGuarded;					/*!< @brief Whether execution is happening within main()/WinMain()'s try/catch handler */
 CORE_API extern UBOOL					GIsLoadingLevel;
 CORE_API extern UBOOL					GIsOpenGL;
 CORE_API extern UBOOL					GIsPixomatic;
 CORE_API extern UBOOL					GIsPurgingFNames;
-CORE_API extern UBOOL					GIsRequestingExit;
-CORE_API extern UBOOL					GIsRunning;
-CORE_API extern UBOOL					GIsScriptable;
-CORE_API extern UBOOL					GIsServer;
-CORE_API extern UBOOL					GIsSlowTask;
-CORE_API extern UBOOL					GIsStarted;
-CORE_API extern UBOOL					GScriptEntryTag;
-CORE_API extern UBOOL					GIsStrict;
-CORE_API extern UBOOL					GLazyLoad;
-CORE_API extern UBOOL					GIsUCC;
+CORE_API extern UBOOL					GIsRequestingExit;			/*!< @brief Indicates that MainLoop() should be exited at the end of the current iteration */
+CORE_API extern UBOOL					GIsRunning;					/*!< @brief Whether execution is happening within MainLoop() */
+CORE_API extern UBOOL					GIsScriptable;				/*!< @brief Whether script execution is allowed */
+CORE_API extern UBOOL					GIsServer;					/*!< @brief Whether engine was launched as a server, true if GIsClient */
+CORE_API extern UBOOL					GIsSlowTask;				/*!< @brief Whether there is a slow task in progress */
+CORE_API extern UBOOL					GIsStarted;					/*!< @brief Whether execution is happening from within main()/WinMain() */
+CORE_API extern UBOOL					GScriptEntryTag;			/*!< @brief Number of recursive UnrealScript calls currently on the stack */
+CORE_API extern UBOOL					GIsStrict;					/*!< @brief Causes all UnrealScript execution warnings to be fatal errors */
+CORE_API extern UBOOL					GLazyLoad;					/*!< @brief Whether TLazyLoad arrays should be lazy-loaded or not */
+CORE_API extern UBOOL					GIsUCC;						/*!< @brief Is UCC running? */
 CORE_API extern UBOOL					GUseSmallPools;
 CORE_API extern UBOOL					GUseFrontEnd;
-CORE_API extern UBOOL					GEdSelectionLock;
-CORE_API extern UBOOL					GEdShowFogInViewports;
+CORE_API extern UBOOL					GEdSelectionLock;			/*!< @brief Are selections locked? (you can't select/deselect additional actors) */
+CORE_API extern UBOOL					GEdShowFogInViewports;		/*!< @brief Show distance fog in viewports? */
 CORE_API extern UBOOL					GBuildingScripts;
-CORE_API extern class FGlobalMath		GMath;
+CORE_API extern class FGlobalMath		GMath;						/*!< @brief Math code */
+CORE_API extern class FArchive*			GDummySave;					/*!< @brief No-op save archive */
 CORE_API extern class FArchive*			GIsUTracingGDummySave;
-CORE_API extern FFileStream*			GFileStream;
-CORE_API extern FLOAT					GAudioMaxRadiusMultiplier;
-CORE_API extern FLOAT					GAudioDefaultRadius;
-CORE_API extern TArray<FEdLoadError>	GEdLoadErrors;
-CORE_API extern	UDebugger*				GDebugger; //DEBUGGER
-CORE_API extern QWORD					GMakeCacheIDIndex;
+CORE_API extern FFileStream*			GFileStream;				/*!< @brief File streaming */
+CORE_API extern FLOAT					GAudioMaxRadiusMultiplier;	/*!< @brief Max distance = Radius * GAudioMaxRadiusMultiplier */
+CORE_API extern FLOAT					GAudioDefaultRadius;		/*!< @brief Default radius for PlayOwnedSound */
+CORE_API extern TArray<FEdLoadError>	GEdLoadErrors;				/*!< @brief For keeping track of load errors in the editor */
+CORE_API extern	UDebugger*				GDebugger;					/*!< @brief Unrealscript Debugger */
+CORE_API extern QWORD					GMakeCacheIDIndex;			/*!< @brief Cache ID */
 CORE_API extern FString					GBuildLabel;
 CORE_API extern FString					GMachineOS;
 CORE_API extern FString					GMachineCPU;
@@ -538,7 +541,7 @@ extern "C" DLL_EXPORT TCHAR GPackage[];
 #include "UnBits.h"			// Bitstream archiver.
 #include "UnMath.h"			// Vector math functions.
 
-// Worker class for tracking loading errors in the editor
+//! @brief Worker class for tracking loading errors in the editor
 class CORE_API FEdLoadError{
 public:
 	FEdLoadError(){}
@@ -550,7 +553,7 @@ public:
 
 	~FEdLoadError(){}
 
-	// The types of things that could be missing.
+	//! @brief The types of things that could be missing.
 	enum{
 		TYPE_FILE,		// A totally missing file
 		TYPE_RESOURCE	// Texture/Sound/StaticMesh/etc
@@ -571,9 +574,9 @@ public:
 	}
 };
 
-//
-// Archive for counting memory usage.
-//
+/**
+ * @brief Archive for counting memory usage.
+ */
 class CORE_API FArchiveCountMem : public FArchive{
 public:
 	FArchiveCountMem(UObject* Src);
@@ -603,14 +606,14 @@ typedef struct{
 	FString Message;
 } MAPCHECK;
 
-// A convenience to allow referring to axis' by name instead of number
+//! @brief A convenience to allow referring to axis' by name instead of number
 enum EAxis{
 	AXIS_X,
 	AXIS_Y,
 	AXIS_Z,
 };
 
-// Very basic abstract debugger class.
+//! @brief Very basic abstract debugger class.
 class UDebugger{ //DEBUGGER
 public:
 	virtual void DebugInfo(UObject* Debugee, FFrame* Stack, FString InfoType, int LineNumber, int InputPos) = 0;

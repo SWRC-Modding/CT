@@ -163,7 +163,7 @@ class ENGINE_API UBspNodes : public UObject
 
 			Ar << AR_INDEX(_NumZones);
 
-			for( i=0; i<_NumZones; i++ )
+			for( INT i=0; i<_NumZones; i++ )
 				Ar << _Zones[i];
 		}
 		unguardobj;

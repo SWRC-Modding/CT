@@ -154,7 +154,8 @@ class ENGINE_API ULevel : public ULevelBase
 	enum {NUM_LEVEL_TEXT_BLOCKS=16};
 
 	// Main variables, always valid.
-	TArray<UReachSpec>		ReachSpecs;
+	// Not in UE2
+	//TArray<UReachSpec>		ReachSpecs;
 	UModel*					Model;
 	UTextBuffer*			TextBlocks[NUM_LEVEL_TEXT_BLOCKS];
 	FTime                   TimeSeconds;

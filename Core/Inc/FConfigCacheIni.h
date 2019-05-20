@@ -10,10 +10,10 @@
 	Config cache.
 -----------------------------------------------------------------------------*/
 
-//One section in a config file.
+//! @brief Single section in a config file.
 typedef TMultiMap<FName, FString> FConfigSection;
 
-//One config file.
+//! @brief Single config file.
 class FConfigFile : public TMap<FString, FConfigSection>{
 public:
 	UBOOL Dirty, NoSave;
@@ -48,7 +48,7 @@ public:
 
 				*Ptr++ = 0;
 
-				//Ignore comments
+				// Ignore comments
 				if(Start[0] == ';')
 					continue;
 
@@ -63,7 +63,7 @@ public:
 					TCHAR* Value = appStrstr(Start, "=");
 
 					if(Value){
-						if(*(Value - 1) == '+')	//RC uses '+=' for arrays
+						if(*(Value - 1) == '+')	// RC uses '+=' for arrays
 							*(Value - 1) = 0;
 
 						*Value++ = 0;
@@ -129,32 +129,32 @@ public:
 	}
 };
 
-//Set of all cached config files.
+//! @brief Set of all cached config files.
 class FConfigCacheIni : public FConfigCache, public TMap<FString, FConfigFile>{
 protected:
-	FConfigCacheIni(){} //Private constructor. Use FConfigCacheIni::Factory instead
+	FConfigCacheIni(){} //!< Private constructor. Use FConfigCacheIni::Factory instead
 
 public:
-	//Basic functions.
+	// Basic functions.
 	FString SystemIni, UserIni;
 
 	FConfigFile* Find(const TCHAR* InFilename, UBOOL CreateIfNotFound){
 		guard(FConfigCacheIni::Find);
 
-		//If filename not specified, use default.
+		// If filename not specified, use default.
 		FFilename Filename(InFilename ? InFilename : SystemIni);
 
-		//Add .ini extension.
+		// Add .ini extension.
 		if(Filename.GetExtension() == "")
 			Filename += ".ini";
 
-		//Automatically translate generic filenames.
+		// Automatically translate generic filenames.
 		if(Filename == "User.ini")
 			Filename = UserIni;
 		else if(Filename == "System.ini")
 			Filename = SystemIni;
 
-		//Get file.
+		// Get file.
 		FConfigFile* Result = TMap<FString, FConfigFile>::Find(Filename.GetCleanFilename());
 
 		if(!Result && (CreateIfNotFound || GFileManager->FileSize(*Filename) >= 0)){
@@ -167,7 +167,7 @@ public:
 		unguard;
 	}
 
-	//Overrides
+	// Overrides
 
 	UBOOL GetBool(
 		const TCHAR*	Section,
@@ -177,7 +177,7 @@ public:
 	){
 		guard(FConfigCacheIni::GetBool);
 
-		TCHAR Text[80]; 
+		TCHAR Text[80];
 		if(GetString(Section, Key, Text, ARRAY_COUNT(Text), Filename)){
 			if(appStricmp(Text, "True") == 0)
 				Value = 1;
@@ -199,7 +199,7 @@ public:
 	){
 		guard(FConfigCacheIni::GetInt);
 
-		TCHAR Text[80]; 
+		TCHAR Text[80];
 		if(GetString(Section, Key, Text, ARRAY_COUNT(Text), Filename)){
 			Value = appAtoi(Text);
 
@@ -219,7 +219,7 @@ public:
 	){
 		guard(FConfigCacheIni::GetFloat);
 
-		TCHAR Text[80]; 
+		TCHAR Text[80];
 		if(GetString(Section, Key, Text, ARRAY_COUNT(Text), Filename)){
 			Value = appAtof(Text);
 
@@ -490,8 +490,8 @@ public:
 		guard(FConfigCacheIni::Exit);
 
 		Flush(1);
-		
-		operator delete(this); //This is ok since the Object will not be referenced anymore after the call to exit
+
+		operator delete(this); // This is ok since the Object will not be referenced anymore after the call to exit
 
 		if(GConfig == this)
 			GConfig = NULL;
@@ -512,7 +512,7 @@ public:
 		Ar << *this;
 	}
 
-	//Static allocator.
+	//! Static allocator.
 	static FConfigCache* Factory(){
 		return new FConfigCacheIni();
 	}

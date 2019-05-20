@@ -7,16 +7,16 @@
 	UProperty.
 -----------------------------------------------------------------------------*/
 
-// Property exporting flags.
+//! @brief Property exporting flags.
 enum EPropertyPortFlags{
 	PPF_Localized = 1,
 	PPF_Delimited = 2,
-	PPF_CheckReferences = 4, // gam
+	PPF_CheckReferences = 4,
 };
 
-//
-// An UnrealScript variable.
-//
+/**
+ * @brief An UnrealScript variable.
+ */
 class CORE_API UProperty : public UField{
 	DECLARE_ABSTRACT_CLASS(UProperty,UField,CLASS_IsAUProperty,Core)
 	DECLARE_WITHIN(UField)
@@ -77,9 +77,9 @@ class CORE_API UProperty : public UField{
 	UByteProperty.
 -----------------------------------------------------------------------------*/
 
-//
-// Describes an unsigned byte value or 255-value enumeration variable.
-//
+/**
+ * @brief Describes an unsigned byte value or 255-value enumeration variable.
+ */
 class CORE_API UByteProperty : public UProperty{
 	DECLARE_CLASS(UByteProperty,UProperty,CLASS_IsAUProperty,Core)
 
@@ -111,9 +111,9 @@ class CORE_API UByteProperty : public UProperty{
 	UIntProperty.
 -----------------------------------------------------------------------------*/
 
-//
-// Describes a 32-bit signed integer variable.
-//
+/**
+ * @brief Describes a 32-bit signed integer variable.
+ */
 class CORE_API UIntProperty : public UProperty{
 	DECLARE_CLASS(UIntProperty,UProperty,CLASS_IsAUProperty,Core)
 
@@ -138,9 +138,9 @@ class CORE_API UIntProperty : public UProperty{
 	UBoolProperty.
 -----------------------------------------------------------------------------*/
 
-//
-// Describes a single bit flag variable residing in a 32-bit unsigned double word.
-//
+/**
+ * @brief Describes a single bit flag variable residing in a 32-bit unsigned double word.
+ */
 class CORE_API UBoolProperty : public UProperty{
 	DECLARE_CLASS(UBoolProperty,UProperty,CLASS_IsAUProperty,Core)
 
@@ -171,9 +171,9 @@ class CORE_API UBoolProperty : public UProperty{
 	UFloatProperty.
 -----------------------------------------------------------------------------*/
 
-//
-// Describes an IEEE 32-bit floating point variable.
-//
+/**
+ * @brief Describes an IEEE 32-bit floating point variable.
+ */
 class CORE_API UFloatProperty : public UProperty{
 	DECLARE_CLASS(UFloatProperty,UProperty,CLASS_IsAUProperty,Core)
 
@@ -198,9 +198,9 @@ class CORE_API UFloatProperty : public UProperty{
 	UObjectProperty.
 -----------------------------------------------------------------------------*/
 
-//
-// Describes a reference variable to another object which may be nil.
-//
+/**
+ * @brief Describes a reference variable to another object which may be nil.
+ */
 class CORE_API UObjectProperty : public UProperty{
 	DECLARE_CLASS(UObjectProperty,UProperty,CLASS_IsAUProperty,Core)
 
@@ -235,9 +235,9 @@ class CORE_API UObjectProperty : public UProperty{
 	UObjectProperty.
 -----------------------------------------------------------------------------*/
 
-//
-// Describes a reference variable to another object which may be nil.
-//
+/**
+ * @brief Describes a reference variable to another object which may be nil.
+ */
 class CORE_API UClassProperty : public UObjectProperty{
 	DECLARE_CLASS(UClassProperty,UObjectProperty,0,Core)
 
@@ -261,9 +261,9 @@ class CORE_API UClassProperty : public UObjectProperty{
 	UNameProperty.
 -----------------------------------------------------------------------------*/
 
-//
-// Describes a name variable pointing into the global name table.
-//
+/**
+ * @brief Describes a name variable pointing into the global name table.
+ */
 class CORE_API UNameProperty : public UProperty{
 	DECLARE_CLASS(UNameProperty,UProperty,CLASS_IsAUProperty,Core)
 
@@ -287,9 +287,9 @@ class CORE_API UNameProperty : public UProperty{
 	UStrProperty.
 -----------------------------------------------------------------------------*/
 
-//
-// Describes a dynamic string variable.
-//
+/**
+ * @brief Describes a dynamic string variable.
+ */
 class CORE_API UStrProperty : public UProperty{
 	DECLARE_CLASS(UStrProperty,UProperty,CLASS_IsAUProperty,Core)
 
@@ -316,9 +316,9 @@ class CORE_API UStrProperty : public UProperty{
 	UArrayProperty.
 -----------------------------------------------------------------------------*/
 
-//
-// Describes a dynamic array.
-//
+/**
+ * @brief Describes a dynamic array.
+ */
 class CORE_API UArrayProperty : public UProperty{
 	DECLARE_CLASS(UArrayProperty,UProperty,CLASS_IsAUProperty,Core)
 
@@ -357,9 +357,9 @@ class CORE_API UArrayProperty : public UProperty{
 	UMapProperty.
 -----------------------------------------------------------------------------*/
 
-//
-// Describes a dynamic map.
-//
+/**
+ * @brief Describes a dynamic map. NOT IMPLEMENTED!!!
+ */
 class CORE_API UMapProperty : public UProperty{
 	DECLARE_CLASS(UMapProperty,UProperty,CLASS_IsAUProperty,Core)
 
@@ -391,10 +391,10 @@ class CORE_API UMapProperty : public UProperty{
 	UStructProperty.
 -----------------------------------------------------------------------------*/
 
-//
-// Describes a structure variable embedded in (as opposed to referenced by)
-// an object.
-//
+/**
+ * @brief Describes a structure variable embedded in (as opposed to referenced by)
+ * an object.
+ */
 class CORE_API UStructProperty : public UProperty{
 	DECLARE_CLASS(UStructProperty,UProperty,CLASS_IsAUProperty,Core)
 
@@ -430,9 +430,9 @@ class CORE_API UStructProperty : public UProperty{
 	UDelegateProperty.
 -----------------------------------------------------------------------------*/
 
-//
-// Describes a pointer to a function bound to an Object
-//
+/**
+ * @brief Describes a pointer to a function bound to an Object
+ */
 class CORE_API UDelegateProperty : public UProperty{
 	DECLARE_CLASS(UDelegateProperty,UProperty,CLASS_IsAUProperty,Core)
 
@@ -463,9 +463,9 @@ class CORE_API UDelegateProperty : public UProperty{
 	Field templates.
 -----------------------------------------------------------------------------*/
 
-//
-// Find a typed field in a struct.
-//
+/**
+ * @brief Find a typed field in a struct.
+ */
 template<typename T>
 T* FindField(UStruct* Owner, const TCHAR* FieldName){
 	guard(FindField);
@@ -484,9 +484,9 @@ T* FindField(UStruct* Owner, const TCHAR* FieldName){
 	UObject accessors that depend on UClass.
 -----------------------------------------------------------------------------*/
 
-//
-// See if this object belongs to the specified class.
-//
+/**
+ * @brief See if this object belongs to the specified class.
+ */
 inline UBOOL UObject::IsA(UClass* SomeBase) const{
 	for(UClass* TempClass = Class; TempClass; TempClass = static_cast<UClass*>(TempClass->SuperField)){
 		if(TempClass == SomeBase)
@@ -496,9 +496,9 @@ inline UBOOL UObject::IsA(UClass* SomeBase) const{
 	return SomeBase == NULL;
 }
 
-//
-// See if this object is in a certain package.
-//
+/**
+ * @brief See if this object is in a certain package.
+ */
 inline UBOOL UObject::IsIn(UObject* SomeOuter) const{
 	for(UObject* It = GetOuter(); It; It = It->GetOuter()){
 		if(It == SomeOuter)
@@ -507,24 +507,6 @@ inline UBOOL UObject::IsIn(UObject* SomeOuter) const{
 
 	return SomeOuter == NULL;
 }
-
-/*-----------------------------------------------------------------------------
-	UStruct inlines.
------------------------------------------------------------------------------*/
-
-//
-// UStruct inline comparer.
-//
-/*inline bool UStruct::StructCompare(const void* A, const void* B){
-	for(TFieldIterator<UProperty> It(this); It; ++It){
-		for(INT i = 0; i < It->ArrayDim; ++i){
-			if(!It->Matches(A, B, i))
-				return 0;
-		}
-	}
-
-	return 1;
-}*/
 
 /*-----------------------------------------------------------------------------
 	C++ property macros.

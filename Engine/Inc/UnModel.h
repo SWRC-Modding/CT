@@ -100,7 +100,7 @@ class ENGINE_API UModel : public UPrimitive
 	typedef void (*SPHERE_FILTER_CALLBACK)(UModel *Model, INT iNode, int IsBack, int Outside, int Param);
 	// Signature changed as it wouldn't link to Engine.dll
 	//FPointRegion PointRegion( AZoneInfo* Zone, FVector Location ) const;
-	FPointRegion __thiscall PointRegion(class AZoneInfo* Zone, class FVector const & Location)const;
+	FPointRegion PointRegion(class AZoneInfo* Zone, class FVector const & Location)const;
 	FLOAT FindNearestVertex
 	(
 		const FVector	&SourcePoint,

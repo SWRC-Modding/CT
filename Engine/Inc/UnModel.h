@@ -98,7 +98,9 @@ class ENGINE_API UModel : public UPrimitive
 	// UModel collision functions.
 	typedef void (*PLANE_FILTER_CALLBACK )(UModel *Model, INT iNode, int Param);
 	typedef void (*SPHERE_FILTER_CALLBACK)(UModel *Model, INT iNode, int IsBack, int Outside, int Param);
-	FPointRegion PointRegion( AZoneInfo* Zone, FVector Location ) const;
+	// Signature changed as it wouldn't link to Engine.dll
+	//FPointRegion PointRegion( AZoneInfo* Zone, FVector Location ) const;
+	FPointRegion __thiscall PointRegion(class AZoneInfo* Zone, class FVector const & Location)const;
 	FLOAT FindNearestVertex
 	(
 		const FVector	&SourcePoint,

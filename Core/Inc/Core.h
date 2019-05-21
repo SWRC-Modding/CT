@@ -19,8 +19,13 @@
 #endif
 
 //===========================================================================================
+// Give an option to disable this, it can cause link errors if the libs are already defined in the project
+#ifdef DISABLE_LINK_LIB
+#define LINK_LIB(name)
+#else
 //! @brief Used to automatically link the proper lib for the dlls whose headers are currently included
 #define LINK_LIB(name) __pragma(comment(lib, "../"#name"/lib/"#name".lib"))
+#endif
 //===========================================================================================
 
 LINK_LIB(Core)

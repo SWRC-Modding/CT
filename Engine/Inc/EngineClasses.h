@@ -6029,6 +6029,23 @@ public:
 	virtual void PostEditChange();
 };
 
+// Tex Scaler
+class ENGINE_API UTexScaler : public UTexModifier
+{
+public:
+	FMatrix M;
+	FLOAT UScale;
+	FLOAT VScale;
+	FLOAT UOffset;
+	FLOAT VOffset;
+	
+	// Declare the class
+	DECLARE_CLASS(UTexScaler,UTexModifier,0,Engine)
+	
+	// UTexModifier interface
+	virtual FMatrix* GetMatrix(FLOAT TimeSeconds);
+};
+
 /*
 *	ShadowBitmapMaterial
 */

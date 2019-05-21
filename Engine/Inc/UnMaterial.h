@@ -48,12 +48,8 @@ public:
 	// UObject interface
 	void Serialize( FArchive& Ar );
 
-	//TODO: Adjust vtables for material classes
-	/*virtual INT MaterialUSize();
-	virtual INT MaterialVSize();
-	virtual UBOOL RequiresSorting();*/
-
 	// UMaterial interface
+	virtual void ResetCachedStates();
 	virtual UBOOL CheckCircularReferences( TArray<UMaterial*>& History );
 	virtual UBOOL GetValidated() { return Validated; }
 	virtual void SetValidated( UBOOL InValidated ) { Validated = InValidated; }
@@ -101,13 +97,13 @@ class ENGINE_API UBitmapMaterial : public URenderedMaterial
 	INT			UClamp, VClamp;		// Clamped width, must be <= size.
 	BITFIELD	DontCache:1;
 
+	// UMaterial Interface
+	virtual INT MaterialUSize(){ return USize; }
+	virtual INT MaterialVSize(){ return VSize; }
+
 	// UBitmapMaterial interface.
 	virtual FBaseTexture* GetRenderInterface() = 0;
 	virtual UBitmapMaterial* Get( FTime Time, UViewport* Viewport ) { return this; }
-
-	// UMaterial Interface
-	virtual INT MaterialUSize() { return USize; }
-	virtual INT MaterialVSize() { return VSize; }
 };
 
 /*-----------------------------------------------------------------------------

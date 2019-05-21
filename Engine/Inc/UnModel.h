@@ -98,7 +98,7 @@ class ENGINE_API UModel : public UPrimitive
 	// UModel collision functions.
 	typedef void (*PLANE_FILTER_CALLBACK )(UModel *Model, INT iNode, int Param);
 	typedef void (*SPHERE_FILTER_CALLBACK)(UModel *Model, INT iNode, int IsBack, int Outside, int Param);
-	FPointRegion PointRegion( AZoneInfo* Zone, FVector Location ) const;
+	FPointRegion PointRegion(class AZoneInfo* Zone, class FVector const & Location)const;
 	FLOAT FindNearestVertex
 	(
 		const FVector	&SourcePoint,
@@ -161,7 +161,7 @@ class ENGINE_API UBspNodes : public UObject
 
 			Ar << AR_INDEX(_NumZones);
 
-			for( i=0; i<_NumZones; i++ )
+			for( INT i=0; i<_NumZones; i++ )
 				Ar << _Zones[i];
 		}
 		unguardobj;

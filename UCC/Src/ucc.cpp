@@ -69,8 +69,12 @@ int __cdecl main(int argc, char** argv){
 
 			DWORD LoadFlags = LOAD_NoWarn | LOAD_Quiet;
 
-			if(ClassName == "Editor.MakeCommandlet")
+			if(ClassName == "Editor.MakeCommandlet"){
+				// Loading default packages to avoid 'Superclass not found' errors
+				UObject::LoadPackage(NULL, "Core", LOAD_NoFail);
+				UObject::LoadPackage(NULL, "Engine", LOAD_NoFail);
 				LoadFlags |= LOAD_DisallowFiles;
+			}
 
 			UClass* Class = LoadClass<UCommandlet>(NULL, *ClassName, NULL, LoadFlags, NULL);
 

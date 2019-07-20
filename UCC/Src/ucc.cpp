@@ -109,7 +109,7 @@ int __cdecl main(int argc, char** argv){
 					Warn.AuxOut = GLog;
 					GLog = &Warn;
 				}
-				
+
 				if(ClassName == "Engine.Server" || ClassName == "Engine.ServerCommandlet")
 					UServerCommandletMain(); // The ServerCommandlet has a special Main function
 				else

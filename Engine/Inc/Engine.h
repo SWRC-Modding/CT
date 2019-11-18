@@ -60,6 +60,7 @@ ENGINE_API extern FLOAT 			GEngineTime;
 #include "UnRenderIterator.h"	// Enhanced Actor Render Interface
 #include "UnRenderIteratorSupport.h"
 #include "UnRenDev.h"
+#include "UnRenderUtil.h"
 #include "UnPath.h"
 
 ENGINE_API extern class UCubemapManager* 		GCubemapManager;

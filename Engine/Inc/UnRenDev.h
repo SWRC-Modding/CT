@@ -15,6 +15,17 @@
 	URenderDevice.
 ------------------------------------------------------------------------------------*/
 
+// Primitive types for DrawPrimitive.
+
+enum EPrimitiveType
+{
+	PT_TriangleList,
+	PT_TriangleStrip,
+	PT_TriangleFan,
+	PT_PointList,
+	PT_LineList
+};
+
 // Flags for locking a rendering device.
 enum ELockRenderFlags
 {

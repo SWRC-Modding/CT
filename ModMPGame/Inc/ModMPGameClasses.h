@@ -26,6 +26,7 @@ public:
     BITFIELD bImportedPaths:1 GCC_PACK(4);
     void execSpawnNavigationPoint(FFrame& Stack, void* Result);
     void execBuildPaths(FFrame& Stack, void* Result);
+    void execClearPaths(FFrame& Stack, void* Result);
     DECLARE_CLASS(ABotSupport,AActor,0,ModMPGame)
 	virtual void Spawned();
 	virtual void Destroy();
@@ -35,6 +36,7 @@ public:
 	void SpawnNavigationPoint(UClass* NavPtClass, const FVector& Location, const FRotator& Rotation = FRotator(0, 0, 0));
 	void ImportPaths();
 	void BuildPaths();
+	void ClearPaths();
 
 	// Static because it needs to be accessed by UExportPathsCommandlet
 	static void ExportPaths(ALevelInfo* LevelInfo);
@@ -51,7 +53,6 @@ public:
 
 #define AUTO_INITIALIZE_REGISTRANTS_MODMPGAME \
 	ABotSupport::StaticClass(); \
-	UExportPathsCommandlet::StaticClass(); \
 
 #endif // __STATIC_LINK
 

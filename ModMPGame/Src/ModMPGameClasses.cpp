@@ -14,6 +14,7 @@ IMPLEMENT_CLASS(ABotSupport);
 FNativeEntry<ABotSupport> ABotSupport::StaticNativeMap[] = {
 	MAP_NATIVE(SpawnNavigationPoint,0)
 	MAP_NATIVE(BuildPaths,0)
+	MAP_NATIVE(ClearPaths,0)
 	{NULL,NULL}
 };
 LINK_NATIVES(ABotSupport);

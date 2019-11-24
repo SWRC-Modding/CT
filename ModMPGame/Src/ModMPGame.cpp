@@ -27,6 +27,10 @@ static struct FBotSupportExecHook : FExec{
 				GBotSupport->BuildPaths();
 
 				return 1;
+			}else if(ParseCommand(&Cmd, "CLEARPATHS")){
+				GBotSupport->ClearPaths();
+
+				return 1;
 			}
 
 			if(GIsClient){ // Commands only available ingame
@@ -88,6 +92,10 @@ enum ENavPtType{
 	NAVPT_CoverPoint
 };
 
+/*
+ * FNavPtInfo
+ * Information about a navigation point that is written to a file
+ */
 struct FNavPtInfo{
 	ENavPtType Type;
 	FVector Location;
@@ -185,6 +193,11 @@ void ABotSupport::execBuildPaths(FFrame& Stack, void* Result){
 	BuildPaths();
 }
 
+void ABotSupport::execClearPaths(FFrame& Stack, void* Result){
+	P_FINISH;
+	ClearPaths();
+}
+
 /*
  * ABotSupport::BuildPaths
  * Does the same as the build paths option in the editor
@@ -203,6 +216,16 @@ void ABotSupport::BuildPaths(){
 	GIsEditor = isEd;
 	Level->bBegunPlay = begunPlay;
 
+	unguard;
+}
+
+/*
+ * ABotSupport::ClearPaths
+ * Removes all existing paths but keeps navigation points intact
+ */
+void ABotSupport::ClearPaths(){
+	guard(ABotSupport::ClearPaths);
+	GPathBuilder.undefinePaths(XLevel);
 	unguard;
 }
 

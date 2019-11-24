@@ -20,14 +20,15 @@
 class MODMPGAME_API ABotSupport : public AActor
 {
 public:
-    TArrayNoInit<FVector> NavPtFailLocations;
+    BITFIELD bAutoImportPaths:1 GCC_PACK(4);
+    BITFIELD bPathsImported:1;
+    TArrayNoInit<FVector> NavPtFailLocations GCC_PACK(4);
     TArrayNoInit<class AMPBot*> Bots;
     TArrayNoInit<class APlayerStart*> SpawnPoints;
-    BITFIELD bImportedPaths:1 GCC_PACK(4);
     void execSpawnNavigationPoint(FFrame& Stack, void* Result);
     void execBuildPaths(FFrame& Stack, void* Result);
     void execClearPaths(FFrame& Stack, void* Result);
-    DECLARE_CLASS(ABotSupport,AActor,0,ModMPGame)
+    DECLARE_CLASS(ABotSupport,AActor,0|CLASS_Config,ModMPGame)
 	virtual void Spawned();
 	virtual void Destroy();
 	virtual UBOOL Tick(FLOAT DeltaTime, ELevelTick TickType);

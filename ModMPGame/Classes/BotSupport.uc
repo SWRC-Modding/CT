@@ -61,9 +61,11 @@ function AddBot(){
 }
 
 function RemoveBot(){
+	if(Bots.Length > 0){
 	Bots[Bots.Length - 1].Pawn.Destroy();
 	Bots[Bots.Length - 1].Destroy();
 	Bots.Length = Bots.Length - 1;
+}
 }
 
 cpptext

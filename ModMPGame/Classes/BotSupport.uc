@@ -1,7 +1,10 @@
-class BotSupport extends Actor native;
+class BotSupport extends Actor native config(ModMPGameConfig);
 
 #exec OBJ LOAD FILE="MPGame.u"
 
+var config bool bAutoImportPaths;
+
+var bool bPathsImported;
 var Array<Vector> NavPtFailLocations; // Used to debug Navigation points which failed to spawn
 var Array<MPBot> Bots;
 var Array<PlayerStart> SpawnPoints;
@@ -62,10 +65,10 @@ function AddBot(){
 
 function RemoveBot(){
 	if(Bots.Length > 0){
-	Bots[Bots.Length - 1].Pawn.Destroy();
-	Bots[Bots.Length - 1].Destroy();
-	Bots.Length = Bots.Length - 1;
-}
+		Bots[Bots.Length - 1].Pawn.Destroy();
+		Bots[Bots.Length - 1].Destroy();
+		Bots.Length = Bots.Length - 1;
+	}
 }
 
 cpptext
@@ -87,4 +90,5 @@ cpptext
 defaultproperties
 {
 	bHidden=true
+	bAutoImportPaths=true
 }

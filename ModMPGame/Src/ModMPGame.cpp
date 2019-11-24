@@ -150,7 +150,7 @@ void ABotSupport::SpawnNavigationPoint(UClass* NavPtClass, const FVector& Locati
 void ABotSupport::ImportPaths(){
 	guard(ABotSupport::ImportPaths);
 
-	if(bImportedPaths){
+	if(bPathsImported){
 		GLog->Log(NAME_Error, "Paths have already been imported");
 
 		return;
@@ -172,7 +172,7 @@ void ABotSupport::ImportPaths(){
 			);
 		}
 
-		bImportedPaths = 1;
+		bPathsImported = 1;
 	}else{
 		GLog->Logf(NAME_Error, "Cannot import paths from file '%s'", *Filename);
 	}
@@ -276,6 +276,13 @@ void ABotSupport::ExportPaths(ALevelInfo* LevelInfo){
 
 void ABotSupport::Spawned(){
 	GBotSupport = this;
+
+	if(bAutoImportPaths){
+		ImportPaths();
+
+		if(bPathsImported) // We don't want the paths to be rebuilt if import failed
+			BuildPaths();
+	}
 }
 
 void ABotSupport::Destroy(){

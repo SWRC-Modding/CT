@@ -5,3 +5,5 @@ LINK_LIB(ModMPGame)
 #endif
 
 #include "ModMPGameClasses.h"
+
+MODMPGAME_API APlayerController* GetLocalPlayerController();

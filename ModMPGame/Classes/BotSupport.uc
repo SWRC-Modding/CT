@@ -30,6 +30,8 @@ function Timer(){
 		if(Bots[i].Pawn == None){
 			SpawnPoint = SpawnPoints[Rand(SpawnPoints.Length)];
 			P = Spawn(class'MPClone',,, SpawnPoint.Location, SpawnPoint.Rotation);
+			MPPawn(P).ChosenSkin = Bots[i].ChosenSkin;
+			MPPawn(P).DoCustomizations();
 
 			if(P != None){
 				P.AddDefaultInventory();
@@ -47,6 +49,7 @@ function AddBot(){
 	if(Bot != None){
 		Bot.PlayerReplicationInfo.PlayerName = "Bot"$Bots.Length;
 		Bot.bCanGesture = false;
+		Bot.ChosenSkin = Rand(5);
 		Bots[Bots.Length] = Bot;
 		BroadcastLocalizedMessage(Level.Game.GameMessageClass, 1, Bot.PlayerReplicationInfo);
 	}

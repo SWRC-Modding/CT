@@ -1,5 +1,7 @@
 class MPBot extends CTBot;
 
+var int ChosenSkin;
+
 function GivePawn(){
 	Log("GivePawn called");
 }

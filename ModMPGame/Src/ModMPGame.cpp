@@ -30,6 +30,8 @@ static struct FBotSupportExecHook : FExec{
 			}
 
 			if(GIsClient){ // Commands only available ingame
+				UClass* PutNavPtClass = NULL;
+
 				if(ParseCommand(&Cmd, "SHOWPATHS")){
 					GBotSupport->bHidden = 0;
 
@@ -39,19 +41,12 @@ static struct FBotSupportExecHook : FExec{
 
 					return 1;
 				}else if(ParseCommand(&Cmd, "PUTPATHNODE")){
-					APlayerController* Player = GetLocalPlayerController();
-					check(Player);
-					FVector Loc;
-
-					if(Player->Pawn)
-						Loc = Player->Pawn->Location;
-					else
-						Loc = Player->Location;
-
-					GBotSupport->SpawnNavigationPoint(APathNode::StaticClass(), Loc);
-
-					return 1;
+					PutNavPtClass = APathNode::StaticClass();
 				}else if(ParseCommand(&Cmd, "PUTCOVERPOINT")){
+					PutNavPtClass = ACoverPoint::StaticClass();
+				}
+
+				if(PutNavPtClass){
 					APlayerController* Player = GetLocalPlayerController();
 					check(Player);
 					FVector Loc;
@@ -65,7 +60,7 @@ static struct FBotSupportExecHook : FExec{
 						Rot.Yaw = Player->Rotation.Yaw;
 					}
 
-					GBotSupport->SpawnNavigationPoint(ACoverPoint::StaticClass(), Loc, Rot);
+					GBotSupport->SpawnNavigationPoint(PutNavPtClass, Loc, Rot);
 
 					return 1;
 				}

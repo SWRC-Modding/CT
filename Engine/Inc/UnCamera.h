@@ -170,7 +170,7 @@ enum EViewportShowFlags
 };
 
 // Mouse buttons and commands.
-enum EMouseButtons	
+enum EMouseButtons
 {
 	MOUSE_Left			= 0x0001,		// Left mouse button.
 	MOUSE_Right			= 0x0002,		// Right mouse button.
@@ -193,7 +193,9 @@ class ENGINE_API UViewport : public UPlayer{
 	DECLARE_ABSTRACT_CLASS(UViewport,UPlayer,CLASS_Transient,Engine)
 	DECLARE_WITHIN(UClient)
 
-	char Padding[356];
+	char Padding1[288];
+	FRenderInterface* RI;
+	char Padding2[64];
 
 	/*// Referenced objects.
 	class UCanvas*		 Canvas;	// Viewport's painting canvas.
@@ -338,7 +340,7 @@ class ENGINE_API UClient : public UObject
 	INT			TextureLODSet[LODSET_MAX];
 	FLOAT		MinDesiredFrameRate;
 	INT			ParticleDensity;
-	
+
 
 	// Constructors.
 	UClient();

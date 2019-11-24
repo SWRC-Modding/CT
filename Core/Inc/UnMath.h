@@ -169,7 +169,7 @@ enum EVectorFlags{
 /**
  * @brief Floating point vector.
  */
-class CORE_API FVector{
+class /*CORE_API*/ FVector{
 public:
 	// Variables.
 	FLOAT X,Y,Z;

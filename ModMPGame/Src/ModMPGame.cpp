@@ -9,18 +9,13 @@ static struct FBotSupportExecHook : FExec{
 	FExec* OldGExec;
 
 	FBotSupportExecHook() : OldGExec(GExec){ GExec = this; }
+	~FBotSupportExecHook(){ GExec = OldGExec; }
 
 	virtual UBOOL Exec(const TCHAR* Cmd, FOutputDevice& Ar){
+		guard(FBotSupportExecHook::Exec);
+
 		if(GBotSupport){
-			if(ParseCommand(&Cmd, "SHOWPATHS")){
-				GBotSupport->bHidden = 0;
-
-				return 1;
-			}else if(ParseCommand(&Cmd, "HIDEPATHS")){
-				GBotSupport->bHidden = 1;
-
-				return 1;
-			}else if(ParseCommand(&Cmd, "IMPORTPATHS")){
+			if(ParseCommand(&Cmd, "IMPORTPATHS")){
 				GBotSupport->ImportPaths();
 
 				return 1;
@@ -32,42 +27,62 @@ static struct FBotSupportExecHook : FExec{
 				GBotSupport->BuildPaths();
 
 				return 1;
-			}else if(ParseCommand(&Cmd, "PUTPATHNODE")){
-				TObjectIterator<UViewport> It;
-				check(It);
-				FVector Loc;
+			}
 
-				if(It->Actor->Pawn)
-					Loc = It->Actor->Pawn->Location;
-				else
-					Loc = It->Actor->Location;
+			if(GIsClient){ // Commands only available ingame
+				if(ParseCommand(&Cmd, "SHOWPATHS")){
+					GBotSupport->bHidden = 0;
 
-				GBotSupport->SpawnNavigationPoint(APathNode::StaticClass(), Loc);
+					return 1;
+				}else if(ParseCommand(&Cmd, "HIDEPATHS")){
+					GBotSupport->bHidden = 1;
 
-				return 1;
-			}else if(ParseCommand(&Cmd, "PUTCOVERPOINT")){
-				TObjectIterator<UViewport> It;
-				check(It);
-				FVector Loc;
-				FRotator Rot(0, 0, 0);
+					return 1;
+				}else if(ParseCommand(&Cmd, "PUTPATHNODE")){
+					APlayerController* Player = GetLocalPlayerController();
+					check(Player);
+					FVector Loc;
 
-				if(It->Actor->Pawn){
-					Loc = It->Actor->Pawn->Location;
-					Rot.Yaw = It->Actor->Pawn->Rotation.Yaw;
-				}else{
-					Loc = It->Actor->Location;
-					Rot.Yaw = It->Actor->Rotation.Yaw;
+					if(Player->Pawn)
+						Loc = Player->Pawn->Location;
+					else
+						Loc = Player->Location;
+
+					GBotSupport->SpawnNavigationPoint(APathNode::StaticClass(), Loc);
+
+					return 1;
+				}else if(ParseCommand(&Cmd, "PUTCOVERPOINT")){
+					APlayerController* Player = GetLocalPlayerController();
+					check(Player);
+					FVector Loc;
+					FRotator Rot(0, 0, 0);
+
+					if(Player->Pawn){
+						Loc = Player->Pawn->Location;
+						Rot.Yaw = Player->Pawn->Rotation.Yaw;
+					}else{
+						Loc = Player->Location;
+						Rot.Yaw = Player->Rotation.Yaw;
+					}
+
+					GBotSupport->SpawnNavigationPoint(ACoverPoint::StaticClass(), Loc, Rot);
+
+					return 1;
 				}
-
-				GBotSupport->SpawnNavigationPoint(ACoverPoint::StaticClass(), Loc, Rot);
-
-				return 1;
 			}
 		}
 
-		return OldGExec->Exec(Cmd, Ar);
+		return OldGExec ? OldGExec->Exec(Cmd, Ar) : 0;
+
+		unguard;
 	}
 } BotSupportExecHook;
+
+APlayerController* GetLocalPlayerController(){
+	TObjectIterator<UViewport> It;
+
+	return It ? It->Actor : NULL;
+}
 
 static FFilename GetPathFileName(const FString MapName){
 	return GFileManager->GetDefaultDirectory() * ".." * "Maps" * "Paths" * FFilename(MapName).GetBaseFilename() + ".ctp";
@@ -188,11 +203,13 @@ void ABotSupport::ExportPaths(ALevelInfo* LevelInfo){
 	while(NavPt){
 		FNavPtInfo NavPtInfo;
 
-		NavPtInfo.Type = NavPt->IsA(ACoverPoint::StaticClass()) ? NAVPT_CoverPoint : NAVPT_PathNode;
-		NavPtInfo.Location = NavPt->Location;
-		NavPtInfo.Rotation = NavPt->Rotation;
-		NavPt = NavPt->nextNavigationPoint;
-		NavPts.AddItem(NavPtInfo);
+		if(!NavPt->IsA(APlayerStart::StaticClass())){ // Playerstarts are always part of the map and thus not exported
+			NavPtInfo.Type = NavPt->IsA(ACoverPoint::StaticClass()) ? NAVPT_CoverPoint : NAVPT_PathNode;
+			NavPtInfo.Location = NavPt->Location;
+			NavPtInfo.Rotation = NavPt->Rotation;
+			NavPt = NavPt->nextNavigationPoint;
+			NavPts.AddItem(NavPtInfo);
+		}
 	}
 
 	if(NavPts.Num() > 0){
@@ -233,23 +250,23 @@ UBOOL ABotSupport::Tick(FLOAT DeltaTime, ELevelTick TickType){
 	guard(ABotSupport::Tick);
 
 	/*
-	 * Keeping the BotSupport Actor always in the players view so that it is always rendered
+	 * Keeping the BotSupport Actor in the players view at all times so that it is always rendered
 	 * which is needed when the ShowPaths command was used
 	 */
 	if(!bHidden){
-		TObjectIterator<UViewport> It;
+		APlayerController* Player = GetLocalPlayerController();
 
-		if(It){
+		if(Player){
 			FVector Loc;
 
-			if(It->Actor->Pawn){
-				Loc = It->Actor->Pawn->Location;
-				Loc.Z += It->Actor->Pawn->EyeHeight;
+			if(Player->Pawn){
+				Loc = Player->Pawn->Location;
+				Loc.Z += Player->Pawn->EyeHeight;
 			}else{
-				Loc = It->Actor->Location;
+				Loc = Player->Location;
 			}
 
-			XLevel->FarMoveActor(this, Loc + It->Actor->Rotation.Vector());
+			XLevel->FarMoveActor(this, Loc + Player->Rotation.Vector());
 		}
 	}
 
@@ -269,10 +286,10 @@ void ABotSupport::PostRender(class FLevelSceneNode* SceneNode, class FRenderInte
 	FLineBatcher LineBatcher(RI);
 
 	for(int i = 0; i < NavPtFailLocations.Num(); ++i)
-		LineBatcher.DrawLine(NavPtFailLocations[i], FVector(0, 0, WORLD_MAX), FPlane(1.0f, 0.0f, 0.0f, 1.0f));
+		LineBatcher.DrawLine(NavPtFailLocations[i], FVector(0, 0, WORLD_MAX), FPlane(1, 0, 0, 1));
 
 	for(ANavigationPoint *Nav=Level->NavigationPointList; Nav; Nav=Nav->nextNavigationPoint){
-		for(INT i=0; i<Nav->PathList.Num(); i++){
+		for(INT i = 0; i < Nav->PathList.Num(); ++i){
 			UReachSpec* ReachSpec = Nav->PathList[i];
 
 			if(ReachSpec->Start && ReachSpec->End){

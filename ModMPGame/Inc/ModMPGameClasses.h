@@ -44,6 +44,15 @@ public:
 };
 
 
+class MODMPGAME_API AMPBot : public ACTBot
+{
+public:
+    INT ChosenSkin;
+    DECLARE_CLASS(AMPBot,ACTBot,0|CLASS_Config,ModMPGame)
+    NO_DEFAULT_CONSTRUCTOR(AMPBot)
+};
+
+
 
 #if SUPPORTS_PRAGMA_PACK
 #pragma pack (pop)
@@ -53,6 +62,8 @@ public:
 
 #define AUTO_INITIALIZE_REGISTRANTS_MODMPGAME \
 	ABotSupport::StaticClass(); \
+	AMPBot::StaticClass(); \
+	UExportPathsCommandlet::StaticClass(); \
 
 #endif // __STATIC_LINK
 

@@ -18,3 +18,5 @@ FNativeEntry<ABotSupport> ABotSupport::StaticNativeMap[] = {
 	{NULL,NULL}
 };
 LINK_NATIVES(ABotSupport);
+
+IMPLEMENT_CLASS(AMPBot);

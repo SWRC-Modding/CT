@@ -328,15 +328,13 @@ void ABotSupport::PostRender(class FLevelSceneNode* SceneNode, class FRenderInte
 	// Drawing the collision cylinder for each bot
 	// Not terribly useful but can make it easier to see them when testing
 	for(int i = 0; i < Bots.Num(); ++i){
-		AController* Bot = reinterpret_cast<AController*>(Bots[i]);
-
-		if(Bot->Pawn){
+		if(Bots[i]->Pawn){
 			LineBatcher.DrawCylinder(
-				Bot->Pawn->Location,
+				Bots[i]->Pawn->Location,
 				FVector(0, 0, 1),
 				FColor(255, 0, 255),
-				Bot->Pawn->CollisionRadius,
-				Bot->Pawn->CollisionHeight,
+				Bots[i]->Pawn->CollisionRadius,
+				Bots[i]->Pawn->CollisionHeight,
 				16
 			);
 		}

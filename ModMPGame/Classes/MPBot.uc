@@ -1,4 +1,4 @@
-class MPBot extends CTBot;
+class MPBot extends CTBot native;
 
 var int ChosenSkin;
 

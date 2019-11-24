@@ -9,6 +9,7 @@ var bool bImportedPaths;
 
 native final function SpawnNavigationPoint(Class<NavigationPoint> NavPtClass, Vector Loc, optional Rotator Rot);
 native final function BuildPaths();
+native final function ClearPaths();
 
 function PostBeginPlay(){
 	local PlayerStart P;
@@ -75,6 +76,7 @@ cpptext
 	void SpawnNavigationPoint(UClass* NavPtClass, const FVector& Location, const FRotator& Rotation = FRotator(0, 0, 0));
 	void ImportPaths();
 	void BuildPaths();
+	void ClearPaths();
 
 	// Static because it needs to be accessed by UExportPathsCommandlet
 	static void ExportPaths(ALevelInfo* LevelInfo);

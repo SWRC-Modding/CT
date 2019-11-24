@@ -23,6 +23,9 @@ public:
     TArrayNoInit<FVector> NavPtFailLocations;
     TArrayNoInit<class AMPBot*> Bots;
     TArrayNoInit<class APlayerStart*> SpawnPoints;
+    BITFIELD bImportedPaths:1 GCC_PACK(4);
+    void execSpawnNavigationPoint(FFrame& Stack, void* Result);
+    void execBuildPaths(FFrame& Stack, void* Result);
     DECLARE_CLASS(ABotSupport,AActor,0,ModMPGame)
 	virtual void Spawned();
 	virtual void Destroy();
@@ -35,6 +38,7 @@ public:
 
 	// Static because it needs to be accessed by UExportPathsCommandlet
 	static void ExportPaths(ALevelInfo* LevelInfo);
+    DECLARE_NATIVES(ABotSupport)
 };
 
 

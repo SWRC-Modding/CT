@@ -171,7 +171,7 @@ class ENGINE_API ULevel : public ULevelBase
 	// Temporary stats.
 	INT NetTickCycles, NetDiffCycles, ActorTickCycles, AudioTickCycles, FindPathCycles, MoveCycles, NumMoves, NumReps, NumPV, GetRelevantCycles, NumRPC, SeePlayer, Spawning, Unused;
 
-	char Padding[56];
+	char Padding[64];
 
 	// Constructor.
 	ULevel( UEngine* InEngine, UBOOL RootOutside );

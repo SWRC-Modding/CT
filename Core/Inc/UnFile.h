@@ -367,7 +367,7 @@ inline DWORD appStrihash(const TCHAR* Data){
 	Parsing functions.
 -----------------------------------------------------------------------------*/
 
-CORE_API UBOOL ParseCommand(const TCHAR** Stream, const TCHAR* Match);
+CORE_API UBOOL CDECL ParseCommand(const TCHAR** Stream, const TCHAR* Match);
 CORE_API UBOOL Parse(const TCHAR* Stream, const TCHAR* Match, class FName& Name);
 CORE_API UBOOL Parse(const TCHAR* Stream, const TCHAR* Match, DWORD& Value);
 CORE_API UBOOL Parse(const TCHAR* Stream, const TCHAR* Match, class FGuid& Guid);

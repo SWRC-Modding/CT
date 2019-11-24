@@ -688,7 +688,7 @@ public:
 	class UClass* AttachItemClass;
 	FStringNoInit ActivatePromptText;
 	TArrayNoInit<FString> ActivatePromptButtonFuncs;
-	
+
 	//Events
 	FLOAT DurationMultiplier();
 
@@ -727,7 +727,7 @@ public:
 		DECLARE_NAME(AbortSetup);
 		UObject::ProcessEvent(NAbortSetup, NULL);
 	}
-	
+
 	DECLARE_CLASS(AActivateItem,AActor,0,Engine)
 	NO_DEFAULT_CONSTRUCTOR(AActivateItem)
 };
@@ -825,7 +825,7 @@ public:
 	INT LocationPriority;
 	FStringNoInit LocationName;
 	TArrayNoInit<FDecorationType> DecoList;
-	
+
 	DECLARE_CLASS(AVolume,ABrush,0,Engine)
 };
 
@@ -844,7 +844,7 @@ public:
 		UObject::ProcessEvent(NAreFactoriesExhausted, &Parms);
 		return Parms.ReturnValue;
 	}
-	
+
 	DECLARE_CLASS(AEngineBattleVolume,AVolume,0,Engine)
 	NO_DEFAULT_CONSTRUCTOR(AEngineBattleVolume)
 };
@@ -887,7 +887,7 @@ public:
 	FLOAT KExtraAngularDamping;
 	FLOAT KBuoyancy;
 	class APhysicsVolume* NextPhysicsVolume;
-	
+
 	void PhysicsChangedFor(class AActor* Other){
 		FName NPhysicsChangedFor(NAME_PhysicsChangedFor);
 		if(!IsProbing(NPhysicsChangedFor))
@@ -942,7 +942,7 @@ public:
 		Parms.Other=Other;
 		UObject::ProcessEvent(NPawnLeavingVolume, &Parms);
 	}
-	
+
 	DECLARE_CLASS(APhysicsVolume,AVolume,CLASS_NativeReplication,Engine)
 };
 
@@ -3579,7 +3579,7 @@ public:
 	class AActor* TriggerActor2;
 	FName AcceptEvent;
 	FLOAT LastFired;
-	
+
 	DECLARE_CLASS(ATeleporter,ANavigationPoint,0,Engine)
 };
 
@@ -4328,7 +4328,7 @@ public:
 	FLOAT LifeTime;
 	FLOAT ImpactInterval;
 	FLOAT LastImpactTime;
-	
+
 	DECLARE_CLASS(AKarmaProp,AProp,0,Engine)
 	NO_DEFAULT_CONSTRUCTOR(AKarmaProp)
 };
@@ -4399,7 +4399,7 @@ public:
 	INT OverlayMaxSpacing;
 	BITFIELD bDoMusicOnceOnly:1;
 	BITFIELD bMusicUsedUp:1;
-	
+
 	DECLARE_CLASS(UAudioEnvironment,UObject,0,Engine)
 	NO_DEFAULT_CONSTRUCTOR(UAudioEnvironment)
 };
@@ -4411,7 +4411,7 @@ public:
 class ENGINE_API UCheatManager : public UObject{
 public:
 	FRotator LockedRotation;
-	
+
 	DECLARE_CLASS(UCheatManager,UObject,0,Engine)
 	NO_DEFAULT_CONSTRUCTOR(UCheatManager)
 };
@@ -4447,7 +4447,7 @@ public:
 	FLOAT VisorHitScaleMax;
 	class USound* VisorHitSound;
 	FLOAT VisorHitDelayNeed;
-	
+
 	DECLARE_CLASS(UDamageType,UObject,0,Engine)
 	NO_DEFAULT_CONSTRUCTOR(UDamageType)
 };
@@ -4475,7 +4475,7 @@ class ENGINE_API UDamageVariance : public UObject{
 public:
 	TArrayNoInit<FDamageIncludedInfo> IncludeTypes;
 	TArrayNoInit<class UClass*> ExcludeTypes;
-	
+
 	DECLARE_CLASS(UDamageVariance,UObject,0,Engine)
 	NO_DEFAULT_CONSTRUCTOR(UDamageVariance)
 };
@@ -4505,7 +4505,7 @@ public:
 	TArrayNoInit<class UHardwareShader*> ActorShaderFX;
 	BITFIELD DrawRegularWorld:1;
 	INT FSAA;
-	
+
 	DECLARE_CLASS(UFrameFX,UObject,0,Engine)
 
 	// --------- Member Variables ---------
@@ -4794,7 +4794,7 @@ public:
 	class UHardwareShader* HSWiper;
 	class UFont* Orbit8Font;
 	class UFont* Orbit15Font;
-	
+
 	DECLARE_CLASS(UHelmet,UObject,0,Engine)
 	#define MAX_CACHED_MARKERS 20
 	// --------- UObject interface ---------
@@ -4904,7 +4904,7 @@ public:
 	BITFIELD bDecayHFLimit:1;
 	INT Environment;
 	INT Updated;
-	
+
 	DECLARE_CLASS(UI3DL2Listener,UObject,0,Engine)
 	NO_DEFAULT_CONSTRUCTOR(UI3DL2Listener)
 };
@@ -4932,7 +4932,7 @@ public:
 	class USound* CurrentBattleTrio;
 	class USound* CurrentOverlayMultiSound;
 	class AEngineBattleVolume* BattleZone;
-	
+
 	DECLARE_CLASS(UIMuseStateInfo,UObject,0,Engine)
 };
 
@@ -5230,12 +5230,12 @@ public:
 	BITFIELD bNativeEvents:1;
 	class UPlayer* ViewportOwner;
 	class UInteractionMaster* Master;
-	
+
 	void Initialized(){
 		DECLARE_NAME(Initialized);
 		UObject::ProcessEvent(NInitialized, NULL);
 	}
-	
+
 	DECLARE_CLASS(UInteraction,UInteractions,0,Engine)
 };
 
@@ -5428,7 +5428,7 @@ public:
 		Parms.bOnlyIfNotPlaying=bOnlyIfNotPlaying;
 		UObject::ProcessEvent(NRestartMenuBackgroundMusic, &Parms);
 	}
-	
+
 	DECLARE_CLASS(UConsole,UInteraction,CLASS_Config,Engine)
 
 	void StartMenuBackgroundMusic(USound* sound);
@@ -5449,7 +5449,7 @@ public:
 	class UInteraction* Console;
 	TArrayNoInit<class UInteraction*> GlobalInteractions;
 	BITFIELD bRequireRawJoystick:1;
-	
+
 	class UInteraction* AddInteraction(const FString& InteractionName, class UPlayer* AttachTo){
 		DECLARE_NAME(AddInteraction);
 		struct{
@@ -5566,7 +5566,7 @@ public:
 		Parms.InteractionArray=InteractionArray;
 		UObject::ProcessEvent(NProcess_Message, &Parms);
 	}
-	
+
 	DECLARE_CLASS(UInteractionMaster,UInteractions,CLASS_Transient,Engine)
 };
 
@@ -5583,7 +5583,7 @@ public:
 	FLOAT KRestitution;
 	FLOAT KImpactThreshold;
 	BITFIELD bContactingLevel:1;
-	
+
 	DECLARE_CLASS(UKarmaParamsCollision,UObject,0,Engine)
 	NO_DEFAULT_CONSTRUCTOR(UKarmaParamsCollision)
 };
@@ -5622,7 +5622,7 @@ public:
 	FLOAT StayUprightStiffness;
 	FLOAT StayUprightDamping;
 	BYTE SafeTimeMode;
-	
+
 	DECLARE_CLASS(UKarmaParams,UKarmaParamsCollision,0,Engine)
 
 	void PostEditChange();
@@ -5642,7 +5642,7 @@ public:
 	FLOAT KShotStrength;
 	BITFIELD bKApplyToRoot:1;
 	BITFIELD bKImportantRagdoll:1;
-	
+
 	DECLARE_CLASS(UKarmaParamsSkel,UKarmaParams,0,Engine)
 	NO_DEFAULT_CONSTRUCTOR(UKarmaParamsSkel)
 };
@@ -5657,7 +5657,7 @@ public:
 	FStringNoInit Author;
 	INT IdealPlayerCount;
 	FStringNoInit LevelEnterText;
-	
+
 	DECLARE_CLASS(ULevelSummary,UObject,0,Engine)
 };
 
@@ -5698,7 +5698,7 @@ public:
 	BITFIELD InvertMask:1;
 	BITFIELD Modulate2X:1;
 	BITFIELD Modulate4X:1;
-	
+
 	DECLARE_CLASS(UCombiner,UMaterial,0,Engine)
 };
 
@@ -5709,7 +5709,7 @@ public:
 class ENGINE_API UHardwareShaderMacros : public UMaterial{
 public:
 	FStringNoInit Macros;
-	
+
 	DECLARE_CLASS(UHardwareShaderMacros,UMaterial,0,Engine)
 	NO_DEFAULT_CONSTRUCTOR(UHardwareShaderMacros)
 };
@@ -5721,7 +5721,7 @@ public:
 class ENGINE_API UModifier : public UMaterial{
 public:
 	class UMaterial* Material;
-	
+
 	DECLARE_CLASS(UModifier,UMaterial,0,Engine)
 };
 
@@ -5832,7 +5832,7 @@ public:
 	FColor Color;
 	BITFIELD RenderTwoSided:1;
 	BITFIELD AlphaBlend:1;
-	
+
 	DECLARE_CLASS(UColorModifier,UModifier,0,Engine)
 	NO_DEFAULT_CONSTRUCTOR(UColorModifier)
 };
@@ -5866,7 +5866,7 @@ public:
 	BITFIELD OverrideAlpha:1;
 	BITFIELD AlphaEnable:1;
 	BYTE AlphaRef;
-	
+
 	DECLARE_CLASS(UFinalBlend,UModifier,0,Engine)
 };
 
@@ -5921,7 +5921,7 @@ public:
 	BYTE UClampMode;
 	BYTE VClampMode;
 	BITFIELD TexCoordProjected:1;
-	
+
 	DECLARE_CLASS(UTexModifier,UModifier,0,Engine)
 	// UTexModifier interface
 	virtual FMatrix* GetMatrix(FLOAT TimeSeconds){ return NULL; }
@@ -5963,7 +5963,7 @@ public:
 	FLOAT LastSv;
 	FLOAT CurrentUJitter;
 	FLOAT CurrentVJitter;
-	
+
 	DECLARE_CLASS(UTexOscillator,UTexModifier,0,Engine)
 	// UTexModifier interface
 	virtual FMatrix* GetMatrix(FLOAT TimeSeconds);
@@ -5980,7 +5980,7 @@ public:
 	FRotator PanDirection;
 	FLOAT PanRate;
 	FMatrix M;
-	
+
 	DECLARE_CLASS(UTexPanner,UTexModifier,0,Engine)
 	// UTexModifier interface
 	virtual FMatrix* GetMatrix(FLOAT TimeSeconds);
@@ -6001,7 +6001,7 @@ public:
 	FLOAT ClampedSizeU;
 	FLOAT ClampedSizeV;
 	FMatrix M;
-	
+
 	DECLARE_CLASS(UTexPanner2D,UTexModifier,0,Engine)
 	// UTexModifier interface
 	virtual FMatrix* GetMatrix(FLOAT TimeSeconds);
@@ -6018,7 +6018,7 @@ public:
 	class AActor* Client;
 	INT Revision;
 	INT OldRevision;
-	
+
 	DECLARE_CLASS(UScriptedTexture,UBitmapMaterial,0,Engine)
 
 	void Render(class FRenderInterface* RI);
@@ -6038,10 +6038,10 @@ public:
 	FLOAT VScale;
 	FLOAT UOffset;
 	FLOAT VOffset;
-	
+
 	// Declare the class
 	DECLARE_CLASS(UTexScaler,UTexModifier,0,Engine)
-	
+
 	// UTexModifier interface
 	virtual FMatrix* GetMatrix(FLOAT TimeSeconds);
 };
@@ -6066,7 +6066,7 @@ public:
 	FLOAT LastUpdateTime;
 	class UBitmapMaterial* BlobShadow;
 	class UHardwareShader* HSMip;
-	
+
 	DECLARE_CLASS(UShadowBitmapMaterial,UBitmapMaterial,0,Engine)
 
 	virtual void Destroy();
@@ -6122,7 +6122,7 @@ public:
 	FLOAT FadePeriod;
 	FLOAT FadePhase;
 	BYTE ColorFadeType;
-	
+
 	DECLARE_CLASS(UFadeColor,UConstantMaterial,0,Engine)
 	//
 	// UConstantMaterial interface
@@ -6137,7 +6137,7 @@ public:
 class ENGINE_API UHardwareShaderWrapper : public URenderedMaterial{
 public:
 	class UHardwareShader* ShaderImplementation;
-	
+
 	DECLARE_CLASS(UHardwareShaderWrapper,URenderedMaterial,0,Engine)
 	// Make sure derived classes implement the setup funcion
 	virtual INT SetupShaderWrapper(class FRenderInterface* RI){ return 0; }
@@ -6174,7 +6174,7 @@ public:
 	class UTexture* DiffuseTexture;
 	FColor HologramColor;
 	BITFIELD UseMarkerColorInstead:1;
-	
+
 	DECLARE_CLASS(UHsHologram,UHardwareShaderWrapper,0,Engine)
 	// Make sure to implement this function in UnHardwareShaderWrapper.cpp
 	virtual INT SetupShaderWrapper(class FRenderInterface* RI);
@@ -6206,7 +6206,7 @@ public:
 	BITFIELD AcceptsProjectors:1;
 	INT NumProjectors;
 	FParticleProjectorInfo Projectors[8];
-	
+
 	DECLARE_CLASS(UParticleMaterial,URenderedMaterial,0,Engine)
 	NO_DEFAULT_CONSTRUCTOR(UParticleMaterial)
 };
@@ -6277,7 +6277,7 @@ public:
 	BITFIELD Wireframe:1;
 	BITFIELD ModulateStaticLighting2X:1;
 	BITFIELD PerformLightingOnSpecularPass:1;
-	
+
 	DECLARE_CLASS(UShader,URenderedMaterial,0,Engine)
 };
 
@@ -6310,7 +6310,7 @@ public:
 	BITFIELD FlashlightOn:1;
 	class UI3DL2Listener* EAXEffect;
 	class UI3DL2Listener* EAXEffectXbox;
-	
+
 	DECLARE_CLASS(UVisionMode,URenderedMaterial,0,Engine)
 	// Make sure derived classes implement the setup funcion
 	virtual UHardwareShader* SetVisionMode(UViewport* Viewport, class UProxyBitmapMaterial* RenderedWorldTexture, class UProxyBitmapMaterial* BlurTargetTexture, int TargetSizeX, int TargetSizeY, float Fade=1.f){ return VisionShader; }
@@ -6352,7 +6352,7 @@ public:
 	FLOAT PanSpeedX;
 	FLOAT PanSpeedY;
 	class UHardwareShader* AltVisionShader;
-	
+
 	DECLARE_CLASS(UVisionModeDistort,UVisionMode,0,Engine)
 	// Make sure to implement this function in UnVisionModes.cpp
 	virtual UHardwareShader* SetVisionMode(UViewport* Viewport, class UProxyBitmapMaterial* RenderedWorldTexture, class UProxyBitmapMaterial* BlurTargetTexture, int TargetSizeX, int TargetSizeY, float Fade/*=1.f*/);
@@ -6403,7 +6403,7 @@ public:
 	FLOAT MinTextureScale;
 	FLOAT MaxTextureScale;
 	class UHardwareShader* AltVisionShader;
-	
+
 	DECLARE_CLASS(UVisionModeScavDrill,UVisionMode,0,Engine)
 	// Make sure to implement this function in UnVisionModes.cpp
 	virtual UHardwareShader* SetVisionMode(UViewport* Viewport, class UProxyBitmapMaterial* RenderedWorldTexture, class UProxyBitmapMaterial* BlurTargetTexture, int TargetSizeX, int TargetSizeY, float Fade/*=1.f*/);
@@ -6720,7 +6720,7 @@ public:
 	BITFIELD RealDisableFogging:1;
 	BITFIELD AllParticlesDead:1;
 	BITFIELD WarmedUp:1;
-	
+
 	DECLARE_CLASS(UParticleEmitter,UObject,0,Engine)
 };
 
@@ -6735,7 +6735,7 @@ public:
 	BITFIELD RenderTwoSided:1;
 	BITFIELD UseParticleColor:1;
 	FVector MeshExtent;
-	
+
 	DECLARE_CLASS(UMeshEmitter,UParticleEmitter,0,Engine)
 };
 
@@ -6795,7 +6795,7 @@ public:
 	FRibbonPoint LastSampledPoint;
 	BITFIELD bKilled:1;
 	BITFIELD bDecaying:1;
-	
+
 	DECLARE_CLASS(URibbonEmitter,UParticleEmitter,0,Engine)
 };
 
@@ -7025,7 +7025,7 @@ enum EPawnAudioEvent{
 class ENGINE_API UPawnAudioTable : public UObject{
 public:
 	TArrayNoInit<class USound*> Table;
-	
+
 	DECLARE_CLASS(UPawnAudioTable,UObject,0,Engine)
 };
 
@@ -7083,7 +7083,7 @@ public:
 	FLOAT JoyMaxTimerV;
 	FLOAT DoubleClickTimer;
 	FLOAT DoubleClickTime;
-	
+
 	void PlayerInput(FLOAT DeltaTime){
 		FName NPlayerInput(NAME_PlayerInput);
 		struct{
@@ -7092,7 +7092,7 @@ public:
 		Parms.DeltaTime=DeltaTime;
 		UObject::ProcessEvent(NPlayerInput, &Parms);
 	}
-	
+
 	DECLARE_CLASS(UPlayerInput,UObject,CLASS_Transient|CLASS_Config,Engine)
 	NO_DEFAULT_CONSTRUCTOR(UPlayerInput)
 };
@@ -7112,7 +7112,9 @@ public:
 	BITFIELD bJump:1;
 	BITFIELD bPerch:1;
 	BITFIELD bFly:1;
-	
+
+	FPlane PathColor();
+
 	DECLARE_CLASS(UReachSpec,UObject,0,Engine)
 	NO_DEFAULT_CONSTRUCTOR(UReachSpec)
 };
@@ -7167,7 +7169,7 @@ public:
 	BITFIELD bDisable3DFalloffXBox:1;
 	FLOAT XBoxRolloffFactor;
 	BITFIELD XBox6dbBoost:1;
-	
+
 	DECLARE_CLASS(UAudioParams,USoundBase,0,Engine)
 };
 
@@ -7187,7 +7189,7 @@ public:
 	FVector CamShakeOffsetMag;
 	FLOAT CamShakeRollRate;
 	FVector CamShakeOffsetRate;
-	
+
 	DECLARE_CLASS(URumbleParams,USoundBase,0,Engine)
 	virtual void PostEditChange();
 
@@ -7235,7 +7237,7 @@ public:
 	TArrayNoInit<FBanterLine> Lines;
 	FLOAT Likelihood;
 	BITFIELD Used:1;
-	
+
 	DECLARE_CLASS(USoundBanter,USoundBase,0,Engine)
 	// AnimNotify interface.
 	virtual void PostEditChange();
@@ -7284,7 +7286,7 @@ public:
 	BITFIELD bCheckCorpses:1;
 	BITFIELD FavorCombatNearestTether:1;
 	BITFIELD PreventTetherOneWayOnly:1;
-	
+
 	DECLARE_CLASS(USquadStance,UObject,0,Engine)
 	NO_DEFAULT_CONSTRUCTOR(USquadStance)
 };
@@ -7308,7 +7310,7 @@ public:
 	INT RefCount;
 	INT Responses;
 	FLOAT Time;
-	
+
 	DECLARE_CLASS(UStimulus,UObject,0,Engine)
 };
 

@@ -174,9 +174,9 @@ public:
 	{
 		return FVector(R/255.f, G/255.f, B/255.f);
 	}
-	operator DWORD() const 
-	{ 
-		return DWColor(); 
+	operator DWORD() const
+	{
+		return DWColor();
 	}
 };
 
@@ -187,7 +187,7 @@ public:
 class FRenderResource
 {
 public:
-
+	virtual ~FRenderResource(){}
 	virtual QWORD GetCacheId() = 0;
 	virtual INT GetRevision() = 0;
 };
@@ -381,7 +381,7 @@ class FBaseTexture : public FRenderResource
 public:
 
 	virtual FBaseTexture* GetBaseTextureInterface() { return this; }
-	virtual FCubemap* GetCubemapInterface() { return NULL; } 
+	virtual FCubemap* GetCubemapInterface() { return NULL; }
 	virtual FTexture* GetTextureInterface() { return NULL; }
 	virtual FCompositeTexture* GetCompositeTextureInterface() { return NULL; }
 	virtual FRenderTarget* GetRenderTargetInterface() { return NULL; }
@@ -433,7 +433,7 @@ class FCubemap : public FBaseTexture
 public:
 
 	virtual FCubemap* GetCubemapInterface() { return this; }
-	
+
 	virtual FTexture* GetFace( INT Face ) = 0;
 };
 
@@ -458,7 +458,7 @@ public:
 
 class		URenderResource;
 class   	UVertexBuffer;
-class		USkinVertexBuffer;       
+class		USkinVertexBuffer;
 class   	UIndexBuffer;
 
 /*------------------------------------------------------------------------------------
@@ -497,7 +497,7 @@ class ENGINE_API UVertexStreamBase: public URenderResource
 	DWORD	StreamType;
 
 	// UVertexStreamBase interface
-	UVertexStreamBase( INT InItemSize, DWORD InPolyFlags, DWORD InStreamType ) 
+	UVertexStreamBase( INT InItemSize, DWORD InPolyFlags, DWORD InStreamType )
 		: ItemSize(InItemSize), PolyFlags(InPolyFlags), StreamType(InStreamType) {};
 	virtual void* GetData()=0;
 	virtual INT GetDataSize()=0;
@@ -776,10 +776,10 @@ struct FSkinVertex
 {
 	FVector	Position;  // 3d  12
 	FVector Normal;    // 3d  12
- 	FLOAT	U,V;	   // 2d   8	
-	FLOAT   Index[4];  // DWORD   BoneIndices; // total 
+ 	FLOAT	U,V;	   // 2d   8
+	FLOAT   Index[4];  // DWORD   BoneIndices; // total
 	FLOAT	Weight[4]; // 4d  16 // 4 weights...
-				
+
 	FSkinVertex()
 	{}
 	FSkinVertex( FVector InPosition )
@@ -801,7 +801,7 @@ struct FSkinVertex
 			<< V.Weight[0]
 			<< V.Weight[1]
 			<< V.Weight[2]
-			<< V.Weight[3];			
+			<< V.Weight[3];
 	}
 };
 #if SUPPORTS_PRAGMA_PACK
@@ -840,4 +840,3 @@ class ENGINE_API UIndexBuffer : public URenderResource
 /*------------------------------------------------------------------------------------
 	The End.
 ------------------------------------------------------------------------------------*/
-

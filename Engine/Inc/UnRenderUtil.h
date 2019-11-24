@@ -70,6 +70,7 @@ public:
 	QWORD					CacheId;
 	UBOOL					ZTest;
 	FRenderInterface*		RI;
+	char Padding[256];
 
 	// Constructor/destructor.
 
@@ -77,28 +78,28 @@ public:
 	~FLineBatcher();
 
 	// Flush - Renders all buffered lines.
-	void Flush( DWORD PolyFlags=0 );
+	void Flush(DWORD PolyFlags = 0);
 
 	// DrawLine - Buffers a line for rendering.
-	void DrawLine(FVector P1,FVector P2,FColor Color);
+	void DrawLine(const FVector& P1, const FVector& P2, FColor Color);
 
 	// DrawPoint - Buffers a point for rendering.  Renders the point as a square of connected lines.
-	void DrawPoint(class FSceneNode* SceneNode,FVector P,FColor Color);
+	void DrawPoint(class FSceneNode* SceneNode, const FVector& P, FColor Color);
 
 	// DrawBox - Buffers a wireframe box for rendering.
-	void DrawBox(FBox Box,FColor Color);
+	void DrawBox(const FBox& Box, FColor Color);
 
 	// DrawCircle - Buffers a wireframe circle for rendering.
-	void DrawCircle(FVector Base,FVector X,FVector Y,FColor Color,FLOAT Radius,INT NumSides);
+	void DrawCircle(const FVector& Base, const FVector& X, const FVector& Y, FColor Color, FLOAT Radius, INT NumSides);
 
 	// DrawCylinder - Buffers a wireframe cylinder for rendering.
-	void DrawCylinder(FRenderInterface* RI,FVector Base,FVector X,FVector Y,FVector Z,FColor Color,FLOAT Radius,FLOAT HalfHeight,INT NumSides);
+	void DrawCylinder(FRenderInterface* RI, const FVector& Base, const FVector& X, const FVector& Y, const FVector& Z, FColor Color, FLOAT Radius, FLOAT HalfHeight, INT NumSides);
 
 	// DrawDirectionalArrow
-	void DrawDirectionalArrow(FVector InLocation,FRotator InRotation,FColor InColor,FLOAT InDrawScale = 1.0f);
+	void DrawDirectionalArrow(const FVector& InLocation, const FRotator& InRotation, FColor InColor, FLOAT InDrawScale = 1.0f);
 
 	// DrawConvexVolume
-	void DrawConvexVolume(FConvexVolume Volume,FColor Color);
+	void DrawConvexVolume(const FConvexVolume& Volume, FColor Color);
 
 	// FRenderResource interface.
 	virtual QWORD GetCacheId();

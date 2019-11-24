@@ -142,6 +142,12 @@ void ABotSupport::SpawnNavigationPoint(UClass* NavPtClass, const FVector& Locati
 void ABotSupport::ImportPaths(){
 	guard(ABotSupport::ImportPaths);
 
+	if(bImportedPaths){
+		GLog->Log(NAME_Error, "Paths have already been imported");
+
+		return;
+	}
+
 	FString Filename = GetPathFileName(Level->Title);
 	FArchive* Ar = GFileManager->CreateFileReader(*Filename);
 
@@ -157,11 +163,26 @@ void ABotSupport::ImportPaths(){
 				NavPtInfo[i].Rotation
 			);
 		}
+
+		bImportedPaths = 1;
 	}else{
 		GLog->Logf(NAME_Error, "Cannot import paths from file '%s'", *Filename);
 	}
 
 	unguard;
+}
+
+void ABotSupport::execSpawnNavigationPoint(FFrame& Stack, void* Result){
+	P_GET_OBJECT(UClass, NavPtClass);
+	P_GET_VECTOR(Loc);
+	P_GET_ROTATOR_OPTX(Rot, FRotator(0, 0, 0));
+	P_FINISH;
+	SpawnNavigationPoint(NavPtClass, Loc, Rot);
+}
+
+void ABotSupport::execBuildPaths(FFrame& Stack, void* Result){
+	P_FINISH;
+	BuildPaths();
 }
 
 /*

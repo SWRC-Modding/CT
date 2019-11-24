@@ -316,19 +316,61 @@ UBOOL ABotSupport::Tick(FLOAT DeltaTime, ELevelTick TickType){
 
 /*
  * ABotSupport::PostRender
- * Draws the connections between navigation points like the show paths option in the Editor
  */
 void ABotSupport::PostRender(class FLevelSceneNode* SceneNode, class FRenderInterface* RI){
 	guard(ABotSupport::PostRender);
 	Super::PostRender(SceneNode, RI);
 
 	FLineBatcher LineBatcher(RI);
+	APlayerController* Player = GetLocalPlayerController();
+	check(Player);
 
+	// Drawing the collision cylinder for each bot
+	// Not terribly useful but can make it easier to see them when testing
+	for(int i = 0; i < Bots.Num(); ++i){
+		AController* Bot = reinterpret_cast<AController*>(Bots[i]);
+
+		if(Bot->Pawn){
+			LineBatcher.DrawCylinder(
+				Bot->Pawn->Location,
+				FVector(0, 0, 1),
+				FColor(255, 0, 255),
+				Bot->Pawn->CollisionRadius,
+				Bot->Pawn->CollisionHeight,
+				16
+			);
+		}
+	}
+
+	FVector BoxSize(8, 8, 8);
+
+	// Navigation points that failed to spawn are drawn as a red box for debugging purposes
 	for(int i = 0; i < NavPtFailLocations.Num(); ++i)
-		LineBatcher.DrawLine(NavPtFailLocations[i], FVector(0, 0, WORLD_MAX), FPlane(1, 0, 0, 1));
+		LineBatcher.DrawBox(FBox(NavPtFailLocations[i] - BoxSize, NavPtFailLocations[i] + BoxSize), FColor(255, 0, 0));
 
+	// All navigation points in the level are drawn as a colored box
+	for(TObjectIterator<ANavigationPoint> It; It; ++It){
+		if(It->XLevel != XLevel)
+			continue;
+
+		FColor Color;
+
+		if(It->IsA(APlayerStart::StaticClass()))
+			Color = FColor(100, 100, 100);
+		else if(It->IsA(ACoverPoint::StaticClass()))
+			Color = FColor(0, 0, 255);
+		else
+			Color = FColor(150, 100, 150);
+
+		LineBatcher.DrawBox(FBox(It->Location - BoxSize, It->Location + BoxSize), Color);
+
+		if(It->bDirectional)
+			LineBatcher.DrawDirectionalArrow(It->Location, It->Rotation, FColor(255, 0, 0));
+	}
+
+	// Drawing connections between path nodes like in UnrealEd
 	for(ANavigationPoint *Nav=Level->NavigationPointList; Nav; Nav=Nav->nextNavigationPoint){
-		for(INT i = 0; i < Nav->PathList.Num(); ++i){
+		for(int i = 0; i < Nav->PathList.Num(); ++i){
 			UReachSpec* ReachSpec = Nav->PathList[i];
 
 			if(ReachSpec->Start && ReachSpec->End){

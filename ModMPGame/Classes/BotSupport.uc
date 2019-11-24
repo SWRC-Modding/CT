@@ -8,11 +8,17 @@ var Array<PlayerStart> SpawnPoints;
 
 function PostBeginPlay(){
 	local PlayerStart P;
+	local BotSupportBroadcastHandler B;
 
 	foreach AllActors(class'PlayerStart', P)
 		SpawnPoints[SpawnPoints.Length] = P;
 
 	SetTimer(5.0f, true);
+
+	B = Spawn(class'BotSupportBroadcastHandler');
+
+	B.BotSupport = Self;
+	Level.Game.BroadcastHandler = B;
 }
 
 function Timer(){

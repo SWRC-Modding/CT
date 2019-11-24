@@ -66,11 +66,9 @@ class ENGINE_API FLineBatcher : public FVertexStream
 {
 public:
 
-	TArray<FLineVertex>		Vertices;
-	QWORD					CacheId;
-	UBOOL					ZTest;
-	FRenderInterface*		RI;
-	char Padding[256];
+	char Padding1[20];
+	UBOOL ZTest;
+	char Padding2[64];
 
 	// Constructor/destructor.
 
@@ -93,7 +91,7 @@ public:
 	void DrawCircle(const FVector& Base, const FVector& X, const FVector& Y, FColor Color, FLOAT Radius, INT NumSides);
 
 	// DrawCylinder - Buffers a wireframe cylinder for rendering.
-	void DrawCylinder(FRenderInterface* RI, const FVector& Base, const FVector& X, const FVector& Y, const FVector& Z, FColor Color, FLOAT Radius, FLOAT HalfHeight, INT NumSides);
+	void DrawCylinder(const FVector& Base, const FVector& Dir, FColor Color, FLOAT Radius, FLOAT HalfHeight, INT NumSides);
 
 	// DrawDirectionalArrow
 	void DrawDirectionalArrow(const FVector& InLocation, const FRotator& InRotation, FColor InColor, FLOAT InDrawScale = 1.0f);

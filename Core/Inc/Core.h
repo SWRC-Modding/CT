@@ -436,81 +436,80 @@ private:
 	~FFileStream(){}
 };
 
-class FEdLoadError;
-
 /*----------------------------------------------------------------------------
 	Global variables.
 ----------------------------------------------------------------------------*/
 
 // Core globals.
-CORE_API extern FMemStack				GMem;						/*!< @brief Global memory stack */
-CORE_API extern FOutputDevice*			GLog;						/*!< @brief Regular logging */
-CORE_API extern FOutputDeviceError*		GError;						/*!< @brief Critical errors */
-CORE_API extern FOutputDevice*			GNull;						/*!< @brief Log to nowhere */
-CORE_API extern FOutputDevice*			GThrow;						/*!< @brief Exception thrower */
-CORE_API extern FFeedbackContext*		GWarn;						/*!< @brief User interaction and non critical warnings */
-CORE_API extern FConfigCache*			GConfig;					/*!< @brief Configuration database cache */
-CORE_API extern FTransactionBase*		GUndo;						/*!< @brief Transaction tracker, non-NULL when a transaction is in progress */
-CORE_API extern FOutputDevice*			GLogHook;					/*!< @brief Launch log output hook */
-CORE_API extern FExec*					GExec;						/*!< @brief Launch command-line exec hook */
-CORE_API extern FMalloc*				GMalloc;					/*!< @brief Memory allocator */
-CORE_API extern FFileManager*			GFileManager;				/*!< @brief File manager */
-CORE_API extern USystem*				GSys;						/*!< @brief System control code */
-CORE_API extern UProperty*				GProperty;					/*!< @brief Property for UnrealScript interpreter */
-CORE_API extern BYTE*					GPropAddr;					/*!< @brief Property address for UnrealScript interpreter */
-CORE_API extern UObject*				GPropObject;				/*!< @brief Object with Property for UnrealScript interpreter */
-CORE_API extern DWORD					GRuntimeUCFlags;			/*!< @brief Property for storing flags between calls to bytecode functions */
-CORE_API extern USubsystem*				GWindowManager;				/*!< @brief Window update routine called once per tick */
-CORE_API extern TCHAR					GErrorHist[4096];			/*!< @brief For building call stack text dump in guard/unguard mechanism */
-CORE_API extern TCHAR					GYes[64];					/*!< @brief Localized "yes" text */
-CORE_API extern TCHAR					GNo[64];					/*!< @brief Localized "no" text */
-CORE_API extern TCHAR					GTrue[64];					/*!< @brief Localized "true" text */
-CORE_API extern TCHAR					GFalse[64];					/*!< @brief Localized "false" text */
-CORE_API extern TCHAR					GNone[64];					/*!< @brief Localized "none" text */
-CORE_API extern TCHAR					GCdPath[];					/*!< @brief Cd path, if any */
-CORE_API extern	DOUBLE					GSecondsPerCycle;			/*!< @brief Seconds per CPU cycle for this PC */
+CORE_API extern FMemStack				GMem;						//! Global memory stack
+CORE_API extern FOutputDevice*			GLog;						//! Regular logging
+CORE_API extern FOutputDeviceError*		GError;						//! Critical errors
+CORE_API extern FOutputDevice*			GNull;						//! Log to nowhere
+CORE_API extern FOutputDevice*			GThrow;						//! Exception thrower
+CORE_API extern FFeedbackContext*		GWarn;						//! User interaction and non critical warnings
+CORE_API extern FConfigCache*			GConfig;					//! Configuration database cache
+CORE_API extern FTransactionBase*		GUndo;						//! Transaction tracker, non-NULL when a transaction is in progress
+CORE_API extern FOutputDevice*			GLogHook;					//! Launch log output hook
+CORE_API extern FExec*					GExec;						//! Launch command-line exec hook
+CORE_API extern FMalloc*				GMalloc;					//! Memory allocator
+CORE_API extern FFileManager*			GFileManager;				//! File manager
+CORE_API extern USystem*				GSys;						//! System control code
+CORE_API extern UProperty*				GProperty;					//! Property for UnrealScript interpreter
+CORE_API extern BYTE*					GPropAddr;					//! Property address for UnrealScript interpreter
+CORE_API extern UObject*				GPropObject;				//! Object with Property for UnrealScript interpreter
+CORE_API extern DWORD					GRuntimeUCFlags;			//! Property for storing flags between calls to bytecode functions
+CORE_API extern USubsystem*				GWindowManager;				//! Window update routine called once per tick
+CORE_API extern TCHAR					GErrorHist[4096];			//! For building call stack text dump in guard/unguard mechanism
+CORE_API extern TCHAR					GYes[64];					//! Localized "yes" text
+CORE_API extern TCHAR					GNo[64];					//! Localized "no" text
+CORE_API extern TCHAR					GTrue[64];					//! Localized "true" text
+CORE_API extern TCHAR					GFalse[64];					//! Localized "false" text
+CORE_API extern TCHAR					GNone[64];					//! Localized "none" text
+CORE_API extern TCHAR					GCdPath[];					//! Cd path, if any
+CORE_API extern	DOUBLE					GSecondsPerCycle;			//! Seconds per CPU cycle for this PC
 CORE_API extern DOUBLE					GLastFNamePurgeTime;
-CORE_API extern DOUBLE					GTempDouble;				/*!< @brief Used during development for timing */
-CORE_API extern void					(*GTempFunc)(void*);		/*!< @brief Used during development for debug hooks */
-CORE_API extern SQWORD					GTicks;						/*!< @brief Number of non-persistent ticks thus far in this level, for profiling */
-CORE_API extern DWORD					GPageSize;					/*!< @brief Operating system page size */
-CORE_API extern DWORD					GProcessorCount;			/*!< @brief Number of CPUs in this PC */
-CORE_API extern DWORD					GPhysicalMemory;			/*!< @brief Bytes of physical memory in this PC */
-CORE_API extern DWORD					GUglyHackFlags;				/*!< @brief Flags for passing around globally hacked stuff */
-CORE_API extern UBOOL					GIsBenchmarking;			/*!< @brief Whether we are in benchmark mode or not */
-CORE_API extern UBOOL					GIsClient;					/*!< @brief Whether engine was launched as a client */
-CORE_API extern UBOOL					GIsCriticalError;			/*!< @brief An appError() has occured */
-CORE_API extern UBOOL					GIsEditor;					/*!< @brief Whether engine was launched for editing */
+CORE_API extern DOUBLE					GTempDouble;				//! Used during development for timing
+CORE_API extern void					(*GTempFunc)(void*);		//! Used during development for debug hooks
+CORE_API extern SQWORD					GTicks;						//! Number of non-persistent ticks thus far in this level, for profiling
+CORE_API extern DWORD					GPageSize;					//! Operating system page size
+CORE_API extern DWORD					GProcessorCount;			//! Number of CPUs in this PC
+CORE_API extern DWORD					GPhysicalMemory;			//! Bytes of physical memory in this PC
+CORE_API extern DWORD					GUglyHackFlags;				//! Flags for passing around globally hacked stuff
+CORE_API extern UBOOL					GIsBenchmarking;			//! Whether we are in benchmark mode or not
+CORE_API extern UBOOL					GIsClient;					//! Whether engine was launched as a client
+CORE_API extern UBOOL					GIsCriticalError;			//! An appError() has occured
+CORE_API extern UBOOL					GIsEditor;					//! Whether engine was launched for editing
 CORE_API extern UBOOL					GIsGarbageCollecting;
-CORE_API extern UBOOL					GIsGuarded;					/*!< @brief Whether execution is happening within main()/WinMain()'s try/catch handler */
+CORE_API extern UBOOL					GIsGuarded;					//! Whether execution is happening within main()/WinMain()'s try/catch handler
 CORE_API extern UBOOL					GIsLoadingLevel;
 CORE_API extern UBOOL					GIsOpenGL;
 CORE_API extern UBOOL					GIsPixomatic;
 CORE_API extern UBOOL					GIsPurgingFNames;
-CORE_API extern UBOOL					GIsRequestingExit;			/*!< @brief Indicates that MainLoop() should be exited at the end of the current iteration */
-CORE_API extern UBOOL					GIsRunning;					/*!< @brief Whether execution is happening within MainLoop() */
-CORE_API extern UBOOL					GIsScriptable;				/*!< @brief Whether script execution is allowed */
-CORE_API extern UBOOL					GIsServer;					/*!< @brief Whether engine was launched as a server, true if GIsClient */
-CORE_API extern UBOOL					GIsSlowTask;				/*!< @brief Whether there is a slow task in progress */
-CORE_API extern UBOOL					GIsStarted;					/*!< @brief Whether execution is happening from within main()/WinMain() */
-CORE_API extern UBOOL					GScriptEntryTag;			/*!< @brief Number of recursive UnrealScript calls currently on the stack */
-CORE_API extern UBOOL					GIsStrict;					/*!< @brief Causes all UnrealScript execution warnings to be fatal errors */
-CORE_API extern UBOOL					GLazyLoad;					/*!< @brief Whether TLazyLoad arrays should be lazy-loaded or not */
-CORE_API extern UBOOL					GIsUCC;						/*!< @brief Is UCC running? */
+CORE_API extern UBOOL					GIsRequestingExit;			//! Indicates that MainLoop() should be exited at the end of the current iteration
+CORE_API extern UBOOL					GIsRunning;					//! Whether execution is happening within MainLoop()
+CORE_API extern UBOOL					GIsScriptable;				//! Whether script execution is allowed
+CORE_API extern UBOOL					GIsServer;					//! Whether engine was launched as a server, true if GIsClient
+CORE_API extern UBOOL					GIsSlowTask;				//! Whether there is a slow task in progress
+CORE_API extern UBOOL					GIsStarted;					//! Whether execution is happening from within main()/WinMain()
+CORE_API extern UBOOL					GScriptEntryTag;			//! Number of recursive UnrealScript calls currently on the stack
+CORE_API extern UBOOL					GIsStrict;					//! Causes all UnrealScript execution warnings to be fatal errors
+CORE_API extern UBOOL					GLazyLoad;					//! Whether TLazyLoad arrays should be lazy-loaded or not
+CORE_API extern UBOOL					GIsUCC;						//! Is UCC running?
 CORE_API extern UBOOL					GUseSmallPools;
 CORE_API extern UBOOL					GUseFrontEnd;
-CORE_API extern UBOOL					GEdSelectionLock;			/*!< @brief Are selections locked? (you can't select/deselect additional actors) */
-CORE_API extern UBOOL					GEdShowFogInViewports;		/*!< @brief Show distance fog in viewports? */
+CORE_API extern UBOOL					GEdSelectionLock;			//! Are selections locked? (you can't select/deselect additional actors)
+CORE_API extern UBOOL					GEdShowFogInViewports;		//! Show distance fog in viewports?
 CORE_API extern UBOOL					GBuildingScripts;
-CORE_API extern class FGlobalMath		GMath;						/*!< @brief Math code */
-CORE_API extern class FArchive*			GDummySave;					/*!< @brief No-op save archive */
+CORE_API extern class FGlobalMath		GMath;						//! Math code
+CORE_API extern class FArchive*			GDummySave;					//! No-op save archive
 CORE_API extern class FArchive*			GIsUTracingGDummySave;
-CORE_API extern FFileStream*			GFileStream;				/*!< @brief File streaming */
-CORE_API extern FLOAT					GAudioMaxRadiusMultiplier;	/*!< @brief Max distance = Radius * GAudioMaxRadiusMultiplier */
-CORE_API extern FLOAT					GAudioDefaultRadius;		/*!< @brief Default radius for PlayOwnedSound */
-CORE_API extern TArray<FEdLoadError>	GEdLoadErrors;				/*!< @brief For keeping track of load errors in the editor */
-CORE_API extern	UDebugger*				GDebugger;					/*!< @brief Unrealscript Debugger */
-CORE_API extern QWORD					GMakeCacheIDIndex;			/*!< @brief Cache ID */
+CORE_API extern FFileStream*			GFileStream;				//! File streaming
+CORE_API extern FLOAT					GAudioMaxRadiusMultiplier;	//! Max distance = Radius * GAudioMaxRadiusMultiplier
+CORE_API extern FLOAT					GAudioDefaultRadius;		//! Default radius for PlayOwnedSound
+// Gives annoying warning when there are unrelated compile errors...
+//CORE_API extern TArray<FEdLoadError>	GEdLoadErrors;				//! For keeping track of load errors in the editor
+CORE_API extern	UDebugger*				GDebugger;					//! Unrealscript Debugger
+CORE_API extern QWORD					GMakeCacheIDIndex;			//! Cache ID
 CORE_API extern FString					GBuildLabel;
 CORE_API extern FString					GMachineOS;
 CORE_API extern FString					GMachineCPU;

@@ -14,7 +14,7 @@
 	virtual void PostEditUndo();
 	virtual void PostLoad();
 	virtual void PreEditUndo();
-	virtual void ProcessEvent(class UFunction*, void*, void*);
+	virtual void ProcessEvent(class UFunction* Function, void* Parms, void* UnusedResult = NULL);
 	virtual int ProcessRemoteFunction(class UFunction* Function, void* Parms, struct FFrame* Stack);
 	virtual void ProcessState(FLOAT DeltaSeconds);
 	virtual void Serialize(class FArchive&);

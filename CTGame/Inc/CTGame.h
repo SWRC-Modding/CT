@@ -126,6 +126,100 @@ enum EBotGestureSuite{
 
 class CTGAME_API ACTBot : public AScriptedController{
 public:
+	INT MaxDodgeAngle;
+	FLOAT MinDodgeTime;
+	FLOAT MinGrenadeTime;
+	FLOAT CoverBoredomTime;
+	FLOAT GrenadeProbability;
+	FLOAT MinBurstInterval;
+	FLOAT NextBurstTime;
+	FLOAT NextCoverSearchTime;
+	FLOAT NextGrenadeTime;
+	FLOAT NextDodgeTime;
+	class ANavigationPoint* ReservedNode;
+	class ULocalSituation* Situation;
+	FLOAT NextDecisionTime;
+	TArrayNoInit<class UStateObject*> States;
+	class UGoalQueue* MainGoals;
+	class UGoalQueue* ScriptedGoals;
+	class UGoalQueue* SquadGoals;
+	class UGoalQueue* ReflexGoals;
+	class UGoalQueue* GestureGoals;
+	class UStateObject* CurrentState;
+	class UStateObject* NextState;
+	FLOAT BestUtility;
+	TArrayNoInit<class UStimulus*> StimuliReceived;
+	FLOAT EnemyMemoryTime;
+	FLOAT LastTimeEnemySeen;
+	INT LastManeuver;
+	INT ShotCounter;
+	INT BurstCount;
+	TArrayNoInit<class UStimulus*> UnprocessedStimuli;
+	class UStimulus* StrongestStimulus;
+	class UGOAL_WaitForEvent* WaitForEventGoal;
+	class UGOAL_Shoot* CurrentShootGoal;
+	class ACoverPoint* SuggestedCombatPosition;
+	class AActor* SuggestedEnemy;
+	class AActor* TetherTarget;
+	class APawn* TetherPawn;
+	class AActor* PreventTether;
+	FLOAT PreventRange;
+	FLOAT NextGunSafetyCheck;
+	FLOAT TimeOfLastBattleStimulus;
+	FLOAT TimeOfLastStimulus;
+	FVector OffsetDirection;
+	class APawn* AllyInWay;
+	FLOAT AllyInWayRadius;
+	FLOAT ClosestAllyAngle;
+	class AActor* GrenadeTarget;
+	BYTE Phase;
+	BYTE GestureSuite;
+	BYTE BumpCount;
+	BYTE FriendlyFireCount;
+	FLOAT LastFriendlyFireTime;
+	FLOAT NextIdleGestureTime;
+	FLOAT NextLookDirectorTime;
+	class UClass* LastStateClass;
+	FLOAT StateActivationTime;
+	FLOAT LastStateLength;
+	FLOAT DecisionInterval;
+	FLOAT EmoteProbability;
+	FLOAT DodgeErrorTime;
+	FLOAT LastBumpTime;
+	FLOAT PostWorldCheckFireDuration;
+	FLOAT LastClearShotTime;
+	BYTE HostileStimuliResponses[SG_MAX];
+	BYTE BenignStimuliResponses[SG_MAX];
+	BITFIELD StateWasForced:1;
+	BITFIELD ExecutingCriticalGoal:1;
+	BITFIELD bPlayEmoteHear:1;
+	BITFIELD ShouldReloadSoon:1;
+	BITFIELD CanReloadNow:1;
+	BITFIELD CanDodgeNow:1;
+	BITFIELD bLeapFrog:1;
+	BITFIELD bBotCombatEnabled:1;
+	BITFIELD bAutoSelectRunOrWalk:1;
+	BITFIELD bShouldCrouch:1;
+	BITFIELD bWantsToFire:1;
+	BITFIELD bLastSafeToShoot:1;
+	BITFIELD bAttackFromCrouch:1;
+	BITFIELD bLookDirectorEnabled:1;
+	BITFIELD bBotCombatAllowsMelee:1;
+	BITFIELD bUseAdditionalTargets:1;
+	BITFIELD bWasProcessingReflexes:1;
+	BITFIELD bCanDecelerate:1;
+	BITFIELD bPreventTetherOneWay:1;
+	BITFIELD bCheckCorpseFire:1;
+	BITFIELD bAutoAntiArmor:1;
+	BITFIELD bAutoSnipe:1;
+	BITFIELD bAutoGrenade:1;
+	BITFIELD bIgnoreFF:1;
+	BITFIELD bAbortShootToDefend:1;
+	BITFIELD bCheckFavoriteWeapon:1;
+	BITFIELD bCanGesture:1;
+	class UCLASS* RequiredStates[UCONST_MAXSTATEOBJECTS];
+	FLOAT HearingMultiplier;
+
 	FLOAT MaxAimError();
 
 	DECLARE_CLASS(ACTBot,AScriptedController,CLASS_Config,CTGame)
@@ -724,7 +818,7 @@ public:
 	BITFIELD bPathComplete:1;
 
 	DECLARE_CLASS(UGOAL_GotoCautious,UGoalObject,0,CTGame)
-	
+
 private:
 	UGOAL_GotoCautious();
 };

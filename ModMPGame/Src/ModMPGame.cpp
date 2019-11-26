@@ -44,6 +44,8 @@ static struct FBotSupportExecHook : FExec{
 					PutNavPtClass = APathNode::StaticClass();
 				}else if(ParseCommand(&Cmd, "PUTCOVERPOINT")){
 					PutNavPtClass = ACoverPoint::StaticClass();
+				}else if(ParseCommand(&Cmd, "PUTPATROLPOINT")){
+					PutNavPtClass = APatrolPoint::StaticClass();
 				}
 
 				if(PutNavPtClass){
@@ -85,7 +87,8 @@ static FFilename GetPathFileName(const FString MapName){
 
 enum ENavPtType{
 	NAVPT_PathNode,
-	NAVPT_CoverPoint
+	NAVPT_CoverPoint,
+	NAVPT_PatrolPoint
 };
 
 /*
@@ -161,14 +164,25 @@ void ABotSupport::ImportPaths(){
 		*Ar << NavPtInfo;
 
 		for(int i = 0; i < NavPtInfo.Num(); ++i){
+			UClass* NavPtClass;
+
+			if(NavPtInfo[i].Type == NAVPT_CoverPoint)
+				NavPtClass = ACoverPoint::StaticClass();
+			else if(NavPtInfo[i].Type == NAVPT_PatrolPoint)
+				NavPtClass = APatrolPoint::StaticClass();
+			else
+				NavPtClass = APathNode::StaticClass();
+
 			SpawnNavigationPoint(
-				NavPtInfo[i].Type == NAVPT_CoverPoint ? ACoverPoint::StaticClass() : APathNode::StaticClass(),
+				NavPtClass,
 				NavPtInfo[i].Location,
 				NavPtInfo[i].Rotation
 			);
 		}
 
 		bPathsImported = 1;
+
+		delete Ar;
 	}else{
 		GLog->Logf(NAME_Error, "Cannot import paths from file '%s'", *Filename);
 	}
@@ -201,16 +215,21 @@ void ABotSupport::execClearPaths(FFrame& Stack, void* Result){
 void ABotSupport::BuildPaths(){
 	guard(ABotSupport::BuildPaths);
 
-	int isEd = GIsEditor;
-	int begunPlay = Level->bBegunPlay;
+	UBOOL IsEd = GIsEditor;
+	UBOOL BegunPlay = Level->bBegunPlay;
 
 	Level->bBegunPlay = 0;
 	GIsEditor = 1;
 
 	GPathBuilder.definePaths(XLevel);
 
-	GIsEditor = isEd;
-	Level->bBegunPlay = begunPlay;
+	GIsEditor = IsEd;
+	Level->bBegunPlay = 1; // Actor script events are only called if Level->bBegunPlay == true which is not the case when paths are loaded at startup
+
+	if(BotScript)
+		SetupBotScript();
+
+	Level->bBegunPlay = BegunPlay;
 
 	unguard;
 }
@@ -239,7 +258,16 @@ void ABotSupport::ExportPaths(){
 		FNavPtInfo NavPtInfo;
 
 		if(!NavPt->IsA(APlayerStart::StaticClass())){ // Playerstarts are always part of the map and thus not exported
-			NavPtInfo.Type = NavPt->IsA(ACoverPoint::StaticClass()) ? NAVPT_CoverPoint : NAVPT_PathNode;
+			ENavPtType NavPtType;
+
+			if(NavPt->IsA(ACoverPoint::StaticClass()))
+				NavPtType = NAVPT_CoverPoint;
+			else if(NavPt->IsA(APatrolPoint::StaticClass()))
+				NavPtType = NAVPT_PatrolPoint;
+			else
+				NavPtType = NAVPT_PathNode;
+
+			NavPtInfo.Type = NavPtType;
 			NavPtInfo.Location = NavPt->Location;
 			NavPtInfo.Rotation = NavPt->Rotation;
 			NavPts.AddItem(NavPtInfo);
@@ -273,6 +301,17 @@ void ABotSupport::ExportPaths(){
 
 void ABotSupport::Spawned(){
 	GBotSupport = this;
+
+	UBOOL IsEd = GIsEditor;
+
+	GIsEditor = 1; // ScriptedSequence has bStatic = true and can only be spawned if GIsEditor
+
+	BotScript = Cast<AScriptedSequence>(XLevel->SpawnActor(AScriptedSequence::StaticClass()));
+
+	GIsEditor = IsEd;
+
+	if(!BotScript)
+		GLog->Log(NAME_Error, "Failed to spawn bot script, bots won't patrol around the map");
 
 	if(bAutoImportPaths){
 		ImportPaths();
@@ -363,6 +402,8 @@ void ABotSupport::PostRender(class FLevelSceneNode* SceneNode, class FRenderInte
 			Color = FColor(100, 100, 100);
 		else if(It->IsA(ACoverPoint::StaticClass()))
 			Color = FColor(0, 0, 255);
+		else if(It->IsA(APatrolPoint::StaticClass()))
+			Color = FColor(0, 255, 255);
 		else
 			Color = FColor(150, 100, 150);
 

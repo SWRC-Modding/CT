@@ -25,9 +25,15 @@ public:
     TArrayNoInit<FVector> NavPtFailLocations GCC_PACK(4);
     TArrayNoInit<class AMPBot*> Bots;
     TArrayNoInit<class APlayerStart*> SpawnPoints;
+    class AScriptedSequence* BotScript;
     void execSpawnNavigationPoint(FFrame& Stack, void* Result);
     void execBuildPaths(FFrame& Stack, void* Result);
     void execClearPaths(FFrame& Stack, void* Result);
+    void SetupBotScript()
+    {
+        DECLARE_NAME(SetupBotScript);
+        ProcessEvent(NSetupBotScript, NULL);
+    }
     DECLARE_CLASS(ABotSupport,AActor,0|CLASS_Config,ModMPGame)
 	virtual void Spawned();
 	virtual void Destroy();
@@ -52,6 +58,14 @@ public:
 };
 
 
+class MODMPGAME_API APatrolPoint : public ANavigationPoint
+{
+public:
+    DECLARE_CLASS(APatrolPoint,ANavigationPoint,0,ModMPGame)
+    NO_DEFAULT_CONSTRUCTOR(APatrolPoint)
+};
+
+
 
 #if SUPPORTS_PRAGMA_PACK
 #pragma pack (pop)
@@ -62,6 +76,7 @@ public:
 #define AUTO_INITIALIZE_REGISTRANTS_MODMPGAME \
 	ABotSupport::StaticClass(); \
 	AMPBot::StaticClass(); \
+	APatrolPoint::StaticClass(); \
 	UExportPathsCommandlet::StaticClass(); \
 
 #endif // __STATIC_LINK

@@ -2,31 +2,33 @@ class MPBot extends CTBot native;
 
 var int ChosenSkin;
 
-function GivePawn(){
-	Log("GivePawn called");
+function PawnDied(Pawn P){
+	Super.PawnDied(P);
+	GotoState('Dead');
 }
-
-/*function GameHasEnded()
-{
-	if ( Pawn != None )
-		Pawn.bNoWeaponFiring = true;
-	GotoState('GameEnded');
-}*/
 
 State Dead{
 	ignores SeePlayer, HearNoise, KilledBy;
 
 	function PawnDied(Pawn P){
 		if(Level.NetMode != NM_Client)
-			warn(self$" Pawndied while dead");
+			warn(self$" PawnDied while dead");
 	}
 
-	function ServerReStartPlayer(){
-		if(Level.NetMode == NM_Client)
-			return;
+Begin:
+	if(Level.Game.bGameEnded)
+		GotoState('GameEnded');
 
-		Level.Game.RestartPlayer(self);
-	}
+	Sleep(0.2);
+TryAgain:
+	Sleep(0.25 + MPGame(Level.Game).RespawnWaitTime);
+	Level.Game.ReStartPlayer(self);
+	Goto('TryAgain');
+MPStart:
+	Level.Game.ChangeTeam(Self, 255, false, false);
+	Sleep(0.75 + FRand());
+	Level.Game.ReStartPlayer(self);
+	Goto('TryAgain');
 }
 
 defaultproperties

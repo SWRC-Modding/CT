@@ -31,6 +31,14 @@ static struct FBotSupportExecHook : FExec{
 				GBotSupport->ClearPaths();
 
 				return 1;
+			}else if(ParseCommand(&Cmd, "ADDBOT")){
+				GBotSupport->AddBot();
+
+				return 1;
+			}else if(ParseCommand(&Cmd, "REMOVEBOT")){
+				GBotSupport->RemoveBot();
+
+				return 1;
 			}
 
 			if(GIsClient){ // Commands only available ingame

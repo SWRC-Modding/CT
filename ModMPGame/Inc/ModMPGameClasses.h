@@ -34,6 +34,16 @@ public:
         DECLARE_NAME(SetupBotScript);
         ProcessEvent(NSetupBotScript, NULL);
     }
+    void AddBot()
+    {
+        DECLARE_NAME(AddBot);
+        ProcessEvent(NAddBot, NULL);
+    }
+    void RemoveBot()
+    {
+        DECLARE_NAME(RemoveBot);
+        ProcessEvent(NRemoveBot, NULL);
+    }
     DECLARE_CLASS(ABotSupport,AActor,0|CLASS_Config,ModMPGame)
 	virtual void Spawned();
 	virtual void Destroy();

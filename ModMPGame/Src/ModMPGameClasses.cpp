@@ -20,3 +20,5 @@ FNativeEntry<ABotSupport> ABotSupport::StaticNativeMap[] = {
 LINK_NATIVES(ABotSupport);
 
 IMPLEMENT_CLASS(AMPBot);
+
+IMPLEMENT_CLASS(APatrolPoint);

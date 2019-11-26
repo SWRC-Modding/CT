@@ -38,6 +38,8 @@ function Broadcast(Actor Sender, coerce string Msg, optional name Type){
 				BotSupport.RemoveBot();
 				++i;
 			}until(i >= NumBots);
+		}else if(Sender.IsA('PlayerController')){
+			PlayerController(Sender).ClientMessage("Unknown command");
 		}
 	}else{
 		Super.Broadcast(Sender, Msg, Type);

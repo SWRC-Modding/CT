@@ -19,8 +19,8 @@ LINK_LIB(CTGame)
 #endif
 
 /*
-*	ActivateDoor
-*/
+ * ActivateDoor
+ */
 
 class CTGAME_API AActivateDoor : public AActivateItem{
 public:
@@ -35,8 +35,8 @@ public:
 };
 
 /*
-*	ActivateTrap
-*/
+ * ActivateTrap
+ */
 
 class CTGAME_API AActivateTrap : public AActivateItem{
 public:
@@ -64,8 +64,8 @@ public:
 };
 
 /*
-*	BactaDispenser
-*/
+ * BactaDispenser
+ */
 
 class CTGAME_API ABactaDispenser : public AActivateItem{
 public:
@@ -86,8 +86,8 @@ public:
 };
 
 /*
-*	HackTerminal
-*/
+ * HackTerminal
+ */
 
 class CTGAME_API AHackTerminal : public AActivateItem{
 public:
@@ -102,8 +102,8 @@ public:
 };
 
 /*
-*	CTBot
-*/
+ * CTBot
+ */
 
 enum EStatePhase{
 	SP_Inactive,
@@ -240,8 +240,8 @@ public:
 };
 
 /*
-*	CTPlayer
-*/
+ * CTPlayer
+ */
 
 class CTGAME_API ACTPlayer : public APlayerController{
 public:
@@ -270,8 +270,8 @@ public:
 };
 
 /*
-*	Factory
-*/
+ * Factory
+ */
 
 enum ESpawnMode{
 	SPM_Cyclic,
@@ -314,8 +314,8 @@ public:
 };
 
 /*
-*	PawnFactory
-*/
+ * PawnFactory
+ */
 
 class CTGAME_API APawnFactory : public AFactory{
 public:
@@ -344,8 +344,8 @@ public:
 };
 
 /*
-*	CTGameInfo
-*/
+ * CTGameInfo
+ */
 
 class CTGAME_API ACTGameInfo : public AGameInfo{
 public:
@@ -354,8 +354,8 @@ public:
 };
 
 /*
-*	CTSquadNative
-*/
+ * CTSquadNative
+ */
 
 struct FSquadAssignment{
 	class APawn* Member;
@@ -403,8 +403,8 @@ public:
 };
 
 /*
-*	CTTeamInfo
-*/
+ * CTTeamInfo
+ */
 
 class CTGAME_API ACTTeamInfo : public ATeamInfo{
 public:
@@ -415,8 +415,8 @@ public:
 };
 
 /*
-*	SpawnPoint
-*/
+ * SpawnPoint
+ */
 
 class CTGAME_API ASpawnPoint : public AKeypoint{
 public:
@@ -429,8 +429,8 @@ public:
 };
 
 /*
-*	CTMarker
-*/
+ * CTMarker
+ */
 
 class CTGAME_API ACTMarker : public ASquadMarker{
 public:
@@ -440,8 +440,8 @@ public:
 };
 
 /*
-*	MarkerGetBactaNative
-*/
+ * MarkerGetBactaNative
+ */
 
 class CTGAME_API AMarkerGetBactaNative : public ACTMarker{
 public:
@@ -454,22 +454,22 @@ public:
 };
 
 /*
-*	MarkerReviveOther
-*/
+ * MarkerReviveOther
+ */
 
 class CTGAME_API AMarkerReviveOther : public ACTMarker{
 public:
 	FLOAT Duration;
 
-	DECLARE_CLASS(AMarkerReviveOther,ACTMarker,/*CLASS_NoAutoLoad*/0,CTGame)
+	DECLARE_CLASS(AMarkerReviveOther,ACTMarker,/*CLASS_NoAutoLoad */0,CTGame)
 
 	virtual UBOOL Update();
 	virtual void CompleteMarker();
 };
 
 /*
-*	CTPawn
-*/
+ * CTPawn
+ */
 
 class CTGAME_API ACTPawn : public APawn{
 public:
@@ -488,8 +488,8 @@ protected:
 };
 
 /*
-*	KnockoverProp
-*/
+ * KnockoverProp
+ */
 
 class CTGAME_API AKnockoverProp : public AKarmaProp{
 public:
@@ -502,8 +502,8 @@ public:
 };
 
 /*
-*	CTDamageType
-*/
+ * CTDamageType
+ */
 
 class CTGAME_API UCTDamageType : public UDamageType{
 public:
@@ -512,8 +512,8 @@ public:
 };
 
 /*
-*	CTDamageMelee
-*/
+ * CTDamageMelee
+ */
 
 class CTGAME_API UCTDamageMelee : public UCTDamageType{
 public:
@@ -522,8 +522,8 @@ public:
 };
 
 /*
-*	FootstepInfo
-*/
+ * FootstepInfo
+ */
 
 struct FFootstepSoundInfo{
 	BYTE StepOnMaterial;
@@ -544,8 +544,8 @@ public:
 };
 
 /*
-*	GoalQueue
-*/
+ * GoalQueue
+ */
 
 enum EGoalStatus{
 	GS_Inactive,
@@ -568,8 +568,8 @@ public:
 };
 
 /*
-*	GoalObject
-*/
+ * GoalObject
+ */
 
 class CTGAME_API UGoalObject : public UGoalQueue{
 public:
@@ -583,8 +583,8 @@ public:
 };
 
 /*
-*	GOAL_ChangeAnimTurn
-*/
+ * GOAL_ChangeAnimTurn
+ */
 
 enum EAimTurnGoal{
 	ATG_Focus,
@@ -611,8 +611,8 @@ private:
 };
 
 /*
-*	GOAL_ChangePhysics
-*/
+ * GOAL_ChangePhysics
+ */
 
 struct FPhysicsData{
 	BYTE Physics;
@@ -634,8 +634,8 @@ private:
 };
 
 /*
-*	GOAL_ChangeWeapon
-*/
+ * GOAL_ChangeWeapon
+ */
 
 class CTGAME_API UGOAL_ChangeWeapon : public UGoalObject{
 public:
@@ -649,8 +649,8 @@ private:
 };
 
 /*
-*	GOAL_CheckCorpse
-*/
+ * GOAL_CheckCorpse
+ */
 
 class CTGAME_API UGOAL_CheckCorpse : public UGoalObject{
 public:
@@ -663,8 +663,8 @@ public:
 };
 
 /*
-*	GOAL_Crouch
-*/
+ * GOAL_Crouch
+ */
 
 class CTGAME_API UGOAL_Crouch : public UGoalObject{
 public:
@@ -677,8 +677,8 @@ private:
 };
 
 /*
-*	GOAL_ExecuteMarker
-*/
+ * GOAL_ExecuteMarker
+ */
 
 class CTGAME_API UGOAL_ExecuteMarker : public UGoalObject{
 public:
@@ -694,8 +694,8 @@ private:
 };
 
 /*
-*	GOAL_FinishingMove
-*/
+ * GOAL_FinishingMove
+ */
 
 class CTGAME_API UGOAL_FinishingMove : public UGoalObject{
 public:
@@ -711,8 +711,8 @@ public:
 };
 
 /*
-*	GOAL_Follow
-*/
+ * GOAL_Follow
+ */
 
 class CTGAME_API UGOAL_Follow : public UGoalObject{
 public:
@@ -739,8 +739,8 @@ public:
 };
 
 /*
-*	GOAL_SquadFollow
-*/
+ * GOAL_SquadFollow
+ */
 
 class CTGAME_API UGOAL_SquadFollow : public UGOAL_Follow{
 public:
@@ -749,8 +749,8 @@ public:
 };
 
 /*
-*	GOAL_FollowLink
-*/
+ * GOAL_FollowLink
+ */
 
 class CTGAME_API UGOAL_FollowLink : public UGoalObject{
 public:
@@ -767,8 +767,8 @@ public:
 };
 
 /*
-*	GOAL_GetBacta
-*/
+ * GOAL_GetBacta
+ */
 
 class CTGAME_API UGOAL_GetBacta : public UGoalObject{
 public:
@@ -782,8 +782,8 @@ private:
 };
 
 /*
-*	GOAL_GoThroughDoor
-*/
+ * GOAL_GoThroughDoor
+ */
 
 class CTGAME_API UGOAL_GoThroughDoor : public UGoalObject{
 public:
@@ -797,8 +797,8 @@ private:
 };
 
 /*
-*	GOAL_Goto
-*/
+ * GOAL_Goto
+ */
 
 class CTGAME_API UGOAL_Goto : public UGoalObject{
 public:
@@ -817,8 +817,8 @@ private:
 };
 
 /*
-*	GOAL_GotoCautious
-*/
+ * GOAL_GotoCautious
+ */
 
 class CTGAME_API UGOAL_GotoCautious : public UGoalObject{
 public:
@@ -838,8 +838,8 @@ private:
 };
 
 /*
-*	GOAL_GotoPointBlind
-*/
+ * GOAL_GotoPointBlind
+ */
 
 class CTGAME_API UGOAL_GotoPointBlind : public UGoalObject{
 public:
@@ -854,8 +854,8 @@ private:
 };
 
 /*
-*	GOAL_GotoSpecial
-*/
+ * GOAL_GotoSpecial
+ */
 
 class CTGAME_API UGOAL_GotoSpecial : public UGoalObject{
 public:
@@ -874,8 +874,8 @@ private:
 };
 
 /*
-*	GOAL_HealOther
-*/
+ * GOAL_HealOther
+ */
 
 class CTGAME_API UGOAL_HealOther : public UGoalObject{
 public:
@@ -890,8 +890,8 @@ private:
 };
 
 /*
-*	GOAL_JumpTo
-*/
+ * GOAL_JumpTo
+ */
 
 class CTGAME_API UGOAL_JumpTo : public UGoalObject{
 public:
@@ -908,8 +908,8 @@ private:
 };
 
 /*
-*	GOAL_LaunchMissiles
-*/
+ * GOAL_LaunchMissiles
+ */
 
 class CTGAME_API UGOAL_LaunchMissiles : public UGoalObject{
 public:
@@ -917,8 +917,8 @@ public:
 };
 
 /*
-*	GOAL_ManTurret
-*/
+ * GOAL_ManTurret
+ */
 
 class CTGAME_API UGOAL_ManTurret : public UGoalObject{
 public:
@@ -932,8 +932,8 @@ public:
 };
 
 /*
-*	GOAL_MeleeAttack
-*/
+ * GOAL_MeleeAttack
+ */
 
 class CTGAME_API UGOAL_MeleeAttack : public UGoalObject{
 public:
@@ -948,8 +948,8 @@ public:
 };
 
 /*
-*	GOAL_MoveAndRotate
-*/
+ * GOAL_MoveAndRotate
+ */
 
 class CTGAME_API UGOAL_MoveAndRotate : public UGoalObject{
 public:
@@ -966,8 +966,8 @@ private:
 };
 
 /*
-*	GOAL_PlayAnim
-*/
+ * GOAL_PlayAnim
+ */
 
 class CTGAME_API UGOAL_PlayAnim : public UGoalObject{
 public:
@@ -984,8 +984,8 @@ public:
 };
 
 /*
-*	GOAL_PlaySound
-*/
+ * GOAL_PlaySound
+ */
 
 class CTGAME_API UGOAL_PlaySound : public UGoalObject{
 public:
@@ -1002,8 +1002,8 @@ public:
 };
 
 /*
-*	GOAL_Shoot
-*/
+ * GOAL_Shoot
+ */
 
 class CTGAME_API UGOAL_Shoot : public UGoalObject{
 public:
@@ -1017,8 +1017,8 @@ private:
 };
 
 /*
-*	GOAL_Sleep
-*/
+ * GOAL_Sleep
+ */
 
 class CTGAME_API UGOAL_Sleep : public UGoalObject{
 public:
@@ -1031,8 +1031,8 @@ private:
 };
 
 /*
-*	GOAL_ThrowGrenade
-*/
+ * GOAL_ThrowGrenade
+ */
 
 class CTGAME_API UGOAL_ThrowGrenade : public UGoalObject{
 public:
@@ -1043,8 +1043,8 @@ public:
 };
 
 /*
-*	GOAL_Trigger
-*/
+ * GOAL_Trigger
+ */
 
 class CTGAME_API UGOAL_Trigger : public UGoalObject{
 public:
@@ -1057,8 +1057,8 @@ private:
 };
 
 /*
-*	GOAL_TurnTo
-*/
+ * GOAL_TurnTo
+ */
 
 class CTGAME_API UGOAL_TurnTo : public UGoalObject{
 public:
@@ -1076,8 +1076,8 @@ private:
 };
 
 /*
-*	GOAL_UseActor
-*/
+ * GOAL_UseActor
+ */
 
 class CTGAME_API UGOAL_UseActor : public UGoalObject{
 public:
@@ -1088,8 +1088,8 @@ public:
 };
 
 /*
-*	GOAL_WaitForEvent
-*/
+ * GOAL_WaitForEvent
+ */
 
 class CTGAME_API UGOAL_WaitForEvent : public UGoalObject{
 public:
@@ -1103,8 +1103,8 @@ private:
 };
 
 /*
-*	GOAL_WaitForLanding
-*/
+ * GOAL_WaitForLanding
+ */
 
 class CTGAME_API UGOAL_WaitForLanding : public UGoalObject{
 public:
@@ -1112,8 +1112,8 @@ public:
 };
 
 /*
-*	GOAL_WaitForScriptState
-*/
+ * GOAL_WaitForScriptState
+ */
 
 class CTGAME_API UGOAL_WaitForScriptState : public UGoalObject{
 public:
@@ -1124,8 +1124,8 @@ public:
 };
 
 /*
-*	GOAL_WaitUntilNear
-*/
+ * GOAL_WaitUntilNear
+ */
 
 class CTGAME_API UGOAL_WaitUntilNear : public UGoalObject{
 public:
@@ -1136,8 +1136,8 @@ public:
 };
 
 /*
-*	IdleInfo
-*/
+ * IdleInfo
+ */
 
 struct CTGAME_API FIdleAnimInfo{
 	FName AnimationName;
@@ -1155,8 +1155,8 @@ public:
 };
 
 /*
-*	LocalSituation
-*/
+ * LocalSituation
+ */
 
 class CTGAME_API ULocalSituation : public UObject{
 public:
@@ -1172,8 +1172,8 @@ public:
 };
 
 /*
-*	ACTION_MoveToPoint
-*/
+ * ACTION_MoveToPoint
+ */
 
 class CTGAME_API UACTION_MoveToPoint : public ULatentScriptedAction{
 public:
@@ -1187,8 +1187,8 @@ public:
 };
 
 /*
-*	StanceDefault
-*/
+ * StanceDefault
+ */
 
 class CTGAME_API UStanceDefault : public USquadStance{
 public:
@@ -1197,8 +1197,8 @@ public:
 };
 
 /*
-*	StanceEngageTarget
-*/
+ * StanceEngageTarget
+ */
 
 class CTGAME_API UStanceEngageTarget : public USquadStance{
 public:
@@ -1207,8 +1207,8 @@ public:
 };
 
 /*
-*	StanceFormUp
-*/
+ * StanceFormUp
+ */
 
 class CTGAME_API UStanceFormUp : public USquadStance{
 public:
@@ -1217,8 +1217,8 @@ public:
 };
 
 /*
-*	StanceFormUpTight
-*/
+ * StanceFormUpTight
+ */
 
 class CTGAME_API UStanceFormUpTight : public UStanceFormUp{
 public:
@@ -1227,8 +1227,8 @@ public:
 };
 
 /*
-*	StanceHold
-*/
+ * StanceHold
+ */
 
 class CTGAME_API UStanceHold : public USquadStance{
 public:
@@ -1237,8 +1237,8 @@ public:
 };
 
 /*
-*	StanceHoldLoose
-*/
+ * StanceHoldLoose
+ */
 
 class CTGAME_API UStanceHoldLoose : public UStanceHold{
 public:
@@ -1247,8 +1247,8 @@ public:
 };
 
 /*
-*	StancePreviousOrder
-*/
+ * StancePreviousOrder
+ */
 
 class CTGAME_API UStancePreviousOrder : public USquadStance{
 public:
@@ -1257,8 +1257,8 @@ public:
 };
 
 /*
-*	StanceSearchAndDestroy
-*/
+ * StanceSearchAndDestroy
+ */
 
 class CTGAME_API UStanceSearchAndDestroy : public USquadStance{
 public:
@@ -1267,8 +1267,8 @@ public:
 };
 
 /*
-*	StanceSecurePosition
-*/
+ * StanceSecurePosition
+ */
 
 class CTGAME_API UStanceSecurePosition : public USquadStance{
 public:
@@ -1277,8 +1277,8 @@ public:
 };
 
 /*
-*	StateObject
-*/
+ * StateObject
+ */
 
 class CTGAME_API UStateObject : public UObject{
 public:
@@ -1290,8 +1290,8 @@ public:
 };
 
 /*
-*	StateAbstractAttack
-*/
+ * StateAbstractAttack
+ */
 
 class CTGAME_API UStateAbstractAttack : public UStateObject{
 public:
@@ -1317,8 +1317,8 @@ public:
 };
 
 /*
-*	StateAttack
-*/
+ * StateAttack
+ */
 
 class CTGAME_API UStateAttack : public UStateAbstractAttack{
 public:
@@ -1326,8 +1326,8 @@ public:
 };
 
 /*
-*	StateBattleDroidAttack
-*/
+ * StateBattleDroidAttack
+ */
 
 class CTGAME_API UStateBattleDroidAttack : public UStateAbstractAttack{
 public:
@@ -1339,8 +1339,8 @@ public:
 };
 
 /*
-*	StateBerserk
-*/
+ * StateBerserk
+ */
 
 class CTGAME_API UStateBerserk : public UStateAbstractAttack{
 public:
@@ -1352,8 +1352,8 @@ public:
 };
 
 /*
-*	StateDroidekaAttack
-*/
+ * StateDroidekaAttack
+ */
 
 class CTGAME_API UStateDroidekaAttack : public UStateAbstractAttack{
 public:
@@ -1361,8 +1361,8 @@ public:
 };
 
 /*
-*	StateDroneAttack
-*/
+ * StateDroneAttack
+ */
 
 class CTGAME_API UStateDroneAttack : public UStateAbstractAttack{
 public:
@@ -1373,8 +1373,8 @@ public:
 };
 
 /*
-*	StateFlyingAttack
-*/
+ * StateFlyingAttack
+ */
 
 class CTGAME_API UStateFlyingAttack : public UStateAbstractAttack{
 public:
@@ -1392,8 +1392,8 @@ public:
 };
 
 /*
-*	StateGeonosianWarriorAttack
-*/
+ * StateGeonosianWarriorAttack
+ */
 
 class CTGAME_API UStateGeonosianWarriorAttack : public UStateAbstractAttack{
 public:
@@ -1409,8 +1409,8 @@ public:
 };
 
 /*
-*	StateHeavyAttack
-*/
+ * StateHeavyAttack
+ */
 
 class CTGAME_API UStateHeavyAttack : public UStateAbstractAttack{
 public:
@@ -1426,8 +1426,8 @@ public:
 };
 
 /*
-*	StateSimpleAttack
-*/
+ * StateSimpleAttack
+ */
 
 class CTGAME_API UStateSimpleAttack : public UStateAbstractAttack{
 public:
@@ -1435,8 +1435,8 @@ public:
 };
 
 /*
-*	StateSpiderDroidAttack
-*/
+ * StateSpiderDroidAttack
+ */
 
 class CTGAME_API UStateSpiderDroidAttack : public UStateAbstractAttack{
 public:
@@ -1457,8 +1457,8 @@ public:
 };
 
 /*
-*	StateSquadAttack
-*/
+ * StateSquadAttack
+ */
 
 class CTGAME_API UStateSquadAttack : public UStateAbstractAttack{
 public:
@@ -1468,8 +1468,8 @@ public:
 };
 
 /*
-*	StateStationaryAttack
-*/
+ * StateStationaryAttack
+ */
 
 class CTGAME_API UStateStationaryAttack : public UStateAbstractAttack{
 public:
@@ -1477,8 +1477,8 @@ public:
 };
 
 /*
-*	StateTrandoshanAttack
-*/
+ * StateTrandoshanAttack
+ */
 
 class CTGAME_API UStateTrandoshanAttack : public UStateAbstractAttack{
 public:
@@ -1495,8 +1495,8 @@ public:
 };
 
 /*
-*	StateTurretAttack
-*/
+ * StateTurretAttack
+ */
 
 class CTGAME_API UStateTurretAttack : public UStateAbstractAttack{
 public:
@@ -1509,8 +1509,8 @@ public:
 };
 
 /*
-*	StateWookieeAttack
-*/
+ * StateWookieeAttack
+ */
 
 class CTGAME_API UStateWookieeAttack : public UStateAbstractAttack{
 public:
@@ -1518,8 +1518,8 @@ public:
 };
 
 /*
-*	StateDispensing
-*/
+ * StateDispensing
+ */
 
 class CTGAME_API UStateDispensing : public UStateObject{
 public:
@@ -1527,8 +1527,8 @@ public:
 };
 
 /*
-*	StateFreakOut
-*/
+ * StateFreakOut
+ */
 
 class CTGAME_API UStateFreakOut : public UStateObject{
 public:
@@ -1541,8 +1541,8 @@ public:
 };
 
 /*
-*	StateIdle
-*/
+ * StateIdle
+ */
 
 class CTGAME_API UStateIdle : public UStateObject{
 public:
@@ -1552,8 +1552,8 @@ public:
 };
 
 /*
-*	StateIdleSquad
-*/
+ * StateIdleSquad
+ */
 
 class CTGAME_API UStateIdleSquad : public UStateObject{
 public:
@@ -1568,8 +1568,8 @@ public:
 };
 
 /*
-*	StateInvestigate
-*/
+ * StateInvestigate
+ */
 
 class CTGAME_API UStateInvestigate : public UStateObject{
 public:
@@ -1581,8 +1581,8 @@ public:
 };
 
 /*
-*	StateMarker
-*/
+ * StateMarker
+ */
 
 class CTGAME_API UStateMarker : public UStateObject{
 public:
@@ -1592,8 +1592,8 @@ public:
 };
 
 /*
-*	StatePatrol
-*/
+ * StatePatrol
+ */
 
 class CTGAME_API UStatePatrol : public UStateObject{
 public:
@@ -1606,8 +1606,8 @@ public:
 };
 
 /*
-*	StateRetreat
-*/
+ * StateRetreat
+ */
 
 class CTGAME_API UStateRetreat : public UStateObject{
 public:
@@ -1620,8 +1620,8 @@ public:
 };
 
 /*
-*	StateScriptWrapper
-*/
+ * StateScriptWrapper
+ */
 
 class CTGAME_API UStateScriptWrapper : public UStateObject{
 public:
@@ -1632,8 +1632,8 @@ public:
 };
 
 /*
-*	StateShutdown
-*/
+ * StateShutdown
+ */
 
 class CTGAME_API UStateShutdown : public UStateObject{
 public:
@@ -1645,8 +1645,8 @@ public:
 };
 
 /*
-*	StateAsleep
-*/
+ * StateAsleep
+ */
 
 class CTGAME_API UStateAsleep : public UStateShutdown{
 public:
@@ -1654,8 +1654,8 @@ public:
 };
 
 /*
-*	StatePerched
-*/
+ * StatePerched
+ */
 
 class CTGAME_API UStatePerched : public UStateShutdown{
 public:
@@ -1668,8 +1668,8 @@ public:
 };
 
 /*
-*	StateSquad
-*/
+ * StateSquad
+ */
 
 class CTGAME_API UStateSquad : public UStateObject{
 public:
@@ -1679,8 +1679,8 @@ public:
 };
 
 /*
-*	StateTether
-*/
+ * StateTether
+ */
 
 class CTGAME_API UStateTether : public UStateObject{
 public:
@@ -1690,8 +1690,8 @@ public:
 };
 
 /*
-*	StateWander
-*/
+ * StateWander
+ */
 
 class CTGAME_API UStateWander : public UStateObject{
 public:
@@ -1702,4 +1702,4 @@ public:
 #pragma pack (pop)
 #endif
 
-#endif //CTGAME_NATIVE_DEFS
+#endif // CTGAME_NATIVE_DEFS

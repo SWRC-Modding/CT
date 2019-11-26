@@ -13,8 +13,8 @@
 #endif
 
 /*
-*	Actor
-*/
+ * Actor
+ */
 
 enum ETravelType{
     TRAVEL_Absolute,
@@ -588,8 +588,8 @@ public:
 };
 
 /*
-*	Accessory
-*/
+ * Accessory
+ */
 
 enum EAccessoryDetachStyle{
 	ADS_BlowUp,
@@ -621,8 +621,8 @@ public:
 };
 
 /*
-*	ActivateItem
-*/
+ * ActivateItem
+ */
 
 enum EMarkerItemDifficulty{
 	MID_Easy,
@@ -734,8 +734,8 @@ public:
 
 
 /*
-*	AIScript
-*/
+ * AIScript
+ */
 
 class ENGINE_API AAIScript : public AActor{
 public:
@@ -748,8 +748,8 @@ public:
 
 
 /*
-*	AntiPortalActor
-*/
+ * AntiPortalActor
+ */
 
 class ENGINE_API AAntiPortalActor : public AActor{
 public:
@@ -758,8 +758,8 @@ public:
 };
 
 /*
-*	Brush
-*/
+ * Brush
+ */
 
 enum ECsgOper{
 	CSG_Active,
@@ -805,8 +805,8 @@ public:
 };
 
 /*
-*	Volume
-*/
+ * Volume
+ */
 
 struct FDecorationType{
 	class UStaticMesh* StaticMesh;
@@ -830,8 +830,8 @@ public:
 };
 
 /*
-*	BattleVolume
-*/
+ * BattleVolume
+ */
 
 class ENGINE_API AEngineBattleVolume : public AVolume{
 public:
@@ -850,8 +850,8 @@ public:
 };
 
 /*
-*	PhysicsVolume
-*/
+ * PhysicsVolume
+ */
 
 class ENGINE_API APhysicsVolume : public AVolume{
 public:
@@ -947,8 +947,8 @@ public:
 };
 
 /*
-*	DefaultPhysicsVolume
-*/
+ * DefaultPhysicsVolume
+ */
 
 class ENGINE_API ADefaultPhysicsVolume : public APhysicsVolume{
 public:
@@ -957,8 +957,8 @@ public:
 };
 
 /*
-*	Controller
-*/
+ * Controller
+ */
 
 #define UCONST_LATENT_MOVETOWARD 503
 
@@ -1027,8 +1027,8 @@ public:
 };
 
 /*
-*	AIController
-*/
+ * AIController
+ */
 
 #define UCONST_MAX_ERROR_ANGLE 60
 #define UCONST_DEG_TO_ROTATOR 182.04
@@ -1053,8 +1053,8 @@ public:
 };
 
 /*
-*	PlayerController
-*/
+ * PlayerController
+ */
 
 enum ETargetType{
 	TGT_Default,
@@ -1355,8 +1355,8 @@ public:
 };
 
 /*
-*	Emitter
-*/
+ * Emitter
+ */
 
 class ENGINE_API AEmitter : public AActor{
 public:
@@ -1394,8 +1394,8 @@ public:
 };
 
 /*
-*	Flashlight
-*/
+ * Flashlight
+ */
 
 class ENGINE_API AFlashlight : public AActor{
 public:
@@ -1421,8 +1421,8 @@ public:
 };
 
 /*
-*	HUD
-*/
+ * HUD
+ */
 
 struct FConsoleMessage{
 	FStringNoInit Text;
@@ -1630,8 +1630,8 @@ public:
 };
 
 /*
-*	Info
-*/
+ * Info
+ */
 
 struct FKeyValuePair{
 	FString Key;
@@ -1680,8 +1680,8 @@ public:
 };
 
 /*
-*	FileLog
-*/
+ * FileLog
+ */
 
 class ENGINE_API AFileLog : public AInfo{
 public:
@@ -1693,8 +1693,8 @@ public:
 };
 
 /*
-*	GameInfo
-*/
+ * GameInfo
+ */
 
 struct FVoiceChatterInfo{
 	class AController* Controller;
@@ -1958,8 +1958,8 @@ public:
 };
 
 /*
-*	GameStats
-*/
+ * GameStats
+ */
 
 class ENGINE_API AGameStats : public AInfo{
 public:
@@ -1972,8 +1972,8 @@ public:
 };
 
 /*
-*	InternetInfo
-*/
+ * InternetInfo
+ */
 
 class ENGINE_API AInternetInfo : public AInfo{
 public:
@@ -1982,8 +1982,8 @@ public:
 };
 
 /*
-*	Mutator
-*/
+ * Mutator
+ */
 
 class ENGINE_API AMutator : public AInfo{
 public:
@@ -2000,8 +2000,8 @@ public:
 };
 
 /*
-*	ReplicationInfo
-*/
+ * ReplicationInfo
+ */
 
 class ENGINE_API AReplicationInfo : public AInfo{
 public:
@@ -2011,8 +2011,8 @@ public:
 };
 
 /*
-*	GameReplicationInfo
-*/
+ * GameReplicationInfo
+ */
 
 class ENGINE_API AGameReplicationInfo : public AReplicationInfo{
 public:
@@ -2062,8 +2062,8 @@ public:
 };
 
 /*
-*	PlayerReplicationInfo
-*/
+ * PlayerReplicationInfo
+ */
 
 class ENGINE_API APlayerReplicationInfo : public AReplicationInfo{
 public:
@@ -2128,8 +2128,8 @@ public:
 };
 
 /*
-*	Squad
-*/
+ * Squad
+ */
 
 enum EStanceType{
 	STT_Invalid,
@@ -2250,8 +2250,8 @@ public:
 };
 
 /*
-*	TeamInfo
-*/
+ * TeamInfo
+ */
 
 class ENGINE_API ATeamInfo : public AReplicationInfo{
 public:
@@ -2281,8 +2281,8 @@ public:
 };
 
 /*
-*	SavedMove
-*/
+ * SavedMove
+ */
 
 class ENGINE_API ASavedMove : public AInfo{
 public:
@@ -2310,8 +2310,8 @@ public:
 };
 
 /*
-*	Security
-*/
+ * Security
+ */
 
 class ENGINE_API ASecurity : public AInfo{
 public:
@@ -2334,8 +2334,8 @@ public:
 };
 
 /*
-*	ZoneInfo
-*/
+ * ZoneInfo
+ */
 
 class ENGINE_API AZoneInfo : public AInfo{
 public:
@@ -2403,8 +2403,8 @@ public:
 };
 
 /*
-*	LevelInfo
-*/
+ * LevelInfo
+ */
 
 enum ELevelCampaign{
 	LC_GEO,
@@ -2581,8 +2581,8 @@ public:
 };
 
 /*
-*	SkyZoneInfo
-*/
+ * SkyZoneInfo
+ */
 
 class ENGINE_API ASkyZoneInfo : public AZoneInfo{
 public:
@@ -2591,8 +2591,8 @@ public:
 };
 
 /*
-*	IntangibleActor
-*/
+ * IntangibleActor
+ */
 
 class ENGINE_API AIntangibleActor : public AActor{
 public:
@@ -2601,8 +2601,8 @@ public:
 };
 
 /*
-*	Inventory
-*/
+ * Inventory
+ */
 
 class ENGINE_API AInventory : public AActor{
 public:
@@ -2682,8 +2682,8 @@ public:
 };
 
 /*
-*	Ammunition
-*/
+ * Ammunition
+ */
 
 enum EAmmunitionType{
 	AT_Random,
@@ -2738,8 +2738,8 @@ public:
 };
 
 /*
-*	Powerups
-*/
+ * Powerups
+ */
 
 class ENGINE_API APowerups : public AInventory{
 public:
@@ -2756,8 +2756,8 @@ public:
 };
 
 /*
-*	Weapon
-*/
+ * Weapon
+ */
 
 enum EFireMode{
 	FM_SemiAuto,
@@ -2922,8 +2922,8 @@ public:
 };
 
 /*
-*	InventoryAttachment
-*/
+ * InventoryAttachment
+ */
 
 class ENGINE_API AInventoryAttachment : public AActor{
 public:
@@ -2932,8 +2932,8 @@ public:
 };
 
 /*
-*	WeaponAttachment
-*/
+ * WeaponAttachment
+ */
 
 class ENGINE_API AWeaponAttachment : public AInventoryAttachment{
 public:
@@ -2985,8 +2985,8 @@ public:
 };
 
 /*
-*	Keypoint
-*/
+ * Keypoint
+ */
 
 class ENGINE_API AKeypoint : public AActor{
 public:
@@ -2995,8 +2995,8 @@ public:
 };
 
 /*
-*	Light
-*/
+ * Light
+ */
 
 class ENGINE_API ALight : public AActor{
 public:
@@ -3010,8 +3010,8 @@ public:
 };
 
 /*
-*	DynamicLight
-*/
+ * DynamicLight
+ */
 
 class ENGINE_API ADynamicLight : public ALight{
 public:
@@ -3020,8 +3020,8 @@ public:
 };
 
 /*
-*	MarkerIconActor
-*/
+ * MarkerIconActor
+ */
 
 class ENGINE_API AMarkerIconActor : public AActor{
 public:
@@ -3034,8 +3034,8 @@ public:
 };
 
 /*
-*	SquadMarker
-*/
+ * SquadMarker
+ */
 
 enum EMarkerAction{
 	MA_None,
@@ -3149,8 +3149,8 @@ public:
 };
 
 /*
-*	Menu
-*/
+ * Menu
+ */
 
 enum InputSource{
 	IS_None,
@@ -3240,8 +3240,8 @@ public:
 };
 
 /*
-*	MissionObjectives
-*/
+ * MissionObjectives
+ */
 
 enum EObjectiveMode{
 	OM_Hidden,
@@ -3273,8 +3273,8 @@ public:
 };
 
 /*
-*	Mover
-*/
+ * Mover
+ */
 
 enum EMoverEncroachType{
 	ME_StopWhenEncroach,
@@ -3383,8 +3383,8 @@ public:
 };
 
 /*
-*	NavigationPoint
-*/
+ * NavigationPoint
+ */
 
 enum ENavConnectionType{
 	NCT_Normal,
@@ -3491,8 +3491,8 @@ public:
 };
 
 /*
-*	CoverPoint
-*/
+ * CoverPoint
+ */
 
 class ENGINE_API ACoverPoint : public ANavigationPoint{
 public:
@@ -3518,8 +3518,8 @@ public:
 };
 
 /*
-*	Perch
-*/
+ * Perch
+ */
 
 class ENGINE_API APerch : public ANavigationPoint{
 public:
@@ -3533,15 +3533,15 @@ public:
 };
 
 /*
-*	PathNode
-*/
+ * PathNode
+ */
 class ENGINE_API APathNode : public ANavigationPoint{
 	DECLARE_CLASS(APathNode,ANavigationPoint,0,Engine)
 };
 
 /*
-*	PlayerStart
-*/
+ * PlayerStart
+ */
 
 class ENGINE_API APlayerStart : public ANavigationPoint{
 public:
@@ -3559,8 +3559,8 @@ public:
 };
 
 /*
-*	SquadMarkerSpot
-*/
+ * SquadMarkerSpot
+ */
 
 class ENGINE_API ASquadMarkerSpot : public ANavigationPoint{
 public:
@@ -3570,8 +3570,8 @@ public:
 };
 
 /*
-*	Teleporter
-*/
+ * Teleporter
+ */
 
 class ENGINE_API ATeleporter : public ANavigationPoint{
 public:
@@ -3593,8 +3593,8 @@ public:
 };
 
 /*
-*	Pawn
-*/
+ * Pawn
+ */
 
 enum EPawnMovementStyle{
 	MS_None,
@@ -3990,8 +3990,8 @@ public:
 };
 
 /*
-*	Turret
-*/
+ * Turret
+ */
 
 struct FTurretInfo{
 	FName TransitionEvent;
@@ -4111,8 +4111,8 @@ public:
 };
 
 /*
-*	Scout
-*/
+ * Scout
+ */
 class ENGINE_API AScout : public APawn{
 public:
 	FLOAT MaxLandingVelocity;
@@ -4121,8 +4121,8 @@ public:
 };
 
 /*
-*	Pickup
-*/
+ * Pickup
+ */
 
 enum EPickupType{
 	PUT_Health,
@@ -4158,8 +4158,8 @@ public:
 };
 
 /*
-*	Ammo
-*/
+ * Ammo
+ */
 
 class ENGINE_API AAmmo : public APickup{
 public:
@@ -4170,8 +4170,8 @@ public:
 };
 
 /*
-*	Projectile
-*/
+ * Projectile
+ */
 
 class ENGINE_API AProjectile : public AActor{
 public:
@@ -4200,8 +4200,8 @@ public:
 };
 
 /*
-*	Projector
-*/
+ * Projector
+ */
 
 enum EProjectorBlending{
 	PB_None,
@@ -4251,8 +4251,8 @@ public:
 };
 
 /*
-*	ShadowProjector
-*/
+ * ShadowProjector
+ */
 
 class ENGINE_API AShadowProjector : public AProjector{
 public:
@@ -4273,8 +4273,8 @@ public:
 };
 
 /*
-*	Prop
-*/
+ * Prop
+ */
 
 struct FTransitionInfo{
 	FName Event;
@@ -4318,8 +4318,8 @@ public:
 };
 
 /*
-*	KarmaProp
-*/
+ * KarmaProp
+ */
 
 class ENGINE_API AKarmaProp : public AProp{
 public:
@@ -4343,8 +4343,8 @@ public:
 };
 
 /*
-*	AnimNotify
-*/
+ * AnimNotify
+ */
 
 class ENGINE_API UAnimNotify : public UObject{
 public:
@@ -4358,8 +4358,8 @@ public:
 };
 
 /*
-*	AnimNotify_Footstep
-*/
+ * AnimNotify_Footstep
+ */
 
 enum eMaterialWalkType{
 	WalkT_Forward,
@@ -4388,8 +4388,8 @@ public:
 };
 
 /*
-*	AudioEnvironment
-*/
+ * AudioEnvironment
+ */
 
 class ENGINE_API UAudioEnvironment : public UObject{
 public:
@@ -4414,8 +4414,8 @@ public:
 };
 
 /*
-*	CheatManager
-*/
+ * CheatManager
+ */
 
 class ENGINE_API UCheatManager : public UObject{
 public:
@@ -4426,8 +4426,8 @@ public:
 };
 
 /*
-*	DamageType
-*/
+ * DamageType
+ */
 
 class ENGINE_API UDamageType : public UObject{
 public:
@@ -4462,8 +4462,8 @@ public:
 };
 
 /*
-*	DamageBleedOut
-*/
+ * DamageBleedOut
+ */
 
 class ENGINE_API UDamageBleedOut : public UDamageType{
 public:
@@ -4472,8 +4472,8 @@ public:
 };
 
 /*
-*	DamageVariance
-*/
+ * DamageVariance
+ */
 
 struct FDamageIncludedInfo{
 	class UClass* DamageTypeClass;
@@ -4490,8 +4490,8 @@ public:
 };
 
 /*
-*	FrameFX
-*/
+ * FrameFX
+ */
 
 class ENGINE_API UFrameFX : public UObject{
 public:
@@ -4520,13 +4520,13 @@ public:
 	// --------- Member Variables ---------
 	// Static working targets (shared even in splitscreen)
 	static const int MaxMips = 6;
-	static class FAuxRenderTarget*	MipTargets[MaxMips];
-	static class FAuxRenderTarget*	WorkingTarget;
-	static class FAuxRenderTarget*	AccumulatorTarget;
-	static class FAuxRenderTarget*	AntiAliasTarget;
+	static class FAuxRenderTarget * MipTargets[MaxMips];
+	static class FAuxRenderTarget * WorkingTarget;
+	static class FAuxRenderTarget * AccumulatorTarget;
+	static class FAuxRenderTarget * AntiAliasTarget;
 
 	// Static Frame Grid variables
-	static class FFrameGrid*	FrameGrid;
+	static class FFrameGrid * FrameGrid;
 
 	// --------- UObject interface ---------
 	void Destroy();
@@ -4555,8 +4555,8 @@ public:
 };
 
 /*
-*	Helmet
-*/
+ * Helmet
+ */
 
 struct FSplatInfo{
 	class UMaterial* SplatDecal;
@@ -4875,8 +4875,8 @@ public:
 };
 
 /*
-*	I3DL2Listener
-*/
+ * I3DL2Listener
+ */
 
 class ENGINE_API UI3DL2Listener : public UObject{
 public:
@@ -4919,8 +4919,8 @@ public:
 };
 
 /*
-*	IMuseStateInfo
-*/
+ * IMuseStateInfo
+ */
 
 class ENGINE_API UIMuseStateInfo : public UObject{
 public:
@@ -4946,8 +4946,8 @@ public:
 };
 
 /*
-*	Interactions
-*/
+ * Interactions
+ */
 
 enum EInputAction{
 	IST_None,
@@ -5228,8 +5228,8 @@ public:
 };
 
 /*
-*	Interaction
-*/
+ * Interaction
+ */
 
 class ENGINE_API UInteraction : public UInteractions{
 public:
@@ -5249,8 +5249,8 @@ public:
 };
 
 /*
-*	Console
-*/
+ * Console
+ */
 
 enum HoldingState{
 	StandingStill,
@@ -5448,8 +5448,8 @@ public:
 };
 
 /*
-*	InteractionMaster
-*/
+ * InteractionMaster
+ */
 
 class ENGINE_API UInteractionMaster : public UInteractions{
 public:
@@ -5580,8 +5580,8 @@ public:
 };
 
 /*
-*	KarmaParamsCollision
-*/
+ * KarmaParamsCollision
+ */
 
 class ENGINE_API UKarmaParamsCollision : public UObject{
 public:
@@ -5598,8 +5598,8 @@ public:
 };
 
 /*
-*	KarmaParams
-*/
+ * KarmaParams
+ */
 
 enum ESafeTimeMode{
 	KST_None,
@@ -5638,8 +5638,8 @@ public:
 };
 
 /*
-*	KarmaParamsSkel
-*/
+ * KarmaParamsSkel
+ */
 
 class ENGINE_API UKarmaParamsSkel : public UKarmaParams{
 public:
@@ -5657,8 +5657,8 @@ public:
 };
 
 /*
-*	LevelSummary
-*/
+ * LevelSummary
+ */
 
 class ENGINE_API ULevelSummary : public UObject{
 public:
@@ -5671,8 +5671,8 @@ public:
 };
 
 /*
-*	Combiner
-*/
+ * Combiner
+ */
 
 enum EColorOperation{
 	CO_Use_Color_From_Material1,
@@ -5712,8 +5712,8 @@ public:
 };
 
 /*
-*	HardwareShaderMacros
-*/
+ * HardwareShaderMacros
+ */
 
 class ENGINE_API UHardwareShaderMacros : public UMaterial{
 public:
@@ -5724,8 +5724,8 @@ public:
 };
 
 /*
-*	Modifier
-*/
+ * Modifier
+ */
 
 class ENGINE_API UModifier : public UMaterial{
 public:
@@ -5735,8 +5735,8 @@ public:
 };
 
 /*
-*	HardwareShader
-*/
+ * HardwareShader
+ */
 
 enum SConstant{
 	EVC_Unused,
@@ -5833,8 +5833,8 @@ public:
 };
 
 /*
-*	ColorModifier
-*/
+ * ColorModifier
+ */
 
 class ENGINE_API UColorModifier : public UModifier{
 public:
@@ -5847,8 +5847,8 @@ public:
 };
 
 /*
-*	FinalBlend
-*/
+ * FinalBlend
+ */
 
 enum EFrameBufferBlending{
 	FB_Overwrite,
@@ -5880,8 +5880,8 @@ public:
 };
 
 /*
-*	TexModifier
-*/
+ * TexModifier
+ */
 
 enum ETexCoordSrc{
 	TCS_Stream0,
@@ -5944,8 +5944,8 @@ public:
 };
 
 /*
-*	TexOscillator
-*/
+ * TexOscillator
+ */
 
 enum ETexOscillationType{
 	OT_Pan,
@@ -5981,8 +5981,8 @@ public:
 };
 
 /*
-*	TexPanner
-*/
+ * TexPanner
+ */
 
 class ENGINE_API UTexPanner : public UTexModifier{
 public:
@@ -5996,8 +5996,8 @@ public:
 };
 
 /*
-*	TexPanner2D
-*/
+ * TexPanner2D
+ */
 
 class ENGINE_API UTexPanner2D : public UTexModifier{
 public:
@@ -6017,8 +6017,8 @@ public:
 };
 
 /*
-*	ScriptedTexture
-*/
+ * ScriptedTexture
+ */
 
 class ENGINE_API UScriptedTexture : public UBitmapMaterial{
 public:
@@ -6056,8 +6056,8 @@ public:
 };
 
 /*
-*	ShadowBitmapMaterial
-*/
+ * ShadowBitmapMaterial
+ */
 
 class ENGINE_API UShadowBitmapMaterial : public UBitmapMaterial{
 public:
@@ -6089,8 +6089,8 @@ public:
 };
 
 /*
-*	MovieTexture
-*/
+ * MovieTexture
+ */
 
 class ENGINE_API UMovieTexture : public UTexture{
 public:
@@ -6102,8 +6102,8 @@ public:
 };
 
 /*
-*	ConstantMaterial
-*/
+ * ConstantMaterial
+ */
 
 class ENGINE_API UConstantMaterial : public URenderedMaterial{
 public:
@@ -6115,8 +6115,8 @@ public:
 };
 
 /*
-*	FadeColor
-*/
+ * FadeColor
+ */
 
 enum EColorFadeType{
 	FC_Linear,
@@ -6140,8 +6140,8 @@ public:
 };
 
 /*
-*	HardwareShaderWrapper
-*/
+ * HardwareShaderWrapper
+ */
 
 class ENGINE_API UHardwareShaderWrapper : public URenderedMaterial{
 public:
@@ -6175,8 +6175,8 @@ public:
 };
 
 /*
-*	HsHologram
-*/
+ * HsHologram
+ */
 
 class ENGINE_API UHsHologram : public UHardwareShaderWrapper{
 public:
@@ -6190,8 +6190,8 @@ public:
 };
 
 /*
-*	ParticleMaterial
-*/
+ * ParticleMaterial
+ */
 
 struct FParticleProjectorInfo{
 	class UBitmapMaterial* BitmapMaterial;
@@ -6221,8 +6221,8 @@ public:
 };
 
 /*
-*	Shader
-*/
+ * Shader
+ */
 
 enum EBumpMapType{
 	BMT_Static_Diffuse,
@@ -6291,8 +6291,8 @@ public:
 };
 
 /*
-*	VisionMode
-*/
+ * VisionMode
+ */
 
 class ENGINE_API UVisionMode : public URenderedMaterial{
 public:
@@ -6350,8 +6350,8 @@ public:
 };
 
 /*
-*	VisionModeDistort
-*/
+ * VisionModeDistort
+ */
 
 class ENGINE_API UVisionModeDistort : public UVisionMode{
 public:
@@ -6364,46 +6364,46 @@ public:
 
 	DECLARE_CLASS(UVisionModeDistort,UVisionMode,0,Engine)
 	// Make sure to implement this function in UnVisionModes.cpp
-	virtual UHardwareShader* SetVisionMode(UViewport* Viewport, class UProxyBitmapMaterial* RenderedWorldTexture, class UProxyBitmapMaterial* BlurTargetTexture, int TargetSizeX, int TargetSizeY, float Fade/*=1.f*/);
+	virtual UHardwareShader* SetVisionMode(UViewport* Viewport, class UProxyBitmapMaterial* RenderedWorldTexture, class UProxyBitmapMaterial* BlurTargetTexture, int TargetSizeX, int TargetSizeY, float Fade/*=1.f */);
 };
 
 /*
-*	VisionModeEnhance
-*/
+ * VisionModeEnhance
+ */
 
 class ENGINE_API UVisionModeEnhance : public UVisionMode{
 public:
 	DECLARE_CLASS(UVisionModeEnhance,UVisionMode,0,Engine)
 	// Make sure to implement this function in UnVisionModes.cpp
-	virtual UHardwareShader* SetVisionMode(UViewport* Viewport, class UProxyBitmapMaterial* RenderedWorldTexture, class UProxyBitmapMaterial* BlurTargetTexture, int TargetSizeX, int TargetSizeY, float Fade/*=1.f*/);
+	virtual UHardwareShader* SetVisionMode(UViewport* Viewport, class UProxyBitmapMaterial* RenderedWorldTexture, class UProxyBitmapMaterial* BlurTargetTexture, int TargetSizeX, int TargetSizeY, float Fade/*=1.f */);
 };
 
 /*
-*	VisionModeHit
-*/
+ * VisionModeHit
+ */
 
 class ENGINE_API UVisionModeHit : public UVisionMode{
 public:
 	DECLARE_CLASS(UVisionModeHit,UVisionMode,0,Engine)
 	// Make sure to implement this function in UnVisionModes.cpp
-	virtual UHardwareShader* SetVisionMode(UViewport* Viewport, class UProxyBitmapMaterial* RenderedWorldTexture, class UProxyBitmapMaterial* BlurTargetTexture, int TargetSizeX, int TargetSizeY, float Fade/*=1.f*/);
+	virtual UHardwareShader* SetVisionMode(UViewport* Viewport, class UProxyBitmapMaterial* RenderedWorldTexture, class UProxyBitmapMaterial* BlurTargetTexture, int TargetSizeX, int TargetSizeY, float Fade/*=1.f */);
 };
 
 /*
-*	VisionModeNormal
-*/
+ * VisionModeNormal
+ */
 
 class ENGINE_API UVisionModeNormal : public UVisionMode{
 public:
 	DECLARE_CLASS(UVisionModeNormal,UVisionMode,0,Engine)
 	// Make sure to implement this function in UnVisionModes.cpp
-	virtual UHardwareShader* SetVisionMode(UViewport* Viewport, class UProxyBitmapMaterial* RenderedWorldTexture, class UProxyBitmapMaterial* BlurTargetTexture, int TargetSizeX, int TargetSizeY, float Fade/*=1.f*/);
-	virtual UHardwareShader* GetSkelMeshShader(UViewport* Viewport, AActor* Actor, float Fade/*=1.f*/);
+	virtual UHardwareShader* SetVisionMode(UViewport* Viewport, class UProxyBitmapMaterial* RenderedWorldTexture, class UProxyBitmapMaterial* BlurTargetTexture, int TargetSizeX, int TargetSizeY, float Fade/*=1.f */);
+	virtual UHardwareShader* GetSkelMeshShader(UViewport* Viewport, AActor* Actor, float Fade/*=1.f */);
 };
 
 /*
-*	VisionModeScavDrill
-*/
+ * VisionModeScavDrill
+ */
 
 class ENGINE_API UVisionModeScavDrill : public UVisionMode{
 public:
@@ -6415,24 +6415,24 @@ public:
 
 	DECLARE_CLASS(UVisionModeScavDrill,UVisionMode,0,Engine)
 	// Make sure to implement this function in UnVisionModes.cpp
-	virtual UHardwareShader* SetVisionMode(UViewport* Viewport, class UProxyBitmapMaterial* RenderedWorldTexture, class UProxyBitmapMaterial* BlurTargetTexture, int TargetSizeX, int TargetSizeY, float Fade/*=1.f*/);
+	virtual UHardwareShader* SetVisionMode(UViewport* Viewport, class UProxyBitmapMaterial* RenderedWorldTexture, class UProxyBitmapMaterial* BlurTargetTexture, int TargetSizeX, int TargetSizeY, float Fade/*=1.f */);
 };
 
 /*
-*	VisionModeSniper
-*/
+ * VisionModeSniper
+ */
 
 class ENGINE_API UVisionModeSniper : public UVisionMode{
 public:
 	DECLARE_CLASS(UVisionModeSniper,UVisionMode,0,Engine)
 	// Make sure to implement this function in UnVisionModes.cpp
-	virtual UHardwareShader* SetVisionMode(UViewport* Viewport, class UProxyBitmapMaterial* RenderedWorldTexture, class UProxyBitmapMaterial* BlurTargetTexture, int TargetSizeX, int TargetSizeY, float Fade/*=1.f*/);
-	virtual UHardwareShader* GetSkelMeshShader(UViewport* Viewport, AActor* Actor, float Fade/*=1.f*/);
+	virtual UHardwareShader* SetVisionMode(UViewport* Viewport, class UProxyBitmapMaterial* RenderedWorldTexture, class UProxyBitmapMaterial* BlurTargetTexture, int TargetSizeX, int TargetSizeY, float Fade/*=1.f */);
+	virtual UHardwareShader* GetSkelMeshShader(UViewport* Viewport, AActor* Actor, float Fade/*=1.f */);
 };
 
 /*
-*	MeshObject
-*/
+ * MeshObject
+ */
 
 enum EImpSpaceMode{
 	ISM_Sprite,
@@ -6471,8 +6471,8 @@ public:
 };
 
 /*
-*	ParticleEmitter
-*/
+ * ParticleEmitter
+ */
 
 enum EBlendMode{
 	BM_MODULATE,
@@ -6734,8 +6734,8 @@ public:
 };
 
 /*
-*	MeshEmitter
-*/
+ * MeshEmitter
+ */
 
 class ENGINE_API UMeshEmitter : public UParticleEmitter{
 public:
@@ -6749,8 +6749,8 @@ public:
 };
 
 /*
-*	RibbonEmitter
-*/
+ * RibbonEmitter
+ */
 
 enum EGetPointAxis{
 	PAXIS_OwnerX,
@@ -6809,8 +6809,8 @@ public:
 };
 
 /*
-*	SpriteEmitter
-*/
+ * SpriteEmitter
+ */
 
 enum EParticleDirectionUsage{
 	PTDU_None,
@@ -6831,8 +6831,8 @@ public:
 };
 
 /*
-*	PawnAudioTable
-*/
+ * PawnAudioTable
+ */
 
 enum EPawnAudioEvent{
 	PAE_Invalid,
@@ -7039,8 +7039,8 @@ public:
 };
 
 /*
-*	PlayerInput
-*/
+ * PlayerInput
+ */
 
 class ENGINE_API UPlayerInput : public UObject{
 public:
@@ -7107,8 +7107,8 @@ public:
 };
 
 /*
-*	ReachSpec
-*/
+ * ReachSpec
+ */
 
 class ENGINE_API UReachSpec : public UObject{
 public:
@@ -7129,8 +7129,8 @@ public:
 };
 
 /*
-*	SoundBase
-*/
+ * SoundBase
+ */
 
 enum ESoundBattleContext{
 	SBC_Either,
@@ -7145,8 +7145,8 @@ public:
 };
 
 /*
-*	AudioParams
-*/
+ * AudioParams
+ */
 
 enum EAudioGroup{
 	AG_Music,
@@ -7183,8 +7183,8 @@ public:
 };
 
 /*
-*	RumbleParams
-*/
+ * RumbleParams
+ */
 
 class ENGINE_API URumbleParams : public USoundBase{
 public:
@@ -7229,8 +7229,8 @@ public:
 };
 
 /*
-*	SoundBanter
-*/
+ * SoundBanter
+ */
 
 struct FBanterLine{
 	class UClass* PawnClass;
@@ -7254,8 +7254,8 @@ public:
 };
 
 /*
-*	SquadStance
-*/
+ * SquadStance
+ */
 
 enum EStanceTetherObject{
 	STO_None,
@@ -7301,8 +7301,8 @@ public:
 };
 
 /*
-*	Stimulus
-*/
+ * Stimulus
+ */
 
 #define UCONST_SF_ProcessImmediately 0x0001
 #define UCONST_SF_PassToSquad 0x0002

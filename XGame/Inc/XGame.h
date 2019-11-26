@@ -19,8 +19,8 @@ LINK_LIB(XGame)
 #endif
 
 /*
-*	DumpGameListCommandlet
-*/
+ * DumpGameListCommandlet
+ */
 
 class XGAME_API UDumpGameListCommandlet : public UCommandlet{
 public:
@@ -29,8 +29,8 @@ public:
 };
 
 /*
-*	DumpMapListCommandlet
-*/
+ * DumpMapListCommandlet
+ */
 
 class XGAME_API UDumpMapListCommandlet : public UCommandlet{
 public:
@@ -39,8 +39,8 @@ public:
 };
 
 /*
-*	DumpMutatorListCommandlet
-*/
+ * DumpMutatorListCommandlet
+ */
 
 class XGAME_API UDumpMutatorListCommandlet : public UCommandlet{
 public:
@@ -49,8 +49,8 @@ public:
 };
 
 /*
-*	DumpWeaponListCommandlet
-*/
+ * DumpWeaponListCommandlet
+ */
 
 class XGAME_API UDumpWeaponListCommandlet : public UCommandlet{
 public:
@@ -59,8 +59,8 @@ public:
 };
 
 /*
-*	DecoText
-*/
+ * DecoText
+ */
 
 class XGAME_API UDecoText : public UObject{
 public:
@@ -72,8 +72,8 @@ public:
 };
 
 /*
-*	xUtil
-*/
+ * xUtil
+ */
 
 struct FGameTypeRecord{
 	FStringNoInit GameName;
@@ -159,8 +159,8 @@ public:
 };
 
 /*
-*	CacheGameTypes
-*/
+ * CacheGameTypes
+ */
 
 class XGAME_API UCacheGameTypes : public UxUtil{
 public:
@@ -171,8 +171,8 @@ public:
 };
 
 /*
-*	CacheMaps
-*/
+ * CacheMaps
+ */
 
 class XGAME_API UCacheMaps : public UxUtil{
 public:
@@ -186,4 +186,4 @@ public:
 #pragma pack (pop)
 #endif
 
-#endif //XGAME_NATIVE_DEFS
+#endif // XGAME_NATIVE_DEFS

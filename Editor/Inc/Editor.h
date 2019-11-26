@@ -19,20 +19,20 @@ LINK_LIB(Editor)
 #endif
 
 /*
-*	AnimNotifyProps
-*/
+ * AnimNotifyProps
+ */
 
 class EDITOR_API UAnimNotifyProps : public UObject{
 public:
 	class UAnimNotify* Notify;
-	
+
 	DECLARE_CLASS(UAnimNotifyProps,UObject,0,Editor)
 	NO_DEFAULT_CONSTRUCTOR(UAnimNotifyProps)
 };
 
 /*
-*	BrushBuilder
-*/
+ * BrushBuilder
+ */
 
 struct FBuilderPoly{
 	TArray<INT> VertexIndices;
@@ -59,8 +59,8 @@ public:
 };
 
 /*
-*	AnalyzeContentCommandlets
-*/
+ * AnalyzeContentCommandlets
+ */
 
 class EDITOR_API UAnalyzeContentCommandlet : public UCommandlet{
 public:
@@ -69,8 +69,8 @@ public:
 };
 
 /*
-*	BatchExportCommandlet
-*/
+ * BatchExportCommandlet
+ */
 
 class EDITOR_API UBatchExportCommandlet : public UCommandlet{
 public:
@@ -79,8 +79,8 @@ public:
 };
 
 /*
-*	ChecksumPackageCommandlet
-*/
+ * ChecksumPackageCommandlet
+ */
 
 class EDITOR_API UChecksumPackageCommandlet : public UCommandlet{
 public:
@@ -89,8 +89,8 @@ public:
 };
 
 /*
-*	CheckUnicodeCommandlet
-*/
+ * CheckUnicodeCommandlet
+ */
 
 class EDITOR_API UCheckUnicodeCommandlet : public UCommandlet{
 public:
@@ -99,8 +99,8 @@ public:
 };
 
 /*
-*	CompareIntCommandlet
-*/
+ * CompareIntCommandlet
+ */
 
 class EDITOR_API UCompareIntCommandlet : public UCommandlet{
 public:
@@ -109,8 +109,8 @@ public:
 };
 
 /*
-*	CompressToDXTCommandlet
-*/
+ * CompressToDXTCommandlet
+ */
 
 class EDITOR_API UCompressToDXTCommandlet : public UCommandlet{
 public:
@@ -119,8 +119,8 @@ public:
 };
 
 /*
-*	ConformCommandlet
-*/
+ * ConformCommandlet
+ */
 
 class EDITOR_API UConformCommandlet : public UCommandlet{
 public:
@@ -129,8 +129,8 @@ public:
 };
 
 /*
-*	ComvertMaterialCommandlet
-*/
+ * ComvertMaterialCommandlet
+ */
 
 class EDITOR_API UConvertMaterialCommandlet : public UCommandlet{
 public:
@@ -139,8 +139,8 @@ public:
 };
 
 /*
-*	CutdownContentCommandlet
-*/
+ * CutdownContentCommandlet
+ */
 
 class EDITOR_API UCutdownContentCommandlet : public UCommandlet{
 public:
@@ -149,8 +149,8 @@ public:
 };
 
 /*
-*	DataRipCommandlet
-*/
+ * DataRipCommandlet
+ */
 
 class EDITOR_API UDataRipCommandlet : public UCommandlet{
 public:
@@ -159,8 +159,8 @@ public:
 };
 
 /*
-*	AnimNotifyProps
-*/
+ * AnimNotifyProps
+ */
 
 class EDITOR_API UDumpIntCommandlet : public UCommandlet{
 public:
@@ -169,8 +169,8 @@ public:
 };
 
 /*
-*	DumpSoundParamsCommandlet
-*/
+ * DumpSoundParamsCommandlet
+ */
 
 class EDITOR_API UDumpSoundParamsCommandlet : public UCommandlet{
 public:
@@ -179,8 +179,8 @@ public:
 };
 
 /*
-*	DumpSoundPropLogCommandlet
-*/
+ * DumpSoundPropLogCommandlet
+ */
 
 class EDITOR_API UDumpSoundPropLogCommandlet : public UCommandlet{
 public:
@@ -189,8 +189,8 @@ public:
 };
 
 /*
-*	DXTConvertCommandlet
-*/
+ * DXTConvertCommandlet
+ */
 
 class EDITOR_API UDXTConvertCommandlet : public UCommandlet{
 public:
@@ -199,8 +199,8 @@ public:
 };
 
 /*
-*	ExecCommandlet
-*/
+ * ExecCommandlet
+ */
 
 class EDITOR_API UExecCommandlet : public UCommandlet{
 public:
@@ -209,8 +209,8 @@ public:
 };
 
 /*
-*	FontUpdateCommandlet
-*/
+ * FontUpdateCommandlet
+ */
 
 class EDITOR_API UFontUpdateCommandlet : public UCommandlet{
 public:
@@ -219,8 +219,8 @@ public:
 };
 
 /*
-*	ImportAseCommandlet
-*/
+ * ImportAseCommandlet
+ */
 
 class EDITOR_API UImportAseCommandlet : public UCommandlet{
 public:
@@ -229,8 +229,8 @@ public:
 };
 
 /*
-*	ImportTextureCommandlet
-*/
+ * ImportTextureCommandlet
+ */
 
 class EDITOR_API UImportTextureCommandlet : public UCommandlet{
 public:
@@ -239,8 +239,8 @@ public:
 };
 
 /*
-*	ListPackageContentsCommandlet
-*/
+ * ListPackageContentsCommandlet
+ */
 
 class EDITOR_API UListPackageContentsCommandlet : public UCommandlet{
 public:
@@ -249,8 +249,8 @@ public:
 };
 
 /*
-*	MakeCommandlet
-*/
+ * MakeCommandlet
+ */
 
 class EDITOR_API UMakeCommandlet : public UCommandlet{
 public:
@@ -259,8 +259,8 @@ public:
 };
 
 /*
-*	MapConvertCommandlet
-*/
+ * MapConvertCommandlet
+ */
 
 class EDITOR_API UMapConvertCommandlet : public UCommandlet{
 public:
@@ -269,8 +269,8 @@ public:
 };
 
 /*
-*	MasterCommandlet
-*/
+ * MasterCommandlet
+ */
 
 class EDITOR_API UMasterCommandlet : public UCommandlet{
 public:
@@ -279,8 +279,8 @@ public:
 };
 
 /*
-*	MergeIntCommandlet
-*/
+ * MergeIntCommandlet
+ */
 
 class EDITOR_API UMergeIntCommandlet : public UCommandlet{
 public:
@@ -289,8 +289,8 @@ public:
 };
 
 /*
-*	ModifyPackageFlagsCommandlet
-*/
+ * ModifyPackageFlagsCommandlet
+ */
 
 class EDITOR_API UModifyPackageFlagsCommandlet : public UCommandlet{
 public:
@@ -299,8 +299,8 @@ public:
 };
 
 /*
-*	PackageFlagCommandlet
-*/
+ * PackageFlagCommandlet
+ */
 
 class EDITOR_API UPackageFlagCommandlet : public UCommandlet{
 public:
@@ -309,8 +309,8 @@ public:
 };
 
 /*
-*	PkgCommandlet
-*/
+ * PkgCommandlet
+ */
 
 class EDITOR_API UPkgCommandlet : public UCommandlet{
 public:
@@ -319,8 +319,8 @@ public:
 };
 
 /*
-*	RearrangeIntCommandlet
-*/
+ * RearrangeIntCommandlet
+ */
 
 class EDITOR_API URearrangeIntCommandlet : public UCommandlet{
 public:
@@ -329,8 +329,8 @@ public:
 };
 
 /*
-*	ResavePackageCommandlet
-*/
+ * ResavePackageCommandlet
+ */
 
 class EDITOR_API UResavePackageCommandlet : public UCommandlet{
 public:
@@ -339,8 +339,8 @@ public:
 };
 
 /*
-*	StripSourceCommandlet
-*/
+ * StripSourceCommandlet
+ */
 
 class EDITOR_API UStripSourceCommandlet : public UCommandlet{
 public:
@@ -349,8 +349,8 @@ public:
 };
 
 /*
-*	TestMathCommandlet
-*/
+ * TestMathCommandlet
+ */
 
 class EDITOR_API UTestMathCommandlet : public UCommandlet{
 public:
@@ -359,8 +359,8 @@ public:
 };
 
 /*
-*	UpdateUModCommandlet
-*/
+ * UpdateUModCommandlet
+ */
 
 class EDITOR_API UUpdateUModCommandlet : public UCommandlet{
 public:
@@ -369,8 +369,8 @@ public:
 };
 
 /*
-*	XACTExportCommandlet
-*/
+ * XACTExportCommandlet
+ */
 
 class EDITOR_API UXACTExportCommandlet : public UCommandlet{
 public:
@@ -379,8 +379,8 @@ public:
 };
 
 /*
-*	EditInfo
-*/
+ * EditInfo
+ */
 
 class EDITOR_API UEditInfo : public UObject{
 public:
@@ -389,8 +389,8 @@ public:
 };
 
 /*
-*	MaterialFactory
-*/
+ * MaterialFactory
+ */
 
 #define UCONST_RF_Standalone 0x00080000
 
@@ -398,14 +398,14 @@ class EDITOR_API UMaterialFactory : public UObject{
 public:
 	FStringNoInit Description;
 	class UMaterial* CreateMaterial(class UObject* InOuter, FString const& InPackage, FString const& InGroup, FString const& InName);
-	
+
 	DECLARE_CLASS(UMaterialFactory,UObject,0,Editor)
 	NO_DEFAULT_CONSTRUCTOR(UMaterialFactory)
 };
 
 /*
-*	Prefab
-*/
+ * Prefab
+ */
 
 class EDITOR_API UPrefab : public UObject{
 public:
@@ -414,8 +414,8 @@ public:
 };
 
 /*
-*	Transactor
-*/
+ * Transactor
+ */
 
 class EDITOR_API UTransactor : public UObject{
 public:
@@ -424,8 +424,8 @@ public:
 };
 
 /*
-*	TransBuffer
-*/
+ * TransBuffer
+ */
 
 class EDITOR_API UTransBuffer : public UObject{
 public:
@@ -434,8 +434,8 @@ public:
 };
 
 /*
-*	EditorEngine
-*/
+ * EditorEngine
+ */
 
 class EDITOR_API UEditorEngine : public UEngine{
 public:
@@ -492,7 +492,7 @@ public:
 	BITFIELD DontUseArcball:1;
 	BITFIELD HideOrthoAxes:1;
 	BITFIELD MayaStyleMovement:1;
-	
+
 	DECLARE_CLASS(UEditorEngine,UEngine,CLASS_Transient|CLASS_Config,Editor)
 
 	//Overrides

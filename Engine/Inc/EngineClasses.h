@@ -1040,6 +1040,15 @@ public:
 	FLOAT Skill;
 	FVector FinalDestination;
 
+	// Overrides
+	virtual int AcceptNearbyPath(class AActor*);
+	virtual void AdjustFromWall(const FVector&, class AActor*);
+	virtual void SetAdjustLocation(const FVector&);
+
+	// Virtual Functions
+	virtual void AddReflexAnimGoal(FName, FName, int, float, int);
+	virtual void AddReflexSleepGoal(float);
+
 	DECLARE_CLASS(AAIController,AController,CLASS_Config,Engine)
 };
 

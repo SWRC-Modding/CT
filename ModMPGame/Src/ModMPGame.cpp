@@ -37,11 +37,7 @@ static struct FBotSupportExecHook : FExec{
 				UClass* PutNavPtClass = NULL;
 
 				if(ParseCommand(&Cmd, "SHOWPATHS")){
-					GBotSupport->bHidden = 0;
-
-					return 1;
-				}else if(ParseCommand(&Cmd, "HIDEPATHS")){
-					GBotSupport->bHidden = 1;
+					GBotSupport->bHidden = !GBotSupport->bHidden;
 
 					return 1;
 				}else if(ParseCommand(&Cmd, "PUTPATHNODE")){

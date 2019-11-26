@@ -3499,8 +3499,8 @@ public:
 
 	// Virtual Functions
 	virtual int ProscribedPathTo(class ANavigationPoint*);
-	virtual void addReachSpecTo(class ANavigationPoint*, class APawn*);
 	virtual void addReachSpecs(class APawn*, int);
+	virtual void addReachSpecTo(class ANavigationPoint*, class APawn*);
 	virtual void PostaddReachSpecs(class APawn*);
 	virtual void InitForPathFinding();
 	virtual void SetupForcedPath(class APawn*, class UReachSpec*);

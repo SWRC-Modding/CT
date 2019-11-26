@@ -8,7 +8,6 @@ var bool bPathsImported;
 var Array<Vector> NavPtFailLocations; // Used to debug Navigation points which failed to spawn
 var Array<MPBot> Bots;
 var Array<PlayerStart> SpawnPoints;
-var bool bImportedPaths;
 
 native final function SpawnNavigationPoint(Class<NavigationPoint> NavPtClass, Vector Loc, optional Rotator Rot);
 native final function BuildPaths();

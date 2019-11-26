@@ -20,7 +20,7 @@ static struct FBotSupportExecHook : FExec{
 
 				return 1;
 			}else if(ParseCommand(&Cmd, "EXPORTPATHS")){
-				ABotSupport::ExportPaths(GBotSupport->Level);
+				GBotSupport->ExportPaths();
 
 				return 1;
 			}else if(ParseCommand(&Cmd, "BUILDPATHS")){
@@ -229,11 +229,11 @@ void ABotSupport::ClearPaths(){
  * ABotSupport::ExportPaths
  * Exports all navigation points from the current map to a file
  */
-void ABotSupport::ExportPaths(ALevelInfo* LevelInfo){
+void ABotSupport::ExportPaths(){
 	guard(ABotSupport::ExportPaths);
 
 	TArray<FNavPtInfo> NavPts;
-	ANavigationPoint* NavPt = LevelInfo->NavigationPointList;
+	ANavigationPoint* NavPt = Level->NavigationPointList;
 
 	while(NavPt){
 		FNavPtInfo NavPtInfo;
@@ -242,14 +242,15 @@ void ABotSupport::ExportPaths(ALevelInfo* LevelInfo){
 			NavPtInfo.Type = NavPt->IsA(ACoverPoint::StaticClass()) ? NAVPT_CoverPoint : NAVPT_PathNode;
 			NavPtInfo.Location = NavPt->Location;
 			NavPtInfo.Rotation = NavPt->Rotation;
-			NavPt = NavPt->nextNavigationPoint;
 			NavPts.AddItem(NavPtInfo);
 		}
+
+		NavPt = NavPt->nextNavigationPoint;
 	}
 
 	if(NavPts.Num() > 0){
-		if(LevelInfo->Title.Len() > 0){
-			FFilename Filename = GetPathFileName(LevelInfo->Title);
+		if(Level->Title.Len() > 0){
+			FFilename Filename = GetPathFileName(Level->Title);
 			GFileManager->MakeDirectory(*Filename.GetPath(), 1);
 			FArchive* Ar = GFileManager->CreateFileWriter(*Filename);
 
@@ -432,19 +433,26 @@ class UExportPathsCommandlet : public UCommandlet{
 
 		if(Parse(Parms, "map=", MapName)){
 			UPackage* Package = UObject::LoadPackage(NULL, *MapName, LOAD_NoFail);
-			ANavigationPoint* NavPt = NULL;
-			ALevelInfo* LevelInfo = NULL;
+			ULevel* Level = NULL;
 
-			for(TObjectIterator<ALevelInfo> It; It; ++It){
+			for(TObjectIterator<ULevel> It; It; ++It){
 				if(It->IsIn(Package)){
-					NavPt = It->NavigationPointList;
-					LevelInfo = *It;
+					Level = *It;
 
 					break;
 				}
 			}
 
-			ABotSupport::ExportPaths(LevelInfo);
+			if(Level){
+				ABotSupport* BotSupport = Cast<ABotSupport>(Level->SpawnActor(ABotSupport::StaticClass()));
+
+				if(BotSupport)
+					BotSupport->ExportPaths();
+				else
+					GWarn->Log(NAME_Error, "Unable to export paths");
+			}else{
+				GWarn->Logf(NAME_Error, "Package '%s' is not a map", *MapName);
+			}
 		}else{
 			GWarn->Log(NAME_Error, "Map to export paths from must be specified with 'map=<MapName>'");
 		}

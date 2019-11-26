@@ -7,6 +7,21 @@ function PawnDied(Pawn P){
 	GotoState('Dead');
 }
 
+function ServerRestartPlayer(){
+	local MPPawn MPP;
+
+	Super.ServerRestartPlayer();
+
+	Level.Game.ReStartPlayer(self);
+
+	MPP = MPPawn(Pawn);
+
+	if(MPP != None){
+		MPP.ChosenSkin = ChosenSkin;
+		MPP.DoCustomizations();
+	}
+}
+
 State Dead{
 	ignores SeePlayer, HearNoise, KilledBy;
 
@@ -18,16 +33,14 @@ State Dead{
 Begin:
 	if(Level.Game.bGameEnded)
 		GotoState('GameEnded');
-
-	Sleep(0.2);
 TryAgain:
 	Sleep(0.25 + MPGame(Level.Game).RespawnWaitTime);
-	Level.Game.ReStartPlayer(self);
+	ServerRestartPlayer();
 	Goto('TryAgain');
 MPStart:
-	Level.Game.ChangeTeam(Self, 255, false, false);
 	Sleep(0.75 + FRand());
-	Level.Game.ReStartPlayer(self);
+	Level.Game.ChangeTeam(Self, 255, false, false);
+	ServerRestartPlayer();
 	Goto('TryAgain');
 }
 

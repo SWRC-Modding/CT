@@ -344,6 +344,8 @@ void ABotSupport::PostRender(class FLevelSceneNode* SceneNode, class FRenderInte
 				Bots[i]->Pawn->CollisionHeight,
 				16
 			);
+
+			Bots[i]->DebugDraw(LineBatcher);
 		}
 	}
 

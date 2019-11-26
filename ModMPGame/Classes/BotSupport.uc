@@ -58,7 +58,7 @@ event SetupBotScript(){
 	BotScript.Actions[BotScript.Actions.Length] = S;
 }
 
-function AddBot(){
+event AddBot(){
 	local MPBot Bot;
 
 	Bot = Spawn(class'MPBot');
@@ -85,7 +85,7 @@ function AddBot(){
 	}
 }
 
-function RemoveBot(){
+event RemoveBot(){
 	if(Bots.Length > 0){
 		Bots[Bots.Length - 1].Pawn.Destroy();
 		Bots[Bots.Length - 1].Destroy();

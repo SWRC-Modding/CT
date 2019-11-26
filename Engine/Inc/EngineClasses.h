@@ -3487,6 +3487,35 @@ public:
 		return Parms.ReturnValue;
 	}
 
+	// Overrides
+	virtual void Destroy();
+	virtual void PostEditChange();
+	virtual void PostEditPaste();
+	virtual class ANavigationPoint* GetAnchor();
+	virtual void PostEditMove();
+	virtual void Spawned();
+	virtual int AddMyMarker(AActor*);
+	virtual void CheckForErrors();
+
+	// Virtual Functions
+	virtual int ProscribedPathTo(class ANavigationPoint*);
+	virtual void addReachSpecTo(class ANavigationPoint*, class APawn*);
+	virtual void addReachSpecs(class APawn*, int);
+	virtual void PostaddReachSpecs(class APawn*);
+	virtual void InitForPathFinding();
+	virtual void SetupForcedPath(class APawn*, class UReachSpec*);
+	virtual void ClearPaths();
+	virtual void FindBase();
+	virtual int CanBeValidAnchorFor(class APawn*);
+	virtual bool IsValidForTarget(class FVector const&);
+	virtual void ClearNodeInfo();
+	virtual int IsAvailable() const;
+	virtual int IsIdentifiedAs(FName);
+	virtual int ReviewPath(class APawn*);
+	virtual void CheckSymmetry(class ANavigationPoint*);
+	virtual void AdjustRadius();
+	virtual void RemoveObstructed();
+
 	DECLARE_CLASS(ANavigationPoint,AActor,0,Engine)
 };
 

@@ -19,22 +19,22 @@ LINK_LIB(Gameplay)
 #endif
 
 /*
-*	ScriptedSequence
-*/
+ * ScriptedSequence
+ */
 
 class GAMEPLAY_API AScriptedSequence : public AAIScript{
 public:
 	BITFIELD bDrawLinks:1;
 	TArrayNoInit<class UScriptedAction*> Actions;
 	class UClass* ScriptControllerClass;
-	
+
 	DECLARE_CLASS(AScriptedSequence,AAIScript,0,Gameplay)
 	void RenderEditorSelected(FLevelSceneNode* SceneNode,FRenderInterface* RI, FDynamicActor* FDA);
 };
 
 /*
-*	ScriptedController
-*/
+ * ScriptedController
+ */
 
 class GAMEPLAY_API AScriptedController : public AAIController{
 public:
@@ -53,14 +53,14 @@ public:
 	FName FiringMode;
 	INT IterationCounter;
 	INT IterationSectionStart;
-	
+
 	DECLARE_CLASS(AScriptedController,AAIController,CLASS_Config,Gameplay)
 	NO_DEFAULT_CONSTRUCTOR(AScriptedController)
 };
 
 /*
-*	ScriptedAction
-*/
+ * ScriptedAction
+ */
 
 class GAMEPLAY_API UScriptedAction : public UObject{
 public:
@@ -69,50 +69,50 @@ public:
 	BITFIELD bDisabled:1;
 	FColor ActionColor;
 	FStringNoInit Comment;
-	
+
 	DECLARE_CLASS(UScriptedAction,UObject,0,Gameplay)
 };
 
 /*
-*	ACTION_EnableAIVoice
-*/
+ * ACTION_EnableAIVoice
+ */
 
 class GAMEPLAY_API UACTION_EnableAIVoice : public UScriptedAction{
 public:
 	BITFIELD bEnable:1;
 	void execInitActionFor(FFrame& Stack, void* Result);
-	
+
 	DECLARE_CLASS(UACTION_EnableAIVoice,UScriptedAction,0,Gameplay)
 	NO_DEFAULT_CONSTRUCTOR(UACTION_EnableAIVoice)
 };
 
 /*
-*	ACTION_SetViewTarget
-*/
+ * ACTION_SetViewTarget
+ */
 
 class GAMEPLAY_API UACTION_SetViewTarget : public UScriptedAction{
 public:
 	FName ViewTargetTag;
-	
+
 	DECLARE_CLASS(UACTION_SetViewTarget,UScriptedAction,0,Gameplay)
 	NO_DEFAULT_CONSTRUCTOR(UACTION_SetViewTarget)
 };
 
 /*
-*	ACTION_TriggerEvent
-*/
+ * ACTION_TriggerEvent
+ */
 
 class GAMEPLAY_API UACTION_TriggerEvent : public UScriptedAction{
 public:
 	FName Event;
-	
+
 	DECLARE_CLASS(UACTION_TriggerEvent,UScriptedAction,0,Gameplay)
 	NO_DEFAULT_CONSTRUCTOR(UACTION_TriggerEvent)
 };
 
 /*
-*	LatentScriptedAction
-*/
+ * LatentScriptedAction
+ */
 
 class GAMEPLAY_API ULatentScriptedAction : public UScriptedAction{
 public:
@@ -121,8 +121,8 @@ public:
 };
 
 /*
-*	ACTION_TeleportToPoint
-*/
+ * ACTION_TeleportToPoint
+ */
 
 class GAMEPLAY_API UACTION_TeleportToPoint : public ULatentScriptedAction{
 public:
@@ -131,14 +131,14 @@ public:
 	BITFIELD bPlaySpawnEffect:1;
 	BITFIELD bNoCheck:1;
 	class AActor* Dest;
-	
+
 	DECLARE_CLASS(UACTION_TeleportToPoint,ULatentScriptedAction,0,Gameplay)
 	NO_DEFAULT_CONSTRUCTOR(UACTION_TeleportToPoint)
 };
 
 /*
-*	ACTION_WaitForEvent
-*/
+ * ACTION_WaitForEvent
+ */
 
 class GAMEPLAY_API UACTION_WaitForEvent : public ULatentScriptedAction{
 public:
@@ -146,7 +146,7 @@ public:
 	class ATriggeredCondition* T;
 	FLOAT ScriptPriorityOnTrigger;
 	BITFIELD UnforceStateOnTrigger:1;
-	
+
 	DECLARE_CLASS(UACTION_WaitForEvent,ULatentScriptedAction,0,Gameplay)
 	NO_DEFAULT_CONSTRUCTOR(UACTION_WaitForEvent)
 };

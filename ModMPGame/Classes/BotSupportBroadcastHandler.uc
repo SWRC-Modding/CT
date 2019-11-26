@@ -8,7 +8,7 @@ var BotSupport BotSupport;
  */
 function bool ParseCommand(out String Cmd, String Match){
 	if(Left(Cmd, Len(Match)) ~= Match){
-		Cmd = Mid(Cmd, Len(Cmd));
+		Cmd = Mid(Cmd, Len(Match));
 
 		return true;
 	}

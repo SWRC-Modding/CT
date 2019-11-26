@@ -36,11 +36,9 @@ public:
 
 	void SpawnNavigationPoint(UClass* NavPtClass, const FVector& Location, const FRotator& Rotation = FRotator(0, 0, 0));
 	void ImportPaths();
+	void ExportPaths();
 	void BuildPaths();
 	void ClearPaths();
-
-	// Static because it needs to be accessed by UExportPathsCommandlet
-	static void ExportPaths(ALevelInfo* LevelInfo);
     DECLARE_NATIVES(ABotSupport)
 };
 

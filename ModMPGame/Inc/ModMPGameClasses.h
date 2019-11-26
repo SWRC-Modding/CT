@@ -45,16 +45,17 @@ public:
         ProcessEvent(NRemoveBot, NULL);
     }
     DECLARE_CLASS(ABotSupport,AActor,0|CLASS_Config,ModMPGame)
-	virtual void Spawned();
-	virtual void Destroy();
-	virtual UBOOL Tick(FLOAT DeltaTime, ELevelTick TickType);
-	virtual void PostRender(class FLevelSceneNode* SceneNode, class FRenderInterface* RI);
-
 	void SpawnNavigationPoint(UClass* NavPtClass, const FVector& Location, const FRotator& Rotation = FRotator(0, 0, 0));
 	void ImportPaths();
 	void ExportPaths();
 	void BuildPaths();
 	void ClearPaths();
+
+	// Overrides
+	virtual void Spawned();
+	virtual void Destroy();
+	virtual UBOOL Tick(FLOAT DeltaTime, ELevelTick TickType);
+	virtual void PostRender(class FLevelSceneNode* SceneNode, class FRenderInterface* RI);
     DECLARE_NATIVES(ABotSupport)
 };
 

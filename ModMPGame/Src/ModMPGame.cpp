@@ -198,59 +198,6 @@ void ABotSupport::ImportPaths(){
 	unguard;
 }
 
-void ABotSupport::execSpawnNavigationPoint(FFrame& Stack, void* Result){
-	P_GET_OBJECT(UClass, NavPtClass);
-	P_GET_VECTOR(Loc);
-	P_GET_ROTATOR_OPTX(Rot, FRotator(0, 0, 0));
-	P_FINISH;
-	SpawnNavigationPoint(NavPtClass, Loc, Rot);
-}
-
-void ABotSupport::execBuildPaths(FFrame& Stack, void* Result){
-	P_FINISH;
-	BuildPaths();
-}
-
-void ABotSupport::execClearPaths(FFrame& Stack, void* Result){
-	P_FINISH;
-	ClearPaths();
-}
-
-/*
- * ABotSupport::BuildPaths
- * Does the same as the build paths option in the editor
- */
-void ABotSupport::BuildPaths(){
-	guard(ABotSupport::BuildPaths);
-
-	UBOOL IsEd = GIsEditor;
-	UBOOL BegunPlay = Level->bBegunPlay;
-
-	Level->bBegunPlay = 0;
-	GIsEditor = 1;
-
-	GPathBuilder.definePaths(XLevel);
-
-	GIsEditor = IsEd;
-	Level->bBegunPlay = 1; // Actor script events are only called if Level->bBegunPlay == true which is not the case when paths are loaded at startup
-
-	if(BotScript)
-		SetupBotScript();
-
-	Level->bBegunPlay = BegunPlay;
-
-	unguard;
-}
-
-/*
- * ABotSupport::ClearPaths
- * Removes all existing paths but keeps navigation points intact
- */
-void ABotSupport::ClearPaths(){
-	guard(ABotSupport::ClearPaths);
-	GPathBuilder.undefinePaths(XLevel);
-	unguard;
-}
 
 /*
  * ABotSupport::ExportPaths
@@ -304,6 +251,42 @@ void ABotSupport::ExportPaths(){
 		GLog->Log("Map does not contain any path nodes");
 	}
 
+	unguard;
+}
+
+/*
+ * ABotSupport::BuildPaths
+ * Does the same as the build paths option in the editor
+ */
+void ABotSupport::BuildPaths(){
+	guard(ABotSupport::BuildPaths);
+
+	UBOOL IsEd = GIsEditor;
+	UBOOL BegunPlay = Level->bBegunPlay;
+
+	Level->bBegunPlay = 0;
+	GIsEditor = 1;
+
+	GPathBuilder.definePaths(XLevel);
+
+	GIsEditor = IsEd;
+	Level->bBegunPlay = 1; // Actor script events are only called if Level->bBegunPlay == true which is not the case when paths are loaded at startup
+
+	if(BotScript)
+		SetupBotScript();
+
+	Level->bBegunPlay = BegunPlay;
+
+	unguard;
+}
+
+/*
+ * ABotSupport::ClearPaths
+ * Removes all existing paths but keeps navigation points intact
+ */
+void ABotSupport::ClearPaths(){
+	guard(ABotSupport::ClearPaths);
+	GPathBuilder.undefinePaths(XLevel);
 	unguard;
 }
 
@@ -459,6 +442,24 @@ void ABotSupport::PostRender(class FLevelSceneNode* SceneNode, class FRenderInte
 	}
 
 	unguard;
+}
+
+void ABotSupport::execSpawnNavigationPoint(FFrame& Stack, void* Result){
+	P_GET_OBJECT(UClass, NavPtClass);
+	P_GET_VECTOR(Loc);
+	P_GET_ROTATOR_OPTX(Rot, FRotator(0, 0, 0));
+	P_FINISH;
+	SpawnNavigationPoint(NavPtClass, Loc, Rot);
+}
+
+void ABotSupport::execBuildPaths(FFrame& Stack, void* Result){
+	P_FINISH;
+	BuildPaths();
+}
+
+void ABotSupport::execClearPaths(FFrame& Stack, void* Result){
+	P_FINISH;
+	ClearPaths();
 }
 
 /*

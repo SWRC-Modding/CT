@@ -220,7 +220,21 @@ public:
 	class UCLASS* RequiredStates[UCONST_MAXSTATEOBJECTS];
 	FLOAT HearingMultiplier;
 
-	FLOAT MaxAimError();
+	// Overrides
+	virtual void Destroy();
+	virtual void DebugOutputSelf(FOutputDevice&);
+	virtual void ReceiveStimulus(class UStimulus*);
+	virtual void FixupSubObjectPointers();
+	virtual void Spawned();
+	virtual void TickAuthoritative(FLOAT DeltaSeconds);
+	virtual bool SetEnemy(class AActor*);
+	virtual int SafeToShoot(class AActor*, const FVector&);
+	virtual void WeaponFired();
+	virtual void DebugDraw(class FLineBatcher&);
+	virtual int ScriptedGoalsFinished() const;
+	virtual int IsAvailable() const;
+	virtual void AddReflexAnimGoal(FName, FName, int, float, int);
+	virtual void AddReflexSleepGoal(float);
 
 	DECLARE_CLASS(ACTBot,AScriptedController,CLASS_Config,CTGame)
 };

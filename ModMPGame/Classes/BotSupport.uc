@@ -61,6 +61,12 @@ event SetupBotScript(){
 event AddBot(){
 	local MPBot Bot;
 
+	if(Level.Game.NumPlayers + Level.Game.NumBots >= Level.Game.MaxPlayers){
+		Warn("Cannot more bots. Maximum number of players is"@Level.Game.MaxPlayers);
+
+		return;
+	}
+
 	Bot = Spawn(class'MPBot');
 
 	if(Bot != None){

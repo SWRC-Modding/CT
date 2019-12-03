@@ -24,15 +24,14 @@ public:
     BITFIELD bPathsImported:1;
     TArrayNoInit<FVector> NavPtFailLocations GCC_PACK(4);
     TArrayNoInit<class AMPBot*> Bots;
-    TArrayNoInit<class APlayerStart*> SpawnPoints;
-    class AScriptedSequence* BotScript;
+    TArrayNoInit<FPatrolPoint> BotPatrolRoute;
     void execSpawnNavigationPoint(FFrame& Stack, void* Result);
     void execBuildPaths(FFrame& Stack, void* Result);
     void execClearPaths(FFrame& Stack, void* Result);
-    void SetupBotScript()
+    void SetupPatrolRoute()
     {
-        DECLARE_NAME(SetupBotScript);
-        ProcessEvent(NSetupBotScript, NULL);
+        DECLARE_NAME(SetupPatrolRoute);
+        ProcessEvent(NSetupPatrolRoute, NULL);
     }
     void AddBot()
     {

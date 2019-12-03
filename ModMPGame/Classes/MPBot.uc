@@ -16,10 +16,10 @@ function ServerRestartPlayer(){
 
 	MPP = MPPawn(Pawn);
 
-		MPP.ChosenSkin = ChosenSkin;
-		MPP.DoCustomizations();
+	MPP.ChosenSkin = ChosenSkin;
+	MPP.DoCustomizations();
 	MPP.PatrolRoute = BotSupport(Owner).BotPatrolRoute;
-	}
+}
 
 State Dead{
 	ignores SeePlayer, HearNoise, KilledBy;
@@ -41,6 +41,32 @@ MPStart:
 	Level.Game.ChangeTeam(Self, 255, false, false);
 	ServerRestartPlayer();
 	Goto('TryAgain');
+}
+
+state GameEnded{
+	ignores SeePlayer, HearNoise, KilledBy, NotifyBump, HitWall, NotifyHeadVolumeChange, NotifyPhysicsVolumeChange, Falling, TakeDamage;
+
+	function ServerReStartPlayer();
+
+	function BeginState(){
+		if(Pawn != None ){
+			if(Pawn.Weapon != None)
+				Pawn.Weapon.HolderDied();
+
+			Pawn.bPhysicsAnimUpdate = false;
+			Pawn.StopAnimating();
+			Pawn.SimAnim[0].RateScale = 0;
+			Pawn.SetCollision(true,false,false);
+			Pawn.Velocity = vect(0,0,0);
+			Pawn.SetPhysics(PHYS_None);
+			Pawn.bIgnoreForces = true;
+
+			// The original code calls Pawn.UnPossessed here which is wrong and causes a crash
+			// UnPossess calls Pawn.UnPossessed internally but also sets the controller's Pawn
+			// property to None which was missing before.
+			UnPossess();
+		}
+	}
 }
 
 defaultproperties

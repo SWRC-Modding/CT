@@ -24,11 +24,6 @@ function ServerRestartPlayer(){
 State Dead{
 	ignores SeePlayer, HearNoise, KilledBy;
 
-	function PawnDied(Pawn P){
-		if(Level.NetMode != NM_Client)
-			warn(self$" PawnDied while dead");
-	}
-
 Begin:
 	if(Level.Game.bGameEnded)
 		GotoState('GameEnded');

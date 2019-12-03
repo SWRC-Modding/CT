@@ -9,19 +9,14 @@ var config bool bAutoImportPaths;
 var bool bPathsImported;
 var Array<Vector> NavPtFailLocations; // Used to debug Navigation points which failed to spawn
 var Array<MPBot> Bots;
-var Array<PlayerStart> SpawnPoints;
-var ScriptedSequence BotScript; // Automatically spawned in native code
+var Array<Pawn.PatrolPoint> BotPatrolRoute;
 
 native final function SpawnNavigationPoint(Class<NavigationPoint> NavPtClass, Vector Loc, optional Rotator Rot);
 native final function BuildPaths();
 native final function ClearPaths();
 
 function PostBeginPlay(){
-	local PlayerStart P;
 	local BotSupportBroadcastHandler B;
-
-	foreach AllActors(class'PlayerStart', P)
-		SpawnPoints[SpawnPoints.Length] = P;
 
 	B = Spawn(class'BotSupportBroadcastHandler');
 
@@ -29,33 +24,22 @@ function PostBeginPlay(){
 	Level.Game.BroadcastHandler = B;
 }
 
-/*
- * Called by native code whenever paths are rebuilt.
- * TODO: Maybe get rid of the ScriptedSequence and use Pawn::PatrolRoute instead
- */
-event SetupBotScript(){
+event SetupPatrolRoute(){
 	local NavigationPoint NavPt;
-	local ScriptedAction S;
+	local Pawn.PatrolPoint P;
 
-	BotScript.Actions.Length = 0;
-	NavPt = Level.NavigationPointList;
+	BotPatrolRoute.Length = 0;
 
-	while(NavPt != None){
-		if(NavPt.IsA('PatrolPoint')){
-			NavPt.Tag = NavPt.Name;
-			S = new Class'ACTION_MoveToPoint';
-			ACTION_MoveToPoint(S).WalkToPoint = true;
-			ACTION_MoveToPoint(S).OrientToPoint = true;
-			ACTION_MoveToPoint(S).DestinationTag = NavPt.Name;
-			BotScript.Actions[BotScript.Actions.Length] = S;
+	for(NavPt = Level.NavigationPointList; NavPt != None; NavPt = NavPt.nextNavigationPoint){
+		if(PatrolPoint(NavPt) != None){
+			P.Node = NavPt;
+			P.RunToNode = true;
+			P.ShootWhileMoving = true;
+			P.OrientToNode = true;
+			P.PatrolPriorityOverride = 0.5;
+			BotPatrolRoute[BotPatrolRoute.Length] = P;
 		}
-
-		NavPt = NavPt.nextNavigationPoint;
 	}
-
-	S = new Class'ACTION_GotoAction';
-	ACTION_GotoAction(S).ActionNumber = 1;
-	BotScript.Actions[BotScript.Actions.Length] = S;
 }
 
 event AddBot(){
@@ -67,7 +51,7 @@ event AddBot(){
 		return;
 	}
 
-	Bot = Spawn(class'MPBot');
+	Bot = Spawn(class'MPBot', Self);
 
 	if(Bot != None){
 		Bot.PlayerReplicationInfo.PlayerName = "Bot"$Bots.Length;
@@ -80,14 +64,6 @@ event AddBot(){
 		Bot.GotoState('Dead', 'MPStart');
 
 		++Level.Game.NumBots;
-
-		//Level.Game.RestartPlayer(Bot);
-
-		if(BotScript != None && BotScript.Actions.Length > 0){
-			Bot.ClearScript();
-			Bot.SetNewScript(BotScript);
-			Bot.SetScriptingPriority(0.5f);
-		}
 	}
 }
 

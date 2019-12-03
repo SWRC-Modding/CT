@@ -272,8 +272,7 @@ void ABotSupport::BuildPaths(){
 	GIsEditor = IsEd;
 	Level->bBegunPlay = 1; // Actor script events are only called if Level->bBegunPlay == true which is not the case when paths are loaded at startup
 
-	if(BotScript)
-		SetupBotScript();
+	SetupPatrolRoute();
 
 	Level->bBegunPlay = BegunPlay;
 
@@ -292,17 +291,6 @@ void ABotSupport::ClearPaths(){
 
 void ABotSupport::Spawned(){
 	GBotSupport = this;
-
-	UBOOL IsEd = GIsEditor;
-
-	GIsEditor = 1; // ScriptedSequence has bStatic = true and can only be spawned if GIsEditor
-
-	BotScript = Cast<AScriptedSequence>(XLevel->SpawnActor(AScriptedSequence::StaticClass()));
-
-	GIsEditor = IsEd;
-
-	if(!BotScript)
-		GLog->Log(NAME_Error, "Failed to spawn bot script, bots won't patrol around the map");
 
 	if(bAutoImportPaths){
 		ImportPaths();

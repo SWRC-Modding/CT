@@ -16,11 +16,10 @@ function ServerRestartPlayer(){
 
 	MPP = MPPawn(Pawn);
 
-	if(MPP != None){
 		MPP.ChosenSkin = ChosenSkin;
 		MPP.DoCustomizations();
+	MPP.PatrolRoute = BotSupport(Owner).BotPatrolRoute;
 	}
-}
 
 State Dead{
 	ignores SeePlayer, HearNoise, KilledBy;

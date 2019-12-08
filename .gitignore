@@ -32,3 +32,37 @@
 *.lib
 *.exe
 *.htm
+
+# Non-native script packages
+/AccessoryProperties
+/ALAudio
+/AnimPropProperties
+/AudioEnv
+/CTAudio
+/CTCharacters
+/CTEffects
+/CTInventory
+/DeathProperties
+/FootstepProps
+/KarmaPropProperties
+/LightObjectProperties
+/MarkerProperties
+/MoverProperties
+/MPGame
+/PhysicalMaterials
+/Properties
+/Reverb
+/StaticPropProperties
+/UDebugMenu
+/VoicePacks
+/XGame
+/XInterface
+/XInterfaceCommon
+/XInterfaceCTMenus
+/XInterfaceGamespy
+/XInterfaceLive
+/XInterfaceMP
+# TODO: Remove
+/UWindow
+/UnrealEd
+/WinDrv

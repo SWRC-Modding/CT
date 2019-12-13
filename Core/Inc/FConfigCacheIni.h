@@ -108,7 +108,7 @@ public:
 				It.Value().MultiFind(It2.Key(), ArrayValues);
 
 				if(ArrayValues.Num() == 1){
-					appSprintf(Temp, "%s=%s\r\n", *It2.Key(), ArrayValues[0]);
+					appSprintf(Temp, "%s=%s\r\n", *It2.Key(), *ArrayValues[0]);
 					Text += Temp;
 				}else{
 					for(TArray<FString>::TIterator It3(ArrayValues); It3; ++It3){

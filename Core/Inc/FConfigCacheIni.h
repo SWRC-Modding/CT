@@ -45,6 +45,10 @@ public:
 
 				*Ptr++ = 0;
 
+				// Skip comments
+				if(*Start == ';')
+					continue;
+
 				if(Start[0] == '[' && Start[appStrlen(Start) - 1] == ']'){
 					Start++;
 					Start[appStrlen(Start) - 1] = 0;
@@ -59,7 +63,9 @@ public:
 					TCHAR* Value = appStrstr(Start, "=");
 
 					if(Value){
-						if(*(Value - 1) == '+')	// RC uses '+=' for arrays
+						bool IsArrayValue = *(Value - 1) == '+'; // RC uses '+=' for arrays
+
+						if(IsArrayValue)
 							*(Value - 1) = 0;
 
 						*Value++ = 0;
@@ -69,10 +75,19 @@ public:
 							Value[appStrlen(Value) - 1] = 0;
 						}
 
-						if(CurrentOverrideSection){
-							const FString* overrideValue = CurrentOverrideSection->Find(Start);
+						if(CurrentOverrideSection && !CurrentSection->Find(Start)){
+							TArray<FString> OverrideValues;
+							CurrentOverrideSection->MultiFind(Start, OverrideValues);
 
-							CurrentSection->Add(Start, overrideValue ? **overrideValue : Value);
+							if(OverrideValues.Num() > 1 || IsArrayValue){
+								if(OverrideValues.FindItemIndex(Value) == INDEX_NONE) // Only add Value if it is not already contained in OverrideValues
+									CurrentSection->Add(Start, Value);
+
+								for(TArray<FString>::TIterator It(OverrideValues); It; ++It)
+									CurrentSection->Add(Start, **It);
+							}else{
+								CurrentSection->Add(Start, OverrideValues.Num() == 1 ? *OverrideValues[0] : Value);
+							}
 						}else{
 							CurrentSection->Add(Start, Value);
 						}
@@ -84,7 +99,7 @@ public:
 		unguard;
 	}
 
-	UBOOL Write(const TCHAR* Filename){
+	UBOOL Write(const TCHAR* Filename, const FConfigFile* Defaults = NULL){
 		guard(FConfigFile::Write);
 
 		if(!Dirty || NoSave)
@@ -95,31 +110,57 @@ public:
 		FString Text;
 		char Temp[1024];
 
-		for(TIterator It(*this); It; ++It){
-			appSprintf(Temp, "[%s]\r\n", *It.Key());
+		for(TIterator SectionIt(*this); SectionIt; ++SectionIt){
+			appSprintf(Temp, "[%s]\r\n", *SectionIt.Key());
 			Text += Temp;
 
+			// Array values are are all processed at once and added to this array.
+			// When encountering a key that is contained in this array we can simply skip it.
 			TArray<FName> AlreadyProcessed;
+			const FConfigSection* DefaultSection = Defaults ? Defaults->Find(SectionIt.Key()) : NULL;
 
-			for(FConfigSection::TIterator It2(It.Value()); It2; ++It2){
-				if(AlreadyProcessed.FindItemIndex(It2.Key()) != INDEX_NONE)
+			for(FConfigSection::TIterator ValueIt(SectionIt.Value()); ValueIt; ++ValueIt){
+				if(AlreadyProcessed.FindItemIndex(ValueIt.Key()) != INDEX_NONE)
 					continue;
 
-				TArray<FString> ArrayValues;
+				TArray<FString> Values;
+				TArray<FString> DefaultValues;
 
-				It.Value().MultiFind(It2.Key(), ArrayValues);
+				if(DefaultSection)
+					DefaultSection->MultiFind(ValueIt.Key(), DefaultValues);
 
-				if(ArrayValues.Num() == 1){
-					appSprintf(Temp, "%s=%s\r\n", *It2.Key(), *ArrayValues[0]);
+				SectionIt.Value().MultiFind(ValueIt.Key(), Values);
+
+				// Values that are the same as in the default config are commented out using ';'
+				if(Values.Num() == 1 && DefaultValues.Num() <= 1){ // If there is only one single value '=' is used instead of "+="
+					if(DefaultSection && Values[0] == DefaultValues[0])
+						appSprintf(Temp, ";  %s=%s\r\n", *ValueIt.Key(), *Values[0]);
+					else
+						appSprintf(Temp, "%s=%s\r\n", *ValueIt.Key(), *Values[0]);
+
 					Text += Temp;
 				}else{
-					for(TArray<FString>::TIterator It3(ArrayValues); It3; ++It3){
-						appSprintf(Temp, "%s+=%s\r\n", *It2.Key(), *It3);
+					for(TArray<FString>::TIterator It(Values); It; ++It){
+						int Index = DefaultValues.FindItemIndex(*It);
+
+						if(Index == INDEX_NONE){
+							appSprintf(Temp, "%s+=%s\r\n", *ValueIt.Key(), *It);
+						}else{
+							appSprintf(Temp, ";  %s+=%s\r\n", *ValueIt.Key(), *It);
+							DefaultValues.Remove(Index);
+						}
+
+						Text += Temp;
+					}
+
+					// Writing remaining default values that have not yet been written
+					for(TArray<FString>::TIterator It(DefaultValues); It; ++It){
+						appSprintf(Temp, ";  %s+=%s\r\n", *ValueIt.Key(), *It);
 						Text += Temp;
 					}
 				}
 
-				AlreadyProcessed.AddUniqueItem(It2.Key());
+				AlreadyProcessed.AddUniqueItem(ValueIt.Key());
 			}
 
 			Text += "\r\n";
@@ -436,8 +477,12 @@ public:
 		guard(FConfigCacheIni::Flush);
 
 		for(TIterator It(*this); It; ++It){
-			if(!Filename || It.Key()==Filename)
-				It.Value().Write(*It.Key());
+			if(!Filename || It.Key() == Filename){
+				FConfigFile DefaultConfig;
+
+				DefaultConfig.Read(*It.Key());
+				It.Value().Write(*((It.Key() == UserIni ? GCurrProfilePath : GGlobalSettingsPath) * FFilename(It.Key()).GetCleanFilename()), &DefaultConfig);
+			}
 		}
 
 		if(Read){

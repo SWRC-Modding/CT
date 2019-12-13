@@ -243,6 +243,9 @@ public:
 	virtual void Tick(){}
 };
 
+//! @brief Single section in a config file.
+typedef TMultiMap<FName, FString> FConfigSection;
+
 //! @brief Configuration database cache.
 class FConfigCache{
 public:
@@ -253,7 +256,7 @@ public:
 	virtual UBOOL GetString(const TCHAR* Section, const TCHAR* Key, FString& Str, const TCHAR* Filename = NULL) = 0;
 	virtual const TCHAR* GetStr(const TCHAR* Section, const TCHAR* Key, const TCHAR* Filename = NULL) = 0;
 	virtual UBOOL GetSection(const TCHAR* Section, TCHAR* Value, INT Size, const TCHAR* Filename = NULL) = 0;
-	virtual TMultiMap<FName, FString>* GetSectionPrivate(const TCHAR* Section, UBOOL Force, UBOOL Const, const TCHAR* Filename = NULL) = 0;
+	virtual FConfigSection* GetSectionPrivate(const TCHAR* Section, UBOOL Force, UBOOL Const, const TCHAR* Filename = NULL) = 0;
 	virtual void EmptySection(const TCHAR* Section, const TCHAR* Filename = NULL) = 0;
 	virtual void SetBool(const TCHAR* Section, const TCHAR* Key, UBOOL Value, const TCHAR* Filename = NULL) = 0;
 	virtual void SetInt(const TCHAR* Section, const TCHAR* Key, INT Value, const TCHAR* Filename = NULL) = 0;
@@ -516,6 +519,7 @@ CORE_API extern FString					GMachineOS;
 CORE_API extern FString					GMachineCPU;
 CORE_API extern FString					GMachineVideo;
 CORE_API extern FString					GSavePath;
+CORE_API extern FString					GCurrProfilePath;
 CORE_API extern FString					GGlobalSettingsPath;
 CORE_API extern FString					GGlobalSettingsSaveName;
 CORE_API extern FLOAT					NEAR_CLIPPING_PLANE;

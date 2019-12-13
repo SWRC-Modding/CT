@@ -10,9 +10,6 @@
 	Config cache.
 -----------------------------------------------------------------------------*/
 
-//! @brief Single section in a config file.
-typedef TMultiMap<FName, FString> FConfigSection;
-
 //! @brief Single config file.
 class FConfigFile : public TMap<FString, FConfigSection>{
 public:
@@ -21,7 +18,7 @@ public:
 	FConfigFile() : Dirty(0),
 					NoSave(0){}
 
-	void Read(const TCHAR* Filename){
+	void Read(const TCHAR* Filename, const FConfigFile* DefaultsOverride = NULL){
 		guard(FConfigFile::Read);
 
 		Empty();
@@ -31,7 +28,7 @@ public:
 		if(appLoadFileToString(Text, Filename)){
 			TCHAR* Ptr = const_cast<TCHAR*>(*Text);
 			FConfigSection* CurrentSection = NULL;
-
+			const FConfigSection* CurrentOverrideSection = NULL;
 			bool Done = false;
 
 			while(!Done){
@@ -48,10 +45,6 @@ public:
 
 				*Ptr++ = 0;
 
-				// Ignore comments
-				if(Start[0] == ';')
-					continue;
-
 				if(Start[0] == '[' && Start[appStrlen(Start) - 1] == ']'){
 					Start++;
 					Start[appStrlen(Start) - 1] = 0;
@@ -59,6 +52,9 @@ public:
 
 					if(!CurrentSection)
 						CurrentSection = &Set(Start, FConfigSection());
+
+					if(DefaultsOverride)
+						CurrentOverrideSection = DefaultsOverride->Find(Start);
 				}else if(CurrentSection && *Start){
 					TCHAR* Value = appStrstr(Start, "=");
 
@@ -73,7 +69,13 @@ public:
 							Value[appStrlen(Value) - 1] = 0;
 						}
 
-						CurrentSection->Add(Start, Value);
+						if(CurrentOverrideSection){
+							const FString* overrideValue = CurrentOverrideSection->Find(Start);
+
+							CurrentSection->Add(Start, overrideValue ? **overrideValue : Value);
+						}else{
+							CurrentSection->Add(Start, Value);
+						}
 					}
 				}
 			}
@@ -158,8 +160,12 @@ public:
 		FConfigFile* Result = TMap<FString, FConfigFile>::Find(Filename.GetCleanFilename());
 
 		if(!Result && (CreateIfNotFound || GFileManager->FileSize(*Filename) >= 0)){
+			FConfigFile DefaultsOverride;
+
+			DefaultsOverride.Read(*((Filename == UserIni ? GCurrProfilePath : GGlobalSettingsPath) * Filename.GetCleanFilename()));
+
 			Result = &Set(*Filename.GetCleanFilename(), FConfigFile());
-			Result->Read(*Filename);
+			Result->Read(*Filename, &DefaultsOverride);
 		}
 
 		return Result;

@@ -64,6 +64,11 @@ state GameEnded{
 	}
 }
 
+cpptext
+{
+	virtual int Tick(FLOAT DeltaTime, ELevelTick TickType);
+}
+
 defaultproperties
 {
 	bIsPlayer=true

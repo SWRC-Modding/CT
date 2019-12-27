@@ -58,7 +58,6 @@ static struct FBotSupportExecHook : FExec{
 							It->bStatic = 0;
 							It->bNoDelete = 0;
 							GBotSupport->XLevel->DestroyActor(*It);
-							GBotSupport->BuildPaths();
 
 							break;
 						}

@@ -48,6 +48,23 @@ static struct FBotSupportExecHook : FExec{
 					GBotSupport->bHidden = !GBotSupport->bHidden;
 
 					return 1;
+				}else if(ParseCommand(&Cmd, "REMOVENAVIGATIONPOINT")){
+					APlayerController* Player = GetLocalPlayerController();
+					check(Player);
+
+					for(TActorIterator<ANavigationPoint> It(GBotSupport->XLevel); It; ++It){
+						if(!It->IsA(APlayerStart::StaticClass()) &&
+						   ((Player->Pawn ? Player->Pawn->Location : Player->Location) - It->Location).SizeSquared() <= 40 * 40){
+							It->bStatic = 0;
+							It->bNoDelete = 0;
+							GBotSupport->XLevel->DestroyActor(*It);
+							GBotSupport->BuildPaths();
+
+							break;
+						}
+					}
+
+					return 1;
 				}else if(ParseCommand(&Cmd, "PUTPATHNODE")){
 					PutNavPtClass = APathNode::StaticClass();
 				}else if(ParseCommand(&Cmd, "PUTCOVERPOINT")){
@@ -372,7 +389,7 @@ void ABotSupport::PostRender(class FLevelSceneNode* SceneNode, class FRenderInte
 
 	// All navigation points in the level are drawn as a colored box
 	for(TObjectIterator<ANavigationPoint> It; It; ++It){
-		if(It->XLevel != XLevel)
+		if(It->XLevel != XLevel || It->bDeleteMe)
 			continue;
 
 		FColor Color;

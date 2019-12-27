@@ -64,7 +64,7 @@ class MODMPGAME_API AMPBot : public ACTBot
 public:
     INT ChosenSkin;
     DECLARE_CLASS(AMPBot,ACTBot,0|CLASS_Config,ModMPGame)
-    NO_DEFAULT_CONSTRUCTOR(AMPBot)
+	virtual int Tick(FLOAT DeltaTime, ELevelTick TickType);
 };
 
 

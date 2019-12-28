@@ -142,13 +142,14 @@ void ABotSupport::SpawnNavigationPoint(UClass* NavPtClass, const FVector& Locati
 	guard(ABotSupport::SpawnNavigationPoint);
 	check(NavPtClass->IsChildOf(ANavigationPoint::StaticClass()));
 
-	NavPtClass->GetDefaultActor()->bStatic = 0;
-	NavPtClass->GetDefaultActor()->bNoDelete = 0;
+	UBOOL IsEd = GIsEditor;
+
+	GIsEditor = 1;
 
 	// For some reason the game crashes when two navigation points have the same name
-	// SpawnActor should take care of this, but whatever...
+	// SpawnActor should take care of this but whatever...
 	// This guarantees a unique name
-	static int NavPtNum = 0;
+	static unsigned int NavPtNum = 0;
 	ANavigationPoint* NavPt = Cast<ANavigationPoint>(XLevel->SpawnActor(
 		NavPtClass,
 		FName(FString::Printf("CustomNavPt%i", NavPtNum++)),
@@ -156,16 +157,12 @@ void ABotSupport::SpawnNavigationPoint(UClass* NavPtClass, const FVector& Locati
 		Rotation
 	));
 
-	if(NavPt){
-		NavPt->bStatic = 1;
-		NavPt->bNoDelete = 1;
-	}else{
+	if(!NavPt){
 		GLog->Logf(NAME_Error, "Failed to spawn %s", *NavPtClass->FriendlyName);
 		NavPtFailLocations.AddItem(Location);
 	}
 
-	NavPtClass->GetDefaultActor()->bStatic = 1;
-	NavPtClass->GetDefaultActor()->bNoDelete = 1;
+	GIsEditor = IsEd;
 
 	unguard;
 }

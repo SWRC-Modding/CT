@@ -245,7 +245,7 @@ void ABotSupport::ExportPaths(){
 	}
 
 	if(NavPts.Num() > 0){
-		if(Level->Title.Len() > 0){
+		if(Level->Title.Len() > 0 && Level->Title != "Untitled"){
 			FFilename Filename = GetPathFileName(Level->Title);
 			GFileManager->MakeDirectory(*Filename.GetPath(), 1);
 			FArchive* Ar = GFileManager->CreateFileWriter(*Filename);

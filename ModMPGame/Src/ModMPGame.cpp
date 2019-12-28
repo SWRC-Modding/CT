@@ -305,10 +305,13 @@ void ABotSupport::ClearPaths(){
 void ABotSupport::Spawned(){
 	GBotSupport = this;
 
+	if(!GIsEditor) // Don't draw the Actor sprite during gameplay
+		DrawType = DT_None;
+
 	if(bAutoImportPaths){
 		ImportPaths();
 
-		if(bPathsImported) // We don't want the paths to be rebuilt if import failed
+		if(bPathsImported) // We don't want to rebuild paths if import failed
 			BuildPaths();
 	}
 }

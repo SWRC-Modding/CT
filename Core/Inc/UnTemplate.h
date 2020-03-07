@@ -193,7 +193,7 @@ class TAllocator{};
 -----------------------------------------------------------------------------*/
 
 /**
- * @brief Former dynamic array base.
+ * Former dynamic array base.
  *
  * All functionality has been moved to TArray.
  * This class only exists for FTransactionBase::SaveArray
@@ -205,8 +205,9 @@ private:
 };
 
 /**
- * @brief Template dynamic array
- * @todo Implement missing functions, figure out how flags are used, fix memory leaks
+ * Template dynamic array
+ *
+ * @param T The element type for the array. In theory this could be any type but in practice only POD types and FString should be used.
  */
 template<typename T>
 class TArray{
@@ -234,8 +235,10 @@ public:
 	}
 
 	~TArray(){
-		if(IsAllocated())
+		if(IsAllocated()){
+			Deinit(0, ArrayNum);
 			appFree(Data);
+		}
 
 		Data = NULL;
 		ArrayNum = 0;
@@ -538,7 +541,6 @@ public:
 protected:
 	void* Data;
 	INT ArrayNum : 29;
-	// Just a guess...
 	mutable BITFIELD bUnreferenced : 1; // Array doesn't own the data it points to and thus is not allowed to free it
 										// Mutable because TArray::Unreference is const for some reason
 	BITFIELD bIdk : 1; // Only used in FStringTemp, no idea what it means
@@ -556,26 +558,21 @@ protected:
 	}
 
 	void Init(INT Index, INT Count){
-		//TODO: find out how this is implemented
-		/*void *v3; // edi@1
-		int result; // eax@1
-		int v5; // edi@1
-		int i; // ecx@1
-
-		v3 = (void *)(a2 + *(_DWORD *)this);
-		result = 0;
-		memset(v3, 0, 4 * (a3 >> 2));
-		v5 = (int)((char *)v3 + 4 * (a3 >> 2));
-		for ( i = a3 & 3; i; --i )
-		*(_BYTE *)v5++ = 0;
-		return result;*/
-
 		appMemzero(static_cast<BYTE*>(Data) + Index * sizeof(T), Count * sizeof(T));
+	}
+
+	void Deinit(INT Index, INT Count){
+		if(TTypeInfo<T>::NeedsDestructor()){
+			for(INT i = Index; i < Index + Count; ++i)
+				(&(*this)[i])->~T();
+		}
 	}
 
 	void Realloc(INT NewSize, INT Slack){
 		if(IsAllocated()){
-			if(NewSize <= Num()){
+			if(NewSize <= ArrayNum){
+				Deinit(NewSize, ArrayNum - NewSize);
+
 				if(ArrayNum >= 0 && Align(NewSize * sizeof(T), 32) < Align(Num() * sizeof(T), 32))
 					Data = appRealloc(Data, NewSize * sizeof(T), (Slack < NewSize ? NewSize : Slack) * sizeof(T));
 			}else{
@@ -583,10 +580,10 @@ protected:
 			}
 		}else{
 			if(NewSize > 0 || Slack > 0){
-				void* Temp = appMalloc((NewSize >= Slack ? NewSize : Slack) * sizeof(T));
+				void* Temp = appMalloc(Max(NewSize, Slack) * sizeof(T));
 
 				if(Data)
-					appMemcpy(Temp, Data, (Num() > NewSize ? NewSize : Num()) * sizeof(T));
+					appMemcpy(Temp, Data, Min(ArrayNum, NewSize) * sizeof(T));
 
 				Data = Temp;
 				bUnreferenced = 0; // To make sure the memory isn't leaked.
@@ -666,6 +663,7 @@ public:
 	}
 
 	// Add, Insert, Remove, Empty interface.
+
 	INT Add(INT Count = 1){
 		INT Index = TArray<T>::Add(Count);
 		if(GUndo)

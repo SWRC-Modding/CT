@@ -206,7 +206,7 @@ private:
 
 /**
  * @brief Template dynamic array
- * @todo Implement missing functions, figure out how flags are used
+ * @todo Implement missing functions, figure out how flags are used, fix memory leaks
  */
 template<typename T>
 class TArray{
@@ -222,9 +222,9 @@ public:
 
 	TArray(ENoInit){}
 
-	TArray(INT Size, bool What = false) : Data(NULL),
-										  ArrayNum(What << 31){
-		if(What)
+	TArray(INT Size, bool NoShrink = false) : Data(NULL),
+											  bNoShrink(NoShrink){
+		if(NoShrink)
 			Set(Size, Size);
 	}
 
@@ -238,12 +238,12 @@ public:
 			appFree(Data);
 
 		Data = NULL;
-		ArrayNum &= ARRAY_AllFlags; //Preserve bits 29, 30, 31 if they're set and clear the rest
+		ArrayNum = 0;
 	}
 
 	void Set(T* Src, INT Count){
 		Data = Src;
-		ArrayNum ^= (Count ^ ArrayNum) & ~ARRAY_AllFlags; //Assigning ArrayNum while preserving bitflags???
+		ArrayNum = Count
 	}
 
 	T* GetData(){
@@ -259,7 +259,7 @@ public:
 	}
 
 	INT Num() const{
-		return ArrayNum & ~ARRAY_AllFlags;
+		return ArrayNum;
 	}
 
 	INT Size() const{
@@ -267,7 +267,7 @@ public:
 	}
 
 	bool IsAllocated() const{
-		return Data != NULL && (ArrayNum & ARRAY_Unreferenced) == 0; //Returns true if Data is not NULL and bit 29 is not set
+		return Data != NULL && !bUnreferenced; // Returns true if Data is not NULL and bit 29 is not set
 	}
 
 	T& operator[](INT Index){
@@ -305,10 +305,7 @@ public:
 	}
 
 	void SetNoShrink(bool NoShrink){
-		if(NoShrink)
-			ArrayNum |= ARRAY_NoShrink;
-		else
-			ArrayNum &= ~ARRAY_NoShrink;
+		bNoShrink = NoShrink
 	}
 
 	void CountBytes(FArchive& Ar){
@@ -320,38 +317,39 @@ public:
 	}
 
 	void Serialize(FArchive& Ar){
+		guard(MyTArray::Serialize);
 		CountBytes(Ar);
 
-		if(sizeof(T) == 1){
-			//Serialize simple bytes which require no construction or destruction.
-			if(Ar.IsLoading()){
-				Ar << AR_INDEX(ArrayNum);
-				Realloc(Num(), 0);
-			}else{
-				INT TempNum = Num();
+		INT TempNum = Num();
 
+		if(sizeof(T) == 1){
+			// Serialize simple bytes which require no construction or destruction.
+			if(Ar.IsLoading()){
+				Ar << AR_INDEX(TempNum);
+				Realloc(TempNum, 0);
+			}else{
 				Ar << AR_INDEX(TempNum);
 			}
 
 			Ar.Serialize(&(*this)[0], Num());
 		}else if(Ar.IsLoading()){
-			//Load array.
-			INT NewNum;
+			// Load array.
 
-			Ar << AR_INDEX(NewNum);
+			Ar << AR_INDEX(TempNum);
 
-			Empty(NewNum);
+			Empty(TempNum);
 
-			for(INT i = 0; i < NewNum; ++i)
+			for(INT i = 0; i < TempNum; ++i)
 				Ar << *new(*this)T;
 		}else{
-			//Save array.
-			INT TempNum = Num();
+			// Save array.
 			Ar << AR_INDEX(TempNum);
 
 			for(INT i = 0; i < Num(); ++i)
 				Ar << (*this)[i];
 		}
+
+		unguard;
 	}
 
 	void Reserve(INT Size){
@@ -442,8 +440,10 @@ public:
 		Realloc(0, 0);
 
 		Data = Src.Data;
-		ArrayNum ^= (ArrayNum ^ Src.Num()) & ~ARRAY_AllFlags; //Assigning ArrayNum while preserving bitflags???
-		ArrayNum ^= (ArrayNum ^ (Src.ArrayNum & ~(ARRAY_Idk | ARRAY_NoShrink))) & ARRAY_Unreferenced; //???
+		ArrayNum = Src.ArrayNum;
+		bUnreferenced = Src.bUnreferenced;
+		bIdk = Src.bIdk;
+		bNoShrink = Src.bNoShrink;
 
 		Src.Unreference();
 	}
@@ -494,7 +494,7 @@ public:
 
 	TArray<T>& operator=(const TArray<T>& Other){
 		if(this != &Other){
-			if(!(Other.ArrayNum & (ARRAY_Unreferenced | ARRAY_Idk))){
+			if(Other.bUnreferenced && Other.bIdk){
 				Realloc(Other.Num(), 0);
 				appMemcpy(Data, Other.Data, Other.Num());
 			}else{
@@ -516,7 +516,7 @@ public:
 		return Result;
 	}
 
-	//Iterator
+	// Iterator
 	class TIterator{
 	public:
 		TIterator(TArray<T>& InArray) : Array(InArray), Index(-1) { ++*this;           }
@@ -537,16 +537,12 @@ public:
 
 protected:
 	void* Data;
-	INT ArrayNum;
-
-	//Just a guess...
-	enum EArrayFlags{
-		ARRAY_Unreferenced = 0x20000000, //Array doesn't own the data it points to and thus is not allowed to free it
-		ARRAY_Idk = 0x40000000, //Only used in FStringTemp, no idea what it means
-		ARRAY_NoShrink = 0x80000000,
-
-		ARRAY_AllFlags = ARRAY_Unreferenced | ARRAY_Idk | ARRAY_NoShrink
-	};
+	INT ArrayNum : 29;
+	// Just a guess...
+	mutable BITFIELD bUnreferenced : 1; // Array doesn't own the data it points to and thus is not allowed to free it
+										// Mutable because TArray::Unreference is const for some reason
+	BITFIELD bIdk : 1; // Only used in FStringTemp, no idea what it means
+	BITFIELD bNoShrink : 1;
 
 	INT Capacity() const{
 		if(IsAllocated())
@@ -556,7 +552,7 @@ protected:
 	}
 
 	void Unreference() const{
-		const_cast<INT&>(ArrayNum) |= ARRAY_Unreferenced; //Setting bit 29
+		bUnreferenced = 1;
 	}
 
 	void Init(INT Index, INT Count){
@@ -574,7 +570,7 @@ protected:
 		*(_BYTE *)v5++ = 0;
 		return result;*/
 
-		appMemzero(static_cast<BYTE*>(Data) + Index * sizeof(T), (Count & ~(ARRAY_Idk | ARRAY_NoShrink)) * sizeof(T)); //Clearing bit 30 and 31 from a3 for some reason
+		appMemzero(static_cast<BYTE*>(Data) + Index * sizeof(T), Count * sizeof(T));
 	}
 
 	void Realloc(INT NewSize, INT Slack){
@@ -593,16 +589,16 @@ protected:
 					appMemcpy(Temp, Data, (Num() > NewSize ? NewSize : Num()) * sizeof(T));
 
 				Data = Temp;
-				ArrayNum &= ~ARRAY_Unreferenced; //To make sure the memory isn't leaked.
-												 //This doesn't exist in the original code which means that either
-												 //the developers made a mistake or I'm missing something else about
-												 //how these flags are used...
+				bUnreferenced = 0; // To make sure the memory isn't leaked.
+								   // This doesn't exist in the original code which means that either
+								   // the developers made a mistake or I'm missing something else about
+								   // how these flags are used...
 			}else{
 				Data = NULL;
 			}
 		}
 
-		ArrayNum ^= (NewSize ^ ArrayNum) & ~ARRAY_AllFlags; //Assigning NewSize while preserving bit flags???
+		ArrayNum = NewSize;
 	}
 
 	friend FArchive& operator<<(FArchive& Ar, TArray<T>& Array){

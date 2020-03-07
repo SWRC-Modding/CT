@@ -1,2 +1,3 @@
-call "%VS71COMNTOOLS%\vsvars32.bat"
-devenv.com /build release CT.sln
+@echo off
+
+"%VS71COMNTOOLS%\..\IDE\devenv.com" /build release CT.sln

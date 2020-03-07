@@ -284,19 +284,23 @@ public:
 //	ETextureFormat
 //
 enum ETextureFormat{
-	TEXF_P8			= 0x00,
-	TEXF_RGBA7		= 0x01,
-	TEXF_RGB16		= 0x02,
-	TEXF_DXT1       = 0x03,
-	TEXF_RGB8       = 0x04,
-	TEXF_RGBA8      = 0x05,
-	TEXF_NODATA		= 0x06,
-	TEXF_DXT3		= 0x07,
-	TEXF_DXT5		= 0x08,
-	TEXF_L8			= 0x09,
-	TEXF_G16		= 0x0a,
-	TEXF_RRRGGGBBB	= 0x0b,
-	TEXF_MAX		= 0xff
+	TEXF_P8        = 0x00,
+	TEXF_RGBA7     = 0x01,
+	TEXF_RGB16     = 0x02,
+	TEXF_DXT1      = 0x03,
+	TEXF_RGB8      = 0x04,
+	TEXF_RGBA8     = 0x05,
+	TEXF_NODATA    = 0x06,
+	TEXF_DXT3      = 0x07,
+	TEXF_DXT5      = 0x08,
+	TEXF_L8        = 0x09,
+	TEXF_G16       = 0x0a,
+	TEXF_RRRGGGBBB = 0x0b,
+	TEXF_V8U8      = 0x0c,
+	TEXF_LIN_RGB8  = 0x0d,
+	TEXF_L6V5U5    = 0x0e,
+	TEXF_X8L8V8U8  = 0x0f,
+	TEXF_MAX       = 0xff
 };
 
 //
@@ -320,14 +324,14 @@ inline UBOOL IsDXTC( ETextureFormat Format )
 //
 //	GetBytesPerPixel
 //
-inline INT GetBytesPerPixel(ETextureFormat Format,INT NumPixels)
-{
-	switch(Format)
-	{
+inline INT GetBytesPerPixel(ETextureFormat Format, INT NumPixels){
+	switch(Format){
 	case TEXF_DXT1:
 		return NumPixels / 2;
 	case TEXF_RGBA8:
 	case TEXF_RGBA7:
+	case TEXF_LIN_RGB8:
+	case TEXF_X8L8V8U8:
 		return NumPixels * 4;
 	case TEXF_P8:
 	case TEXF_DXT3:
@@ -336,6 +340,8 @@ inline INT GetBytesPerPixel(ETextureFormat Format,INT NumPixels)
 		return NumPixels;
 	case TEXF_RGB16:
 	case TEXF_G16:
+	case TEXF_V8U8:
+	case TEXF_L6V5U5:
 		return NumPixels * 2;
 	case TEXF_RGB8:
 		return NumPixels * 3;
@@ -347,10 +353,8 @@ inline INT GetBytesPerPixel(ETextureFormat Format,INT NumPixels)
 //
 //  CalculateTexelPointer
 //
-inline BYTE* CalculateTexelPointer(BYTE* Base,ETextureFormat Format,INT Stride,INT X,INT Y)
-{
-	switch(Format)
-	{
+inline BYTE* CalculateTexelPointer(BYTE* Base, ETextureFormat Format, INT Stride, INT X, INT Y){
+	switch(Format){
 	case TEXF_DXT1:
 		return Base + Stride * (Y / 4) + (X * 2);
 	case TEXF_DXT3:
@@ -361,9 +365,13 @@ inline BYTE* CalculateTexelPointer(BYTE* Base,ETextureFormat Format,INT Stride,I
 		return Base + Stride * Y + X * 4;
 	case TEXF_RGB8:
 	case TEXF_RRRGGGBBB:
+	case TEXF_LIN_RGB8:
+	case TEXF_X8L8V8U8:
 		return Base + Stride * Y + X * 3;
 	case TEXF_RGB16:
 	case TEXF_G16:
+	case TEXF_V8U8:
+	case TEXF_L6V5U5:
 		return Base + Stride * Y + X * 2;
 	case TEXF_P8:
 	case TEXF_L8:

@@ -34,7 +34,7 @@ enum{
 extern ENGINE_API FPlane FGetHSV(BYTE H, BYTE S, BYTE V);
 
 //
-// A palette object.  Holds NUM_PAL_COLORS unique FColor values, 
+// A palette object.  Holds NUM_PAL_COLORS unique FColor values,
 // forming a 256-color palette which can be referenced by textures.
 //
 class ENGINE_API UPalette : public UObject{
@@ -211,7 +211,7 @@ class ENGINE_API UTexture : public UBitmapMaterial{
 	BITFIELD	bRealtimeChanged:1;			// Changed since last render.
 	BITFIELD    OLDbHasComp:1;				//!!OLDVER Compressed version included?
 	BITFIELD    bNoRawData:1;				// Texture has no raw data (i.e; updated directly...such as MovieTexture)
-	
+
 	BYTE        LODSet;						// Level of detail type.
     INT         NormalLOD, MinLOD, MaxLOD;
 
@@ -249,7 +249,7 @@ class ENGINE_API UTexture : public UBitmapMaterial{
 	void PostLoad();
 	void Destroy();
 	void PostEditChange(); // gam
-	
+
 	// UBitmap interface.
 	DWORD GetColorsIndex()
 	{
@@ -267,26 +267,7 @@ class ENGINE_API UTexture : public UBitmapMaterial{
 	{
 		return &Mips[i];
 	}
-	FString GetFormatDesc()
-	{
-		switch( Format )
-		{
-			case TEXF_P8:		return TEXT("P8");
-			case TEXF_RGBA7:	return TEXT("RGBA7");
-			case TEXF_RGB16:	return TEXT("RGB16");
-			case TEXF_DXT1:		return TEXT("DXT1");
-			case TEXF_RGB8:		return TEXT("RGB8");
-			case TEXF_RGBA8:	return TEXT("RGBA8");
-			case TEXF_DXT3:		return TEXT("DXT3");
-			case TEXF_DXT5:		return TEXT("DXT5");
-			case TEXF_G16:		return TEXT("G16");
-			case TEXF_RRRGGGBBB:return TEXT("RRRGGGBBB");
-			case TEXF_L8:		return TEXT("L8");
-			break;
-		}
-
-		return TEXT("?");
-	}
+	FString GetFormatDesc();
 
 	// UTexture interface.
 	virtual void Clear( DWORD ClearFlags );
@@ -388,14 +369,14 @@ struct ENGINE_API FFontCharacter{
 	//BYTE TextureIndex;
 
 	// Serializer.
-	
+
 	friend FArchive& operator<<(FArchive& Ar, FFontCharacter& Ch)
 	{
 		guard(FFontCharacter<<);
 		return Ar << Ch.StartU << Ch.StartV << Ch.USize << Ch.VSize;
 		unguard;
 	}
-	
+
 };
 
 //
@@ -408,15 +389,15 @@ struct ENGINE_API FFontPage{
 	TArray<FFontCharacter> Characters;
 
 	// Serializer.
-	
+
 	friend FArchive& operator<<(FArchive& Ar, FFontPage& Ch)
 	{
 		guard(FFontCharacter<<);
 		return Ar << Ch.Texture << Ch.Characters;
 		unguard;
 	}
-	
-	
+
+
 	struct FFontPage& operator=(struct FFontCharacter const &);
 };
 */
@@ -432,19 +413,19 @@ class ENGINE_API UFont : public UObject{
 
 	// Variables.
 	TArray<FFontCharacter> Characters;
-	TArray<class UTexture*> Textures;	
+	TArray<class UTexture*> Textures;
 	TMap<TCHAR, TCHAR> CharRemap;
 	UBOOL IsRemapped;
-	
+
 	// Found in UT2003, IDK what gam means, probably the signature
 	INT Kerning; // gam
 
 	// Constructors.
 	UFont();
-	
+
 	// Found in IDA
 	UFont(UFont const &);
-	
+
 
 	// UObject interface.
 	void Serialize(FArchive& Ar);
@@ -458,14 +439,14 @@ class ENGINE_API UFont : public UObject{
 		p = CharRemap.Find(ch);
 		return p ? *p : 32; // return space if not found.
 	}
-	
+
 	// Found in IDA
 	void GetCharSize(UFont* Font, TCHAR InCh, INT& Width, INT& Height);
-	
+
 	// Also found in IDA
 	UFont& operator=(class UFont const &);
 
-	
+
 };
 
 /*----------------------------------------------------------------------------

@@ -39,34 +39,35 @@ public:
 	INT MaterialCacheFlags;
 	INT CachedType;
 	BYTE TypeOfMaterial;
-	BITFIELD UseFallback:1;
-	BITFIELD Validated:1;
+	BITFIELD UseFallback:1; //!< Render device should use the fallback.
+	BITFIELD Validated:1;   //!< Material has been validated as renderable.
 
 	// Constructor.
 	UMaterial();
 
 	// UObject interface
-	void Serialize( FArchive& Ar );
+	virtual void Serialize(FArchive& Ar);
+	virtual void Destroy();
 
 	// UMaterial interface
 	virtual void ResetCachedStates();
-	virtual UBOOL CheckCircularReferences( TArray<UMaterial*>& History );
-	virtual UBOOL GetValidated() { return Validated; }
-	virtual void SetValidated( UBOOL InValidated ) { Validated = InValidated; }
-	virtual void PreSetMaterial(FLOAT TimeSeconds) {};
+	virtual UBOOL CheckCircularReferences(TArray<UMaterial*>& History);
+	virtual UBOOL GetValidated(){ return Validated; }
+	virtual void SetValidated(UBOOL InValidated){ Validated = InValidated; }
+	virtual void PreSetMaterial(FLOAT TimeSeconds){}
 
 	// Getting information about a combined material:
-	virtual INT MaterialUSize() { return 0; }
-	virtual INT MaterialVSize() { return 0; }
-	virtual UBOOL RequiresSorting() { return 0; }
-	virtual UBOOL IsTransparent() { return 0; }
-	virtual BYTE RequiredUVStreams() { return 1; }
-	virtual UBOOL RequiresNormal() { return 0; }
+	virtual INT MaterialUSize(){ return 0; }
+	virtual INT MaterialVSize(){ return 0; }
+	virtual UBOOL RequiresSorting(){ return 0; }
+	virtual UBOOL IsTransparent(){ return 0; }
+	virtual BYTE RequiredUVStreams(){ return 1; }
+	virtual UBOOL RequiresNormal(){ return 0; }
 
 	// Fallback handling
 	static void ClearFallbacks();
 	virtual UMaterial* CheckFallback();
-	virtual UBOOL HasFallback() { return FallbackMaterial != NULL; }
+	virtual UBOOL HasFallback(){ return FallbackMaterial != NULL; }
 
 	//!! OLDVER
 	UMaterial* ConvertPolyFlagsToMaterial( UMaterial* InMaterial, DWORD InPolyFlags );
@@ -76,34 +77,43 @@ public:
 	URenderedMaterial.
 -----------------------------------------------------------------------------*/
 
-class ENGINE_API URenderedMaterial : public UMaterial
-{
+class ENGINE_API URenderedMaterial : public UMaterial{
 	DECLARE_ABSTRACT_CLASS(URenderedMaterial,UMaterial,0,Engine)
 };
 
 /*-----------------------------------------------------------------------------
 	UBitmapMaterial.
 -----------------------------------------------------------------------------*/
-class ENGINE_API UBitmapMaterial : public URenderedMaterial
-{
+class ENGINE_API UBitmapMaterial : public URenderedMaterial{
 	DECLARE_ABSTRACT_CLASS(UBitmapMaterial,URenderedMaterial,0,Engine)
 
-	BYTE		Format;				// ETextureFormat.
-	BYTE		UClampMode;			// Texture U clamp mode
-	BYTE		VClampMode;			// Texture V clamp mode
+	BYTE     Format;         //!< ETextureFormat.
+	BYTE     UClampMode;     //!< Texture U clamp mode
+	BYTE     VClampMode;     //!< Texture V clamp mode
 
-	BYTE		UBits, VBits;		// # of bits in USize, i.e. 8 for 256.
-	INT			USize, VSize;		// Size, must be power of 2.
-	INT			UClamp, VClamp;		// Clamped width, must be <= size.
-	BITFIELD	DontCache:1;
+	BYTE     UBits, VBits;   //!< # of bits in USize, i.e. 8 for 256.
+	INT      USize, VSize;   //!< Size, must be power of 2.
+	INT      UClamp, VClamp; //!< Clamped width, must be <= size.
+	BITFIELD DontCache:1;
 
 	// UMaterial Interface
+	virtual void ResetCachedStates();
+	virtual UBOOL CheckCircularReferences(TArray<UMaterial*>& History);
+	virtual UBOOL GetValidated(){ return Validated; }
+	virtual void SetValidated(UBOOL InValidated){ Validated = InValidated; }
+	virtual void PreSetMaterial(FLOAT TimeSeconds){}
 	virtual INT MaterialUSize(){ return USize; }
 	virtual INT MaterialVSize(){ return VSize; }
+	virtual UBOOL RequiresSorting();
+	virtual UBOOL IsTransparent();
+	virtual BYTE RequiredUVStreams();
+	virtual UBOOL RequiresNormal();
+	virtual UMaterial* CheckFallback();
+	virtual UBOOL HasFallback();
 
 	// UBitmapMaterial interface.
 	virtual FBaseTexture* GetRenderInterface() = 0;
-	virtual UBitmapMaterial* Get( FTime Time, UViewport* Viewport ) { return this; }
+	virtual UBitmapMaterial* Get(FTime Time, UViewport* Viewport){ return this; }
 };
 
 /*-----------------------------------------------------------------------------

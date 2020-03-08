@@ -181,15 +181,23 @@ public:
 };
 
 //
-//	FRenderResource
-//	Abstract rendering resource interface.
+// FRenderResource
+// Abstract rendering resource interface.
 //
-class FRenderResource
-{
+class FRenderResource{
 public:
+	QWORD CacheId;
+	INT Revision;
 
-	virtual QWORD GetCacheId() = 0;
-	virtual INT GetRevision() = 0;
+	FRenderResource() : CacheId(0), Revision(1){}
+
+	virtual ~FRenderResource(){}
+	virtual INT GetRevision(){ return Revision; }
+	virtual bool isUMA(){ return false; }
+	virtual bool bPersistantCache(){ return false; }
+
+	QWORD GetCacheId(){ return CacheId; }
+	void Serialize(FArchive& Ar);
 };
 
 //
@@ -281,7 +289,7 @@ public:
 };
 
 //
-//	ETextureFormat
+// ETextureFormat
 //
 enum ETextureFormat{
 	TEXF_P8        = 0x00,
@@ -304,7 +312,7 @@ enum ETextureFormat{
 };
 
 //
-//	ETexClampMode
+// ETexClampMode
 //
 enum ETexClampMode{
 	TC_Wrap,
@@ -315,14 +323,13 @@ enum ETexClampMode{
 //
 //  IsDXTC
 //
-inline UBOOL IsDXTC( ETextureFormat Format )
-{
+inline UBOOL IsDXTC( ETextureFormat Format ){
 	return ( (Format == TEXF_DXT1) || (Format == TEXF_DXT3) || (Format == TEXF_DXT5) );
 }
 
 
 //
-//	GetBytesPerPixel
+// GetBytesPerPixel
 //
 inline INT GetBytesPerPixel(ETextureFormat Format, INT NumPixels){
 	switch(Format){
@@ -351,7 +358,7 @@ inline INT GetBytesPerPixel(ETextureFormat Format, INT NumPixels){
 }
 
 //
-//  CalculateTexelPointer
+// CalculateTexelPointer
 //
 inline BYTE* CalculateTexelPointer(BYTE* Base, ETextureFormat Format, INT Stride, INT X, INT Y){
 	switch(Format){
@@ -382,12 +389,10 @@ inline BYTE* CalculateTexelPointer(BYTE* Base, ETextureFormat Format, INT Stride
 }
 
 //
-//	Base texture interface.
+// Base texture interface.
 //
-class FBaseTexture : public FRenderResource
-{
+class FBaseTexture : public FRenderResource{
 public:
-
 	virtual FBaseTexture* GetBaseTextureInterface() { return this; }
 	virtual FCubemap* GetCubemapInterface() { return NULL; }
 	virtual FTexture* GetTextureInterface() { return NULL; }

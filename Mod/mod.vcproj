@@ -26,7 +26,6 @@
 				StructMemberAlignment="3"
 				WarningLevel="4"
 				DebugInformationFormat="3"
-				Optimization="0"
 				CallingConvention="1"/>
 			<Tool
 				Name="VCCustomBuildTool"/>

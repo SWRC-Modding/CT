@@ -167,6 +167,11 @@ inline DWORD GetTypeHash(const TCHAR* S){
 	return appStrihash(S);
 }
 
+template<typename T>
+DWORD GetTypeHash(const T* P){
+	return (DWORD)P;
+}
+
 #define ExchangeB(A,B) do{UBOOL T=A; A=B; B=T;}while(false);
 
 /*----------------------------------------------------------------------------
@@ -361,7 +366,7 @@ public:
 		Realloc(Num(), CurrentSize < Size ? Size : CurrentSize);
 	}
 
-	void Insert(INT Index, INT Count = 1, bool bInit = false){
+	void Insert(INT Index, INT Count = 1, bool bInit = true){
 		Realloc(Num() + Count, 0);
 
 		appMemmove(
@@ -460,7 +465,7 @@ public:
 			Remove(NewSize, Num() - NewSize);
 
 		if(Num() > OldNum)
-			appMemzero(static_cast<BYTE*>(Data) + OldNum, Num() - OldNum);
+			appMemzero(static_cast<BYTE*>(Data) + OldNum, (Num() - OldNum) * sizeof(T));
 	}
 
 	void Set(INT NewSize){
@@ -574,7 +579,7 @@ protected:
 				Deinit(NewSize, ArrayNum - NewSize);
 
 				if(ArrayNum >= 0 && Align(NewSize * sizeof(T), 32) < Align(Num() * sizeof(T), 32))
-					Data = appRealloc(Data, NewSize * sizeof(T), (Slack < NewSize ? NewSize : Slack) * sizeof(T));
+					Data = appRealloc(Data, NewSize * sizeof(T), Max(NewSize, Slack) * sizeof(T));
 			}else{
 				Data = appRealloc(Data, NewSize * sizeof(T), Slack * sizeof(T));
 			}

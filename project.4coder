@@ -1,0 +1,26 @@
+version(1);
+
+patterns = {
+	"*.h",
+	"*.cpp",
+	//"*.uc",
+	"*.txt"
+};
+
+load_paths = {
+	{{{"."}}, .os = "win"}
+};
+
+command_list = {
+	{
+		.name = "run",
+		.out = "*compilation*",
+		.footer_panel = true,
+		.save_dirty_files = true,
+		.cmd = {
+			{"..\GameData\System\Launcher.exe", .os = "win"}
+		}
+	}
+};
+
+fkey_command[5] = "run";

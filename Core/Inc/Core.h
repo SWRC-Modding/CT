@@ -262,7 +262,7 @@ public:
 	virtual void SetInt(const TCHAR* Section, const TCHAR* Key, INT Value, const TCHAR* Filename = NULL) = 0;
 	virtual void SetFloat(const TCHAR* Section, const TCHAR* Key, FLOAT Value, const TCHAR* Filename = NULL) = 0;
 	virtual void SetString(const TCHAR* Section, const TCHAR* Key, const TCHAR* Value, const TCHAR* Filename = NULL) = 0;
-	virtual void Flush(UBOOL Read, const TCHAR* Filename = NULL) = 0;
+	virtual void Flush(UBOOL Read, const TCHAR* Filename = NULL, INT Idk = 0) = 0;
 	virtual void UnloadFile(const TCHAR* Filename) = 0;
 	virtual void UnloadInts(const TCHAR* Filename) = 0;
 	virtual void Detach(const TCHAR* Filename) = 0;

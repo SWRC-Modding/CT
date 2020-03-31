@@ -36,7 +36,7 @@ void UServerCommandletMain(){
 	if(GConfig->GetString("Engine.Engine", "Language", Language, "System.ini"))
 		UObject::SetLanguage(*Language);
 
-	UClass*	EngineClass = LoadClass<UEngine>(NULL, "ini:Engine.Engine.GameEngine", NULL, LOAD_NoFail, NULL);
+	UClass* EngineClass = LoadClass<UEngine>(NULL, "ini:Engine.Engine.GameEngine", NULL, LOAD_NoFail, NULL);
 
 	// Literally the only reason for this function to be rewritten
 	// The original one doesn't assign a value to GEngine which leads to a gpf...

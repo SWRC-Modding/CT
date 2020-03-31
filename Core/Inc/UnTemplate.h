@@ -217,25 +217,26 @@ private:
 template<typename T>
 class TArray{
 public:
-	TArray() : Data(NULL), ArrayNum(0){}
+	TArray() : Data(NULL), ArrayNum(0), bUnreferenced(0), bIdk(0), bNoShrink(0){}
 
-	TArray(T* Src, INT Count){
-		Data = Src;
-		ArrayNum = Count;
-
-		Unreference();
-	}
+	TArray(T* Src, INT Count) : Data(Src), ArrayNum(Count), bUnreferenced(1), bIdk(0), bNoShrink(0){}
 
 	TArray(ENoInit){}
 
 	TArray(INT Size, bool NoShrink = false) : Data(NULL),
+											  ArrayNum(0),
+											  bUnreferenced(0),
+											  bIdk(0),
 											  bNoShrink(NoShrink){
 		if(NoShrink)
 			Set(Size, Size);
 	}
 
-	TArray(const TArray<T>& other, bool What = false) : Data(NULL),
-														ArrayNum(What << 31){
+	TArray(const TArray<T>& other, bool NoShrink = false) : Data(NULL),
+															ArrayNum(0),
+															bUnreferenced(0),
+															bIdk(0),
+															bNoShrink(NoShrink){
 		*this = other;
 	}
 
@@ -379,7 +380,7 @@ public:
 			Init(Index, Count);
 	}
 
-	INT Add(INT Count, bool bInit = false){
+	INT Add(INT Count, bool bInit = true){
 		Realloc(Num() + Count, 0);
 
 		if(bInit)
@@ -410,10 +411,7 @@ public:
 	}
 
 	void Remove(INT Index, INT Count = 1){
-		if(TTypeInfo<T>::NeedsDestructor()){
-			for(INT i = Index; i < Index + Count; ++i)
-				(&(*this)[i])->~T();
-		}
+		Deinit(Index, Count);
 
 		if(Count){
 			appMemmove(
@@ -459,13 +457,14 @@ public:
 	void Set(INT NewSize, INT Slack){
 		INT OldNum = Num();
 
-		if(NewSize >= Num())
+		if(NewSize >= Num()){
 			Realloc(NewSize, Slack);
-		else
-			Remove(NewSize, Num() - NewSize);
 
-		if(Num() > OldNum)
-			appMemzero(static_cast<BYTE*>(Data) + OldNum, (Num() - OldNum) * sizeof(T));
+			if(Num() > OldNum)
+				appMemzero(static_cast<BYTE*>(Data) + OldNum, (Num() - OldNum) * sizeof(T));
+		}else{
+			Remove(NewSize, Num() - NewSize);
+		}
 	}
 
 	void Set(INT NewSize){
@@ -502,11 +501,18 @@ public:
 
 	TArray<T>& operator=(const TArray<T>& Other){
 		if(this != &Other){
-			if(Other.bUnreferenced && Other.bIdk){
-				Realloc(Other.Num(), 0);
-				appMemcpy(Data, Other.Data, Other.Num());
-			}else{
+			if(Other.bUnreferenced || Other.bIdk){
 				Transfer(const_cast<TArray<T>&>(Other));
+			}else{
+				Realloc(Other.ArrayNum, 0);
+
+				// It is assumed that a type is not trivially copyable if it needs a destructor which should be true in pretty much any case
+				if(TTypeInfo<T>::NeedsDestructor()){
+					for(INT i = 0; i < Other.ArrayNum; ++i)
+						(*this)[i] = Other[i];
+				}else{
+					appMemcpy(Data, Other.Data, Other.ArrayNum * sizeof(T));
+				}
 			}
 		}
 
@@ -545,11 +551,10 @@ public:
 
 protected:
 	void* Data;
-	INT ArrayNum : 29;
+	INT ArrayNum                   : 29;
 	mutable BITFIELD bUnreferenced : 1; // Array doesn't own the data it points to and thus is not allowed to free it
-										// Mutable because TArray::Unreference is const for some reason
-	BITFIELD bIdk : 1; // Only used in FStringTemp, no idea what it means
-	BITFIELD bNoShrink : 1;
+	BITFIELD bIdk                  : 1; // Only used in FStringTemp, no idea what it means
+	BITFIELD bNoShrink             : 1;
 
 	INT Capacity() const{
 		if(IsAllocated())
@@ -563,10 +568,13 @@ protected:
 	}
 
 	void Init(INT Index, INT Count){
+		// This assumes every type used with TArray can be zero initialized
 		appMemzero(static_cast<BYTE*>(Data) + Index * sizeof(T), Count * sizeof(T));
 	}
 
 	void Deinit(INT Index, INT Count){
+		check(IsAllocated());
+
 		if(TTypeInfo<T>::NeedsDestructor()){
 			for(INT i = Index; i < Index + Count; ++i)
 				(&(*this)[i])->~T();
@@ -574,11 +582,11 @@ protected:
 	}
 
 	void Realloc(INT NewSize, INT Slack){
+		guard(TArray::Realloc);
+
 		if(IsAllocated()){
 			if(NewSize <= ArrayNum){
-				Deinit(NewSize, ArrayNum - NewSize);
-
-				if(ArrayNum >= 0 && Align(NewSize * sizeof(T), 32) < Align(Num() * sizeof(T), 32))
+				if(!bNoShrink && ArrayNum >= 0 && Align(NewSize * sizeof(T), 32) < Align(Num() * sizeof(T), 32))
 					Data = appRealloc(Data, NewSize * sizeof(T), Max(NewSize, Slack) * sizeof(T));
 			}else{
 				Data = appRealloc(Data, NewSize * sizeof(T), Slack * sizeof(T));
@@ -591,16 +599,19 @@ protected:
 					appMemcpy(Temp, Data, Min(ArrayNum, NewSize) * sizeof(T));
 
 				Data = Temp;
-				bUnreferenced = 0; // To make sure the memory isn't leaked.
-								   // This doesn't exist in the original code which means that either
-								   // the developers made a mistake or I'm missing something else about
-								   // how these flags are used...
 			}else{
 				Data = NULL;
 			}
+
+			bUnreferenced = 0; // To make sure the memory isn't leaked.
+							   // This doesn't exist in the original code which means that either
+							   // the developers made a mistake or I'm missing something else about
+							   // how these flags are used...
 		}
 
 		ArrayNum = NewSize;
+
+		unguard;
 	}
 
 	friend FArchive& operator<<(FArchive& Ar, TArray<T>& Array){
@@ -1244,12 +1255,10 @@ protected:
 
 		Pair.HashNext = Hash[iHash];
 		Hash[iHash]   = Pairs.Num()-1;
-
 		if(HashCount * 2 + 8 < Pairs.Num()){
 			HashCount *= 2;
 			Rehash();
 		}
-
 		return Pair.Value;
 	}
 

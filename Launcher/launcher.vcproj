@@ -68,6 +68,19 @@
 				RelativePath=".\Src\Launcher.cpp">
 			</File>
 		</Filter>
+		<Filter
+			Name="Res"
+			Filter="rc,h">
+			<File
+				RelativePath=".\Res\Launcher.rc">
+			</File>
+			<File
+				RelativePath=".\Res\resource.h">
+			</File>
+			<File
+				RelativePath=".\Res\SWRC.ico">
+			</File>
+		</Filter>
 	</Files>
 	<Globals>
 	</Globals>

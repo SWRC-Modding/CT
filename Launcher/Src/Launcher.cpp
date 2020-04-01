@@ -23,12 +23,6 @@ static void InitEngine(){
 	if(ParseParam(appCmdLine(), "FirstRun"))
 		FirstRun = 0;
 
-	// Create is-running semaphore file.
-	FArchive* Ar = GFileManager->CreateFileWriter("Running.ini",0);
-
-	if(Ar)
-		delete Ar;
-
 	// Update first-run.
 	if(FirstRun < ENGINE_VERSION)
 		FirstRun = ENGINE_VERSION;
@@ -114,11 +108,6 @@ static void MainLoop(){
 }
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nShowCmd){
-	CreateMutexA(NULL, 0, "SWRCIsRunning");
-
-	if(GetLastError() == ERROR_ALREADY_EXISTS)
-		return 1;
-
 	int ExitCode = EXIT_SUCCESS;
 
 	GIsStarted = 1;
@@ -174,8 +163,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 		if(GEngine && !GIsRequestingExit)
 			MainLoop();
-
-		GFileManager->Delete("Running.ini");
 
 		appPreExit();
 

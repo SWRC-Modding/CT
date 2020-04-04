@@ -331,7 +331,7 @@ CORE_API TCHAR* appStrupr(TCHAR* String);
 CORE_API const TCHAR* appStrfind(const TCHAR* Str, const TCHAR* Find);
 CORE_API DWORD appStrCrc(const TCHAR* Data);
 CORE_API DWORD appStrCrcCaps(const TCHAR* Data);
-CORE_API INT CDECL appAtoi(const TCHAR* Str);
+CORE_API INT __cdecl appAtoi(const TCHAR* Str);
 CORE_API TCHAR* appItoa(const INT Num);
 CORE_API FLOAT appAtof(const TCHAR* Str);
 CORE_API INT appStrtoi(const TCHAR* Start, TCHAR** End, INT Base);
@@ -345,7 +345,7 @@ CORE_API INT appStrPrefix(const TCHAR* Str, const TCHAR* Prefix);
 CORE_API INT appGetVarArgs(TCHAR* Dest, INT Count, const TCHAR*& Fmt);
 
 typedef int QSORT_RETURN;
-typedef QSORT_RETURN(CDECL*QSORT_COMPARE)(const void* A, const void* B);
+typedef QSORT_RETURN(__cdecl*QSORT_COMPARE)(const void* A, const void* B);
 CORE_API void appQsort(void* Base, INT Num, INT Width, QSORT_COMPARE Compare);
 
 //
@@ -367,7 +367,7 @@ inline DWORD appStrihash(const TCHAR* Data){
 	Parsing functions.
 -----------------------------------------------------------------------------*/
 
-CORE_API UBOOL ParseCommand(const TCHAR** Stream, const TCHAR* Match);
+CORE_API UBOOL __cdecl ParseCommand(const TCHAR** Stream, const TCHAR* Match);
 CORE_API UBOOL Parse(const TCHAR* Stream, const TCHAR* Match, class FName& Name);
 CORE_API UBOOL Parse(const TCHAR* Stream, const TCHAR* Match, DWORD& Value);
 CORE_API UBOOL Parse(const TCHAR* Stream, const TCHAR* Match, class FGuid& Guid);
@@ -385,9 +385,9 @@ CORE_API UBOOL ParseUBOOL(const TCHAR* Stream, const TCHAR* Match, UBOOL& OnOff)
 CORE_API UBOOL ParseObject(const TCHAR* Stream, const TCHAR* Match, class UClass* Type, class UObject*& DestRes, class UObject* InParent);
 CORE_API UBOOL ParseLine(const TCHAR** Stream, TCHAR* Result, INT MaxLen, UBOOL Exact = 0);
 CORE_API UBOOL ParseLine(const TCHAR** Stream, FString& Resultd, UBOOL Exact = 0);
-CORE_API UBOOL CDECL ParseToken(const TCHAR*& Str, TCHAR* Result, INT MaxLen, UBOOL UseEscape);
-CORE_API UBOOL CDECL ParseToken(const TCHAR*& Str, FString& Arg, UBOOL UseEscape);
-CORE_API FString CDECL ParseToken(const TCHAR*& Str, UBOOL UseEscape);
+CORE_API UBOOL __cdecl ParseToken(const TCHAR*& Str, TCHAR* Result, INT MaxLen, UBOOL UseEscape);
+CORE_API UBOOL __cdecl ParseToken(const TCHAR*& Str, FString& Arg, UBOOL UseEscape);
+CORE_API FString __cdecl ParseToken(const TCHAR*& Str, UBOOL UseEscape);
 CORE_API void ParseNext(const TCHAR** Stream);
 CORE_API UBOOL ParseParam(const TCHAR* Stream, const TCHAR* Param);
 
@@ -460,13 +460,13 @@ CORE_API void appMemset(void* Dest, INT C, INT Count);
 //
 // C++ style memory allocation.
 //
-inline void* CDECL operator new(unsigned int Size, const TCHAR* Tag){
+inline void* __cdecl operator new(unsigned int Size, const TCHAR* Tag){
 	guardSlow(new);
 	return appMalloc(Size);
 	unguardSlow;
 }
 
-inline void* CDECL operator new(unsigned int Size){
+inline void* __cdecl operator new(unsigned int Size){
 	guardSlow(new);
 
 	return appMalloc(Size);
@@ -474,7 +474,7 @@ inline void* CDECL operator new(unsigned int Size){
 	unguardSlow;
 }
 
-inline void CDECL operator delete(void* Ptr){
+inline void __cdecl operator delete(void* Ptr){
 	guardSlow(delete);
 
 	appFree(Ptr);
@@ -482,7 +482,7 @@ inline void CDECL operator delete(void* Ptr){
 	unguardSlow;
 }
 
-inline void* CDECL operator new[](unsigned int Size, const TCHAR* Tag){
+inline void* __cdecl operator new[](unsigned int Size, const TCHAR* Tag){
 	guardSlow(new);
 
 	return appMalloc(Size);
@@ -490,7 +490,7 @@ inline void* CDECL operator new[](unsigned int Size, const TCHAR* Tag){
 	unguardSlow;
 }
 
-inline void* CDECL operator new[](unsigned int Size){
+inline void* __cdecl operator new[](unsigned int Size){
 	guardSlow(new);
 
 	return appMalloc(Size);
@@ -498,7 +498,7 @@ inline void* CDECL operator new[](unsigned int Size){
 	unguardSlow;
 }
 
-inline void CDECL operator delete[](void* Ptr){
+inline void __cdecl operator delete[](void* Ptr){
 	guardSlow(delete);
 
 	appFree(Ptr);

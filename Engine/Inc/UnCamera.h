@@ -170,7 +170,7 @@ enum EViewportShowFlags
 };
 
 // Mouse buttons and commands.
-enum EMouseButtons	
+enum EMouseButtons
 {
 	MOUSE_Left			= 0x0001,		// Left mouse button.
 	MOUSE_Right			= 0x0002,		// Right mouse button.
@@ -244,25 +244,33 @@ class ENGINE_API UViewport : public UPlayer{
 	void Serialize( const TCHAR* Data, EName MsgType );
 
 	// UPlayer interface.
-	void ReadInput( FLOAT DeltaSeconds );
+	void ReadInput( FLOAT DeltaSeconds );*/
 
 	// UViewport interface.
-	virtual UBOOL SetDrag( UBOOL NewDrag );
-	virtual UBOOL IsFullscreen()=0;
-	virtual UBOOL Lock( FPlane FlashScale, FPlane FlashFog, FPlane ScreenClear, DWORD RenderLockFlags, BYTE* HitData=NULL, INT* HitSize=NULL );
-	virtual UBOOL ResizeViewport( DWORD BlitType, INT X=INDEX_NONE, INT Y=INDEX_NONE, INT ColorBytes=INDEX_NONE )=0;
-	virtual void Unlock( UBOOL Blit=0 );
-	virtual void SetModeCursor()=0;
-	virtual void UpdateWindowFrame()=0;
-	virtual void OpenWindow( DWORD ParentWindow, UBOOL Temporary, INT NewX, INT NewY, INT OpenX, INT OpenY )=0;
-	virtual void CloseWindow()=0;
-	virtual void UpdateInput( UBOOL Reset )=0;
-	virtual void* GetWindow()=0;
+	virtual UBOOL Lock(FPlane FlashScale, FPlane FlashFog, FPlane ScreenClear, DWORD RenderLockFlags, BYTE* HitData=NULL, INT* HitSize = NULL);
+	virtual void Unlock(UBOOL Blit = 0);
+	virtual void Present();
+	virtual UBOOL SetDrag(UBOOL NewDrag);
+	virtual UBOOL IsFullscreen() = 0;
+	virtual UBOOL ResizeViewport(DWORD BlitType, INT X = INDEX_NONE, INT Y = INDEX_NONE, INT ColorBytes = INDEX_NONE) = 0;
+	virtual void SetModeCursor() = 0;
+	virtual void UpdateWindowFrame() = 0;
+	virtual void OpenWindow(DWORD ParentWindow, UBOOL Temporary, INT NewX, INT NewY, INT OpenX, INT OpenY) = 0;
+	virtual void CloseWindow() = 0;
+	virtual void UpdateInput(UBOOL Reset) = 0;
+	virtual void* GetWindow() = 0;
 	virtual void* GetServer();
-	virtual void SetMouseCapture( UBOOL Capture, UBOOL Clip, UBOOL FocusOnly=0 )=0;
-	virtual void Repaint( UBOOL Blit )=0;
-	virtual UBOOL Exec( const TCHAR* Cmd, FOutputDevice& Ar=*GLog );
-	virtual void TryRenderDevice( const TCHAR* ClassName, INT NewX, INT NewY, INT NewColorBytes, UBOOL Fullscreen ) {}*/
+	virtual void SetMouseCapture(UBOOL Capture, UBOOL Clip, UBOOL FocusOnly = 0) = 0;
+	virtual void Repaint(UBOOL Blit) = 0;
+	virtual void TryRenderDevice(const TCHAR* ClassName, INT NewX, INT NewY, INT NewColorBytes, UBOOL Fullscreen){}
+	virtual char* GetLocalizedKeyName(EInputKey Key) = 0;
+	virtual void DisableWinKey();
+	virtual void EndFullscreen();
+	virtual void IgnoreInput(bool Ignore);
+	virtual bool IgnoringInput();
+	virtual void ProfileSetMarker(char*, INT, INT, INT, INT);
+	virtual INT ProfileBeginEvent(char*, INT, INT, INT, INT);
+	virtual INT ProfileEndEvent();
 };
 
 // Viewport hit-testing macros.
@@ -338,7 +346,7 @@ class ENGINE_API UClient : public UObject
 	INT			TextureLODSet[LODSET_MAX];
 	FLOAT		MinDesiredFrameRate;
 	INT			ParticleDensity;
-	
+
 
 	// Constructors.
 	UClient();

@@ -18,7 +18,7 @@ public:
 	FConfigFile() : Dirty(0),
 					NoSave(0){}
 
-	void Read(const TCHAR* Filename, const FConfigFile* DefaultsOverride = NULL){
+	void Read(const TCHAR* Filename, FConfigFile* DefaultsOverride = NULL){
 		guard(FConfigFile::Read);
 
 		Empty();
@@ -93,6 +93,16 @@ public:
 						}
 					}
 				}
+			}
+		}
+
+		// Inserting remaining sections from defaults override which do not exist in the file read from disk
+		if(DefaultsOverride){
+			for(TIterator It(*DefaultsOverride); It; ++It){
+				if(Find(It.Key()))
+					continue;
+
+				Set(*It.Key(), It.Value());
 			}
 		}
 

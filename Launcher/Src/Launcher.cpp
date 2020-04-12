@@ -5,10 +5,67 @@
 #include "../../Core/Inc/FConfigCacheIni.h"
 #include "../../Engine/Inc/Engine.h"
 #include "../../Window/Inc/Window.h"
+#include "../../GameSpyMgr/Inc/GameSpyMgr.h"
 
 FOutputDeviceFile Log;
 FOutputDeviceWindowsError Error;
 FFeedbackContextCmd Warn; // TODO(Leon): Replace with FFeedbackContextWindows
+
+static struct FExecHook : public FExec{
+	FExecHook(){ GExec = this; }
+
+	UBOOL Exec(const TCHAR* Cmd, FOutputDevice& Ar){
+		guard(FExecHook::Exec);
+
+		if(ParseCommand(&Cmd, "SHOWLOG")){
+			if(!GLogWindow){
+				// Create log window if it does not yet exist
+				GLogWindow = new WLog(Log.Filename, Log.LogAr, "GameLog");
+				GLogWindow->OpenWindow(1, 0);
+
+				if(!GIsRunning)
+					GLogWindow->Log(NAME_Title, LocalizeGeneral("Start", "SWRepublicCommando"));
+				else
+					GLogWindow->Log(NAME_Title, LocalizeGeneral("Run", "SWRepublicCommando"));
+
+				if(GEngine)
+					GLogWindow->SetExec(GEngine);
+			}
+
+			GLogWindow->Show(1);
+			SetFocus(*GLogWindow);
+			GLogWindow->Display.ScrollCaret();
+
+			return 1;
+		}else if(ParseCommand(&Cmd, "HIDELOG")){
+			if(GLogWindow)
+				GLogWindow->Show(0);
+
+			return 1;
+		}else if(ParseCommand(&Cmd, "EDITOBJ")){
+			TObjectIterator<UEngine> EngineIt;
+
+			UObject* Obj = FindObject<UObject>(ANY_PACKAGE, Cmd);
+
+			if(!EngineIt){
+				Ar.Logf("EngineIt stinky");
+			}else if(!Obj){
+				Ar.Logf("Object \"%s\" not found", Cmd);
+			}else{
+				WObjectProperties* P = new WObjectProperties("EditObj", 0, "", NULL, 1);
+				P->OpenWindow((HWND)EngineIt->Client->Viewports[0]->GetWindow());
+				P->Root.SetObjects(&Obj, 1);
+				P->Show(1);
+			}
+
+			return 1;
+		}
+
+		return 0;
+
+		unguard;
+	}
+} LauncherExecHook;
 
 static void InitEngine(){
 	guard(InitEngine);
@@ -33,6 +90,12 @@ static void InitEngine(){
 	UClass* EngineClass = LoadClass<UEngine>(NULL, "ini:Engine.Engine.GameEngine", NULL, LOAD_NoFail, NULL);
 
 	GEngine = ConstructObject<UEngine>(EngineClass);
+
+	if(GLogWindow){
+		GLogWindow->SetExec(GEngine);
+		GLogWindow->Log(NAME_Title, LocalizeGeneral("Run", "SWRepublicCommando"));
+	}
+
 	GEngine->Init();
 	debugf("Startup time: %f seconds", appSeconds() - LoadTime);
 	unguard;
@@ -58,7 +121,7 @@ static void MainLoop(){
 		DOUBLE NewTime  = appSeconds();
 		FLOAT DeltaTime = NewTime - OldTime;
 
-		GEngine->Tick( DeltaTime );
+		GEngine->Tick(DeltaTime);
 
 		if(GWindowManager)
 			GWindowManager->Tick(DeltaTime);
@@ -78,7 +141,7 @@ static void MainLoop(){
 		FLOAT MaxTickRate = GEngine->GetMaxTickRate();
 		if(MaxTickRate > 0.0f){
 			FLOAT Delta = (1.0f / MaxTickRate) - (appSeconds() - OldTime);
-			appSleep(Max(0.0f,Delta));
+			appSleep(Max(0.0f, Delta));
 		}
 		unguard;
 
@@ -86,7 +149,7 @@ static void MainLoop(){
 		guard(MessagePump);
 		MSG Msg;
 
-		while(PeekMessageA(&Msg,NULL,0,0,PM_REMOVE)){
+		while(PeekMessageA(&Msg,NULL, 0, 0, PM_REMOVE)){
 			if(Msg.message == WM_QUIT)
 				GIsRequestingExit = 1;
 
@@ -149,7 +212,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 			UObject::SetLanguage("prt");
 		}
 
-		appInit(appPackage(), lpCmdLine, &Log, &Error, &Warn, FConfigCacheIni::Factory, 1);
+		FString CmdLine = FStringTemp(lpCmdLine) + " -windowed -log";
+
+		appInit(appPackage(), *CmdLine, &Log, &Error, &Warn, FConfigCacheIni::Factory, 1);
 
 		GIsClient = 1;
 		GIsServer = 1;
@@ -159,10 +224,25 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		GUseFrontEnd = ParseParam(appCmdLine(), "NOUI") == 0;
 
 		InitWindowing();
+
+		GameSpyCDKeyResponseInterface CDKeyInterface;
+
+		if(ParseParam(appCmdLine(), "LOG"))
+			LauncherExecHook.Exec("SHOWLOG", Log);
+
 		InitEngine();
 
 		if(GEngine && !GIsRequestingExit)
 			MainLoop();
+
+		if(GLogWindow)
+			GLogWindow->Log(NAME_Title, LocalizeGeneral("Exit", "SWRepublicCommando"));
+
+		if(GLogWindow){
+			check(GLogHook == GLogWindow);
+			delete GLogWindow;
+			//GLogHook = NULL;
+		}
 
 		appPreExit();
 

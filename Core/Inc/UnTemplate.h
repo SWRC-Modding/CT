@@ -10,8 +10,8 @@
 	Type information.
 -----------------------------------------------------------------------------*/
 
-/**
- * @brief Type information for initialization.
+/*
+ * Type information for initialization.
  */
 template<typename T>
 struct TTypeInfoBase{
@@ -178,11 +178,11 @@ DWORD GetTypeHash(const T* P){
 	Standard macros.
 ----------------------------------------------------------------------------*/
 
-//! @brief Number of elements in an array.
+// Number of elements in an array.
 #define ARRAY_COUNT(array) \
 	(sizeof(array) / sizeof((array)[0]))
 
-//! @brief Offset of a struct member.
+// Offset of a struct member.
 #define STRUCT_OFFSET(struc, member) \
 	((INT)&((struc*)NULL)->member)
 
@@ -197,7 +197,7 @@ class TAllocator{};
 	Dynamic array template.
 -----------------------------------------------------------------------------*/
 
-/**
+/*
  * Former dynamic array base.
  *
  * All functionality has been moved to TArray.
@@ -209,10 +209,9 @@ private:
 	INT ArrayNum;
 };
 
-/**
- * Template dynamic array
- *
- * @param T The element type for the array. In theory this could be any type but in practice only POD types and FString should be used.
+/*
+ * Template dynamic array.
+ * Should only be used with POD types.
  */
 template<typename T>
 class TArray{
@@ -787,8 +786,8 @@ private:
 	Lazy loading.
 -----------------------------------------------------------------------------*/
 
-/**
- * @brief Lazy loader base class.
+/*
+ * Lazy loader base class.
  */
 class FLazyLoader{
 	friend class ULinkerLoad;
@@ -801,10 +800,8 @@ public:
 
 	virtual void Load() = 0;
 	virtual void Unload() = 0;
-	/**
+	/*
 	 * Returns the byte offset to the payload.
-	 *
-	 * @return offset in bytes from beginning of file to beginning of data
 	 */
 	virtual DWORD GetOffset(){
 		return Abs(SavedPos);
@@ -812,7 +809,7 @@ public:
 };
 
 /*
- * @brief Lazy-loadable dynamic array.
+ * Lazy-loadable dynamic array.
  */
 template<typename T>
 class TLazyArray : public TArray<T>, public FLazyLoader{
@@ -825,11 +822,9 @@ public:
 		if(SavedAr)
 			SavedAr->DetachLazyLoader(this);
 	}
-	/**
+	/*
 	 * Returns the byte offset to the payload, skipping the array size serialized
 	 * by TArray's serializer.
-	 *
-	 * @return offset in bytes from beginning of file to beginning of data
 	 */
 	virtual DWORD GetOffset(){
 		// Skips array size being serialized.
@@ -900,11 +895,10 @@ public:
 	Dynamic strings.
 -----------------------------------------------------------------------------*/
 
-//Forward declaration
 class FStringTemp;
 
-/**
- * @brief A dynamically sizeable string.
+/*
+ * A dynamically sizeable string.
  */
 class CORE_API FString : protected TArray<TCHAR>{
 public:
@@ -977,8 +971,8 @@ protected:
 	}
 };
 
-/**
- * @brief Probably some sort of reference to avoid  unnecessary copies
+/*
+ * Probably some sort of reference to avoid  unnecessary copies
  *
  * No idea what this class is for. The only difference to FString seems
  * to be a different binary flag used in various places (0x40000000)
@@ -1031,8 +1025,8 @@ inline void ExchangeString(FString& A, FString& B){
 	FFilename.
 -----------------------------------------------------------------------------*/
 
-/**
- * @brief Utility class for quick inquiries against filenames.
+/*
+ * Utility class for quick inquiries against filenames.
  */
 struct FFilename : public FString{
 public:
@@ -1093,8 +1087,8 @@ private:
 	Special archivers.
 ----------------------------------------------------------------------------*/
 
-/**
- * @brief String output device.
+/*
+ * String output device.
  */
 class FStringOutputDevice : public FString, public FOutputDevice{
 public:
@@ -1105,8 +1099,8 @@ public:
 	}
 };
 
-/**
- * @brief Buffer writer.
+/*
+ * Buffer writer.
  */
 class FBufferWriter : public FArchive{
 public:
@@ -1144,15 +1138,15 @@ private:
 	INT Pos;
 };
 
-/**
- * @brief Buffer archiver.
+/*
+ * Buffer archiver.
  */
 class FBufferArchive : public FBufferWriter, public TArray<BYTE>{
 public:
 	FBufferArchive() : FBufferWriter((TArray<BYTE>&)*this){}
 };
 
-/**
+/*
  * Buffer reader.
  */
 class CORE_API FBufferReader : public FArchive{
@@ -1199,8 +1193,8 @@ private:
 	TMap.
 ----------------------------------------------------------------------------*/
 
-/**
- * @brief Maps unique keys to values.
+/*
+ * Maps unique keys to values.
  */
 template<typename TK, typename TI>
 class TMapBase{
@@ -1480,8 +1474,8 @@ struct TStack{
 	T* Max;
 };
 
-/**
- * @brief Sort elements.
+/*
+ * Sort elements.
  *
  * The sort is unstable, meaning that the ordering of equal
  * items is not necessarily preserved.
@@ -1556,55 +1550,6 @@ void Sort(T* First, INT Num){
 	}
 	unguard;
 }
-
-/*----------------------------------------------------------------------------
-	TDoubleLinkedList.
-----------------------------------------------------------------------------*/
-
-/**
- * @brief Simple double-linked list template.
- */
-template<typename T>
-class TDoubleLinkedList : public T{
-public:
-	TDoubleLinkedList* Next;
-	TDoubleLinkedList** PrevLink;
-
-	void Unlink(){
-		if(Next)
-			Next->PrevLink = PrevLink;
-		*PrevLink = Next;
-	}
-
-	void Link(TDoubleLinkedList*& Before){
-		if(Before)
-			Before->PrevLink = &Next;
-		Next     = Before;
-		PrevLink = &Before;
-		Before   = this;
-	}
-};
-
-/*----------------------------------------------------------------------------
-	FRainbowPtr.
-----------------------------------------------------------------------------*/
-
-/**
- * @brief A union of pointers of all base types.
- */
-union CORE_API FRainbowPtr{
-	// All pointers.
-	void*  PtrVOID;
-	BYTE*  PtrBYTE;
-	_WORD* PtrWORD;
-	DWORD* PtrDWORD;
-	QWORD* PtrQWORD;
-	FLOAT* PtrFLOAT;
-
-	// Conversion constructors.
-	FRainbowPtr(){}
-	FRainbowPtr(void* Ptr) : PtrVOID(Ptr){};
-};
 
 /*-----------------------------------------------------------------------------
 	The End.

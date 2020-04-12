@@ -5,7 +5,7 @@ IMPLEMENT_PACKAGE(Mod)
 /*
  * PatchVTable
  */
-void* PatchVTable(void** VTable, INT Index, void* Func){
+void* PatchVTable(void** VTable, INT Index, void* NewFunc){
 	DWORD OldProtect;
 
 	if(!VirtualProtect(VTable + Index, sizeof(void*), PAGE_EXECUTE_READWRITE, &OldProtect)){
@@ -16,7 +16,7 @@ void* PatchVTable(void** VTable, INT Index, void* Func){
 
 	void* OldFunc = VTable[Index];
 
-	VTable[Index] = Func;
+	VTable[Index] = NewFunc;
 
 	return OldFunc;
 }

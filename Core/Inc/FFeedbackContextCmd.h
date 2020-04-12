@@ -13,8 +13,8 @@
 #include <cstdio>
 #include <Windows.h>
 
-/**
- * @brief Windows command prompt feedback context.
+/*
+ * Windows command prompt feedback context.
  */
 class FFeedbackContextCmd : public FFeedbackContext{
 public:

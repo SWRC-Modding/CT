@@ -187,53 +187,53 @@ enum ETextureArithOp{
 class ENGINE_API UTexture : public UBitmapMaterial{
 	DECLARE_CLASS(UTexture,UBitmapMaterial,CLASS_SafeReplace,Engine)
 
-	UPalette*  Palette;        //!< Palette if 8-bit palettized.
-	UMaterial* Detail;         //!< Detail texture to apply.
-	FLOAT      DetailScale;    //!< Detail texture scale.
-	FColor     MipZero;        //!< Overall average color of texture.
-	FColor     MaxColor;       //!< Maximum color for normalization.
-	DOUBLE     LastUpdateTime; //!< Last time texture was locked for rendering.
+	UPalette*  Palette;        // Palette if 8-bit palettized.
+	UMaterial* Detail;         // Detail texture to apply.
+	FLOAT      DetailScale;    // Detail texture scale.
+	FColor     MipZero;        // Overall average color of texture.
+	FColor     MaxColor;       // Maximum color for normalization.
+	DOUBLE     LastUpdateTime; // Last time texture was locked for rendering.
 
 	// Deprecated stuff.
-	UTexture* OLDDetailTexture;       //!< Detail texture to apply.
-	UTexture* OLDEnvironmentMap;      //!< Environment map.
-	BYTE      OLDEnvMapTransformType; //!< Transform type for environment map.
-	FLOAT     OLDSpecular;            //!< Diffuse lighting coefficient (0.f-1.f).
+	UTexture* OLDDetailTexture;       // Detail texture to apply.
+	UTexture* OLDEnvironmentMap;      // Environment map.
+	BYTE      OLDEnvMapTransformType; // Transform type for environment map.
+	FLOAT     OLDSpecular;            // Diffuse lighting coefficient (0.f-1.f).
 
 	// Flags.
-	BITFIELD    bMasked:1;             //!< Texture is masked.
-	BITFIELD    bAlphaTexture:1;       //!< Texture is an alphatexture.
-	BITFIELD    bTwoSided:1;           //!< Texture should be rendered two sided when placed directly on a surface.
-	BITFIELD    bHighColorQuality:1;   //!< High color quality hint.
-	BITFIELD    bHighTextureQuality:1; //!< High color quality hint.
-	BITFIELD    bRealtime:1;           //!< Texture changes in realtime.
-	BITFIELD    bParametric:1;         //!< Texture data need not be stored.
-	BITFIELD    bRealtimeChanged:1;    //!< Changed since last render.
-	BITFIELD    OLDbHasComp:1;         //!< !!OLDVER Compressed version included?
-	BITFIELD    bNoRawData:1;          //!< Texture has no raw data (i.e; updated directly...such as MovieTexture)
+	BITFIELD    bMasked:1;             // Texture is masked.
+	BITFIELD    bAlphaTexture:1;       // Texture is an alphatexture.
+	BITFIELD    bTwoSided:1;           // Texture should be rendered two sided when placed directly on a surface.
+	BITFIELD    bHighColorQuality:1;   // High color quality hint.
+	BITFIELD    bHighTextureQuality:1; // High color quality hint.
+	BITFIELD    bRealtime:1;           // Texture changes in realtime.
+	BITFIELD    bParametric:1;         // Texture data need not be stored.
+	BITFIELD    bRealtimeChanged:1;    // Changed since last render.
+	BITFIELD    OLDbHasComp:1;         // !!OLDVER Compressed version included?
+	BITFIELD    bNoRawData:1;          // Texture has no raw data (i.e; updated directly...such as MovieTexture)
 
-	BYTE        LODSet; //!< Level of detail type.
+	BYTE        LODSet; // Level of detail type.
     INT         NormalLOD, MinLOD, MaxLOD;
 
 	// Animation related.
-	UTexture* AnimNext;     //!< Next texture in looped animation sequence.
-	UTexture* AnimCur;      //!< Current animation frame.
-	BYTE      PrimeCount;   //!< Priming total for algorithmic textures.
-	BYTE      PrimeCurrent; //!< Priming current for algorithmic textures.
-	FLOAT     MinFrameRate; //!< Minimum animation rate in fps.
-	FLOAT     MaxFrameRate; //!< Maximum animation rate in fps.
-	FLOAT     Accumulator;  //!< Frame accumulator.
+	UTexture* AnimNext;     // Next texture in looped animation sequence.
+	UTexture* AnimCur;      // Current animation frame.
+	BYTE      PrimeCount;   // Priming total for algorithmic textures.
+	BYTE      PrimeCurrent; // Priming current for algorithmic textures.
+	FLOAT     MinFrameRate; // Minimum animation rate in fps.
+	FLOAT     MaxFrameRate; // Maximum animation rate in fps.
+	FLOAT     Accumulator;  // Frame accumulator.
 
 	// Table of mipmaps.
-	TArray<FMipmap> Mips;          //!< Mipmaps in native format.
-	BYTE            OLDCompFormat; //!< !!OLDVER Compressed texture format.
+	TArray<FMipmap> Mips;          // Mipmaps in native format.
+	BYTE            OLDCompFormat; // !!OLDVER Compressed texture format.
 
-	BYTE		PS2FirstMip;       //!< using part of the pad space
-	BYTE		PS2NumMips;        //!< using part of the pad space
+	BYTE		PS2FirstMip;       // using part of the pad space
+	BYTE		PS2NumMips;        // using part of the pad space
 
-	FStaticTexture* RenderInterface; //!< The interface used to render this texture.
+	FStaticTexture* RenderInterface; // The interface used to render this texture.
 
-	DOUBLE __LastUpdateTime; //!< Last time texture was locked for rendering.
+	DOUBLE __LastUpdateTime; // Last time texture was locked for rendering.
 
 	// Static.
 	static class UClient* __Client;

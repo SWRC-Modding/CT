@@ -16,7 +16,7 @@
 //
 class FFeedbackContextWindows : public FFeedbackContext
 {
-	/** Context information for warning and error messages */
+	/* Context information for warning and error messages */
 	FContextSupplier*	Context;
 
 public:

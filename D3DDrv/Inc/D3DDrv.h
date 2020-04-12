@@ -15,7 +15,8 @@ LINK_LIB(D3DDrv)
 class D3DDRV_API UD3DRenderDevice : public URenderDevice{
 	DECLARE_CLASS(UD3DRenderDevice,URenderDevice,CLASS_Config,D3DDrv);
 public:
-	char Padding1[17924];
+	char Padding1[17920];
+	class IDirect3D8*       Direct3D8;
 	class IDirect3DDevice8* Direct3DDevice8;
 	char Padding2[47868];
 

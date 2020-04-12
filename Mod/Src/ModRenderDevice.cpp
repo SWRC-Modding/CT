@@ -3,9 +3,11 @@
 #include <Windows.h>
 
 enum{
+	// D3D8
+	D3DVTableIndex_D3D8CreateDevice    = 15,
 	// D3DDevice
 	D3DVTableIndex_DeviceCreateTexture = 20,
-	//D3DTexture
+	// D3DTexture
 	D3DVTableIndex_TextureGetLevelDesc = 14,
 	D3DVTableIndex_TextureLockRect     = 16,
 	D3DVTableIndex_TextureUnlockRect   = 17
@@ -16,6 +18,7 @@ enum{
  * We could simply include d3d8.h and inherit from the d3d interfaces but this way it is simpler and doesn't add any external dependencies.
  */
 
+typedef void FD3D8;
 typedef void FD3DDevice;
 typedef void FD3DTexture;
 
@@ -91,7 +94,6 @@ static void ConvertL6U5V5ToX8L8U8V8(const void* In, void* Out, UINT Width, UINT 
 		}
 	}
 }
-
 
 /*
  * GetLevelDesc
@@ -226,7 +228,7 @@ static HRESULT __stdcall D3DDeviceCreateTextureOverride(FD3DDevice* D3DDevice,
 											Pool,
 											ppTexture);
 
-	if(SUCCEEDED(Result)){
+	if(SUCCEEDED(Result) && Format == D3DFormat_L6V5U5){
 		// Patching vtables if it wasn't done already
 
 		if(!D3DTextureGetLevelDesc)
@@ -244,21 +246,57 @@ static HRESULT __stdcall D3DDeviceCreateTextureOverride(FD3DDevice* D3DDevice,
 																					 D3DTextureUnlockRectOverride));
 		}
 
-		if(Format == D3DFormat_L6V5U5){
-			INT TextureIndex;
+		INT TextureIndex;
 
-			if(AvailableTextureIndices.Num() > 0) {
-				TextureIndex = AvailableTextureIndices.Pop();
-				CurrentTextures[TextureIndex] = *ppTexture;
-			}else{
-				TextureIndex = CurrentTextures.AddItem(*ppTexture);
-			}
-
-			if(MipLevelsByTexture.Num() <= TextureIndex)
-				MipLevelsByTexture.Set(TextureIndex + 1);
-
-			MipLevelsByTexture[CurrentTextures.FindItemIndex(*ppTexture)].Set(Levels);
+		if(AvailableTextureIndices.Num() > 0) {
+			TextureIndex = AvailableTextureIndices.Pop();
+			CurrentTextures[TextureIndex] = *ppTexture;
+		}else{
+			TextureIndex = CurrentTextures.AddItem(*ppTexture);
 		}
+
+		if(MipLevelsByTexture.Num() <= TextureIndex)
+			MipLevelsByTexture.Set(TextureIndex + 1);
+
+		MipLevelsByTexture[CurrentTextures.FindItemIndex(*ppTexture)].Set(Levels);
+	}
+
+	return Result;
+}
+
+/*
+ * CreateDevice
+ */
+
+typedef HRESULT(__stdcall*D3D8CreateDeviceFunc)(FD3D8* D3D8,
+												UINT Adapter,
+												enum D3DDEVTYPE DeviceType,
+												HWND hFocusWindow,
+												DWORD BehaviorFlags,
+												struct D3DPRESENT_PARAMETERS* pPresentationParameters,
+												class IDirect3DDevice8** ppReturnedDeviceInterface);
+
+D3D8CreateDeviceFunc D3D8CreateDevice = NULL;
+
+HRESULT __stdcall D3D8CreateDeviceOverride(FD3D8* D3D8,
+										   UINT Adapter,
+										   enum D3DDEVTYPE DeviceType,
+										   HWND hFocusWindow,
+										   DWORD BehaviorFlags,
+										   struct D3DPRESENT_PARAMETERS* pPresentationParameters,
+										   class IDirect3DDevice8** ppReturnedDeviceInterface){
+	check(D3D8CreateDevice);
+
+	HRESULT Result = D3D8CreateDevice(D3D8, Adapter, DeviceType, hFocusWindow, BehaviorFlags, pPresentationParameters, ppReturnedDeviceInterface);
+
+	if(SUCCEEDED(Result)){
+		D3DDeviceCreateTextureFunc CreateTextureFunc =
+			static_cast<D3DDeviceCreateTextureFunc>(PatchVTable(*reinterpret_cast<void***>(*ppReturnedDeviceInterface),
+																						   D3DVTableIndex_DeviceCreateTexture,
+																						   D3DDeviceCreateTextureOverride));
+
+		if(CreateTextureFunc != D3DDeviceCreateTextureOverride)
+			D3DDeviceCreateTexture = CreateTextureFunc;
 	}
 
 	return Result;
@@ -271,18 +309,16 @@ static HRESULT __stdcall D3DDeviceCreateTextureOverride(FD3DDevice* D3DDevice,
 class MOD_API UModRenderDevice : public UD3DRenderDevice{
 	DECLARE_CLASS(UModRenderDevice, UD3DRenderDevice, 0, Mod)
 public:
-	// Overriding SetRes because that's where the direct3d device is created
-	// NOTE: We could also just create a dummy device and patch the vtable there but this would require linking against d3d8.dll
-	virtual UBOOL SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL Fullscreen, INT ColorBytes = 0, UBOOL bSaveSize = true){
-		UBOOL result = UD3DRenderDevice::SetRes(Viewport, NewX, NewY, Fullscreen, ColorBytes, bSaveSize);
+	virtual UBOOL Init(){
+		UBOOL Result = Super::Init();
 
-		if(result && !D3DDeviceCreateTexture){
-			D3DDeviceCreateTexture = static_cast<D3DDeviceCreateTextureFunc>(PatchVTable(*reinterpret_cast<void***>(Direct3DDevice8),
-																						 D3DVTableIndex_DeviceCreateTexture,
-																						 D3DDeviceCreateTextureOverride));
+		if(Result){
+			D3D8CreateDevice = static_cast<D3D8CreateDeviceFunc>(PatchVTable(*reinterpret_cast<void***>(Direct3D8),
+																			 D3DVTableIndex_D3D8CreateDevice,
+																			 D3D8CreateDeviceOverride));
 		}
 
-		return result;
+		return Result;
 	}
 };
 

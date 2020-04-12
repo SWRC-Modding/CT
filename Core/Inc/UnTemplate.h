@@ -407,6 +407,7 @@ public:
 	}
 
 	void Empty(INT Slack = 0){
+		Deinit(0, ArrayNum);
 		Realloc(0, Slack);
 	}
 
@@ -504,14 +505,15 @@ public:
 			if(Other.bUnreferenced || Other.bIdk){
 				Transfer(const_cast<TArray<T>&>(Other));
 			}else{
-				Realloc(Other.ArrayNum, 0);
+				Empty(Other.ArrayNum);
 
 				// It is assumed that a type is not trivially copyable if it needs a destructor which should be true in pretty much any case
 				if(TTypeInfo<T>::NeedsDestructor()){
 					for(INT i = 0; i < Other.ArrayNum; ++i)
-						(*this)[i] = Other[i];
+						new(*this)T(Other[i]);
 				}else{
 					appMemcpy(Data, Other.Data, Other.ArrayNum * sizeof(T));
+					ArrayNum = Other.ArrayNum;
 				}
 			}
 		}
@@ -573,7 +575,7 @@ protected:
 	}
 
 	void Deinit(INT Index, INT Count){
-		check(IsAllocated());
+		check(ArrayNum == 0 || IsAllocated());
 
 		if(TTypeInfo<T>::NeedsDestructor()){
 			for(INT i = Index; i < Index + Count; ++i)

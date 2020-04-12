@@ -63,7 +63,7 @@ enum EFixedVertexFunction
 	FVF_MAX
 };
 
-enum ED3DBLEND 
+enum ED3DBLEND
 {
 	NOBLEND,
     ZERO,
@@ -81,9 +81,9 @@ enum ED3DBLEND
     BOTHINVSRCALPHA
 };
 
-/**
- * Used to specify constants for a vertex shader. 
- */ 
+/*
+ * Used to specify constants for a vertex shader.
+ */
 struct SConstantsInfo
 {
 	var() SConstant Type;
@@ -97,7 +97,7 @@ struct BumpSettingInfo
 	var() float BumpLumaScale;
 };
 
-/** 
+/*
  * Indexed array of where the streams will show up
  * if StreamMapping[0] == NORMAL then v0 will contain the vertex normal
  */
@@ -131,7 +131,7 @@ var() ED3DBLEND DestBlend;
 var transient const int VertexShader;
 var transient const int PixelShader;
 
-// Cache the max number of constants 
+// Cache the max number of constants
 var int NumVSConstants;
 var int NumPSConstants;
 
@@ -139,4 +139,3 @@ var int NumPSConstants;
 defaultproperties
 {
 }
-

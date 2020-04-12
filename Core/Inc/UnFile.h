@@ -35,30 +35,28 @@ CORE_API extern DWORD GCRCTable[];
 	Global init and exit.
 -----------------------------------------------------------------------------*/
 
-/**
- * @brief Global initialization
+/*
+ * Global initialization.
+ * appInit initializes the engine's subsystems and thus must always be the first thing that is called in an application.
  *
- * appInit initializes the engine's subsystems and thus must always be the first thing that is called in an application
- *
- * @param InPackage Name of the .int file (without extension) for the application (usually just "SWRepublicCommando")
- * @param InCmdLine Command line
- * @param InLog Global logger
- * @param InError OutputDevice for error handling
- * @param InWarn FeedbackContext used for warnings and user interaction
- * @param ConfigFactory Function that returns an instance of FConfigCache
- * @param RequireConfig Passed to FConfigCache::Init but otherwise unused
+ * Parameters:
+ * InPackage     Name of the .int file (without extension) for the application (usually just "SWRepublicCommando")
+ * InCmdLine     Command line
+ * InLog         Global logger
+ * InError       OutputDevice for error handling
+ * InWarn        FeedbackContext used for warnings and user interaction
+ * ConfigFactory Function that returns an instance of FConfigCache
+ * RequireConfig Passed to FConfigCache::Init but otherwise unused
  */
 CORE_API void appInit(const TCHAR* InPackage, const TCHAR* InCmdLine, FOutputDevice* InLog, FOutputDeviceError* InError, FFeedbackContext* InWarn, FConfigCache*(*ConfigFactory)(), UBOOL RequireConfig);
-/**
- * @brief Pre-shutdown
- *
- * Called from within guarded exit code, only during non-error exits
+/*
+ * Pre-shutdown.
+ * Called from within guarded exit code, only during non-error exits.
  */
 CORE_API void appPreExit();
-/**
- * @brief Shutdown
- *
- * Called outside guarded exit code, during all exits (including error exits)
+/*
+ * Shutdown.
+ * Called outside guarded exit code, during all exits (including error exits).
  */
 CORE_API void appExit();
 
@@ -69,25 +67,22 @@ CORE_API void appExit();
 CORE_API void appRequestExit(UBOOL Force);
 
 CORE_API void VARARGS appFailAssert(const ANSICHAR* Expr, const ANSICHAR* File, INT Line);
-/**
- * @brief Unwind the stack
- *
- * Called from the unguard macro when an exception is thrown in order to create a stacktrace
+/*
+ * Unwind the stack.
+ * Called from the unguard macro when an exception is thrown in order to create a stacktrace.
  */
 CORE_API void VARARGS appUnwindf(const TCHAR* Fmt, ...);
 CORE_API const TCHAR* appGetSystemErrorMessage(INT Error = 0);
 CORE_API const void appDebugMessagef(const TCHAR* Fmt, ...);
-/**
- * @brief Shows a message box
- * @param Type 1 = MB_YESNO, 2 = MB_OKCANCEL, 3 = MB_OK
- * @param Fmt Formatted message
- * @return true for yes/ok, false for no/cancel
+/*
+ * Shows a message box.
+ * Type: 1 = MB_YESNO, 2 = MB_OKCANCEL, 3 = MB_OK.
+ * Returns true for yes/ok, false for no/cancel.
  */
 CORE_API const UBOOL appMsgf(INT Type, const TCHAR* Fmt, ...);
 CORE_API const void appGetLastError();
 CORE_API const void EdClearLoadErrors();
 CORE_API const void EdLoadErrorf(INT Type, const TCHAR* Fmt, ...);
-//CORE_API void appDebugBreak();
 CORE_API UBOOL appIsDebuggerPresent();
 
 #define debugf				GLog->Logf
@@ -453,9 +448,9 @@ CORE_API void appMemset(void* Dest, INT C, INT Count);
 //
 // C style memory allocation stubs.
 //
-#define appMalloc     GMalloc->Malloc
-#define appFree       GMalloc->Free
-#define appRealloc    GMalloc->Realloc
+#define appMalloc  GMalloc->Malloc
+#define appFree    GMalloc->Free
+#define appRealloc GMalloc->Realloc
 
 //
 // C++ style memory allocation.
@@ -468,41 +463,31 @@ inline void* __cdecl operator new(unsigned int Size, const TCHAR* Tag){
 
 inline void* __cdecl operator new(unsigned int Size){
 	guardSlow(new);
-
 	return appMalloc(Size);
-
 	unguardSlow;
 }
 
 inline void __cdecl operator delete(void* Ptr){
 	guardSlow(delete);
-
 	appFree(Ptr);
-
 	unguardSlow;
 }
 
 inline void* __cdecl operator new[](unsigned int Size, const TCHAR* Tag){
 	guardSlow(new);
-
 	return appMalloc(Size);
-
 	unguardSlow;
 }
 
 inline void* __cdecl operator new[](unsigned int Size){
 	guardSlow(new);
-
 	return appMalloc(Size);
-
 	unguardSlow;
 }
 
 inline void __cdecl operator delete[](void* Ptr){
 	guardSlow(delete);
-
 	appFree(Ptr);
-
 	unguardSlow;
 }
 

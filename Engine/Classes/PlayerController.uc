@@ -134,8 +134,8 @@ var globalconfig bool bKeepHintMenusAwfulHack;
 
 var globalconfig byte AnnouncerLevel;  // 0=none, 1=no possession announcements, 2=all
 var globalconfig byte AnnouncerVolume; // 1 to 4
-var globalconfig byte AimingHelp; 
-var globalconfig byte MeleeAimingHelp; 
+var globalconfig byte AimingHelp;
+var globalconfig byte MeleeAimingHelp;
 var globalconfig float MaxResponseTime;		// how long server will wait for client move update before setting position
 var float WaitDelay;			// Delay time until can restart
 var pawn AcknowledgedPawn;				     // used in net games so client can acknowledge it possessed a pawn
@@ -222,7 +222,7 @@ var float	TimeSinceLastFogChange;
 var int		LastZone;
 
 // Remote Pawn ViewTargets
-var rotator		TargetViewRotation; 
+var rotator		TargetViewRotation;
 var rotator     BlendedTargetViewRotation;
 var float		TargetEyeHeight;
 var vector		TargetWeaponViewOffset;
@@ -239,15 +239,15 @@ var float LastPlaySpeech;
 // when they get position updates from the server.
 var SavedMove SavedMoves;	// buffered moves pending position updates
 var SavedMove FreeMoves;	// freed moves, available for buffering
-var SavedMove PendingMove;	
+var SavedMove PendingMove;
 var float CurrentTimeStamp,LastUpdateTime,ServerTimeStamp,TimeMargin, ClientUpdateTime;
 var globalconfig float MaxTimeMargin;
 var Weapon OldClientWeapon;
 var int WeaponUpdate;
 
 // array of weapons indicated by their WeaponIndex: 1 if player hasn't switch to weapon yet, 0 if player has, -1 if player doesn't have weapon
-// See EWeaponIndexType in Weapon.uc for list of weapon index numbers 
-var	travel int	FirstTimeSwitch[15];	
+// See EWeaponIndexType in Weapon.uc for list of weapon index numbers
+var	travel int	FirstTimeSwitch[15];
 
 
 // Progess Indicator - used by the engine to provide status messages (HUD is responsible for displaying these).
@@ -407,15 +407,15 @@ replication
 	reliable if( Role==ROLE_Authority )
 		ClientSetHUD, FOV, StartZoom, ForceWeaponSwitch, SetOkToSwitchWeapon,
 		ToggleZoom, StopZoom, EndZoom, ClientSetMusic, ClientRestart,
-		ClientAdjustGlow, 
-		ClientSetBehindView, ClientSetFixedCamera, ClearProgressMessages, 
+		ClientAdjustGlow,
+		ClientSetBehindView, ClientSetFixedCamera, ClearProgressMessages,
         SetProgressMessage, SetProgressTime,
 		GivePawn, ClientGotoState,
 		ClientChangeVoiceChatter,
 		ClientLeaveVoiceChat,
 		ClientValidate,ClientSpeechMenuClose,
         ClientSetViewTarget, ClientCapBandwidth,
-		ClientOpenMenu, ClientCloseMenu, 
+		ClientOpenMenu, ClientCloseMenu,
 		ClientSetBadCDKey,
 		ClientSetMissingContent;
 
@@ -426,7 +426,7 @@ replication
 	reliable if( Role==ROLE_Authority && !bDemoRecording )
         ClientStopForceFeedback, ClientTravel;
 	unreliable if( Role==ROLE_Authority )
-        SetFOVAngle, ClientShake, ClientStopShake, ClientFlash,  
+        SetFOVAngle, ClientShake, ClientStopShake, ClientFlash,
 		ClientAdjustPosition, ShortClientAdjustPosition, VeryShortClientAdjustPosition, LongClientAdjustPosition;
 	unreliable if( (!bDemoRecording || bClientDemoRecording && bClientDemoNetFunc) && Role==ROLE_Authority )
 		ClientHearSound;
@@ -436,7 +436,7 @@ replication
 	// Functions client can call.
 	unreliable if( Role<ROLE_Authority )
         ServerUpdatePing, ShortServerMove, ServerMove, DualServerMove,
-		RocketServerMove, Say, TeamSay, ServerSetHandedness, 
+		RocketServerMove, Say, TeamSay, ServerSetHandedness,
 		ServerViewNextPlayer, ServerViewSelf,ServerUse, ServerDrive, ServerToggleBehindView;
 	reliable if( Role<ROLE_Authority )
 		Speech, Pause, ServerSetPause, Mutate, ServerSetFOV, ServerAcknowledgePossession, ServerShortTimeout,
@@ -583,15 +583,15 @@ native function SetFSAALevel(int level);
 
 native function bool GetConfigValue(string section, string key, out string value, optional string file );
 
-function int GetDifficultyLevel() 
-{ 
+function int GetDifficultyLevel()
+{
 	if ( DifficultyDamageModifier == DamageModifierEasy )
 		return 0;
 	else if ( DifficultyDamageModifier == DamageModifierMedium )
 		return 1;
 	else if ( DifficultyDamageModifier == DamageModifierHard )
 		return 2;
-		
+
 	return -1;
 }
 
@@ -626,13 +626,13 @@ native function bool IsLevelLoading();
 exec function SetVisorModeDefault( int vmDefault )
 {
 	VisorModeDefault = vmDefault;
-	
+
 	if ( Level.NetMode != NM_Standalone )
 		return;
-	
+
 	if ( Pawn == None )
 		return;
-		
+
 	if ( ( VisorModeDefault == 0 ) && ( Pawn.CurrentUserVisionMode == 0 ) )
 		GotoVisionMode( 1 );
 	else if ( ( VisorModeDefault == 1 ) && ( Pawn.CurrentUserVisionMode == 1 ) )
@@ -682,16 +682,16 @@ returns an integer to use as a pitch to orient player view along current ground 
 native(524) final function int FindStairRotation(float DeltaTime);
 
 native event X_ClientHearSound(
-	actor Actor, 
-	sound S, 
-	vector SoundLocation, 
+	actor Actor,
+	sound S,
+	vector SoundLocation,
 	int Flags
 );
 
 event ClientHearSound(
-	actor Actor, 
-	sound S, 
-	vector SoundLocation, 
+	actor Actor,
+	sound S,
+	vector SoundLocation,
 	int Flags
 )
 {
@@ -717,7 +717,7 @@ event PostBeginPlay()
 	DesiredFOV = DefaultFOV;
 	SetViewTarget(self);  // MUST have a view target!
 	LastActiveTime = Level.TimeSeconds;
-	
+
 	if ( Level.NetMode == NM_Standalone )
 		AddCheats();
 
@@ -731,19 +731,19 @@ event PostBeginPlay()
 
 	for (i = 0; i < 10; i++)
 		FirstTimeSwitch[i] = -1;
-		
+
 	bRumbleActive = bGlobalRumbleActive;
-	
+
 	if ( (DifficultyDamageModifier != DamageModifierEasy) &&
 		 (DifficultyDamageModifier != DamageModifierMedium) &&
 		 (DifficultyDamageModifier != DamageModifierHard) )
 	{
 		DifficultyDamageModifier = DamageModifierMedium;
 	}
-	
+
 	// Refresh the number of existing saves
 	if (Level.NetMode == NM_StandAlone)
-		CurrentProfileNumSaves();	
+		CurrentProfileNumSaves();
 }
 
 event KickWarning()
@@ -779,7 +779,7 @@ event PostLoadBeginPlay()
 {
 	Super.PostLoadBeginPlay();
 	SpawnDefaultHUD();
-	
+
 	// Refresh the number of existing saves
 	if (Level.NetMode == NM_StandAlone)
 	{
@@ -819,7 +819,7 @@ function ClientCapBandwidth(int Cap)
 	if ( (Player != None) && (Player.CurrentNetSpeed > Cap) )
 		SetNetSpeed(Cap);
 }
-		
+
 function PendingStasis()
 {
 	bStasis = true;
@@ -857,7 +857,7 @@ function ServerVerifyViewTarget()
 {
 	if (( ViewTarget == self ) || ( ViewTarget == None ))
 		return;
-	
+
 	ClientSetViewTarget(ViewTarget);
 }
 
@@ -897,7 +897,7 @@ simulated function TracerProxy( Vector Start, Vector End, class<Emitter> TracerE
 	}
 }
 
-/* Reset() 
+/* Reset()
 reset actor to initial state - used when restarting level without reloading.
 */
 function Reset()
@@ -918,7 +918,7 @@ function Reset()
 function CleanOutSavedMoves()
 {
     local SavedMove Next;
-	
+
 	// clean out saved moves
 	while ( SavedMoves != None )
 	{
@@ -960,8 +960,8 @@ function AskForPawn()
 	{
 		bFrozen = false;
 		ServerRestartPlayer();
-	}		
-}	
+	}
+}
 
 function GivePawn(Pawn NewPawn)
 {
@@ -972,10 +972,10 @@ function GivePawn(Pawn NewPawn)
 	ClientRestart(Pawn);
 
 	PassOnTacticalIntensity();
-	
+
 	if ( ( VisorModeDefault != 1 ) && ( Level.NetMode == NM_Standalone ) )
-		GotoVisionMode( 1 );	
-}	
+		GotoVisionMode( 1 );
+}
 
 // Possess a pawn
 function Possess(Pawn aPawn)
@@ -988,18 +988,18 @@ function Possess(Pawn aPawn)
 	Pawn = aPawn;
 	Pawn.bStasis = false;
 	ResetTimeMargin();
-    CleanOutSavedMoves();  // don't replay moves previous to possession	
+    CleanOutSavedMoves();  // don't replay moves previous to possession
 	ServerSetHandedness(Handedness);
 	Restart();
 
 	PassOnTacticalIntensity();
-	
+
 	if ( ( VisorModeDefault != 1 ) && ( Level.NetMode == NM_Standalone ) )
-		GotoVisionMode( 1 );		
+		GotoVisionMode( 1 );
 }
 
 function AcknowledgePossession(Pawn P)
-{	
+{
 	if ( Viewport(Player) != None )
 	{
 		AcknowledgedPawn = P;
@@ -1015,7 +1015,7 @@ function ServerAcknowledgePossession(Pawn P, float NewHand, bool bNewAutoTaunt)
 {
 	ResetTimeMargin();
 	AcknowledgedPawn = P;
-	ServerSetHandedness(NewHand);	
+	ServerSetHandedness(NewHand);
 }
 
 // unpossessed a pawn (not because pawn was killed)
@@ -1051,15 +1051,15 @@ function PawnDied(Pawn P)
 
 	/*
 	if ( ViewTarget == Pawn )
-		bBehindView = true;	
+		bBehindView = true;
 	*/
-	
+
 	ClientSpeechMenuClose();
 
 	if(Level.NetMode > NM_Standalone || Level.IsSplitScreen())
 		Super.PawnDied(P);
 
-	if ( !IsInState('GameEnded') ) 
+	if ( !IsInState('GameEnded') )
 		GotoState('Dead'); // can respawn
 }
 
@@ -1094,7 +1094,7 @@ function ClientSetHUD(class<HUD> newHUDType, class<Scoreboard> newScoringType)
 
 	if ( (myHUD == None) || ((newHUDType != None) && (newHUDType != myHUD.Class)) )
 	{
-		NewHUD = spawn(newHUDType, self); 
+		NewHUD = spawn(newHUDType, self);
 		if ( NewHUD != None )
 		{
 			if ( myHUD != None )
@@ -1156,7 +1156,7 @@ event ViewFlash(float DeltaTime)
 
     if ( Pawn != None )
     {
-        goalScale += Pawn.HeadVolume.ViewFlash.X; 
+        goalScale += Pawn.HeadVolume.ViewFlash.X;
         goalFog += Pawn.HeadVolume.ViewFog;
     }
 	Step = 0.6 * delta;
@@ -1175,7 +1175,7 @@ simulated event ReceiveLocalizedMessage( class<LocalMessage> Message, optional i
 		return;
 
 	Message.Static.ClientReceive( Self, Switch, RelatedPRI_1, RelatedPRI_2, OptionalObject );
-	
+
 
 	if ( Message.default.bIsConsoleMessage && (Player != None) && (Player.Console != None) )
 		Player.Console.Message(Message.Static.GetString(Switch, RelatedPRI_1, RelatedPRI_2, OptionalObject),0 );
@@ -1219,7 +1219,7 @@ event TeamMessage( PlayerReplicationInfo PRI, coerce string S, name Type  )
 simulated function PlayBeepSound();
 
 simulated function PlayAnnouncement(sound ASound, byte AnnouncementLevel, optional bool bForce)
-{	
+{
 //gdr - Removed this since it was causing issues.
 //	log("PlayAnnouncement - AnnouncementLevel ="@AnnouncementLevel$", AnnouncerLevel ="@AnnouncerLevel);
 //	log("PlayAnnouncement - Level.TimeSeconds = "@Level.TimeSeconds$", LastPlaySound ="@LastPlaySound);
@@ -1246,7 +1246,7 @@ function bool AllowVoiceMessage(name MessageType)
 {
 	if ( Level.NetMode == NM_Standalone )
 		return true;
-		
+
 	if ( Level.TimeSeconds - OldMessageTime < 3 )
 	{
 		if ( (MessageType == 'TAUNT') || (MessageType == 'AUTOTAUNT') )
@@ -1260,7 +1260,7 @@ function bool AllowVoiceMessage(name MessageType)
 		OldMessageTime = Level.TimeSeconds;
 	return true;
 }
-	
+
 //Play a sound client side (so only client will hear it
 simulated function ClientPlaySoundLocally(sound ASound)
 {
@@ -1287,17 +1287,17 @@ function BroadcastSound(Sound theSound)
 
 simulated event Destroyed()
 {
-	local SavedMove Next;	
+	local SavedMove Next;
 
 	// cheatmanager, adminmanager, and playerinput cleaned up in C++ PostScriptDestroyed()
- 
+
     StopFeedbackEffect();
- 
+
 	if ( Pawn != None )
 	{
 		Pawn.Health = 0;
 		Pawn.Unpossessed();
-		Pawn.Died( self, class'Suicided', Pawn.Location );	    
+		Pawn.Died( self, class'Suicided', Pawn.Location );
 	}
 
 	if( PlayerSpotLight != None )
@@ -1317,7 +1317,7 @@ simulated event Destroyed()
 		SavedMoves.Destroy();
 		SavedMoves = Next;
 	}
-    
+
     if( PlayerSecurity != None )
     {
         PlayerSecurity.Destroy();
@@ -1331,7 +1331,7 @@ function ClientSetMusic( Sound NewMusic )
 {
 	PlayMusic( NewMusic );
 }
-	
+
 // ------------------------------------------------------------------------
 // Zooming/FOV change functions
 
@@ -1342,7 +1342,7 @@ function ToggleZoom()
 	else
 		StartZoom();
 }
-	
+
 function StartZoom()
 {
 	ZoomLevel = 0.0;
@@ -1421,11 +1421,11 @@ function Timer()
 exec function FOV(float F)
 {
 	if (bBriefing)
-		return;	
+		return;
 
 	if (F <= 0.0)
 	{
-		F = Pawn.Weapon.GetNextZoomFOV(); 
+		F = Pawn.Weapon.GetNextZoomFOV();
 
 		if (FOVAngle > F)
 		{
@@ -1608,7 +1608,7 @@ function SetHand(int IntValue)
     Handedness = IntValue;
     if( (Pawn != None) && (Pawn.Weapon != None) )
 	Pawn.Weapon.SetHand(Handedness);
-     
+
 	ServerSetHandedness(Handedness);
 }
 
@@ -1668,27 +1668,27 @@ compressed version of server move for PlayerRocketing state
 */
 function RocketServerMove
 (
-	float TimeStamp, 
-	vector InAccel, 
+	float TimeStamp,
+	vector InAccel,
 	vector ClientLoc,
-	byte ClientRoll, 
+	byte ClientRoll,
 	int View
 )
 {
 	ServerMove(TimeStamp,InAccel,ClientLoc,false,false,false,false, DCLICK_NONE,ClientRoll,View);
-}	
+}
 
 /* ShortServerMove()
 compressed version of server move for bandwidth saving
 */
 function ShortServerMove
 (
-	float TimeStamp, 
+	float TimeStamp,
 	vector ClientLoc,
 	bool NewbRun,
 	bool NewbDuck,
-	bool NewbJumpStatus, 
-	byte ClientRoll, 
+	bool NewbJumpStatus,
+	byte ClientRoll,
 	int View
 )
 {
@@ -1833,7 +1833,7 @@ function ServerMove
 	DeltaTime = FMin(MaxResponseTime,TimeStamp - CurrentTimeStamp);
 
 	if ( Pawn == None )
-	{		
+	{
 		ResetTimeMargin();
 	}
 	else if ( !CheckSpeedHack(DeltaTime) )
@@ -1847,7 +1847,7 @@ function ServerMove
 			}
 			ClientMessage( "Speed Hack Detected!",'CriticalEvent' );
 		}
-		
+
 		bWasSpeedHack = true;
 		DeltaTime = 0;
 		Pawn.Velocity = vect(0,0,0);
@@ -1869,7 +1869,7 @@ function ServerMove
 
 	if ( NewbPressedJump || (InAccel != vect(0,0,0)) )
 		LastActiveTime = Level.TimeSeconds;
-	
+
 	if ( AcknowledgedPawn != Pawn )
 		return;
 
@@ -1937,7 +1937,7 @@ function ServerMove
 		LastUpdateTime = Level.TimeSeconds;
 
 		PendingAdjustment.TimeStamp = TimeStamp;
-		PendingAdjustment.newState = GetStateName();		
+		PendingAdjustment.newState = GetStateName();
 	}
 	//log("Server moved stamp "$TimeStamp$" location "$Pawn.Location$" Acceleration "$Pawn.Acceleration$" Velocity "$Pawn.Velocity);
 }
@@ -2016,20 +2016,20 @@ function ProcessDrive(float InForward, float InStrafe, float InUp, bool InJump);
 //}
 
 function ProcessMove ( float DeltaTime, vector newAccel, eDoubleClickDir DoubleClickMove, rotator DeltaRot)
-{	
+{
     if ( (Pawn != None) && (Pawn.Acceleration != newAccel) )
 		Pawn.Acceleration = newAccel;
 }
 
 final function MoveAutonomous
-(	
-	float DeltaTime, 	
+(
+	float DeltaTime,
 	bool NewbRun,
 	bool NewbDuck,
-	bool NewbPressedJump, 
+	bool NewbPressedJump,
     bool NewbDoubleJump,
-	eDoubleClickDir DoubleClickMove, 
-	vector newAccel, 
+	eDoubleClickDir DoubleClickMove,
+	vector newAccel,
 	rotator DeltaRot
 )
 {
@@ -2046,7 +2046,7 @@ final function MoveAutonomous
     bDoubleJump = NewbDoubleJump;
 	HandleWalking();
 	ProcessMove(DeltaTime, newAccel, DoubleClickMove, DeltaRot);
-	if ( Pawn != None )	
+	if ( Pawn != None )
 		Pawn.AutonomousPhysics(DeltaTime);
 	else
 		AutonomousPhysics(DeltaTime);
@@ -2059,10 +2059,10 @@ bandwidth saving version, when velocity is zeroed, and pawn is walking
 */
 function VeryShortClientAdjustPosition
 (
-	float TimeStamp, 
-	float NewLocX, 
-	float NewLocY, 
-	float NewLocZ, 
+	float TimeStamp,
+	float NewLocX,
+	float NewLocY,
+	float NewLocZ,
 	Actor NewBase
 )
 {
@@ -2078,12 +2078,12 @@ bandwidth saving version, when velocity is zeroed
 */
 function ShortClientAdjustPosition
 (
-	float TimeStamp, 
-	name newState, 
+	float TimeStamp,
+	name newState,
 	EPhysics newPhysics,
-	float NewLocX, 
-	float NewLocY, 
-	float NewLocZ, 
+	float NewLocX,
+	float NewLocY,
+	float NewLocZ,
 	Actor NewBase
 )
 {
@@ -2099,14 +2099,14 @@ function ShortClientAdjustPosition
 */
 function ClientAdjustPosition
 (
-	float TimeStamp, 
-	name newState, 
+	float TimeStamp,
+	name newState,
 	EPhysics newPhysics,
-	float NewLocX, 
-	float NewLocY, 
-	float NewLocZ, 
-	float NewVelX, 
-	float NewVelY, 
+	float NewLocX,
+	float NewLocY,
+	float NewLocZ,
+	float NewVelX,
+	float NewVelY,
 	float NewVelZ,
 	Actor NewBase
 )
@@ -2118,19 +2118,19 @@ function ClientAdjustPosition
 	LongClientAdjustPosition(TimeStamp,newState,newPhysics,NewLocX,NewLocY,NewLocZ,NewVelX,NewVelY,NewVelZ,NewBase,Floor.X,Floor.Y,Floor.Z);
 }
 
-/* LongClientAdjustPosition 
+/* LongClientAdjustPosition
 long version, when care about pawn's floor normal
 */
 function LongClientAdjustPosition
 (
-	float TimeStamp, 
-	name newState, 
+	float TimeStamp,
+	name newState,
 	EPhysics newPhysics,
-	float NewLocX, 
-	float NewLocY, 
-	float NewLocZ, 
-	float NewVelX, 
-	float NewVelY, 
+	float NewLocX,
+	float NewLocY,
+	float NewLocZ,
+	float NewVelX,
+	float NewVelY,
 	float NewVelZ,
 	Actor NewBase,
 	float NewFloorX,
@@ -2193,7 +2193,7 @@ function LongClientAdjustPosition
 			SetViewTarget(Pawn);
 		}
 	}
-	else 
+	else
     {
 		MoveActor = self;
  	   	if( GetStateName() != newstate )
@@ -2233,16 +2233,16 @@ function LongClientAdjustPosition
             CurrentMove.NextMove = FreeMoves;
             FreeMoves = CurrentMove;
 			if ( CurrentMove.TimeStamp == CurrentTimeStamp )
-			{ 
+			{
 				FreeMoves.Clear();
 				if ( (Mover(NewBase) != None) && (NewBase == CurrentMove.EndBase) )
 				{
 					if ( (GetStateName() == NewState)
 						&& IsInState('PlayerWalking')
-						&& ((MoveActor.Physics == PHYS_Walking) || (MoveActor.Physics == PHYS_Falling)) 
+						&& ((MoveActor.Physics == PHYS_Walking) || (MoveActor.Physics == PHYS_Falling))
 						&& ( VSize(CurrentMove.SavedRelativeLocation - NewLocation) < 3 ) )
 					{
-						
+
 						CurrentMove = None;
 						return;
 					}
@@ -2356,7 +2356,7 @@ function ClientUpdatePosition()
 			CurrentMove = CurrentMove.NextMove;
 		}
 	}
-    
+
 	bUpdating = false;
 	bDuck = realbDuck;
 	bRun = realbRun;
@@ -2400,7 +2400,7 @@ final function SavedMove GetFreeMove()
 		FreeMoves = FreeMoves.NextMove;
 		s.NextMove = None;
 		return s;
-	}	
+	}
 }
 
 function int CompressAccel(int C)
@@ -2412,27 +2412,27 @@ function int CompressAccel(int C)
 	return C;
 }
 
-/* 
+/*
 ========================================================================
 Here's how player movement prediction, replication and correction works in network games:
 
-Every tick, the PlayerTick() function is called.  It calls the PlayerMove() function (which is implemented 
-in various states).  PlayerMove() figures out the acceleration and rotation, and then calls ProcessMove() 
+Every tick, the PlayerTick() function is called.  It calls the PlayerMove() function (which is implemented
+in various states).  PlayerMove() figures out the acceleration and rotation, and then calls ProcessMove()
 (for single player or listen servers), or ReplicateMove() (if its a network client).
 
-ReplicateMove() saves the move (in the PendingMove list), calls ProcessMove(), and then replicates the move 
-to the server by calling the replicated function ServerMove() - passing the movement parameters, the client's 
+ReplicateMove() saves the move (in the PendingMove list), calls ProcessMove(), and then replicates the move
+to the server by calling the replicated function ServerMove() - passing the movement parameters, the client's
 resultant position, and a timestamp.
 
-ServerMove() is executed on the server.  It decodes the movement parameters and causes the appropriate movement 
-to occur.  It then looks at the resulting position and if enough time has passed since the last response, or the 
+ServerMove() is executed on the server.  It decodes the movement parameters and causes the appropriate movement
+to occur.  It then looks at the resulting position and if enough time has passed since the last response, or the
 position error is significant enough, the server calls ClientAdjustPosition(), a replicated function.
 
-ClientAdjustPosition() is executed on the client.  The client sets its position to the servers version of position, 
-and sets the bUpdatePosition flag to true.  
+ClientAdjustPosition() is executed on the client.  The client sets its position to the servers version of position,
+and sets the bUpdatePosition flag to true.
 
-When PlayerTick() is called on the client again, if bUpdatePosition is true, the client will call 
-ClientUpdatePosition() before calling PlayerMove().  ClientUpdatePosition() replays all the moves in the pending 
+When PlayerTick() is called on the client again, if bUpdatePosition is true, the client will call
+ClientUpdatePosition() before calling PlayerMove().  ClientUpdatePosition() replays all the moves in the pending
 move list which occured after the timestamp of the move the server was adjusting.
 */
 
@@ -2620,7 +2620,7 @@ function ReplicateMove
 
 	CallServerMove
 		(
-		NewMove.TimeStamp, 
+		NewMove.TimeStamp,
 		NewMove.Acceleration * 10,
 		MoveLoc,
 		NewMove.bRun,
@@ -2629,7 +2629,7 @@ function ReplicateMove
 		bJumpStatus,
 		NewMove.bDoubleJump,
 		NewMove.DoubleClickMove,
-		ClientRoll, 
+		ClientRoll,
 		(32767 & (Rotation.Pitch/2)) * 32768 + (32767 & (Rotation.Yaw/2)),
 		OldTimeDelta,
 		OldAccel
@@ -2772,7 +2772,7 @@ function CallServerMove
 			ClientRoll,
             View,
 			OldTimeDelta,
-			OldAccel 
+			OldAccel
 		);
 }
     else if ( (InAccel == vect(0,0,0)) && (DoubleClickMove == DCLICK_None) && !NewbDoubleJump )
@@ -2807,7 +2807,7 @@ function CallServerMove
 function HandleWalking()
 {
 	if ( Pawn != None )
-		Pawn.SetWalking( (bRun != 0) && !Region.Zone.IsA('WarpZoneInfo') ); 
+		Pawn.SetWalking( (bRun != 0) && !Region.Zone.IsA('WarpZoneInfo') );
 }
 
 function ServerRestartGame()
@@ -2822,13 +2822,13 @@ function SetFOVAngle(float newFOV)
 		Pawn.Weapon.SetWeapFOV(FOVAngle);
 	}
 }
-	 
+
 function ClientFlash( float scale, vector fog )
 {
     FlashScale = scale * vect(1,1,1);
     flashfog = 0.001 * fog;
 }
-   
+
 function ClientAdjustGlow( float scale, vector fog )
 {
 	ConstantGlowScale += scale;
@@ -2852,13 +2852,13 @@ private function ClientStopShake()
 }
 
 exec event ShakeView(float InTime, float SustainTime, float OutTime, float XMag, float YMag, float ZMag, float YawMag, float PitchMag, float Frequency )
-{	
+{
 	local vector NewShakeOffset;
 	local vector NewShakeRotation;
 	local float LerpFactor;
 
 	if( ShakeTimeElapsed != -1 )
-	{	
+	{
 		NewShakeOffset.X = XMag;
 		NewShakeOffset.Y = YMag;
 		NewShakeOffset.Z = ZMag;
@@ -2872,7 +2872,7 @@ exec event ShakeView(float InTime, float SustainTime, float OutTime, float XMag,
 		else if( ShakeTimeElapsed < ShakeTimeSustain )
 			LerpFactor = 1;
 		else if( ShakeTimeElapsed < ShakeTimeOut )
-			LerpFactor = 1 - ShakeTimeElapsed / ShakeTimeOut;	
+			LerpFactor = 1 - ShakeTimeElapsed / ShakeTimeOut;
 
 		if( VSize( NewShakeOffset ) < VSize( ShakeOffsetMag * LerpFactor ) ||
 			VSize( NewShakeRotation ) < VSize( ShakeRotMag * LerpFactor ) )
@@ -2906,7 +2906,7 @@ private function ClientShake( float InTime, float SustainTime, float OutTime, fl
 
 event ViewShake(float DeltaTime)
 {
-	local Rotator ViewRotation;	
+	local Rotator ViewRotation;
 	local vector NewRotNoise;
 	local vector NewOffsetNoise;
 	local float LerpFactor;
@@ -2919,15 +2919,15 @@ event ViewShake(float DeltaTime)
 	else if( ShakeTimeElapsed < ShakeTimeSustain )
 		LerpFactor = 1;
 	else if( ShakeTimeElapsed < ShakeTimeOut )
-		LerpFactor = 1 - ShakeTimeElapsed / ShakeTimeOut;	
+		LerpFactor = 1 - ShakeTimeElapsed / ShakeTimeOut;
 
 	NewRotNoise.X = FClamp( (frand() * 2 - 1) - ShakeRotLastNoise.X, -ShakeFrequency, ShakeFrequency );
 	NewRotNoise.Y = FClamp( (frand() * 2 - 1) - ShakeRotLastNoise.Y, -ShakeFrequency, ShakeFrequency );
-	NewRotNoise.Z = FClamp( (frand() * 2 - 1) - ShakeRotLastNoise.Z, -ShakeFrequency, ShakeFrequency );	
+	NewRotNoise.Z = FClamp( (frand() * 2 - 1) - ShakeRotLastNoise.Z, -ShakeFrequency, ShakeFrequency );
 
 	ViewRotation = Rotation;
 	ViewRotation.Pitch	+= ShakeRotMag.X * ( ShakeRotLastNoise.X + NewRotNoise.X ) * LerpFactor;
-	ViewRotation.Yaw	+= ShakeRotMag.Y * ( ShakeRotLastNoise.Y + NewRotNoise.Y ) * LerpFactor;	
+	ViewRotation.Yaw	+= ShakeRotMag.Y * ( ShakeRotLastNoise.Y + NewRotNoise.Y ) * LerpFactor;
 
 	NewOffsetNoise.X = FClamp( (frand() * 2 - 1) - ShakeOffsetLastNoise.X, -ShakeFrequency, ShakeFrequency );
 	NewOffsetNoise.Y = FClamp( (frand() * 2 - 1) - ShakeOffsetLastNoise.Y, -ShakeFrequency, ShakeFrequency );
@@ -2935,7 +2935,7 @@ event ViewShake(float DeltaTime)
 
 	ShakeOffset.X = ShakeOffsetMag.X * ( ShakeOffsetLastNoise.X + NewOffsetNoise.X ) * LerpFactor;
 	ShakeOffset.Y = ShakeOffsetMag.Y * ( ShakeOffsetLastNoise.Y + NewOffsetNoise.Y ) * LerpFactor;
-	ShakeOffset.Z = ShakeOffsetMag.Z * ( ShakeOffsetLastNoise.Z + NewOffsetNoise.Z ) * LerpFactor;	
+	ShakeOffset.Z = ShakeOffsetMag.Z * ( ShakeOffsetLastNoise.Z + NewOffsetNoise.Z ) * LerpFactor;
 
 	ShakeRotLastNoise = ShakeRotLastNoise + NewRotNoise;
 	ShakeOffsetLastNoise = ShakeOffsetLastNoise + NewOffsetNoise;
@@ -2957,7 +2957,7 @@ function LimitRotation( int MaxPitch, int MinPitch, int MaxYaw, int MinYaw )
 	MinPlayerYaw = MinYaw;
 }
 
-//*************************************************************************************
+//************************************************************************************
 // Normal gameplay execs
 // Type the name of the exec function at the console to execute it
 
@@ -3024,7 +3024,7 @@ simulated function RestartMission()
 {
 	local string CurrentLevel;
 	local string MissionStartLevel;
-	
+
 	GetCurrentMapName( CurrentLevel );
 	MissionStartLevel = GetMissionStart( CurrentLevel );
 	if ( MissionStartLevel != "" )
@@ -3039,7 +3039,7 @@ simulated function int CurrentProfileNumSaves()
 	local string prefix;
 	local array<string> SaveGames;
 	local array<string> DateTimes;
-	
+
 	// Check to see if there are any saves
 	profileName = GetCurrentProfileName();
 	prefix = profileName $ "_";
@@ -3047,7 +3047,7 @@ simulated function int CurrentProfileNumSaves()
 	GetSaveGames( prefix, SaveGames, DateTimes );
 
 	CachedNumSaves = SaveGames.Length;
-		
+
 	return CachedNumSaves;
 }
 
@@ -3055,7 +3055,7 @@ exec function QuickSave()
 {
 	local string saveName;
 	local string LevelName;
-	
+
 	// Quick and dirty hack to disable saving in the prologue
 	GetCurrentMapName( LevelName );
 	LevelName = Caps( LevelName );
@@ -3064,7 +3064,7 @@ exec function QuickSave()
 		LevelName = Left(LevelName, Len(LevelName) - 4);
 	if ( LevelName == "PRO" )
 		return;
-	
+
 	saveName = GetCurrentProfileName() $ "_" $ QuickSaveName;
 	LastSave = saveName;
 	ConsoleCommand("SaveGame " $ saveName);
@@ -3073,7 +3073,7 @@ exec function QuickSave()
 exec function bool HasQuickSave()
 {
 	local string qSaveName;
-	
+
 	qSaveName = GetCurrentProfileName() $ "_" $ QuickSaveName;
 
 	return SaveGameExists( qSaveName );
@@ -3085,17 +3085,17 @@ function bool CanAutoSave()
 	local bool bGotValue;
 	local string value;
 	local string saveName;
-			
-	bGotValue = GetConfigValue("Engine.GameEngine", "DVDDemo", value );			
+
+	bGotValue = GetConfigValue("Engine.GameEngine", "DVDDemo", value );
 	if ( bGotValue )
 	{
 		bDVDDemo = bool(value);
 		if ( bDVDDemo )
 			return False;
 	}
-	
+
 	saveName = GetCurrentProfileName() $ "_" $ AutoSaveName;
-	
+
 	if ( IsOnConsole() )
 	{
 		if ( !SaveGameExists( saveName ) )
@@ -3107,7 +3107,7 @@ function bool CanAutoSave()
 			}
 		}
 	}
-	
+
 	return True;
 }
 
@@ -3118,8 +3118,8 @@ function AutoSave()
 	local bool bGotValue;
 	local string value;
 	local string saveName;
-			
-	bGotValue = GetConfigValue("Engine.GameEngine", "DVDDemo", value );			
+
+	bGotValue = GetConfigValue("Engine.GameEngine", "DVDDemo", value );
 	if ( bGotValue )
 	{
 		bDVDDemo = bool(value);
@@ -3128,7 +3128,7 @@ function AutoSave()
 	}
 
 	saveName = GetCurrentProfileName() $ "_" $ AutoSaveName;
-	
+
 	if ( IsOnConsole() )
 	{
 		if ( !SaveGameExists( saveName ) )
@@ -3136,19 +3136,19 @@ function AutoSave()
 			// Check to make sure we've got space for it...
 			if ( !HaveAdequateDiscSpace( True, False ) )
 			{
-				//*** No need to show this, as they've already seen this and
+				//** No need to show this, as they've already seen this and
 				//	 opted to continue from the menus...
 				//ClientShowSingularMenu( "XInterfaceCommon.MenuLowStorage", "" );
-				//***
+				//**
 				return;
 			}
 		}
 	}
-	
+
 	LastSave = saveName;
 	ConsoleCommand("SaveGame " $ saveName);
 	// Refresh the number of existing saves
-	CurrentProfileNumSaves();		
+	CurrentProfileNumSaves();
 }
 
 exec function LoadGame( string Name )
@@ -3160,7 +3160,7 @@ exec function LoadGame( string Name )
 exec function QuickLoad()
 {
 	local string qSaveName;
-	
+
 	qSaveName = GetCurrentProfileName() $ "_" $ QuickSaveName;
 
 	if ( SaveGameExists( qSaveName ) )
@@ -3171,11 +3171,11 @@ exec event LoadMostRecent()
 {
 	local String SaveName;
 	local String Prefix;
-	
+
 	Prefix = GetCurrentProfileName() $ "_";
-	
+
 	GetMostRecentSaveGame( Prefix, SaveName );
-	
+
 	if ( SaveName != "" )
 		LoadGame( SaveName );
 
@@ -3185,26 +3185,26 @@ exec event LoadMostRecent()
 	local string aSaveName;
 	local bool bQSaveExists;
 	local bool bASaveExists;
-	
+
 	local int result;
-	
+
 	qSaveName = GetCurrentProfileName() $ "_" $ QuickSaveName;
 	aSaveName = GetCurrentProfileName() $ "_" $ AutoSaveName;
 
 	bQSaveExists = SaveGameExists( qSaveName );
 	bASaveExists = SaveGameExists( aSaveName );
-	
+
 	if ( bQSaveExists && bASaveExists )
 	{
 		result = CompareSaveGameTimes( qSaveName, aSaveName );
 		if ( result >= 0 )
 		{
-log("Loading "$qSaveName$", because it's newer than "$aSaveName);		
+log("Loading "$qSaveName$", because it's newer than "$aSaveName);
 			LoadGame( qSaveName );
 		}
 		else
 		{
-log("Loading "$aSaveName$", because it's newer than "$qSaveName);		
+log("Loading "$aSaveName$", because it's newer than "$qSaveName);
 			LoadGame( aSaveName );
 		}
 	}
@@ -3215,12 +3215,12 @@ log("Loading "$qSaveName$", because there's no AutoSave");
 	}
 	else if ( bASaveExists )
 	{
-log("Loading "$aSaveName$", because there's no QuickSave");	
+log("Loading "$aSaveName$", because there's no QuickSave");
 		LoadGame( aSaveName );
 	}
 	else
 	{
-log("No QuickSave or AutoSave");	
+log("No QuickSave or AutoSave");
 		//ClientOpenMenu( "XInterfaceCommon.MenuWarning", false, NoQuickOrAutoSave );
 	}
 	*/
@@ -3246,18 +3246,18 @@ function bool ServerSetPause(BOOL bPause)
     bAltFire = 0;
 	return Level.Game.SetPause(bPause, self);
 }
- 
+
 function bool SetPause( BOOL bPause )
 {
 	if( bPause == True )
-	{	
+	{
 		ReleaseAllButtons();
 		// addition
 		bFire = 0;
 		bAltFire = 0;
 		bDuck = 0;
 	}
-	
+
     return ServerSetPause( bPause );
 }
 
@@ -3282,7 +3282,7 @@ exec function ShowTitleCardMenu( String MenuClass, String Args )
 {
 	if (/* NO_GUI_UI
 		Player.GUIController == None &&
-		*/ 
+		*/
 		Player.Actor == None )
 		return;
 
@@ -3293,7 +3293,7 @@ exec function ShowTitleCardMenu( String MenuClass, String Args )
 	StopForceFeedback();  // jdf - no way to pause feedback
 
 	// Open menu
-	ClientOpenMenu( MenuClass, False, Args );		
+	ClientOpenMenu( MenuClass, False, Args );
 }
 
 exec event ShowMenu(optional String MenuClass, optional String Title, optional String Text, optional String PicName, optional String NewLevel)
@@ -3301,13 +3301,13 @@ exec event ShowMenu(optional String MenuClass, optional String Title, optional S
 	local bool bIPaused;
 	if (/* NO_GUI_UI
 		Player.GUIController == None &&
-		*/ 
+		*/
 		Player.Actor == None )
 		return;
 
 	if ( Level.TimeSeconds <= 0 )
 		return;
-		
+
 	// Pause if not already
 	if(Level.Pauser == None)
 	{
@@ -3324,8 +3324,8 @@ exec event ShowMenu(optional String MenuClass, optional String Title, optional S
 		ClientOpenMenu( MenuClass );
 	else if (bIPaused)   // don't allow other playercontrollers other than the pausing one to do this.
 		ClientOpenMenu( GetPauseMenuClass() );
-		
-	if ( Player != None && 
+
+	if ( Player != None &&
 	     Player.Console != None &&
 	     Player.Console.CurMenu != None )
 	{
@@ -3377,7 +3377,7 @@ exec function PrevWeapon()
 {
 	if( Level.Pauser!=None )
 		return;
-		
+
 	if ( Pawn.Weapon == None )
 	{
 		SwitchToBestWeapon();
@@ -3394,7 +3394,7 @@ exec function PrevWeapon()
 		if ( Pawn.PendingWeapon != None )
 			Pawn.Weapon.PutDown(Pawn.PendingWeapon);
 	}
-	else		
+	else
 		ToggleWeapon();
 }
 
@@ -3413,7 +3413,7 @@ exec function NextWeapon()
 	}
 
 	if( Level.NetMode == NM_StandAlone )
-	{	
+	{
 		if ( Pawn.PendingWeapon != None )
 			Pawn.PendingWeapon = Pawn.Inventory.NextWeapon(None, Pawn.PendingWeapon);
 		else
@@ -3469,8 +3469,8 @@ simulated function ForceWeaponSwitch(byte F)
 	if ( (Pawn != None) && (Pawn.Inventory != None) )
 		newWeapon = Pawn.Inventory.WeaponChange(F, false);
 	else
-		newWeapon = None;	
-	
+		newWeapon = None;
+
 	if ( newWeapon == None )
 		return;
 
@@ -3515,7 +3515,7 @@ exec function GetWeapon(class<Weapon> NewWeaponClass )
 			return;
     }
 }
-	
+
 // The player wants to select previous item
 exec function PrevItem()
 {
@@ -3524,23 +3524,23 @@ exec function PrevItem()
 
     if ( (Level.Pauser!=None) || (Pawn == None) )
 		return;
-	if (Pawn.SelectedItem==None) 
+	if (Pawn.SelectedItem==None)
 	{
 		Pawn.SelectedItem = Pawn.Inventory.SelectNext();
 		Return;
 	}
-	if (Pawn.SelectedItem.Inventory!=None) 
-		for( Inv=Pawn.SelectedItem.Inventory; Inv!=None; Inv=Inv.Inventory ) 
+	if (Pawn.SelectedItem.Inventory!=None)
+		for( Inv=Pawn.SelectedItem.Inventory; Inv!=None; Inv=Inv.Inventory )
 		{
 			if (Inv==None) Break;
 			if ( Inv.IsA('Powerups') && Powerups(Inv).bActivatable) LastItem=Powerups(Inv);
 		}
-	for( Inv=Pawn.Inventory; Inv!=Pawn.SelectedItem; Inv=Inv.Inventory ) 
+	for( Inv=Pawn.Inventory; Inv!=Pawn.SelectedItem; Inv=Inv.Inventory )
 	{
 		if (Inv==None) Break;
 		if ( Inv.IsA('Powerups') && Powerups(Inv).bActivatable) LastItem=Powerups(Inv);
 	}
-	if (LastItem!=None) 
+	if (LastItem!=None)
 		Pawn.SelectedItem = LastItem;
 }
 
@@ -3549,7 +3549,7 @@ exec function ActivateItem()
 {
 	if( Level.Pauser!=None )
 		return;
-	if ( (Pawn != None) && (Pawn.SelectedItem!=None) ) 
+	if ( (Pawn != None) && (Pawn.SelectedItem!=None) )
 		Pawn.SelectedItem.Activate();
 }
 
@@ -3622,7 +3622,7 @@ function ServerUse()
 
 	if (Pawn==None)
 		return;
-	
+
 	// Send the 'DoUse' event to each actor player is touching.
 	ForEach Pawn.TouchingActors(class'Actor', A)
 	{
@@ -3698,7 +3698,7 @@ simulated event UpdateName(string newName)
 {
 	ChangeName( newName );
 }
-	
+
 
 exec function SetName( coerce string S)
 {
@@ -3743,7 +3743,7 @@ exec function ChangeTeam( int N, optional bool bSwitch )
 	else
 	{
 		if (( N == 0 ) || (N == 1))
-			ReceiveLocalizedMessage(class'GameMessage', 17 + N );	
+			ReceiveLocalizedMessage(class'GameMessage', 17 + N );
 	}
 }
 
@@ -3799,7 +3799,7 @@ function EnterStartState()
 	{
 		NewState = Pawn.WaterMovementState;
 	}
-	else  
+	else
 		NewState = Pawn.LandMovementState;
 
 	if ( IsInState(NewState) )
@@ -3809,7 +3809,7 @@ function EnterStartState()
 }
 
 function ClientRestart(Pawn NewPawn)
-{	
+{
 	local bool bNewViewTarget;
 
 	Pawn = NewPawn;
@@ -3831,7 +3831,7 @@ function ClientRestart(Pawn NewPawn)
 	bBehindView = false;
 	BehindView(bBehindView);
 	CleanOutSavedMoves();
-	EnterStartState();	
+	EnterStartState();
 }
 
 exec function BehindView( Bool B )
@@ -3845,7 +3845,7 @@ exec function BehindView( Bool B )
 	    ClientSetBehindView(bBehindView);
     }
 }
-	
+
 exec function ToggleBehindView()
 {
 	ServerToggleBehindview();
@@ -3904,7 +3904,7 @@ event PlayerTick( float DeltaTime )
 				AcknowledgedPawn.Controller = None;
 		}
 		AcknowledgePossession(Pawn);
-	}		
+	}
 	PlayerInput.PlayerInput(DeltaTime);
 	if ( bUpdatePosition )
 		ClientUpdatePosition();
@@ -3932,7 +3932,7 @@ event PlayerTick( float DeltaTime )
 function UpdateBlending( float DeltaTime )
 {
 	local float Lerp;
-	local int	StageIndex;	
+	local int	StageIndex;
 
 	// Update Add Color
 	if( CurrentAddStage != CBS_None )
@@ -3950,13 +3950,13 @@ function UpdateBlending( float DeltaTime )
 			ColorAdd.G = ( AddStages[StageIndex].GoalColor.G * Lerp ) + ( AddStages[StageIndex].BaseColor.G * ( 1 - Lerp ) );
 			ColorAdd.B = ( AddStages[StageIndex].GoalColor.B * Lerp ) + ( AddStages[StageIndex].BaseColor.B * ( 1 - Lerp ) );
 			break;
-		case CBS_Sustain:			
+		case CBS_Sustain:
 			ColorAdd = AddStages[StageIndex].GoalColor;
 			break;
 		}
 
-		if( AddStages[StageIndex].RemainingTime == 0 )		
-			CurrentAddStage = EColorBlendStage( ( CurrentAddStage + 1 ) % 4 );		
+		if( AddStages[StageIndex].RemainingTime == 0 )
+			CurrentAddStage = EColorBlendStage( ( CurrentAddStage + 1 ) % 4 );
 	}
 
 	// Update Mult Color
@@ -3965,7 +3965,7 @@ function UpdateBlending( float DeltaTime )
 		StageIndex = CurrentMultStage - 1;
 		MultStages[StageIndex].RemainingTime -= DeltaTime;
 		MultStages[StageIndex].RemainingTime = FMax( MultStages[StageIndex].RemainingTime, 0 );
-		
+
 		switch( CurrentMultStage )
 		{
 		case CBS_In:
@@ -3975,13 +3975,13 @@ function UpdateBlending( float DeltaTime )
 			ColorMultiply.G = ( MultStages[StageIndex].GoalColor.G * Lerp ) + ( MultStages[StageIndex].BaseColor.G * ( 1 - Lerp ) );
 			ColorMultiply.B = ( MultStages[StageIndex].GoalColor.B * Lerp ) + ( MultStages[StageIndex].BaseColor.B * ( 1 - Lerp ) );
 			break;
-		case CBS_Sustain:			
+		case CBS_Sustain:
 			ColorMultiply = MultStages[StageIndex].GoalColor;
-			break;			
-		}		
+			break;
+		}
 
-		if( MultStages[StageIndex].RemainingTime == 0 )		
-			CurrentMultStage = EColorBlendStage( ( CurrentMultStage + 1 ) % 4 );	
+		if( MultStages[StageIndex].RemainingTime == 0 )
+			CurrentMultStage = EColorBlendStage( ( CurrentMultStage + 1 ) % 4 );
 	}
 
 	// Update Blur
@@ -3998,13 +3998,13 @@ function UpdateBlending( float DeltaTime )
 			Lerp = 1 - ( BlurStages[StageIndex].RemainingTime / BlurStages[StageIndex].TotalTime );
 			Blur = ( BlurStages[StageIndex].GoalColor.R * Lerp ) + ( BlurStages[StageIndex].BaseColor.R * ( 1 - Lerp ) );
 			break;
-		case CBS_Sustain:						
+		case CBS_Sustain:
 			Lerp = BlurStages[StageIndex].GoalColor.R;
 			break;
 		}
 
-		if( BlurStages[StageIndex].RemainingTime == 0 )		
-			CurrentBlurStage = EColorBlendStage( ( CurrentBlurStage + 1 ) % 4 );		
+		if( BlurStages[StageIndex].RemainingTime == 0 )
+			CurrentBlurStage = EColorBlendStage( ( CurrentBlurStage + 1 ) % 4 );
 	}
 
 	// Update BloomFilter
@@ -4021,13 +4021,13 @@ function UpdateBlending( float DeltaTime )
 			Lerp = 1 - ( BloomStages[StageIndex].RemainingTime / BloomStages[StageIndex].TotalTime );
 			Bloom = ( BloomStages[StageIndex].GoalColor.R * Lerp ) + ( BloomStages[StageIndex].BaseColor.R * ( 1 - Lerp ) );
 			break;
-		case CBS_Sustain:			
+		case CBS_Sustain:
 			Bloom = BloomStages[StageIndex].GoalColor.R;
-			break;		
-		}		
+			break;
+		}
 
-		if( BloomStages[StageIndex].RemainingTime == 0 )		
-			CurrentBloomStage = EColorBlendStage( ( CurrentBloomStage + 1 ) % 4 );	
+		if( BloomStages[StageIndex].RemainingTime == 0 )
+			CurrentBloomStage = EColorBlendStage( ( CurrentBloomStage + 1 ) % 4 );
 	}
 }
 
@@ -4065,7 +4065,7 @@ function rotator AdjustAim(Ammunition FiredAmmunition, vector projStart, float a
 			{
 				bestAim = 1.0 - ( AimingHelp * FiredAmmunition.AimAdjustment ) / 65025.0;//cg: why not opt.!? (255.0 * 255.0);
 				if ( FOVAngle < DefaultFOV )
-					bestAim = 1.0 - ( AimingHelp * FiredAmmunition.ZoomedAimAdjustment) / 65025.0;//cg : (255.0 * 255.0);				
+					bestAim = 1.0 - ( AimingHelp * FiredAmmunition.ZoomedAimAdjustment) / 65025.0;//cg : (255.0 * 255.0);
 				MaxAimRange = FiredAmmunition.MaxAutoAimRange;
 			}
 			else if ( Pawn != None && Pawn.Weapon != None )
@@ -4104,7 +4104,7 @@ function rotator AdjustAim(Ammunition FiredAmmunition, vector projStart, float a
 	// If the target is behind or to the side of projStart, just fire straight out of the barrel
 	// Fixes visual artifacts of bolt coming out of barrel at oblique angles
 	// The threshold number was arrived at through emperical observation
-	if( Normal(AimTarget - projStart) Dot ViewDir < 0.4 ) 
+	if( Normal(AimTarget - projStart) Dot ViewDir < 0.4 )
 		AimTarget = projStart + ViewDir * 100;
 
 	AdjustedTarget = AdjustAimError(projStart, AimTarget, aimerror);
@@ -4124,7 +4124,7 @@ function vector AdjustAimError(vector projStart, vector target, float aimerror)
 			RealAimError = Pawn.Weapon.ZoomedAimError;
 	}
 
-	// we want a cone effect on the aimerror based on distance	
+	// we want a cone effect on the aimerror based on distance
 	TargetDist = VSize(target - projStart);
 	TargetDist *= 0.001;
 	// get a random int between -1 and 1
@@ -4159,9 +4159,9 @@ function AdjustView(float DeltaTime )
 	if ( FOVAngle != DesiredFOV )
 	{
 		if ( FOVAngle > DesiredFOV )
-			FOVAngle = FOVAngle - FMax(7, 0.19 * DeltaTime * (FOVAngle - DesiredFOV)); 
-		else 
-			FOVAngle = FOVAngle - FMin(-7, 0.19 * DeltaTime * (FOVAngle - DesiredFOV)); 
+			FOVAngle = FOVAngle - FMax(7, 0.19 * DeltaTime * (FOVAngle - DesiredFOV));
+		else
+			FOVAngle = FOVAngle - FMin(-7, 0.19 * DeltaTime * (FOVAngle - DesiredFOV));
 		if ( Abs(FOVAngle - DesiredFOV) <= 10 )
 			FOVAngle = DesiredFOV;
 
@@ -4173,12 +4173,12 @@ function AdjustView(float DeltaTime )
 
 	// adjust FOV for weapon zooming
 	if ( bZooming )
-	{	
+	{
 		ZoomLevel += DeltaTime * 1.0;
 		if (ZoomLevel > 0.19)
 			ZoomLevel = 0.19;
 		DesiredFOV = FClamp(90.0 - (ZoomLevel * 88.0), 1, 170);
-	} 
+	}
 }
 
 function CalcBehindView(out vector CameraLocation, out rotator CameraRotation, float Dist)
@@ -4199,7 +4199,7 @@ function CalcBehindView(out vector CameraLocation, out rotator CameraRotation, f
 		ViewDist = FMin( (CameraLocation - HitLocation) Dot View, Dist );
 	else
 		ViewDist = Dist;
-    
+
     if ( !bBlockCloseCamera || !bValidBehindCamera || (ViewDist > 10 + FMax(ViewTarget.CollisionRadius, ViewTarget.CollisionHeight)) )
 	{
 		//Log("Update Cam ");
@@ -4213,7 +4213,7 @@ function CalcBehindView(out vector CameraLocation, out rotator CameraRotation, f
 		SetRotation(OldCameraRot);
 	}
 
-    CameraLocation = OldCameraLoc; 
+    CameraLocation = OldCameraLoc;
     CameraRotation = OldCameraRot;
 }
 
@@ -4297,7 +4297,7 @@ event PlayerCalcView(out actor ViewActor, out vector CameraLocation, out rotator
 			CameraRotation = Rotation;
 		return;
 	}
-    else if ( ViewTarget.IsA('Projectile') && !bBehindView ) 
+    else if ( ViewTarget.IsA('Projectile') && !bBehindView )
     {
         CameraLocation += (ViewTarget.CollisionHeight) * vect(0,0,1);
         CameraRotation = Rotation;
@@ -4367,7 +4367,7 @@ ignores SeePlayer, HearNoise, Bump;
 		return false;
 	}
 
-	function ProcessMove(float DeltaTime, vector NewAccel, eDoubleClickDir DoubleClickMove, rotator DeltaRot)	
+	function ProcessMove(float DeltaTime, vector NewAccel, eDoubleClickDir DoubleClickMove, rotator DeltaRot)
 	{
 		local vector OldAccel;
 		local bool OldCrouch;
@@ -4376,7 +4376,7 @@ ignores SeePlayer, HearNoise, Bump;
 			return;
 		OldAccel = Pawn.Acceleration;
 		if ( Pawn.Acceleration != NewAccel )
-			Pawn.Acceleration = NewAccel;				
+			Pawn.Acceleration = NewAccel;
 		if ( bPressedJump )
 			Pawn.DoJump(bUpdating);
 		if ( Pawn.Physics != PHYS_Falling )
@@ -4401,20 +4401,20 @@ ignores SeePlayer, HearNoise, Bump;
 		GetAxes(ViewRotation, X,Y,Z);
 
 		// Update acceleration.
-		NewAccel = aForward*X + aStrafe*Y; 
+		NewAccel = aForward*X + aStrafe*Y;
 		NewAccel.Z = 0;
 		if ( VSizeSq(NewAccel) < 1.0 )
 			NewAccel = vect(0,0,0);
 		DoubleClickMove = PlayerInput.CheckForDoubleClickMove(DeltaTime);
-	
-		GroundPitch = 0;	
+
+		GroundPitch = 0;
 		ViewRotation = Rotation;
 
 		if ( (Pawn != None) && (Pawn.Physics == PHYS_Walking) )
 		{
 			// tell pawn about any direction changes to give it a chance to play appropriate animation
 			//if walking, look up/down stairs - unless player is rotating view
-			if ( (bLook == 0) 
+			if ( (bLook == 0)
                 && (((Pawn.Acceleration != Vect(0,0,0)) && bSnapToLevel) || !bKeyboardLook) )
 			{
 				if ( bLookUpStairs || bSnapToLevel )
@@ -4429,10 +4429,10 @@ ignores SeePlayer, HearNoise, Bump;
 						ViewRotation.Pitch -= 65536;
 					ViewRotation.Pitch = ViewRotation.Pitch * (1 - 12 * FMin(0.0833, deltaTime));
                     if ( Abs(ViewRotation.Pitch) < 200 )
-						ViewRotation.Pitch = 0;	
+						ViewRotation.Pitch = 0;
 				}
 			}
-		}	
+		}
 		else
 		{
 			if ( !bKeyboardLook && (bLook == 0) && bCenterView )
@@ -4442,7 +4442,7 @@ ignores SeePlayer, HearNoise, Bump;
 					ViewRotation.Pitch -= 65536;
 				ViewRotation.Pitch = ViewRotation.Pitch * (1 - 12 * FMin(0.0833, deltaTime));
                 if ( Abs(ViewRotation.Pitch) < 200 )
-					ViewRotation.Pitch = 0;	
+					ViewRotation.Pitch = 0;
 			}
 		}
 
@@ -4484,7 +4484,7 @@ ignores SeePlayer, HearNoise, Bump;
 			Pawn.SetPhysics(PHYS_Walking);
 		}
 	}
-	
+
 	function EndState()
 	{
 		GroundPitch = 0;
@@ -4509,7 +4509,7 @@ ignores SeePlayer, HearNoise, Bump;
 		return false;
 	}
 
-	function ProcessMove(float DeltaTime, vector NewAccel, eDoubleClickDir DoubleClickMove, rotator DeltaRot)	
+	function ProcessMove(float DeltaTime, vector NewAccel, eDoubleClickDir DoubleClickMove, rotator DeltaRot)
 	{
 		local vector OldAccel;
 
@@ -4536,7 +4536,7 @@ ignores SeePlayer, HearNoise, Bump;
 		NewAccel = aForward*X + aStrafe*Y;
 		if ( VSizeSq(NewAccel) < 1.0 )
 			NewAccel = vect(0,0,0);
-		
+
 		ViewRotation = Rotation;
 
 		// Update rotation.
@@ -4556,7 +4556,7 @@ ignores SeePlayer, HearNoise, Bump;
 		Pawn.ShouldCrouch(false);
 		bPressedJump = false;
 	}
-	
+
 	function EndState()
 	{
 		if ( Pawn != None )
@@ -4582,19 +4582,19 @@ state PlayerPossessed extends PlayerWalking
 			CalcFirstPersonView( NewMachineLoc, Rot );
 			NewMachineLoc.Z += 10;
 			Machine.SetLocation(NewMachineLoc);
-		}					
-		
+		}
+
 		Super.ThrowScav();
 
-		GotoState('PlayerWalking');		
+		GotoState('PlayerWalking');
 	}
 
 	// no weapon switching in this mode
 	exec function PrevWeapon() {}
 	exec function NextWeapon() {}
 	exec function PipedSwitchWeapon(byte F) {}
-	
-	// NathanM: This is duped from the main state function	
+
+	// NathanM: This is duped from the main state function
 	exec function SwitchWeapon (byte F )
 	{
 		if( Machine != None && F != 0 )
@@ -4609,7 +4609,7 @@ state PlayerPossessed extends PlayerWalking
 		Pawn.ChangeAnimation();
 		Pawn.CreateInventory( "CTInventory.AttachedScavDroid" );
 		SwitchWeapon(0);
-		//Pawn.ChangedWeapon();		
+		//Pawn.ChangedWeapon();
 		if (Pawn.PendingWeapon != None)
 			myHUD.bScavangerHead=true;
 		Target = None;
@@ -4619,19 +4619,19 @@ state PlayerPossessed extends PlayerWalking
 	function EndState()
 	{
 		if( Pawn.Health > 0 )
-		{			
+		{
 			Pawn.SetPhysics(PHYS_Falling);
 			Pawn.CurrentIdleState = AS_Alert;
 			Pawn.ChangeAnimation();
 		}
 		else
 			Pawn.TossWeapon(Pawn.Weapon,vect(0,0,0));
-		
-		myHUD.bScavangerHead=false;					
+
+		myHUD.bScavangerHead=false;
 	}
 
 	function WeaponFired()
-	{		
+	{
 	}
 }
 
@@ -4684,7 +4684,7 @@ state PlayerManningTurret
 			Log("Machine is broken");
 			return;
 		}
-		//if the pawn has been incapacitated on the turret, 
+		//if the pawn has been incapacitated on the turret,
 		if (Pawn.bIncapacitatedOnTurret)
 		{
 			MannedTurret.UsedBy(Pawn);
@@ -4713,7 +4713,7 @@ state PlayerManningTurret
 	}
 
 	exec function Use()
-	{	
+	{
 		switch(TargetType)
 		{
 			case TGT_Marker:
@@ -4738,20 +4738,20 @@ ignores SeePlayer, HearNoise, Bump;
 
 		GetAxes(Rotation,X,Y,Z);
 
-		Pawn.Acceleration = aForward*X + aStrafe*Y; 
+		Pawn.Acceleration = aForward*X + aStrafe*Y;
 		if ( VSize(Pawn.Acceleration) < 1.0 )
 			Pawn.Acceleration = vect(0,0,0);
 		if ( bCheatFlying && (Pawn.Acceleration == vect(0,0,0)) )
 			Pawn.Velocity = vect(0,0,0);
 		// Update rotation.
 		UpdateRotation(DeltaTime, 2);
-		
+
 		if ( Role < ROLE_Authority ) // then save this move and replicate it
 			ReplicateMove(DeltaTime, Pawn.Acceleration, DCLICK_None, rot(0,0,0));
 		else
 			ProcessMove(DeltaTime, Pawn.Acceleration, DCLICK_None, rot(0,0,0));
 	}
-	
+
 	function BeginState()
 	{
 		Pawn.SetPhysics(PHYS_Flying);
@@ -4763,22 +4763,22 @@ state PlayerRocketing
 {
 ignores SeePlayer, HearNoise, Bump;
 
-	/* ServerMove() 
+	/* ServerMove()
 	- replicated function sent by client to server - contains client movement and firing info
 	Passes acceleration in components so it doesn't get rounded.
 	IGNORE VANILLA SERVER MOVES
 	*/
 	function ServerMove
 	(
-		float TimeStamp, 
-		vector InAccel, 
+		float TimeStamp,
+		vector InAccel,
 		vector ClientLoc,
 		bool NewbRun,
 		bool NewbDuck,
-		bool NewbJumpStatus, 
+		bool NewbJumpStatus,
 		bool NewbDoubleJump,
-		eDoubleClickDir DoubleClickMove, 
-		byte ClientRoll, 
+		eDoubleClickDir DoubleClickMove,
+		byte ClientRoll,
 		int View,
 		optional byte OldTimeDelta,
 		optional int OldAccel
@@ -4788,32 +4788,32 @@ ignores SeePlayer, HearNoise, Bump;
 	       Pawn.AutonomousPhysics(TimeStamp - CurrentTimeStamp);
 		CurrentTimeStamp = TimeStamp;
 		ServerTimeStamp = Level.TimeSeconds;
-	}	
+	}
 
 	function RocketServerMove
 	(
-		float TimeStamp, 
-		vector InAccel, 
+		float TimeStamp,
+		vector InAccel,
 		vector ClientLoc,
-		byte ClientRoll, 
+		byte ClientRoll,
 		int View
 	)
 	{
 		//if ( InAccel Dot Pawn.Velocity < 0 )
 		//	InAccel = 0.1 * Pawn.AccelRate * Normal(Pawn.Velocity);
 		Global.ServerMove(TimeStamp,InAccel,ClientLoc,false,false,false,false, DCLICK_NONE,ClientRoll,View);
-	}	
-		
+	}
+
     function PlayerMove(float DeltaTime)
     {
 		//Pawn.UpdateRocketAcceleration(DeltaTime,aTurn,aLookUp);
-		SetRotation(Pawn.Rotation);        
+		SetRotation(Pawn.Rotation);
 		if ( Role < ROLE_Authority ) // then save this move and replicate it
 			ReplicateMove(DeltaTime, Pawn.Acceleration, DCLICK_None, rot(0,0,0));
 		else
 			ProcessMove(DeltaTime, Pawn.Acceleration, DCLICK_None, rot(0,0,0));
 	}
-    
+
     function BeginState()
     {
         Pawn.SetPhysics(PHYS_Flying);
@@ -4832,8 +4832,8 @@ state BaseSpectating
 		return true;
 	}
 
-	function ProcessMove(float DeltaTime, vector NewAccel, eDoubleClickDir DoubleClickMove, rotator DeltaRot)	
-	{		
+	function ProcessMove(float DeltaTime, vector NewAccel, eDoubleClickDir DoubleClickMove, rotator DeltaRot)
+	{
 		Acceleration = NewAccel;
         MoveSmooth(SpectateSpeed * Normal(Acceleration) * DeltaTime);
 	}
@@ -4851,8 +4851,8 @@ state BaseSpectating
 			BlendedTargetViewRotation.Roll = BlendRot(DeltaTime, BlendedTargetViewRotation.Roll, TargetViewRotation.Roll & 65535);
 		}
 		GetAxes(Rotation,X,Y,Z);
-	
-		Acceleration = 0.02 * (aForward*X + aStrafe*Y + aUp*vect(0,0,1));  
+
+		Acceleration = 0.02 * (aForward*X + aStrafe*Y + aUp*vect(0,0,1));
 
 		UpdateRotation(DeltaTime, 1);
 
@@ -4889,7 +4889,7 @@ function ServerViewNextPlayer()
 
     bRealSpec = PlayerReplicationInfo.bOnlySpectator;
     PlayerReplicationInfo.bOnlySpectator = true;
-    
+
     // view next player
     for ( C=Level.ControllerList; C!=None; C=C.NextController )
     {
@@ -4901,7 +4901,7 @@ function ServerViewNextPlayer()
             {
                 Pick = C.Pawn;
                 break;
-            }   
+            }
             else
                 bFound = ( ViewTarget == C.Pawn );
         }
@@ -4927,10 +4927,10 @@ function ServerViewSelf()
 function LoadPlayers()
 {
 	local int i;
-	
+
 	if ( GameReplicationInfo == None )
 		return;
-		
+
 	for ( i=0; i<GameReplicationInfo.PRIArray.Length; i++ )
 		GameReplicationInfo.PRIArray[i].UpdatePrecacheMaterials();
 }
@@ -5022,7 +5022,7 @@ function ProfileCallback()
 //replicated to server
 function ServerChooseTeam()
 {
-	PlayerReplicationInfo.bIsSpectator = false;		
+	PlayerReplicationInfo.bIsSpectator = false;
 	GotoState('ChooseTeam');
 }
 
@@ -5051,7 +5051,7 @@ state Spectating extends BaseSpectating
 		bBehindView = false;
 		ServerViewSelf();
 	}
-	
+
     function Timer()
     {
     	bFrozen = false;
@@ -5070,7 +5070,7 @@ state Spectating extends BaseSpectating
 
 	function EndState()
 	{
-		PlayerReplicationInfo.bIsSpectator = false;		
+		PlayerReplicationInfo.bIsSpectator = false;
 		bCollideWorld = false;
 	}
 }
@@ -5084,20 +5084,20 @@ state ChooseTeam extends BaseSpectating
 	exec function Suicide();
 	exec function AltFire(optional float F);
 	exec function ThrowGrenade(optional float F);
-	
+
 	function bool CanRestartPlayer()
 	{
 		return false;
 	}
-	
+
 	function ChangeTeam( int N, optional bool bSwitch )
 	{
 		// 255 implies autoselect
 		if (N == 255)
-		{	
+		{
 			N = Level.Game.PickTeam( N,None );
 		}
-		
+
 		if (N < 0)
 		{
 			if (Level.Game.AllowBecomeSpectator( self ))
@@ -5113,7 +5113,7 @@ state ChooseTeam extends BaseSpectating
 
          // Find a start spot.
 			StartSpot = Level.Game.FindPlayerStart( self, byte(N) );
-			
+
 			GotoState('PlayerWaiting');
 
 			Fire();
@@ -5126,13 +5126,13 @@ state ChooseTeam extends BaseSpectating
 
 	exec function Fire(optional float F)
 	{
-		//ClientOpenMenu( GetTeamMenuClass() );	
+		//ClientOpenMenu( GetTeamMenuClass() );
 	}
-	
+
 
 	function EndState()
 	{
-		SetTimer(0.0, false);	
+		SetTimer(0.0, false);
 	}
 
 	function Timer()
@@ -5144,13 +5144,13 @@ state ChooseTeam extends BaseSpectating
 			SetTimer(0.0, false);
 		}
 	}
-	
+
 	function BeginState()
 	{
 		// O_o  implied if spectating, then we should put up the menu.
 		PlayerReplicationInfo.Team = None;
 
-		SetTimer(0.5, true);			
+		SetTimer(0.5, true);
 	}
 }
 
@@ -5164,12 +5164,12 @@ state ChooseProfile extends BaseSpectating
 	exec function Suicide();
 	exec function AltFire(optional float F);
 	exec function ThrowGrenade(optional float F);
-	
+
 	function bool CanRestartPlayer()
 	{
 		return false;
 	}
-	
+
 	function ProfileCallback()
 	{
 		if (GameReplicationInfo.bTeamGame)
@@ -5180,13 +5180,13 @@ state ChooseProfile extends BaseSpectating
 
 	exec function Fire(optional float F)
 	{
-		//ClientOpenMenu( GetTeamMenuClass() );	
+		//ClientOpenMenu( GetTeamMenuClass() );
 	}
-	
+
 
 	function EndState()
 	{
-		SetTimer(0.0, false);	
+		SetTimer(0.0, false);
 	}
 
 	function Timer()
@@ -5198,10 +5198,10 @@ state ChooseProfile extends BaseSpectating
 			SetTimer(0.0, false);
 		}
 	}
-	
+
 	function BeginState()
 	{
-		SetTimer(0.5, true);			
+		SetTimer(0.5, true);
 	}
 }
 
@@ -5219,7 +5219,7 @@ ignores SeePlayer, HearNoise, NotifyBump, TakeDamage, PhysicsVolumeChange, NextW
 	}
 
     function ServerRestartPlayer()
-	{		
+	{
 		if ( Level.TimeSeconds < WaitDelay )
 			return;
 		if ( Level.NetMode == NM_Client )
@@ -5235,7 +5235,7 @@ ignores SeePlayer, HearNoise, NotifyBump, TakeDamage, PhysicsVolumeChange, NextW
         LoadPlayers();
 		ServerReStartPlayer();
 	}
-	
+
 	exec function AltFire(optional float F)
 	{
         Fire(F);
@@ -5270,7 +5270,7 @@ ignores SeePlayer, HearNoise, KilledBy, SwitchWeapon;
 
 	exec function AltFire( optional float F );
 	exec function ThrowGrenade(optional float F);
-	
+
 	exec function Fire( optional float F )
 	{
 		AskForPawn();
@@ -5278,14 +5278,14 @@ ignores SeePlayer, HearNoise, KilledBy, SwitchWeapon;
 
 	function LongClientAdjustPosition
 	(
-		float TimeStamp, 
-		name newState, 
+		float TimeStamp,
+		name newState,
 		EPhysics newPhysics,
-		float NewLocX, 
-		float NewLocY, 
-		float NewLocZ, 
-		float NewVelX, 
-		float NewVelY, 
+		float NewLocX,
+		float NewLocY,
+		float NewLocZ,
+		float NewVelX,
+		float NewVelY,
 		float NewVelZ,
 		Actor NewBase,
 		float NewFloorX,
@@ -5338,7 +5338,7 @@ ignores SeePlayer, HearNoise, KilledBy, NotifyBump, HitWall, NotifyHeadVolumeCha
 
 	function ServerReStartPlayer();
 	exec function ThrowWeapon();
-	
+
 	function bool IsSpectating()
 	{
 		return true;
@@ -5358,7 +5358,7 @@ ignores SeePlayer, HearNoise, KilledBy, NotifyBump, HitWall, NotifyHeadVolumeCha
 		else if ( TimerRate <= 0 )
 			SetTimer(1.5, false);
 	}
-	
+
 	exec function AltFire( optional float F )
 	{
 		Fire(F);
@@ -5385,7 +5385,7 @@ ignores SeePlayer, HearNoise, KilledBy, NotifyBump, HitWall, NotifyHeadVolumeCha
 			ViewRotation.Pitch = ViewRotation.Pitch & 65535;
 			If ((ViewRotation.Pitch > 18000) && (ViewRotation.Pitch < 49152))
 			{
-				If (aLookUp > 0) 
+				If (aLookUp > 0)
 					ViewRotation.Pitch = 18000;
 				else
 					ViewRotation.Pitch = 49152;
@@ -5407,15 +5407,15 @@ ignores SeePlayer, HearNoise, KilledBy, NotifyBump, HitWall, NotifyHeadVolumeCha
 
 	function ServerMove
 	(
-		float TimeStamp, 
-		vector InAccel, 
+		float TimeStamp,
+		vector InAccel,
 		vector ClientLoc,
 		bool NewbRun,
 		bool NewbDuck,
-		bool NewbJumpStatus, 
-        bool NewbDoubleJump, 
-		eDoubleClickDir DoubleClickMove, 
-		byte ClientRoll, 
+		bool NewbJumpStatus,
+        bool NewbDoubleJump,
+		eDoubleClickDir DoubleClickMove,
+		byte ClientRoll,
 		int View,
 		optional byte OldTimeDelta,
 		optional int OldAccel
@@ -5434,14 +5434,14 @@ ignores SeePlayer, HearNoise, KilledBy, NotifyBump, HitWall, NotifyHeadVolumeCha
 		local float bestdist, newdist;
 		local int startYaw;
 		local actor ViewActor;
-		
+
 		ViewRotation = Rotation;
 		ViewRotation.Pitch = 56000;
 		tries = 0;
 		besttry = 0;
 		bestdist = 0.0;
 		startYaw = ViewRotation.Yaw;
-		
+
 		for (tries=0; tries<16; tries++)
 		{
 			cameraLoc = ViewTarget.Location;
@@ -5450,40 +5450,40 @@ ignores SeePlayer, HearNoise, KilledBy, NotifyBump, HitWall, NotifyHeadVolumeCha
 			newdist = VSize(cameraLoc - ViewTarget.Location);
 			if (newdist > bestdist)
 			{
-				bestdist = newdist;	
+				bestdist = newdist;
 				besttry = tries;
 			}
 			ViewRotation.Yaw += 4096;
 		}
-			
+
 		ViewRotation.Yaw = startYaw + besttry * 4096;
 		SetRotation(ViewRotation);
 	}
-	
+
 	function Timer()
 	{
 		bFrozen = false;
 	}
-	
+
 	function LongClientAdjustPosition
 	(
-		float TimeStamp, 
-		name newState, 
+		float TimeStamp,
+		name newState,
 		EPhysics newPhysics,
-		float NewLocX, 
-		float NewLocY, 
-		float NewLocZ, 
-		float NewVelX, 
-		float NewVelY, 
+		float NewLocX,
+		float NewLocY,
+		float NewLocZ,
+		float NewVelX,
+		float NewVelY,
 		float NewVelZ,
 		Actor NewBase,
 		float NewFloorX,
 		float NewFloorY,
 		float NewFloorZ
 	)
-	{   
+	{
 	}
-		 
+
 	function BeginState()
 	{
 		local Pawn P;
@@ -5522,7 +5522,7 @@ ignores SeePlayer, HearNoise, KilledBy, NotifyBump, HitWall, NotifyHeadVolumeCha
 			if ( P.Role == ROLE_Authority )
 				P.RemoteRole = ROLE_DumbProxy;
 			P.SetCollision(true,false,false);
-			P.AmbientSound = None; 			
+			P.AmbientSound = None;
 			P.Velocity = vect(0,0,0);
 			P.SetPhysics(PHYS_None);
             P.bPhysicsAnimUpdate = false;
@@ -5548,7 +5548,7 @@ state CtrlIncapacitated
 			return;
 		}
 	}
-	
+
 	exec function AltFire( optional float F )
 	{
 		Fire(F);
@@ -5561,15 +5561,15 @@ state CtrlIncapacitated
 
 	function ServerMove
 	(
-		float TimeStamp, 
-		vector Accel, 
+		float TimeStamp,
+		vector Accel,
 		vector ClientLoc,
 		bool NewbRun,
 		bool NewbDuck,
 		bool NewbJumpStatus,
         bool NewbDoubleJump,
-		eDoubleClickDir DoubleClickMove, 
-		byte ClientRoll, 
+		eDoubleClickDir DoubleClickMove,
+		byte ClientRoll,
 		int View,
 		optional byte OldTimeDelta,
 		optional int OldAccel
@@ -5577,19 +5577,19 @@ state CtrlIncapacitated
 	{
 		Global.ServerMove(
 					TimeStamp,
-					Accel, 
+					Accel,
 					ClientLoc,
 					false,
 					false,
 					false,
                     false,
-					DoubleClickMove, 
-					ClientRoll, 
+					DoubleClickMove,
+					ClientRoll,
 					View);
 	}
 
 	function PlayerMove(float DeltaTime)
-	{		
+	{
 		local rotator ViewRotation;
 
 		if ( !bFrozen )
@@ -5599,13 +5599,13 @@ state CtrlIncapacitated
 				Fire(0);
 				bPressedJump = false;
 			}
-			
+
 			ViewRotation = RelativeRotation;
 
 			ViewRotation.Yaw += 4.0 * DeltaTime * aTurn;
-			ViewRotation.Pitch += 4.0 * DeltaTime * aLookUp;			
+			ViewRotation.Pitch += 4.0 * DeltaTime * aLookUp;
 			ViewRotation.Yaw = Clamp( ViewRotation.Yaw, -8000, 8000 );
-			ViewRotation.Pitch = Clamp( ViewRotation.Pitch, -8000, 8000 );			
+			ViewRotation.Pitch = Clamp( ViewRotation.Pitch, -8000, 8000 );
 			SetRelativeRotation( ViewRotation );
 		}
         else if ( (TimerRate <= 0.0) || (TimerRate > 1.0) )
@@ -5614,7 +5614,7 @@ state CtrlIncapacitated
 		ViewShake(DeltaTime);
 		ViewFlash(DeltaTime);
 	}
-	
+
 	function BeginState()
 	{
 		StopFiring();
@@ -5622,7 +5622,7 @@ state CtrlIncapacitated
 		FOVAngle = DesiredFOV;
 		Target = None;
 		TargetType = TGT_Default;
-		TargetMarker = None;		
+		TargetMarker = None;
 		Pawn.bUpdateEyeHeight = false;
 		Enemy = None;
 		//bBehindView = true;
@@ -5631,7 +5631,7 @@ state CtrlIncapacitated
         bBlockCloseCamera = true;
 		bValidBehindCamera = false;
 		//FindGoodView();
-		CleanOutSavedMoves();		
+		CleanOutSavedMoves();
 		Pawn.AttachToBone( self, 'DeathCamera' );
 		SetTimer(2.0,false);
 		SavedVisionMode = Pawn.CurrentUserVisionMode;
@@ -5643,7 +5643,7 @@ state CtrlIncapacitated
 		if( Pawn != None && Pawn.Weapon != None )
 			Pawn.Disarm();
 	}
-	
+
 	function EndState()
 	{
 		local Rotator Rot;
@@ -5657,7 +5657,7 @@ state CtrlIncapacitated
 		SetRotation(Rot);
 		bBehindView = false;
 		bPressedJump = false;
-		myHUD.bShowScores = false;	
+		myHUD.bShowScores = false;
 		Pawn.SwitchToLastWeapon();
 		Pawn.bUpdateEyeHeight = true;
 		SetBase(None);
@@ -5665,14 +5665,14 @@ state CtrlIncapacitated
 	}
 
 	function rotator GetViewRotation()
-	{		
+	{
 		return Pawn.GetBoneRotation('DeathCamera') + RelativeRotation;
 	}
 
 	function CalcFirstPersonView( out vector CameraLocation, out rotator CameraRotation )
-	{		
+	{
 		CameraLocation = Pawn.GetBoneLocation('DeathCamera');
-		CameraRotation = Pawn.GetBoneRotation('DeathCamera') + RelativeRotation;		
+		CameraRotation = Pawn.GetBoneRotation('DeathCamera') + RelativeRotation;
 	}
 }
 
@@ -5683,7 +5683,7 @@ ignores QuickSave, SeePlayer, HearNoise, KilledBy, SwitchWeapon, NextWeapon, Pre
 	//gdr Need to continue to send empty movements to have the server update our ping.
 	//    Makes sense in some strange Unreal way doesn't it?
 	function PlayerMove(float DeltaTime)
-	{		
+	{
         if ( Role < ROLE_Authority ) // then save this move and replicate it
             ReplicateMove(DeltaTime, vect(0,0,0), DCLICK_None, rot(0,0,0));
         else
@@ -5696,14 +5696,14 @@ ignores QuickSave, SeePlayer, HearNoise, KilledBy, SwitchWeapon, NextWeapon, Pre
 	}
 
 	function ServerReStartPlayer()
-	{		
+	{
 		if ( Level.NetMode == NM_Client )
 			return;
 
 		Level.Game.RestartPlayer(self);
 	}
 
-	function PawnDied(Pawn P) 
+	function PawnDied(Pawn P)
 	{
 		if ( Level.NetMode != NM_Client )
 			warn(self$" PawnDied while dead");
@@ -5717,7 +5717,7 @@ ignores QuickSave, SeePlayer, HearNoise, KilledBy, SwitchWeapon, NextWeapon, Pre
 				bFrozen = false;
 			return;
 		}
-		//*** SBD - Now that we have a death pause menu, we
+		//** SBD - Now that we have a death pause menu, we
 		//		   don't want to do this anymore in single player
 		if ( Level.NetMode != NM_Standalone )
 		{
@@ -5725,7 +5725,7 @@ ignores QuickSave, SeePlayer, HearNoise, KilledBy, SwitchWeapon, NextWeapon, Pre
 			ServerReStartPlayer();
 		}
 	}
-	
+
 	exec function AltFire( optional float F )
 	{
 		Fire(F);
@@ -5735,10 +5735,10 @@ ignores QuickSave, SeePlayer, HearNoise, KilledBy, SwitchWeapon, NextWeapon, Pre
 	{
 		Fire(F);
 	}
-	
+
 	function Timer()
-	{		
-		if ( Player != None && 
+	{
+		if ( Player != None &&
 			 Player.Console != None &&
 			 Player.Console.CurMenu == None )
 		{
@@ -5747,11 +5747,11 @@ ignores QuickSave, SeePlayer, HearNoise, KilledBy, SwitchWeapon, NextWeapon, Pre
 
 		if (!bFrozen)
 			return;
-			
+
 		bFrozen = false;
 		bPressedJump = false;
 	}
-	
+
 	function FindGoodView()
 	{
 		local vector cameraLoc;
@@ -5760,7 +5760,7 @@ ignores QuickSave, SeePlayer, HearNoise, KilledBy, SwitchWeapon, NextWeapon, Pre
 		local float bestdist, newdist;
 		local int startYaw;
 		local actor ViewActor;
-		
+
 		////log("Find good death scene view");
 		ViewRotation = Rotation;
 		ViewRotation.Pitch = 56000;
@@ -5768,7 +5768,7 @@ ignores QuickSave, SeePlayer, HearNoise, KilledBy, SwitchWeapon, NextWeapon, Pre
 		besttry = 0;
 		bestdist = 0.0;
 		startYaw = ViewRotation.Yaw;
-		
+
 		for (tries=0; tries<16; tries++)
 		{
 			cameraLoc = ViewTarget.Location;
@@ -5777,12 +5777,12 @@ ignores QuickSave, SeePlayer, HearNoise, KilledBy, SwitchWeapon, NextWeapon, Pre
 			newdist = VSize(cameraLoc - ViewTarget.Location);
 			if (newdist > bestdist)
 			{
-				bestdist = newdist;	
+				bestdist = newdist;
 				besttry = tries;
 			}
 			ViewRotation.Yaw += 4096;
 		}
-			
+
 		ViewRotation.Yaw = startYaw + besttry * 4096;
 		SetRotation(ViewRotation);
 	}
@@ -5791,7 +5791,7 @@ ignores QuickSave, SeePlayer, HearNoise, KilledBy, SwitchWeapon, NextWeapon, Pre
 	{
 		local float VisorFadeTime;
 		local color FlashColor;
-		local color FadeColor;		
+		local color FadeColor;
 
 		//if ( (Pawn != None) && (Pawn.Controller == self) )
 		//	Pawn.Controller = None;
@@ -5810,19 +5810,19 @@ ignores QuickSave, SeePlayer, HearNoise, KilledBy, SwitchWeapon, NextWeapon, Pre
 		bJumpStatus = false;
 		bPressedJump = false;
         //bBlockCloseCamera = true;
-		//bValidBehindCamera = false;		
+		//bValidBehindCamera = false;
 		//FindGoodView();
-        //SetTimer(1.0, false); 
+        //SetTimer(1.0, false);
 		StopForceFeedback();
 		ClientPlayForceFeedback("Damage");  // jdf
-		CleanOutSavedMoves();		
+		CleanOutSavedMoves();
 
 		VisorFadeTime = 5;
 
 		FlashColor.R = 180;
 		FlashColor.G = 180;
-		FlashColor.B = 180;	
-		
+		FlashColor.B = 180;
+
 		FadeColor.R = 255;
 		FadeColor.G = 255;
 		FadeColor.B = 255;
@@ -5836,12 +5836,12 @@ ignores QuickSave, SeePlayer, HearNoise, KilledBy, SwitchWeapon, NextWeapon, Pre
 		SetTimer( VisorFadeTime, false );
 
 		if (( Level.NetMode == NM_Standalone ) && (Pawn != None))
-		{		
+		{
 			SavedVisionMode = Pawn.CurrentUserVisionMode;
-			GotoVisionMode( 0 );		
+			GotoVisionMode( 0 );
 		}
 	}
-	
+
 	function EndState()
 	{
 		bBlockCloseCamera = false;
@@ -5852,7 +5852,7 @@ ignores QuickSave, SeePlayer, HearNoise, KilledBy, SwitchWeapon, NextWeapon, Pre
 		bBehindView = false;
 		bPressedJump = false;
 		myHUD.bShowScores = false;
-		
+
 		if ( Level.NetMode == NM_Standalone )
 			GotoVisionMode( SavedVisionMode );
 	}
@@ -5875,7 +5875,7 @@ state Briefing
 		bOkToSwitchWeapon = false;
 		Pawn.bWantsToCrouch = false;
 	}
-	
+
 	function PlayerMove(float DeltaTime)
 	{
 		// Rotation only.
@@ -5894,14 +5894,14 @@ state Briefing
 			else
 				Pawn.Weapon.BringUp(None);
 		}
-		
+
 		GotoVisionMode( SavedVisionMode );
 	}
 
 }
 
 //------------------------------------------------------------------------------
-// Control options	
+// Control options
 function ChangeStairLook( bool B )
 {
 	bLookUpStairs = B;
@@ -5928,7 +5928,7 @@ simulated event ClientSetMissingContent( bool bSet, string ContentName )
 	log("ClientSetMissingContent"@bMissingContent@bSet@ContentName);
 	bMissingContent = bSet;
 	MissingContentName = ContentName;
-	PropagateMissingContent();	
+	PropagateMissingContent();
 }
 
 // Replace with good code
@@ -5969,7 +5969,7 @@ event ClientOpenXMenu (string Menu, optional bool bDisconnect,optional string Ms
 }
 
 event ClientShowSingularMenu ( string Menu, string Args )
-{   
+{
 	local class<Menu> MenuClass;
 
     MenuClass = class<Menu>( DynamicLoadObject( Menu, class'Class' ) );
@@ -5979,26 +5979,26 @@ event ClientShowSingularMenu ( string Menu, string Args )
         log( "Could not load menu! ["$Menu$"]", 'Error' );
         return;
     }
-    
+
     if ( Player.Console.CurMenu.Class == MenuClass )
     {
 		// We're already showing one
 		return;
     }
-    
+
 	StopForceFeedback();  // jdf - no way to pause feedback
-    
+
 	/* // Pause if not already
 	if(Level.Pauser == None)
 		SetPause(true);
     */
-    
+
     if ( Player.Console.CurMenu == None )
     {
  log("PC.C.PauseLevelMusic()");
 		Player.Console.PauseLevelMusic();
     }
-    
+
     Player.Console.MenuCall( MenuClass, Args );
 }
 
@@ -6034,7 +6034,7 @@ function bool CanRestartPlayer()
 simulated event ServerChangeVoiceChatter( PlayerController Player, XboxAddr xbAddr, int Handle, int VoiceChannels, bool Add )
 {
 	if( (Level.NetMode == NM_DedicatedServer) || (Level.NetMode == NM_ListenServer) )
-	{		
+	{
 		Level.Game.ChangeVoiceChatter( Player, xbAddr, Handle, VoiceChannels, Add );
 	}
 }
@@ -6048,9 +6048,9 @@ simulated event ServerChangeHasVoice( bool bVoiceOn )
 simulated event ServerGetVoiceChatters( PlayerController Player )
 {
 	local int i;
-	
+
 	if( (Level.NetMode == NM_DedicatedServer) || (Level.NetMode == NM_ListenServer) )
-	{		
+	{
 		for( i=0; i<Level.Game.VoiceChatters.Length; i++ )
 		{
 			if( Player != Level.Game.VoiceChatters[i].Controller )
@@ -6077,7 +6077,7 @@ function UpdateVoiceChatters()
 			if (PC != self)
 			{
 				if( PC != None &&
-					PC.PlayerReplicationInfo != None && 
+					PC.PlayerReplicationInfo != None &&
 					PC.PlayerReplicationInfo.Team == self.PlayerReplicationInfo.Team )
 				{
 					Log(" Turning ON voice for"@PC.GamerTag);
@@ -6093,15 +6093,15 @@ function UpdateVoiceChatters()
 	}
 }
 simulated function ClientChangeVoiceChatter( XboxAddr xbAddr, int Handle, int VoiceChannels, bool Add )
-{	
+{
 	ChangeVoiceChatter( xbAddr, Handle, VoiceChannels, Add );
 }
-	
+
 simulated function ClientLeaveVoiceChat()
-{	
+{
 	LeaveVoiceChat();
 }
-	
+
 native final function LeaveVoiceChat();
 native final function ChangeVoiceChatter( XboxAddr xbAddr, int Handle, int VoiceChannels, bool Add );
 
@@ -6124,7 +6124,7 @@ exec function UTrace()
 	log("UTracing changed to "$IsUTracing()$" at "$Level.TimeSeconds);
 }
 
-	
+
 //--------------------- Demo recording stuff
 
 // Called on the client during client-side demo recording
@@ -6132,7 +6132,7 @@ simulated event StartClientDemoRec()
 {
 	// Here we replicate functions which the demo never saw.
 	DemoClientSetHUD( MyHud.Class, MyHud.ScoreBoard.Class );
-	
+
 	// tell server to replicate more stuff to me
 	bClientDemo = true;
 	ServerSetClientDemo();
@@ -6163,7 +6163,7 @@ simulated event MenuOpen (class<Menu> MenuClass, optional String Args)
         log ("PlayerController::MenuOpen: can't open menu without a console", 'Error');
         return;
     }
-    
+
     Player.Console.MenuOpen (MenuClass, Args);
 }
 
@@ -6180,11 +6180,11 @@ simulated event MenuClose()
         log ("PlayerController::MenuClose: can't close menu without a console", 'Error');
         return;
     }
-    
+
 	// Refresh the number of existing saves
 	if (Level.NetMode == NM_StandAlone)
-		CurrentProfileNumSaves();	
-    
+		CurrentProfileNumSaves();
+
     Player.Console.MenuClose();
 }
 
@@ -6195,26 +6195,26 @@ exec function PlayM(INT movieNum)
       //Plays the movie directly to the frame buffer at the size of
       //the movie regaurdless of screen resolution.
       //Upper-left corner of movie is at 50, 50.
-      myHud.PlayMovieDirect("xbox_trailer_av1400.xmv", 50, 50, true, false); 
+      myHud.PlayMovieDirect("xbox_trailer_av1400.xmv", 50, 50, true, false);
    /*}
    else if(movieNum == 1)
    {
       //Plays the movie scaled to 1/2 the size of the screen in the center.
       myHud.PlayMovieScaled(Texture'Movies.Movie1', 0.25, 0.25, 0.75,
-                                                   0.75, false, false); 
+                                                   0.75, false, false);
    }
    else if(movieNum == 2)
    {
       //Same as above but the movie is drawn using "Translucent" draw style.
       myHud.PlayMovieScaled(Texture'Movies.Movie1', 0.25, 0.25, 0.75,
-                                             0.75, false, false, true); 
+                                             0.75, false, false, true);
    }
    else if(movieNum == 3)
    {
-      //Plays the movie full screen with a sound played at 
+      //Plays the movie full screen with a sound played at
       //the same time to match the video.
       myHud.PlayMovieScaled(Texture'Movies.Movie1', 0, 0, 1, 1, false,
-                                                                false); 
+                                                                false);
       ViewTarget.PlaySound(Sound'CL_Sounds.SimpleTest1');
    }*/
 }
@@ -6414,4 +6414,3 @@ defaultproperties
      bTravel=True
      NetPriority=3
 }
-

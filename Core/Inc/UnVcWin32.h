@@ -231,12 +231,12 @@ inline FLOAT appFractional(FLOAT Value){
 }
 
 inline FLOAT appSRand(){
-	GSRandSeed = (GSRandSeed * 196314165) + 907633515; 
+	GSRandSeed = (GSRandSeed * 196314165) + 907633515;
 	//@todo fix type aliasing
 	FLOAT Result;
 	*(INT*)&Result = (*(INT*)&SRandTemp & 0xff800000) | (GSRandSeed & 0x007fffff);
-	return appFractional(Result); 
-} 
+	return appFractional(Result);
+}
 
 //
 //  MSM: Round (to nearest) a floating point number to an integer.
@@ -272,7 +272,7 @@ inline FLOAT appInvSqrt(FLOAT F){
 	{
 		movss	xmm1,[F]
 		rsqrtss	xmm0,xmm1			// 1/sqrt estimate (12 bits)
-		
+
 		// Newton-Raphson iteration (X1 = 0.5*X0*(3-(Y*X0)*X0))
 		movss	xmm3,[fThree]
 		movss	xmm2,xmm0
@@ -301,7 +301,7 @@ inline FLOAT appSqrt(FLOAT F){
 	{
 		movss	xmm1,[F]
 		rsqrtss xmm0,xmm1			// 1/sqrt estimate (12 bits)
-		
+
 		// Newton-Raphson iteration (X1 = 0.5*X0*(3-(Y*X0)*X0))
 		movss	xmm3,[fThree]
 		movss	xmm2,xmm0
@@ -410,7 +410,7 @@ inline DOUBLE appSeconds()
 //
 #if ASM
 #define DEFINED_appMemcpy
-/******************************************************************************
+/*****************************************************************************
 
  Copyright (c) 2001 Advanced Micro Devices, Inc.
 
@@ -443,7 +443,7 @@ inline DOUBLE appSeconds()
  3dsdk.support@amd.com
 ******************************************************************************/
 
-/*****************************************************************************
+/****************************************************************************
 MEMCPY_AMD.CPP
 ******************************************************************************/
 
@@ -732,8 +732,7 @@ FORCEINLINE void appDebugBreak()
 #endif
 
 extern "C" void* __cdecl _alloca(size_t);
-//#define appAlloca(size) _alloca((size+7)&~7)
-#define appAlloca(size) ((size==0) ? 0 : _alloca((size+7)&~7))
+#define appAlloca(size) ((size == 0) ? NULL : _alloca((size + 7) & ~7))
 
 /*----------------------------------------------------------------------------
 	The End.

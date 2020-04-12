@@ -1,16 +1,16 @@
 //=============================================================================
 // Controller, the base class of players or AI.
 //
-// Controllers are non-physical actors that can be attached to a pawn to control 
-// its actions.  PlayerControllers are used by human players to control pawns, while 
-// AIControFllers implement the artificial intelligence for the pawns they control.  
-// Controllers take control of a pawn using their Possess() method, and relinquish 
+// Controllers are non-physical actors that can be attached to a pawn to control
+// its actions.  PlayerControllers are used by human players to control pawns, while
+// AIControFllers implement the artificial intelligence for the pawns they control.
+// Controllers take control of a pawn using their Possess() method, and relinquish
 // control of the pawn by calling UnPossess().
 //
-// Controllers receive notifications for many of the events occuring for the Pawn they 
-// are controlling.  This gives the controller the opportunity to implement the behavior 
-// in response to this event, intercepting the event and superceding the Pawn's default 
-// behavior.  
+// Controllers receive notifications for many of the events occuring for the Pawn they
+// are controlling.  This gives the controller the opportunity to implement the behavior
+// in response to this event, intercepting the event and superceding the Pawn's default
+// behavior.
 //
 // This is a built-in Unreal class and it shouldn't be modified.
 //=============================================================================
@@ -26,7 +26,7 @@ var		Actor		Machine;			// The actor that the player is controlling
 var const int		PlayerNum;			// The player number - per-match player number.
 var		float		SightCounter;		// Used to keep track of when to check player visibility
 var		float		FovAngle;			// X field of view angle in degrees, usually 90.
-var globalconfig float	Handedness; 
+var globalconfig float	Handedness;
 var		bool        bIsPlayer;			// Pawn is a player or a player-bot.
 var		bool		bGodMode;			// cheat - when true, can't be killed or hurt
 
@@ -108,15 +108,15 @@ replication
 		PawnClass;
 
 	// Functions the server calls on the client side.
-	reliable if( RemoteRole==ROLE_AutonomousProxy ) 
+	reliable if( RemoteRole==ROLE_AutonomousProxy )
 		ClientGameEnded, ClientDying, ClientSetRotation, ClientSetLocation,
-		/*ClientSwitchToBestWeapon,*/ ClientSetWeapon; 
+		/*ClientSwitchToBestWeapon,*/ ClientSetWeapon;
 	reliable if (ROLE==ROLE_Authority)
 		ClientSwitchToBestWeapon;
 
 	// Functions the client calls on the server.
 	unreliable if( Role<ROLE_Authority )
-		SendVoiceMessage, SetPawnClass; 
+		SendVoiceMessage, SetPawnClass;
 	reliable if ( Role < ROLE_Authority )
 		ServerRestartPlayer, ServerSwitchGrenade;
 }
@@ -154,10 +154,10 @@ native event rotator GetFocusRotation();
 native event vector GetFocusLocation();
 
 // native AI functions
-/* LineOfSightTo() returns true if any of several points of Other is visible 
+/* LineOfSightTo() returns true if any of several points of Other is visible
   (origin, top, bottom)
 */
-native(514) final function bool LineOfSightTo(actor Other); 
+native(514) final function bool LineOfSightTo(actor Other);
 
 final function DebugAILog( coerce string S )
 {
@@ -167,7 +167,7 @@ final function DebugAILog( coerce string S )
 
 /* CanSee() similar to line of sight, but also takes into account Pawn's peripheral vision
 */
-//native(533) final function bool CanSee(Pawn Other); 
+//native(533) final function bool CanSee(Pawn Other);
 
 //native(523) final function vector EAdjustJump(float BaseZ, float XYSpeed);
 
@@ -190,7 +190,7 @@ native(529) final function AddController();
 native(530) final function RemoveController();
 
 // Pick best pawn target
-native(531) final function pawn PickTarget(out float bestAim, out float bestDist, vector FireDir, vector projStart, float MaxRange); 
+native(531) final function pawn PickTarget(out float bestAim, out float bestDist, vector FireDir, vector projStart, float MaxRange);
 native(534) final function actor PickAnyTarget(out float bestAim, out float bestDist, vector FireDir, vector projStart);
 
 native final function bool InLatentExecution(int LatentActionNumber); //returns true if controller currently performing latent action specified by LatentActionNumber
@@ -219,7 +219,7 @@ function DisplayDebug(Canvas Canvas, out float YL, out float YPos)
 		Super.DisplayDebug(Canvas,YL,YPos);
 		return;
 	}
-	
+
 	Canvas.SetDrawColor(255,0,0);
 	Canvas.DrawText("CONTROLLER "$GetItemName(string(self))$" Pawn "$GetItemName(string(Pawn)));
 	YPos += YL;
@@ -253,7 +253,7 @@ function rotator GetViewRotation()
 	return Rotation;
 }
 
-/* Reset() 
+/* Reset()
 reset actor to initial state
 */
 function Reset()
@@ -276,10 +276,10 @@ teleports, etc.
 function ClientSetLocation( vector NewLocation, rotator NewRotation )
 {
 	SetRotation(NewRotation);
-	If ( (Rotation.Pitch > RotationRate.Pitch) 
+	If ( (Rotation.Pitch > RotationRate.Pitch)
 		&& (Rotation.Pitch < 65536 - RotationRate.Pitch) )
 	{
-		If (Rotation.Pitch < 32768) 
+		If (Rotation.Pitch < 32768)
 			NewRotation.Pitch = RotationRate.Pitch;
 		else
 			NewRotation.Pitch = 65536 - RotationRate.Pitch;
@@ -377,7 +377,7 @@ function bool RestartGame()
 event LongFall(); // called when latent function WaitForLanding() doesn't return after 4 seconds
 
 // notifications of pawn events (from C++)
-// if return true, then pawn won't get notified 
+// if return true, then pawn won't get notified
 event bool NotifyPhysicsVolumeChange(PhysicsVolume NewVolume);
 event bool NotifyHeadVolumeChange(PhysicsVolume NewVolume);
 event bool NotifyLanded(vector HitNormal);
@@ -401,7 +401,7 @@ event PreBeginPlay()
 	if ( bDeleteMe )
 		return;
 
-	SightCounter = 0.2 * FRand();  //offset randomly 
+	SightCounter = 0.2 * FRand();  //offset randomly
 }
 
 event PostBeginPlay()
@@ -453,7 +453,7 @@ simulated event Destroyed()
 	Super.Destroyed();
 }
 
-/* AdjustView() 
+/* AdjustView()
 by default, check and see if pawn still needs to update eye height
 (only if some playercontroller still has pawn as its viewtarget)
 Overridden in playercontroller
@@ -469,7 +469,7 @@ function AdjustView( float DeltaTime )
 	Pawn.bUpdateEyeHeight =false;
 	Pawn.Eyeheight = Pawn.BaseEyeheight;
 }
-			
+
 function bool WantsSmoothedView()
 {
 	return ( (Pawn != None) && ((Pawn.Physics==PHYS_Walking) || (Pawn.Physics==PHYS_Spider)) && !Pawn.bJustLanded );
@@ -500,7 +500,7 @@ function bool AllowVoiceMessage(name MessageType)
 }
 function SendVoiceMessage(PlayerReplicationInfo S, PlayerReplicationInfo Recipient, name messagetype, byte messageID, name broadcasttype);
 
-//***************************************************************
+//**************************************************************
 // AI related
 
 /* AdjustToss()
@@ -511,7 +511,7 @@ function vector AdjustToss(float TSpeed, vector Start, vector End, bool bNormali
 {
 	local vector Dest2D, Result, Vel2D;
 	local float Dist2D;
-	
+
 	if ( Start.Z > End.Z + 64 )
 	{
 		Dest2D = End;
@@ -578,15 +578,15 @@ native function WeaponFired(); // This function is called everytime the weapon f
 event ThrowScav()
 {
 	if( Machine != None )
-	{		
+	{
 		Machine.Velocity = vector(Rotation) * 1000;
 		if( bIsPlayer )
 			Machine.SetRotation(Rotation);
 		Machine.TakeDamage( 1000, Pawn, Machine.Location, vect(0,0,0), class'DamageThrown' );
 		Machine = None;
-	}	
+	}
 }
- 
+
 function StopFiring()
 {
 	bFire = 0;
@@ -604,7 +604,7 @@ function float WeaponPreference(Weapon W)
 }
 
 /* AdjustAim()
-AIController version does adjustment for non-controlled pawns. 
+AIController version does adjustment for non-controlled pawns.
 PlayerController version does the adjustment for player aiming help.
 Only adjusts aiming at pawns
 allows more error in Z direction (full as defined by AutoAim - only half that difference for XY)
@@ -630,13 +630,13 @@ exec event SwitchGrenade( optional float F )
 	{
         newGrenade = currentGrenade.Inventory.WeaponChange(F, true);	// next item in the inventory after the currentGrenade
 		if ( newGrenade == None )
-			newGrenade = Pawn.Inventory.WeaponChange(F, true); 
-	}	
+			newGrenade = Pawn.Inventory.WeaponChange(F, true);
+	}
 	else
-		newGrenade = None;	
+		newGrenade = None;
 
 	if ( newGrenade == None )
-		return;	
+		return;
 
 	Pawn.CurrentGrenade = newGrenade;
 	ServerSwitchGrenade(newGrenade);
@@ -653,7 +653,7 @@ exec function SwitchToBestWeapon()
 
 	if ( Pawn == None || Pawn.Inventory == None )
 		return;
-	
+
     if ( (Pawn.PendingWeapon == None) || (AIController(self) != None) )
     {
 		Pawn.PendingWeapon = Pawn.Inventory.RecommendWeapon(rating);
@@ -667,7 +667,7 @@ exec function SwitchToBestWeapon()
 
 	if ( Pawn.Weapon == None )
 		Pawn.ChangedWeapon();
-		
+
 	else if ( Pawn.Weapon != Pawn.PendingWeapon )
 		Pawn.Weapon.PutDown(Pawn.PendingWeapon);
 }
@@ -681,14 +681,14 @@ simulated function ClientSwitchToBestWeapon()
 function ClientSetWeapon( class<Weapon> WeaponClass )
 {
     local Inventory Inv;
-	local int Count;	
-	
+	local int Count;
+
     for( Inv = Pawn.Inventory; Inv != None; Inv = Inv.Inventory )
     {
 		Count++;
 		if ( Count > 1000 )
 			return;
-		
+
         if( !ClassIsChildOf( Inv.Class, WeaponClass ) )
             continue;
 
@@ -786,4 +786,3 @@ defaultproperties
      RotationRate=(Pitch=3072,Yaw=30000,Roll=2048)
      bHiddenEd=True
 }
-

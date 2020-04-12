@@ -1,17 +1,17 @@
 //=============================================================================
 // Pawn, the base class of all actors that can be controlled by players or AI.
 //
-// Pawns are the physical representations of players and creatures in a level.  
-// Pawns have a mesh, collision, and physics.  Pawns can take damage, make sounds, 
-// and hold weapons and other inventory.  In short, they are responsible for all 
+// Pawns are the physical representations of players and creatures in a level.
+// Pawns have a mesh, collision, and physics.  Pawns can take damage, make sounds,
+// and hold weapons and other inventory.  In short, they are responsible for all
 // physical interaction between the player or AI and the world.
 //
 // This is a built-in Unreal class and it shouldn't be modified.
 //=============================================================================
-class Pawn extends Actor 
+class Pawn extends Actor
 	abstract
 	native
-	dependsOn(PawnAudioTable)	
+	dependsOn(PawnAudioTable)
 	placeable
 	config(user)
 	nativereplication
@@ -45,7 +45,7 @@ enum EStartState
 	SS_PerchedCeiling,
 	SS_Shutdown,
 	SS_Asleep,
-	SS_StationaryAttack,	
+	SS_StationaryAttack,
 };
 
 // The Alert state determines which idle animation to play
@@ -54,7 +54,7 @@ enum EIdleState
 	AS_Shutdown,
 	AS_Relaxed,
 	AS_Alert,
-	AS_Berserk,	
+	AS_Berserk,
 	AS_PerchedCeiling,
 	AS_PerchedWall,
 	AS_Possessed,
@@ -97,13 +97,13 @@ struct PatrolPoint
 struct DamageMultiplier
 {
 	var() name		BoneName;
-	var() float		Multiplier;	
+	var() float		Multiplier;
 };
 
 struct AccessoryInfo
 {
 	var bool				HasBeenUsed;
-	var() bool				IsRequired;	
+	var() bool				IsRequired;
 	var() class<Accessory>	AccessoryClass;
 	var() name				BoneName;
 };
@@ -128,7 +128,7 @@ struct FinishingMove
 struct ImpactAnim
 {
 	var() name			BoneName;
-	var() name			Animation;	
+	var() name			Animation;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -142,7 +142,7 @@ var const bool	bIsCrouched;			// set by physics to specify that pawn is currentl
 var const bool	bTryToUncrouch;			// when auto-crouch during movement, continually try to uncrouch
 var bool		bJustLanded;			// used by eyeheight adjustment
 var bool		bWarping;				// Set when travelling through warpzone (so shouldn't telefrag)
-var bool		bUpAndOut;				// used by swimming 
+var bool		bUpAndOut;				// used by swimming
 var bool		bCrawler;				// crawling - pitch and roll based on surface pawn is on
 var	bool		bRollToDesired;			// Update roll when turning to desired rotation (normally false)
 var bool		bPhysicsAnimUpdate;		// Use physics to drive movement animations
@@ -154,7 +154,7 @@ var bool		bCannotDie;				// if the character gets incapacitated rather than dyin
 var bool		bIncapacitated;			// currently incapacitated
 var bool		bFallOnDeath;			// Enter PHYS_Falling when killed
 var bool		bHasFullFlyAnims;		// This character has the full suite of directional flying animations
-var bool		bDisallowPainAnims;		
+var bool		bDisallowPainAnims;
 var bool		bIncapacitatedOnTurret;	// The character was incapacitated while on a turret
 var bool		bIgnoreFriendlyFire;	// Whether anybody should care if we're a victim of friendly fire
 
@@ -182,7 +182,7 @@ var	bool		bStopAtLedges;			// if bAvoidLedges and bStopAtLedges, Pawn doesn't tr
 var	bool		bCanWalkOffLedges;		// Can still fall off ledges, even when walking (for Player Controlled pawns)
 var bool		bDismembered;			// This pawn was dismembered when it died
 // Jump Flags
-var	bool		bNoJumpAdjust;			// set to tell controller not to modify velocity of a jump/fall	
+var	bool		bNoJumpAdjust;			// set to tell controller not to modify velocity of a jump/fall
 
 // Collision and Physics Flags
 var	bool		bIgnoreForces;			// if true, not affected by external forces
@@ -212,7 +212,7 @@ var		bool		bNeverMeleeMe;			// AIs should not try to melee attack this Pawn (cou
 var		bool		bSquadShouldFallBack;
 
 // Hearing flags
-var(AI) static bool	bLOSHearing;			// can hear sounds from line-of-sight sources (which are close enough to hear) bLOSHearing=true is like UT/Unreal hearing										
+var(AI) static bool	bLOSHearing;			// can hear sounds from line-of-sight sources (which are close enough to hear) bLOSHearing=true is like UT/Unreal hearing
 var(AI) static bool	bSameZoneHearing;		// can hear any sound in same zone (if close enough to hear)
 var(AI) static bool	bAdjacentZoneHearing;	// can hear any sound in adjacent zone (if close enough to hear)
 var(AI) static bool	bMuffledHearing;		// can hear sounds through walls (but muffled - sound distance increased to double plus 4x the distance through walls
@@ -360,13 +360,13 @@ var		class<DamageType>			HitDamageType;			// damage type of last hit (for playin
 var		class<DamageType>			LastHitDamageType;		// Last damage type
 var		Pawn						LastHitBy;				// Who damaged me last
 var		float						LastHitLocalTime;		// Time hit on the local machine, not replicated!
-var		Vector						LastHitLocation;		// World position of last shield hit 
+var		Vector						LastHitLocation;		// World position of last shield hit
 var		name						LastHitBone;
 
 var()	float						MaxDeathLoopTime;
 var		float						DeathLoopStartTime;
 var		static float				GunHeight;				// Height of gun barrel when standing
-var		float						LastDodgeTime;			
+var		float						LastDodgeTime;
 var		vector						PreDodgeLocation;
 var(Events)	name					FirstDamagedEvent;		// Event to play when first damaged
 
@@ -476,7 +476,7 @@ var(Karma) static float RagdollLifeSpan;	// MAXIMUM time the ragdoll will be aro
 var(Karma) string		RagdollOverride;	// Name of the Ragdoll asset to use when entering ragdoll
 
 // Networking
-var		name							AnimAction;			// use for replicating anims 
+var		name							AnimAction;			// use for replicating anims
 var		float							LastStartTime;		// the last spawn time, only used in PlayerController::Suicide()
 var		transient CompressedPosition	PawnPosition;		// Used if bUseCompressed position is true
 var		float							NetRelevancyTime;
@@ -518,7 +518,7 @@ replication
 	reliable if( bNetDirty && (Role==ROLE_Authority) )
 		bWasHit;
 	reliable if( bTearOff && bNetDirty && (Role==ROLE_Authority) )
-		TearOffMomentum;	
+		TearOffMomentum;
 	reliable if( bNetDirty && bNetOwner && Role==ROLE_Authority )
          Controller,SelectedItem, GroundSpeed, WaterSpeed, AirSpeed, AccelRate, JumpZ, AirControl, /*CurrentTossableWeapon, */CurrentGrenade, LastHitBy;
 	reliable if( bNetDirty && Role==ROLE_Authority )
@@ -569,7 +569,7 @@ simulated function PlayerController GetRecentController()
 	return PlayerController(Controller);
 }
 
-/* Reset() 
+/* Reset()
 reset actor to initial state - used when restarting level without reloading.
 */
 function Reset()
@@ -646,7 +646,7 @@ function PossessedBy(Controller C)
 }
 
 function UnPossessed()
-{		
+{
 	PlayerReplicationInfo = None;
 	SetOwner(None);
 	Controller = None;
@@ -675,7 +675,7 @@ event SetWalking(bool bNewIsWalking)
 {
 	// If we are wounded we can only walk
 	//if (UseWoundedAnims())
-	//	bNewIsWalking = true;	
+	//	bNewIsWalking = true;
 
 	if ( bNewIsWalking != bIsWalking )
 	{
@@ -772,7 +772,7 @@ simulated function DisplayDebug(Canvas Canvas, out float YL, out float YPos)
 	else
 		Weapon.DisplayDebug(Canvas,YL,YPos);
 }
-		 		
+
 //
 // Compute offset for drawing an inventory item.
 //
@@ -783,11 +783,11 @@ simulated function vector CalcDrawOffset(inventory Inv)
 	if ( Controller == None )
 		return (Inv.PlayerViewOffset >> Rotation) + BaseEyeHeight * vect(0,0,1);
 
-	DrawOffset = ((0.9/Weapon.DisplayFOV * 100 * ModifiedPlayerViewOffset(Inv)) >> GetViewRotation() ); 
+	DrawOffset = ((0.9/Weapon.DisplayFOV * 100 * ModifiedPlayerViewOffset(Inv)) >> GetViewRotation() );
 	if ( !IsLocallyControlled() )
 		DrawOffset.Z += BaseEyeHeight;
 	else
-	{	
+	{
 		DrawOffset.Z += EyeHeight;
         if( bWeaponBob )
 			DrawOffset += WeaponBob(Inv.BobDamping);
@@ -850,8 +850,8 @@ function CheckBob(float DeltaTime, vector Y)
 		WalkBob = WalkBob * (1 - FMin(1, 8 * deltatime));
 	}
 }
-	
-//***************************************
+
+//**************************************
 // Interface to Pawn's Controller
 
 // return true if controlled by a Player (AI or human)
@@ -910,7 +910,7 @@ simulated final function bool PressingAltFire()
 }
 
 function Actor GetMoveTarget()
-{	
+{
 	if ( Controller == None )
 		return None;
 
@@ -926,7 +926,7 @@ function SetMoveTarget(Actor NewTarget )
 function bool LineOfSightTo(actor Other)
 {
 	return ( (Controller != None) && Controller.LineOfSightTo(Other) );
-} 
+}
 
 simulated final function rotator AdjustAim(Ammunition FiredAmmunition, vector ProjStart, float AimError, optional out int ShouldFire)
 {
@@ -947,7 +947,7 @@ function Actor ShootSpecial(Actor A)
 }
 
 function HandlePickup(Pickup pick)
-{	
+{
 	if ( Controller != None )
 		Controller.HandlePickup(pick);
 }
@@ -967,7 +967,7 @@ event ClientMessage( coerce string S, optional Name Type )
 function Trigger( actor Other, pawn EventInstigator )
 {
 	// If we have the same tag as the controller, there's no reason to trigger it directly
-	if ( Controller != None && Tag != Controller.Tag ) 
+	if ( Controller != None && Tag != Controller.Tag )
 		Controller.Trigger(Other, EventInstigator);
 }
 
@@ -1034,9 +1034,9 @@ function SetFlashlight(bool bOn)
 			Player.PlayerSpotLight.LightRadiusInner = 120;
 			Player.PlayerSpotLight.LightCone = 0;
 			Player.PlayerSpotLight.bDynamicLight = true;
-			Player.PlayerSpotLight.bLightPriorityOverride = true; // cg: make it outpower all other lights. 
+			Player.PlayerSpotLight.bLightPriorityOverride = true; // cg: make it outpower all other lights.
 			PlaySound( Player.myHud.FlashlightOn );
-			
+
 
 			// ------- PROJECTED TEXTURE ---------
 			// Used on BSP until we implement dynamic spots on BSP
@@ -1059,7 +1059,7 @@ function SetFlashlight(bool bOn)
 	}
 }
 
-//***************************************
+//**************************************
 
 function GiveWeapon(string aClassName )
 {
@@ -1070,7 +1070,7 @@ function GiveWeapon(string aClassName )
 
 	if( FindInventoryType(WeaponClass) != None )
 		return;
-	
+
 	newWeapon = Spawn(WeaponClass);
 
 	if( newWeapon != None )
@@ -1293,8 +1293,8 @@ event TossWeapon(Weapon WeaponToThrow, Vector TossVel)
 		TossOrientation = GetBoneRotation(GetWeaponBoneFor(WeaponToThrow));
 		WeaponToThrow.DropFrom(TossOrigin, TossOrientation);
 	}
-	
-}	
+
+}
 
 exec function SwitchToLastWeapon()
 {
@@ -1324,7 +1324,7 @@ exec function NextItem()
 		Return;
 	}
 	if (SelectedItem.Inventory!=None)
-		SelectedItem = SelectedItem.Inventory.SelectNext(); 
+		SelectedItem = SelectedItem.Inventory.SelectNext();
 	else
 		SelectedItem = Inventory.SelectNext();
 
@@ -1334,14 +1334,14 @@ exec function NextItem()
 
 // FindInventoryType()
 // returns the inventory item of the requested class
-// if it exists in this pawn's inventory 
+// if it exists in this pawn's inventory
 
 event Inventory FindInventoryType( class DesiredClass )
 {
 	local Inventory Inv;
 	local int Count;
 
-	for( Inv=Inventory; Inv!=None; Inv=Inv.Inventory )   
+	for( Inv=Inventory; Inv!=None; Inv=Inv.Inventory )
 	{
 		if ( Inv.class == DesiredClass )
 			return Inv;
@@ -1350,9 +1350,9 @@ event Inventory FindInventoryType( class DesiredClass )
 			return None;
 	}
 	return None;
-} 
+}
 
-// Add Item to this pawn's inventory. 
+// Add Item to this pawn's inventory.
 // Returns true if successfully added, false if not.
 function bool AddInventory( inventory NewItem )
 {
@@ -1361,7 +1361,7 @@ function bool AddInventory( inventory NewItem )
 	local actor Last;
 
 	Last = self;
-	
+
 	// The item should not have been destroyed if we get here.
 	if (NewItem ==None )
 		log("tried to add none inventory to "$self);
@@ -1427,7 +1427,7 @@ event ChangedWeapon()
 	{
 		PlayerController(Controller).EndZoom();
 	}
-	
+
 	if (Weapon == PendingWeapon)
 	{
 		if ( Weapon == None )
@@ -1437,7 +1437,7 @@ event ChangedWeapon()
 		}
 		/*
 		// TODO: ClientIsInState is a NOOP .. will always retun false
-		else if ( Weapon.ClientIsInState('DownWeapon') ) 
+		else if ( Weapon.ClientIsInState('DownWeapon') )
 			Weapon.ClientGotoState('Idle');
 		PendingWeapon = None;
 		*/
@@ -1449,7 +1449,7 @@ event ChangedWeapon()
 	//if ( PendingWeapon == None )
 	//	PendingWeapon = Weapon;
 	//Log("PendingWeapon "$PendingWeapon$" Weapon "$Weapon);
-		
+
 	Weapon = PendingWeapon;
 	if ( (Weapon != None) && (Level.NetMode == NM_Client) )
 		Weapon.BringUp(LastWeapon);
@@ -1467,7 +1467,7 @@ function ServerChangedWeapon(Weapon LastWeapon, Weapon W)
 	if ( LastWeapon != None )
 	{
 		LastWeapon.SetDefaultDisplayProperties();
-		LastWeapon.DetachFromPawn(self);		
+		LastWeapon.DetachFromPawn(self);
 	}
 	Weapon = W;
 	if ( Weapon == None )
@@ -1481,7 +1481,7 @@ function ServerChangedWeapon(Weapon LastWeapon, Weapon W)
 	if ( LastWeapon == Weapon )
 	{
 		// TODO: ClientIsInState is a NOOP .. will always retun false
-		if ( Weapon.ClientIsInState('DownWeapon') ) 
+		if ( Weapon.ClientIsInState('DownWeapon') )
 			Weapon.BringUp(LastWeapon);
 		Inventory.OwnerEvent('ChangedWeapon'); // tell inventory that weapon changed (in case any effect was being applied)
 		return;
@@ -1497,10 +1497,10 @@ event bool EncroachingOn( actor Other )
 {
 	if ( Other.bWorldGeometry )
 		return true;
-		
+
 	if ( ((Controller == None) || !Controller.bIsPlayer || bWarping) && (Pawn(Other) != None) )
 		return true;
-		
+
 	return false;
 }
 
@@ -1538,9 +1538,9 @@ singular event BaseChange()
 	// Pawns can only set base to non-pawns, or pawns which specifically allow it.
 	// Otherwise we do some damage and jump off.
 	else if ( Pawn(Base) != None )
-	{	
+	{
 		if ( !Pawn(Base).bCanBeBaseForPawns )
-			JumpOffPawn();		
+			JumpOffPawn();
 	}
 }
 
@@ -1613,7 +1613,7 @@ simulated event Destroyed()
 
 	while ( Accessories.length > 0 )
 	{
-		if ( Accessories[0] != None && !Accessories[0].bDeleteMe )		
+		if ( Accessories[0] != None && !Accessories[0].bDeleteMe )
 			Accessories[0].Destroy();
 		else
 			Accessories.Remove(0,1);
@@ -1682,7 +1682,7 @@ event PostBeginPlay()
 		Disable('Tick');
 	}
 	SetShields( MaxShields );
-	
+
 
 	// automatically add controller to pawns which were placed in level
 	// NOTE: pawns spawned during gameplay are not automatically possessed by a controller
@@ -1690,26 +1690,26 @@ event PostBeginPlay()
 	{
 		// check if I have an AI Script
 		if ( AIScriptTag != '' )
-		{			
+		{
 			ForEach AllActors(class'AIScript',A,AIScriptTag)
 				break;
 			// let the AIScript spawn and init my controller
-			if ( A != None )			
-				A.SpawnControllerFor(self);			
+			if ( A != None )
+				A.SpawnControllerFor(self);
 		}
 		if ( A == None ) //only do this work if we didn't find an AIScript controller
 		{
 			if ( (ControllerClass != None) && (Controller == None) )
 				Controller = spawn(ControllerClass);
-			if ( Controller != None )		
+			if ( Controller != None )
 				Controller.Possess(self);
 		}
 	}
-	
-	if ( Level.bStartup && !bNoDefaultInventory )	
-	{		
-		AddDefaultInventory();		
-	}  	
+
+	if ( Level.bStartup && !bNoDefaultInventory )
+	{
+		AddDefaultInventory();
+	}
 
 }
 
@@ -1741,12 +1741,12 @@ simulated event PostNetBeginPlay()
 		if ( (PlayerController(Controller) != None)
 			&& (PlayerController(Controller).ViewTarget == Controller) )
 			PlayerController(Controller).SetViewTarget(self);
-	} 
+	}
 
 	if ( Role == ROLE_AutonomousProxy )
 		bUpdateEyeHeight = true;
 
-	if ( (PlayerReplicationInfo != None) 
+	if ( (PlayerReplicationInfo != None)
 		&& (PlayerReplicationInfo.Owner == None) )
 		PlayerReplicationInfo.SetOwner(Controller);
 
@@ -1777,7 +1777,7 @@ function SetMovementPhysics()
 
 simulated function TeamInfo GetTeam()
 {
-	return Level.GRI.GetTeam(GetTeamIndex());	
+	return Level.GRI.GetTeam(GetTeamIndex());
 }
 
 event DieAgain()
@@ -1818,7 +1818,7 @@ function Died(Controller Killer, class<DamageType> damageType, vector HitLocatio
 	if (bCannotDie && !DamageKills)
 	{
 		if (Controller != None && Controller.Machine != None && Controller.Machine.IsA('Turret'))
-		{			
+		{
 			bIncapacitatedOnTurret = true;
 			bValidEnemy=true;
 			return;
@@ -1863,8 +1863,8 @@ function Died(Controller Killer, class<DamageType> damageType, vector HitLocatio
 		Killer.Killed(self, damageType);
 	}
 
-	if ( Controller != None ) 
-	{   
+	if ( Controller != None )
+	{
 		Controller.WasKilledBy(Killer, damageType);
 		Level.Game.Killed(Killer, Controller, self, damageType);
 	}
@@ -1905,7 +1905,7 @@ event HitWall(vector HitNormal, actor Wall, EMaterialType KindOfMaterial);
 
 event Landed(vector HitNormal)
 {
-	LandBob = FMin(50, 0.055 * Velocity.Z); 
+	LandBob = FMin(50, 0.055 * Velocity.Z);
 	TakeFallingDamage();
 	if ( Health > 0 )
 		PlayLanded(Velocity.Z);
@@ -1925,7 +1925,7 @@ function bool TouchingWaterVolume()
 	ForEach TouchingActors(class'PhysicsVolume',V)
 		if ( V.bWaterVolume )
 			return true;
-			
+
 	return false;
 }
 
@@ -1941,7 +1941,7 @@ function bool IsInPain()
 		if ( V.bPainCausing && (V.DamagePerSec > 0) )
 			return true;
 	return false;
-}		
+}
 
 function bool CheckWaterJump(out vector WallNormal)
 {
@@ -1993,7 +1993,7 @@ function bool DoJump( bool bUpdating )
 		else
 			Velocity.Z = JumpZ;
 		if ( (Base != None) && !Base.bWorldGeometry )
-			Velocity.Z += Base.Velocity.Z; 
+			Velocity.Z += Base.Velocity.Z;
 		PlayJumpSoundOnCurrentMaterial();
 		SetPhysics(PHYS_Falling);
         return true;
@@ -2009,13 +2009,13 @@ function PlayMoverHitSound();
 function PlayDyingSound();
 
 
-/* 
+/*
 Pawn was killed - detach any controller, and die
 */
 
-// blow up into little pieces (implemented in subclass)		
+// blow up into little pieces (implemented in subclass)
 // Pawn was killed - detach any controller, and die
-simulated function ChunkUp( Rotator HitRotation, class<DamageType> D ) 
+simulated function ChunkUp( Rotator HitRotation, class<DamageType> D )
 {
 	if (bCannotDie)
 		return;
@@ -2032,7 +2032,7 @@ simulated function ChunkUp( Rotator HitRotation, class<DamageType> D )
 	HitDamageType = class'Gibbed'; // make sure clients gib also
 	if ( (Level.NetMode == NM_DedicatedServer) || (Level.NetMode == NM_ListenServer) )
 		GotoState('TimingOut');
-	if ( Level.NetMode == NM_DedicatedServer ) 
+	if ( Level.NetMode == NM_DedicatedServer )
 		return;
 	if ( class'GameInfo'.static.UseLowGore() )
 	{
@@ -2118,8 +2118,8 @@ function PlayTakeHit(vector HitLoc, int Damage, class<DamageType> damageType)
 		return;
 
 	GetAxes(Rotation,X,Y,Z);
-	Dir = Normal(HitLoc - Location);	
-	PlayAnim('hit');	
+	Dir = Normal(HitLoc - Location);
+	PlayAnim('hit');
 }
 
 //=============================================================================
@@ -2131,7 +2131,7 @@ simulated function PlayBreathe(optional name animName)
 	LoopAnim('ActionBreathe');
 	if (Level.NetMode == NM_Standalone && !Level.IsSplitScreen())
 		return;
-	
+
 	if (animName != '')
 		BreatheWeaponAnim = animName;
 
@@ -2142,7 +2142,7 @@ simulated function PlayBreathe(optional name animName)
 simulated event ChangeAnimation()
 {
 	if ( (Controller != None) && Controller.bControlAnimations )
-		return;	
+		return;
 	if (bIncapacitated || Health < 0) // REVISIT: this might be handled better a different way
 		return;
 
@@ -2188,11 +2188,11 @@ simulated event PlayFalling()
 simulated function PlayMoving()
 {
 	local EPawnMovementStyle OldMovementStyle;
-	
+
 	OldMovementStyle = CurrentMovementStyle;
 	CurrentMovementStyle = UpdateMovementStyle();
 
-	if (CurrentMovementStyle != OldMovementStyle || OldIdleState != CurrentIdleState ){		
+	if (CurrentMovementStyle != OldMovementStyle || OldIdleState != CurrentIdleState ){
 		ChangeWeaponAnimation();
 		ChangeMovementAnimation();
 	}
@@ -2215,7 +2215,7 @@ simulated function ChangeMovementAnimation()
 	case MS_WalkWounded:
 		AnimateWoundedWalking();
 		return;
-	case MS_Run:	
+	case MS_Run:
 		AnimateRunning();
 		return;
 	case MS_RunWounded:
@@ -2267,14 +2267,14 @@ simulated function AnimateStanding()
 	{
 		switch(CurrentIdleState)
 		{
-		case AS_Shutdown:			
+		case AS_Shutdown:
 			if( HasAnim('ShutdownBreathe' ) )
 				LoopAnim('ShutdownBreathe');
 			else if( HasAnim('RelaxBreathe') )
 				LoopAnim('RelaxBreathe');
 			else
 				PlayBreathe();
-			break;			
+			break;
 		case AS_Relaxed:
 			if (UseWoundedAnims())
 				LoopAnim('WoundedBreathe');
@@ -2288,24 +2288,24 @@ simulated function AnimateStanding()
 				PlayBreathe();
 			else if( HasAnim('RelaxBreathe') )
 				LoopAnim('RelaxBreathe');
-			break;			
-		case AS_Berserk:			
-			LoopAnim('BerserkBreathe');			
-			break;								
+			break;
+		case AS_Berserk:
+			LoopAnim('BerserkBreathe');
+			break;
 		case AS_PerchedWall:
-			LoopAnim('WallBreathe');			
-			break;		
-		case AS_PerchedCeiling:					
+			LoopAnim('WallBreathe');
+			break;
+		case AS_PerchedCeiling:
 			LoopAnim('CeilingBreathe');
 			break;
 		case AS_Possessed:
-			LoopAnim('ScavHeadBreathe');			
+			LoopAnim('ScavHeadBreathe');
 			break;
-		case AS_StandTurret:			
-			LoopAnim('TurretStandBreathe');			
+		case AS_StandTurret:
+			LoopAnim('TurretStandBreathe');
 			break;
-		case AS_SitTurret:				
-			LoopAnim('TurretSitBreathe');						
+		case AS_SitTurret:
+			LoopAnim('TurretSitBreathe');
 			break;
 		case AS_BackToWall:
 			LoopAnim('WallStandBreathe');
@@ -2358,7 +2358,7 @@ simulated function AnimateCrouching()
 {
 	LoopAnim('CrouchBreathe');
 }
-	
+
 simulated function AnimateRunning()
 {
 	if( CurrentIdleState == AS_Berserk )
@@ -2428,7 +2428,7 @@ simulated function EPawnMovementStyle UpdateMovementStyle()
 }
 
 simulated function ChangeWeaponAnimation()
-{	
+{
 	return;
 }
 
@@ -2436,24 +2436,24 @@ simulated function PlayWaiting()
 {
 	if (bIncapacitated) //REVISIT: this might be handled better a different way
 		return;
-	
-	if ( Physics == PHYS_Falling && VSizeSq( Velocity ) != 0 )	
+
+	if ( Physics == PHYS_Falling && VSizeSq( Velocity ) != 0 )
 		PlayFalling();
 	else if ( bIsCrouched )
-		AnimateCrouching();	
+		AnimateCrouching();
 	else
 		AnimateStanding();
 }
 
 function PlayLanded(float impactVel)
-{	
+{
 	impactVel = impactVel/JumpZ;
 	impactVel = 0.1 * impactVel * impactVel;
 	BaseEyeHeight = Default.BaseEyeHeight;
 
 	PostStimulusToWorld(ST_FootstepLoud);
 
-	if ( impactVel > 0.17 )	
+	if ( impactVel > 0.17 )
 		PlayOwnedCue(PAE_LandGrunt);
 
 	if ( (impactVel > 0.01) && !TouchingWaterVolume() )
@@ -2504,14 +2504,14 @@ simulated function PlayDyingAnim(class<DamageType> DamageType, vector HitLoc)
 
 simulated event PlayDying(class<DamageType> DamageType, vector HitLoc, optional name BoneName )
 {
-	local Emitter DeathEmitter;	
+	local Emitter DeathEmitter;
 
 	AmbientSound = None;
-    bCanTeleport = false; 
+    bCanTeleport = false;
     bReplicateMovement = false;
     bTearOff = true;
     bPlayedDeath = true;
-		
+
 	HitDamageType = DamageType; // these are replicated to other clients
     TakeHitLocation = HitLoc;
 
@@ -2529,7 +2529,7 @@ simulated event PlayDying(class<DamageType> DamageType, vector HitLoc, optional 
 	GotoState('Dying');
 
 	if( TryToRagdoll( DamageType, BoneName ) )
-	{				
+	{
 		if (GoRagDoll(DamageType, HitLoc))
 			return;
 	}
@@ -2551,7 +2551,7 @@ simulated event PlayDying(class<DamageType> DamageType, vector HitLoc, optional 
 		else if( bFallOnDeath )
 			SetPhysics(PHYS_Falling);
 		else
-			SetPhysics(PHYS_None);		
+			SetPhysics(PHYS_None);
 	}
 	else if( !bSaveMyCorpse )
 	{
@@ -2573,7 +2573,7 @@ simulated function PartiallyDismember( name BoneName, vector HitLocation, vector
 	local vector BoneLoc;
 	local rotator BoneRot;
 	local Accessory NewPart;
-	local Emitter NewEmitter;	
+	local Emitter NewEmitter;
 
 	if( class'GameInfo'.static.UseLowGore() && TypeOfMaterial != MT_DroidMetal )
 		return;
@@ -2595,7 +2595,7 @@ simulated function PartiallyDismember( name BoneName, vector HitLocation, vector
 			{
 				NewPart = Spawn( DismembermentParts[i].Part, , , BoneLoc, BoneRot );
 				if( NewPart != None )
-					NewPart.DetachAccessory(HitLocation,Momentum);					
+					NewPart.DetachAccessory(HitLocation,Momentum);
 			}
 
 			if( DismembermentParts[i].DismembermentEffectClass != None )
@@ -2633,7 +2633,7 @@ simulated function CompletelyDismember( float MomentumMag )
 	for( i = 0; i < DismembermentParts.length; i++ )
 	{
 		if( Level.ActiveKarmaAccessories < Level.MaxKarmaAccessories && frand() < DismembermentParts[i].SpawnProbability )
-		{			
+		{
 			NewPart = Spawn( DismembermentParts[i].Part, , , GetBoneLocation( DismembermentParts[i].Bone ), GetBoneRotation( DismembermentParts[i].Bone ) );
 			if( NewPart != None )
 			{
@@ -2699,7 +2699,7 @@ State Dying
 {
 ignores Trigger, Bump, HitWall, HeadVolumeChange, PhysicsVolumeChange, Falling;
 
-	event ChangeAnimation() {}	
+	event ChangeAnimation() {}
 	function PlayWaiting() {}
 	function PlayBreathe(optional name animName) {}
 	function PlayWeaponSwitch(Weapon NewWeapon) {}
@@ -2720,14 +2720,14 @@ ignores Trigger, Bump, HitWall, HeadVolumeChange, PhysicsVolumeChange, Falling;
 	}
 
 	event AnimEnd(int Channel)
-	{		
+	{
 		if ( Channel != 0 )
 			return;
-		
+
 		if( !bCollideAfterDeath )
 			SetCollision(false, false, false);
 
-		bProjTarget = false;		
+		bProjTarget = false;
 	}
 
 	simulated event AnimLoopEnd( float LoopStart )
@@ -2754,14 +2754,14 @@ ignores Trigger, Bump, HitWall, HeadVolumeChange, PhysicsVolumeChange, Falling;
 		// Warning!! LastHitTime is not replicated as absolute times don't match on clients at all
 		if( DamageType.IsA( HitDamageType.Name ) )
 		{
-			LastHitLocalTime = Level.TimeSeconds;			
+			LastHitLocalTime = Level.TimeSeconds;
 		}
 
 		if(bPlayedDeath && Physics == PHYS_KarmaRagdoll)
 		{
 			//LifeSpan += 2.0;
-			//LifeSpan = Min( LifeSpan, RagdollLifeSpan );			
-				
+			//LifeSpan = Min( LifeSpan, RagdollLifeSpan );
+
 			if( damageType.default.KApplyImpulseToRoot )
 			{
 				KAddImpulse( Momentum, HitLocation, 'root');
@@ -2769,7 +2769,7 @@ ignores Trigger, Bump, HitWall, HeadVolumeChange, PhysicsVolumeChange, Falling;
 			else
 			{
 				KAddImpulse( Momentum, HitLocation );
-			}			
+			}
 		}
 
 		return Damage;
@@ -2777,19 +2777,19 @@ ignores Trigger, Bump, HitWall, HeadVolumeChange, PhysicsVolumeChange, Falling;
 
 	singular function BaseChange()
 	{
-		if( base == None && 
+		if( base == None &&
 			Physics != PHYS_Falling && Physics != PHYS_Karma && Physics != PHYS_KarmaRagdoll )
-			SetPhysics(PHYS_Falling);		        	
+			SetPhysics(PHYS_Falling);
 	}
 
 	function BeginState()
 	{
 		if( !bCollideAfterDeath )
 		{
-			SetCollision(true,false,false);			
+			SetCollision(true,false,false);
 
-			if( bBlockKarma && Physics != PHYS_KarmaRagdoll )			
-				KSetBlockKarma(false);		
+			if( bBlockKarma && Physics != PHYS_KarmaRagdoll )
+				KSetBlockKarma(false);
 		}
 
 		bCollideWorld = true;
@@ -2798,7 +2798,7 @@ ignores Trigger, Bump, HitWall, HeadVolumeChange, PhysicsVolumeChange, Falling;
 			LifeSpan = 1.0;
 		else
 			SetTimer(RagdollLifeSpan * 0.1, false);
-        		
+
 		if ( Controller != None )
 		{
 			if ( Controller.bIsPlayer )
@@ -2836,14 +2836,14 @@ Begin:
 event Revive()
 {
 	Health = 1;
-	bCanTeleport = true; 
+	bCanTeleport = true;
 	GotoState('Reviving');
 }
 
 simulated event bool GoRagDoll(class<DamageType> DamageType, vector HitLocation)
 {
 	local vector shotDir;
-	local float maxDim;	
+	local float maxDim;
 	local KarmaParamsSkel skelParams;
 	local vector TraceOffset;
 
@@ -2857,29 +2857,29 @@ simulated event bool GoRagDoll(class<DamageType> DamageType, vector HitLocation)
         skelParams = KarmaParamsSkel(KParams);
 		skelParams.KSkeleton = RagdollOverride;
 		KParams = skelParams;
-		
+
 		// Stop animation playing.
 		StopAnimating(false);
-		
+
 		// Set initial linear velocity for ragdoll.
-		skelParams.KStartLinVel = Velocity;			
-		    
+		skelParams.KStartLinVel = Velocity;
+
 		// Set up deferred shot-bone impulse
 		shotDir = Normal(TearOffMomentum);
 		maxDim = Max(CollisionRadius, CollisionHeight);
 
 		TraceOffset = ( 2 * maxDim ) * shotDir;
-					    
+
 		skelParams.KShotStart = HitLocation - TraceOffset;
 		skelParams.KShotEnd = HitLocation + TraceOffset;
 		skelParams.KShotStrength = VSize(TearOffMomentum);
 		if( DamageType != None && DamageType.default.KApplyImpulseToRoot )
-			skelParams.bKApplyToRoot = true;		
-		
-		// Turn on Karma collision for ragdoll.		
+			skelParams.bKApplyToRoot = true;
+
+		// Turn on Karma collision for ragdoll.
 		KSetBlockKarma(true);
-		
-		// Set physics mode to ragdoll. 
+
+		// Set physics mode to ragdoll.
 		// This doesn't actaully start it straight away, it's deferred to the next tick.
 		SetPhysics(PHYS_KarmaRagdoll);
 
@@ -2892,8 +2892,8 @@ simulated event bool GoRagDoll(class<DamageType> DamageType, vector HitLocation)
 //Client functionality
 simulated event PlayIncapacitated(class<DamageType> DamageType, vector HitLocation)
 {
-	bCanTeleport = false; 
-		
+	bCanTeleport = false;
+
 	HitDamageType = DamageType; // these are replicated to other clients
     TakeHitLocation = HitLocation;
 	bIncapacitated = true;
@@ -2907,9 +2907,9 @@ simulated event PlayIncapacitated(class<DamageType> DamageType, vector HitLocati
 		//if (GoRagDoll(DamageType, HitLocation))
 		//	return;
 	}
-		
+
 	// non-ragdoll death fallback
-    BaseEyeHeight = Default.BaseEyeHeight;    
+    BaseEyeHeight = Default.BaseEyeHeight;
 	bPlayedDeath = true;
 }
 
@@ -2918,7 +2918,7 @@ function SetReviveDuration(class<DamageType> DamageType)
 }
 
 function OnIncapacitated(Controller Killer, class<DamageType> DamageType, vector HitLocation)
-{	
+{
 	//Log("Incapacitated");
 	SetReviveDuration(DamageType);
 	PlayIncapacitated(DamageType, HitLocation);
@@ -2946,7 +2946,7 @@ function PlayReviveCue()
 State Reviving
 {
 	ignores GibbedBy;
-	event ChangeAnimation() {}	
+	event ChangeAnimation() {}
 	function PlayWeaponSwitch(Weapon NewWeapon) {}
 	function PlayTakeHit(vector HitLoc, int Damage, class<DamageType> damageType) {}
 	simulated function PlayNextAnimation() {}
@@ -2957,7 +2957,7 @@ State Reviving
 	}
 
 	function float TakeDamage( float Damage, Pawn instigatedBy, Vector hitlocation, Vector momentum, class<DamageType> damageType, optional Name BoneName )
-	{	
+	{
 		local bool DamageKills;
 		DamageKills = false;
 		if (IsHumanControlled())
@@ -3000,7 +3000,7 @@ State Reviving
 		bIncapacitated = false;
 		bValidEnemy = true;
 		Health = MaxHealth/2;
-		SetHealthLevel();		
+		SetHealthLevel();
 		bCanTeleport = true;
 		PlayReviveCue();
 		Controller.PawnRevived(self); //does this need to be execute on client?
@@ -3023,13 +3023,13 @@ State Incapacitated
 	ignores GibbedBy, Trigger, Bump, HitWall, HeadVolumeChange, PhysicsVolumeChange, Falling;
 
 	function PlayWaiting(){}
-	event ChangeAnimation() {}	
+	event ChangeAnimation() {}
 	function PlayWeaponSwitch(Weapon NewWeapon) {}
 	function PlayTakeHit(vector HitLoc, int Damage, class<DamageType> damageType) {}
 	simulated function PlayNextAnimation() {}
 
 	function float TakeDamage( float Damage, Pawn instigatedBy, Vector hitlocation, Vector momentum, class<DamageType> damageType, optional Name BoneName )
-	{	
+	{
 		local bool DamageKills;
 
 		DamageKills = false;
@@ -3063,11 +3063,11 @@ State Incapacitated
 
 		bEnableAim = true;
 		bEnableTurn = true;
-		
+
 		while( i < Attached.length )
 		{
 			if( Attached[i].IsA( 'StatusEffect' ) )
-			{				
+			{
 				Attached[i].Destroy();
 				continue;
 			}
@@ -3089,23 +3089,23 @@ State Incapacitated
 		}
 	}
 	function Timer()
-	{	
+	{
 		Log("Incapacitated timer calling BleedOut");
 		BleedOut();
 	}
 
 Begin:
-	if ( Controller != None )		
-		Controller.PawnIncapacitated(self);		
-	Health = 0;	
+	if ( Controller != None )
+		Controller.PawnIncapacitated(self);
+	Health = 0;
 	ShieldRechargeRate = 0;
 	SetShields(0);
 	Controller.bGodMode = true;
 	bEnableAim = false;
-	bEnableTurn = false;	
-	Velocity = vect(0,0,0); //set our velocity to zero	
+	bEnableTurn = false;
+	Velocity = vect(0,0,0); //set our velocity to zero
 	Acceleration = vect(0,0,0);
-	Weapon.ServerStopFire();	
+	Weapon.ServerStopFire();
 	HookupReviveMarker();
 
 	// NathanM: This check is a hack that needs to be before the death anim
@@ -3116,7 +3116,7 @@ Begin:
 
 	if( !LastHitDamageType.default.DisallowDeathAnim )
 	{
-		PlayFallDown();	
+		PlayFallDown();
 		FinishAnim();
 	}
 	bIncapacitatedOnTurret=false;
@@ -3144,10 +3144,10 @@ State Dispense
 	function AnimEnd(int Channel)
 	{
 		if (Channel == 4)
-		{			
+		{
 			bCollideWorld = true;
 			SetCollision(true, true, true);
-			SetPhysics(PHYS_Walking);			
+			SetPhysics(PHYS_Walking);
 			bPhysicsAnimUpdate = true;
 			bAlignBottom = true;
 			TeamIndex = Default.TeamIndex;
@@ -3218,7 +3218,7 @@ simulated event Tick(float DeltaTime )	// Restore the charge
 		{
 			Shadow.Destroy();
 		}
-	}	
+	}
 }
 
 //change these to native events?
@@ -3233,7 +3233,7 @@ simulated event bool IsDeadOrIncapacitated()
 }
 
 //would use native events, but the auto-generate code doesn't make function const
-simulated native function bool IsWounded(); 
+simulated native function bool IsWounded();
 simulated native function bool UseWoundedAnims();
 simulated native function bool IsLocallyControlled(); // return true if controlled by local (not network) player
 
@@ -3257,11 +3257,11 @@ simulated event SetHealthLevel()
 	HealthRatio = Health/MaxHealth;
 
 	HealthLevel = CalcHealthLevel(HealthRatio);
-	
+
 	if( HealthLevel != OldHealthLevel && HealthAffectsGameplay )
-	{		
+	{
 		ChangeAnimation();
-	}	
+	}
 }
 
 const REDDELAY = 15.0;
@@ -3279,7 +3279,7 @@ function float TakeDamage( float Damage, Pawn instigatedBy, Vector hitlocation, 
 
 	if ( Role < ROLE_Authority )
 		return 0;
-	
+
 	// apply bone multiplier regardless of shield state
 	for( i = 0; i < DamageMultipliers.length; ++i )
 	{
@@ -3311,7 +3311,7 @@ function float TakeDamage( float Damage, Pawn instigatedBy, Vector hitlocation, 
 
 	if (actualDamage <= 0)
 		return 0;
-	
+
 	if ( damagetype == None )
 	{
 		if ( InstigatedBy != None )
@@ -3325,7 +3325,7 @@ function float TakeDamage( float Damage, Pawn instigatedBy, Vector hitlocation, 
 	{
 		TriggerEvent( FirstDamagedEvent, self, self );
 		FirstDamagedEvent = '';
-	}	
+	}
 
 	bWasHit = true;
 	LastHitLocalTime = Level.TimeSeconds;
@@ -3350,12 +3350,12 @@ function float TakeDamage( float Damage, Pawn instigatedBy, Vector hitlocation, 
 	if( !damageType.default.bBypassesShields)
 	{
 		SetShields( Shields - actualDamage ); //apply damage to shields
-		delay = ShieldRechargeDelay;		
+		delay = ShieldRechargeDelay;
 		NextShieldRechargeTime = max(Level.TimeSeconds + ShieldRechargeDelay, NextShieldRechargeTime); //delay shield recharge any time the shields are hit by 1 second
 		if( Shields < 0 )
 		{
 			actualDamage = -Shields;
-			Shields = 0;			
+			Shields = 0;
 		}
 		else
 		{
@@ -3372,7 +3372,7 @@ function float TakeDamage( float Damage, Pawn instigatedBy, Vector hitlocation, 
 	}
 
 	Health -= actualDamage;
-	
+
 	if( Shields > 0 && !DamageType.default.bBypassesShields )
 	{
 		if( Level.TimeSeconds - LastShieldDamageSoundTime >= MinShieldDamageSoundInterval )
@@ -3382,7 +3382,7 @@ function float TakeDamage( float Damage, Pawn instigatedBy, Vector hitlocation, 
 		}
 		bHurt = false;
 	}
-	else 
+	else
 	{
 		if( Level.TimeSeconds - LastYelpTime >= MinYelpTime )
 		{
@@ -3394,7 +3394,7 @@ function float TakeDamage( float Damage, Pawn instigatedBy, Vector hitlocation, 
 		if( actualDamage > MaxHealth * 0.1f || (actualDamage > 0.f && Health < MaxHealth * 0.4f) )
 			// Show visor damage
 			bHurt = true;
-	}	
+	}
 
 	// TimR: Added for testing low health states
 	if( Health <= 0 && InGodMode() )
@@ -3404,12 +3404,12 @@ function float TakeDamage( float Damage, Pawn instigatedBy, Vector hitlocation, 
 
 	OldHealth = HealthLevel;
 	SetHealthLevel();
-	
+
 	if( !IsHumanControlled() )
 	{
 		if( ( HealthLevel == HL_Orange || HealthLevel == HL_Red ) && (OldHealth == HL_Yellow || OldHealth == HL_Green) )
 		{
-			PlayOwnedCue(PAE_DropToOrange);		
+			PlayOwnedCue(PAE_DropToOrange);
 		}
 
 		if( !bDisallowPainAnims )
@@ -3451,12 +3451,12 @@ function float TakeDamage( float Damage, Pawn instigatedBy, Vector hitlocation, 
 	if ( HitLocation == vect(0,0,0) )
 		HitLocation = Location;
 	if ( bAlreadyDead )
-	{		
+	{
 		Warn(self$" took regular damage "$damagetype$" from "$instigatedby$" while already dead at "$Level.TimeSeconds);
 		ChunkUp(Rotation, DamageType);
 		return 0;
 	}
-	
+
 	if ( Health <= 0 )
 	{
 		// pawn died
@@ -3466,13 +3466,13 @@ function float TakeDamage( float Damage, Pawn instigatedBy, Vector hitlocation, 
 				Killer = instigatedBy.GetRecentController();
 			else
 				Killer = instigatedBy.Controller;
-	
+
 			instigatedBy.EnemyKilledThisFrame = self;
 		}
-	
 
-		if ( bPhysicsAnimUpdate )		
-			TearOffMomentum = momentum;					
+
+		if ( bPhysicsAnimUpdate )
+			TearOffMomentum = momentum;
 		Died(Killer, damageType, HitLocation, BoneName);
 	}
 	else
@@ -3491,7 +3491,7 @@ function float TakeDamage( float Damage, Pawn instigatedBy, Vector hitlocation, 
 
 event DoMeleeAttack( name AttackBone, vector BoneOffset )
 {
-	local Actor HitActor;	
+	local Actor HitActor;
 	local vector VecToOther, BodyDir, HitLocation;
 	local name NearestBone;
 
@@ -3505,7 +3505,7 @@ event DoMeleeAttack( name AttackBone, vector BoneOffset )
 	HitLocation += BoneOffset << GetBoneRotation( AttackBone ) ;
 
 	ForEach VisibleCollidingActors( class'Actor', HitActor, Weapon.MeleeRange )
-	{				
+	{
 		if( abs( HitActor.Location.Z - Location.Z ) <= ( Max( HitActor.CollisionHeight, CollisionHeight ) * 1.5 ) )
 		{
 			VecToOther = HitActor.Location - Location;
@@ -3530,7 +3530,7 @@ event DoMeleeAttack( name AttackBone, vector BoneOffset )
 				}
 			}
 		}
-	}	
+	}
 }
 
 function AddDefaultInventory()
@@ -3539,15 +3539,15 @@ function AddDefaultInventory()
 
 	//CL: Add Default Equipment
 	for ( i=0; i<16; i++ )
-		if ( RequiredEquipment[i] != "" )	
-			CreateInventory(RequiredEquipment[i]);			
-	
+		if ( RequiredEquipment[i] != "" )
+			CreateInventory(RequiredEquipment[i]);
+
 	Level.Game.AddGameSpecificInventory(self);
 
 	// HACK FIXME
 	if ( inventory != None )
 		inventory.OwnerEvent('LoadOut');
-	
+
 	Controller.ClientSwitchToBestWeapon();
 
     SpawnAccessories();
@@ -3561,9 +3561,9 @@ function Inventory CreateInventory(string InventoryClassName)
 	InventoryClass = Level.Game.BaseMutator.GetInventoryClass(InventoryClassName);
 	if( (InventoryClass!=None) && (FindInventoryType(InventoryClass)==None) )
 	{
-		Inv = Spawn(InventoryClass,self);		
+		Inv = Spawn(InventoryClass,self);
 		if( Inv != None )
-		{			
+		{
 			Inv.GiveTo(self);
 			if ( Inv != None )
 			Inv.PickupFunction(self);
@@ -3585,11 +3585,11 @@ function Inventory CreateInventory(string InventoryClassName)
 function SpawnAccessories()
 {
 	local int i;
-	local int NumAvailableAccessories;	
+	local int NumAvailableAccessories;
 	local bool StopSpawningAccessories;
 
 	NumAvailableAccessories = AvailableAccessories.length;
-	
+
 	for( i = 0; i < AvailableAccessories.length && Accessories.length < MaxAccessories; ++i )
 	{
 		if( AvailableAccessories[i].IsRequired && IsBoneAvailable( AvailableAccessories[i].BoneName ) )
@@ -3602,7 +3602,7 @@ function SpawnAccessories()
 
 	while( Accessories.length < MaxAccessories && NumAvailableAccessories > 0 )
 	{
-		
+
 		i = rand( AvailableAccessories.length );
 		if( !AvailableAccessories[i].HasBeenUsed && IsBoneAvailable( AvailableAccessories[i].BoneName ) )
 		{
@@ -3628,7 +3628,7 @@ function SpawnAccessories()
 
 simulated function AddAccessory( int which )
 {
-	local AccessoryInfo newAccessoryInfo;	
+	local AccessoryInfo newAccessoryInfo;
 
 	if (which < 0 || which >= AvailableAccessories.length)
 		return;
@@ -3639,7 +3639,7 @@ simulated function AddAccessory( int which )
 	Accessories[0] = spawn( newAccessoryInfo.AccessoryClass, self );
 	AttachToBone( Accessories[0], newAccessoryInfo.BoneName );
 	Accessories[0].SetRelativeLocation( vect(0,0,0) );
-	Accessories[0].SetRelativeRotation( rot(0,0,0) );	
+	Accessories[0].SetRelativeRotation( rot(0,0,0) );
 }
 
 function Detach( Actor Other )
@@ -3649,7 +3649,7 @@ function Detach( Actor Other )
 	for( i = 0; i < Accessories.length; ++i )
 	{
 		if( Other == Accessories[i] )
-		{			
+		{
 			Accessories.Remove( i, 1 );
 			break;
 		}
@@ -3662,8 +3662,8 @@ function bool IsBoneAvailable( name BoneName )
 
 	for( i = 0; i < Accessories.Length; ++i )
 	{
-		if( Accessories[i].AttachmentBone == BoneName )		
-			return false;		
+		if( Accessories[i].AttachmentBone == BoneName )
+			return false;
 	}
 
 	return true;
@@ -3687,7 +3687,7 @@ simulated function name GetWeaponBoneFor(Inventory I)
 //	hierarchy -- we may want to consider non-Pawns as enemies, allies, etc.
 //	Make team functions simulated? shouldn't really be necessary
 //  since the logic probably only matters on the server, but there will
-//  likely be the info necessary to compute them on the client 
+//  likely be the info necessary to compute them on the client
 
 
 simulated function bool IsEnemy(Pawn Other)
@@ -3895,4 +3895,3 @@ defaultproperties
      bDirectional=True
      bValidEnemy=True
 }
-

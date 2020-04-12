@@ -10,7 +10,7 @@
 	Config cache.
 -----------------------------------------------------------------------------*/
 
-//! @brief Single config file.
+// Single config file.
 class FConfigFile : public TMap<FString, FConfigSection>{
 public:
 	UBOOL Dirty, NoSave;
@@ -182,10 +182,10 @@ public:
 	}
 };
 
-//! @brief Set of all cached config files.
+// Set of all cached config files.
 class FConfigCacheIni : public FConfigCache, public TMap<FString, FConfigFile>{
 protected:
-	FConfigCacheIni(){} //!< Private constructor. Use FConfigCacheIni::Factory instead
+	FConfigCacheIni(){} // Private constructor. Use FConfigCacheIni::Factory instead
 
 public:
 	// Basic functions.
@@ -577,7 +577,7 @@ public:
 		Ar << *this;
 	}
 
-	//! Static allocator.
+	//Static allocator.
 	static FConfigCache* Factory(){
 		return new FConfigCacheIni();
 	}

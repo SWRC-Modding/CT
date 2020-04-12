@@ -10,14 +10,8 @@
 	Archive.
 -----------------------------------------------------------------------------*/
 
-struct FMemCount{
-	DWORD Allocations;
-	DWORD Used;
-	DWORD Reserved;
-};
-
-/**
- * @brief Archive class.
+/*
+ * Archive class.
  *
  * Used for loading, saving, and garbage collecting
  * in a byte order neutral way.
@@ -186,8 +180,8 @@ FArchive& operator<<(FArchive& Ar, FTime& F);
 	FArchive macros.
 -----------------------------------------------------------------------------*/
 
-/**
- * @brief Class for serializing objects compactly, mapping small values
+/*
+ * Class for serializing objects compactly, mapping small values
  * to fewer bytes.
  */
 class CORE_API FCompactIndex{
@@ -203,7 +197,7 @@ public:
 	}
 };
 
-//! @brief Archive constructor.
+// Archive constructor.
 template<typename T>
 T Arctor(FArchive& Ar){
 	T Tmp;
@@ -212,7 +206,7 @@ T Arctor(FArchive& Ar){
 	return Tmp;
 }
 
-//! @brief Macro to serialize an integer as a compact index.
+// Macro to serialize an integer as a compact index.
 #define AR_INDEX(intref) \
 	(*(FCompactIndex*)&(intref))
 

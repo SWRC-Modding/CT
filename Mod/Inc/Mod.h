@@ -5,11 +5,10 @@
 LINK_LIB(Mod)
 #endif
 
-/**
+/*
  * Patches the given vtable with a custom function and returns the old function.
- * @param The vtable to patch. It can be obtained like so: *reinterpret_cast<void***>(PointerToObject).
- * @param Index The index of the function in the vtable. *NOT* the byte offset.
- * @param Func The function which is inserted into VTable at Index.
- * @return The function pointer that was at Index previously. NULL if there was an error.
+ * The vtable can be obtained like so: *reinterpret_cast<void***>(PointerToObject).
+ * NOTE: This changes the vtable for all objects of the same class.
+ * Returns the function pointer that was at Index previously. NULL if there was an error.
  */
-MOD_API void* PatchVTable(void** VTable, INT Index, void* Func);
+MOD_API void* PatchVTable(void** VTable, INT Index, void* NewFunc);

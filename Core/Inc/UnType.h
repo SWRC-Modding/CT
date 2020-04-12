@@ -7,28 +7,28 @@
 	UProperty.
 -----------------------------------------------------------------------------*/
 
-//! @brief Property exporting flags.
+// Property exporting flags.
 enum EPropertyPortFlags{
 	PPF_Localized = 1,
 	PPF_Delimited = 2,
 	PPF_CheckReferences = 4,
 };
 
-/**
- * @brief An UnrealScript variable.
+/*
+ * An UnrealScript variable.
  */
 class CORE_API UProperty : public UField{
 	DECLARE_ABSTRACT_CLASS(UProperty,UField,CLASS_IsAUProperty,Core)
 	DECLARE_WITHIN(UField)
 
 	// Persistent variables.
-	DWORD		PropertyFlags;
-	FName		Category;
-	_WORD		RepOffset;
-	_WORD		RepIndex;
-	_WORD		ArrayDim;
-	_WORD		Offset;
-	char		Padding[4]; // Padding
+	DWORD PropertyFlags;
+	FName Category;
+	_WORD RepOffset;
+	_WORD RepIndex;
+	_WORD ArrayDim;
+	_WORD Offset;
+	char  Padding[4]; // Padding
 
 	// Constructors.
 	UProperty();
@@ -77,8 +77,8 @@ class CORE_API UProperty : public UField{
 	UByteProperty.
 -----------------------------------------------------------------------------*/
 
-/**
- * @brief Describes an unsigned byte value or 255-value enumeration variable.
+/*
+ * Describes an unsigned byte value or 255-value enumeration variable.
  */
 class CORE_API UByteProperty : public UProperty{
 	DECLARE_CLASS(UByteProperty,UProperty,CLASS_IsAUProperty,Core)
@@ -111,8 +111,8 @@ class CORE_API UByteProperty : public UProperty{
 	UIntProperty.
 -----------------------------------------------------------------------------*/
 
-/**
- * @brief Describes a 32-bit signed integer variable.
+/*
+ * Describes a 32-bit signed integer variable.
  */
 class CORE_API UIntProperty : public UProperty{
 	DECLARE_CLASS(UIntProperty,UProperty,CLASS_IsAUProperty,Core)
@@ -138,8 +138,8 @@ class CORE_API UIntProperty : public UProperty{
 	UBoolProperty.
 -----------------------------------------------------------------------------*/
 
-/**
- * @brief Describes a single bit flag variable residing in a 32-bit unsigned double word.
+/*
+ * Describes a single bit flag variable residing in a 32-bit unsigned double word.
  */
 class CORE_API UBoolProperty : public UProperty{
 	DECLARE_CLASS(UBoolProperty,UProperty,CLASS_IsAUProperty,Core)
@@ -171,8 +171,8 @@ class CORE_API UBoolProperty : public UProperty{
 	UFloatProperty.
 -----------------------------------------------------------------------------*/
 
-/**
- * @brief Describes an IEEE 32-bit floating point variable.
+/*
+ * Describes an IEEE 32-bit floating point variable.
  */
 class CORE_API UFloatProperty : public UProperty{
 	DECLARE_CLASS(UFloatProperty,UProperty,CLASS_IsAUProperty,Core)
@@ -198,8 +198,8 @@ class CORE_API UFloatProperty : public UProperty{
 	UObjectProperty.
 -----------------------------------------------------------------------------*/
 
-/**
- * @brief Describes a reference variable to another object which may be nil.
+/*
+ * Describes a reference variable to another object which may be nil.
  */
 class CORE_API UObjectProperty : public UProperty{
 	DECLARE_CLASS(UObjectProperty,UProperty,CLASS_IsAUProperty,Core)
@@ -235,8 +235,8 @@ class CORE_API UObjectProperty : public UProperty{
 	UObjectProperty.
 -----------------------------------------------------------------------------*/
 
-/**
- * @brief Describes a reference variable to another object which may be nil.
+/*
+ * Describes a reference variable to another object which may be nil.
  */
 class CORE_API UClassProperty : public UObjectProperty{
 	DECLARE_CLASS(UClassProperty,UObjectProperty,0,Core)
@@ -261,8 +261,8 @@ class CORE_API UClassProperty : public UObjectProperty{
 	UNameProperty.
 -----------------------------------------------------------------------------*/
 
-/**
- * @brief Describes a name variable pointing into the global name table.
+/*
+ * Describes a name variable pointing into the global name table.
  */
 class CORE_API UNameProperty : public UProperty{
 	DECLARE_CLASS(UNameProperty,UProperty,CLASS_IsAUProperty,Core)
@@ -287,8 +287,8 @@ class CORE_API UNameProperty : public UProperty{
 	UStrProperty.
 -----------------------------------------------------------------------------*/
 
-/**
- * @brief Describes a dynamic string variable.
+/*
+ * Describes a dynamic string variable.
  */
 class CORE_API UStrProperty : public UProperty{
 	DECLARE_CLASS(UStrProperty,UProperty,CLASS_IsAUProperty,Core)
@@ -316,8 +316,8 @@ class CORE_API UStrProperty : public UProperty{
 	UArrayProperty.
 -----------------------------------------------------------------------------*/
 
-/**
- * @brief Describes a dynamic array.
+/*
+ * Describes a dynamic array.
  */
 class CORE_API UArrayProperty : public UProperty{
 	DECLARE_CLASS(UArrayProperty,UProperty,CLASS_IsAUProperty,Core)
@@ -354,45 +354,11 @@ class CORE_API UArrayProperty : public UProperty{
 };
 
 /*-----------------------------------------------------------------------------
-	UMapProperty.
------------------------------------------------------------------------------*/
-
-/**
- * @brief Describes a dynamic map. NOT IMPLEMENTED!!!
- */
-class CORE_API UMapProperty : public UProperty{
-	DECLARE_CLASS(UMapProperty,UProperty,CLASS_IsAUProperty,Core)
-
-	// Variables.
-	UProperty* Key;
-	UProperty* Value;
-
-	// Constructors.
-	UMapProperty(){}
-	UMapProperty(ECppProperty, INT InOffset, const TCHAR* InCategory, DWORD InFlags) : UProperty(EC_CppProperty, InOffset, InCategory, InFlags){}
-
-	// UObject interface.
-	virtual void Serialize(FArchive& Ar);
-
-	// UProperty interface.
-	virtual INT GetElementSize() const;
-	virtual void Link(FArchive& Ar, UProperty* Prev);
-	virtual UBOOL Identical(const void* A, const void* B) const;
-	virtual void ExportCppItem(FOutputDevice& Out, UBOOL IsEvent) const;
-	virtual void SerializeItem(FArchive& Ar, void* Value, INT MaxReadBytes, INT IDONTKNOWWHATTHISIS) const;
-	virtual UBOOL NetSerializeItem(FArchive& Ar, UPackageMap* Map, void* Data) const;
-	virtual void ExportTextItem(TCHAR* ValueStr, BYTE* PropertyValue, BYTE* DefaultValue, INT PortFlags) const;
-	virtual const TCHAR* ImportText(const TCHAR* Buffer, BYTE* Data, INT PortFlags) const;
-	virtual void CopySingleValue(void* Dest, void* Src, UObject* SuperObject) const;
-	virtual void DestroyValue(void* Dest) const;
-};
-
-/*-----------------------------------------------------------------------------
 	UStructProperty.
 -----------------------------------------------------------------------------*/
 
-/**
- * @brief Describes a structure variable embedded in (as opposed to referenced by)
+/*
+ * Describes a structure variable embedded in (as opposed to referenced by)
  * an object.
  */
 class CORE_API UStructProperty : public UProperty{
@@ -430,8 +396,8 @@ class CORE_API UStructProperty : public UProperty{
 	UDelegateProperty.
 -----------------------------------------------------------------------------*/
 
-/**
- * @brief Describes a pointer to a function bound to an Object
+/*
+ * Describes a pointer to a function bound to an Object
  */
 class CORE_API UDelegateProperty : public UProperty{
 	DECLARE_CLASS(UDelegateProperty,UProperty,CLASS_IsAUProperty,Core)
@@ -463,8 +429,8 @@ class CORE_API UDelegateProperty : public UProperty{
 	Field templates.
 -----------------------------------------------------------------------------*/
 
-/**
- * @brief Find a typed field in a struct.
+/*
+ * Find a typed field in a struct.
  */
 template<typename T>
 T* FindField(UStruct* Owner, const TCHAR* FieldName){
@@ -484,8 +450,8 @@ T* FindField(UStruct* Owner, const TCHAR* FieldName){
 	UObject accessors that depend on UClass.
 -----------------------------------------------------------------------------*/
 
-/**
- * @brief See if this object belongs to the specified class.
+/*
+ * See if this object belongs to the specified class.
  */
 inline UBOOL UObject::IsA(UClass* SomeBase) const{
 	for(UClass* TempClass = Class; TempClass; TempClass = static_cast<UClass*>(TempClass->SuperField)){
@@ -496,8 +462,8 @@ inline UBOOL UObject::IsA(UClass* SomeBase) const{
 	return SomeBase == NULL;
 }
 
-/**
- * @brief See if this object is in a certain package.
+/*
+ * See if this object is in a certain package.
  */
 inline UBOOL UObject::IsIn(UObject* SomeOuter) const{
 	for(UObject* It = GetOuter(); It; It = It->GetOuter()){

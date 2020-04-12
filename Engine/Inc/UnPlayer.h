@@ -16,7 +16,7 @@
 class ENGINE_API UPlayer : public UObject, public FOutputDevice, public FExec{
 	DECLARE_ABSTRACT_CLASS(UPlayer,UObject,CLASS_Transient|CLASS_Config,Engine)
 
-	//Objects
+	// Objects
 	class APlayerController* Actor;
 	class UConsole* Console;
 
@@ -34,13 +34,18 @@ class ENGINE_API UPlayer : public UObject, public FOutputDevice, public FExec{
 	class UInteractionMaster* InteractionMaster;
 	TArrayNoInit<class UInteraction*> LocalInteractions;
 
-	//Constructor
+	// Constructor
 	UPlayer();
 
-	//Overrides
+	// Overrides
 	virtual void Destroy();
 	virtual int Exec(const char*, FOutputDevice&);
 	virtual void Serialize(FArchive&);
+
+	// UPlayer Interface
+
+	virtual void ReadInput(FLOAT DeltaSeconds);
+	virtual bool CheckPad();
 };
 
 /*-----------------------------------------------------------------------------

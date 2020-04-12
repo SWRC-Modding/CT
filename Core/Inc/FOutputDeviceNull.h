@@ -9,11 +9,9 @@
 //
 // ANSI stdout output device.
 //
-class FOutputDeviceNull : public FOutputDevice
-{
+class FOutputDeviceNull : public FOutputDevice{
 public:
-	void Serialize( const TCHAR* V, enum EName Event )
-	{}
+	void Serialize(const TCHAR* V, enum EName Event){}
 };
 
 /*-----------------------------------------------------------------------------

@@ -10,11 +10,11 @@
 	Native functions.
 -----------------------------------------------------------------------------*/
 
-//! @brief Native function table.
+// Native function table.
 extern CORE_API Native GNatives[];
 BYTE CORE_API GRegisterNative(INT iNative, const Native& Func);
 
-//! @brief Native cast table.
+// Native cast table.
 extern CORE_API Native GCasts[];
 BYTE CORE_API GRegisterCast(INT CastCode, const Native& Func);
 
@@ -26,8 +26,8 @@ BYTE CORE_API GRegisterCast(INT CastCode, const Native& Func);
 #define MAP_NATIVE(func, num) \
 	{#func, &ThisClass::exec##func, num},
 
-/**
- * @brief Initializes all native functions for a class at startup.
+/*
+ * Initializes all native functions for a class at startup.
  */
 template<typename T>
 struct FNativeInitializer{

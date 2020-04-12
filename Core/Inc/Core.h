@@ -6,8 +6,7 @@
 		* Created by Tim Sweeney
 =============================================================================*/
 
-#ifndef _INC_CORE
-#define _INC_CORE
+#pragma once
 
 /*----------------------------------------------------------------------------
 	Low level includes.
@@ -19,11 +18,10 @@
 #endif
 
 //===========================================================================================
-// Give an option to disable this, it can cause link errors if the libs are already defined in the project
 #ifdef DISABLE_LINK_LIB
 #define LINK_LIB(name)
 #else
-//! @brief Used to automatically link the proper lib for the dlls whose headers are currently included
+// Used to automatically link the proper lib for the dlls whose headers are currently included
 #define LINK_LIB(name) __pragma(comment(lib, "../"#name"/lib/"#name".lib"))
 #endif
 //===========================================================================================
@@ -38,21 +36,21 @@ LINK_LIB(Core)
 class FTime{
 	typedef __int64 TIMETYP;
 public:
-			FTime      ()				{ v = 0; }
-			FTime      (float f)		{ v = (TIMETYP)(f * FIXTIME); }
-			FTime      (double d)		{ v = (TIMETYP)(d * FIXTIME); }
-	float	GetFloat   ()				{ return v / FIXTIME; }
-	FTime	operator+  (float f) const	{ return FTime(v + (TIMETYP)(f * FIXTIME)); }
-	float	operator-  (FTime t) const	{ return (v - t.v) / FIXTIME; }
-	FTime	operator*  (float f) const	{ return FTime(v * f); }
-	FTime	operator/  (float f) const	{ return FTime(v / f); }
-	FTime&	operator+= (float f)		{ v = v + (TIMETYP)(f * FIXTIME); return *this; }
-	FTime&	operator*= (float f)		{ v = (TIMETYP)(v * f); return *this; }
-	FTime&	operator/= (float f)		{ v = (TIMETYP)(v / f); return *this; }
-	int		operator== (FTime t)		{ return v == t.v; }
-	int		operator!= (FTime t)		{ return v != t.v; }
-	int		operator>  (FTime t)		{ return v > t.v; }
-	FTime&	operator=  (const FTime& t) { v=t.v; return *this; }
+			FTime      ()              { v = 0; }
+			FTime      (float f)       { v = (TIMETYP)(f * FIXTIME); }
+			FTime      (double d)      { v = (TIMETYP)(d * FIXTIME); }
+	float   GetFloat   ()              { return v / FIXTIME; }
+	FTime   operator+  (float f) const { return FTime(v + (TIMETYP)(f * FIXTIME)); }
+	float   operator-  (FTime t) const { return (v - t.v) / FIXTIME; }
+	FTime   operator*  (float f) const { return FTime(v * f); }
+	FTime   operator/  (float f) const { return FTime(v / f); }
+	FTime&  operator+= (float f)       { v = v + (TIMETYP)(f * FIXTIME); return *this; }
+	FTime&  operator*= (float f)       { v = (TIMETYP)(v * f); return *this; }
+	FTime&  operator/= (float f)       { v = (TIMETYP)(v / f); return *this; }
+	int     operator== (FTime t)       { return v == t.v; }
+	int     operator!= (FTime t)       { return v != t.v; }
+	int     operator>  (FTime t)       { return v > t.v; }
+	FTime&  operator=  (const FTime& t){ v=t.v; return *this; }
 
 private:
 	TIMETYP v;
@@ -68,14 +66,14 @@ private:
 #endif
 
 // Global constants.
-enum{ MAXBYTE		= 0xff		  };
-enum{ MAXWORD		= 0xffffU	  };
-enum{ MAXDWORD		= 0xffffffffU };
-enum{ MAXSBYTE		= 0x7f		  };
-enum{ MAXSWORD		= 0x7fff	  };
-enum{ MAXINT		= 0x7fffffff  };
-enum{ INDEX_NONE	= -1		  };
-enum{ UNICODE_BOM	= 0xfeff	  };
+enum{ MAXBYTE       = 0xff        };
+enum{ MAXWORD       = 0xffffU     };
+enum{ MAXDWORD      = 0xffffffffU };
+enum{ MAXSBYTE      = 0x7f        };
+enum{ MAXSWORD      = 0x7fff      };
+enum{ MAXINT        = 0x7fffffff  };
+enum{ INDEX_NONE    = -1          };
+enum{ UNICODE_BOM   = 0xfeff      };
 enum ENoInit{ E_NoInit = 0 };
 
 enum ERunningOS{
@@ -92,7 +90,7 @@ enum ERunningOS{
 	OS_UNKNOWN	= 255
 };
 
-// Single byte character set mappings. No wchar_t in Republic Commando...
+// Multi byte character set mappings. No wchar_t in Republic Commando...
 typedef ANSICHAR  TCHAR;
 typedef ANSICHARU TCHARU;
 
@@ -162,10 +160,16 @@ class FString;
 class FMalloc;
 struct FFrame;
 
-//! @brief Native function.
+struct FMemCount{
+	DWORD Allocations;
+	DWORD Used;
+	DWORD Reserved;
+};
+
+// Native function.
 typedef void(UObject::*Native)(FFrame& TheStack, void* const Result);
 
-//! @brief Single entry in a UClass' native funtion table.
+// Single entry in a UClass' native funtion table.
 template<typename T>
 struct FNativeEntry{
 	const TCHAR* name;
@@ -195,7 +199,7 @@ CORE_API extern class FOutputDevice* GNull;
 	Abstract interfaces.
 -----------------------------------------------------------------------------*/
 
-//! @brief An output device.
+// An output device.
 class CORE_API FOutputDevice{
 public:
 	// FOutputDevice interface.
@@ -211,13 +215,13 @@ public:
 	void Logf(const TCHAR* Fmt, ...);
 };
 
-//! @brief Error device.
+// Error device.
 class CORE_API FOutputDeviceError : public FOutputDevice{
 public:
 	virtual void HandleError() = 0;
 };
 
-//! @brief Memory allocator.
+// Memory allocator.
 class /*CORE_API*/ FMalloc{
 public:
 	virtual void Init(){}
@@ -243,10 +247,10 @@ public:
 	virtual void Tick(){}
 };
 
-//! @brief Single section in a config file.
+// Single section in a config file.
 typedef TMultiMap<FName, FString> FConfigSection;
 
-//! @brief Configuration database cache.
+// Configuration database cache.
 class FConfigCache{
 public:
 	virtual UBOOL GetBool(const TCHAR* Section, const TCHAR* Key, UBOOL& Value, const TCHAR* Filename = NULL) = 0;
@@ -262,7 +266,7 @@ public:
 	virtual void SetInt(const TCHAR* Section, const TCHAR* Key, INT Value, const TCHAR* Filename = NULL) = 0;
 	virtual void SetFloat(const TCHAR* Section, const TCHAR* Key, FLOAT Value, const TCHAR* Filename = NULL) = 0;
 	virtual void SetString(const TCHAR* Section, const TCHAR* Key, const TCHAR* Value, const TCHAR* Filename = NULL) = 0;
-	virtual void Flush(UBOOL Read, const TCHAR* Filename = NULL) = 0;
+	virtual void Flush(UBOOL Read, const TCHAR* Filename = NULL, INT Idk = 0) = 0;
 	virtual void UnloadFile(const TCHAR* Filename) = 0;
 	virtual void UnloadInts(const TCHAR* Filename) = 0;
 	virtual void Detach(const TCHAR* Filename) = 0;
@@ -273,13 +277,13 @@ public:
 	virtual ~FConfigCache(){}
 };
 
-//! @brief Any object that is capable of taking commands.
+// Any object that is capable of taking commands.
 class CORE_API FExec{
 public:
 	virtual UBOOL Exec(const TCHAR* Cmd, FOutputDevice& Ar) = 0;
 };
 
-//! @brief Notification hook.
+// Notification hook.
 class CORE_API FNotifyHook{
 public:
 	virtual void NotifyDestroy(void* Src){}
@@ -288,13 +292,13 @@ public:
 	virtual void NotifyExec(void* Src, const TCHAR* Cmd){}
 };
 
-//! @brief Interface for returning a context string.
+// Interface for returning a context string.
 class FContextSupplier{
 public:
 	virtual FString GetContext() = 0;
 };
 
-//! @brief A context for displaying modal warning messages.
+// A context for displaying modal warning messages.
 class FFeedbackContext : public FOutputDevice{
 public:
 	virtual UBOOL VARARGS YesNof(const TCHAR* Fmt, ...) = 0;
@@ -321,39 +325,34 @@ public:
 };
 
 // File manager.
-enum EFileTimes{
-	FILETIME_Create,
-	FILETIME_LastAccess,
-	FILETIME_LastWrite,
-};
 
 enum EFileWrite{
-	FILEWRITE_NoFail			= 0x01,
-	FILEWRITE_NoReplaceExisting	= 0x02,
-	FILEWRITE_EvenIfReadOnly	= 0x04,
-	FILEWRITE_Unbuffered		= 0x08,
-	FILEWRITE_Append			= 0x10,
-	FILEWRITE_AllowRead			= 0x20,
+	FILEWRITE_NoFail            = 0x01,
+	FILEWRITE_NoReplaceExisting = 0x02,
+	FILEWRITE_EvenIfReadOnly    = 0x04,
+	FILEWRITE_Unbuffered        = 0x08,
+	FILEWRITE_Append            = 0x10,
+	FILEWRITE_AllowRead         = 0x20,
 };
 
 enum EFileRead{
-	FILEREAD_NoFail				= 0x01,
+	FILEREAD_NoFail             = 0x01,
 };
 
 enum ECopyCompress{
-	FILECOPY_Normal				= 0x00,
-	FILECOPY_Compress			= 0x01,
-	FILECOPY_Decompress			= 0x02,
+	FILECOPY_Normal             = 0x00,
+	FILECOPY_Compress           = 0x01,
+	FILECOPY_Decompress         = 0x02,
 };
 
 enum ECopyResult{
-	COPY_OK						= 0x00,
-	COPY_MiscFail				= 0x01,
-	COPY_ReadFail				= 0x02,
-	COPY_WriteFail				= 0x03,
-	COPY_CompFail				= 0x04,
-	COPY_DecompFail				= 0x05,
-	COPY_Canceled				= 0x06,
+	COPY_OK                     = 0x00,
+	COPY_MiscFail               = 0x01,
+	COPY_ReadFail               = 0x02,
+	COPY_WriteFail              = 0x03,
+	COPY_CompFail               = 0x04,
+	COPY_DecompFail             = 0x05,
+	COPY_Canceled               = 0x06,
 };
 
 #define COMPRESSED_EXTENSION	".uz2"
@@ -362,8 +361,6 @@ struct FCopyProgress{
 	virtual UBOOL Poll(FLOAT Fraction) = 0;
 };
 
-CORE_API const TCHAR* appBaseDir();
-
 class CORE_API FFileManager{
 public:
 	virtual void Init(UBOOL Startup){}
@@ -371,8 +368,8 @@ public:
 	virtual FArchive* CreateFileWriter(const TCHAR* Filename, DWORD WriteFlags = 0, FOutputDevice* Error = GNull) = 0;
 	virtual INT FileSize(const TCHAR* Filename) = 0;
 	virtual UBOOL Delete(const TCHAR* Filename, UBOOL RequireExists = 0, UBOOL EvenReadOnly = 0) = 0;
-	virtual UBOOL Copy(const TCHAR* Dest, const TCHAR* Src, UBOOL Replace=1, UBOOL EvenIfReadOnly = 0, UBOOL Attributes = 0, void (*Progress)(FLOAT Fraction) = NULL) = 0;
-	virtual UBOOL Move(const TCHAR* Dest, const TCHAR* Src, UBOOL Replace=1, UBOOL EvenIfReadOnly = 0, UBOOL Attributes = 0) = 0;
+	virtual UBOOL Copy(const TCHAR* Dest, const TCHAR* Src, UBOOL Replace = 1, UBOOL EvenIfReadOnly = 0, UBOOL Attributes = 0, void(*Progress)(FLOAT Fraction) = NULL) = 0;
+	virtual UBOOL Move(const TCHAR* Dest, const TCHAR* Src, UBOOL Replace = 1, UBOOL EvenIfReadOnly = 0, UBOOL Attributes = 0) = 0;
 	virtual SQWORD GetGlobalTime(const TCHAR* Filename) = 0;
 	virtual UBOOL SetGlobalTime(const TCHAR* Filename) = 0;
 	virtual UBOOL MakeDirectory(const TCHAR* Path, UBOOL Tree = 0) = 0;
@@ -382,9 +379,8 @@ public:
 	virtual FString GetDefaultDirectory() = 0;
 	virtual const TCHAR* CalcHomeDir();
 	virtual int Cache(const TCHAR*);
-	virtual void vtpad(){}
-	virtual QWORD GetFreeDiskSpace(const TCHAR*);
 	virtual struct FFileStats GetStats(bool);
+	virtual QWORD GetFreeDiskSpace(const TCHAR*);
 };
 
 //
@@ -398,15 +394,15 @@ enum EFileStreamType{
 };
 
 struct FStream{
-	void*	Data;
-	void*	Handle;
-	void*	TDD;		// type dependent data
-	INT		FileSeek;
-	INT		ChunkSize;
-	INT		ChunksRequested;
-	INT		Locked;
-	INT		Used;
-	INT		EndOfFile;
+	void* Data;
+	void* Handle;
+	void* TDD;		// type dependent data
+	INT   FileSeek;
+	INT   ChunkSize;
+	INT   ChunksRequested;
+	INT   Locked;
+	INT   Used;
+	INT   EndOfFile;
 	EFileStreamType	Type;
 };
 
@@ -444,112 +440,110 @@ private:
 ----------------------------------------------------------------------------*/
 
 // Core globals.
-CORE_API extern FMemStack				GMem;						//! Global memory stack
-CORE_API extern FOutputDevice*			GLog;						//! Regular logging
-CORE_API extern FOutputDeviceError*		GError;						//! Critical errors
-CORE_API extern FOutputDevice*			GNull;						//! Log to nowhere
-CORE_API extern FOutputDevice*			GThrow;						//! Exception thrower
-CORE_API extern FFeedbackContext*		GWarn;						//! User interaction and non critical warnings
-CORE_API extern FConfigCache*			GConfig;					//! Configuration database cache
-CORE_API extern FTransactionBase*		GUndo;						//! Transaction tracker, non-NULL when a transaction is in progress
-CORE_API extern FOutputDevice*			GLogHook;					//! Launch log output hook
-CORE_API extern FExec*					GExec;						//! Launch command-line exec hook
-CORE_API extern FMalloc*				GMalloc;					//! Memory allocator
-CORE_API extern FFileManager*			GFileManager;				//! File manager
-CORE_API extern USystem*				GSys;						//! System control code
-CORE_API extern UProperty*				GProperty;					//! Property for UnrealScript interpreter
-CORE_API extern BYTE*					GPropAddr;					//! Property address for UnrealScript interpreter
-CORE_API extern UObject*				GPropObject;				//! Object with Property for UnrealScript interpreter
-CORE_API extern DWORD					GRuntimeUCFlags;			//! Property for storing flags between calls to bytecode functions
-CORE_API extern USubsystem*				GWindowManager;				//! Window update routine called once per tick
-CORE_API extern TCHAR					GErrorHist[4096];			//! For building call stack text dump in guard/unguard mechanism
-CORE_API extern TCHAR					GYes[64];					//! Localized "yes" text
-CORE_API extern TCHAR					GNo[64];					//! Localized "no" text
-CORE_API extern TCHAR					GTrue[64];					//! Localized "true" text
-CORE_API extern TCHAR					GFalse[64];					//! Localized "false" text
-CORE_API extern TCHAR					GNone[64];					//! Localized "none" text
-CORE_API extern TCHAR					GCdPath[];					//! Cd path, if any
-CORE_API extern	DOUBLE					GSecondsPerCycle;			//! Seconds per CPU cycle for this PC
-CORE_API extern DOUBLE					GLastFNamePurgeTime;
-CORE_API extern DOUBLE					GTempDouble;				//! Used during development for timing
-CORE_API extern void					(*GTempFunc)(void*);		//! Used during development for debug hooks
-CORE_API extern SQWORD					GTicks;						//! Number of non-persistent ticks thus far in this level, for profiling
-CORE_API extern DWORD					GPageSize;					//! Operating system page size
-CORE_API extern DWORD					GProcessorCount;			//! Number of CPUs in this PC
-CORE_API extern DWORD					GPhysicalMemory;			//! Bytes of physical memory in this PC
-CORE_API extern DWORD					GUglyHackFlags;				//! Flags for passing around globally hacked stuff
-CORE_API extern UBOOL					GIsBenchmarking;			//! Whether we are in benchmark mode or not
-CORE_API extern UBOOL					GIsClient;					//! Whether engine was launched as a client
-CORE_API extern UBOOL					GIsCriticalError;			//! An appError() has occured
-CORE_API extern UBOOL					GIsEditor;					//! Whether engine was launched for editing
-CORE_API extern UBOOL					GIsGarbageCollecting;
-CORE_API extern UBOOL					GIsGuarded;					//! Whether execution is happening within main()/WinMain()'s try/catch handler
-CORE_API extern UBOOL					GIsLoadingLevel;
-CORE_API extern UBOOL					GIsOpenGL;
-CORE_API extern UBOOL					GIsPixomatic;
-CORE_API extern UBOOL					GIsPurgingFNames;
-CORE_API extern UBOOL					GIsRequestingExit;			//! Indicates that MainLoop() should be exited at the end of the current iteration
-CORE_API extern UBOOL					GIsRunning;					//! Whether execution is happening within MainLoop()
-CORE_API extern UBOOL					GIsScriptable;				//! Whether script execution is allowed
-CORE_API extern UBOOL					GIsServer;					//! Whether engine was launched as a server, true if GIsClient
-CORE_API extern UBOOL					GIsSlowTask;				//! Whether there is a slow task in progress
-CORE_API extern UBOOL					GIsStarted;					//! Whether execution is happening from within main()/WinMain()
-CORE_API extern UBOOL					GScriptEntryTag;			//! Number of recursive UnrealScript calls currently on the stack
-CORE_API extern UBOOL					GIsStrict;					//! Causes all UnrealScript execution warnings to be fatal errors
-CORE_API extern UBOOL					GLazyLoad;					//! Whether TLazyLoad arrays should be lazy-loaded or not
-CORE_API extern UBOOL					GIsUCC;						//! Is UCC running?
-CORE_API extern UBOOL					GUseSmallPools;
-CORE_API extern UBOOL					GUseFrontEnd;
-CORE_API extern UBOOL					GEdSelectionLock;			//! Are selections locked? (you can't select/deselect additional actors)
-CORE_API extern UBOOL					GEdShowFogInViewports;		//! Show distance fog in viewports?
-CORE_API extern UBOOL					GBuildingScripts;
-CORE_API extern class FGlobalMath		GMath;						//! Math code
-CORE_API extern class FArchive*			GDummySave;					//! No-op save archive
-CORE_API extern class FArchive*			GIsUTracingGDummySave;
-CORE_API extern FFileStream*			GFileStream;				//! File streaming
-CORE_API extern FLOAT					GAudioMaxRadiusMultiplier;	//! Max distance = Radius * GAudioMaxRadiusMultiplier
-CORE_API extern FLOAT					GAudioDefaultRadius;		//! Default radius for PlayOwnedSound
-// Gives annoying warning when there are unrelated compile errors...
-//CORE_API extern TArray<FEdLoadError>	GEdLoadErrors;				//! For keeping track of load errors in the editor
-CORE_API extern	UDebugger*				GDebugger;					//! Unrealscript Debugger
-CORE_API extern QWORD					GMakeCacheIDIndex;			//! Cache ID
-CORE_API extern FString					GBuildLabel;
-CORE_API extern FString					GMachineOS;
-CORE_API extern FString					GMachineCPU;
-CORE_API extern FString					GMachineVideo;
-CORE_API extern FString					GSavePath;
-CORE_API extern FString					GCurrProfilePath;
-CORE_API extern FString					GGlobalSettingsPath;
-CORE_API extern FString					GGlobalSettingsSaveName;
-CORE_API extern FLOAT					NEAR_CLIPPING_PLANE;
-CORE_API extern FLOAT					FAR_CLIPPING_PLANE;
-CORE_API extern ERunningOS				GRunningOS;
+CORE_API extern FMemStack               GMem;                       // Global memory stack
+CORE_API extern FOutputDevice*          GLog;                       // Regular logging
+CORE_API extern FOutputDeviceError*     GError;                     // Critical errors
+CORE_API extern FOutputDevice*          GNull;                      // Log to nowhere
+CORE_API extern FOutputDevice*          GThrow;                     // Exception thrower
+CORE_API extern FFeedbackContext*       GWarn;                      // User interaction and non critical warnings
+CORE_API extern FConfigCache*           GConfig;                    // Configuration database cache
+CORE_API extern FTransactionBase*       GUndo;                      // Transaction tracker, non-NULL when a transaction is in progress
+CORE_API extern FOutputDevice*          GLogHook;                   // Launch log output hook
+CORE_API extern FExec*                  GExec;                      // Launch command-line exec hook
+CORE_API extern FMalloc*                GMalloc;                    // Memory allocator
+CORE_API extern FFileManager*           GFileManager;               // File manager
+CORE_API extern USystem*                GSys;                       // System control code
+CORE_API extern UProperty*              GProperty;                  // Property for UnrealScript interpreter
+CORE_API extern BYTE*                   GPropAddr;                  // Property address for UnrealScript interpreter
+CORE_API extern UObject*                GPropObject;                // Object with Property for UnrealScript interpreter
+CORE_API extern DWORD                   GRuntimeUCFlags;            // Property for storing flags between calls to bytecode functions
+CORE_API extern USubsystem*             GWindowManager;             // Window update routine called once per tick
+CORE_API extern TCHAR                   GErrorHist[4096];           // For building call stack text dump in guard/unguard mechanism
+CORE_API extern TCHAR                   GYes[64];                   // Localized "yes" text
+CORE_API extern TCHAR                   GNo[64];                    // Localized "no" text
+CORE_API extern TCHAR                   GTrue[64];                  // Localized "true" text
+CORE_API extern TCHAR                   GFalse[64];                 // Localized "false" text
+CORE_API extern TCHAR                   GNone[64];                  // Localized "none" text
+CORE_API extern TCHAR                   GCdPath[];                  // Cd path, if any
+CORE_API extern	DOUBLE                  GSecondsPerCycle;           // Seconds per CPU cycle for this PC
+CORE_API extern DOUBLE                  GLastFNamePurgeTime;
+CORE_API extern DOUBLE                  GTempDouble;                // Used during development for timing
+CORE_API extern void                    (*GTempFunc)(void*);        // Used during development for debug hooks
+CORE_API extern SQWORD                  GTicks;                     // Number of non-persistent ticks thus far in this level, for profiling
+CORE_API extern DWORD                   GPageSize;                  // Operating system page size
+CORE_API extern DWORD                   GProcessorCount;            // Number of CPUs in this PC
+CORE_API extern DWORD                   GPhysicalMemory;            // Bytes of physical memory in this PC
+CORE_API extern DWORD                   GUglyHackFlags;             // Flags for passing around globally hacked stuff
+CORE_API extern UBOOL                   GIsBenchmarking;            // Whether we are in benchmark mode or not
+CORE_API extern UBOOL                   GIsClient;                  // Whether engine was launched as a client
+CORE_API extern UBOOL                   GIsCriticalError;           // An appError() has occured
+CORE_API extern UBOOL                   GIsEditor;                  // Whether engine was launched for editing
+CORE_API extern UBOOL                   GIsGarbageCollecting;
+CORE_API extern UBOOL                   GIsGuarded;                 // Whether execution is happening within main()/WinMain()'s try/catch handler
+CORE_API extern UBOOL                   GIsLoadingLevel;
+CORE_API extern UBOOL                   GIsOpenGL;
+CORE_API extern UBOOL                   GIsPixomatic;
+CORE_API extern UBOOL                   GIsPurgingFNames;
+CORE_API extern UBOOL                   GIsRequestingExit;          // Indicates that MainLoop() should be exited at the end of the current iteration
+CORE_API extern UBOOL                   GIsRunning;                 // Whether execution is happening within MainLoop()
+CORE_API extern UBOOL                   GIsScriptable;              // Whether script execution is allowed
+CORE_API extern UBOOL                   GIsServer;                  // Whether engine was launched as a server, true if GIsClient
+CORE_API extern UBOOL                   GIsSlowTask;                // Whether there is a slow task in progress
+CORE_API extern UBOOL                   GIsStarted;                 // Whether execution is happening from within main()/WinMain()
+CORE_API extern UBOOL                   GScriptEntryTag;            // Number of recursive UnrealScript calls currently on the stack
+CORE_API extern UBOOL                   GIsStrict;                  // Causes all UnrealScript execution warnings to be fatal errors
+CORE_API extern UBOOL                   GLazyLoad;                  // Whether TLazyLoad arrays should be lazy-loaded or not
+CORE_API extern UBOOL                   GIsUCC;                     // Is UCC running?
+CORE_API extern UBOOL                   GUseSmallPools;
+CORE_API extern UBOOL                   GUseFrontEnd;
+CORE_API extern UBOOL                   GEdSelectionLock;           // Are selections locked? (you can't select/deselect additional actors)
+CORE_API extern UBOOL                   GEdShowFogInViewports;      // Show distance fog in viewports?
+CORE_API extern UBOOL                   GBuildingScripts;
+CORE_API extern class FGlobalMath       GMath;                      // Math code
+CORE_API extern class FArchive*         GDummySave;                 // No-op save archive
+CORE_API extern class FArchive*         GIsUTracingGDummySave;
+CORE_API extern FFileStream*            GFileStream;                //  File streaming
+CORE_API extern FLOAT                   GAudioMaxRadiusMultiplier;  //  Max distance = Radius * GAudioMaxRadiusMultiplier
+CORE_API extern FLOAT                   GAudioDefaultRadius;        //  Default radius for PlayOwnedSound
+CORE_API extern	UDebugger*              GDebugger;                  //  Unrealscript Debugger
+CORE_API extern QWORD                   GMakeCacheIDIndex;          //  Cache ID
+CORE_API extern FString                 GBuildLabel;
+CORE_API extern FString                 GMachineOS;
+CORE_API extern FString                 GMachineCPU;
+CORE_API extern FString                 GMachineVideo;
+CORE_API extern FString                 GSavePath;
+CORE_API extern FString                 GCurrProfilePath;
+CORE_API extern FString                 GGlobalSettingsPath;
+CORE_API extern FString                 GGlobalSettingsSaveName;
+CORE_API extern FLOAT                   NEAR_CLIPPING_PLANE;
+CORE_API extern FLOAT                   FAR_CLIPPING_PLANE;
+CORE_API extern ERunningOS              GRunningOS;
 
 // Per module globals.
 extern "C" DLL_EXPORT TCHAR GPackage[];
 
 // Normal includes.
-#include "UnFile.h"			// Low level utility code.
-#include "UnObjVer.h"		// Object version info.
-#include "UnArc.h"			// Archive class.
-#include "UnTemplate.h"	  	// Dynamic arrays.
-#include "UnName.h"			// Global name subsystem.
-#include "UnStack.h"		// Script stack definition.
-#include "UnObjBas.h"		// Object base class.
-#include "UnCoreNet.h"		// Core networking.
-#include "UnCorObj.h"		// Core object class definitions.
-#include "UnClass.h"		// Class definition.
-#include "UnType.h"			// Base property type.
-#include "UnScript.h"		// Script class.
-#include "UFactory.h"		// Factory definition.
-#include "UExporter.h"		// Exporter definition.
-#include "UnCache.h"		// Cache based memory management.
-#include "UnMem.h"			// Stack based memory management.
-#include "UnCId.h"			// Cache ID's.
-#include "UnBits.h"			// Bitstream archiver.
-#include "UnMath.h"			// Vector math functions.
+#include "UnFile.h"	     // Low level utility code.
+#include "UnObjVer.h"    // Object version info.
+#include "UnArc.h"	     // Archive class.
+#include "UnTemplate.h"  // Dynamic arrays.
+#include "UnName.h"	     // Global name subsystem.
+#include "UnStack.h"     // Script stack definition.
+#include "UnObjBas.h"    // Object base class.
+#include "UnCoreNet.h"   // Core networking.
+#include "UnCorObj.h"    // Core object class definitions.
+#include "UnClass.h"     // Class definition.
+#include "UnType.h"      // Base property type.
+#include "UnScript.h"    // Script class.
+#include "UFactory.h"    // Factory definition.
+#include "UExporter.h"   // Exporter definition.
+#include "UnCache.h"     // Cache based memory management.
+#include "UnMem.h"       // Stack based memory management.
+#include "UnCId.h"       // Cache ID's.
+#include "UnBits.h"      // Bitstream archiver.
+#include "UnMath.h"      // Vector math functions.
 
-//! @brief Worker class for tracking loading errors in the editor
+// Worker class for tracking loading errors in the editor
 class CORE_API FEdLoadError{
 public:
 	FEdLoadError(){}
@@ -561,7 +555,7 @@ public:
 
 	~FEdLoadError(){}
 
-	//! @brief The types of things that could be missing.
+	// The types of things that could be missing.
 	enum{
 		TYPE_FILE,		// A totally missing file
 		TYPE_RESOURCE	// Texture/Sound/StaticMesh/etc
@@ -582,8 +576,10 @@ public:
 	}
 };
 
-/**
- * @brief Archive for counting memory usage.
+CORE_API extern TArray<FEdLoadError>	GEdLoadErrors; /*  For keeping track of load errors in the editor */
+
+/*
+ * Archive for counting memory usage.
  */
 class CORE_API FArchiveCountMem : public FArchive{
 public:
@@ -614,14 +610,14 @@ typedef struct{
 	FString Message;
 } MAPCHECK;
 
-//! @brief A convenience to allow referring to axis' by name instead of number
+// A convenience to allow referring to axis' by name instead of number
 enum EAxis{
 	AXIS_X,
 	AXIS_Y,
-	AXIS_Z,
+	AXIS_Z
 };
 
-//! @brief Very basic abstract debugger class.
+// Very basic abstract debugger class.
 class UDebugger{ //DEBUGGER
 public:
 	virtual void DebugInfo(UObject* Debugee, FFrame* Stack, FString InfoType, int LineNumber, int InputPos) = 0;
@@ -631,4 +627,3 @@ public:
 /*-----------------------------------------------------------------------------
 	The End.
 -----------------------------------------------------------------------------*/
-#endif

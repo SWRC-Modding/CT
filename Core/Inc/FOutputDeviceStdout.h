@@ -9,12 +9,10 @@
 //
 // ANSI stdout output device.
 //
-class FOutputDeviceStdout : public FOutputDevice
-{
+class FOutputDeviceStdout : public FOutputDevice{
 public:
-	void Serialize( const TCHAR* V, EName Event )
-	{
-		printf( "%s\n", V );
+	void Serialize( const TCHAR* V, EName Event ){
+		puts(V);
 	}
 };
 

@@ -7,8 +7,8 @@
 	UPackage.
 -----------------------------------------------------------------------------*/
 
-/**
- * @brief A package.
+/*
+ * A package.
  */
 class CORE_API UPackage : public UObject{
 	DECLARE_CLASS(UPackage,UObject,0,Core)
@@ -17,7 +17,7 @@ class CORE_API UPackage : public UObject{
 	void* DllHandle;
 	UBOOL AttemptedBind;
 	DWORD PackageFlags;
-	UBOOL bDirty; //!< Used by the editor to determine if a package has been changed
+	UBOOL bDirty; // Used by the editor to determine if a package has been changed
 
 	// Constructors.
 	UPackage();
@@ -34,8 +34,8 @@ class CORE_API UPackage : public UObject{
 	USubsystem.
 -----------------------------------------------------------------------------*/
 
-/**
- * @brief A subsystem.
+/*
+ * A subsystem.
  */
 class CORE_API USubsystem : public UObject, public FExec{
 	DECLARE_ABSTRACT_CLASS(USubsystem,UObject,CLASS_Transient,Core)
@@ -57,8 +57,8 @@ struct UCommandlet_eventMain_Parms{
 	INT ReturnValue;
 };
 
-/**
- * @brief A command-line applet.
+/*
+ * A command-line applet.
  */
 class CORE_API UCommandlet : public UObject{
 	DECLARE_CLASS(UCommandlet,UObject,CLASS_Transient|CLASS_Abstract|CLASS_Localized,Core)
@@ -75,8 +75,8 @@ class CORE_API UCommandlet : public UObject{
 
 	virtual INT Main(const TCHAR* Parms);
 
-	/**
-	* @brief Entry point.
+	/*
+	*  Entry point.
 	*
 	* For some reason LucasArts removed the 'event' prefix
 	* from functions that call UnrealScript events which
@@ -106,8 +106,8 @@ class CORE_API UCommandlet : public UObject{
 	ULanguage.
 -----------------------------------------------------------------------------*/
 
-/**
- * @brief A language (special case placeholder class).
+/*
+ * A language (special case placeholder class).
  */
 class CORE_API ULanguage : public UObject{
 	DECLARE_ABSTRACT_CLASS(ULanguage,UObject,CLASS_Transient,Core)
@@ -120,8 +120,8 @@ class CORE_API ULanguage : public UObject{
 	UTextBuffer.
 -----------------------------------------------------------------------------*/
 
-/**
- * @brief An object that holds a bunch of text.
+/*
+ * An object that holds a bunch of text.
  *
  * The text is contiguous and, if of nonzero length,
  * is terminated by a NULL at the very last position.

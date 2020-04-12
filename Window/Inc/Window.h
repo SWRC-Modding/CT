@@ -166,8 +166,8 @@ struct FRect{
 	FControlSnoop.
 -----------------------------------------------------------------------------*/
 
-/**
- * @brief For forwarding interaction with a control to an object.
+/*
+ * For forwarding interaction with a control to an object.
  */
 class WINDOW_API FControlSnoop{
 public:
@@ -182,8 +182,8 @@ public:
 	FCommandTarget.
 -----------------------------------------------------------------------------*/
 
-/**
- * @brief Interface for accepting commands.
+/*
+ * Interface for accepting commands.
  */
 class WINDOW_API FCommandTarget{
 public:
@@ -213,15 +213,15 @@ struct WINDOW_API FDelegateInt{
 	virtual void operator()(INT I);
 };
 
-//! @brief Load a menu and localize its text.
+// Load a menu and localize its text.
 WINDOW_API HMENU LoadLocalizedMenu(HINSTANCE hInstance, INT Id, const TCHAR* Name, const TCHAR* Package = GPackage);
 
 /*-----------------------------------------------------------------------------
 	FWindowsBitmap.
 -----------------------------------------------------------------------------*/
 
-/**
- * @brief A bitmap.
+/*
+ * A bitmap.
  */
 class WINDOW_API FWindowsBitmap{
 public:
@@ -247,8 +247,8 @@ private:
 #define W_DECLARE_CLASS(a,b,c) public:
 #define W_IMPLEMENT_CLASS(a)
 
-/**
- * @brief An operating system window.
+/*
+ * An operating system window.
  */
 class WINDOW_API WWindow : public FCommandTarget{
 	W_DECLARE_ABSTRACT_CLASS(WWindow,UObject,CLASS_Transient);
@@ -266,13 +266,13 @@ class WINDOW_API WWindow : public FCommandTarget{
 	UBOOL bShow;
 	WPARAM LastwParam;
 	LPARAM LastlParam;
-	INT UDNHelpTopic;		//!< Matches one of the ID's registed to the UDN help topic map in UnrealEd\src\main.cpp
+	INT UDNHelpTopic;		// Matches one of the ID's registed to the UDN help topic map in UnrealEd\src\main.cpp
 
 	// Static.
 	static INT              ModalCount;
 	static TArray<WWindow*> _Windows;
 	static TArray<WWindow*> _DeleteWindows;
-	//! Use this procedure for modeless dialogs.
+	//Use this procedure for modeless dialogs.
 	static INT_PTR CALLBACK StaticDlgProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	static LONG APIENTRY StaticWndProc(HWND hWnd, UINT Message, UINT wParam, LONG lParam);
 	static WNDPROC RegisterWindowClass(const TCHAR* Name, DWORD Style);
@@ -363,8 +363,8 @@ class WINDOW_API WWindow : public FCommandTarget{
 	WControl.
 -----------------------------------------------------------------------------*/
 
-/**
- * @brief A control which exists inside an owner window.
+/*
+ * A control which exists inside an owner window.
  */
 class WINDOW_API WControl : public WWindow{
 	W_DECLARE_ABSTRACT_CLASS(WControl,WWindow,CLASS_Transient);
@@ -412,8 +412,8 @@ class WINDOW_API WTabControl : public WControl{
 	WLabel.
 -----------------------------------------------------------------------------*/
 
-/**
- * @brief A non-interactive label control.
+/*
+ * A non-interactive label control.
  */
 class WINDOW_API WLabel : public WControl{
 	W_DECLARE_CLASS(WLabel,WControl,CLASS_Transient)
@@ -449,8 +449,8 @@ class WINDOW_API WGroupBox : public WControl{
 	template to determine where to place child controls.
 -----------------------------------------------------------------------------*/
 
-/**
- * @brief Helper struct that stores the window positions
+/*
+ * Helper struct that stores the window positions
  * of the various controls this page contains.
  */
 struct WPropertyPageCtrl{
@@ -532,8 +532,8 @@ class WINDOW_API WCustomLabel : public WLabel{
 	WButton.
 -----------------------------------------------------------------------------*/
 
-/**
- * @brief A button.
+/*
+ * A button.
  */
 class WINDOW_API WButton : public WControl{
 	W_DECLARE_CLASS(WButton,WControl,CLASS_Transient);
@@ -567,15 +567,15 @@ class WINDOW_API WButton : public WControl{
 	WBitmapButton.
 -----------------------------------------------------------------------------*/
 
-/**
- * @brief Works like a normal button, but has a bitmap on it instead of text.
+/*
+ * Works like a normal button, but has a bitmap on it instead of text.
  */
 class WINDOW_API WBitmapButton : public WButton{
 	W_DECLARE_CLASS(WBitmapButton,WButton,CLASS_Transient);
 	DECLARE_WINDOWSUBCLASS(WBitmapButton,WButton,Window)
 
 	HBITMAP hbmSource;
-	FRect EnabledRect, DownRect, DisabledRect; //!< the position/size to read from the source bitmap
+	FRect EnabledRect, DownRect, DisabledRect; // the position/size to read from the source bitmap
 	UBOOL bIsAutoCheckBox;
 
 	// Constructor.
@@ -612,8 +612,8 @@ class WINDOW_API WColorButton : public WButton{
 	WToolTip
 -----------------------------------------------------------------------------*/
 
-/**
- * @brief Tooltip window - easy way to create tooltips for standard controls.
+/*
+ * Tooltip window - easy way to create tooltips for standard controls.
  */
 class WINDOW_API WToolTip : public WControl{
 	W_DECLARE_CLASS(WToolTip,WControl,CLASS_Transient);
@@ -630,8 +630,8 @@ class WINDOW_API WToolTip : public WControl{
 /*-----------------------------------------------------------------------------
 	WThinScrollBar.
 -----------------------------------------------------------------------------*/
-/**
- * @brief A small, MAX-like scrollbar.
+/*
+ * A small, MAX-like scrollbar.
  */
 class WINDOW_API WThinScrollBar : public WWindow{
 	DECLARE_WINDOWCLASS(WThinScrollBar,WWindow,Window)
@@ -640,9 +640,9 @@ class WINDOW_API WThinScrollBar : public WWindow{
 	FDelegate PosChangedDelegate;
 
 	FLOAT ThumbPosPct;
-	FLOAT ThumbSzPct;	//!< The pct's where the thumb sits and how large it is
-	INT ID;				//!< The controls ID
-	INT MaxVal;			//!< The maximum value the scrollbar represents
+	FLOAT ThumbSzPct;	// The pct's where the thumb sits and how large it is
+	INT ID;				// The controls ID
+	INT MaxVal;			// The maximum value the scrollbar represents
 
 	HBRUSH ThumbBrush;
 	FPoint OldMouseLocation;
@@ -667,8 +667,8 @@ class WINDOW_API WThinScrollBar : public WWindow{
 /*-----------------------------------------------------------------------------
 	WTimeScrollBar.
 -----------------------------------------------------------------------------*/
-/**
- * @brief Custom scrollbar style control for Matinee.
+/*
+ * Custom scrollbar style control for Matinee.
  */
 class WINDOW_API WTimeScrollBar : public WWindow{
 	DECLARE_WINDOWCLASS(WTimeScrollBar,WWindow,Window)
@@ -676,9 +676,9 @@ class WINDOW_API WTimeScrollBar : public WWindow{
 	// Delegates.
 	FDelegate PosChangedDelegate;
 
-	FLOAT ThumbPosPct;	//!< The position of the thumb expressed a %
-	INT ID;				//!< The controls ID
-	INT MaxVal;			//!< The maximum value the scrollbar represents
+	FLOAT ThumbPosPct;	// The position of the thumb expressed a %
+	INT ID;				// The controls ID
+	INT MaxVal;			// The maximum value the scrollbar represents
 
 	HBITMAP hbmThumb, hbmLeft, hbmBody, hbmRight;
 	FPoint OldMouseLocation;
@@ -736,8 +736,8 @@ class WINDOW_API WPictureButton : public WWindow{
 	WUDNWindow.
 -----------------------------------------------------------------------------*/
 
-/**
- * @brief Creating to capture the mouse so UDN help topics can be requested.
+/*
+ * Creating to capture the mouse so UDN help topics can be requested.
  */
 class WINDOW_API WUDNWindow : public WWindow{
 	DECLARE_WINDOWCLASS(WUDNWindow,WWindow,Window)
@@ -758,8 +758,8 @@ class WINDOW_API WUDNWindow : public WWindow{
 	WCheckBox.
 -----------------------------------------------------------------------------*/
 
-/**
- * @brief A checkbox.
+/*
+ * A checkbox.
  */
 class WINDOW_API WCheckBox : public WButton{
 	W_DECLARE_CLASS(WCheckBox,WButton,CLASS_Transient);
@@ -782,8 +782,8 @@ class WINDOW_API WCheckBox : public WButton{
 	WScrollBar.
 -----------------------------------------------------------------------------*/
 
-/**
- * @brief A vertical scrollbar.
+/*
+ * A vertical scrollbar.
  */
 class WINDOW_API WScrollBar : public WControl{
 	W_DECLARE_CLASS(WScrollBar,WControl,CLASS_Transient);
@@ -800,8 +800,8 @@ class WINDOW_API WScrollBar : public WControl{
 	WTreeView.
 -----------------------------------------------------------------------------*/
 
-/**
- * @brief A tree control
+/*
+ * A tree control
  */
 class WINDOW_API WTreeView : public WControl{
 	W_DECLARE_CLASS(WTreeView,WControl,CLASS_Transient);
@@ -827,8 +827,8 @@ class WINDOW_API WTreeView : public WControl{
 	WCoolButton.
 -----------------------------------------------------------------------------*/
 
-/**
- * @brief Frame showing styles.
+/*
+ * Frame showing styles.
  */
 enum EFrameFlags{
 	CBFF_ShowOver	= 0x01,
@@ -838,8 +838,8 @@ enum EFrameFlags{
 	CBFF_NoCenter   = 0x10
 };
 
-/**
- * @brief A coolbar-style button.
+/*
+ * A coolbar-style button.
  */
 class WINDOW_API WCoolButton : public WButton{
 	W_DECLARE_CLASS(WCoolButton,WButton,CLASS_Transient);
@@ -863,8 +863,8 @@ class WINDOW_API WCoolButton : public WButton{
 	WUrlButton.
 -----------------------------------------------------------------------------*/
 
-/**
- * @brief A URL button.
+/*
+ * A URL button.
  */
 class WINDOW_API WUrlButton : public WCoolButton{
 	W_DECLARE_CLASS(WUrlButton,WCoolButton,CLASS_Transient);
@@ -884,8 +884,8 @@ class WINDOW_API WUrlButton : public WCoolButton{
 	WComboBox.
 -----------------------------------------------------------------------------*/
 
-/**
- * @brief A combo box control.
+/*
+ * A combo box control.
  */
 class WINDOW_API WComboBox : public WControl{
 	W_DECLARE_CLASS(WComboBox,WControl,CLASS_Transient);
@@ -925,8 +925,8 @@ class WINDOW_API WComboBox : public WControl{
 	WEdit.
 -----------------------------------------------------------------------------*/
 
-/**
- * @brief A single-line or multiline edit control.
+/*
+ * A single-line or multiline edit control.
  */
 class WINDOW_API WEdit : public WControl{
 	W_DECLARE_CLASS(WEdit,WControl,CLASS_Transient);
@@ -958,8 +958,8 @@ class WINDOW_API WEdit : public WControl{
 	WRichEdit.
 -----------------------------------------------------------------------------*/
 
-/**
- * @brief A single-line or multiline edit control.
+/*
+ * A single-line or multiline edit control.
  */
 class WINDOW_API WRichEdit : public WControl{
 	W_DECLARE_CLASS(WRichEdit,WControl,CLASS_Transient);
@@ -984,8 +984,8 @@ class WINDOW_API WRichEdit : public WControl{
 	WTerminal.
 -----------------------------------------------------------------------------*/
 
-/**
- * @brief Base class of terminal edit windows.
+/*
+ * Base class of terminal edit windows.
  */
 class WINDOW_API WTerminalBase : public WWindow{
 	W_DECLARE_ABSTRACT_CLASS(WTerminalBase,WWindow,CLASS_Transient);
@@ -1000,8 +1000,8 @@ class WINDOW_API WTerminalBase : public WWindow{
 	virtual void Paste() = 0;
 };
 
-/**
- * @brief A terminal edit window.
+/*
+ * A terminal edit window.
  */
 class WINDOW_API WEditTerminal : public WEdit{
 	W_DECLARE_ABSTRACT_CLASS(WEditTerminal,WEdit,CLASS_Transient)
@@ -1019,8 +1019,8 @@ class WINDOW_API WEditTerminal : public WEdit{
 	void OnUndo();
 };
 
-/**
- * @brief A terminal window.
+/*
+ * A terminal window.
  */
 class WINDOW_API WTerminal : public WTerminalBase, public FOutputDevice{
 	W_DECLARE_CLASS(WTerminal,WTerminalBase,CLASS_Transient);
@@ -1062,7 +1062,7 @@ class WINDOW_API WLog : public WTerminal{
 	UINT NidMessage;
 	FArchive*& LogAr;
 	FString LogFilename;
-
+	char Padding[1024];
 	// Functions.
 	WLog();
 	WLog(const TCHAR* InLogFilename, FArchive*& InLogAr, FName InPersistentName, WWindow* InOwnerWindow = NULL);
@@ -1082,8 +1082,8 @@ class WINDOW_API WLog : public WTerminal{
 	WDialog.
 -----------------------------------------------------------------------------*/
 
-/**
- * @brief A dialog window, always based on a Visual C++ dialog template.
+/*
+ * A dialog window, always based on a Visual C++ dialog template.
  */
 class WINDOW_API WDialog : public WWindow{
 	W_DECLARE_ABSTRACT_CLASS(WDialog,WWindow,CLASS_Transient);
@@ -1109,8 +1109,8 @@ class WINDOW_API WDialog : public WWindow{
 	WCrashBoxDialog.
 -----------------------------------------------------------------------------*/
 
-/**
- * @brief A crash dialog box.
+/*
+ * A crash dialog box.
  */
 class WINDOW_API WCrashBoxDialog : public WDialog{
 	W_DECLARE_CLASS(WCrashBoxDialog,WDialog,CLASS_Transient);
@@ -1161,8 +1161,8 @@ class WINDOW_API WTrackBar : public WControl{
 	WProgressBar.
 -----------------------------------------------------------------------------*/
 
-/**
- * @brief A non-interactive label control.
+/*
+ * A non-interactive label control.
  */
 class WINDOW_API WProgressBar : public WControl{
 	W_DECLARE_CLASS(WProgressBar,WControl,CLASS_Transient);
@@ -1239,8 +1239,8 @@ class WINDOW_API WListBox : public WControl{
 	WCheckListBox.
 -----------------------------------------------------------------------------*/
 
-/**
- * @brief A list box where each item has a checkbox beside it.
+/*
+ * A list box where each item has a checkbox beside it.
  */
 class WINDOW_API WCheckListBox : public WListBox{
 	W_DECLARE_CLASS(WCheckListBox,WListBox,CLASS_Transient);
@@ -1274,8 +1274,8 @@ public:
 	WItemBox.
 -----------------------------------------------------------------------------*/
 
-/**
- * @brief A list box contaning list items.
+/*
+ * A list box contaning list items.
  */
 class WINDOW_API WItemBox : public WListBox{
 	W_DECLARE_CLASS(WItemBox,WListBox,CLASS_Transient);
@@ -1296,8 +1296,8 @@ class WINDOW_API WItemBox : public WListBox{
 	WListView.
 -----------------------------------------------------------------------------*/
 
-/**
- * @brief A list view.
+/*
+ * A list view.
  */
 class WINDOW_API WListView : public WControl{
 	W_DECLARE_CLASS(WListView,WControl,CLASS_Transient)
@@ -1346,8 +1346,8 @@ class WINDOW_API WPropertiesBase : public WWindow, public FControlSnoop{
 	WDragInterceptor.
 -----------------------------------------------------------------------------*/
 
-/**
- * @brief Splitter drag handler.
+/*
+ * Splitter drag handler.
  */
 class WINDOW_API WDragInterceptor : public WWindow{
 	W_DECLARE_CLASS(WDragInterceptor,WWindow,CLASS_Transient);
@@ -1378,8 +1378,8 @@ class WINDOW_API WDragInterceptor : public WWindow{
 	FTreeItem.
 -----------------------------------------------------------------------------*/
 
-/**
- * @brief Base class of list items.
+/*
+ * Base class of list items.
  */
 class WINDOW_API FTreeItem : public FTreeItemBase{
 public:
@@ -1439,8 +1439,8 @@ public:
 	virtual UObject* GetParentObject();
 };
 
-/**
- * @brief Property list item.
+/*
+ * Property list item.
  */
 class WINDOW_API FPropertyItem : public FTreeItem{
 public:
@@ -1460,7 +1460,7 @@ public:
 	UBOOL			EdFindable;
 	UBOOL			SingleSelect;
 	FName			Name;
-	FString			Equation;				//!< A work area to store editor equations
+	FString			Equation;				// A work area to store editor equations
 
 	// Constructors.
 	FPropertyItem(WPropertiesBase* InOwnerProperties, FTreeItem* InParent, UProperty* InProperty, FName InName, INT InOffset, INT InArrayIndex, INT SixSixSix);
@@ -1502,8 +1502,8 @@ public:
 	virtual void ReceiveFromControl();
 };
 
-/**
- * @brief An abstract list header.
+/*
+ * An abstract list header.
  */
 class WINDOW_API FHeaderItem : public FTreeItem{
 public:
@@ -1522,7 +1522,7 @@ public:
 	INT GetHeight();
 };
 
-/**
+/*
  * A category header list item.
  */
 class WINDOW_API FCategoryItem : public FHeaderItem{
@@ -1541,8 +1541,8 @@ public:
 	void Collapse();
 };
 
-/**
- * @brief Item to create a new object for inline editing.
+/*
+ * Item to create a new object for inline editing.
  */
 class WINDOW_API FNewObjectItem : public FHeaderItem{
 public:
@@ -1570,8 +1570,8 @@ public:
 	WProperties.
 -----------------------------------------------------------------------------*/
 
-/**
- * @brief General property editing control.
+/*
+ * General property editing control.
  */
 class WINDOW_API WProperties : public WPropertiesBase{
 	W_DECLARE_ABSTRACT_CLASS(WProperties,WPropertiesBase,CLASS_Transient);
@@ -1641,8 +1641,8 @@ public:
 	WObjectProperties.
 -----------------------------------------------------------------------------*/
 
-/**
- * @brief Object properties root.
+/*
+ * Object properties root.
  */
 class WINDOW_API FObjectsItem : public FPropertyItemBase{
 public:
@@ -1662,6 +1662,12 @@ public:
 	void SetProperty(FPropertyItem* Child, const TCHAR* Value);
 	void Expand();
 	FString GetCaption() const;
+	// TODO(Leon): Fix vtables
+	virtual void vtpad1(){}
+	virtual void vtpad2(){}
+	virtual void vtpad3(){}
+	virtual void vtpad4(){}
+	virtual void vtpad5(){}
 	virtual void SetObjects(UObject** InObjects, INT Count);
 	virtual UObject* GetParentObject();
 	UBOOL Eval(FString Str, FLOAT* pResult);
@@ -1670,12 +1676,14 @@ public:
 	FLOAT Val(FString Value);
 };
 
-/**
- * @brief Multiple selection object properties.
+/*
+ * Multiple selection object properties.
  */
 class WINDOW_API WObjectProperties : public WProperties{
 	W_DECLARE_CLASS(WObjectProperties,WProperties,CLASS_Transient);
 	DECLARE_WINDOWCLASS(WObjectProperties,WProperties,Window)
+
+	char PADDING[4];
 
 	// Variables.
 	FObjectsItem Root;
@@ -1692,8 +1700,8 @@ class WINDOW_API WObjectProperties : public WProperties{
 	WClassProperties.
 -----------------------------------------------------------------------------*/
 
-/**
- * @brief Class properties root.
+/*
+ * Class properties root.
  */
 class WINDOW_API FClassItem : public FPropertyItemBase{
 public:
@@ -1707,8 +1715,8 @@ public:
 	void Expand();
 };
 
-/**
- * @brief Multiple selection class properties.
+/*
+ * Multiple selection class properties.
  */
 class WINDOW_API WClassProperties : public WProperties{
 	W_DECLARE_CLASS(WClassProperties,WProperties,CLASS_Transient);
@@ -1728,8 +1736,8 @@ class WINDOW_API WClassProperties : public WProperties{
 	WConfigProperties.
 -----------------------------------------------------------------------------*/
 
-/**
- * @brief Object configuration header.
+/*
+ * Object configuration header.
  */
 class WINDOW_API FObjectConfigItem : public FPropertyItemBase{
 public:
@@ -1753,8 +1761,8 @@ public:
 	void Serialize(FArchive& Ar);
 };
 
-/**
- * @brief A configuration list item.
+/*
+ * A configuration list item.
  */
 class WINDOW_API FConfigItem : public FHeaderItem{
 public:
@@ -1772,8 +1780,8 @@ public:
 	void Collapse();
 };
 
-/**
- * @brief Configuration properties.
+/*
+ * Configuration properties.
  */
 class WINDOW_API WConfigProperties : public WProperties{
 	W_DECLARE_CLASS(WConfigProperties,WProperties,CLASS_Transient);
@@ -1793,8 +1801,8 @@ class WINDOW_API WConfigProperties : public WProperties{
 	WWizardPage.
 -----------------------------------------------------------------------------*/
 
-/**
- * @brief A wizard page.
+/*
+ * A wizard page.
  */
 class WINDOW_API WWizardPage : public WDialog{
 	W_DECLARE_ABSTRACT_CLASS(WWizardPage,WDialog,CLASS_Transient);
@@ -1821,8 +1829,8 @@ class WINDOW_API WWizardPage : public WDialog{
 	WWizardDialog.
 -----------------------------------------------------------------------------*/
 
-/**
- * @brief The wizard frame dialog.
+/*
+ * The wizard frame dialog.
  */
 class WINDOW_API WWizardDialog : public WDialog{
 	W_DECLARE_CLASS(WWizardDialog,WDialog,CLASS_Transient);
@@ -1864,13 +1872,13 @@ class WINDOW_API WWizardDialog : public WDialog{
 #define STANDARD_BUTTON_WIDTH	77
 
 enum EAnchorPos{
-	ANCHOR_NONE		= 0,	//!< No change
-	ANCHOR_TOP		= 1,	//!< Anchor relative to top of window
-	ANCHOR_LEFT		= 2,	//!< Anchor relative to left of window
-	ANCHOR_BOTTOM	= 4,	//!< Anchor relative to bottom of window
-	ANCHOR_RIGHT	= 8,	//!< Anchor relative to right of window
-	ANCHOR_WIDTH	= 16,	//!< Use a hardcoded width
-	ANCHOR_HEIGHT	= 32,	//!< Use a hardcoded height
+	ANCHOR_NONE		= 0,	// No change
+	ANCHOR_TOP		= 1,	// Anchor relative to top of window
+	ANCHOR_LEFT		= 2,	// Anchor relative to left of window
+	ANCHOR_BOTTOM	= 4,	// Anchor relative to bottom of window
+	ANCHOR_RIGHT	= 8,	// Anchor relative to right of window
+	ANCHOR_WIDTH	= 16,	// Use a hardcoded width
+	ANCHOR_HEIGHT	= 32,	// Use a hardcoded height
 
 	ANCHOR_TL		= ANCHOR_TOP | ANCHOR_LEFT,
 	ANCHOR_BR		= ANCHOR_BOTTOM | ANCHOR_RIGHT,
@@ -1886,14 +1894,14 @@ public:
 
 	FWindowAnchor operator=(const FWindowAnchor& Other);
 
-	HWND RefWindow;		//!< The window to anchor to
+	HWND RefWindow;		// The window to anchor to
 
-	HWND Window;		//!< The window we are anchoring
-	INT PosFlags;		//!< ANCHOR_
-	INT XPos, YPos;		//!< The offsets for the top/left corner
+	HWND Window;		// The window we are anchoring
+	INT PosFlags;		// ANCHOR_
+	INT XPos, YPos;		// The offsets for the top/left corner
 
-	INT SzFlags;		//!< ANCHOR_
-	INT XSz, YSz;		//!< Either the offsets for the bottom/right corner of the window, or the hardcoded width/height
+	INT SzFlags;		// ANCHOR_
+	INT XSz, YSz;		// Either the offsets for the bottom/right corner of the window, or the hardcoded width/height
 };
 
 class WINDOW_API FContainer{
@@ -1911,8 +1919,8 @@ public:
 	WSplitterPane.
 -----------------------------------------------------------------------------*/
 
-/**
- * @brief The window that sits on either side of a WSPplitter.
+/*
+ * The window that sits on either side of a WSPplitter.
  */
 class WINDOW_API WSplitterPane : public WWindow{
 	DECLARE_WINDOWCLASS(WSplitterPane,WWindow,Window)
@@ -1932,14 +1940,14 @@ class WINDOW_API WSplitterPane : public WWindow{
 
 #define STANDARD_SPLITTER_SZ 6
 
-/**
- * @brief The bar that sits between the panes being split.
+/*
+ * The bar that sits between the panes being split.
  */
 class WINDOW_API WSplitter : public WWindow{
 	DECLARE_WINDOWCLASS(WSplitter,WWindow,Window)
 
 	UBOOL bVertical;
-	FLOAT Pct;	//!< 0.0f-100.0f
+	FLOAT Pct;	// 0.0f-100.0f
 
 	// Constructor.
 	WSplitter();
@@ -1959,8 +1967,8 @@ class WINDOW_API WSplitter : public WWindow{
 	WSplitterContainer.
 -----------------------------------------------------------------------------*/
 
-/**
- * @brief A window which allows you to have 2 windows with a splitter bar between them.
+/*
+ * A window which allows you to have 2 windows with a splitter bar between them.
  *
  * Dragging the splitter control will resize the windows.
  */
@@ -1987,8 +1995,8 @@ class WINDOW_API WSplitterContainer : public WWindow{
 	UDN Help.
 -----------------------------------------------------------------------------*/
 
-/**
- * @brief Helper class to assist with context sensitive UDN help.
+/*
+ * Helper class to assist with context sensitive UDN help.
  */
 class WINDOW_API FUDNHelpTopic{
 public:
@@ -2003,8 +2011,8 @@ public:
 	FWaitCursor.
 -----------------------------------------------------------------------------*/
 
-/**
- * @brief Simple class to handle the hourglass cursor.
+/*
+ * Simple class to handle the hourglass cursor.
  */
 class WINDOW_API FWaitCursor{
 public:

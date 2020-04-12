@@ -10,20 +10,20 @@
 	FObjectExport.
 -----------------------------------------------------------------------------*/
 
-/**
- * @brief Information about an exported object.
+/*
+ * Information about an exported object.
  */
 struct CORE_API FObjectExport{
 	// Variables.
-	INT         ClassIndex;		//!< Persistent.
-	INT         SuperIndex;		//!< Persistent (for UStruct-derived objects only).
-	INT			PackageIndex;	//!< Persistent.
-	FName		ObjectName;		//!< Persistent.
-	DWORD		ObjectFlags;	//!< Persistent.
-	INT         SerialSize;		//!< Persistent.
-	INT         SerialOffset;	//!< Persistent (for checking only).
-	UObject*	_Object;		//!< Internal.
-	INT			_iHashNext;		//!< Internal.
+	INT      ClassIndex;   // Persistent.
+	INT      SuperIndex;   // Persistent (for UStruct-derived objects only).
+	INT      PackageIndex; // Persistent.
+	FName    ObjectName;   // Persistent.
+	DWORD    ObjectFlags;  // Persistent.
+	INT      SerialSize;   // Persistent.
+	INT      SerialOffset; // Persistent (for checking only).
+	UObject* _Object;      // Internal.
+	INT      _iHashNext;   // Internal.
 
 	// Functions.
 	FObjectExport();
@@ -52,18 +52,18 @@ struct CORE_API FObjectExport{
 	FObjectImport.
 -----------------------------------------------------------------------------*/
 
-/**
- * @brief Information about an imported object.
+/*
+ * Information about an imported object.
  */
 struct CORE_API FObjectImport{
 	// Variables.
-	FName			ClassPackage;	//!< Persistent.
-	FName			ClassName;		//!< Persistent.
-	INT				PackageIndex;	//!< Persistent.
-	FName			ObjectName;		//!< Persistent.
-	UObject*		XObject;		//!< Internal (only really needed for saving, can easily be gotten rid of for loading).
-	ULinkerLoad*	SourceLinker;	//!< Internal.
-	INT             SourceIndex;	//!< Internal.
+	FName        ClassPackage; // Persistent.
+	FName        ClassName;    // Persistent.
+	INT          PackageIndex; // Persistent.
+	FName        ObjectName;   // Persistent.
+	UObject*     XObject;      // Internal (only really needed for saving, can easily be gotten rid of for loading).
+	ULinkerLoad* SourceLinker; // Internal.
+	INT          SourceIndex;  // Internal.
 
 	// Functions.
 	FObjectImport();
@@ -91,8 +91,8 @@ struct CORE_API FObjectImport{
 	Items stored in Unrealfiles.
 ----------------------------------------------------------------------------*/
 
-/**
- * @brief Unrealfile summary, stored at top of file.
+/*
+ * Unrealfile summary, stored at top of file.
  */
 struct FGenerationInfo{
 	INT ExportCount, NameCount;
@@ -110,17 +110,17 @@ struct FGenerationInfo{
 
 struct FPackageFileSummary{
 	// Variables.
-	INT		Tag;
+	INT   Tag;
 
 protected:
-	INT		FileVersion;
+	INT   FileVersion;
 
 public:
-	DWORD	PackageFlags;
-	INT		NameCount,		NameOffset;
-	INT		ExportCount,	ExportOffset;
-	INT     ImportCount,	ImportOffset;
-	FGuid	Guid;
+	DWORD PackageFlags;
+	INT   NameCount, NameOffset;
+	INT   ExportCount, ExportOffset;
+	INT   ImportCount, ImportOffset;
+	FGuid Guid;
 	TArray<FGenerationInfo> Generations;
 
 	// Constructor.
@@ -179,7 +179,7 @@ public:
 	ULinker.
 ----------------------------------------------------------------------------*/
 
-/**
+/*
  * A file linker.
  */
 class CORE_API ULinker : public UObject{
@@ -187,14 +187,14 @@ class CORE_API ULinker : public UObject{
 	NO_DEFAULT_CONSTRUCTOR(ULinker)
 
 	// Variables.
-	UObject*				LinkerRoot;		//!< The linker's root object.
-	FPackageFileSummary		Summary;		//!< File summary.
-	TArray<FName>			NameMap;		//!< Maps file name indices to name table indices.
-	TArray<FObjectImport>	ImportMap;		//!< Maps file object indices >=0 to external object names.
-	TArray<FObjectExport>	ExportMap;		//!< Maps file object indices >=0 to external object names.
-	INT						Success;		//!< Whether the object was constructed successfully.
-	FString					Filename;		//!< Filename.
-	DWORD					_ContextFlags;	//!< Load flag mask.
+	UObject*              LinkerRoot;    // The linker's root object.
+	FPackageFileSummary   Summary;       // File summary.
+	TArray<FName>         NameMap;       // Maps file name indices to name table indices.
+	TArray<FObjectImport> ImportMap;     // Maps file object indices >=0 to external object names.
+	TArray<FObjectExport> ExportMap;     // Maps file object indices >=0 to external object names.
+	INT                   Success;       // Whether the object was constructed successfully.
+	FString               Filename;      // Filename.
+	DWORD                 _ContextFlags; //Load flag mask.
 
 	// Constructors.
 	ULinker(UObject* InRoot, const TCHAR* InFilename);
@@ -207,9 +207,9 @@ class CORE_API ULinker : public UObject{
 	// The QuickMD5 hash is a check of 4 major tables for this package.  It looks at
 	// the Header, Name, Import and Export tables.  Any changes here will result in a failure.
 
-	FString QuickMD5(); //!< Returns the Quick MD5 hash for this package
+	FString QuickMD5(); // Returns the Quick MD5 hash for this package
 
-	virtual UBOOL LinksToCode(); //!< True if this Linker contains code
+	virtual UBOOL LinksToCode(); // True if this Linker contains code
 
 protected:
 
@@ -220,8 +220,8 @@ protected:
 	ULinkerLoad.
 ----------------------------------------------------------------------------*/
 
-/**
- * @brief A file loader.
+/*
+ * A file loader.
  */
 class ULinkerLoad : public ULinker, public FArchive{
 	DECLARE_CLASS(ULinkerLoad,ULinker,CLASS_Transient,Core)
@@ -232,11 +232,11 @@ class ULinkerLoad : public ULinker, public FArchive{
 	friend class UPackageMap;
 
 	// Variables.
-	DWORD					LoadFlags;
-	UBOOL					Verified;
-	INT						ExportHash[256];
-	TArray<FLazyLoader*>	LazyLoaders;
-	FArchive*				Loader;
+	DWORD                LoadFlags;
+	UBOOL                Verified;
+	INT                  ExportHash[256];
+	TArray<FLazyLoader*> LazyLoaders;
+	FArchive*            Loader;
 
 	ULinkerLoad(UObject* InParent, const TCHAR* InFilename, DWORD InLoadFlags);
 
@@ -249,7 +249,7 @@ class ULinkerLoad : public ULinker, public FArchive{
 	UObject* Create(UClass* ObjectClass, FName ObjectName, DWORD LoadFlags, UBOOL Checked);
 	void Preload(UObject* Object);
 
-	virtual UBOOL LinksToCode();	//!< True if this Linker contains code
+	virtual UBOOL LinksToCode();	// True if this Linker contains code
 
 
 private:
@@ -312,15 +312,15 @@ private:
 	ULinkerSave.
 ----------------------------------------------------------------------------*/
 
-/**
- * @brief A file saver.
+/*
+ * A file saver.
  */
 class ULinkerSave : public ULinker, public FArchive{
 	DECLARE_CLASS(ULinkerSave,ULinker,CLASS_Transient,Core);
 	NO_DEFAULT_CONSTRUCTOR(ULinkerSave);
 
 	// Variables.
-	FArchive* Saver;
+	FArchive*   Saver;
 	TArray<INT> ObjectIndices;
 	TArray<INT> NameIndices;
 

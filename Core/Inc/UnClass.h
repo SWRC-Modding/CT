@@ -10,15 +10,15 @@
 	Constants
 -----------------------------------------------------------------------------*/
 
-//! Boundary to align class properties on.
+//Boundary to align class properties on.
 enum { PROPERTY_ALIGNMENT = 4 };
 
 /*-----------------------------------------------------------------------------
 	FRepRecord
 -----------------------------------------------------------------------------*/
 
-/**
- * @brief Information about a property to replicate.
+/*
+ * Information about a property to replicate.
  */
 struct FRepRecord{
 	UProperty* Property;
@@ -32,15 +32,15 @@ struct FRepRecord{
 	FDependency
 -----------------------------------------------------------------------------*/
 
-/**
- * @brief One dependency record, for incremental compilation.
+/*
+ * One dependency record, for incremental compilation.
  */
 class CORE_API FDependency{
 public:
 	// Variables.
-	UClass*		Class;
-	UBOOL		Deep;
-	DWORD		ScriptTextCRC;
+	UClass* Class;
+	UBOOL   Deep;
+	DWORD   ScriptTextCRC;
 
 	// Functions.
 	FDependency();
@@ -53,13 +53,13 @@ public:
 	FRepLink
 -----------------------------------------------------------------------------*/
 
-/**
- * @brief A tagged linked list of replicatable variables.
+/*
+ * A tagged linked list of replicatable variables.
  */
 class FRepLink{
 public:
-	UProperty*	Property;		// Replicated property.
-	FRepLink*	Next;			// Next replicated link per class.
+	UProperty* Property; // Replicated property.
+	FRepLink*  Next;     // Next replicated link per class.
 
 	FRepLink(UProperty* InProperty, FRepLink* InNext) : Property(InProperty),
 														Next(InNext){}
@@ -69,13 +69,13 @@ public:
 	FLabelEntry
 -----------------------------------------------------------------------------*/
 
-/**
- * @brief Entry in a state's label table.
+/*
+ * Entry in a state's label table.
  */
 struct CORE_API FLabelEntry{
 	// Variables.
-	FName	Name;
-	INT		iCode;
+	FName Name;
+	INT   iCode;
 
 	// Functions.
 	FLabelEntry(FName InName, INT iInCode);
@@ -86,8 +86,8 @@ struct CORE_API FLabelEntry{
 	UField
 -----------------------------------------------------------------------------*/
 
-/**
- * @brief Base class of UnrealScript language objects.
+/*
+ * Base class of UnrealScript language objects.
  */
 class CORE_API UField : public UObject{
 	DECLARE_ABSTRACT_CLASS(UField,UObject,0,Core)
@@ -97,7 +97,7 @@ class CORE_API UField : public UObject{
 	enum{ HASH_COUNT = 256 };
 
 	// Variables.
-	UField*			Next;
+	UField* Next;
 
 	// Constructors.
 	UField(ENativeConstructor, UClass* InClass, const TCHAR* InName, const TCHAR* InPackageName, DWORD InFlags);
@@ -120,8 +120,8 @@ class CORE_API UField : public UObject{
 	TFieldIterator
 -----------------------------------------------------------------------------*/
 
-/**
- * @brief For iterating through a linked list of fields.
+/*
+ * For iterating through a linked list of fields.
  */
 template<typename T>
 class TFieldIterator{
@@ -184,7 +184,7 @@ public:
 
 protected:
 	UStruct* Struct;
-	UField* Field;
+	UField*  Field;
 
 	inline void IterateToNext(){
 		while(Struct){
@@ -207,40 +207,40 @@ protected:
 	UStruct
 -----------------------------------------------------------------------------*/
 
-/**
- * @brief State flags.
+/*
+ * State flags.
  */
 enum EStructFlags{
 	STRUCT_Native  = 0x00000001,
 	STRUCT_Export  = 0x00000002,
-	STRUCT_Long	   = 0x00000004, //!< will get shown as "..." in editactor until expanded.
+	STRUCT_Long    = 0x00000004, // will get shown as "..." in editactor until expanded.
 	STRUCT_Inherit = STRUCT_Long,
 };
 
-/**
- * @brief An UnrealScript structure definition.
+/*
+ * An UnrealScript structure definition.
  */
 class CORE_API UStruct : public UField{
 	DECLARE_CLASS(UStruct,UField,0,Core)
 	NO_DEFAULT_CONSTRUCTOR(UStruct)
 
 	// Variables.
-	char				Pad1[4]; // Padding
-	UField*				SuperField;
-	UTextBuffer*		ScriptText;
-	UTextBuffer*		CppText;
-	UField*				Children;
-	INT					PropertiesSize;
-	char				Pad2[4]; // Padding
-	INT					MinAlignment;
-	FName				FriendlyName;
-	TArray<BYTE>		Script;
+	char         Pad1[4]; // Padding
+	UField*      SuperField;
+	UTextBuffer* ScriptText;
+	UTextBuffer* CppText;
+	UField*      Children;
+	INT          PropertiesSize;
+	char         Pad2[4]; // Padding
+	INT          MinAlignment;
+	FName        FriendlyName;
+	TArray<BYTE> Script;
 
 	// Compiler info.
-	INT					TextPos;
-	INT					Line;
-	DWORD				StructFlags;
-	char				Pad3[4]; // Padding
+	INT          TextPos;
+	INT          Line;
+	DWORD        StructFlags;
+	char         Pad3[4]; // Padding
 
 	// Constructors.
 	UStruct(ENativeConstructor, INT InSize, const TCHAR* InName, const TCHAR* InPackageName, DWORD InFlags, UStruct* InSuperStruct);
@@ -275,15 +275,15 @@ class CORE_API UStruct : public UField{
 
 protected:
 	// Cheat Protection
-	BYTE FunctionMD5Digest[16]; //!< Holds a MD5 digest for this function
+	BYTE FunctionMD5Digest[16]; // Holds a MD5 digest for this function
 };
 
 /*-----------------------------------------------------------------------------
 	UFunction
 -----------------------------------------------------------------------------*/
 
-/**
- * @brief An UnrealScript function.
+/*
+ * An UnrealScript function.
  */
 class CORE_API UFunction : public UStruct{
 	DECLARE_CLASS(UFunction,UStruct,0,Core)
@@ -291,15 +291,15 @@ class CORE_API UFunction : public UStruct{
 	NO_DEFAULT_CONSTRUCTOR(UFunction)
 
 	// Persistent variables.
-	DWORD FunctionFlags;
-	_WORD iNative;
-	_WORD RepOffset;
-	BYTE  OperPrecedence;
+	DWORD  FunctionFlags;
+	_WORD  iNative;
+	_WORD  RepOffset;
+	BYTE   OperPrecedence;
 
 	// Variables in memory only.
-	BYTE  NumParms;
-	_WORD ParmsSize;
-	_WORD ReturnValueOffset;
+	BYTE   NumParms;
+	_WORD  ParmsSize;
+	_WORD  ReturnValueOffset;
 	Native Func;
 
 	// Constructors.
@@ -326,18 +326,18 @@ class CORE_API UFunction : public UStruct{
 	UState
 -----------------------------------------------------------------------------*/
 
-/**
- * @brief An UnrealScript state.
+/*
+ * An UnrealScript state.
  */
 class CORE_API UState : public UStruct{
 	DECLARE_CLASS(UState,UStruct,0,Core)
 	NO_DEFAULT_CONSTRUCTOR(UState)
 
 	// Variables.
-	QWORD ProbeMask;
-	QWORD IgnoreMask;
-	DWORD StateFlags;
-	_WORD LabelTableOffset;
+	QWORD   ProbeMask;
+	QWORD   IgnoreMask;
+	DWORD   StateFlags;
+	_WORD   LabelTableOffset;
 	UField* VfHash;
 
 	// Constructors.
@@ -362,8 +362,8 @@ class CORE_API UState : public UStruct{
 	UEnum
 -----------------------------------------------------------------------------*/
 
-/**
- * @brief An enumeration, a list of names usable by UnrealScript.
+/*
+ * An enumeration, a list of names usable by UnrealScript.
  */
 class CORE_API UEnum : public UField{
 	DECLARE_CLASS(UEnum,UField,0,Core)
@@ -384,8 +384,8 @@ class CORE_API UEnum : public UField{
 	UClass
 -----------------------------------------------------------------------------*/
 
-/**
- * @brief An object class.
+/*
+ * An object class.
  */
 class CORE_API UClass : public UState{
 	DECLARE_CLASS(UClass,UState,0,Core)
@@ -395,28 +395,28 @@ class CORE_API UClass : public UState{
 	typedef void(UObject::*StaticConstructor)();
 
 	// Variables.
-	DWORD					ClassFlags;
-	INT						ClassUnique;
-	FGuid					ClassGuid;
-	DWORD					ClassCRC;
-	UClass*					ClassWithin;
-	FName					ClassConfigName;
-	INT 					ScriptPropertiesSize;
-	TArray<FRepRecord>		ClassReps;
-	TArray<UField*>			NetFields;
-	TArray<FDependency> 	Dependencies;
-	TArray<FName>			PackageImports;
-	TArray<BYTE>			Defaults;
-	TArray<FName>			HideCategories;
-	TArray<FName>       	DependentOn;
-	FString					ClassHeaderFilename; // Just a guess, but it fits here... (Can't verify since it's always empty)
-	FNativeEntry<UObject>*	NativeFunctions;
-	Constructor				ClassConstructor;
-	StaticConstructor		ClassStaticConstructor;
+	DWORD                  ClassFlags;
+	INT                    ClassUnique;
+	FGuid                  ClassGuid;
+	DWORD                  ClassCRC;
+	UClass*                ClassWithin;
+	FName                  ClassConfigName;
+	INT                    ScriptPropertiesSize;
+	TArray<FRepRecord>     ClassReps;
+	TArray<UField*>        NetFields;
+	TArray<FDependency>    Dependencies;
+	TArray<FName>          PackageImports;
+	TArray<BYTE>           Defaults;
+	TArray<FName>          HideCategories;
+	TArray<FName>          DependentOn;
+	FString                ClassHeaderFilename; // Just a guess, but it fits here... (Can't verify since it's always empty)
+	FNativeEntry<UObject>* NativeFunctions;
+	Constructor            ClassConstructor;
+	StaticConstructor      ClassStaticConstructor;
 
 	// In memory only.
-	FString					DefaultPropText;
-	UClass*					DefaultClass; // Just a guess... Is initialized with 'this' in UClass::UClass
+	FString                DefaultPropText;
+	UClass*                DefaultClass; // Just a guess... Is initialized with 'this' in UClass::UClass
 
 	// Constructors.
 	UClass();
@@ -466,8 +466,8 @@ private:
 	UConst
 -----------------------------------------------------------------------------*/
 
-/**
- * @brief An UnrealScript constant.
+/*
+ * An UnrealScript constant.
  */
 class CORE_API UConst : public UField{
 	DECLARE_CLASS(UConst,UField,0,Core)

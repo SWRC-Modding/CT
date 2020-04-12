@@ -160,7 +160,7 @@ simulated event PostLoadBeginPlay()
 	PlayerOwner = PlayerController(Owner);
 
 	// Setup the flashlight
-	// Note that the projectors starts at off, hence MaxTraceDistance = 0	
+	// Note that the projectors starts at off, hence MaxTraceDistance = 0
 
 	// NathanM: We're not using it, so why spawn it?
 	//FlashlightProjector = spawn(class'DynamicProjector',self);
@@ -168,10 +168,10 @@ simulated event PostLoadBeginPlay()
 	{
 		FlashlightProjector.SetBase( self );
 		FlashlightProjector.SetRelativeLocation(vect(25,0,0));
-		FlashlightProjector.ProjTexture = None;	
+		FlashlightProjector.ProjTexture = None;
 		FlashlightProjector.FOV = 7;
 		FlashlightProjector.MaxTraceDistance = 10000;
-		FlashlightProjector.FramebufferBlendingOp = PB_Add;	
+		FlashlightProjector.FramebufferBlendingOp = PB_Add;
 		FlashlightProjector.bProjectBSP = true;
 		FlashlightProjector.bProjectStaticMesh = false;
 		FlashlightProjector.bProjectTerrain = false;
@@ -227,8 +227,8 @@ event ConnectFailure(string FailCode, string URL)
 }
 /* ShowUpgradeMenu()
 Event called when the engine version is less than the MinNetVer of the server you are trying
-to connect with.  
-*/ 
+to connect with.
+*/
 event ShowUpgradeMenu();
 
 function PlayStartupMessage(byte Stage);
@@ -252,13 +252,13 @@ event AddCriticalMessage( string Message, float Duration, color TextColor )
 		LastUsedSlot = i;
     }
 
-	if ( (LastUsedSlot >= 0) && 
+	if ( (LastUsedSlot >= 0) &&
 		 (CriticalMessages[LastUsedSlot].Text == Message) )
 	{
 		// Same message as the last one...discard it.
 		return;
 	}
-	
+
 	// If the message is too big then split it into multiple lines
 	MaxLen = 80;
 	if( Len(Message) > MaxLen )
@@ -339,7 +339,7 @@ simulated event DrawXLiveNotification( canvas C )
 		C.DrawTileScaled( XNotificationInviteIcon, 1.0, 1.0);
 	else if( PlayerOwner.GetNumFriendRequests() > LastNumFriendReqs )
 		C.DrawTileScaled( XNotificationFriendIcon, 1.0, 1.0);
-	else		
+	else
 		XNotificationTimer = 0;	// uh? nothing to draw? reset timer then
 }
 
@@ -358,12 +358,12 @@ simulated event PostRender( canvas Canvas )
 			P.Weapon.RenderOverlays(Canvas);
 		}
 	}
-	
+
 	// xbox live notifications, if any
 	if( PlayerOwner.GetNumGameInvites() > 0 || PlayerOwner.GetNumFriendRequests() > 0 )
 	{
-		if ( (XNotificationTimer <= 0) && 
-			 ((PlayerOwner.GetNumGameInvites() > LastNumInvites) || 
+		if ( (XNotificationTimer <= 0) &&
+			 ((PlayerOwner.GetNumGameInvites() > LastNumInvites) ||
 			  (PlayerOwner.GetNumFriendRequests() > LastNumFriendReqs)) )
 		{
 			XNotificationTimer = 300;  // 3 seconds for notification display, as per current xlive TCR
@@ -437,7 +437,7 @@ simulated event PostRenderMenus ( canvas Canvas )
 {
 	local Console PlayerConsole;
 
-	 // O_o  [uncommented] because it handles the fading in/out of menus, and without it, the xbox live menus fail to draw cuz the "previous" menu never fades out.  
+	 // O_o  [uncommented] because it handles the fading in/out of menus, and without it, the xbox live menus fail to draw cuz the "previous" menu never fades out.
 	// O_o  brought in from UC, for XInterface menu
 	 if (class'GameEngine'.default.bUseXInterface)
 	 {
@@ -445,7 +445,7 @@ simulated event PostRenderMenus ( canvas Canvas )
 		    PlayerConsole = PlayerOwner.Player.Console;
        else
 		    PlayerConsole = None;
-	 
+
 		 if (PlayerConsole != None)
 		 {
 			 PlayerConsole.MenuRender (Canvas);
@@ -477,11 +477,11 @@ simulated function DisplayProgressMessage(Canvas C)
 	if ( IsOnConsole() )
 		return;
 	// ****
-	
-	//**** SBD - In fact, let's not display these messages at all
+
+	//*** SBD - In fact, let's not display these messages at all
 	return;
-	//****
-	
+	//***
+
     TimeLeft = PlayerOwner.ProgressTimeOut - Level.TimeSeconds;
 
     if( TimeLeft >= ProgressFadeTime )
@@ -495,11 +495,11 @@ simulated function DisplayProgressMessage(Canvas C)
 
     for (i = 0; i < ArrayCount (PlayerOwner.ProgressMessage); i++)
     {
-		//*** SBD - Only show the first entry
+		//** SBD - Only show the first entry
 		if ( i > 0 )
 			continue;
-		//***
-		
+		//**
+
         if (PlayerOwner.ProgressMessage[i] == "")
             continue;
 
@@ -527,10 +527,10 @@ simulated function DisplayProgressMessage(Canvas C)
 
     for (i = 0; i < ArrayCount (PlayerOwner.ProgressMessage); i++)
     {
-		//*** SBD - Only show the first entry
+		//** SBD - Only show the first entry
 		if ( i > 0 )
 			continue;
-		//***
+		//**
 
         if (PlayerOwner.ProgressMessage[i] == "")
             continue;
@@ -597,7 +597,7 @@ function DisplayBadConnectionAlert();
 // Added by Demiurge Studios (Movie)
 function PlayMovieDirect(String MovieFilename, int XPos, int YPos, bool UseSound, bool LoopMovie)
 {
-	StopMovie();	
+	StopMovie();
 
 	MoviePosX = XPos;
 	MoviePosY = YPos;
@@ -627,7 +627,7 @@ function PlayMovieScaled(MovieTexture InMovie, float Left, float Top, float Righ
 	if(Right < 0)
 		Right = 0;
 	if(Right > 1)
-		Right = 1;	
+		Right = 1;
 
 	TexMovieTop = Top;
 	TexMovieLeft = Left;
@@ -682,7 +682,7 @@ simulated function Message( PlayerReplicationInfo PRI, coerce string Msg, name M
 		PlayerOwner.PlayBeepSound();
 	if ( (MsgType == 'Say') || (MsgType == 'TeamSay') )
 		Msg = PRI.GetPlayerName()$": "$Msg;
-	
+
 	// TimR: Try putting this in the new HUD only
 	//AddTextMessage(Msg,class'LocalMessage',PRI);
 	AddCriticalMessage(Msg, 3, class'Canvas'.Static.MakeColor(200,200,200) );
@@ -848,7 +848,7 @@ simulated function Font LoadFont(int i)
 
 function Font GetFontSizeIndex(Canvas C, int FontSize)
 {
-//gdr Select one size smaller than requested in split screen, 
+//gdr Select one size smaller than requested in split screen,
 //and don't bump the size at 640 unless clipy is 480.
     if ( C.ClipX < 640 || C.ClipY < 480)
 		FontSize--;
@@ -1023,4 +1023,3 @@ defaultproperties
      bHidden=True
      RemoteRole=ROLE_None
 }
-

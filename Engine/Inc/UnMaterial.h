@@ -39,8 +39,8 @@ public:
 	INT MaterialCacheFlags;
 	INT CachedType;
 	BYTE TypeOfMaterial;
-	BITFIELD UseFallback:1; //!< Render device should use the fallback.
-	BITFIELD Validated:1;   //!< Material has been validated as renderable.
+	BITFIELD UseFallback:1; // Render device should use the fallback.
+	BITFIELD Validated:1;   // Material has been validated as renderable.
 
 	// Constructor.
 	UMaterial();
@@ -87,13 +87,13 @@ class ENGINE_API URenderedMaterial : public UMaterial{
 class ENGINE_API UBitmapMaterial : public URenderedMaterial{
 	DECLARE_ABSTRACT_CLASS(UBitmapMaterial,URenderedMaterial,0,Engine)
 
-	BYTE     Format;         //!< ETextureFormat.
-	BYTE     UClampMode;     //!< Texture U clamp mode
-	BYTE     VClampMode;     //!< Texture V clamp mode
+	BYTE     Format;         // ETextureFormat.
+	BYTE     UClampMode;     // Texture U clamp mode
+	BYTE     VClampMode;     // Texture V clamp mode
 
-	BYTE     UBits, VBits;   //!< # of bits in USize, i.e. 8 for 256.
-	INT      USize, VSize;   //!< Size, must be power of 2.
-	INT      UClamp, VClamp; //!< Clamped width, must be <= size.
+	BYTE     UBits, VBits;   // # of bits in USize, i.e. 8 for 256.
+	INT      USize, VSize;   // Size, must be power of 2.
+	INT      UClamp, VClamp; // Clamped width, must be <= size.
 	BITFIELD DontCache:1;
 
 	// UMaterial Interface
@@ -165,5 +165,3 @@ class ENGINE_API UTexCoordMaterial : public URenderedMaterial
 /*-----------------------------------------------------------------------------
 	The End.
 -----------------------------------------------------------------------------*/
-
-

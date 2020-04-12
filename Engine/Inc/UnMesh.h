@@ -96,10 +96,10 @@ struct ULODProcessInfo
 	INT   Style;
 };
 
-// LOD-style Textured vertex struct. references one vertex, and 
+// LOD-style Textured vertex struct. references one vertex, and
 // contains texture U,V information. 4 bytes.
 // One triangular polygon in a mesh, which references three vertices,
-// and various drawing/texturing information. 
+// and various drawing/texturing information.
 struct FMeshWedge
 {
 	_WORD		iVertex;		// Vertex index.
@@ -115,7 +115,7 @@ struct FMeshWedge
 		// Superfast copy by considering it as a DWORD.
 		*(DWORD*)this = *(DWORD*)&Other;
 		return *this;
-	}	
+	}
 };
 
 // Extended wedge - floating-point UV coordinates.
@@ -155,7 +155,7 @@ struct FMeshFace
 		this->MaterialIndex = Other.MaterialIndex;
 		return *this;
 		unguardSlow;
-	}	
+	}
 };
 
 // LOD-style mesh material.
@@ -278,10 +278,6 @@ class ENGINE_API UMesh : public UPrimitive
 	ULodMesh.
 -----------------------------------------------------------------------------*/
 
-/*-----------------------------------------------------------------------------
-	ULodMesh.
------------------------------------------------------------------------------*/
-
 //
 // A LodMesh, completely describing a 3D object (creature, weapon, etc) and
 // its animation sequences.  Does not reference textures.
@@ -294,7 +290,7 @@ class ENGINE_API ULodMesh : public UMesh
 	// Make lazy arrays where useful.
 	TArray<_WORD>			CollapsePointThus;  // Lod-collapse single-linked list for points.
 	TArray<_WORD>           FaceLevel;          // Minimum lod-level indicator for each face.
-	TArray<FMeshFace>       Faces;              // Faces 
+	TArray<FMeshFace>       Faces;              // Faces
 	TArray<_WORD>			CollapseWedgeThus;  // Lod-collapse single-linked list for the wedges.
 	TArray<FMeshWedge>		Wedges;             // 'Hoppe-style' textured vertices.
 	TArray<FMeshMaterial>   Materials;          // Materials
@@ -317,7 +313,7 @@ class ENGINE_API ULodMesh : public UMesh
 	// Remapping of animation vertices.
 	TArray<_WORD> RemapAnimVerts;
 	INT    OldFrameVerts;  // Possibly different old per-frame vertex count.
-	
+
 	//  UObject interface.
 	ULodMesh(){};
 	void Serialize( FArchive& Ar );
@@ -325,7 +321,7 @@ class ENGINE_API ULodMesh : public UMesh
 	//  UMesh interface.
 	void SetScale( FVector NewScale );
 	ULodMesh( INT NumPolys, INT NumVerts, INT NumFrames );
-	
+
 	// GetFrame for LOD.
 	virtual void GetFrame( FVector* Verts, INT Size, FCoords Coords, AActor* Owner, INT& LODRequest );
 };

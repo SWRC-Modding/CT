@@ -20,17 +20,17 @@ class CORE_API UFactory : public UObject{
 
 	// Per-class variables.
 	UClass*         SupportedClass;
-	UClass*			ContextClass;
-	FString			Description;
-	FString			InContextCommand;
-	FString			OutOfContextCommand;
+	UClass*         ContextClass;
+	FString         Description;
+	FString         InContextCommand;
+	FString         OutOfContextCommand;
 	TArray<FString> Formats;
 	BITFIELD        bCreateNew         : 1;
-	BITFIELD		bShowPropertySheet : 1;
-	BITFIELD		bShowCategories    : 1;
-	BITFIELD		bText              : 1;
-	BITFIELD		bMulti			   : 1;
-	INT				AutoPriority;
+	BITFIELD        bShowPropertySheet : 1;
+	BITFIELD        bShowCategories    : 1;
+	BITFIELD        bText              : 1;
+	BITFIELD        bMulti             : 1;
+	INT             AutoPriority;
 
 	// Constructors.
 	UFactory();

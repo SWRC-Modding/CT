@@ -9,10 +9,10 @@ class Weapon extends Inventory
 
 
 enum EFireMode
-{	
+{
 	FM_SemiAuto,		//You have to press fire every time you want to shoot, probably only for player weapons
 	FM_Burst,			//Each fire request will generate a BurstNumber of shots
-	FM_Automatic,		//Fire constantly 
+	FM_Automatic,		//Fire constantly
 	FM_AnimationDriven	//PlaceHolder
 };
 
@@ -38,9 +38,9 @@ enum EPawnWeaponAnimation
 	PWA_Reload
 };
 
-// 0: Blaster  1: Sniper  2: AA  3:Pistol  4: Shotgun  5: Elite Beam  6: Conc Rifle  7: Rocket Launcher  8: Bowcaster  9: SMG  10: Trandoshan Rifle 
+// 0: Blaster  1: Sniper  2: AA  3:Pistol  4: Shotgun  5: Elite Beam  6: Conc Rifle  7: Rocket Launcher  8: Bowcaster  9: SMG  10: Trandoshan Rifle
 enum EWeaponIndexType
-{	
+{
 	WI_Blaster,
 	WI_Sniper,
 	WI_AntiArmor,
@@ -205,7 +205,7 @@ var()	float					MeleeStatusEffectDamagePerSec;
 var()	float					BeginMeleeLoopFrame;// value between 0-1
 
 //-----------------------------------------------------------------------------
-// Anim 
+// Anim
 var		name					LoadAnim;
 var		name					FireAnim;
 var		name					HolsterAnim;
@@ -244,7 +244,7 @@ replication
 
 	// functions called by client on server
 	reliable if( Role<ROLE_Authority )
-		ServerFire, ServerStopFire, ServerForceReload, ServerAltFire, ServerThrowGrenade, ServerZoom;	
+		ServerFire, ServerStopFire, ServerForceReload, ServerAltFire, ServerThrowGrenade, ServerZoom;
 }
 
 native function PlayOwnedSoundOnQueue(Sound WeaponFire);
@@ -269,8 +269,8 @@ function float GetDamageRadius()
 // fixme - make IsFiring() weapon state based
 function bool IsFiring()
 {
-	return (   (Instigator != None) 
-			&& (Instigator.Controller != None) 
+	return (   (Instigator != None)
+			&& (Instigator.Controller != None)
 			&& ((Instigator.Controller.bFire !=0) || (Instigator.Controller.bAltFire != 0)) );
 
 }
@@ -285,7 +285,7 @@ simulated event PostNetBeginPlay()
 	if ( (Instigator == None) || (Instigator.Controller == None) )
 		SetHand(0);
 	else
-		SetHand(Instigator.Controller.Handedness);	
+		SetHand(Instigator.Controller.Handedness);
 
 }
 
@@ -298,7 +298,7 @@ simulated function DisplayDebug(Canvas Canvas, out float YL, out float YPos)
 	local WeaponAttachment W;
 
 	Super.DisplayDebug(Canvas, YL, YPos);
-	
+
 	W = WeaponAttachment(ThirdPersonActor);
 
 	Canvas.SetDrawColor(255,255,0);
@@ -378,7 +378,7 @@ simulated function Destroyed()
 simulated function ClientSwapSecondaryWeapon(Pawn Other, Ammunition Ammo)
 {
 	//Log("ClientSwapSecondaryWeapon self "$self$" Ammo "$Ammo$" AmmoType "$AmmoType$" PendingWeapon "$Other.PendingWeapon);
-	
+
 	if (ROLE == ROLE_Authority)
 		return;
 
@@ -467,7 +467,7 @@ function bool GiveTo(Pawn Other)
 		Other.CurrentTossableWeapon = self;
 
 	if( Super.GiveTo(Other) )
-	{	
+	{
 		// make sure the auto fire is set properly for this weapon - AI uses auto fire, player doesn't always
 		if ( bAutoFire && (FireMode != FM_Automatic) && Other.Controller.IsA('PlayerController') )
 			bAutoFire = false;
@@ -479,13 +479,13 @@ function bool GiveTo(Pawn Other)
 	{
 		good = false;
 	}
-			
+
 	bTossedOut = false;
 	Instigator = Other;
 
 	// don't give more ammo if this is called during a level transition.
 	if (!bJustTravelled)
-	{	
+	{
 		GiveAmmo(Other);
 		bJustTravelled = false;
 	}
@@ -545,7 +545,7 @@ simulated event RenderOverlays( canvas Canvas )
 
 		setRotation(newRot);
 	}
-	
+
 	Canvas.DrawActor(self, false, false, DisplayFOV);
 }
 
@@ -633,7 +633,7 @@ function bool HandlePickupQuery( Pickup Item )
 				NewAmmo = Weapon(Item.Inventory).PickupAmmoCount;
 			else
 				NewAmmo = class<Weapon>(Item.InventoryType).Default.PickupAmmoCount;
-			if ( AmmoType.AddAmmo(NewAmmo) && (OldAmmo == 0) 
+			if ( AmmoType.AddAmmo(NewAmmo) && (OldAmmo == 0)
 				&& (P.Weapon.class != item.InventoryType) )
 			{
 				ClientWeaponSet(true);
@@ -647,7 +647,7 @@ function bool HandlePickupQuery( Pickup Item )
 			}
 		}
 		Item.AnnouncePickup(Pawn(Owner));
-		Item.SetRespawn(); 
+		Item.SetRespawn();
 		return true;
 	}
 	if ( Inventory == None )
@@ -703,7 +703,7 @@ function bool UseSquadAmmo( Pawn Other )
 	//if the leader doesn't have a full clip, give up
 	if (LeaderAmmoType.AmmoAmount < default.ReloadCount)
 		return false;
-	
+
 	//Log("Weapon::UseSquadAmmo 3");
 	AmmoType = Ammunition(Other.FindInventoryType(AmmoName));
 	if (AmmoType != None)
@@ -739,7 +739,7 @@ function GiveAmmo( Pawn Other )
 		else
 			AmmoType.AmmoAmount = AmmoType.MaxAmmo;
 	}
-}	
+}
 
 simulated function HolderDied()
 {
@@ -747,7 +747,7 @@ simulated function HolderDied()
 	{
 		PlayerController(Pawn(Owner).Controller).ResetFOV();
 	}
-	
+
 	GotoState('');
 }
 
@@ -831,7 +831,7 @@ simulated function PlayTurnAnim(float deltaYaw, float deltaPitch)
 	}
 	else
 	{
-		bPlayingIdle = true;		
+		bPlayingIdle = true;
 		if ( deltaPitch > 0 && HasAnim('Up') )
 			PlayAnim('Up');
 		else if ( deltaPitch < 0 && HasAnim('Down') )
@@ -839,16 +839,16 @@ simulated function PlayTurnAnim(float deltaYaw, float deltaPitch)
 		if ( deltaYaw < 0 && HasAnim('Left') )
 			PlayAnim('Left');
 		else if ( deltaYaw > 0 && HasAnim('Right') )
-			PlayAnim('Right');		
+			PlayAnim('Right');
 	}
 }
 
 function CheckAnimating();
 simulated event TurretFire();					// spawn the projectiles from the corresponding turret muzzle
 
-//**************************************************************************************
+//*************************************************************************************
 // ADDITIONAL ATTACHMENT EFFECTs
-//**************************************************************************************
+//*************************************************************************************
 simulated function SpawnBreechEffect()
 {
 	local vector BoneLoc;
@@ -862,7 +862,7 @@ simulated function SpawnBreechEffect()
 			BoneLoc = GetBoneLocation(BreechAttachBone);
 			BreechEffect = Spawn(BreechEffectClass,,,BoneLoc);
 			AttachToBone(BreechEffect, BreechAttachBone);
-			BreechEffect.SetRelativeLocation(vect(0,0,0)); 
+			BreechEffect.SetRelativeLocation(vect(0,0,0));
 		}
 		else
 		{
@@ -870,8 +870,8 @@ simulated function SpawnBreechEffect()
 			BoneName = P.GetWeaponBoneFor(P.Weapon);
 			BoneLoc = P.GetBoneLocation(BoneName);
 			BreechEffect = Spawn(BreechEffectClass,,,BoneLoc);
-			P.AttachToBone(BreechEffect, BoneName);	
-			BreechEffect.SetRelativeLocation(BreechOffset); 
+			P.AttachToBone(BreechEffect, BoneName);
+			BreechEffect.SetRelativeLocation(BreechOffset);
 		}
 		BreechEffect.LifeSpan = 0;
 		BreechEffect.SetRelativeRotation(rot(0,0,0));
@@ -882,7 +882,7 @@ simulated event LoadAttachment()
 {
 	if (BreechEffect != None)
 		BreechEffect.bHidden = false;
-	
+
 	ManageAmmoEffect(true);
 }
 
@@ -922,9 +922,9 @@ simulated function DetachFromPawn(Pawn P)
 	}
 }
 
-//**************************************************************************************
+//*************************************************************************************
 // TARGETING
-//**************************************************************************************
+//*************************************************************************************
 event bool IsTargeting()
 {
 	return false;
@@ -965,12 +965,12 @@ event float GetElapsedSecondaryTargetLockTime()
 	return 0.0f;
 }
 
-//**************************************************************************************
+//*************************************************************************************
 // FIRE
-//**************************************************************************************
+//*************************************************************************************
 simulated function Fire( float Value )
 {
-	if ( !AmmoType.HasAmmo() )	
+	if ( !AmmoType.HasAmmo() )
 	{
 		if (WeaponEmptySound != None)
 			PlaySound(WeaponEmptySound);
@@ -978,14 +978,14 @@ simulated function Fire( float Value )
 	}
 
 	if( AmmoType.HasAmmo() && ( Level.TimeSeconds >= NextShotTime ) && ((ReloadCount != 0) || !bCanReload) )
-	{		
+	{
 		ClientFire();
 		ServerFire();
 	}
 }
 
 event ServerFire()
-{	
+{
 	local Pawn PawnOwner;
 
 	if ( bCanReload && (ReloadCount == 0) )
@@ -1002,7 +1002,7 @@ event ServerFire()
 	//Log(""$self$": Level Time "$Level.TimeSeconds$" NextShotTime "$NextShotTime);
 
 	if( AmmoType.HasAmmo() && ( Level.TimeSeconds >= NextShotTime ) )
-	{	
+	{
 		if (!IsInState('NormalFire'))
 			GotoState('NormalFire');
 		CalculateFire();
@@ -1035,13 +1035,13 @@ function CalculateFire()
 	local int ShouldFire;
 
 	ShouldFire = 1;
-	AdjustWeaponAccuracy();		
+	AdjustWeaponAccuracy();
 	GetAxes(Instigator.GetViewRotation(),X,Y,Z);
 	Start = GetFireStart(X,Y,Z);
 	AdjustedAim = Instigator.AdjustAim(AmmoType, Start, AimError, ShouldFire);
 
 	if( ShouldFire != 0 )
-		AmmoType.DoFire( Start, AdjustedAim );	
+		AmmoType.DoFire( Start, AdjustedAim );
 }
 
 simulated function ClientFire()
@@ -1102,7 +1102,7 @@ simulated function ClientFire()
 			PlayOwnedSoundOnQueue(FireSound);
 		}
 	}
-	
+
 	if ( Affector != None )
 		Affector.FireEffect();
 	if (!IsInState('NormalFire'))
@@ -1135,7 +1135,7 @@ simulated function CreateMuzzleEffect()
 	}
 	else
 	{
-		MuzzleFlash.SetRelativeLocation(vect(0,0,0)); 
+		MuzzleFlash.SetRelativeLocation(vect(0,0,0));
 		MuzzleFlash.SetRelativeRotation(rot(0,0,0));
 	}
 }
@@ -1149,15 +1149,15 @@ simulated function SpawnMuzzleFlash()
 	{
 		Start = GetBoneLocation(MuzzleBone);
 		MuzzleFlash = Spawn(MuzzleClass,,, Start);
-		AttachToBone(MuzzleFlash, MuzzleBone);	
-		MuzzleFlash.SetRelativeLocation(vect(0,0,0)); 
-		MuzzleFlash.SetRelativeRotation(rot(0,0,0));			
+		AttachToBone(MuzzleFlash, MuzzleBone);
+		MuzzleFlash.SetRelativeLocation(vect(0,0,0));
+		MuzzleFlash.SetRelativeRotation(rot(0,0,0));
 
 		// "just in case" property settings
 		MuzzleFlash.AutoDestroy = false;
-		MuzzleFlash.LightType = LT_None; 
+		MuzzleFlash.LightType = LT_None;
 		for (i = 0; i < MuzzleFlash.Emitters.Length; i++)
-		{				
+		{
 			MuzzleFlash.Emitters[i].TriggerDisabled = false;
 			MuzzleFlash.Emitters[i].ResetOnTrigger = true;
 			MuzzleFlash.Emitters[i].AutoDestroy = false;
@@ -1211,13 +1211,13 @@ event ServerStopFire()
 	{
 		WeaponAttachment(ThirdPersonActor).bPlayingFireSound = false;
 		WeaponAttachment(ThirdPersonActor).IncrementStopFireCount();
-		
+
 		//if ( bLoopMuzzleFX && WeaponAttachment(ThirdPersonActor).MuzzleFlash != None )
 		WeaponAttachment(ThirdPersonActor).StopMuzzleFlash();
 	}
 
 	if ((Level.NetMode == NM_ListenServer || Level.NetMode == NM_StandAlone) && Instigator != None && !Instigator.IsLocallyControlled())
-	{		
+	{
 		StopSound(ThirdPersonActor, FireSound, 0.1);
 		if ( FireMode == FM_Automatic )
 			Instigator.PawnStopFiring();
@@ -1226,12 +1226,12 @@ event ServerStopFire()
 }
 
 simulated event vector GetFireStart(vector X, vector Y, vector Z)
-{	
+{
 	local Pawn P;
 	local vector BoneLocation;
 	local rotator BoneOrientation;
 	local name BoneName;
-	local vector Start, Offset;	
+	local vector Start, Offset;
 
 	P  = Pawn(Owner);
 	if( P.IsHumanControlled() )
@@ -1239,7 +1239,7 @@ simulated event vector GetFireStart(vector X, vector Y, vector Z)
 		Offset = FPFireOffset;
 		if (bWeaponZoom)
 			Offset.Y = 0;
-		Start = P.Location + P.EyePosition() + (X*Offset.X) + (Y*Offset.Y) + (Z*Offset.Z);		
+		Start = P.Location + P.EyePosition() + (X*Offset.X) + (Y*Offset.Y) + (Z*Offset.Z);
 	}
 	else
 	{
@@ -1252,13 +1252,13 @@ simulated event vector GetFireStart(vector X, vector Y, vector Z)
 	}
 	return Start;
 }
-	
+
 function FireWeapon();				// called from an anim notify
-//**************************************************************************************
+//*************************************************************************************
 // IDLE
-//**************************************************************************************
+//*************************************************************************************
 simulated function PlayIdleAnim()
-{	
+{
 	local float	VelocitySq;
 
 	VelocitySq = VSizeSq(Pawn(Owner).Velocity);
@@ -1270,7 +1270,7 @@ simulated function PlayIdleAnim()
 			StartIdleTime = Level.TimeSeconds;
 
 		if ( (Level.TimeSeconds - StartIdleTime) >= PlayIdleTime )
-		{			
+		{
 			PlayAnim('Idle');		// will get more idle anims and randomize later
 			PlayPawnAnimation(PWA_Idle);
 			StartIdleTime = Level.TimeSeconds;
@@ -1296,17 +1296,17 @@ simulated function PlayIdleAnim()
 			PlayAnim('Run');
 	}
 	else if (!bPlayingIdle) /*( (VSize(Instigator.Velocity) < 0.2) && !IsAnimating() )*/
-	{		
+	{
 		if (bWeaponZoom && HasAnim('AimBreathe'))
 			PlayAnim('AimBreathe');
 		else
-			PlayAnim('ActionBreathe');		
+			PlayAnim('ActionBreathe');
 	}
 }
-	
-//**************************************************************************************
+
+//*************************************************************************************
 // RELOAD
-//**************************************************************************************
+//*************************************************************************************
 
 /* Force reloading even though clip isn't empty.  Called by player controller exec function,
 and implemented in idle state */
@@ -1330,7 +1330,7 @@ event ServerForceReload()
 	bForceReload = true;
 
 	if ( AmmoType.HasAmmo() && !IsInState('Reloading') )
-	{		
+	{
 		GotoState('Reloading');
 		ClientForceReload();
 	}
@@ -1354,26 +1354,26 @@ simulated function PlayReloading()
 
 simulated function bool NeedsToReload()
 {
-	local bool val;		
+	local bool val;
 
 	val = (( bForceReload || (Default.ReloadCount > 0 && ReloadCount <= 0) ) && AmmoType.HasAmmo() );
-	
+
 	if( val && Instigator != None && !Instigator.IsHumanControlled() )
 	{
-		Instigator.PostStimulusToIndividual(ST_Reloading, Instigator.Controller);		
+		Instigator.PostStimulusToIndividual(ST_Reloading, Instigator.Controller);
 		return false;
 	}
 	else
 		return val;
 }
-	
-//**************************************************************************************
+
+//*************************************************************************************
 // GRENADE
-//**************************************************************************************
+//*************************************************************************************
 simulated function ThrowGrenade( float Value )
 {
 	if ( (Pawn(Owner).CurrentGrenade == None) || (Pawn(Owner).CurrentGrenade.AmmoType == None) || (bWeaponZoom && !bCanThrowGrenadesWhenZoomed))
-		return;	
+		return;
 
 	if ( HasAnim('ThrowGrenade') || Instigator.IsA('AIController') )
 	{
@@ -1395,7 +1395,7 @@ event ServerThrowGrenade()
 }
 
 simulated function ClientThrowGrenade()
-{	
+{
 	if ( ROLE == ROLE_Authority )
 		return;
     GotoState('GrenadeThrow');
@@ -1416,8 +1416,8 @@ event ReleaseGrenade()
 	bCanSwitchGrenade = true;
 	GetAxes(Instigator.GetViewRotation(),X,Y,Z);
 	Start = GetGrenadeStart(X,Y,Z);
-	AdjustedAim = Instigator.AdjustAim(Pawn(Owner).CurrentGrenade.AmmoType, Start, AimError);			
-	Pawn(Owner).CurrentGrenade.AmmoType.DoFire( Start, AdjustedAim );	
+	AdjustedAim = Instigator.AdjustAim(Pawn(Owner).CurrentGrenade.AmmoType, Start, AimError);
+	Pawn(Owner).CurrentGrenade.AmmoType.DoFire( Start, AdjustedAim );
 	ClientReleaseGrenade();
 }
 
@@ -1427,8 +1427,8 @@ simulated function ClientReleaseGrenade()
 }
 
 function vector GetGrenadeStart(vector X, vector Y, vector Z)
-{	
-	local Pawn P;	
+{
+	local Pawn P;
 	local vector Start;
 
 	P  = Pawn(Owner);
@@ -1441,10 +1441,10 @@ function vector GetGrenadeStart(vector X, vector Y, vector Z)
 	}
 	return Start;
 }
-	
-//**************************************************************************************
+
+//*************************************************************************************
 // MELEE (ALT FIRE)
-//**************************************************************************************
+//*************************************************************************************
 simulated function AltFire( float Value )
 {
 	if ( Owner != None && Pawn(Owner).Health <= 0 )
@@ -1455,14 +1455,14 @@ simulated function AltFire( float Value )
 		ServerAltFire();
 	}
 	else if ( (!bWeaponZoom || bZoomedAltFireCapable) && (HasAnim('MeleeAttack') || Instigator.IsA('AIController') ) )
-	{	
+	{
 		ClientAltFire();
 		ServerAltFire();
 	}
 }
 
 function ServerAltFire()
-{	
+{
 	if (IsInState('Melee'))
 		bLoopMelee = true;
 	else
@@ -1481,7 +1481,7 @@ simulated function PlayMelee()
 	local name LoopAnimName;
 
 	//play the melee animation on me, the WEAPON
-	if (bLoopMelee)		
+	if (bLoopMelee)
 	{
 		if (HasAnim('MeleeAttackLoop'))
 			LoopAnimName = 'MeleeAttackLoop';
@@ -1502,7 +1502,7 @@ simulated event DoMeleeAttack()
 	local Pawn PawnOwner;
 	local vector Start;
 	local vector TraceEnd, HitLocation, HitNormal;
-	local EMaterialType HitMaterialType;	
+	local EMaterialType HitMaterialType;
 	local name HitBone;
 	local int ShouldFire;
 	local rotator AdjustedAim;
@@ -1512,7 +1512,7 @@ simulated event DoMeleeAttack()
 	else
 		return;
 
-	Start = PawnOwner.Location + PawnOwner.EyePosition();	
+	Start = PawnOwner.Location + PawnOwner.EyePosition();
 	AdjustedAim = PawnOwner.AdjustAim(None, Start, 0, ShouldFire);
 	TraceEnd = Start + Vector(AdjustedAim) * MeleeRange;
 	//TraceEnd = Start + (Vector(PlayerController(Instigator.Controller).Rotation) * MeleeRange);
@@ -1520,7 +1520,7 @@ simulated event DoMeleeAttack()
 
 	if (Other != None)
 	{
-		if ( MeleeHitEffectsByMaterial != None && Level.NetMode != NM_DedicatedServer )		
+		if ( MeleeHitEffectsByMaterial != None && Level.NetMode != NM_DedicatedServer )
 			MeleeHitEffectsByMaterial.Static.SpawnEffectsFor(self, HitMaterialType, HitLocation, HitNormal);
 
 		if( MeleeStatusEffect != None && Other.IsA('Pawn') )
@@ -1530,9 +1530,9 @@ simulated event DoMeleeAttack()
 	}
 }
 
-//**************************************************************************************
+//*************************************************************************************
 // WEAPON CHANGE
-//**************************************************************************************
+//*************************************************************************************
 simulated function int GetInventoryGroup()
 {
 	return Level.GRI.WeaponInventoryGroup(self);
@@ -1540,11 +1540,11 @@ simulated function int GetInventoryGroup()
 
 // Change weapon to that specificed by F matching inventory weapon's Inventory Group.
 simulated function Weapon WeaponChange( byte F, bool bSilent )
-{	
+{
 	local Weapon newWeapon;
 
 	//Log("WeaponChange F "$F$" Level.GRI.WeaponInventoryGroup(self) "$Level.GRI.WeaponInventoryGroup(self)$" self "$self);
-	
+
 	if ( GetInventoryGroup() == F )
 	{
 		if ( !AmmoType.HasAmmo() && !ObtainAmmo() && Level.NetMode == NM_StandAlone )
@@ -1561,7 +1561,7 @@ simulated function Weapon WeaponChange( byte F, bool bSilent )
 		{
 			if (Instigator != None && Instigator.Weapon != self)
 				return self;
-			else 
+			else
 			{
 				newWeapon = Inventory.WeaponChange(F, bSilent);
 				if (newWeapon == None)
@@ -1579,11 +1579,11 @@ simulated function Weapon WeaponChange( byte F, bool bSilent )
 
 // Change weapon to first weapon that matches WeaponClass
 simulated function Weapon WeaponChangeClass( class<Weapon> WeaponClass )
-{	
+{
 	local Weapon newWeapon;
 
 	//Log("WeaponChange F "$F$" InventoryGroup "$InventoryGroup$" self "$self);
-	
+
 	if ( IsA(WeaponClass.Name) )
 	{
 		if ( !AmmoType.HasAmmo() )
@@ -1657,7 +1657,7 @@ simulated function BringUp(weapon PrevWeapon)
 	}
 	else
 		Pawn(Owner).OldWeapon = None;
-	
+
 	if ( Instigator.IsHumanControlled() )
 	{
 		PC = PlayerController(Instigator.Controller);
@@ -1671,7 +1671,7 @@ simulated function BringUp(weapon PrevWeapon)
 				TriggerEvent(FirstTimeSwitchEvent, self, Pawn(Owner));
 			PC.FirstTimeSwitch[WeaponIndex] = 0;
 		}
-	}	
+	}
 	if (Level.Game != None && Level.Game.WeaponIsTossable(self))
 		Pawn(Owner).CurrentTossableWeapon = self;
 	bWeaponUp = false;
@@ -1794,7 +1794,7 @@ function SwitchToWeaponWithAmmo()
 
 // Return the switch priority of the weapon (normally AutoSwitchPriority, but may be
 // modified by environment (or by other factors for bots)
-simulated event float SwitchPriority() 
+simulated event float SwitchPriority()
 {
 	if ( !Pawn(Owner).IsHumanControlled() )
 		return RateSelf();
@@ -1805,7 +1805,7 @@ simulated event float SwitchPriority()
 		else
 			return -1;
 	}
-	else 
+	else
 		return default.AutoSwitchPriority;
 }
 
@@ -1824,7 +1824,7 @@ simulated function ClientWeaponSet(bool bOptionalSet)
 	else if ( IsInState('PendingClientWeaponSet') )
 		GotoState('');
 
-	// we always want a non-throwable weapon in the player's hand	
+	// we always want a non-throwable weapon in the player's hand
 	if ( (WeaponType == WT_Thrown) || (WeaponType == WT_Marker) || (Instigator.Weapon == self) )
 		return;
 
@@ -1835,7 +1835,7 @@ simulated function ClientWeaponSet(bool bOptionalSet)
 	{
 		Instigator.PendingWeapon = self;
 		Instigator.ChangedWeapon();
-		return;	
+		return;
 	}
 
 	if ( bOptionalSet && (Instigator.IsHumanControlled() && PlayerController(Instigator.Controller).bNeverSwitchOnPickup) )
@@ -1869,7 +1869,7 @@ simulated function Weapon RecommendWeapon( out float rating )
 	else
 	{
 		rating = RateSelf();
-		if ( (Instigator != None) && (self == Instigator.Weapon) && (Instigator.Controller.Enemy != None) 
+		if ( (Instigator != None) && (self == Instigator.Weapon) && (Instigator.Controller.Enemy != None)
 			&& AmmoType.HasAmmo() )
 			rating += 0.21; // tend to stick with same weapon
 			rating += Instigator.Controller.WeaponPreference(self);
@@ -1885,10 +1885,10 @@ simulated function Weapon RecommendWeapon( out float rating )
 	}
 	return self;
 }
-	
-//**************************************************************************************
+
+//*************************************************************************************
 // ZOOM
-//**************************************************************************************
+//*************************************************************************************
 
 simulated function Zoom(bool ZoomIn)
 {
@@ -1902,7 +1902,7 @@ simulated function Zoom(bool ZoomIn)
 
 simulated function SetZoom(bool ZoomIn)
 {
-	if (!ZoomIn)		
+	if (!ZoomIn)
 		CurrentZoomFOVIndex = 0;
 	bWeaponZoom = ZoomIn;
 }
@@ -1911,7 +1911,7 @@ function ServerZoom(bool ZoomIn)
 {
 	SetZoom(ZoomIn);
 }
-	
+
 simulated function float GetNextZoomFOV()
 {
 	CurrentZoomFOVIndex = (CurrentZoomFOVIndex + 1) % NumZoomFOVs;
@@ -1919,14 +1919,14 @@ simulated function float GetNextZoomFOV()
 }
 
 
-//**************************************************************************************
+//*************************************************************************************
 // RECOIL
-//**************************************************************************************
+//*************************************************************************************
 simulated function WeaponRecoil()
 {
 	local PlayerController P;
 	local Rotator RandomKick;
-	
+
 	if ( Instigator != None && Instigator.IsLocallyControlled() )
 	{
 		P = PlayerController(Instigator.Controller);
@@ -1941,10 +1941,10 @@ simulated function WeaponRecoil()
 		}
 	}
 }
-	
-//**************************************************************************************
+
+//*************************************************************************************
 // MISC
-//**************************************************************************************
+//*************************************************************************************
 
 function bool ObtainAmmo()
 {
@@ -1985,7 +1985,7 @@ function ServerThink()
 	}
 
 	if (!IsInState('Idle') && (StartIdleTime != -1))
-		StartIdleTime = -1;	
+		StartIdleTime = -1;
 
 	if ( !Instigator.IsHumanControlled() )
 	{
@@ -2000,7 +2000,7 @@ function ServerThink()
 		GotoState('Idle');
 	else if ( bForce || bAutoFire )
 		Fire(0);
-	else 
+	else
 		GotoState('Idle');
 
 	if ( NeedsToReload() && AmmoType.HasAmmo() )
@@ -2018,7 +2018,7 @@ simulated function ClientThink()
 		return;
 	}
 	if (!IsInState('Idle') && (StartIdleTime != -1))
-		StartIdleTime = -1;	
+		StartIdleTime = -1;
 	if ( bChangeWeapon )
 		GotoState('DownWeapon');
 	else if ( Instigator.PressingFire() && HasAmmo() )
@@ -2040,7 +2040,7 @@ state NormalFire
 		{
 			if (ROLE == ROLE_Authority)
 				ServerThink();
-			else 
+			else
 				ClientThink();
 		}
 	}
@@ -2094,11 +2094,11 @@ state Idle
 		//Log("Idle BeginState "$self$" CurrentWeapon "$Pawn(Owner).Weapon$" HasAmmo "$AmmoType.HasAmmo());
 		//if ( NeedsToReload() && AmmoType.HasAmmo() )
 		//	ServerForceReload();		//GotoState('Reloading');
-		if ( !AmmoType.HasAmmo() && !AmmoType.bIsRecharge ) 
+		if ( !AmmoType.HasAmmo() && !AmmoType.bIsRecharge )
 			SwitchToWeaponWithAmmo();	//Instigator.Controller.SwitchToBestWeapon();  //Goto Weapon that has Ammo
 		else if ( Instigator.PressingFire() )
 			Fire(0);
-		else if ( Instigator.PressingAltFire() ) 
+		else if ( Instigator.PressingAltFire() )
 			AltFire(0);
 	}
 
@@ -2106,7 +2106,7 @@ state Idle
 	{
 		//Log("Idle EndState "$self);
 	}
-	
+
 	simulated function AnimEnd(int Channel)
 	{
 		if ( Channel == 0 && bPlayingIdle )
@@ -2122,7 +2122,7 @@ state Idle
 	}
 
 	simulated function Tick(float deltaTime)
-	{	
+	{
 		if ( (Pawn(Owner) != None) && (Pawn(Owner).Controller != None) && Pawn(Owner).Controller.IsA('PlayerController') && (Level.NetMode != NM_DedicatedServer) )
 			PlayIdleAnim();
 
@@ -2138,8 +2138,8 @@ state Reloading
 	simulated function Zoom(bool ZoomIn) {}
 	//simulated function AltFire(float value) {}
 	//simulated function ThrowGrenade(float value) {}
-	simulated function bool PutDown(weapon NextWeapon) 
-	{ 
+	simulated function bool PutDown(weapon NextWeapon)
+	{
 		bChangeWeapon = true;
 		NewWeapon = NextWeapon;
 		GotoState('DownWeapon');
@@ -2157,7 +2157,7 @@ state Reloading
 	}
 
 	simulated function BeginState()
-	{	
+	{
 		local Pawn PawnOwner;
 
 		bForceReload = false;		// delete variable?
@@ -2174,8 +2174,8 @@ state Reloading
 
 		if( Instigator.IsHumanControlled() )
 			PlayReloading();
-		else		
-			FinishedReloading();		
+		else
+			FinishedReloading();
 	}
 
 	simulated function AnimEnd(int Channel)
@@ -2218,14 +2218,14 @@ state GrenadeThrow
 	simulated function AltFire(float value) {}
 	simulated function ServerForceReload() {}
 	simulated function ThrowGrenade(float value) {}
-	simulated function bool PutDown(weapon NextWeapon) 
-	{ 		
+	simulated function bool PutDown(weapon NextWeapon)
+	{
 		if (bForcesWeaponChange || NextWeapon.bForcesWeaponChange)
 			return Global.PutDown(NextWeapon);
 		else
 		{
 			bChangeWeapon = false;
-			return false; 
+			return false;
 		}
 	}
 
@@ -2263,14 +2263,14 @@ state Melee
 	simulated function ServerForceReload() {}
 	simulated function ThrowGrenade(float value) {}
 	simulated function Zoom(bool ZoomIn) {}
-	simulated function bool PutDown(weapon NextWeapon) 
-	{ 
+	simulated function bool PutDown(weapon NextWeapon)
+	{
 		if (bForcesWeaponChange || NextWeapon.bForcesWeaponChange)
 			return Global.PutDown(NextWeapon);
 		else
 		{
 			bChangeWeapon = false;
-			return false; 
+			return false;
 		}
 	}
 
@@ -2300,7 +2300,7 @@ state Melee
 	}
 
 	simulated function AnimEnd(int Channel)
-	{		
+	{
 		if (Channel == 0)
 		{
 			if (ROLE == ROLE_Authority)
@@ -2324,7 +2324,7 @@ state DownWeapon
 	simulated function Zoom(bool ZoomIn) {}
 
 	simulated function bool PutDown(weapon NextWeapon)
-	{		
+	{
 		NewWeapon = NextWeapon;
 		bChangeWeapon = true;
 
@@ -2362,12 +2362,12 @@ state DownWeapon
 			}
 		}
 	}
-	
+
 	simulated function Timer()
 	{
 		if (!IsAnimating())
 			AnimEnd(0);
-	}	
+	}
 
 	simulated function float GetNextZoomFOV()
 	{
@@ -2481,8 +2481,8 @@ state Active
 
 /* PendingClientWeaponSet
 Weapon on network client side may be set here by the replicated function ClientWeaponSet(), to wait,
-if needed properties have not yet been replicated.  ClientWeaponSet() is called by the server to 
-tell the client about potential weapon changes after the player runs over a weapon (the client 
+if needed properties have not yet been replicated.  ClientWeaponSet() is called by the server to
+tell the client about potential weapon changes after the player runs over a weapon (the client
 decides whether to actually switch weapons or not.
 */
 simulated State PendingClientWeaponSet
@@ -2552,4 +2552,3 @@ defaultproperties
      bReplicateAnimations=False
      Mass=1
 }
-

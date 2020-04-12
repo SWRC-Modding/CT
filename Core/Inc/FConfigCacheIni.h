@@ -10,7 +10,7 @@
 	Config cache.
 -----------------------------------------------------------------------------*/
 
-//! @brief Single config file.
+// Single config file.
 class FConfigFile : public TMap<FString, FConfigSection>{
 public:
 	UBOOL Dirty, NoSave;
@@ -18,7 +18,7 @@ public:
 	FConfigFile() : Dirty(0),
 					NoSave(0){}
 
-	void Read(const TCHAR* Filename, const FConfigFile* DefaultsOverride = NULL){
+	void Read(const TCHAR* Filename, FConfigFile* DefaultsOverride = NULL){
 		guard(FConfigFile::Read);
 
 		Empty();
@@ -96,6 +96,16 @@ public:
 			}
 		}
 
+		// Inserting remaining sections from defaults override which do not exist in the file read from disk
+		if(DefaultsOverride){
+			for(TIterator It(*DefaultsOverride); It; ++It){
+				if(Find(It.Key()))
+					continue;
+
+				Set(*It.Key(), It.Value());
+			}
+		}
+
 		unguard;
 	}
 
@@ -133,7 +143,7 @@ public:
 
 				// Values that are the same as in the default config are commented out using ';'
 				if(Values.Num() == 1 && DefaultValues.Num() <= 1){ // If there is only one single value '=' is used instead of "+="
-					if(DefaultSection && Values[0] == DefaultValues[0])
+					if(DefaultSection && DefaultValues.Num() == 1 && Values[0] == DefaultValues[0])
 						appSprintf(Temp, ";  %s=%s\r\n", *ValueIt.Key(), *Values[0]);
 					else
 						appSprintf(Temp, "%s=%s\r\n", *ValueIt.Key(), *Values[0]);
@@ -172,10 +182,10 @@ public:
 	}
 };
 
-//! @brief Set of all cached config files.
+// Set of all cached config files.
 class FConfigCacheIni : public FConfigCache, public TMap<FString, FConfigFile>{
 protected:
-	FConfigCacheIni(){} //!< Private constructor. Use FConfigCacheIni::Factory instead
+	FConfigCacheIni(){} // Private constructor. Use FConfigCacheIni::Factory instead
 
 public:
 	// Basic functions.
@@ -334,9 +344,13 @@ public:
 	const TCHAR* GetStr(const TCHAR* Section, const TCHAR* Key, const TCHAR* Filename){
 		guard(FConfigCacheIni::GetStr);
 
-		TCHAR* Result = appStaticString1024();
+		// Seems like LucasArts changed the behavior of appStaticString1024.
+		// It looks like it somehow overflows when used repeatedly which was the case here.
+		static char Buffer[1024];
 
-		if(GetString(Section, Key, Result, 1024, Filename)){}
+		TCHAR* Result = Buffer;//appStaticString1024();
+
+		if(GetString(Section, Key, Result, ARRAY_COUNT(Buffer), Filename)){}
 			return Result;
 
 		return NULL;
@@ -473,7 +487,7 @@ public:
 		unguard;
 	}
 
-	void Flush(UBOOL Read, const TCHAR* Filename = NULL){
+	void Flush(UBOOL Read, const TCHAR* Filename = NULL, INT Idk = 0){
 		guard(FConfigCacheIni::Flush);
 
 		for(TIterator It(*this); It; ++It){
@@ -563,7 +577,7 @@ public:
 		Ar << *this;
 	}
 
-	//! Static allocator.
+	//Static allocator.
 	static FConfigCache* Factory(){
 		return new FConfigCacheIni();
 	}

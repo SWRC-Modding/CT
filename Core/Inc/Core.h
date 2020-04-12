@@ -511,7 +511,6 @@ CORE_API extern class FArchive*			GIsUTracingGDummySave;
 CORE_API extern FFileStream*			GFileStream;				/*!< @brief File streaming */
 CORE_API extern FLOAT					GAudioMaxRadiusMultiplier;	/*!< @brief Max distance = Radius * GAudioMaxRadiusMultiplier */
 CORE_API extern FLOAT					GAudioDefaultRadius;		/*!< @brief Default radius for PlayOwnedSound */
-CORE_API extern TArray<FEdLoadError>	GEdLoadErrors;				/*!< @brief For keeping track of load errors in the editor */
 CORE_API extern	UDebugger*				GDebugger;					/*!< @brief Unrealscript Debugger */
 CORE_API extern QWORD					GMakeCacheIDIndex;			/*!< @brief Cache ID */
 CORE_API extern FString					GBuildLabel;
@@ -582,6 +581,8 @@ public:
 		return *this;
 	}
 };
+
+CORE_API extern TArray<FEdLoadError>	GEdLoadErrors; /*!< @brief For keeping track of load errors in the editor */
 
 /**
  * @brief Archive for counting memory usage.

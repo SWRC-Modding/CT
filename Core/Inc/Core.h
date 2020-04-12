@@ -501,9 +501,9 @@ CORE_API extern UBOOL                   GUseFrontEnd;
 CORE_API extern UBOOL                   GEdSelectionLock;           // Are selections locked? (you can't select/deselect additional actors)
 CORE_API extern UBOOL                   GEdShowFogInViewports;      // Show distance fog in viewports?
 CORE_API extern UBOOL                   GBuildingScripts;
+CORE_API extern UBOOL                   GIsUTracing;
 CORE_API extern class FGlobalMath       GMath;                      // Math code
 CORE_API extern class FArchive*         GDummySave;                 // No-op save archive
-CORE_API extern class FArchive*         GIsUTracingGDummySave;
 CORE_API extern FFileStream*            GFileStream;                //  File streaming
 CORE_API extern FLOAT                   GAudioMaxRadiusMultiplier;  //  Max distance = Radius * GAudioMaxRadiusMultiplier
 CORE_API extern FLOAT                   GAudioDefaultRadius;        //  Default radius for PlayOwnedSound

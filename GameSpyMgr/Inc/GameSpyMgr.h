@@ -19,7 +19,7 @@ public:
 	GameSpyCDKeyResponseInterface& operator=(const GameSpyCDKeyResponseInterface& Other);
 
 	// CDKeyResponseInterface interface
-	virtual void GetResponse(char*, char*, char*);
+	virtual void GetResponse(char* Challenge, char* CDKey, char* Response);
 };
 
 /*
@@ -37,7 +37,7 @@ public:
 	void BeginServerQuery();
 	void CancelServerQuery();
 	void ClearServerQueryResults();
-	BOOL CreateServerBrowser();
+	bool CreateServerBrowser();
 	void DeleteServerBrowser();
 	int Exec(const char*, FOutputDevice&);
 	FString GetExtPlayerQueryResult(int, int);
@@ -45,12 +45,12 @@ public:
 	int GetLocalID();
 	int GetServerQueryNumResults() const;
 	FString GetServerQueryResult(int, int);
-	BOOL IsBackEndAvailable();
+	bool IsBackEndAvailable();
 	void RegisterCustomKeys();
-	BOOL RegisterGame(int);
+	bool RegisterGame(int);
 	void ReleaseAllCDKey();
 	void ReleaseCDKey(int);
-	void __cdecl SetUplinkCB(void(__cdecl*)(int, BOOL, void*), void*);
+	void __cdecl SetUplinkCB(void(__cdecl*)(int, bool, void*), void*);
 	void Tick(float);
 	void UnRegisterGame();
 	void UpdateState();

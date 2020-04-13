@@ -13,7 +13,7 @@ public:
 	static FString GetCDKey();
 	static CDKeyResponseInterface* GetCDKeyInterface();
 
-	virtual void GetResponse(char*, char*, char*);
+	virtual void GetResponse(char* Challenge, char* CDKey, char* Response);
 
 protected:
 	static CDKeyResponseInterface* mpCDKeyInterface;

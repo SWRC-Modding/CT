@@ -43,22 +43,59 @@ static struct FExecHook : public FExec{
 
 			return 1;
 		}else if(ParseCommand(&Cmd, "EDITOBJ")){
-			TObjectIterator<UEngine> EngineIt;
-
 			UObject* Obj = FindObject<UObject>(ANY_PACKAGE, Cmd);
 
-			if(!EngineIt){
-				Ar.Logf("EngineIt stinky");
-			}else if(!Obj){
-				Ar.Logf("Object \"%s\" not found", Cmd);
-			}else{
+			if(Obj){
 				WObjectProperties* P = new WObjectProperties("EditObj", 0, "", NULL, 1);
-				P->OpenWindow((HWND)EngineIt->Client->Viewports[0]->GetWindow());
+				P->OpenWindow((HWND)GEngine->Client->Viewports[0]->GetWindow());
 				P->Root.SetObjects(&Obj, 1);
 				P->Show(1);
+			}else{
+				Ar.Logf("Object \"%s\" not found", Cmd);
 			}
 
 			return 1;
+		}else if(ParseCommand(&Cmd, "EDITACTOR")){
+			UClass* Class;
+			UObject* Found = NULL;
+
+			if(ParseObject<UClass>(Cmd, "Class=", Class, ANY_PACKAGE)){
+				AActor* Player = GEngine->Client->Viewports[0]->Actor;
+				FLOAT   MinDist = 999999.0f;
+
+				for(TObjectIterator<AActor> It; It; ++It){
+					FLOAT Dist = Player ? FDist(It->Location, Player->Location) : 0.0f;
+
+					if((!Player || It->GetLevel() == Player->GetLevel()) &&
+					   !It->bDeleteMe &&
+					   It->IsA(Class) &&
+					   Dist < MinDist){
+						MinDist = Dist;
+						Found   = *It;
+					}
+				}
+			}else{
+				FName ActorName;
+
+				if(Parse(Cmd, "Name=", ActorName)){
+					for(TObjectIterator<AActor> It; It; ++It){
+						if(!It->bDeleteMe && It->GetFName() == ActorName){
+							Found = *It;
+
+							break;
+						}
+					}
+				}
+			}
+
+			if(Found){
+				WObjectProperties* P = new WObjectProperties("EditActor", 0, "", NULL, 1);
+				P->OpenWindow((HWND)GEngine->Client->Viewports[0]->GetWindow());
+				P->Root.SetObjects((UObject**)&Found, 1);
+				P->Show(1);
+			}else{
+				Ar.Logf("Target not found");
+			}
 		}
 
 		return 0;
@@ -215,6 +252,10 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		FString CmdLine = FStringTemp(lpCmdLine) + " -windowed -log";
 
 		appInit(appPackage(), *CmdLine, &Log, &Error, &Warn, FConfigCacheIni::Factory, 1);
+
+		// Using Localization from SWRepublicCommando.exe
+		*GConfig->GetSectionPrivate("General", 1, 1, *(FString(appPackage()) + "." + UObject::GetLanguage())) =
+			*GConfig->GetSectionPrivate("General", 1, 1, *(FString("SWRepublicCommando.") + UObject::GetLanguage()));;
 
 		GIsClient = 1;
 		GIsServer = 1;

@@ -257,6 +257,22 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		*GConfig->GetSectionPrivate("General", 1, 1, *(FString(appPackage()) + "." + UObject::GetLanguage())) =
 			*GConfig->GetSectionPrivate("General", 1, 1, *(FString("SWRepublicCommando.") + UObject::GetLanguage()));;
 
+		// Using Mod.ModRenderDevice if it exists.
+		{
+			FString RenderDeviceClass;
+
+			GConfig->GetString("Engine.Engine", "RenderDevice", RenderDeviceClass, "System.ini");
+
+			if(RenderDeviceClass == "D3DDrv.D3DRenderDevice"){
+				UClass* ModRenderDeviceClass = LoadClass<URenderDevice>(NULL, "Mod.ModRenderDevice", NULL, LOAD_NoWarn | LOAD_Quiet, NULL);
+
+				if(ModRenderDeviceClass){
+					GLog->Log("Using Mod.ModRenderDevice");
+					GConfig->SetString("Engine.Engine", "RenderDevice", "Mod.ModRenderDevice", "System.ini");
+				}
+			}
+		}
+
 		GIsClient = 1;
 		GIsServer = 1;
 		GIsEditor = 0;
@@ -280,9 +296,10 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 			GLogWindow->Log(NAME_Title, LocalizeGeneral("Exit", "SWRepublicCommando"));
 
 		if(GLogWindow){
-			check(GLogHook == GLogWindow);
+			if(GLogHook == GLogWindow)
+				GLogHook = NULL;
+
 			delete GLogWindow;
-			//GLogHook = NULL;
 		}
 
 		appPreExit();

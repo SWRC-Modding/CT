@@ -71,6 +71,8 @@ ENGINE_API FCollisionHashBase* GNewCollisionHash();
 class ENGINE_API ULevelBase : public UObject, public FNetworkNotify{
 	DECLARE_ABSTRACT_CLASS(ULevelBase,UObject,0,Engine)
 
+	char Padding[4];
+
 	// Database.
 	TTransArray<AActor*> Actors;
 
@@ -79,8 +81,6 @@ class ENGINE_API ULevelBase : public UObject, public FNetworkNotify{
 	class UEngine*		Engine;
 	FURL				URL;
 	class UNetDriver*	DemoRecDriver;
-
-	char Padding[4];
 
 	// Constructors.
 	ULevelBase(UEngine* InOwner, const FURL& InURL=FURL(NULL));
@@ -171,7 +171,7 @@ class ENGINE_API ULevel : public ULevelBase
 	// Temporary stats.
 	INT NetTickCycles, NetDiffCycles, ActorTickCycles, AudioTickCycles, FindPathCycles, MoveCycles, NumMoves, NumReps, NumPV, GetRelevantCycles, NumRPC, SeePlayer, Spawning, Unused;
 
-	char Padding[56];
+	char Padding[64];
 
 	// Constructor.
 	ULevel( UEngine* InEngine, UBOOL RootOutside );
@@ -243,6 +243,34 @@ class ENGINE_API ULevel : public ULevelBase
 /*-----------------------------------------------------------------------------
 	Iterators.
 -----------------------------------------------------------------------------*/
+
+template<typename T>
+class TActorIterator{
+public:
+	TActorIterator(ULevel* InLevel) : Level(InLevel),
+									  Index(-1){
+		++(*this);
+	}
+
+	TActorIterator& operator++(){
+		do{
+			++Index;
+
+			if(Level->Actors[Index] && Level->Actors[Index]->IsA(T::StaticClass()))
+				break;
+		}while(static_cast<bool>(*this));
+
+		return *this;
+	}
+
+	T* operator*() const{ return Cast<T>(Level->Actors[Index]); }
+	T* operator->() const{ return Cast<T>(Level->Actors[Index]); }
+	operator bool() const{ return Index < Level->Actors.Num(); }
+
+private:
+	ULevel* Level;
+	INT Index;
+};
 
 //
 // Iterate through all static brushes in a level.

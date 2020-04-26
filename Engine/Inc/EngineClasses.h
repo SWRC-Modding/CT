@@ -13,8 +13,8 @@
 #endif
 
 /*
-*	Actor
-*/
+ * Actor
+ */
 
 enum ETravelType{
     TRAVEL_Absolute,
@@ -588,8 +588,8 @@ public:
 };
 
 /*
-*	Accessory
-*/
+ * Accessory
+ */
 
 enum EAccessoryDetachStyle{
 	ADS_BlowUp,
@@ -621,8 +621,8 @@ public:
 };
 
 /*
-*	ActivateItem
-*/
+ * ActivateItem
+ */
 
 enum EMarkerItemDifficulty{
 	MID_Easy,
@@ -688,7 +688,7 @@ public:
 	class UClass* AttachItemClass;
 	FStringNoInit ActivatePromptText;
 	TArrayNoInit<FString> ActivatePromptButtonFuncs;
-	
+
 	//Events
 	FLOAT DurationMultiplier();
 
@@ -727,15 +727,15 @@ public:
 		DECLARE_NAME(AbortSetup);
 		UObject::ProcessEvent(NAbortSetup, NULL);
 	}
-	
+
 	DECLARE_CLASS(AActivateItem,AActor,0,Engine)
 	NO_DEFAULT_CONSTRUCTOR(AActivateItem)
 };
 
 
 /*
-*	AIScript
-*/
+ * AIScript
+ */
 
 class ENGINE_API AAIScript : public AActor{
 public:
@@ -748,8 +748,8 @@ public:
 
 
 /*
-*	AntiPortalActor
-*/
+ * AntiPortalActor
+ */
 
 class ENGINE_API AAntiPortalActor : public AActor{
 public:
@@ -758,8 +758,8 @@ public:
 };
 
 /*
-*	Brush
-*/
+ * Brush
+ */
 
 enum ECsgOper{
 	CSG_Active,
@@ -805,8 +805,8 @@ public:
 };
 
 /*
-*	Volume
-*/
+ * Volume
+ */
 
 struct FDecorationType{
 	class UStaticMesh* StaticMesh;
@@ -825,13 +825,13 @@ public:
 	INT LocationPriority;
 	FStringNoInit LocationName;
 	TArrayNoInit<FDecorationType> DecoList;
-	
+
 	DECLARE_CLASS(AVolume,ABrush,0,Engine)
 };
 
 /*
-*	BattleVolume
-*/
+ * BattleVolume
+ */
 
 class ENGINE_API AEngineBattleVolume : public AVolume{
 public:
@@ -844,14 +844,14 @@ public:
 		UObject::ProcessEvent(NAreFactoriesExhausted, &Parms);
 		return Parms.ReturnValue;
 	}
-	
+
 	DECLARE_CLASS(AEngineBattleVolume,AVolume,0,Engine)
 	NO_DEFAULT_CONSTRUCTOR(AEngineBattleVolume)
 };
 
 /*
-*	PhysicsVolume
-*/
+ * PhysicsVolume
+ */
 
 class ENGINE_API APhysicsVolume : public AVolume{
 public:
@@ -887,7 +887,7 @@ public:
 	FLOAT KExtraAngularDamping;
 	FLOAT KBuoyancy;
 	class APhysicsVolume* NextPhysicsVolume;
-	
+
 	void PhysicsChangedFor(class AActor* Other){
 		FName NPhysicsChangedFor(NAME_PhysicsChangedFor);
 		if(!IsProbing(NPhysicsChangedFor))
@@ -942,13 +942,13 @@ public:
 		Parms.Other=Other;
 		UObject::ProcessEvent(NPawnLeavingVolume, &Parms);
 	}
-	
+
 	DECLARE_CLASS(APhysicsVolume,AVolume,CLASS_NativeReplication,Engine)
 };
 
 /*
-*	DefaultPhysicsVolume
-*/
+ * DefaultPhysicsVolume
+ */
 
 class ENGINE_API ADefaultPhysicsVolume : public APhysicsVolume{
 public:
@@ -957,8 +957,8 @@ public:
 };
 
 /*
-*	Controller
-*/
+ * Controller
+ */
 
 #define UCONST_LATENT_MOVETOWARD 503
 
@@ -1027,8 +1027,8 @@ public:
 };
 
 /*
-*	AIController
-*/
+ * AIController
+ */
 
 #define UCONST_MAX_ERROR_ANGLE 60
 #define UCONST_DEG_TO_ROTATOR 182.04
@@ -1040,12 +1040,21 @@ public:
 	FLOAT Skill;
 	FVector FinalDestination;
 
+	// Overrides
+	virtual int AcceptNearbyPath(class AActor*);
+	virtual void AdjustFromWall(const FVector&, class AActor*);
+	virtual void SetAdjustLocation(const FVector&);
+
+	// Virtual Functions
+	virtual void AddReflexAnimGoal(FName, FName, int, float, int);
+	virtual void AddReflexSleepGoal(float);
+
 	DECLARE_CLASS(AAIController,AController,CLASS_Config,Engine)
 };
 
 /*
-*	PlayerController
-*/
+ * PlayerController
+ */
 
 enum ETargetType{
 	TGT_Default,
@@ -1346,8 +1355,8 @@ public:
 };
 
 /*
-*	Emitter
-*/
+ * Emitter
+ */
 
 class ENGINE_API AEmitter : public AActor{
 public:
@@ -1385,8 +1394,8 @@ public:
 };
 
 /*
-*	Flashlight
-*/
+ * Flashlight
+ */
 
 class ENGINE_API AFlashlight : public AActor{
 public:
@@ -1412,8 +1421,8 @@ public:
 };
 
 /*
-*	HUD
-*/
+ * HUD
+ */
 
 struct FConsoleMessage{
 	FStringNoInit Text;
@@ -1621,8 +1630,8 @@ public:
 };
 
 /*
-*	Info
-*/
+ * Info
+ */
 
 struct FKeyValuePair{
 	FString Key;
@@ -1671,8 +1680,8 @@ public:
 };
 
 /*
-*	FileLog
-*/
+ * FileLog
+ */
 
 class ENGINE_API AFileLog : public AInfo{
 public:
@@ -1684,8 +1693,8 @@ public:
 };
 
 /*
-*	GameInfo
-*/
+ * GameInfo
+ */
 
 struct FVoiceChatterInfo{
 	class AController* Controller;
@@ -1949,8 +1958,8 @@ public:
 };
 
 /*
-*	GameStats
-*/
+ * GameStats
+ */
 
 class ENGINE_API AGameStats : public AInfo{
 public:
@@ -1963,8 +1972,8 @@ public:
 };
 
 /*
-*	InternetInfo
-*/
+ * InternetInfo
+ */
 
 class ENGINE_API AInternetInfo : public AInfo{
 public:
@@ -1973,8 +1982,8 @@ public:
 };
 
 /*
-*	Mutator
-*/
+ * Mutator
+ */
 
 class ENGINE_API AMutator : public AInfo{
 public:
@@ -1991,8 +2000,8 @@ public:
 };
 
 /*
-*	ReplicationInfo
-*/
+ * ReplicationInfo
+ */
 
 class ENGINE_API AReplicationInfo : public AInfo{
 public:
@@ -2002,8 +2011,8 @@ public:
 };
 
 /*
-*	GameReplicationInfo
-*/
+ * GameReplicationInfo
+ */
 
 class ENGINE_API AGameReplicationInfo : public AReplicationInfo{
 public:
@@ -2053,8 +2062,8 @@ public:
 };
 
 /*
-*	PlayerReplicationInfo
-*/
+ * PlayerReplicationInfo
+ */
 
 class ENGINE_API APlayerReplicationInfo : public AReplicationInfo{
 public:
@@ -2119,8 +2128,8 @@ public:
 };
 
 /*
-*	Squad
-*/
+ * Squad
+ */
 
 enum EStanceType{
 	STT_Invalid,
@@ -2241,8 +2250,8 @@ public:
 };
 
 /*
-*	TeamInfo
-*/
+ * TeamInfo
+ */
 
 class ENGINE_API ATeamInfo : public AReplicationInfo{
 public:
@@ -2272,8 +2281,8 @@ public:
 };
 
 /*
-*	SavedMove
-*/
+ * SavedMove
+ */
 
 class ENGINE_API ASavedMove : public AInfo{
 public:
@@ -2301,8 +2310,8 @@ public:
 };
 
 /*
-*	Security
-*/
+ * Security
+ */
 
 class ENGINE_API ASecurity : public AInfo{
 public:
@@ -2325,8 +2334,8 @@ public:
 };
 
 /*
-*	ZoneInfo
-*/
+ * ZoneInfo
+ */
 
 class ENGINE_API AZoneInfo : public AInfo{
 public:
@@ -2394,8 +2403,8 @@ public:
 };
 
 /*
-*	LevelInfo
-*/
+ * LevelInfo
+ */
 
 enum ELevelCampaign{
 	LC_GEO,
@@ -2572,8 +2581,8 @@ public:
 };
 
 /*
-*	SkyZoneInfo
-*/
+ * SkyZoneInfo
+ */
 
 class ENGINE_API ASkyZoneInfo : public AZoneInfo{
 public:
@@ -2582,8 +2591,8 @@ public:
 };
 
 /*
-*	IntangibleActor
-*/
+ * IntangibleActor
+ */
 
 class ENGINE_API AIntangibleActor : public AActor{
 public:
@@ -2592,8 +2601,8 @@ public:
 };
 
 /*
-*	Inventory
-*/
+ * Inventory
+ */
 
 class ENGINE_API AInventory : public AActor{
 public:
@@ -2673,8 +2682,8 @@ public:
 };
 
 /*
-*	Ammunition
-*/
+ * Ammunition
+ */
 
 enum EAmmunitionType{
 	AT_Random,
@@ -2729,8 +2738,8 @@ public:
 };
 
 /*
-*	Powerups
-*/
+ * Powerups
+ */
 
 class ENGINE_API APowerups : public AInventory{
 public:
@@ -2747,8 +2756,8 @@ public:
 };
 
 /*
-*	Weapon
-*/
+ * Weapon
+ */
 
 enum EFireMode{
 	FM_SemiAuto,
@@ -2913,8 +2922,8 @@ public:
 };
 
 /*
-*	InventoryAttachment
-*/
+ * InventoryAttachment
+ */
 
 class ENGINE_API AInventoryAttachment : public AActor{
 public:
@@ -2923,8 +2932,8 @@ public:
 };
 
 /*
-*	WeaponAttachment
-*/
+ * WeaponAttachment
+ */
 
 class ENGINE_API AWeaponAttachment : public AInventoryAttachment{
 public:
@@ -2976,8 +2985,8 @@ public:
 };
 
 /*
-*	Keypoint
-*/
+ * Keypoint
+ */
 
 class ENGINE_API AKeypoint : public AActor{
 public:
@@ -2986,8 +2995,8 @@ public:
 };
 
 /*
-*	Light
-*/
+ * Light
+ */
 
 class ENGINE_API ALight : public AActor{
 public:
@@ -3001,8 +3010,8 @@ public:
 };
 
 /*
-*	DynamicLight
-*/
+ * DynamicLight
+ */
 
 class ENGINE_API ADynamicLight : public ALight{
 public:
@@ -3011,8 +3020,8 @@ public:
 };
 
 /*
-*	MarkerIconActor
-*/
+ * MarkerIconActor
+ */
 
 class ENGINE_API AMarkerIconActor : public AActor{
 public:
@@ -3025,8 +3034,8 @@ public:
 };
 
 /*
-*	SquadMarker
-*/
+ * SquadMarker
+ */
 
 enum EMarkerAction{
 	MA_None,
@@ -3140,8 +3149,8 @@ public:
 };
 
 /*
-*	Menu
-*/
+ * Menu
+ */
 
 enum InputSource{
 	IS_None,
@@ -3231,8 +3240,8 @@ public:
 };
 
 /*
-*	MissionObjectives
-*/
+ * MissionObjectives
+ */
 
 enum EObjectiveMode{
 	OM_Hidden,
@@ -3264,8 +3273,8 @@ public:
 };
 
 /*
-*	Mover
-*/
+ * Mover
+ */
 
 enum EMoverEncroachType{
 	ME_StopWhenEncroach,
@@ -3374,8 +3383,8 @@ public:
 };
 
 /*
-*	NavigationPoint
-*/
+ * NavigationPoint
+ */
 
 enum ENavConnectionType{
 	NCT_Normal,
@@ -3478,12 +3487,41 @@ public:
 		return Parms.ReturnValue;
 	}
 
+	// Overrides
+	virtual void Destroy();
+	virtual void PostEditChange();
+	virtual void PostEditPaste();
+	virtual class ANavigationPoint* GetAnchor();
+	virtual void PostEditMove();
+	virtual void Spawned();
+	virtual int AddMyMarker(AActor*);
+	virtual void CheckForErrors();
+
+	// Virtual Functions
+	virtual int ProscribedPathTo(class ANavigationPoint*);
+	virtual void addReachSpecs(class APawn*, int);
+	virtual void addReachSpecTo(class ANavigationPoint*, class APawn*);
+	virtual void PostaddReachSpecs(class APawn*);
+	virtual void InitForPathFinding();
+	virtual void SetupForcedPath(class APawn*, class UReachSpec*);
+	virtual void ClearPaths();
+	virtual void FindBase();
+	virtual int CanBeValidAnchorFor(class APawn*);
+	virtual bool IsValidForTarget(class FVector const&);
+	virtual void ClearNodeInfo();
+	virtual int IsAvailable() const;
+	virtual int IsIdentifiedAs(FName);
+	virtual int ReviewPath(class APawn*);
+	virtual void CheckSymmetry(class ANavigationPoint*);
+	virtual void AdjustRadius();
+	virtual void RemoveObstructed();
+
 	DECLARE_CLASS(ANavigationPoint,AActor,0,Engine)
 };
 
 /*
-*	CoverPoint
-*/
+ * CoverPoint
+ */
 
 class ENGINE_API ACoverPoint : public ANavigationPoint{
 public:
@@ -3509,8 +3547,8 @@ public:
 };
 
 /*
-*	Perch
-*/
+ * Perch
+ */
 
 class ENGINE_API APerch : public ANavigationPoint{
 public:
@@ -3524,15 +3562,15 @@ public:
 };
 
 /*
-*	PathNode
-*/
+ * PathNode
+ */
 class ENGINE_API APathNode : public ANavigationPoint{
 	DECLARE_CLASS(APathNode,ANavigationPoint,0,Engine)
 };
 
 /*
-*	PlayerStart
-*/
+ * PlayerStart
+ */
 
 class ENGINE_API APlayerStart : public ANavigationPoint{
 public:
@@ -3550,8 +3588,8 @@ public:
 };
 
 /*
-*	SquadMarkerSpot
-*/
+ * SquadMarkerSpot
+ */
 
 class ENGINE_API ASquadMarkerSpot : public ANavigationPoint{
 public:
@@ -3561,8 +3599,8 @@ public:
 };
 
 /*
-*	Teleporter
-*/
+ * Teleporter
+ */
 
 class ENGINE_API ATeleporter : public ANavigationPoint{
 public:
@@ -3579,13 +3617,13 @@ public:
 	class AActor* TriggerActor2;
 	FName AcceptEvent;
 	FLOAT LastFired;
-	
+
 	DECLARE_CLASS(ATeleporter,ANavigationPoint,0,Engine)
 };
 
 /*
-*	Pawn
-*/
+ * Pawn
+ */
 
 enum EPawnMovementStyle{
 	MS_None,
@@ -3981,8 +4019,8 @@ public:
 };
 
 /*
-*	Turret
-*/
+ * Turret
+ */
 
 struct FTurretInfo{
 	FName TransitionEvent;
@@ -4102,8 +4140,8 @@ public:
 };
 
 /*
-*	Scout
-*/
+ * Scout
+ */
 class ENGINE_API AScout : public APawn{
 public:
 	FLOAT MaxLandingVelocity;
@@ -4112,8 +4150,8 @@ public:
 };
 
 /*
-*	Pickup
-*/
+ * Pickup
+ */
 
 enum EPickupType{
 	PUT_Health,
@@ -4149,8 +4187,8 @@ public:
 };
 
 /*
-*	Ammo
-*/
+ * Ammo
+ */
 
 class ENGINE_API AAmmo : public APickup{
 public:
@@ -4161,8 +4199,8 @@ public:
 };
 
 /*
-*	Projectile
-*/
+ * Projectile
+ */
 
 class ENGINE_API AProjectile : public AActor{
 public:
@@ -4191,8 +4229,8 @@ public:
 };
 
 /*
-*	Projector
-*/
+ * Projector
+ */
 
 enum EProjectorBlending{
 	PB_None,
@@ -4242,8 +4280,8 @@ public:
 };
 
 /*
-*	ShadowProjector
-*/
+ * ShadowProjector
+ */
 
 class ENGINE_API AShadowProjector : public AProjector{
 public:
@@ -4264,8 +4302,8 @@ public:
 };
 
 /*
-*	Prop
-*/
+ * Prop
+ */
 
 struct FTransitionInfo{
 	FName Event;
@@ -4309,8 +4347,8 @@ public:
 };
 
 /*
-*	KarmaProp
-*/
+ * KarmaProp
+ */
 
 class ENGINE_API AKarmaProp : public AProp{
 public:
@@ -4328,14 +4366,14 @@ public:
 	FLOAT LifeTime;
 	FLOAT ImpactInterval;
 	FLOAT LastImpactTime;
-	
+
 	DECLARE_CLASS(AKarmaProp,AProp,0,Engine)
 	NO_DEFAULT_CONSTRUCTOR(AKarmaProp)
 };
 
 /*
-*	AnimNotify
-*/
+ * AnimNotify
+ */
 
 class ENGINE_API UAnimNotify : public UObject{
 public:
@@ -4349,8 +4387,8 @@ public:
 };
 
 /*
-*	AnimNotify_Footstep
-*/
+ * AnimNotify_Footstep
+ */
 
 enum eMaterialWalkType{
 	WalkT_Forward,
@@ -4379,8 +4417,8 @@ public:
 };
 
 /*
-*	AudioEnvironment
-*/
+ * AudioEnvironment
+ */
 
 class ENGINE_API UAudioEnvironment : public UObject{
 public:
@@ -4399,26 +4437,26 @@ public:
 	INT OverlayMaxSpacing;
 	BITFIELD bDoMusicOnceOnly:1;
 	BITFIELD bMusicUsedUp:1;
-	
+
 	DECLARE_CLASS(UAudioEnvironment,UObject,0,Engine)
 	NO_DEFAULT_CONSTRUCTOR(UAudioEnvironment)
 };
 
 /*
-*	CheatManager
-*/
+ * CheatManager
+ */
 
 class ENGINE_API UCheatManager : public UObject{
 public:
 	FRotator LockedRotation;
-	
+
 	DECLARE_CLASS(UCheatManager,UObject,0,Engine)
 	NO_DEFAULT_CONSTRUCTOR(UCheatManager)
 };
 
 /*
-*	DamageType
-*/
+ * DamageType
+ */
 
 class ENGINE_API UDamageType : public UObject{
 public:
@@ -4447,14 +4485,14 @@ public:
 	FLOAT VisorHitScaleMax;
 	class USound* VisorHitSound;
 	FLOAT VisorHitDelayNeed;
-	
+
 	DECLARE_CLASS(UDamageType,UObject,0,Engine)
 	NO_DEFAULT_CONSTRUCTOR(UDamageType)
 };
 
 /*
-*	DamageBleedOut
-*/
+ * DamageBleedOut
+ */
 
 class ENGINE_API UDamageBleedOut : public UDamageType{
 public:
@@ -4463,8 +4501,8 @@ public:
 };
 
 /*
-*	DamageVariance
-*/
+ * DamageVariance
+ */
 
 struct FDamageIncludedInfo{
 	class UClass* DamageTypeClass;
@@ -4475,14 +4513,14 @@ class ENGINE_API UDamageVariance : public UObject{
 public:
 	TArrayNoInit<FDamageIncludedInfo> IncludeTypes;
 	TArrayNoInit<class UClass*> ExcludeTypes;
-	
+
 	DECLARE_CLASS(UDamageVariance,UObject,0,Engine)
 	NO_DEFAULT_CONSTRUCTOR(UDamageVariance)
 };
 
 /*
-*	FrameFX
-*/
+ * FrameFX
+ */
 
 class ENGINE_API UFrameFX : public UObject{
 public:
@@ -4505,19 +4543,19 @@ public:
 	TArrayNoInit<class UHardwareShader*> ActorShaderFX;
 	BITFIELD DrawRegularWorld:1;
 	INT FSAA;
-	
+
 	DECLARE_CLASS(UFrameFX,UObject,0,Engine)
 
 	// --------- Member Variables ---------
 	// Static working targets (shared even in splitscreen)
 	static const int MaxMips = 6;
-	static class FAuxRenderTarget*	MipTargets[MaxMips];
-	static class FAuxRenderTarget*	WorkingTarget;
-	static class FAuxRenderTarget*	AccumulatorTarget;
-	static class FAuxRenderTarget*	AntiAliasTarget;
+	static class FAuxRenderTarget * MipTargets[MaxMips];
+	static class FAuxRenderTarget * WorkingTarget;
+	static class FAuxRenderTarget * AccumulatorTarget;
+	static class FAuxRenderTarget * AntiAliasTarget;
 
 	// Static Frame Grid variables
-	static class FFrameGrid*	FrameGrid;
+	static class FFrameGrid * FrameGrid;
 
 	// --------- UObject interface ---------
 	void Destroy();
@@ -4546,8 +4584,8 @@ public:
 };
 
 /*
-*	Helmet
-*/
+ * Helmet
+ */
 
 struct FSplatInfo{
 	class UMaterial* SplatDecal;
@@ -4794,7 +4832,7 @@ public:
 	class UHardwareShader* HSWiper;
 	class UFont* Orbit8Font;
 	class UFont* Orbit15Font;
-	
+
 	DECLARE_CLASS(UHelmet,UObject,0,Engine)
 	#define MAX_CACHED_MARKERS 20
 	// --------- UObject interface ---------
@@ -4866,8 +4904,8 @@ public:
 };
 
 /*
-*	I3DL2Listener
-*/
+ * I3DL2Listener
+ */
 
 class ENGINE_API UI3DL2Listener : public UObject{
 public:
@@ -4904,14 +4942,14 @@ public:
 	BITFIELD bDecayHFLimit:1;
 	INT Environment;
 	INT Updated;
-	
+
 	DECLARE_CLASS(UI3DL2Listener,UObject,0,Engine)
 	NO_DEFAULT_CONSTRUCTOR(UI3DL2Listener)
 };
 
 /*
-*	IMuseStateInfo
-*/
+ * IMuseStateInfo
+ */
 
 class ENGINE_API UIMuseStateInfo : public UObject{
 public:
@@ -4932,13 +4970,13 @@ public:
 	class USound* CurrentBattleTrio;
 	class USound* CurrentOverlayMultiSound;
 	class AEngineBattleVolume* BattleZone;
-	
+
 	DECLARE_CLASS(UIMuseStateInfo,UObject,0,Engine)
 };
 
 /*
-*	Interactions
-*/
+ * Interactions
+ */
 
 enum EInputAction{
 	IST_None,
@@ -5219,8 +5257,8 @@ public:
 };
 
 /*
-*	Interaction
-*/
+ * Interaction
+ */
 
 class ENGINE_API UInteraction : public UInteractions{
 public:
@@ -5230,18 +5268,18 @@ public:
 	BITFIELD bNativeEvents:1;
 	class UPlayer* ViewportOwner;
 	class UInteractionMaster* Master;
-	
+
 	void Initialized(){
 		DECLARE_NAME(Initialized);
 		UObject::ProcessEvent(NInitialized, NULL);
 	}
-	
+
 	DECLARE_CLASS(UInteraction,UInteractions,0,Engine)
 };
 
 /*
-*	Console
-*/
+ * Console
+ */
 
 enum HoldingState{
 	StandingStill,
@@ -5428,7 +5466,7 @@ public:
 		Parms.bOnlyIfNotPlaying=bOnlyIfNotPlaying;
 		UObject::ProcessEvent(NRestartMenuBackgroundMusic, &Parms);
 	}
-	
+
 	DECLARE_CLASS(UConsole,UInteraction,CLASS_Config,Engine)
 
 	void StartMenuBackgroundMusic(USound* sound);
@@ -5439,8 +5477,8 @@ public:
 };
 
 /*
-*	InteractionMaster
-*/
+ * InteractionMaster
+ */
 
 class ENGINE_API UInteractionMaster : public UInteractions{
 public:
@@ -5449,7 +5487,7 @@ public:
 	class UInteraction* Console;
 	TArrayNoInit<class UInteraction*> GlobalInteractions;
 	BITFIELD bRequireRawJoystick:1;
-	
+
 	class UInteraction* AddInteraction(const FString& InteractionName, class UPlayer* AttachTo){
 		DECLARE_NAME(AddInteraction);
 		struct{
@@ -5566,13 +5604,13 @@ public:
 		Parms.InteractionArray=InteractionArray;
 		UObject::ProcessEvent(NProcess_Message, &Parms);
 	}
-	
+
 	DECLARE_CLASS(UInteractionMaster,UInteractions,CLASS_Transient,Engine)
 };
 
 /*
-*	KarmaParamsCollision
-*/
+ * KarmaParamsCollision
+ */
 
 class ENGINE_API UKarmaParamsCollision : public UObject{
 public:
@@ -5583,14 +5621,14 @@ public:
 	FLOAT KRestitution;
 	FLOAT KImpactThreshold;
 	BITFIELD bContactingLevel:1;
-	
+
 	DECLARE_CLASS(UKarmaParamsCollision,UObject,0,Engine)
 	NO_DEFAULT_CONSTRUCTOR(UKarmaParamsCollision)
 };
 
 /*
-*	KarmaParams
-*/
+ * KarmaParams
+ */
 
 enum ESafeTimeMode{
 	KST_None,
@@ -5622,15 +5660,15 @@ public:
 	FLOAT StayUprightStiffness;
 	FLOAT StayUprightDamping;
 	BYTE SafeTimeMode;
-	
+
 	DECLARE_CLASS(UKarmaParams,UKarmaParamsCollision,0,Engine)
 
 	void PostEditChange();
 };
 
 /*
-*	KarmaParamsSkel
-*/
+ * KarmaParamsSkel
+ */
 
 class ENGINE_API UKarmaParamsSkel : public UKarmaParams{
 public:
@@ -5642,14 +5680,14 @@ public:
 	FLOAT KShotStrength;
 	BITFIELD bKApplyToRoot:1;
 	BITFIELD bKImportantRagdoll:1;
-	
+
 	DECLARE_CLASS(UKarmaParamsSkel,UKarmaParams,0,Engine)
 	NO_DEFAULT_CONSTRUCTOR(UKarmaParamsSkel)
 };
 
 /*
-*	LevelSummary
-*/
+ * LevelSummary
+ */
 
 class ENGINE_API ULevelSummary : public UObject{
 public:
@@ -5657,13 +5695,13 @@ public:
 	FStringNoInit Author;
 	INT IdealPlayerCount;
 	FStringNoInit LevelEnterText;
-	
+
 	DECLARE_CLASS(ULevelSummary,UObject,0,Engine)
 };
 
 /*
-*	Combiner
-*/
+ * Combiner
+ */
 
 enum EColorOperation{
 	CO_Use_Color_From_Material1,
@@ -5698,36 +5736,36 @@ public:
 	BITFIELD InvertMask:1;
 	BITFIELD Modulate2X:1;
 	BITFIELD Modulate4X:1;
-	
+
 	DECLARE_CLASS(UCombiner,UMaterial,0,Engine)
 };
 
 /*
-*	HardwareShaderMacros
-*/
+ * HardwareShaderMacros
+ */
 
 class ENGINE_API UHardwareShaderMacros : public UMaterial{
 public:
 	FStringNoInit Macros;
-	
+
 	DECLARE_CLASS(UHardwareShaderMacros,UMaterial,0,Engine)
 	NO_DEFAULT_CONSTRUCTOR(UHardwareShaderMacros)
 };
 
 /*
-*	Modifier
-*/
+ * Modifier
+ */
 
 class ENGINE_API UModifier : public UMaterial{
 public:
 	class UMaterial* Material;
-	
+
 	DECLARE_CLASS(UModifier,UMaterial,0,Engine)
 };
 
 /*
-*	HardwareShader
-*/
+ * HardwareShader
+ */
 
 enum SConstant{
 	EVC_Unused,
@@ -5824,22 +5862,22 @@ public:
 };
 
 /*
-*	ColorModifier
-*/
+ * ColorModifier
+ */
 
 class ENGINE_API UColorModifier : public UModifier{
 public:
 	FColor Color;
 	BITFIELD RenderTwoSided:1;
 	BITFIELD AlphaBlend:1;
-	
+
 	DECLARE_CLASS(UColorModifier,UModifier,0,Engine)
 	NO_DEFAULT_CONSTRUCTOR(UColorModifier)
 };
 
 /*
-*	FinalBlend
-*/
+ * FinalBlend
+ */
 
 enum EFrameBufferBlending{
 	FB_Overwrite,
@@ -5866,13 +5904,13 @@ public:
 	BITFIELD OverrideAlpha:1;
 	BITFIELD AlphaEnable:1;
 	BYTE AlphaRef;
-	
+
 	DECLARE_CLASS(UFinalBlend,UModifier,0,Engine)
 };
 
 /*
-*	TexModifier
-*/
+ * TexModifier
+ */
 
 enum ETexCoordSrc{
 	TCS_Stream0,
@@ -5921,7 +5959,7 @@ public:
 	BYTE UClampMode;
 	BYTE VClampMode;
 	BITFIELD TexCoordProjected:1;
-	
+
 	DECLARE_CLASS(UTexModifier,UModifier,0,Engine)
 	// UTexModifier interface
 	virtual FMatrix* GetMatrix(FLOAT TimeSeconds){ return NULL; }
@@ -5935,8 +5973,8 @@ public:
 };
 
 /*
-*	TexOscillator
-*/
+ * TexOscillator
+ */
 
 enum ETexOscillationType{
 	OT_Pan,
@@ -5963,7 +6001,7 @@ public:
 	FLOAT LastSv;
 	FLOAT CurrentUJitter;
 	FLOAT CurrentVJitter;
-	
+
 	DECLARE_CLASS(UTexOscillator,UTexModifier,0,Engine)
 	// UTexModifier interface
 	virtual FMatrix* GetMatrix(FLOAT TimeSeconds);
@@ -5972,23 +6010,23 @@ public:
 };
 
 /*
-*	TexPanner
-*/
+ * TexPanner
+ */
 
 class ENGINE_API UTexPanner : public UTexModifier{
 public:
 	FRotator PanDirection;
 	FLOAT PanRate;
 	FMatrix M;
-	
+
 	DECLARE_CLASS(UTexPanner,UTexModifier,0,Engine)
 	// UTexModifier interface
 	virtual FMatrix* GetMatrix(FLOAT TimeSeconds);
 };
 
 /*
-*	TexPanner2D
-*/
+ * TexPanner2D
+ */
 
 class ENGINE_API UTexPanner2D : public UTexModifier{
 public:
@@ -6001,15 +6039,15 @@ public:
 	FLOAT ClampedSizeU;
 	FLOAT ClampedSizeV;
 	FMatrix M;
-	
+
 	DECLARE_CLASS(UTexPanner2D,UTexModifier,0,Engine)
 	// UTexModifier interface
 	virtual FMatrix* GetMatrix(FLOAT TimeSeconds);
 };
 
 /*
-*	ScriptedTexture
-*/
+ * ScriptedTexture
+ */
 
 class ENGINE_API UScriptedTexture : public UBitmapMaterial{
 public:
@@ -6018,7 +6056,7 @@ public:
 	class AActor* Client;
 	INT Revision;
 	INT OldRevision;
-	
+
 	DECLARE_CLASS(UScriptedTexture,UBitmapMaterial,0,Engine)
 
 	void Render(class FRenderInterface* RI);
@@ -6038,17 +6076,17 @@ public:
 	FLOAT VScale;
 	FLOAT UOffset;
 	FLOAT VOffset;
-	
+
 	// Declare the class
 	DECLARE_CLASS(UTexScaler,UTexModifier,0,Engine)
-	
+
 	// UTexModifier interface
 	virtual FMatrix* GetMatrix(FLOAT TimeSeconds);
 };
 
 /*
-*	ShadowBitmapMaterial
-*/
+ * ShadowBitmapMaterial
+ */
 
 class ENGINE_API UShadowBitmapMaterial : public UBitmapMaterial{
 public:
@@ -6066,7 +6104,7 @@ public:
 	FLOAT LastUpdateTime;
 	class UBitmapMaterial* BlobShadow;
 	class UHardwareShader* HSMip;
-	
+
 	DECLARE_CLASS(UShadowBitmapMaterial,UBitmapMaterial,0,Engine)
 
 	virtual void Destroy();
@@ -6080,8 +6118,8 @@ public:
 };
 
 /*
-*	MovieTexture
-*/
+ * MovieTexture
+ */
 
 class ENGINE_API UMovieTexture : public UTexture{
 public:
@@ -6093,8 +6131,8 @@ public:
 };
 
 /*
-*	ConstantMaterial
-*/
+ * ConstantMaterial
+ */
 
 class ENGINE_API UConstantMaterial : public URenderedMaterial{
 public:
@@ -6106,8 +6144,8 @@ public:
 };
 
 /*
-*	FadeColor
-*/
+ * FadeColor
+ */
 
 enum EColorFadeType{
 	FC_Linear,
@@ -6122,7 +6160,7 @@ public:
 	FLOAT FadePeriod;
 	FLOAT FadePhase;
 	BYTE ColorFadeType;
-	
+
 	DECLARE_CLASS(UFadeColor,UConstantMaterial,0,Engine)
 	//
 	// UConstantMaterial interface
@@ -6131,13 +6169,13 @@ public:
 };
 
 /*
-*	HardwareShaderWrapper
-*/
+ * HardwareShaderWrapper
+ */
 
 class ENGINE_API UHardwareShaderWrapper : public URenderedMaterial{
 public:
 	class UHardwareShader* ShaderImplementation;
-	
+
 	DECLARE_CLASS(UHardwareShaderWrapper,URenderedMaterial,0,Engine)
 	// Make sure derived classes implement the setup funcion
 	virtual INT SetupShaderWrapper(class FRenderInterface* RI){ return 0; }
@@ -6166,23 +6204,23 @@ public:
 };
 
 /*
-*	HsHologram
-*/
+ * HsHologram
+ */
 
 class ENGINE_API UHsHologram : public UHardwareShaderWrapper{
 public:
 	class UTexture* DiffuseTexture;
 	FColor HologramColor;
 	BITFIELD UseMarkerColorInstead:1;
-	
+
 	DECLARE_CLASS(UHsHologram,UHardwareShaderWrapper,0,Engine)
 	// Make sure to implement this function in UnHardwareShaderWrapper.cpp
 	virtual INT SetupShaderWrapper(class FRenderInterface* RI);
 };
 
 /*
-*	ParticleMaterial
-*/
+ * ParticleMaterial
+ */
 
 struct FParticleProjectorInfo{
 	class UBitmapMaterial* BitmapMaterial;
@@ -6206,14 +6244,14 @@ public:
 	BITFIELD AcceptsProjectors:1;
 	INT NumProjectors;
 	FParticleProjectorInfo Projectors[8];
-	
+
 	DECLARE_CLASS(UParticleMaterial,URenderedMaterial,0,Engine)
 	NO_DEFAULT_CONSTRUCTOR(UParticleMaterial)
 };
 
 /*
-*	Shader
-*/
+ * Shader
+ */
 
 enum EBumpMapType{
 	BMT_Static_Diffuse,
@@ -6277,13 +6315,13 @@ public:
 	BITFIELD Wireframe:1;
 	BITFIELD ModulateStaticLighting2X:1;
 	BITFIELD PerformLightingOnSpecularPass:1;
-	
+
 	DECLARE_CLASS(UShader,URenderedMaterial,0,Engine)
 };
 
 /*
-*	VisionMode
-*/
+ * VisionMode
+ */
 
 class ENGINE_API UVisionMode : public URenderedMaterial{
 public:
@@ -6310,7 +6348,7 @@ public:
 	BITFIELD FlashlightOn:1;
 	class UI3DL2Listener* EAXEffect;
 	class UI3DL2Listener* EAXEffectXbox;
-	
+
 	DECLARE_CLASS(UVisionMode,URenderedMaterial,0,Engine)
 	// Make sure derived classes implement the setup funcion
 	virtual UHardwareShader* SetVisionMode(UViewport* Viewport, class UProxyBitmapMaterial* RenderedWorldTexture, class UProxyBitmapMaterial* BlurTargetTexture, int TargetSizeX, int TargetSizeY, float Fade=1.f){ return VisionShader; }
@@ -6341,8 +6379,8 @@ public:
 };
 
 /*
-*	VisionModeDistort
-*/
+ * VisionModeDistort
+ */
 
 class ENGINE_API UVisionModeDistort : public UVisionMode{
 public:
@@ -6352,49 +6390,49 @@ public:
 	FLOAT PanSpeedX;
 	FLOAT PanSpeedY;
 	class UHardwareShader* AltVisionShader;
-	
+
 	DECLARE_CLASS(UVisionModeDistort,UVisionMode,0,Engine)
 	// Make sure to implement this function in UnVisionModes.cpp
-	virtual UHardwareShader* SetVisionMode(UViewport* Viewport, class UProxyBitmapMaterial* RenderedWorldTexture, class UProxyBitmapMaterial* BlurTargetTexture, int TargetSizeX, int TargetSizeY, float Fade/*=1.f*/);
+	virtual UHardwareShader* SetVisionMode(UViewport* Viewport, class UProxyBitmapMaterial* RenderedWorldTexture, class UProxyBitmapMaterial* BlurTargetTexture, int TargetSizeX, int TargetSizeY, float Fade/*=1.f */);
 };
 
 /*
-*	VisionModeEnhance
-*/
+ * VisionModeEnhance
+ */
 
 class ENGINE_API UVisionModeEnhance : public UVisionMode{
 public:
 	DECLARE_CLASS(UVisionModeEnhance,UVisionMode,0,Engine)
 	// Make sure to implement this function in UnVisionModes.cpp
-	virtual UHardwareShader* SetVisionMode(UViewport* Viewport, class UProxyBitmapMaterial* RenderedWorldTexture, class UProxyBitmapMaterial* BlurTargetTexture, int TargetSizeX, int TargetSizeY, float Fade/*=1.f*/);
+	virtual UHardwareShader* SetVisionMode(UViewport* Viewport, class UProxyBitmapMaterial* RenderedWorldTexture, class UProxyBitmapMaterial* BlurTargetTexture, int TargetSizeX, int TargetSizeY, float Fade/*=1.f */);
 };
 
 /*
-*	VisionModeHit
-*/
+ * VisionModeHit
+ */
 
 class ENGINE_API UVisionModeHit : public UVisionMode{
 public:
 	DECLARE_CLASS(UVisionModeHit,UVisionMode,0,Engine)
 	// Make sure to implement this function in UnVisionModes.cpp
-	virtual UHardwareShader* SetVisionMode(UViewport* Viewport, class UProxyBitmapMaterial* RenderedWorldTexture, class UProxyBitmapMaterial* BlurTargetTexture, int TargetSizeX, int TargetSizeY, float Fade/*=1.f*/);
+	virtual UHardwareShader* SetVisionMode(UViewport* Viewport, class UProxyBitmapMaterial* RenderedWorldTexture, class UProxyBitmapMaterial* BlurTargetTexture, int TargetSizeX, int TargetSizeY, float Fade/*=1.f */);
 };
 
 /*
-*	VisionModeNormal
-*/
+ * VisionModeNormal
+ */
 
 class ENGINE_API UVisionModeNormal : public UVisionMode{
 public:
 	DECLARE_CLASS(UVisionModeNormal,UVisionMode,0,Engine)
 	// Make sure to implement this function in UnVisionModes.cpp
-	virtual UHardwareShader* SetVisionMode(UViewport* Viewport, class UProxyBitmapMaterial* RenderedWorldTexture, class UProxyBitmapMaterial* BlurTargetTexture, int TargetSizeX, int TargetSizeY, float Fade/*=1.f*/);
-	virtual UHardwareShader* GetSkelMeshShader(UViewport* Viewport, AActor* Actor, float Fade/*=1.f*/);
+	virtual UHardwareShader* SetVisionMode(UViewport* Viewport, class UProxyBitmapMaterial* RenderedWorldTexture, class UProxyBitmapMaterial* BlurTargetTexture, int TargetSizeX, int TargetSizeY, float Fade/*=1.f */);
+	virtual UHardwareShader* GetSkelMeshShader(UViewport* Viewport, AActor* Actor, float Fade/*=1.f */);
 };
 
 /*
-*	VisionModeScavDrill
-*/
+ * VisionModeScavDrill
+ */
 
 class ENGINE_API UVisionModeScavDrill : public UVisionMode{
 public:
@@ -6403,27 +6441,27 @@ public:
 	FLOAT MinTextureScale;
 	FLOAT MaxTextureScale;
 	class UHardwareShader* AltVisionShader;
-	
+
 	DECLARE_CLASS(UVisionModeScavDrill,UVisionMode,0,Engine)
 	// Make sure to implement this function in UnVisionModes.cpp
-	virtual UHardwareShader* SetVisionMode(UViewport* Viewport, class UProxyBitmapMaterial* RenderedWorldTexture, class UProxyBitmapMaterial* BlurTargetTexture, int TargetSizeX, int TargetSizeY, float Fade/*=1.f*/);
+	virtual UHardwareShader* SetVisionMode(UViewport* Viewport, class UProxyBitmapMaterial* RenderedWorldTexture, class UProxyBitmapMaterial* BlurTargetTexture, int TargetSizeX, int TargetSizeY, float Fade/*=1.f */);
 };
 
 /*
-*	VisionModeSniper
-*/
+ * VisionModeSniper
+ */
 
 class ENGINE_API UVisionModeSniper : public UVisionMode{
 public:
 	DECLARE_CLASS(UVisionModeSniper,UVisionMode,0,Engine)
 	// Make sure to implement this function in UnVisionModes.cpp
-	virtual UHardwareShader* SetVisionMode(UViewport* Viewport, class UProxyBitmapMaterial* RenderedWorldTexture, class UProxyBitmapMaterial* BlurTargetTexture, int TargetSizeX, int TargetSizeY, float Fade/*=1.f*/);
-	virtual UHardwareShader* GetSkelMeshShader(UViewport* Viewport, AActor* Actor, float Fade/*=1.f*/);
+	virtual UHardwareShader* SetVisionMode(UViewport* Viewport, class UProxyBitmapMaterial* RenderedWorldTexture, class UProxyBitmapMaterial* BlurTargetTexture, int TargetSizeX, int TargetSizeY, float Fade/*=1.f */);
+	virtual UHardwareShader* GetSkelMeshShader(UViewport* Viewport, AActor* Actor, float Fade/*=1.f */);
 };
 
 /*
-*	MeshObject
-*/
+ * MeshObject
+ */
 
 enum EImpSpaceMode{
 	ISM_Sprite,
@@ -6462,8 +6500,8 @@ public:
 };
 
 /*
-*	ParticleEmitter
-*/
+ * ParticleEmitter
+ */
 
 enum EBlendMode{
 	BM_MODULATE,
@@ -6720,13 +6758,13 @@ public:
 	BITFIELD RealDisableFogging:1;
 	BITFIELD AllParticlesDead:1;
 	BITFIELD WarmedUp:1;
-	
+
 	DECLARE_CLASS(UParticleEmitter,UObject,0,Engine)
 };
 
 /*
-*	MeshEmitter
-*/
+ * MeshEmitter
+ */
 
 class ENGINE_API UMeshEmitter : public UParticleEmitter{
 public:
@@ -6735,13 +6773,13 @@ public:
 	BITFIELD RenderTwoSided:1;
 	BITFIELD UseParticleColor:1;
 	FVector MeshExtent;
-	
+
 	DECLARE_CLASS(UMeshEmitter,UParticleEmitter,0,Engine)
 };
 
 /*
-*	RibbonEmitter
-*/
+ * RibbonEmitter
+ */
 
 enum EGetPointAxis{
 	PAXIS_OwnerX,
@@ -6795,13 +6833,13 @@ public:
 	FRibbonPoint LastSampledPoint;
 	BITFIELD bKilled:1;
 	BITFIELD bDecaying:1;
-	
+
 	DECLARE_CLASS(URibbonEmitter,UParticleEmitter,0,Engine)
 };
 
 /*
-*	SpriteEmitter
-*/
+ * SpriteEmitter
+ */
 
 enum EParticleDirectionUsage{
 	PTDU_None,
@@ -6822,8 +6860,8 @@ public:
 };
 
 /*
-*	PawnAudioTable
-*/
+ * PawnAudioTable
+ */
 
 enum EPawnAudioEvent{
 	PAE_Invalid,
@@ -7025,13 +7063,13 @@ enum EPawnAudioEvent{
 class ENGINE_API UPawnAudioTable : public UObject{
 public:
 	TArrayNoInit<class USound*> Table;
-	
+
 	DECLARE_CLASS(UPawnAudioTable,UObject,0,Engine)
 };
 
 /*
-*	PlayerInput
-*/
+ * PlayerInput
+ */
 
 class ENGINE_API UPlayerInput : public UObject{
 public:
@@ -7083,7 +7121,7 @@ public:
 	FLOAT JoyMaxTimerV;
 	FLOAT DoubleClickTimer;
 	FLOAT DoubleClickTime;
-	
+
 	void PlayerInput(FLOAT DeltaTime){
 		FName NPlayerInput(NAME_PlayerInput);
 		struct{
@@ -7092,14 +7130,14 @@ public:
 		Parms.DeltaTime=DeltaTime;
 		UObject::ProcessEvent(NPlayerInput, &Parms);
 	}
-	
+
 	DECLARE_CLASS(UPlayerInput,UObject,CLASS_Transient|CLASS_Config,Engine)
 	NO_DEFAULT_CONSTRUCTOR(UPlayerInput)
 };
 
 /*
-*	ReachSpec
-*/
+ * ReachSpec
+ */
 
 class ENGINE_API UReachSpec : public UObject{
 public:
@@ -7112,14 +7150,16 @@ public:
 	BITFIELD bJump:1;
 	BITFIELD bPerch:1;
 	BITFIELD bFly:1;
-	
+
+	FPlane PathColor();
+
 	DECLARE_CLASS(UReachSpec,UObject,0,Engine)
 	NO_DEFAULT_CONSTRUCTOR(UReachSpec)
 };
 
 /*
-*	SoundBase
-*/
+ * SoundBase
+ */
 
 enum ESoundBattleContext{
 	SBC_Either,
@@ -7134,8 +7174,8 @@ public:
 };
 
 /*
-*	AudioParams
-*/
+ * AudioParams
+ */
 
 enum EAudioGroup{
 	AG_Music,
@@ -7167,13 +7207,13 @@ public:
 	BITFIELD bDisable3DFalloffXBox:1;
 	FLOAT XBoxRolloffFactor;
 	BITFIELD XBox6dbBoost:1;
-	
+
 	DECLARE_CLASS(UAudioParams,USoundBase,0,Engine)
 };
 
 /*
-*	RumbleParams
-*/
+ * RumbleParams
+ */
 
 class ENGINE_API URumbleParams : public USoundBase{
 public:
@@ -7187,7 +7227,7 @@ public:
 	FVector CamShakeOffsetMag;
 	FLOAT CamShakeRollRate;
 	FVector CamShakeOffsetRate;
-	
+
 	DECLARE_CLASS(URumbleParams,USoundBase,0,Engine)
 	virtual void PostEditChange();
 
@@ -7218,8 +7258,8 @@ public:
 };
 
 /*
-*	SoundBanter
-*/
+ * SoundBanter
+ */
 
 struct FBanterLine{
 	class UClass* PawnClass;
@@ -7235,7 +7275,7 @@ public:
 	TArrayNoInit<FBanterLine> Lines;
 	FLOAT Likelihood;
 	BITFIELD Used:1;
-	
+
 	DECLARE_CLASS(USoundBanter,USoundBase,0,Engine)
 	// AnimNotify interface.
 	virtual void PostEditChange();
@@ -7243,8 +7283,8 @@ public:
 };
 
 /*
-*	SquadStance
-*/
+ * SquadStance
+ */
 
 enum EStanceTetherObject{
 	STO_None,
@@ -7284,14 +7324,14 @@ public:
 	BITFIELD bCheckCorpses:1;
 	BITFIELD FavorCombatNearestTether:1;
 	BITFIELD PreventTetherOneWayOnly:1;
-	
+
 	DECLARE_CLASS(USquadStance,UObject,0,Engine)
 	NO_DEFAULT_CONSTRUCTOR(USquadStance)
 };
 
 /*
-*	Stimulus
-*/
+ * Stimulus
+ */
 
 #define UCONST_SF_ProcessImmediately 0x0001
 #define UCONST_SF_PassToSquad 0x0002
@@ -7308,7 +7348,7 @@ public:
 	INT RefCount;
 	INT Responses;
 	FLOAT Time;
-	
+
 	DECLARE_CLASS(UStimulus,UObject,0,Engine)
 };
 

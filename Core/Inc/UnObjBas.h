@@ -478,7 +478,7 @@ public:
 	void operator delete(void* Object, unsigned int Size);
 
 	// UObject interface.
-	virtual void ProcessEvent(UFunction* Function, void* Parms, void* UnusedResult = NULL);
+	virtual void ProcessEvent(UFunction* Function, void* Parms, void* Result = NULL);
 	virtual void ProcessDelegate(FName DelegateName, FScriptDelegate* Delegate, void* Parms, void* Result = NULL);
 	virtual void ProcessState(FLOAT DeltaSeconds);
 	virtual UBOOL ProcessRemoteFunction(UFunction* Function, void* Parms, FFrame* Stack);
@@ -600,9 +600,8 @@ public:
 	FORCEINLINE FStateFrame* GetStateFrame(){ return StateFrame; }
 };
 
-#define DECLARE_NAME(name) \
-	static FName FuncName(#name); \
-	UFunction* N##name = FindFunctionChecked(FuncName)
+#define DECLARE_NAME(name) static FName N##name(#name);
+#define DECLARE_FUNCTION(func) void func(FFrame& Stack, RESULT_DECL);
 
 /*----------------------------------------------------------------------------
 	Core templates.

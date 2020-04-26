@@ -318,6 +318,33 @@ public:
 																			 D3D8CreateDeviceOverride));
 		}
 
+		if(!GIsEditor){
+			DEVMODE dm = {0};
+
+			dm.dmSize = sizeof(dm);
+
+			TArray<DWORD> AvailableResolutions;
+
+			for(int i = 0; EnumDisplaySettings(NULL, i, &dm) != 0; ++i)
+				AvailableResolutions.AddUniqueItem(MAKELONG(dm.dmPelsWidth, dm.dmPelsHeight));
+
+			if(AvailableResolutions.Num() > 0){
+				Sort(AvailableResolutions.GetData(), AvailableResolutions.Num());
+
+				FString ResolutionList = "(";
+
+				for(int i = 0; i < AvailableResolutions.Num() - 1; ++i)
+					ResolutionList += FString::Printf("\"%ix%i\",", LOWORD(AvailableResolutions[i]), HIWORD(AvailableResolutions[i]));
+
+				ResolutionList += FString::Printf("\"%ix%i\")", LOWORD(AvailableResolutions.Last()), HIWORD(AvailableResolutions.Last()));
+
+				GConfig->SetString("CTGraphicsOptionsPCMenu",
+								   "Options[2].Items",
+								   *ResolutionList,
+								   *(FString("XInterfaceCTMenus.") + UObject::GetLanguage()));
+			}
+		}
+
 		return Result;
 	}
 };

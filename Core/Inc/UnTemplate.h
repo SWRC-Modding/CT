@@ -1474,6 +1474,17 @@ struct TStack{
 	T* Max;
 };
 
+template<typename T>
+INT Compare(const T& T1, const T& T2){
+	if(T1 < T2)
+		return -1;
+
+	if(T1 > T2)
+		return 1;
+
+	return 0;
+}
+
 /*
  * Sort elements.
  *

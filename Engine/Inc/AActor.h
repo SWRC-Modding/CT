@@ -14,7 +14,12 @@
 	virtual void PostEditUndo();
 	virtual void PostLoad();
 	virtual void PreEditUndo();
-	virtual void ProcessEvent(class UFunction*, void*, void*);
+	/*
+	 * If the following function is not commented out there will be compile errors in generated event call stubs.
+	 * They are supposed to call the function with the same name but different parameters in UObject which is shadowed by this one.
+	 * Commenting this out is fine since it is only an override. I have no idea how they made this work originally...
+	 */
+	//virtual void ProcessEvent(class UFunction* Function, void* Parms, void* UnusedResult = NULL);
 	virtual int ProcessRemoteFunction(class UFunction* Function, void* Parms, struct FFrame* Stack);
 	virtual void ProcessState(FLOAT DeltaSeconds);
 	virtual void Serialize(class FArchive&);
@@ -53,7 +58,7 @@
 	virtual int ShouldTrace(AActor*, unsigned long);
 	virtual UPrimitive* GetPrimitive();
 	virtual void NotifyBumpEx(AActor*);
-	virtual void SetBase(AActor* NewBase, const FVector& NewFloor = FVector(0.0f, 0.0f, 1.0f), int bNotifyActor = 1);
+	virtual void SetBase(AActor* NewBase, const FVector& NewFloor = FVector(0.0f, 0.0f, 1.0f), UBOOL bNotifyActor = 1);
 	virtual void NotifyAnimEnd(int Channel);
 	virtual void UpdateAnimation(FLOAT DeltaSeconds);
 	virtual void StartAnimPoll();
@@ -127,7 +132,7 @@ public:
 			FLOAT LoopStart;
 		} Parms;
 		Parms.LoopStart=LoopStart;
-		UObject::ProcessEvent(NAnimLoopEnd, &Parms);
+		ProcessEvent(NAnimLoopEnd, &Parms);
 	}
 
 	void AnimEnd(INT Channel){
@@ -138,7 +143,7 @@ public:
 			INT Channel;
 		} Parms;
 		Parms.Channel=Channel;
-		UObject::ProcessEvent(NAnimEnd, &Parms);
+		ProcessEvent(NAnimEnd, &Parms);
 	}
 
 	AActor* SpawnAttachment(FName BoneName, class UClass* ActorClass, class UStaticMesh* Mesh){
@@ -153,7 +158,7 @@ public:
 		Parms.ActorClass=ActorClass;
 		Parms.Mesh=Mesh;
 		Parms.ReturnValue=0;
-		UObject::ProcessEvent(NSpawnAttachment, &Parms);
+		ProcessEvent(NSpawnAttachment, &Parms);
 		return Parms.ReturnValue;
 	}
 
@@ -163,7 +168,7 @@ public:
 			FName BoneName;
 		} Parms;
 		Parms.BoneName=BoneName;
-		UObject::ProcessEvent(NDestroyAttachment, &Parms);
+		ProcessEvent(NDestroyAttachment, &Parms);
 	}
 
 	void KImpact(AActor* Other, const FVector& pos, const FVector& impactVel, const FVector& impactNorm, BYTE MaterialHit){
@@ -180,22 +185,22 @@ public:
 		Parms.impactVel=impactVel;
 		Parms.impactNorm=impactNorm;
 		Parms.MaterialHit=MaterialHit;
-		UObject::ProcessEvent(NKImpact, &Parms);
+		ProcessEvent(NKImpact, &Parms);
 	}
 
 	void KVelDropBelow(){
 		DECLARE_NAME(KVelDropBelow);
-		UObject::ProcessEvent(NKVelDropBelow, NULL);
+		ProcessEvent(NKVelDropBelow, NULL);
 	}
 
 	void KAtRest(){
 		DECLARE_NAME(KAtRest);
-		UObject::ProcessEvent(NKAtRest, NULL);
+		ProcessEvent(NKAtRest, NULL);
 	}
 
 	void KSkelConvulse(){
 		DECLARE_NAME(KSkelConvulse);
-		UObject::ProcessEvent(NKSkelConvulse, NULL);
+		ProcessEvent(NKSkelConvulse, NULL);
 	}
 
 	void KApplyForce(FVector& Force, FVector& Torque){
@@ -206,7 +211,7 @@ public:
 		} Parms;
 		Parms.Force=Force;
 		Parms.Torque=Torque;
-		UObject::ProcessEvent(NKApplyForce, &Parms);
+		ProcessEvent(NKApplyForce, &Parms);
 		Force=Parms.Force;
 		Torque=Parms.Torque;
 	}
@@ -219,7 +224,7 @@ public:
 		} Parms;
 		Parms.newState=newState;
 		Parms.ReturnValue=0;
-		UObject::ProcessEvent(NKUpdateState, &Parms);
+		ProcessEvent(NKUpdateState, &Parms);
 		newState=Parms.newState;
 		return Parms.ReturnValue;
 	}
@@ -228,7 +233,7 @@ public:
 		FName NDestroyed(NAME_Destroyed);
 		if(!IsProbing(NDestroyed))
 			return;
-		UObject::ProcessEvent(NDestroyed, NULL);
+		ProcessEvent(NDestroyed, NULL);
 	}
 
 	void GainedChild(AActor* Other){
@@ -239,7 +244,7 @@ public:
 			AActor* Other;
 		} Parms;
 		Parms.Other=Other;
-		UObject::ProcessEvent(NGainedChild, &Parms);
+		ProcessEvent(NGainedChild, &Parms);
 	}
 
 	void LostChild(AActor* Other){
@@ -250,7 +255,7 @@ public:
 			AActor* Other;
 		} Parms;
 		Parms.Other=Other;
-		UObject::ProcessEvent(NLostChild, &Parms);
+		ProcessEvent(NLostChild, &Parms);
 	}
 
 	void Tick(FLOAT DeltaTime){
@@ -261,12 +266,12 @@ public:
 			FLOAT DeltaTime;
 		} Parms;
 		Parms.DeltaTime=DeltaTime;
-		UObject::ProcessEvent(NTick, &Parms);
+		ProcessEvent(NTick, &Parms);
 	}
 
 	void PostNetworkReceive(){
 		DECLARE_NAME(PostNetworkReceive);
-		UObject::ProcessEvent(NPostNetworkReceive, NULL);
+		ProcessEvent(NPostNetworkReceive, NULL);
 	}
 
 	void Trigger(AActor* Other, class APawn* EventInstigator){
@@ -279,7 +284,7 @@ public:
 		} Parms;
 		Parms.Other=Other;
 		Parms.EventInstigator=EventInstigator;
-		UObject::ProcessEvent(NTrigger, &Parms);
+		ProcessEvent(NTrigger, &Parms);
 	}
 
 	void UnTrigger(AActor* Other, class APawn* EventInstigator){
@@ -292,24 +297,24 @@ public:
 		} Parms;
 		Parms.Other=Other;
 		Parms.EventInstigator=EventInstigator;
-		UObject::ProcessEvent(NUnTrigger, &Parms);
+		ProcessEvent(NUnTrigger, &Parms);
 	}
 
 	void BeginEvent(){
 		DECLARE_NAME(BeginEvent);
-		UObject::ProcessEvent(NBeginEvent, NULL);
+		ProcessEvent(NBeginEvent, NULL);
 	}
 
 	void EndEvent(){
 		DECLARE_NAME(EndEvent);
-		UObject::ProcessEvent(NEndEvent, NULL);
+		ProcessEvent(NEndEvent, NULL);
 	}
 
 	void Timer(){
 		FName NTimer(NAME_Timer);
 		if(!IsProbing(NTimer))
 			return;
-		UObject::ProcessEvent(NTimer, NULL);
+		ProcessEvent(NTimer, NULL);
 	}
 
 	void HitWall(const FVector& HitNormal, AActor* HitWall, BYTE KindOfMaterial){
@@ -324,14 +329,14 @@ public:
 		Parms.HitNormal=HitNormal;
 		Parms.HitWall=HitWall;
 		Parms.KindOfMaterial=KindOfMaterial;
-		UObject::ProcessEvent(NHitWall, &Parms);
+		ProcessEvent(NHitWall, &Parms);
 	}
 
 	void Falling(){
 		FName NFalling(NAME_Falling);
 		if(!IsProbing(NFalling))
 			return;
-		UObject::ProcessEvent(NFalling, NULL);
+		ProcessEvent(NFalling, NULL);
 	}
 
 	void Landed(const FVector& HitNormal){
@@ -342,7 +347,7 @@ public:
 			FVector HitNormal;
 		} Parms;
 		Parms.HitNormal=HitNormal;
-		UObject::ProcessEvent(NLanded, &Parms);
+		ProcessEvent(NLanded, &Parms);
 	}
 
 	void ZoneChange(AZoneInfo* NewZone){
@@ -353,7 +358,7 @@ public:
 			AZoneInfo* NewZone;
 		} Parms;
 		Parms.NewZone=NewZone;
-		UObject::ProcessEvent(NZoneChange, &Parms);
+		ProcessEvent(NZoneChange, &Parms);
 	}
 
 	void PhysicsVolumeChange(class APhysicsVolume* NewVolume){
@@ -364,7 +369,7 @@ public:
 			class APhysicsVolume* NewVolume;
 		} Parms;
 		Parms.NewVolume=NewVolume;
-		UObject::ProcessEvent(NPhysicsVolumeChange, &Parms);
+		ProcessEvent(NPhysicsVolumeChange, &Parms);
 	}
 
 	void Touch(AActor* Other){
@@ -375,7 +380,7 @@ public:
 			AActor* Other;
 		} Parms;
 		Parms.Other=Other;
-		UObject::ProcessEvent(NTouch, &Parms);
+		ProcessEvent(NTouch, &Parms);
 	}
 
 	void PostTouch(AActor* Other){
@@ -386,7 +391,7 @@ public:
 			AActor* Other;
 		} Parms;
 		Parms.Other=Other;
-		UObject::ProcessEvent(NPostTouch, &Parms);
+		ProcessEvent(NPostTouch, &Parms);
 	}
 
 	void UnTouch(AActor* Other){
@@ -397,7 +402,7 @@ public:
 			AActor* Other;
 		} Parms;
 		Parms.Other=Other;
-		UObject::ProcessEvent(NUnTouch, &Parms);
+		ProcessEvent(NUnTouch, &Parms);
 	}
 
 	void Bump(AActor* Other){
@@ -408,14 +413,14 @@ public:
 			AActor* Other;
 		} Parms;
 		Parms.Other=Other;
-		UObject::ProcessEvent(NBump, &Parms);
+		ProcessEvent(NBump, &Parms);
 	}
 
 	void BaseChange(){
 		FName NBaseChange(NAME_BaseChange);
 		if(!IsProbing(NBaseChange))
 			return;
-		UObject::ProcessEvent(NBaseChange, NULL);
+		ProcessEvent(NBaseChange, NULL);
 	}
 
 	void Attach(AActor* Other){
@@ -426,7 +431,7 @@ public:
 			AActor* Other;
 		} Parms;
 		Parms.Other=Other;
-		UObject::ProcessEvent(NAttach, &Parms);
+		ProcessEvent(NAttach, &Parms);
 	}
 
 	void Detach(AActor* Other){
@@ -437,7 +442,7 @@ public:
 			AActor* Other;
 		} Parms;
 		Parms.Other=Other;
-		UObject::ProcessEvent(NDetach, &Parms);
+		ProcessEvent(NDetach, &Parms);
 	}
 
 	UBOOL EncroachingOn(AActor* Other){
@@ -450,7 +455,7 @@ public:
 		} Parms;
 		Parms.Other=Other;
 		Parms.ReturnValue=0;
-		UObject::ProcessEvent(NEncroachingOn, &Parms);
+		ProcessEvent(NEncroachingOn, &Parms);
 		return Parms.ReturnValue;
 	}
 
@@ -462,19 +467,19 @@ public:
 			AActor* Other;
 		} Parms;
 		Parms.Other=Other;
-		UObject::ProcessEvent(NEncroachedBy, &Parms);
+		ProcessEvent(NEncroachedBy, &Parms);
 	}
 
 	void FinishedInterpolation(){
 		DECLARE_NAME(FinishedInterpolation);
-		UObject::ProcessEvent(NFinishedInterpolation, NULL);
+		ProcessEvent(NFinishedInterpolation, NULL);
 	}
 
 	void EndedRotation(){
 		FName NEndedRotation(NAME_EndedRotation);
 		if(!IsProbing(NEndedRotation))
 			return;
-		UObject::ProcessEvent(NEndedRotation, NULL);
+		ProcessEvent(NEndedRotation, NULL);
 	}
 
 	void UsedBy(class APawn* User){
@@ -483,7 +488,7 @@ public:
 			class APawn* User;
 		} Parms;
 		Parms.User=User;
-		UObject::ProcessEvent(NUsedBy, &Parms);
+		ProcessEvent(NUsedBy, &Parms);
 	}
 
 	void FellOutOfWorld(BYTE KillType){
@@ -492,7 +497,7 @@ public:
 			BYTE KillType;
 		} Parms;
 		Parms.KillType=KillType;
-		UObject::ProcessEvent(NFellOutOfWorld, &Parms);
+		ProcessEvent(NFellOutOfWorld, &Parms);
 	}
 
 	void KilledBy(class APawn* EventInstigator, class UClass* DamageType){
@@ -503,7 +508,7 @@ public:
 		} Parms;
 		Parms.EventInstigator=EventInstigator;
 		Parms.DamageType=DamageType;
-		UObject::ProcessEvent(NKilledBy, &Parms);
+		ProcessEvent(NKilledBy, &Parms);
 	}
 
 	FLOAT TakeDamage(FLOAT Damage, class APawn* EventInstigator, const FVector& HitLocation, const FVector& Momentum, class UClass* DamageType, FName BoneName){
@@ -524,13 +529,13 @@ public:
 		Parms.DamageType=DamageType;
 		Parms.BoneName=BoneName;
 		Parms.ReturnValue=0;
-		UObject::ProcessEvent(NTakeDamage, &Parms);
+		ProcessEvent(NTakeDamage, &Parms);
 		return Parms.ReturnValue;
 	}
 
 	void TornOff(){
 		DECLARE_NAME(TornOff);
-		UObject::ProcessEvent(NTornOff, NULL);
+		ProcessEvent(NTornOff, NULL);
 	}
 
 	FVector CalcTrajectoryVelocity(const FVector& InitialPosition, const FVector& TargetPosition, FLOAT HorizontalVelocity, UBOOL AllowFlatArcs);
@@ -543,7 +548,7 @@ public:
 		} Parms;
 		Parms.InTeleporter=InTeleporter;
 		Parms.ReturnValue=0;
-		UObject::ProcessEvent(NPreTeleport, &Parms);
+		ProcessEvent(NPreTeleport, &Parms);
 		return Parms.ReturnValue;
 	}
 
@@ -553,14 +558,14 @@ public:
 			class ATeleporter* OutTeleporter;
 		} Parms;
 		Parms.OutTeleporter=OutTeleporter;
-		UObject::ProcessEvent(NPostTeleport, &Parms);
+		ProcessEvent(NPostTeleport, &Parms);
 	}
 
 	void BeginPlay(){
 		FName NBeginPlay(NAME_BeginPlay);
 		if(!IsProbing(NBeginPlay))
 			return;
-		UObject::ProcessEvent(NBeginPlay, NULL);
+		ProcessEvent(NBeginPlay, NULL);
 	}
 
 	void RenderTexture(class UScriptedTexture* Tex){
@@ -569,14 +574,14 @@ public:
 			class UScriptedTexture* Tex;
 		} Parms;
 		Parms.Tex=Tex;
-		UObject::ProcessEvent(NRenderTexture, &Parms);
+		ProcessEvent(NRenderTexture, &Parms);
 	}
 
 	void PreBeginPlay(){
 		FName NPreBeginPlay(NAME_PreBeginPlay);
 		if(!IsProbing(NPreBeginPlay))
 			return;
-		UObject::ProcessEvent(NPreBeginPlay, NULL);
+		ProcessEvent(NPreBeginPlay, NULL);
 	}
 
 	void BroadcastLocalizedMessage(class UClass* MessageClass, INT Switch, class APlayerReplicationInfo* RelatedPRI_1, class APlayerReplicationInfo* RelatedPRI_2, class UObject* OptionalObject){
@@ -593,31 +598,31 @@ public:
 		Parms.RelatedPRI_1=RelatedPRI_1;
 		Parms.RelatedPRI_2=RelatedPRI_2;
 		Parms.OptionalObject=OptionalObject;
-		UObject::ProcessEvent(NBroadcastLocalizedMessage, &Parms);
+		ProcessEvent(NBroadcastLocalizedMessage, &Parms);
 	}
 
 	void PostBeginPlay(){
 		FName NPostBeginPlay(NAME_PostBeginPlay);
 		if(!IsProbing(NPostBeginPlay))
 			return;
-		UObject::ProcessEvent(NPostBeginPlay, NULL);
+		ProcessEvent(NPostBeginPlay, NULL);
 	}
 
 	void SetInitialState(){
 		DECLARE_NAME(SetInitialState);
-		UObject::ProcessEvent(NSetInitialState, NULL);
+		ProcessEvent(NSetInitialState, NULL);
 	}
 
 	void PostLoadBeginPlay(){
 		FName NPostLoadBeginPlay(NAME_PostLoadBeginPlay);
 		if(!IsProbing(NPostLoadBeginPlay))
 			return;
-		UObject::ProcessEvent(NPostLoadBeginPlay, NULL);
+		ProcessEvent(NPostLoadBeginPlay, NULL);
 	}
 
 	void PostNetBeginPlay(){
 		DECLARE_NAME(PostNetBeginPlay);
-		UObject::ProcessEvent(NPostNetBeginPlay, NULL);
+		ProcessEvent(NPostNetBeginPlay, NULL);
 	}
 
 	void HurtRadius(FLOAT DamageAmount, FLOAT DamageRadius, class UClass* DamageType, FLOAT Momentum, const FVector& HitLocation, AActor* ExcludedActor){
@@ -636,17 +641,17 @@ public:
 		Parms.Momentum=Momentum;
 		Parms.HitLocation=HitLocation;
 		Parms.ExcludedActor=ExcludedActor;
-		UObject::ProcessEvent(NHurtRadius, &Parms);
+		ProcessEvent(NHurtRadius, &Parms);
 	}
 
 	void TravelPreAccept(){
 		DECLARE_NAME(TravelPreAccept);
-		UObject::ProcessEvent(NTravelPreAccept, NULL);
+		ProcessEvent(NTravelPreAccept, NULL);
 	}
 
 	void TravelPostAccept(){
 		DECLARE_NAME(TravelPostAccept);
-		UObject::ProcessEvent(NTravelPostAccept, NULL);
+		ProcessEvent(NTravelPostAccept, NULL);
 	}
 
 	FString GetItemName(const FString& FullName){
@@ -657,7 +662,7 @@ public:
 		} Parms;
 		Parms.FullName=FullName;
 		Parms.ReturnValue=0;
-		UObject::ProcessEvent(NGetItemName, &Parms);
+		ProcessEvent(NGetItemName, &Parms);
 		return Parms.ReturnValue;
 	}
 
@@ -671,7 +676,7 @@ public:
 		Parms.EventName=EventName;
 		Parms.Other=Other;
 		Parms.EventInstigator=EventInstigator;
-		UObject::ProcessEvent(NTriggerEvent, &Parms);
+		ProcessEvent(NTriggerEvent, &Parms);
 	}
 
 	UBOOL IsInVolume(class AVolume* aVolume){
@@ -682,7 +687,7 @@ public:
 		} Parms;
 		Parms.aVolume=aVolume;
 		Parms.ReturnValue=0;
-		UObject::ProcessEvent(NIsInVolume, &Parms);
+		ProcessEvent(NIsInVolume, &Parms);
 		return Parms.ReturnValue;
 	}
 
@@ -694,7 +699,7 @@ public:
 		} Parms;
 		Parms.StartOfEventName=StartOfEventName;
 		Parms.ReturnValue=0;
-		UObject::ProcessEvent(NContainsPartialEvent, &Parms);
+		ProcessEvent(NContainsPartialEvent, &Parms);
 		return Parms.ReturnValue;
 	}
 
@@ -706,7 +711,7 @@ public:
 		} Parms;
 		Parms.StartOfTagName=StartOfTagName;
 		Parms.ReturnValue=0;
-		UObject::ProcessEvent(NContainsPartialTag, &Parms);
+		ProcessEvent(NContainsPartialTag, &Parms);
 		return Parms.ReturnValue;
 	}
 

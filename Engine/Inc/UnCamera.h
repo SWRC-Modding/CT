@@ -193,7 +193,9 @@ class ENGINE_API UViewport : public UPlayer{
 	DECLARE_ABSTRACT_CLASS(UViewport,UPlayer,CLASS_Transient,Engine)
 	DECLARE_WITHIN(UClient)
 
-	char Padding[356];
+	char Padding1[288];
+	FRenderInterface* RI;
+	char Padding2[64];
 
 	/*// Referenced objects.
 	class UCanvas*		 Canvas;	// Viewport's painting canvas.

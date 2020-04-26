@@ -20,8 +20,8 @@ LINK_LIB(XInterface)
 #endif
 
 /*
-*	PreCacheGame
-*/
+ * PreCacheGame
+ */
 
 #define UCONST_PRECACHE_LEVEL 1
 
@@ -34,8 +34,8 @@ public:
 };
 
 /*
-*	MenuBase
-*/
+ * MenuBase
+ */
 
 enum EMenuWidgetPlatform{
 	MWP_All,
@@ -415,8 +415,8 @@ public:
 };
 
 /*
-*	MenuTemplate
-*/
+ * MenuTemplate
+ */
 
 #define UCONST_LabelTextSpacing 0.04f
 #define UCONST_ListButtonSpacing 0.05f
@@ -471,8 +471,8 @@ public:
 };
 
 /*
-*	MenuTemplateTitled
-*/
+ * MenuTemplateTitled
+ */
 
 class XINTERFACE_API AMenuTemplateTitled : public AMenuTemplate{
 public:
@@ -500,8 +500,8 @@ public:
 };
 
 /*
-*	MenuTemplateTitledA
-*/
+ * MenuTemplateTitledA
+ */
 
 class XINTERFACE_API AMenuTemplateTitledA : public AMenuTemplateTitled{
 public:
@@ -514,8 +514,8 @@ public:
 };
 
 /*
-*	MenuTemplateTitledB
-*/
+ * MenuTemplateTitledB
+ */
 
 class XINTERFACE_API AMenuTemplateTitledB : public AMenuTemplateTitled{
 public:
@@ -528,8 +528,8 @@ public:
 };
 
 /*
-*	MenuTemplateTitledBA
-*/
+ * MenuTemplateTitledBA
+ */
 
 class XINTERFACE_API AMenuTemplateTitledBA : public AMenuTemplateTitledB{
 public:
@@ -541,8 +541,8 @@ public:
 };
 
 /*
-*	MenuTemplateTitledBXA
-*/
+ * MenuTemplateTitledBXA
+ */
 
 class XINTERFACE_API AMenuTemplateTitledBXA : public AMenuTemplateTitledBA{
 public:
@@ -554,8 +554,8 @@ public:
 };
 
 /*
-*	MenuVirtualKeyboard
-*/
+ * MenuVirtualKeyboard
+ */
 
 struct FKeyLayout{
 	FStringNoInit Label;
@@ -590,8 +590,8 @@ public:
 };
 
 /*
-*	MenuTemplateTitledBX
-*/
+ * MenuTemplateTitledBX
+ */
 
 class XINTERFACE_API AMenuTemplateTitledBX : public AMenuTemplateTitledB{
 public:

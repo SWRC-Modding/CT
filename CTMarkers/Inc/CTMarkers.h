@@ -19,8 +19,8 @@ LINK_LIB(CTMarkers)
 #endif
 
 /*
-*	ExplosiveCharge
-*/
+ * ExplosiveCharge
+ */
 
 class CTMARKERS_API AExplosiveCharge : public AActivateItem{
 public:
@@ -37,8 +37,8 @@ public:
 };
 
 /*
-*	MarkerDemolitionNative
-*/
+ * MarkerDemolitionNative
+ */
 
 class CTMARKERS_API AMarkerDemolitionNative : public ACTMarker{
 public:
@@ -53,8 +53,8 @@ public:
 };
 
 /*
-*	MarkerDisarmTrapNative
-*/
+ * MarkerDisarmTrapNative
+ */
 
 class CTMARKERS_API AMarkerDisarmTrapNative : public ACTMarker{
 public:
@@ -70,8 +70,8 @@ public:
 };
 
 /*
-*	MarkerDoorBreachNative
-*/
+ * MarkerDoorBreachNative
+ */
 
 class CTMARKERS_API AMarkerDoorBreachNative : public ACTMarker{
 public:
@@ -89,8 +89,8 @@ public:
 };
 
 /*
-*	MarkerHackDoorNative
-*/
+ * MarkerHackDoorNative
+ */
 
 class CTMARKERS_API AMarkerHackDoorNative : public ACTMarker{
 public:
@@ -102,8 +102,8 @@ public:
 };
 
 /*
-*	MarkerHackTerminalNative
-*/
+ * MarkerHackTerminalNative
+ */
 
 class CTMARKERS_API AMarkerHackTerminalNative : public ACTMarker{
 public:
@@ -115,8 +115,8 @@ public:
 };
 
 /*
-*	MarkerSetProximityMinNative
-*/
+ * MarkerSetProximityMinNative
+ */
 
 class CTMARKERS_API AMarkerSetProximityMineNative : public ACTMarker{
 public:
@@ -130,8 +130,8 @@ public:
 };
 
 /*
-*	MarkerTriggerLoop
-*/
+ * MarkerTriggerLoop
+ */
 
 class CTMARKERS_API AMarkerTriggerLoop : public ACTMarker{
 public:
@@ -148,8 +148,8 @@ public:
 };
 
 /*
-*	MarkerTurretNative
-*/
+ * MarkerTurretNative
+ */
 
 class CTMARKERS_API AMarkerTurretNative : public ACTMarker{
 public:
@@ -162,8 +162,8 @@ public:
 };
 
 /*
-*	MarkerWeapon
-*/
+ * MarkerWeapon
+ */
 
 enum EMarkerWeaponType{
 	MWT_Sniper,
@@ -192,8 +192,8 @@ public:
 };
 
 /*
-*	StateMarkerAttack
-*/
+ * StateMarkerAttack
+ */
 
 class CTMARKERS_API UStateMarkerAttack : public UStateAbstractAttack{
 public:

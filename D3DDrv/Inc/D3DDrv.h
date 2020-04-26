@@ -54,4 +54,4 @@ public:
 #pragma pack (pop)
 #endif
 
-#endif //D3DDRV_NATIVE_DEFS
+#endif // D3DDRV_NATIVE_DEFS

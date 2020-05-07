@@ -24,7 +24,7 @@ typedef void FD3DTexture;
 
 enum ED3DFormat{
 	D3DFormat_L6V5U5   = 61,
-	D3DFormat_X8L8U8V8 = 62
+	D3DFormat_X8L8V8U8 = 62
 };
 
 struct FD3DLockedRect{
@@ -33,11 +33,11 @@ struct FD3DLockedRect{
 };
 
 /*
- * L6V5U5 to X8L8U8V8 texture format conversion.
+ * L6V5U5 to X8L8V8U8 texture format conversion.
  *
- * L6V5U5 is not supported on newer hardwareand either makes the game and editor crash or the driver
- * it directly to X8L8U8V8 which results in strange visual artifacts. That's why we detect if a texture is created with the L6V5U5 format and perform
- * a proper conversion to X8L8U8V8.
+ * L6V5U5 is not supported on newer hardware and either makes the game and editor crash or the driver converts
+ * it directly to X8L8V8U8 which results in strange visual artifacts. That's why we detect if a texture is created with the L6V5U5 format and perform
+ * a proper conversion to X8L8V8U8.
  */
 
 struct FTextureMipLevel{
@@ -51,15 +51,15 @@ static TArray<FD3DTexture*>              CurrentTextures;
 static TArray<INT>                       AvailableTextureIndices;
 static TArray<TArray<FTextureMipLevel> > MipLevelsByTexture;
 
-struct FL6U5V5Pixel{
-	short          V:5;
+struct FL6V5U5Pixel{
 	short          U:5;
+	short          V:5;
 	unsigned short L:6;
 };
 
-struct FX8L8U8V8Pixel{
-	INT8  V;
+struct FX8L8V8U8Pixel{
 	INT8  U;
+	INT8  V;
 	UINT8 L;
 	UINT8 X;
 };
@@ -80,12 +80,12 @@ static INT8 Map5BitSignedTo8BitSigned(INT8 S5){
 	return (INT8)((S5 - min5) * range8 / range5 + min8);
 }
 
-static void ConvertL6U5V5ToX8L8U8V8(const void* In, void* Out, UINT Width, UINT Height){
+static void ConvertL6V5U5ToX8L8V8U8(const void* In, void* Out, UINT Width, UINT Height){
 	for(UINT Y = 0; Y < Height; ++Y){
 		for(UINT X = 0; X < Width; ++X){
 			INT Index = Y * Width + X;
-			const FL6U5V5Pixel* P1 = static_cast<const FL6U5V5Pixel*>(In) + Index;
-			FX8L8U8V8Pixel* P2 = static_cast<FX8L8U8V8Pixel*>(Out) + Index;
+			const FL6V5U5Pixel* P1 = static_cast<const FL6V5U5Pixel*>(In) + Index;
+			FX8L8V8U8Pixel* P2 = static_cast<FX8L8V8U8Pixel*>(Out) + Index;
 
 			P2->V = Map5BitSignedTo8BitSigned(P1->V);
 			P2->U = Map5BitSignedTo8BitSigned(P1->U);
@@ -141,7 +141,7 @@ static HRESULT __stdcall D3DTextureLockRectOverride(FD3DTexture* D3DTexture, UIN
 			MipLevel.Height = SurfaceDesc.Height;
 			MipLevel.Pixels = appMalloc(SurfaceDesc.Size);
 
-			pLockedRect->Pitch = MipLevel.Width * sizeof(FL6U5V5Pixel);
+			pLockedRect->Pitch = MipLevel.Width * sizeof(FL6V5U5Pixel);
 			pLockedRect->pBits = MipLevel.Pixels;
 
 			return S_OK;
@@ -175,7 +175,7 @@ static HRESULT __stdcall D3DTextureUnlockRectOverride(FD3DTexture* D3DTexture, U
 		HRESULT Result = D3DTextureLockRect(D3DTexture, Level, &LockedRect, NULL, 0);
 
 		if(SUCCEEDED(Result)){
-			ConvertL6U5V5ToX8L8U8V8(MipLevel.Pixels, LockedRect.pBits, MipLevel.Width, MipLevel.Height);
+			ConvertL6V5U5ToX8L8V8U8(MipLevel.Pixels, LockedRect.pBits, MipLevel.Width, MipLevel.Height);
 
 			Result = D3DTextureUnlockRect(D3DTexture, Level);
 		}
@@ -219,12 +219,13 @@ static HRESULT __stdcall D3DDeviceCreateTextureOverride(FD3DDevice* D3DDevice,
 														FD3DTexture** ppTexture){
 	check(D3DDeviceCreateTexture);
 
+	ED3DFormat FallbackFormat = Format == D3DFormat_L6V5U5 ? D3DFormat_X8L8V8U8 : Format;
 	HRESULT Result = D3DDeviceCreateTexture(D3DDevice,
 											Width,
 											Height,
 											Levels,
 											Usage,
-											Format == D3DFormat_L6V5U5 ? D3DFormat_X8L8U8V8 : Format,
+											FallbackFormat,
 											Pool,
 											ppTexture);
 

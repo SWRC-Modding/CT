@@ -18,7 +18,7 @@ command_list = {
 		.footer_panel = true,
 		.save_dirty_files = true,
 		.cmd = {
-			{"..\GameData\System\UCC.exe make -ini=../../Code/UCC/UCC.ini", .os = "win"}
+			{"..\GameData\System\UCC.exe make -noprompt -ini=../../Code/UCC/UCC.ini", .os = "win"}
 		}
 	},
 	{

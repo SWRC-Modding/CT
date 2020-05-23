@@ -2,10 +2,6 @@ class BotSupportBroadcastHandler extends BroadcastHandler;
 
 var BotSupport BotSupport;
 
-/*
- * TODO: Add native implementation for this that uses the Parse functions
- *		 from Core.dll. But where to put it? Util.dll?
- */
 function bool ParseCommand(out String Cmd, String Match){
 	if(Left(Cmd, Len(Match)) ~= Match){
 		Cmd = Mid(Cmd, Len(Match));
@@ -14,6 +10,13 @@ function bool ParseCommand(out String Cmd, String Match){
 	}
 
 	return false;
+}
+
+function PostBeginPlay(){
+	Super.PostBeginPlay();
+
+	foreach AllActors(class'BotSupport', BotSupport)
+		break;
 }
 
 function Broadcast(Actor Sender, coerce string Msg, optional name Type){

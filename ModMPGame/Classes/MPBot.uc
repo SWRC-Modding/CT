@@ -11,14 +11,15 @@ function ServerRestartPlayer(){
 	local MPPawn MPP;
 
 	Super.ServerRestartPlayer();
-
 	Level.Game.ReStartPlayer(self);
 
 	MPP = MPPawn(Pawn);
 
-	MPP.ChosenSkin = ChosenSkin;
-	MPP.DoCustomizations();
-	MPP.PatrolRoute = BotSupport(Owner).BotPatrolRoute;
+	if(MPP != None){
+		MPP.ChosenSkin = ChosenSkin;
+		MPP.DoCustomizations();
+		MPP.PatrolRoute = BotSupport(Owner).BotPatrolRoute;
+	}
 }
 
 State Dead{

@@ -1,4 +1,4 @@
-class BotSupport extends Actor native config(ModMPGameConfig);
+class BotSupport extends Actor native;
 
 #exec OBJ LOAD FILE="Gameplay.u"
 #exec OBJ LOAD FILE="CTGame.u"
@@ -15,7 +15,7 @@ native final function SpawnNavigationPoint(Class<NavigationPoint> NavPtClass, Ve
 native final function BuildPaths();
 native final function ClearPaths();
 
-function PostBeginPlay(){
+function PreBeginPlay(){
 	local BotSupportBroadcastHandler B;
 
 	B = Spawn(class'BotSupportBroadcastHandler');
@@ -46,7 +46,7 @@ event AddBot(){
 	local MPBot Bot;
 
 	if(Level.Game.NumPlayers + Level.Game.NumBots >= Level.Game.MaxPlayers){
-		Warn("Cannot more bots. Maximum number of players is"@Level.Game.MaxPlayers);
+		Warn("Cannot add more bots. Maximum number of players is"@Level.Game.MaxPlayers);
 
 		return;
 	}

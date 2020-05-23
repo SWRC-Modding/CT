@@ -30,6 +30,7 @@ public:
 			FConfigSection* CurrentSection = NULL;
 			const FConfigSection* CurrentOverrideSection = NULL;
 			bool Done = false;
+			bool EmptySection = false;
 
 			while(!Done){
 				while(*Ptr == '\r' || *Ptr == '\n')
@@ -50,6 +51,9 @@ public:
 					continue;
 
 				if(Start[0] == '[' && Start[appStrlen(Start) - 1] == ']'){
+					if(CurrentOverrideSection && EmptySection)
+						*CurrentSection = *CurrentOverrideSection;
+
 					Start++;
 					Start[appStrlen(Start) - 1] = 0;
 					CurrentSection = Find(Start);
@@ -59,6 +63,8 @@ public:
 
 					if(DefaultsOverride)
 						CurrentOverrideSection = DefaultsOverride->Find(Start);
+
+					EmptySection = true;
 				}else if(CurrentSection && *Start){
 					TCHAR* Value = appStrstr(Start, "=");
 
@@ -91,19 +97,23 @@ public:
 						}else{
 							CurrentSection->Add(Start, Value);
 						}
+
+						EmptySection = false;
 					}
 				}
 			}
-		}
 
-		// Inserting remaining sections from defaults override which do not exist in the file read from disk
-		if(DefaultsOverride){
-			for(TIterator It(*DefaultsOverride); It; ++It){
-				if(Find(It.Key()))
-					continue;
+			// Inserting remaining sections from defaults override which do not exist in the file read from disk
+			if(DefaultsOverride){
+				for(TIterator It(*DefaultsOverride); It; ++It){
+					if(Find(It.Key()))
+						continue;
 
-				Set(*It.Key(), It.Value());
+					Set(*It.Key(), It.Value());
+				}
 			}
+		}else if(DefaultsOverride){
+			*this = *DefaultsOverride;
 		}
 
 		unguard;
@@ -293,7 +303,7 @@ public:
 
 		Str = "";
 
-		FConfigFile* File = Find(Filename, 0);
+		FConfigFile* File = Find(Filename, 1);
 
 		if(!File )
 			return 0;
@@ -319,7 +329,7 @@ public:
 		guard(FConfigCacheIni::GetString);
 
 		*Value = 0;
-		FConfigFile* File = Find(Filename, 0);
+		FConfigFile* File = Find(Filename, 1);
 
 		if(!File)
 			return 0;
@@ -487,15 +497,29 @@ public:
 		unguard;
 	}
 
-	void Flush(UBOOL Read, const TCHAR* Filename = NULL, INT Idk = 0){
+	void Flush(UBOOL Read, const TCHAR* Filename = NULL, const char* Section = NULL){
 		guard(FConfigCacheIni::Flush);
 
 		for(TIterator It(*this); It; ++It){
-			if(!Filename || It.Key() == Filename){
+			if(It.Value().Dirty && (!Filename || It.Key() == Filename)){
+				FString OutFilename = (It.Key() == UserIni ? GCurrProfilePath : GGlobalSettingsPath) * It.Key();
 				FConfigFile DefaultConfig;
 
 				DefaultConfig.Read(*It.Key());
-				It.Value().Write(*((It.Key() == UserIni ? GCurrProfilePath : GGlobalSettingsPath) * FFilename(It.Key()).GetCleanFilename()), &DefaultConfig);
+
+				if(Section){ // Only the specified section is updated in the file on disk
+					FConfigSection* Sec = GetSectionPrivate(Section, 0, 1, *It.Key());
+
+					if(Sec){
+						FConfigFile OverrideConfig;
+
+						OverrideConfig.Read(*OutFilename);
+						OverrideConfig.Set(Section, *Sec);
+						OverrideConfig.Write(*OutFilename, &DefaultConfig);
+					}
+				}else{
+					It.Value().Write(*OutFilename, &DefaultConfig);
+				}
 			}
 		}
 

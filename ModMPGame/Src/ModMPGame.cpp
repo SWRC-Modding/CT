@@ -391,8 +391,8 @@ void ABotSupport::PostRender(class FLevelSceneNode* SceneNode, class FRenderInte
 		LineBatcher.DrawBox(FBox(NavPtFailLocations[i] - BoxSize, NavPtFailLocations[i] + BoxSize), FColor(255, 0, 0));
 
 	// All navigation points in the level are drawn as a colored box
-	for(TObjectIterator<ANavigationPoint> It; It; ++It){
-		if(It->XLevel != XLevel || It->bDeleteMe)
+	for(TActorIterator<ANavigationPoint> It(XLevel); It; ++It){
+		if(It->bDeleteMe)
 			continue;
 
 		FColor Color;

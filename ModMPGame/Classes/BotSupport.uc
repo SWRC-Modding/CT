@@ -18,12 +18,11 @@ native final function BuildPaths();
 native final function ClearPaths();
 
 function PreBeginPlay(){
-	local BotSupportBroadcastHandler B;
+	Level.Game.BroadcastHandlerClass = "ModMPGame.BotSupportBroadcastHandler";
+}
 
-	B = Spawn(class'BotSupportBroadcastHandler');
-
-	B.BotSupport = Self;
-	Level.Game.BroadcastHandler = B;
+function PostNetBeginPlay(){
+	BotSupportBroadcastHandler(Level.Game.BroadcastHandler).BotSupport = self;
 }
 
 event SetupPatrolRoute(){

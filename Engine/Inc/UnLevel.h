@@ -253,12 +253,12 @@ public:
 	}
 
 	TActorIterator& operator++(){
-		do{
+		for(;;){
 			++Index;
 
-			if(Level->Actors[Index] && Level->Actors[Index]->IsA(T::StaticClass()))
+			if(!static_cast<bool>(*this) || (Level->Actors[Index] && Level->Actors[Index]->IsA(T::StaticClass())))
 				break;
-		}while(static_cast<bool>(*this));
+		}
 
 		return *this;
 	}

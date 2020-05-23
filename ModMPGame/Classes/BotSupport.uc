@@ -1,10 +1,12 @@
-class BotSupport extends Actor native;
+class BotSupport extends Actor native config(ModMPGame);
 
 #exec OBJ LOAD FILE="Gameplay.u"
 #exec OBJ LOAD FILE="CTGame.u"
 #exec OBJ LOAD FILE="MPGame.u"
 
 var config bool bAutoImportPaths;
+var config bool bAutoBuildPaths;
+var config bool bShowPaths;
 
 var bool bPathsImported;
 var Array<Vector> NavPtFailLocations; // Used to debug Navigation points which failed to spawn
@@ -96,4 +98,6 @@ defaultproperties
 {
 	bHidden=true
 	bAutoImportPaths=true
+	bAutoBuildPaths=false
+	bShowPaths=false
 }

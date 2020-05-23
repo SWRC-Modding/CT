@@ -21,6 +21,8 @@ class MODMPGAME_API ABotSupport : public AActor
 {
 public:
     BITFIELD bAutoImportPaths:1 GCC_PACK(4);
+    BITFIELD bAutoBuildPaths:1;
+    BITFIELD bShowPaths:1;
     BITFIELD bPathsImported:1;
     TArrayNoInit<FVector> NavPtFailLocations GCC_PACK(4);
     TArrayNoInit<class AMPBot*> Bots;

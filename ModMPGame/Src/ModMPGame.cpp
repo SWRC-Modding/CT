@@ -45,11 +45,23 @@ static struct FBotSupportExecHook : FExec{
 				UClass* PutNavPtClass = NULL;
 
 				if(ParseCommand(&Cmd, "SHOWPATHS")){
-					GBotSupport->bHidden = 0;
+					GBotSupport->bShowPaths = 1;
+					GBotSupport->SaveConfig();
 
 					return 1;
 				}else if(ParseCommand(&Cmd, "HIDEPATHS")){
-					GBotSupport->bHidden = 1;
+					GBotSupport->bShowPaths = 0;
+					GBotSupport->SaveConfig();
+
+					return 1;
+				}else if(ParseCommand(&Cmd, "ENABLEAUTOBUILDPATHS")){
+					GBotSupport->bAutoBuildPaths = 1;
+					GBotSupport->SaveConfig();
+
+					return 1;
+				}else if(ParseCommand(&Cmd, "DISABLEAUTOBUILDPATHS")){
+					GBotSupport->bAutoBuildPaths = 0;
+					GBotSupport->SaveConfig();
 
 					return 1;
 				}else if(ParseCommand(&Cmd, "REMOVENAVIGATIONPOINT")){
@@ -62,6 +74,7 @@ static struct FBotSupportExecHook : FExec{
 							It->bStatic = 0;
 							It->bNoDelete = 0;
 							GBotSupport->XLevel->DestroyActor(*It);
+							GBotSupport->BuildPaths();
 
 							break;
 						}
@@ -164,6 +177,8 @@ void ABotSupport::SpawnNavigationPoint(UClass* NavPtClass, const FVector& Locati
 	if(!NavPt){
 		GLog->Logf(NAME_Error, "Failed to spawn %s", *NavPtClass->FriendlyName);
 		NavPtFailLocations.AddItem(Location);
+	}else if(bAutoBuildPaths){
+		BuildPaths();
 	}
 
 	GIsEditor = IsEd;
@@ -329,6 +344,8 @@ void ABotSupport::Destroy(){
 
 UBOOL ABotSupport::Tick(FLOAT DeltaTime, ELevelTick TickType){
 	guard(ABotSupport::Tick);
+
+	bHidden = !bShowPaths;
 
 	/*
 	 * Keeping the BotSupport Actor in the players view at all times so that it is always rendered

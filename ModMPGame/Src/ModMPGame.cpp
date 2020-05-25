@@ -1,126 +1,68 @@
 #include "../Inc/ModMPGame.h"
 
-static ABotSupport* GBotSupport = NULL;
-
-/*
- * FBotSupportExecHook
- */
-static struct FBotSupportExecHook : FExec{
-	FExec* OldGExec;
-
-	FBotSupportExecHook() : OldGExec(GExec){ GExec = this; }
-	~FBotSupportExecHook(){ GExec = OldGExec; }
-
-	virtual UBOOL Exec(const TCHAR* Cmd, FOutputDevice& Ar){
-		guard(FBotSupportExecHook::Exec);
-
-		if(GBotSupport){
-			if(ParseCommand(&Cmd, "IMPORTPATHS")){
-				GBotSupport->ImportPaths();
-
-				return 1;
-			}else if(ParseCommand(&Cmd, "EXPORTPATHS")){
-				GBotSupport->ExportPaths();
-
-				return 1;
-			}else if(ParseCommand(&Cmd, "BUILDPATHS")){
-				GBotSupport->BuildPaths();
-
-				return 1;
-			}else if(ParseCommand(&Cmd, "CLEARPATHS")){
-				GBotSupport->ClearPaths();
-
-				return 1;
-			}else if(ParseCommand(&Cmd, "ADDBOT")){
-				GBotSupport->AddBot();
-
-				return 1;
-			}else if(ParseCommand(&Cmd, "REMOVEBOT")){
-				GBotSupport->RemoveBot();
-
-				return 1;
-			}
-
-			if(GIsClient){ // Commands only available ingame
-				UClass* PutNavPtClass = NULL;
-
-				if(ParseCommand(&Cmd, "SHOWPATHS")){
-					GBotSupport->bShowPaths = 1;
-					GBotSupport->SaveConfig();
-
-					return 1;
-				}else if(ParseCommand(&Cmd, "HIDEPATHS")){
-					GBotSupport->bShowPaths = 0;
-					GBotSupport->SaveConfig();
-
-					return 1;
-				}else if(ParseCommand(&Cmd, "ENABLEAUTOBUILDPATHS")){
-					GBotSupport->bAutoBuildPaths = 1;
-					GBotSupport->SaveConfig();
-
-					return 1;
-				}else if(ParseCommand(&Cmd, "DISABLEAUTOBUILDPATHS")){
-					GBotSupport->bAutoBuildPaths = 0;
-					GBotSupport->SaveConfig();
-
-					return 1;
-				}else if(ParseCommand(&Cmd, "REMOVENAVIGATIONPOINT")){
-					APlayerController* Player = GetLocalPlayerController();
-					check(Player);
-
-					for(TActorIterator<ANavigationPoint> It(GBotSupport->XLevel); It; ++It){
-						if(!It->IsA(APlayerStart::StaticClass()) &&
-						   ((Player->Pawn ? Player->Pawn->Location : Player->Location) - It->Location).SizeSquared() <= 40 * 40){
-							It->bStatic = 0;
-							It->bNoDelete = 0;
-							GBotSupport->XLevel->DestroyActor(*It);
-							GBotSupport->BuildPaths();
-
-							break;
-						}
-					}
-
-					return 1;
-				}else if(ParseCommand(&Cmd, "PUTPATHNODE")){
-					PutNavPtClass = APathNode::StaticClass();
-				}else if(ParseCommand(&Cmd, "PUTCOVERPOINT")){
-					PutNavPtClass = ACoverPoint::StaticClass();
-				}else if(ParseCommand(&Cmd, "PUTPATROLPOINT")){
-					PutNavPtClass = APatrolPoint::StaticClass();
-				}
-
-				if(PutNavPtClass){
-					APlayerController* Player = GetLocalPlayerController();
-					check(Player);
-					FVector Loc;
-					FRotator Rot(0, 0, 0);
-
-					if(Player->Pawn){
-						Loc = Player->Pawn->Location;
-						Rot.Yaw = Player->Pawn->Rotation.Yaw;
-					}else{
-						Loc = Player->Location;
-						Rot.Yaw = Player->Rotation.Yaw;
-					}
-
-					GBotSupport->SpawnNavigationPoint(PutNavPtClass, Loc, Rot);
-
-					return 1;
-				}
-			}
-		}
-
-		return OldGExec ? OldGExec->Exec(Cmd, Ar) : 0;
-
-		unguard;
-	}
-} BotSupportExecHook;
-
 APlayerController* GetLocalPlayerController(){
 	TObjectIterator<UViewport> It;
 
 	return It ? It->Actor : NULL;
 }
+
+/*
+ * AdminService
+ */
+
+void AAdminService::execParseCommand(FFrame& Stack, void* Result){
+	P_GET_STR_REF(Stream);
+	P_GET_STR(Match);
+	P_FINISH;
+
+	const char* StreamData = **Stream;
+
+	if(ParseCommand(&StreamData, *Match)){
+		*static_cast<UBOOL*>(Result) = 1;
+		*Stream = StreamData;
+	}else{
+		*static_cast<UBOOL*>(Result) = 0;
+	}
+}
+
+void AAdminService::execParseIntParam(FFrame& Stack, void* Result){
+	P_GET_STR(Stream);
+	P_GET_STR(Match);
+	P_GET_INT_REF(Value);
+	P_FINISH;
+
+	*static_cast<UBOOL*>(Result) = Parse(*Stream, *Match, *Value);
+}
+
+void AAdminService::execParseFloatParam(FFrame& Stack, void* Result){
+	P_GET_STR(Stream);
+	P_GET_STR(Match);
+	P_GET_FLOAT_REF(Value);
+	P_FINISH;
+
+	*static_cast<UBOOL*>(Result) = Parse(*Stream, *Match, *Value);
+}
+
+void AAdminService::execParseStringParam(FFrame& Stack, void* Result){
+	P_GET_STR(Stream);
+	P_GET_STR(Match);
+	P_GET_STR_REF(Value);
+	P_FINISH;
+
+	*static_cast<UBOOL*>(Result) = Parse(*Stream, *Match, *Value);
+}
+
+void AAdminService::execExecCmd(FFrame& Stack, void* Result){
+	P_GET_OBJECT(APlayerController, Player);
+	P_GET_STR(Cmd);
+	P_FINISH;
+
+	*static_cast<UBOOL*>(Result) = ExecCmd(Player, *Cmd);
+}
+
+/*
+ * BotSupport
+ */
 
 static FFilename GetPathFileName(const FString MapName){
 	return GFileManager->GetDefaultDirectory() * ".." * "Maps" * "Paths" * FFilename(MapName).GetBaseFilename() + ".ctp";
@@ -322,7 +264,7 @@ void ABotSupport::ClearPaths(){
 }
 
 void ABotSupport::Spawned(){
-	GBotSupport = this;
+	guard(ABotSupport::Spawned);
 
 	if(!GIsEditor) // Don't draw the Actor sprite during gameplay
 		DrawType = DT_None;
@@ -333,13 +275,8 @@ void ABotSupport::Spawned(){
 		if(bPathsImported) // We don't want to rebuild paths if import failed
 			BuildPaths();
 	}
-}
 
-void ABotSupport::Destroy(){
-	if(GBotSupport == this)
-		GBotSupport = NULL;
-
-	Super::Destroy();
+	unguard;
 }
 
 UBOOL ABotSupport::Tick(FLOAT DeltaTime, ELevelTick TickType){
@@ -467,6 +404,89 @@ void ABotSupport::PostRender(class FLevelSceneNode* SceneNode, class FRenderInte
 	}
 
 	unguard;
+}
+
+bool ABotSupport::ExecCmd(APlayerController* Player, const char* Cmd){
+	if(ParseCommand(&Cmd, "IMPORTPATHS")){
+		ImportPaths();
+
+		return 1;
+	}else if(ParseCommand(&Cmd, "EXPORTPATHS")){
+		ExportPaths();
+
+		return 1;
+	}else if(ParseCommand(&Cmd, "BUILDPATHS")){
+		BuildPaths();
+
+		return 1;
+	}else if(ParseCommand(&Cmd, "CLEARPATHS")){
+		ClearPaths();
+
+		return 1;
+	}
+
+	if(GIsClient){ // Commands only available ingame
+		UClass* PutNavPtClass = NULL;
+
+		if(ParseCommand(&Cmd, "SHOWPATHS")){
+			bShowPaths = 1;
+
+			return true;
+		}else if(ParseCommand(&Cmd, "HIDEPATHS")){
+			bShowPaths = 0;
+
+			return true;
+		}else if(ParseCommand(&Cmd, "ENABLEAUTOBUILDPATHS")){
+			bAutoBuildPaths = 1;
+
+			return true;
+		}else if(ParseCommand(&Cmd, "DISABLEAUTOBUILDPATHS")){
+			bAutoBuildPaths = 0;
+
+			return true;
+		}else if(ParseCommand(&Cmd, "REMOVENAVIGATIONPOINT")){
+			for(TActorIterator<ANavigationPoint> It(XLevel); It; ++It){
+				if(!It->IsA(APlayerStart::StaticClass()) &&
+				   ((Player->Pawn ? Player->Pawn->Location : Player->Location) - It->Location).SizeSquared() <= 40 * 40){
+					It->bStatic = 0;
+					It->bNoDelete = 0;
+					XLevel->DestroyActor(*It);
+					BuildPaths();
+
+					break;
+				}
+			}
+
+			return true;
+		}else if(ParseCommand(&Cmd, "PUTPATHNODE")){
+			PutNavPtClass = APathNode::StaticClass();
+		}else if(ParseCommand(&Cmd, "PUTCOVERPOINT")){
+			PutNavPtClass = ACoverPoint::StaticClass();
+		}else if(ParseCommand(&Cmd, "PUTPATROLPOINT")){
+			PutNavPtClass = APatrolPoint::StaticClass();
+		}
+
+		if(PutNavPtClass){
+			APlayerController* Player = GetLocalPlayerController();
+			check(Player);
+			FVector Loc;
+			FRotator Rot(0, 0, 0);
+
+			if(Player->Pawn){
+				Loc = Player->Pawn->Location;
+				Rot.Yaw = Player->Pawn->Rotation.Yaw;
+			}else{
+				Loc = Player->Location;
+				Rot.Yaw = Player->Rotation.Yaw;
+			}
+
+			SpawnNavigationPoint(PutNavPtClass, Loc, Rot);
+
+			return true;
+		}
+	}
+
+	return false;
 }
 
 void ABotSupport::execSpawnNavigationPoint(FFrame& Stack, void* Result){

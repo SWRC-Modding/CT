@@ -10,6 +10,17 @@ IMPLEMENT_PACKAGE(ModMPGame)
 
 
 
+IMPLEMENT_CLASS(AAdminService);
+FNativeEntry<AAdminService> AAdminService::StaticNativeMap[] = {
+	MAP_NATIVE(ParseCommand,0)
+	MAP_NATIVE(ParseIntParam,0)
+	MAP_NATIVE(ParseFloatParam,0)
+	MAP_NATIVE(ParseStringParam,0)
+	MAP_NATIVE(ExecCmd,0)
+	{NULL,NULL}
+};
+LINK_NATIVES(AAdminService);
+
 IMPLEMENT_CLASS(ABotSupport);
 FNativeEntry<ABotSupport> ABotSupport::StaticNativeMap[] = {
 	MAP_NATIVE(SpawnNavigationPoint,0)

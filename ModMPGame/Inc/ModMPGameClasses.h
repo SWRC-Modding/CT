@@ -17,7 +17,22 @@
 
 
 
-class MODMPGAME_API ABotSupport : public AActor
+class MODMPGAME_API AAdminService : public AActor
+{
+public:
+    BITFIELD bRequiresLogin:1 GCC_PACK(4);
+    void execParseCommand(FFrame& Stack, void* Result);
+    void execParseIntParam(FFrame& Stack, void* Result);
+    void execParseFloatParam(FFrame& Stack, void* Result);
+    void execParseStringParam(FFrame& Stack, void* Result);
+    void execExecCmd(FFrame& Stack, void* Result);
+    DECLARE_CLASS(AAdminService,AActor,0,ModMPGame)
+	virtual bool ExecCmd(class APlayerController* Player, const char* Cmd){ return false; }
+    DECLARE_NATIVES(AAdminService)
+};
+
+
+class MODMPGAME_API ABotSupport : public AAdminService
 {
 public:
     BITFIELD bAutoImportPaths:1 GCC_PACK(4);
@@ -35,17 +50,7 @@ public:
         DECLARE_NAME(SetupPatrolRoute);
         ProcessEvent(NSetupPatrolRoute, NULL);
     }
-    void AddBot()
-    {
-        DECLARE_NAME(AddBot);
-        ProcessEvent(NAddBot, NULL);
-    }
-    void RemoveBot()
-    {
-        DECLARE_NAME(RemoveBot);
-        ProcessEvent(NRemoveBot, NULL);
-    }
-    DECLARE_CLASS(ABotSupport,AActor,0|CLASS_Config,ModMPGame)
+    DECLARE_CLASS(ABotSupport,AAdminService,0|CLASS_Config,ModMPGame)
 	void SpawnNavigationPoint(UClass* NavPtClass, const FVector& Location, const FRotator& Rotation = FRotator(0, 0, 0));
 	void ImportPaths();
 	void ExportPaths();
@@ -54,9 +59,9 @@ public:
 
 	// Overrides
 	virtual void Spawned();
-	virtual void Destroy();
 	virtual UBOOL Tick(FLOAT DeltaTime, ELevelTick TickType);
 	virtual void PostRender(class FLevelSceneNode* SceneNode, class FRenderInterface* RI);
+	virtual bool ExecCmd(class APlayerController* Player, const char* Cmd);
     DECLARE_NATIVES(ABotSupport)
 };
 
@@ -86,6 +91,7 @@ public:
 #if __STATIC_LINK
 
 #define AUTO_INITIALIZE_REGISTRANTS_MODMPGAME \
+	AAdminService::StaticClass(); \
 	ABotSupport::StaticClass(); \
 	AMPBot::StaticClass(); \
 	APatrolPoint::StaticClass(); \

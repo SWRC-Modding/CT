@@ -1,4 +1,4 @@
-class BotSupport extends Actor native config(ModMPGame);
+class BotSupport extends AdminService native;
 
 #exec OBJ LOAD FILE="Gameplay.u"
 #exec OBJ LOAD FILE="CTGame.u"
@@ -17,12 +17,21 @@ native final function SpawnNavigationPoint(Class<NavigationPoint> NavPtClass, Ve
 native final function BuildPaths();
 native final function ClearPaths();
 
-function PreBeginPlay(){
-	Level.Game.BroadcastHandlerClass = "ModMPGame.BotSupportBroadcastHandler";
-}
+function bool ExecCmd(PlayerController Player, String Cmd){
+	if(ParseCommand(Cmd, "ADDBOT")){
+		if(Level.Game.NumPlayers + Level.Game.NumBots < Level.Game.MaxPlayers)
+			AddBot();
+		else
+			Player.ClientMessage("Cannot add more bots. Maximum number of players is " $ Level.Game.MaxPlayers);
 
-function PostNetBeginPlay(){
-	BotSupportBroadcastHandler(Level.Game.BroadcastHandler).BotSupport = self;
+		return true;
+	}else if(ParseCommand(Cmd, "REMOVEBOT")){
+		RemoveBot();
+
+		return true;
+	}
+
+	return Super.ExecCmd(Player, Cmd);
 }
 
 event SetupPatrolRoute(){
@@ -43,19 +52,13 @@ event SetupPatrolRoute(){
 	}
 }
 
-event AddBot(){
+function AddBot(){
 	local MPBot Bot;
-
-	if(Level.Game.NumPlayers + Level.Game.NumBots >= Level.Game.MaxPlayers){
-		Warn("Cannot add more bots. Maximum number of players is"@Level.Game.MaxPlayers);
-
-		return;
-	}
 
 	Bot = Spawn(class'MPBot', Self);
 
 	if(Bot != None){
-		Bot.PlayerReplicationInfo.PlayerName = "Bot"$Bots.Length;
+		Bot.PlayerReplicationInfo.PlayerName = "Bot" $ Bots.Length;
 		Bot.bCanGesture = false;
 		Bot.ChosenSkin = Rand(5);
 		Bot.PlayerReplicationInfo.Team.TeamIndex = 255;
@@ -68,7 +71,7 @@ event AddBot(){
 	}
 }
 
-event RemoveBot(){
+function RemoveBot(){
 	if(Bots.Length > 0){
 		Bots[Bots.Length - 1].Pawn.Destroy();
 		Bots[Bots.Length - 1].Destroy();
@@ -88,9 +91,9 @@ cpptext
 
 	// Overrides
 	virtual void Spawned();
-	virtual void Destroy();
 	virtual UBOOL Tick(FLOAT DeltaTime, ELevelTick TickType);
 	virtual void PostRender(class FLevelSceneNode* SceneNode, class FRenderInterface* RI);
+	virtual bool ExecCmd(class APlayerController* Player, const char* Cmd);
 }
 
 defaultproperties

@@ -39,6 +39,7 @@ public:
     BITFIELD bAutoBuildPaths:1;
     BITFIELD bShowPaths:1;
     BITFIELD bPathsImported:1;
+    BITFIELD bNewPathsAdded:1;
     TArrayNoInit<FVector> NavPtFailLocations GCC_PACK(4);
     TArrayNoInit<class AMPBot*> Bots;
     TArrayNoInit<FPatrolPoint> BotPatrolRoute;

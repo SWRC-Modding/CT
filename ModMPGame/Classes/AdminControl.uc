@@ -11,7 +11,7 @@ function PostBeginPlay(){
 
 	Level.Game.BroadcastHandlerClass = "ModMPGame.AdminControlBroadcastHandler";
 
-	if(Level.Game.BroadcastHandler != None){
+	if(Level.Game.BroadcastHandler != None){ // If this is being called after the LevelInfo has been set up, we have to replace the broadcast handler
 		Level.Game.BroadcastHandler.Destroy();
 		Level.Game.BroadcastHandler = Spawn(Class'AdminControlBroadcastHandler');
 	}

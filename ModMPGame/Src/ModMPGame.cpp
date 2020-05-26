@@ -116,11 +116,14 @@ void ABotSupport::SpawnNavigationPoint(UClass* NavPtClass, const FVector& Locati
 		Rotation
 	));
 
-	if(!NavPt){
+	if(NavPt){
+		bNewPathsAdded = 1;
+
+		if(bAutoBuildPaths)
+			BuildPaths();
+	}else{
 		GLog->Logf(NAME_Error, "Failed to spawn %s", *NavPtClass->FriendlyName);
 		NavPtFailLocations.AddItem(Location);
-	}else if(bAutoBuildPaths){
-		BuildPaths();
 	}
 
 	GIsEditor = IsEd;
@@ -234,6 +237,43 @@ void ABotSupport::ExportPaths(){
  */
 void ABotSupport::BuildPaths(){
 	guard(ABotSupport::BuildPaths);
+
+	/*
+	 * If new navigation points were added, we rearrange the actor list so that static actors (bStatic == true) come before dynamic ones.
+	 * This is how the engine expects it as normally static actors are not spawned during gameplay.
+	 */
+	if(bNewPathsAdded && !Level->bStartup){ // Don't rearrange actors during startup or we'll end up in an infinite initialization loop
+		TArray<AActor*> Actors;
+		Actors.AddItem(XLevel->Actors[0]);
+		Actors.AddItem(XLevel->Actors[1]);
+
+		for(INT i = 2; i < XLevel->Actors.Num(); i++){
+			if(XLevel->Actors[i] && XLevel->Actors[i]->bStatic && !XLevel->Actors[i]->bAlwaysRelevant)
+				Actors.AddItem(XLevel->Actors[i]);
+		}
+
+		XLevel->iFirstNetRelevantActor = Actors.Num();
+
+		for(INT i = 2; i < XLevel->Actors.Num(); i++){
+			if(XLevel->Actors[i] && XLevel->Actors[i]->bStatic && XLevel->Actors[i]->bAlwaysRelevant)
+				Actors.AddItem(XLevel->Actors[i]);
+		}
+
+		XLevel->iFirstDynamicActor = Actors.Num();
+
+		for(INT i = 2; i < XLevel->Actors.Num(); i++){
+			if(XLevel->Actors[i] && !XLevel->Actors[i]->bStatic)
+				Actors.AddItem(XLevel->Actors[i]);
+		}
+
+		XLevel->Actors.Empty();
+		XLevel->Actors.Add(Actors.Num());
+
+		for(INT i = 0; i < Actors.Num(); i++)
+			XLevel->Actors[i] = Actors[i];
+	}
+
+	bNewPathsAdded = 0;
 
 	UBOOL IsEd = GIsEditor;
 	UBOOL BegunPlay = Level->bBegunPlay;

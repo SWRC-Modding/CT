@@ -244,6 +244,7 @@ void ABotSupport::BuildPaths(){
 	 */
 	if(bNewPathsAdded && !Level->bStartup){ // Don't rearrange actors during startup or we'll end up in an infinite initialization loop
 		TArray<AActor*> Actors;
+
 		Actors.AddItem(XLevel->Actors[0]);
 		Actors.AddItem(XLevel->Actors[1]);
 

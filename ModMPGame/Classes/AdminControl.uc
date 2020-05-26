@@ -38,20 +38,20 @@ function PostBeginPlay(){
 	}
 }
 
-function ExecCmd(PlayerController Player, String Cmd){
+function ExecCmd(PlayerController PC, String Cmd){
 	local int i;
 	local bool RecognizedCmd;
 
-	if(Viewport(Player.Player) != None) // The host is always an admin and doesn't need to log in
-		Player.PlayerReplicationInfo.bAdmin = true;
+	if(Viewport(PC.Player) != None) // The host is always an admin and doesn't need to log in
+		PC.PlayerReplicationInfo.bAdmin = true;
 
-	if(Player.PlayerReplicationInfo.bAdmin){
+	if(PC.PlayerReplicationInfo.bAdmin){
 		for(i = 0; i < Services.Length; ++i)
-			RecognizedCmd = Services[i].ExecCmd(Player, Cmd) || RecognizedCmd;
-	}else{ // Player is not logged in, so only forward the command to services that have bRequiresLogin set to false
+			RecognizedCmd = Services[i].ExecCmd(PC, Cmd) || RecognizedCmd;
+	}else{ // Player is not logged in, so only forward the command to services that have bRequiresAdminPermissions set to false
 		for(i = 0; i < Services.Length; ++i){
-			if(!Services[i].bRequiresLogin)
-				RecognizedCmd = Services[i].ExecCmd(Player, Cmd) || RecognizedCmd;
+			if(!Services[i].bRequiresAdminPermissions)
+				RecognizedCmd = Services[i].ExecCmd(PC, Cmd) || RecognizedCmd;
 		}
 	}
 
@@ -66,10 +66,10 @@ function ExecCmd(PlayerController Player, String Cmd){
 		for(i = 0; i < Services.Length; ++i)
 			Services[i].SaveConfig();
 	}else{
-		if(Player.PlayerReplicationInfo.bAdmin)
-			Player.ClientMessage("Unrecognized command");
+		if(PC.PlayerReplicationInfo.bAdmin)
+			PC.ClientMessage("Unrecognized command");
 		else
-			Player.ClientMessage("Unrecognized command or missing permissions");
+			PC.ClientMessage("Unrecognized command or missing permissions");
 	}
 }
 

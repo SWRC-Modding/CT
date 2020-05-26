@@ -9,22 +9,22 @@ function PostBeginPlay(){
 		Level.Game.AccessControl.SetAdminPassword(AdminPassword);
 }
 
-function bool ExecCmd(PlayerController Player, String Cmd){
+function bool ExecCmd(PlayerController PC, String Cmd){
 	if(ParseCommand(Cmd, "LOGIN")){
-		if(Player.PlayerReplicationInfo.bAdmin)
-			Player.ClientMessage("You are already logged in!");
-		else if(Level.Game.AccessControl.AdminLogin(Player, Cmd))
-			Player.PlayerReplicationInfo.bAdmin = true;
+		if(PC.PlayerReplicationInfo.bAdmin)
+			PC.ClientMessage("You are already logged in!");
+		else if(Level.Game.AccessControl.AdminLogin(PC, Cmd))
+			PC.PlayerReplicationInfo.bAdmin = true;
 		else
-			Player.ClientMessage("Wrong password!");
+			PC.ClientMessage("Wrong password!");
 
 		return true;
 	}else if(ParseCommand(Cmd, "LOGOUT")){
-		if(Player.PlayerReplicationInfo.bAdmin){
-			Player.PlayerReplicationInfo.bAdmin = false;
-			Player.ClientMessage("You are no longer an admin!");
+		if(PC.PlayerReplicationInfo.bAdmin){
+			PC.PlayerReplicationInfo.bAdmin = false;
+			PC.ClientMessage("You are no longer an admin!");
 		}else{
-			Player.ClientMessage("You are not logged in!");
+			PC.ClientMessage("You are not logged in!");
 		}
 
 		return true;
@@ -35,5 +35,5 @@ function bool ExecCmd(PlayerController Player, String Cmd){
 
 defaultproperties
 {
-	bRequiresLogin=false // This must be false or players won't be able to use the /login command
+	bRequiresAdminPermissions=false // This must be false or players won't be able to use the /login command
 }

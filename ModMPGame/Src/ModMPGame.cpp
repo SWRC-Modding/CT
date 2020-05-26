@@ -434,17 +434,38 @@ bool ABotSupport::ExecCmd(APlayerController* Player, const char* Cmd){
 
 		return true;
 	}else if(ParseCommand(&Cmd, "REMOVENAVIGATIONPOINT")){
+		UBOOL IsEditor = GIsEditor;
+
+		GIsEditor = 1;
+
 		for(TActorIterator<ANavigationPoint> It(XLevel); It; ++It){
 			if(!It->IsA(APlayerStart::StaticClass()) &&
 			   ((Player->Pawn ? Player->Pawn->Location : Player->Location) - It->Location).SizeSquared() <= 40 * 40){
-				It->bStatic = 0;
-				It->bNoDelete = 0;
 				XLevel->DestroyActor(*It);
-				BuildPaths();
 
 				break;
 			}
 		}
+
+		GIsEditor = IsEditor;
+
+		BuildPaths();
+
+		return true;
+	}else if(ParseCommand(&Cmd, "REMOVEALLNAVIGATIONPOINTS")){
+		UBOOL IsEditor = GIsEditor;
+
+		GIsEditor = 1;
+
+		for(TActorIterator<ANavigationPoint> It(XLevel); It; ++It){
+			if(It->IsA(ANavigationPoint::StaticClass()) && !It->IsA(APlayerStart::StaticClass()))
+				XLevel->DestroyActor(*It);
+		}
+
+		GIsEditor = IsEditor;
+		bPathsImported = 0;
+
+		BuildPaths();
 
 		return true;
 	}else if(ParseCommand(&Cmd, "PUTPATHNODE")){

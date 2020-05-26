@@ -2,12 +2,12 @@ class AdminCommands extends AdminService;
 
 var() config bool bAllowConsoleCommands;
 
-function bool ExecCmd(PlayerController Player, String Cmd){
+function bool ExecCmd(PlayerController PC, String Cmd){
 	local Controller C;
-	local PlayerController PC;
+	local PlayerController Temp;
 
 	if(ParseCommand(Cmd, "CMD") && bAllowConsoleCommands){
-		Log(Player.PlayerReplicationInfo.PlayerName $ " is executing a console command (" $ Cmd $ ")");
+		Log(PC.PlayerReplicationInfo.PlayerName $ " is executing a console command (" $ Cmd $ ")");
 		ConsoleCommand(Cmd);
 
 		return true;
@@ -21,10 +21,10 @@ function bool ExecCmd(PlayerController Player, String Cmd){
 		return true;
 	}else if (ParseCommand(Cmd, "PROMOTE")){
 		for(C = Level.ControllerList; C != None; C = C.NextController){
-			PC = PlayerController(C);
+			Temp = PlayerController(C);
 
-			if(PC != None && PC.PlayerReplicationInfo.PlayerName ~= Cmd){
-				PC.PlayerReplicationInfo.bAdmin = true;
+			if(Temp != None && Temp.PlayerReplicationInfo.PlayerName ~= Cmd){
+				Temp.PlayerReplicationInfo.bAdmin = true;
 
 				break;
 			}
@@ -33,10 +33,10 @@ function bool ExecCmd(PlayerController Player, String Cmd){
 		return true;
 	}else if(ParseCommand(Cmd, "DEMOTE")){
 		for(C = Level.ControllerList; C != None; C = C.NextController){
-			PC = PlayerController(C);
+			Temp = PlayerController(C);
 
-			if(PC != None && PC.PlayerReplicationInfo.PlayerName ~= Cmd){
-				PC.PlayerReplicationInfo.bAdmin = false;
+			if(Temp != None && Temp.PlayerReplicationInfo.PlayerName ~= Cmd){
+				Temp.PlayerReplicationInfo.bAdmin = false;
 
 				break;
 			}

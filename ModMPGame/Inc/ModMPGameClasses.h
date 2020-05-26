@@ -20,7 +20,7 @@
 class MODMPGAME_API AAdminService : public AActor
 {
 public:
-    BITFIELD bRequiresLogin:1 GCC_PACK(4);
+    BITFIELD bRequiresAdminPermissions:1 GCC_PACK(4);
     void execParseCommand(FFrame& Stack, void* Result);
     void execParseIntParam(FFrame& Stack, void* Result);
     void execParseFloatParam(FFrame& Stack, void* Result);

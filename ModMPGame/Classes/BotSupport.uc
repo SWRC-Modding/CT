@@ -18,12 +18,12 @@ native final function SpawnNavigationPoint(Class<NavigationPoint> NavPtClass, Ve
 native final function BuildPaths();
 native final function ClearPaths();
 
-function bool ExecCmd(PlayerController Player, String Cmd){
+function bool ExecCmd(PlayerController PC, String Cmd){
 	if(ParseCommand(Cmd, "ADDBOT")){
 		if(Level.Game.NumPlayers + Level.Game.NumBots < Level.Game.MaxPlayers)
 			AddBot();
 		else
-			Player.ClientMessage("Cannot add more bots. Maximum number of players is " $ Level.Game.MaxPlayers);
+			PC.ClientMessage("Cannot add more bots. Maximum number of players is " $ Level.Game.MaxPlayers);
 
 		return true;
 	}else if(ParseCommand(Cmd, "REMOVEBOT")){
@@ -32,7 +32,7 @@ function bool ExecCmd(PlayerController Player, String Cmd){
 		return true;
 	}
 
-	return Super.ExecCmd(Player, Cmd);
+	return Super.ExecCmd(PC, Cmd);
 }
 
 event SetupPatrolRoute(){

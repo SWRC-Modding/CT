@@ -144,6 +144,7 @@ enum ELevelTick{
 
 //
 // The level object.  Contains the level's actor list, Bsp information, and brush list.
+// // TODO(Leon): Fix member offsets
 //
 class ENGINE_API ULevel : public ULevelBase
 {
@@ -152,7 +153,7 @@ class ENGINE_API ULevel : public ULevelBase
 
 	// Number of blocks of descriptive text to allocate with levels.
 	enum {NUM_LEVEL_TEXT_BLOCKS=16};
-
+/*
 	// Main variables, always valid.
 	UModel*					Model;
 	UTextBuffer*			TextBlocks[NUM_LEVEL_TEXT_BLOCKS];
@@ -164,14 +165,17 @@ class ENGINE_API ULevel : public ULevelBase
 	class FMovingBrushTrackerBase* BrushTracker;
 	AActor* FirstDeleted;
 	struct FActorLink* NewlySpawned;
-	UBOOL InTick, Ticked;
+	UBOOL InTick, Ticked;*/
+
+	char Padding1[108];
+
 	INT iFirstDynamicActor, iFirstNetRelevantActor, NetTag;
 	BYTE ZoneDist[64][64];
-
+/*
 	// Temporary stats.
 	INT NetTickCycles, NetDiffCycles, ActorTickCycles, AudioTickCycles, FindPathCycles, MoveCycles, NumMoves, NumReps, NumPV, GetRelevantCycles, NumRPC, SeePlayer, Spawning, Unused;
-
-	char Padding[64];
+*/
+	char Padding2[128];
 
 	// Constructor.
 	ULevel( UEngine* InEngine, UBOOL RootOutside );
@@ -253,12 +257,12 @@ public:
 	}
 
 	TActorIterator& operator++(){
-		do{
+		for(;;){
 			++Index;
 
-			if(Level->Actors[Index] && Level->Actors[Index]->IsA(T::StaticClass()))
+			if(!static_cast<bool>(*this) || (Level->Actors[Index] && Level->Actors[Index]->IsA(T::StaticClass())))
 				break;
-		}while(static_cast<bool>(*this));
+		}
 
 		return *this;
 	}

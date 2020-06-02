@@ -9,8 +9,9 @@
 			"name": "debug",
 			"type": "cppvsdbg",
 			"request": "launch",
-			"program": "${workspaceFolder}/../GameData/System/Debug.exe",
+			"program": "${workspaceFolder}/../GameData/System/Launcher.exe",
 			"args": [
+				"-windowed",
 				"-log"
 			],
 			"stopAtEntry": false,

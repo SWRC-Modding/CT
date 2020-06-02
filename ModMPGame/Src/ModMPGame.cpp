@@ -142,6 +142,9 @@ void ABotSupport::ImportPaths(){
 
 	FString Filename = GetPathFileName(Level->Title);
 	FArchive* Ar = GFileManager->CreateFileReader(*Filename);
+	UBOOL AutoBuildPaths = bAutoBuildPaths;
+
+	bAutoBuildPaths = 0; // Importing paths potentially calls SpawnNavigationPoint many times. This avoids rebuilding for every single one.
 
 	if(Ar){
 		TArray<FNavPtInfo> NavPtInfo;
@@ -171,6 +174,11 @@ void ABotSupport::ImportPaths(){
 	}else{
 		GLog->Logf(NAME_Error, "Cannot import paths from file '%s'", *Filename);
 	}
+
+	bAutoBuildPaths = AutoBuildPaths;
+
+	if(bPathsImported && bAutoBuildPaths)
+		BuildPaths();
 
 	unguard;
 }
@@ -311,10 +319,13 @@ void ABotSupport::Spawned(){
 		DrawType = DT_None;
 
 	if(bAutoImportPaths){
+		UBOOL AutoBuildPaths = bAutoBuildPaths;
+
+		bAutoBuildPaths = 1; // Paths imported at startup are always built, regardless of whether bAutoBuildPaths is set or not.
+
 		ImportPaths();
 
-		if(bPathsImported) // We don't want to rebuild paths if import failed
-			BuildPaths();
+		bAutoBuildPaths = AutoBuildPaths;
 	}
 
 	unguard;

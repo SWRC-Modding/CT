@@ -3,12 +3,22 @@ class AdminCommands extends AdminService;
 var() config bool bAllowConsoleCommands;
 
 function bool ExecCmd(PlayerController PC, String Cmd){
-	local Controller C;
-	local PlayerController Temp;
+	local PlayerReplicationInfo PRI;
+	local String CommandResult;
 
-	if(ParseCommand(Cmd, "CMD") && bAllowConsoleCommands){
-		Log(PC.PlayerReplicationInfo.PlayerName $ " is executing a console command (" $ Cmd $ ")");
-		ConsoleCommand(Cmd);
+	if(ParseCommand(Cmd, "CMD")){
+		if(bAllowConsoleCommands || Viewport(PC.Player) != None){ // The host can always execute console commands
+			Log(PC.PlayerReplicationInfo.PlayerName $ " is executing a console command (" $ Cmd $ ")");
+
+			CommandResult = ConsoleCommand(Cmd);
+
+			if(CommandResult != ""){
+				Log(CommandResult);
+				PC.ClientMessage(CommandResult);
+			}
+		}else{
+			PC.ClientMessage("Console commands are not allowed!");
+		}
 
 		return true;
 	}else if(ParseCommand(Cmd, "KICK")){
@@ -20,11 +30,9 @@ function bool ExecCmd(PlayerController PC, String Cmd){
 
 		return true;
 	}else if (ParseCommand(Cmd, "PROMOTE")){
-		for(C = Level.ControllerList; C != None; C = C.NextController){
-			Temp = PlayerController(C);
-
-			if(Temp != None && Temp.PlayerReplicationInfo.PlayerName ~= Cmd){
-				Temp.PlayerReplicationInfo.bAdmin = true;
+		foreach DynamicActors(class'PlayerReplicationInfo', PRI){
+			if(PRI.PlayerName ~= Cmd){
+				PRI.bAdmin = true;
 
 				break;
 			}
@@ -32,15 +40,17 @@ function bool ExecCmd(PlayerController PC, String Cmd){
 
 		return true;
 	}else if(ParseCommand(Cmd, "DEMOTE")){
-		for(C = Level.ControllerList; C != None; C = C.NextController){
-			Temp = PlayerController(C);
-
-			if(Temp != None && Temp.PlayerReplicationInfo.PlayerName ~= Cmd){
-				Temp.PlayerReplicationInfo.bAdmin = false;
+		foreach DynamicActors(class'PlayerReplicationInfo', PRI){
+			if(PRI.PlayerName ~= Cmd){
+				PRI.bAdmin = false;
 
 				break;
 			}
 		}
+
+		return true;
+	}else if(ParseCommand(Cmd, "SERVERTRAVEL")){
+		Level.ServerTravel(Cmd, false);
 
 		return true;
 	}

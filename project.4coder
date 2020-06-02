@@ -3,7 +3,7 @@ version(1);
 patterns = {
 	"*.h",
 	"*.cpp",
-	//"*.uc",
+	"*.uc",
 	"*.txt"
 };
 
@@ -12,6 +12,15 @@ load_paths = {
 };
 
 command_list = {
+	{
+		.name = "ucc",
+		.out = "*compilation*",
+		.footer_panel = true,
+		.save_dirty_files = true,
+		.cmd = {
+			{"..\GameData\System\UCC.exe make -noprompt -ini=../../Code/UCC/UCC.ini", .os = "win"}
+		}
+	},
 	{
 		.name = "run",
 		.out = "*compilation*",
@@ -23,4 +32,5 @@ command_list = {
 	}
 };
 
+fkey_command[4] = "ucc";
 fkey_command[5] = "run";

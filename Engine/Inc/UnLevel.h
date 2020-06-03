@@ -248,11 +248,33 @@ class ENGINE_API ULevel : public ULevelBase
 	Iterators.
 -----------------------------------------------------------------------------*/
 
+enum EActorIterator{
+	IT_AllActors,
+	IT_StaticActors,
+	IT_DynamicActors,
+	IT_NetRelevantActors
+};
+
 template<typename T>
 class TActorIterator{
 public:
-	TActorIterator(ULevel* InLevel) : Level(InLevel),
-									  Index(-1){
+	TActorIterator(ULevel* InLevel, EActorIterator It = IT_AllActors) : Level(InLevel),
+																		Index(-1),
+																		Max(Level->Actors.Num()){
+		switch(It){
+		case IT_DynamicActors:
+			Index = InLevel->iFirstDynamicActor - 1;
+
+			break;
+		case IT_StaticActors:
+			Index = -1;
+			Max = Level->iFirstDynamicActor;
+
+			break;
+		case IT_NetRelevantActors:
+			Index = Level->iFirstNetRelevantActor - 1;
+		}
+
 		++(*this);
 	}
 
@@ -269,11 +291,12 @@ public:
 
 	T* operator*() const{ return Cast<T>(Level->Actors[Index]); }
 	T* operator->() const{ return Cast<T>(Level->Actors[Index]); }
-	operator bool() const{ return Index < Level->Actors.Num(); }
+	operator bool() const{ return Index < Max && Index < Level->Actors.Num(); }
 
 private:
 	ULevel* Level;
 	INT Index;
+	INT Max;
 };
 
 //

@@ -689,14 +689,16 @@ public:
 	}
 
 	void Insert(INT Index, INT Count = 1){
-		FArray::Insert(Index, Count, sizeof(T));
+		TArray<T>::Insert(Index, Count);
+
 		if(GUndo)
-			GUndo->SaveArray(Owner, this, Index, Count, 1, sizeof(T), SerializeItem, DestructItem);
+			GUndo->SaveArray(Owner, reinterpret_cast<FArray*>(this), Index, Count, 1, sizeof(T), SerializeItem, DestructItem);
 	}
 
 	void Remove(INT Index, INT Count = 1){
 		if(GUndo)
-			GUndo->SaveArray(Owner, this, Index, Count, -1, sizeof(T), SerializeItem, DestructItem);
+			GUndo->SaveArray(Owner, reinterpret_cast<FArray*>(this), Index, Count, -1, sizeof(T), SerializeItem, DestructItem);
+
 		TArray<T>::Remove(Index, Count);
 	}
 

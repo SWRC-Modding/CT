@@ -117,7 +117,13 @@ void ABotSupport::SpawnNavigationPoint(UClass* NavPtClass, const FVector& Locati
 	));
 
 	if(NavPt){
-		bNewPathsAdded = 1;
+		if(XLevel->Actors.Last() == NavPt && !Level->bStartup){ // We shouldn't mess with the actor list if bStartup == true
+			XLevel->Actors.Pop();
+			XLevel->Actors.Insert(XLevel->iFirstNetRelevantActor);
+			XLevel->Actors[XLevel->iFirstNetRelevantActor] = NavPt;
+			++XLevel->iFirstNetRelevantActor;
+			++XLevel->iFirstDynamicActor;
+		}
 
 		if(bAutoBuildPaths)
 			BuildPaths();
@@ -192,28 +198,26 @@ void ABotSupport::ExportPaths(){
 	guard(ABotSupport::ExportPaths);
 
 	TArray<FNavPtInfo> NavPts;
-	ANavigationPoint* NavPt = Level->NavigationPointList;
 
-	while(NavPt){
+	for(TActorIterator<ANavigationPoint> It(XLevel, IT_StaticActors); It; ++It){
+		if(It->IsA(APlayerStart::StaticClass()))
+			continue; // Playerstarts are always part of the map and thus not exported
+
+
 		FNavPtInfo NavPtInfo;
+		ENavPtType NavPtType;
 
-		if(!NavPt->IsA(APlayerStart::StaticClass())){ // Playerstarts are always part of the map and thus not exported
-			ENavPtType NavPtType;
+		if(It->IsA(ACoverPoint::StaticClass()))
+			NavPtType = NAVPT_CoverPoint;
+		else if(It->IsA(APatrolPoint::StaticClass()))
+			NavPtType = NAVPT_PatrolPoint;
+		else
+			NavPtType = NAVPT_PathNode;
 
-			if(NavPt->IsA(ACoverPoint::StaticClass()))
-				NavPtType = NAVPT_CoverPoint;
-			else if(NavPt->IsA(APatrolPoint::StaticClass()))
-				NavPtType = NAVPT_PatrolPoint;
-			else
-				NavPtType = NAVPT_PathNode;
-
-			NavPtInfo.Type = NavPtType;
-			NavPtInfo.Location = NavPt->Location;
-			NavPtInfo.Rotation = NavPt->Rotation;
-			NavPts.AddItem(NavPtInfo);
-		}
-
-		NavPt = NavPt->nextNavigationPoint;
+		NavPtInfo.Type = NavPtType;
+		NavPtInfo.Location = It->Location;
+		NavPtInfo.Rotation = It->Rotation;
+		NavPts.AddItem(NavPtInfo);
 	}
 
 	if(NavPts.Num() > 0){
@@ -245,44 +249,6 @@ void ABotSupport::ExportPaths(){
  */
 void ABotSupport::BuildPaths(){
 	guard(ABotSupport::BuildPaths);
-
-	/*
-	 * If new navigation points were added, we rearrange the actor list so that static actors (bStatic == true) come before dynamic ones.
-	 * This is how the engine expects it as normally static actors are not spawned during gameplay.
-	 */
-	if(bNewPathsAdded && !Level->bStartup){ // Don't rearrange actors during startup or we'll end up in an infinite initialization loop
-		TArray<AActor*> Actors;
-
-		Actors.AddItem(XLevel->Actors[0]);
-		Actors.AddItem(XLevel->Actors[1]);
-
-		for(INT i = 2; i < XLevel->Actors.Num(); i++){
-			if(XLevel->Actors[i] && XLevel->Actors[i]->bStatic && !XLevel->Actors[i]->bAlwaysRelevant)
-				Actors.AddItem(XLevel->Actors[i]);
-		}
-
-		XLevel->iFirstNetRelevantActor = Actors.Num();
-
-		for(INT i = 2; i < XLevel->Actors.Num(); i++){
-			if(XLevel->Actors[i] && XLevel->Actors[i]->bStatic && XLevel->Actors[i]->bAlwaysRelevant)
-				Actors.AddItem(XLevel->Actors[i]);
-		}
-
-		XLevel->iFirstDynamicActor = Actors.Num();
-
-		for(INT i = 2; i < XLevel->Actors.Num(); i++){
-			if(XLevel->Actors[i] && !XLevel->Actors[i]->bStatic)
-				Actors.AddItem(XLevel->Actors[i]);
-		}
-
-		XLevel->Actors.Empty();
-		XLevel->Actors.Add(Actors.Num());
-
-		for(INT i = 0; i < Actors.Num(); i++)
-			XLevel->Actors[i] = Actors[i];
-	}
-
-	bNewPathsAdded = 0;
 
 	UBOOL IsEd = GIsEditor;
 	UBOOL BegunPlay = Level->bBegunPlay;
@@ -397,7 +363,7 @@ void ABotSupport::PostRender(class FLevelSceneNode* SceneNode, class FRenderInte
 		LineBatcher.DrawBox(FBox(NavPtFailLocations[i] - BoxSize, NavPtFailLocations[i] + BoxSize), FColor(255, 0, 0));
 
 	// All navigation points in the level are drawn as a colored box
-	for(TActorIterator<ANavigationPoint> It(XLevel); It; ++It){
+	for(TActorIterator<ANavigationPoint> It(XLevel, IT_StaticActors); It; ++It){
 		if(It->bDeleteMe)
 			continue;
 
@@ -419,7 +385,7 @@ void ABotSupport::PostRender(class FLevelSceneNode* SceneNode, class FRenderInte
 	}
 
 	// Drawing connections between path nodes like in UnrealEd
-	for(ANavigationPoint *Nav=Level->NavigationPointList; Nav; Nav=Nav->nextNavigationPoint){
+	for(ANavigationPoint* Nav = Level->NavigationPointList; Nav; Nav = Nav->nextNavigationPoint){
 		for(int i = 0; i < Nav->PathList.Num(); ++i){
 			UReachSpec* ReachSpec = Nav->PathList[i];
 
@@ -490,7 +456,7 @@ bool ABotSupport::ExecCmd(APlayerController* Player, const char* Cmd){
 
 		GIsEditor = 1;
 
-		for(TActorIterator<ANavigationPoint> It(XLevel); It; ++It){
+		for(TActorIterator<ANavigationPoint> It(XLevel, IT_StaticActors); It; ++It){
 			if(!It->IsA(APlayerStart::StaticClass()) &&
 			   ((Player->Pawn ? Player->Pawn->Location : Player->Location) - It->Location).SizeSquared() <= 40 * 40){
 				XLevel->DestroyActor(*It);
@@ -509,7 +475,7 @@ bool ABotSupport::ExecCmd(APlayerController* Player, const char* Cmd){
 
 		GIsEditor = 1;
 
-		for(TActorIterator<ANavigationPoint> It(XLevel); It; ++It){
+		for(TActorIterator<ANavigationPoint> It(XLevel, IT_StaticActors); It; ++It){
 			if(It->IsA(ANavigationPoint::StaticClass()) && !It->IsA(APlayerStart::StaticClass()))
 				XLevel->DestroyActor(*It);
 		}

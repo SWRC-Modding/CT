@@ -9,7 +9,6 @@ var config bool bAutoBuildPaths;
 var config bool bShowPaths;
 
 var bool bPathsImported; // Paths were imported using ImportPaths
-var bool bNewPathsAdded; // Used to check whether the actor list needs to be reordered in native code
 var Array<vector> NavPtFailLocations; // Used to debug Navigation points which failed to spawn
 var Array<MPBot> Bots;
 var Array<Pawn.PatrolPoint> BotPatrolRoute;

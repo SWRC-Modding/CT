@@ -15,11 +15,13 @@
 	virtual void PostLoad();
 	virtual void PreEditUndo();
 	/*
-	 * If the following function is not commented out there will be compile errors in generated event call stubs.
-	 * They are supposed to call the function with the same name but different parameters in UObject which is shadowed by this one.
-	 * Commenting this out is fine since it is only an override. I have no idea how they made this work originally...
+	 * The virtual override for ProcessEvent hides the non-virtual function from UObject which causes compile errors due to the different parameters.
+	 * This wrapper makes sure the correct function is called.
 	 */
-	//virtual void ProcessEvent(class UFunction* Function, void* Parms, void* UnusedResult = NULL);
+	FORCEINLINE void ProcessEvent(FName Event, void* Parms, void* UnusedResult = NULL){
+		UObject::ProcessEvent(Event, Parms, UnusedResult);
+	}
+	virtual void ProcessEvent(class UFunction* Function, void* Parms, void* UnusedResult = NULL);
 	virtual int ProcessRemoteFunction(class UFunction* Function, void* Parms, struct FFrame* Stack);
 	virtual void ProcessState(FLOAT DeltaSeconds);
 	virtual void Serialize(class FArchive&);

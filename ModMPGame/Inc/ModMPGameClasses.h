@@ -17,6 +17,32 @@
 
 
 
+class MODMPGAME_API AAdminControl : public AActor
+{
+public:
+    TArrayNoInit<FString> ServiceClasses;
+    TArrayNoInit<class AAdminService*> Services;
+    UBOOL ExecCmd(FString const& Cmd, class APlayerController* PC)
+    {
+        DECLARE_NAME(ExecCmd);
+        struct {
+            FString Cmd;
+            class APlayerController* PC;
+            UBOOL ReturnValue;
+        } Parms;
+        Parms.Cmd=Cmd;
+        Parms.PC=PC;
+        Parms.ReturnValue=0;
+        ProcessEvent(NExecCmd, &Parms);
+        return Parms.ReturnValue;
+    }
+    DECLARE_CLASS(AAdminControl,AActor,0|CLASS_Config,ModMPGame)
+	// Overrides
+	virtual void Spawned();
+	virtual void Destroy();
+};
+
+
 class MODMPGAME_API AAdminService : public AActor
 {
 public:
@@ -27,7 +53,7 @@ public:
     void execParseStringParam(FFrame& Stack, void* Result);
     void execExecCmd(FFrame& Stack, void* Result);
     DECLARE_CLASS(AAdminService,AActor,0,ModMPGame)
-	virtual bool ExecCmd(class APlayerController* Player, const char* Cmd){ return false; }
+	virtual bool ExecCmd(const char* Cmd, class APlayerController* PC = NULL){ return false; }
     DECLARE_NATIVES(AAdminService)
 };
 
@@ -42,9 +68,6 @@ public:
     TArrayNoInit<FVector> NavPtFailLocations GCC_PACK(4);
     TArrayNoInit<class AMPBot*> Bots;
     TArrayNoInit<FPatrolPoint> BotPatrolRoute;
-    void execSpawnNavigationPoint(FFrame& Stack, void* Result);
-    void execBuildPaths(FFrame& Stack, void* Result);
-    void execClearPaths(FFrame& Stack, void* Result);
     void SetupPatrolRoute()
     {
         DECLARE_NAME(SetupPatrolRoute);
@@ -61,8 +84,7 @@ public:
 	virtual void Spawned();
 	virtual UBOOL Tick(FLOAT DeltaTime, ELevelTick TickType);
 	virtual void PostRender(class FLevelSceneNode* SceneNode, class FRenderInterface* RI);
-	virtual bool ExecCmd(class APlayerController* Player, const char* Cmd);
-    DECLARE_NATIVES(ABotSupport)
+	virtual bool ExecCmd(const char* Cmd, class APlayerController* PC);
 };
 
 
@@ -91,6 +113,7 @@ public:
 #if __STATIC_LINK
 
 #define AUTO_INITIALIZE_REGISTRANTS_MODMPGAME \
+	AAdminControl::StaticClass(); \
 	AAdminService::StaticClass(); \
 	ABotSupport::StaticClass(); \
 	AMPBot::StaticClass(); \

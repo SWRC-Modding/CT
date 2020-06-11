@@ -1,4 +1,4 @@
-class AdminControl extends Actor config(ModMPGame);
+class AdminControl extends Actor native config(ModMPGame);
 
 var() config array<String> ServiceClasses;
 
@@ -38,28 +38,37 @@ function PostBeginPlay(){
 	}
 }
 
-function ExecCmd(PlayerController PC, String Cmd){
+event bool ExecCmd(String Cmd, optional PlayerController PC){
 	local int i;
 	local bool RecognizedCmd;
 
-	if(Viewport(PC.Player) != None) // The host is always an admin and doesn't need to log in
+	if(PC != None && Viewport(PC.Player) != None) // The host is always an admin and doesn't need to log in
 		PC.PlayerReplicationInfo.bAdmin = true;
 
 	for(i = 0; i < Services.Length; ++i){
-		if(PC.PlayerReplicationInfo.bAdmin || !Services[i].bRequiresAdminPermissions){
-			if(Services[i].ExecCmd(PC, Cmd)){
+		if(PC == None || PC.PlayerReplicationInfo.bAdmin || !Services[i].bRequiresAdminPermissions){
+			if(Services[i].ExecCmd(Cmd, PC)){
 				Services[i].SaveConfig();
 				RecognizedCmd = true;
 			}
 		}
 	}
 
-	if(!RecognizedCmd){
+	if(PC != None && !RecognizedCmd){
 		if(PC.PlayerReplicationInfo.bAdmin)
 			PC.ClientMessage("Unrecognized command");
 		else
 			PC.ClientMessage("Unrecognized command or missing permissions");
 	}
+
+	return RecognizedCmd;
+}
+
+cpptext
+{
+	// Overrides
+	virtual void Spawned();
+	virtual void Destroy();
 }
 
 defaultproperties

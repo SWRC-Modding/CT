@@ -13,16 +13,20 @@ var Array<vector> NavPtFailLocations; // Used to debug Navigation points which f
 var Array<MPBot> Bots;
 var Array<Pawn.PatrolPoint> BotPatrolRoute;
 
-native final function SpawnNavigationPoint(Class<NavigationPoint> NavPtClass, Vector Loc, optional Rotator Rot);
-native final function BuildPaths();
-native final function ClearPaths();
+function bool ExecCmd(String Cmd, optional PlayerController PC){
+	local String ErrorMsg;
 
-function bool ExecCmd(PlayerController PC, String Cmd){
 	if(ParseCommand(Cmd, "ADDBOT")){
 		if(Level.Game.NumPlayers + Level.Game.NumBots < Level.Game.MaxPlayers)
 			AddBot();
-		else
-			PC.ClientMessage("Cannot add more bots. Maximum number of players is " $ Level.Game.MaxPlayers);
+		else{
+			ErrorMsg = "Cannot add more bots. Maximum number of players is " $ Level.Game.MaxPlayers;
+
+			if(PC != None)
+				PC.ClientMessage(ErrorMsg);
+			else
+				Log(ErrorMsg);
+		}
 
 		return true;
 	}else if(ParseCommand(Cmd, "REMOVEBOT")){
@@ -31,7 +35,7 @@ function bool ExecCmd(PlayerController PC, String Cmd){
 		return true;
 	}
 
-	return Super.ExecCmd(PC, Cmd);
+	return Super.ExecCmd(Cmd, PC);
 }
 
 event SetupPatrolRoute(){
@@ -93,7 +97,7 @@ cpptext
 	virtual void Spawned();
 	virtual UBOOL Tick(FLOAT DeltaTime, ELevelTick TickType);
 	virtual void PostRender(class FLevelSceneNode* SceneNode, class FRenderInterface* RI);
-	virtual bool ExecCmd(class APlayerController* Player, const char* Cmd);
+	virtual bool ExecCmd(const char* Cmd, class APlayerController* PC);
 }
 
 defaultproperties

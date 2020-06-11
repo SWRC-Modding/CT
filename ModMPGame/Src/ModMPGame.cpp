@@ -7,6 +7,51 @@ APlayerController* GetLocalPlayerController(){
 }
 
 /*
+ * AdminControl
+ */
+
+AAdminControl* GAdminControl = NULL;
+
+static struct FAdminControlExec : FExec{
+	FExec* OldExec;
+
+	virtual UBOOL Exec(const TCHAR* Cmd, FOutputDevice& Ar){
+		UBOOL RecognizedCmd = 0;
+
+		if(GAdminControl)
+			RecognizedCmd = GAdminControl->ExecCmd(Cmd, NULL);
+
+		if(!RecognizedCmd)
+			RecognizedCmd = OldExec ? OldExec->Exec(Cmd, Ar) : 0;
+
+		return RecognizedCmd;
+	}
+} GAdminControlExec;
+
+void AAdminControl::Spawned(){
+	Super::Spawned();
+
+	GAdminControl = this;
+
+	if(GExec != &GAdminControlExec){
+		GAdminControlExec.OldExec = GExec;
+		GExec = &GAdminControlExec;
+	}
+}
+
+void AAdminControl::Destroy(){
+	Super::Destroy();
+
+	if(GAdminControl == this)
+		GAdminControl = NULL;
+
+	if(GExec == &GAdminControlExec){
+		GExec = GAdminControlExec.OldExec;
+		GAdminControlExec.OldExec = NULL;
+	}
+}
+
+/*
  * AdminService
  */
 
@@ -53,11 +98,11 @@ void AAdminService::execParseStringParam(FFrame& Stack, void* Result){
 }
 
 void AAdminService::execExecCmd(FFrame& Stack, void* Result){
-	P_GET_OBJECT(APlayerController, Player);
 	P_GET_STR(Cmd);
+	P_GET_OBJECT_OPTX(APlayerController, PC, NULL);
 	P_FINISH;
 
-	*static_cast<UBOOL*>(Result) = ExecCmd(Player, *Cmd);
+	*static_cast<UBOOL*>(Result) = ExecCmd(*Cmd, PC);
 }
 
 /*
@@ -424,8 +469,9 @@ void ABotSupport::PostRender(class FLevelSceneNode* SceneNode, class FRenderInte
 	unguard;
 }
 
-bool ABotSupport::ExecCmd(APlayerController* Player, const char* Cmd){
-	UClass* PutNavPtClass = NULL;
+bool ABotSupport::ExecCmd(const char* Cmd, class APlayerController* PC){
+	if(!PC)
+		PC = GetLocalPlayerController();
 
 	if(ParseCommand(&Cmd, "IMPORTPATHS")){
 		ImportPaths();
@@ -458,7 +504,7 @@ bool ABotSupport::ExecCmd(APlayerController* Player, const char* Cmd){
 
 		for(TActorIterator<ANavigationPoint> It(XLevel, IT_StaticActors); It; ++It){
 			if(!It->IsA(APlayerStart::StaticClass()) &&
-			   ((Player->Pawn ? Player->Pawn->Location : Player->Location) - It->Location).SizeSquared() <= 40 * 40){
+			   ((PC->Pawn ? PC->Pawn->Location : PC->Location) - It->Location).SizeSquared() <= 40 * 40){
 				XLevel->DestroyActor(*It);
 
 				break;
@@ -470,79 +516,62 @@ bool ABotSupport::ExecCmd(APlayerController* Player, const char* Cmd){
 		BuildPaths();
 
 		return true;
-	}else if(ParseCommand(&Cmd, "REMOVEALLNAVIGATIONPOINTS")){
-		UBOOL IsEditor = GIsEditor;
+	}else if(PC){
+		UClass* PutNavPtClass = NULL;
 
-		GIsEditor = 1;
+		if(ParseCommand(&Cmd, "REMOVEALLNAVIGATIONPOINTS")){
+			UBOOL IsEditor = GIsEditor;
 
-		for(TActorIterator<ANavigationPoint> It(XLevel, IT_StaticActors); It; ++It){
-			if(It->IsA(ANavigationPoint::StaticClass()) && !It->IsA(APlayerStart::StaticClass()))
-				XLevel->DestroyActor(*It);
-		}
+			GIsEditor = 1;
 
-		GIsEditor = IsEditor;
-		bPathsImported = 0;
+			for(TActorIterator<ANavigationPoint> It(XLevel, IT_StaticActors); It; ++It){
+				if(It->IsA(ANavigationPoint::StaticClass()) && !It->IsA(APlayerStart::StaticClass()))
+					XLevel->DestroyActor(*It);
+			}
 
-		BuildPaths();
+			GIsEditor = IsEditor;
+			bPathsImported = 0;
 
-		return true;
-	}else if(ParseCommand(&Cmd, "PUTPATHNODE")){
-		PutNavPtClass = APathNode::StaticClass();
-	}else if(ParseCommand(&Cmd, "PUTCOVERPOINT")){
-		PutNavPtClass = ACoverPoint::StaticClass();
-	}else if(ParseCommand(&Cmd, "PUTPATROLPOINT")){
-		PutNavPtClass = APatrolPoint::StaticClass();
-	}else if(GIsClient){ // Commands only available ingame
-		if(ParseCommand(&Cmd, "SHOWPATHS")){
-			bShowPaths = 1;
+			BuildPaths();
 
 			return true;
-		}else if(ParseCommand(&Cmd, "HIDEPATHS")){
-			bShowPaths = 0;
+		}else if(ParseCommand(&Cmd, "PUTPATHNODE")){
+			PutNavPtClass = APathNode::StaticClass();
+		}else if(ParseCommand(&Cmd, "PUTCOVERPOINT")){
+			PutNavPtClass = ACoverPoint::StaticClass();
+		}else if(ParseCommand(&Cmd, "PUTPATROLPOINT")){
+			PutNavPtClass = APatrolPoint::StaticClass();
+		}else if(GIsClient){ // Commands only available ingame
+			if(ParseCommand(&Cmd, "SHOWPATHS")){
+				bShowPaths = 1;
+
+				return true;
+			}else if(ParseCommand(&Cmd, "HIDEPATHS")){
+				bShowPaths = 0;
+
+				return true;
+			}
+		}
+
+		if(PutNavPtClass){
+			FVector Loc;
+			FRotator Rot(0, 0, 0);
+
+			if(PC->Pawn){
+				Loc = PC->Pawn->Location;
+				Rot.Yaw = PC->Pawn->Rotation.Yaw;
+			}else{
+				Loc = PC->Location;
+				Rot.Yaw = PC->Rotation.Yaw;
+			}
+
+			SpawnNavigationPoint(PutNavPtClass, Loc, Rot);
 
 			return true;
 		}
-	}
-
-	if(PutNavPtClass){
-		FVector Loc;
-		FRotator Rot(0, 0, 0);
-
-		if(Player->Pawn){
-			Loc = Player->Pawn->Location;
-			Rot.Yaw = Player->Pawn->Rotation.Yaw;
-		}else{
-			Loc = Player->Location;
-			Rot.Yaw = Player->Rotation.Yaw;
-		}
-
-		SpawnNavigationPoint(PutNavPtClass, Loc, Rot);
-
-		return true;
 	}
 
 	return false;
-}
-
-void ABotSupport::execSpawnNavigationPoint(FFrame& Stack, void* Result){
-	P_GET_OBJECT(UClass, NavPtClass);
-	P_GET_VECTOR(Loc);
-	P_GET_ROTATOR_OPTX(Rot, FRotator(0, 0, 0));
-	P_FINISH;
-
-	SpawnNavigationPoint(NavPtClass, Loc, Rot);
-}
-
-void ABotSupport::execBuildPaths(FFrame& Stack, void* Result){
-	P_FINISH;
-
-	BuildPaths();
-}
-
-void ABotSupport::execClearPaths(FFrame& Stack, void* Result){
-	P_FINISH;
-
-	ClearPaths();
 }
 
 /*

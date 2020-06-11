@@ -12,11 +12,11 @@ native static final function bool ParseIntParam(String Stream, String Match, out
 native static final function bool ParseFloatParam(String Stream, String Match, out float Value);
 native static final function bool ParseStringParam(String Stream, String Match, out String Value);
 
-native function bool ExecCmd(PlayerController Player, String Cmd);
+native function bool ExecCmd(String Cmd, optional PlayerController PC);
 
 cpptext
 {
-	virtual bool ExecCmd(class APlayerController* Player, const char* Cmd){ return false; }
+	virtual bool ExecCmd(const char* Cmd, class APlayerController* PC = NULL){ return false; }
 }
 
 defaultproperties

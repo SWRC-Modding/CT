@@ -9,25 +9,27 @@ function PostBeginPlay(){
 		Level.Game.AccessControl.SetAdminPassword(AdminPassword);
 }
 
-function bool ExecCmd(PlayerController PC, String Cmd){
-	if(ParseCommand(Cmd, "LOGIN")){
-		if(PC.PlayerReplicationInfo.bAdmin)
-			PC.ClientMessage("You are already logged in!");
-		else if(Level.Game.AccessControl.AdminLogin(PC, Cmd))
-			PC.PlayerReplicationInfo.bAdmin = true;
-		else
-			PC.ClientMessage("Wrong password!");
+function bool ExecCmd(String Cmd, optional PlayerController PC){
+	if(PC != None){
+		if(ParseCommand(Cmd, "LOGIN")){
+			if(PC.PlayerReplicationInfo.bAdmin)
+				PC.ClientMessage("You are already logged in!");
+			else if(Level.Game.AccessControl.AdminLogin(PC, Cmd))
+				PC.PlayerReplicationInfo.bAdmin = true;
+			else
+				PC.ClientMessage("Wrong password!");
 
-		return true;
-	}else if(ParseCommand(Cmd, "LOGOUT")){
-		if(PC.PlayerReplicationInfo.bAdmin){
-			PC.PlayerReplicationInfo.bAdmin = false;
-			PC.ClientMessage("You are no longer an admin!");
-		}else{
-			PC.ClientMessage("You are not logged in!");
+			return true;
+		}else if(ParseCommand(Cmd, "LOGOUT")){
+			if(PC.PlayerReplicationInfo.bAdmin){
+				PC.PlayerReplicationInfo.bAdmin = false;
+				PC.ClientMessage("You are no longer an admin!");
+			}else{
+				PC.ClientMessage("You are not logged in!");
+			}
+
+			return true;
 		}
-
-		return true;
 	}
 
 	return false;

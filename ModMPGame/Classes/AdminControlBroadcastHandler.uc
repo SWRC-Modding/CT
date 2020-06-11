@@ -5,7 +5,7 @@ var() AdminControl AdminControl;
 function PostBeginPlay(){
 	Super.PostBeginPlay();
 
-	foreach AllActors(Class'AdminControl', AdminControl)
+	foreach AllActors(class'AdminControl', AdminControl)
 		break;
 }
 
@@ -14,7 +14,7 @@ function Broadcast(Actor Sender, coerce string Msg, optional name Type){
 
 	if(InStr(Msg, "/") == 0){
 		Cmd = Right(Msg, Len(Msg) - 1);
-		AdminControl.ExecCmd(PlayerController(Sender), Cmd);
+		AdminControl.ExecCmd(Cmd, PlayerController(Sender));
 	}else{
 		Super.Broadcast(Sender, Msg, Type);
 	}

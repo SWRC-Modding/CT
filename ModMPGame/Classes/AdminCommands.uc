@@ -2,21 +2,24 @@ class AdminCommands extends AdminService;
 
 var() config bool bAllowConsoleCommands;
 
-function bool ExecCmd(PlayerController PC, String Cmd){
+function bool ExecCmd(String Cmd, optional PlayerController PC){
 	local PlayerReplicationInfo PRI;
 	local String CommandResult;
 
 	if(ParseCommand(Cmd, "CMD")){
-		if(bAllowConsoleCommands || Viewport(PC.Player) != None){ // The host can always execute console commands
-			Log(PC.PlayerReplicationInfo.PlayerName $ " is executing a console command (" $ Cmd $ ")");
+		if(PC == None || bAllowConsoleCommands || Viewport(PC.Player) != None){ // The host can always execute console commands
+			if(PC == None)
+				Log(PC.PlayerReplicationInfo.PlayerName $ " is executing a console command (" $ Cmd $ ")");
 
 			CommandResult = ConsoleCommand(Cmd);
 
 			if(CommandResult != ""){
 				Log(CommandResult);
-				PC.ClientMessage(CommandResult);
+
+				if(PC != None)
+					PC.ClientMessage(CommandResult);
 			}
-		}else{
+		}else if(PC != None){
 			PC.ClientMessage("Console commands are not allowed!");
 		}
 

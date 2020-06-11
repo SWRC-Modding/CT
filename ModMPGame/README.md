@@ -29,6 +29,7 @@ This service adds support for basic admin commands like kicking or banning playe
 |ban _&lt;player name>_     |bans the ip address of the specified player|
 |promote _&lt;player name>_ |gives a player admin rights|
 |demote _&lt;player name>_  |removes a player's admin rights|
+|servertravel _&lt;map and options>_  |switches the server to the specified map with optional parameters|
 
 ### BotSupport
 As the name already implies, this service adds support for bots. They are treated like human players and show up on the scoreboard. In order for the bots to be able to walk around the map there need to be path nodes. This is not a problem when playing on custom maps since they can easily be added by the author but stock maps shouldn't be modified or else players who don't have the modified versions are unable to join. The _BotSupport_ service provides functionality to import or place path nodes during gameplay so that modifying stock maps is not necessary. There are a few ways to add the paths:
@@ -64,7 +65,7 @@ All services inherit from _AdminService_. It contains some convenience functions
 Checking for a command is done using the _ParseCommand_ function. It checks if the input string starts with the specified command and returns true if that is the case. It also removes the parsed command from the input so that it is easier to get the commands arguments if there are any.
 _ParseCommand_ can be used in an if else chain to cover all available commands:
 ```cpp
-function bool ExecCmd(PlayerController Player, String Cmd){
+function bool ExecCmd(String Cmd, optional PlayerController PC){ // PC can be 'None' if the command is executed via the server console
 	if(ParseCommand(Cmd, "FIRSTCMD")){
 		// Cmd now contains the rest of the input without the leading "FIRSTCMD"
 

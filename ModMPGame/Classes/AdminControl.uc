@@ -11,13 +11,13 @@ function PostBeginPlay(){
 
 	Level.Game.BroadcastHandlerClass = "ModMPGame.AdminControlBroadcastHandler";
 
-	if(Level.Game.BroadcastHandler != None){ // If this is being called after the LevelInfo has been set up, we have to replace the broadcast handler
+	if(Level.Game.BroadcastHandler != None){ // If this is called after the LevelInfo has been set up, we have to replace the broadcast handler
 		Level.Game.BroadcastHandler.Destroy();
-		Level.Game.BroadcastHandler = Spawn(Class'AdminControlBroadcastHandler');
+		Level.Game.BroadcastHandler = Spawn(class'AdminControlBroadcastHandler');
 	}
 
 	for(i = 0; i < ServiceClasses.Length; ++i){
-		ServiceClass = Class<AdminService>(DynamicLoadObject(ServiceClasses[i], Class'Class'));
+		ServiceClass = Class<AdminService>(DynamicLoadObject(ServiceClasses[i], class'Class'));
 
 		if(ServiceClass == None){
 			Warn("'" $ ServiceClasses[i] $ "' is not a subclass of AdminService");
@@ -45,27 +45,16 @@ function ExecCmd(PlayerController PC, String Cmd){
 	if(Viewport(PC.Player) != None) // The host is always an admin and doesn't need to log in
 		PC.PlayerReplicationInfo.bAdmin = true;
 
-	if(PC.PlayerReplicationInfo.bAdmin){
-		for(i = 0; i < Services.Length; ++i)
-			RecognizedCmd = Services[i].ExecCmd(PC, Cmd) || RecognizedCmd;
-	}else{ // Player is not logged in, so only forward the command to services that have bRequiresAdminPermissions set to false
-		for(i = 0; i < Services.Length; ++i){
-			if(!Services[i].bRequiresAdminPermissions)
-				RecognizedCmd = Services[i].ExecCmd(PC, Cmd) || RecognizedCmd;
+	for(i = 0; i < Services.Length; ++i){
+		if(PC.PlayerReplicationInfo.bAdmin || !Services[i].bRequiresAdminPermissions){
+			if(Services[i].ExecCmd(PC, Cmd)){
+				Services[i].SaveConfig();
+				RecognizedCmd = true;
+			}
 		}
 	}
 
-	if(RecognizedCmd){
-		/*
-		 * Commands might change the value of config properties which are then saved.
-		 * Ideally SaveConfig would be called at the end of the game but I haven't found a way to do this
- 		* (overriding 'Destroyed' doesn't work since it is never called on this actor).
-		 */
-		SaveConfig();
-
-		for(i = 0; i < Services.Length; ++i)
-			Services[i].SaveConfig();
-	}else{
+	if(!RecognizedCmd){
 		if(PC.PlayerReplicationInfo.bAdmin)
 			PC.ClientMessage("Unrecognized command");
 		else

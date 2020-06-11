@@ -5,7 +5,7 @@
  */
 class AdminService extends Actor abstract native config(ModMPGame);
 
-var bool bRequiresAdminPermissions; // Commands are only forwarded to the service if the issuer is logged in as an administrator
+var() bool bRequiresAdminPermissions; // Commands are only forwarded to the service if the issuer is logged in as an administrator
 
 native static final function bool ParseCommand(out String Stream, String Match);
 native static final function bool ParseIntParam(String Stream, String Match, out int Value);

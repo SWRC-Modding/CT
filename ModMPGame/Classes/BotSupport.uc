@@ -55,7 +55,7 @@ event SetupPatrolRoute(){
 function AddBot(){
 	local MPBot Bot;
 
-	Bot = Spawn(class'MPBot', Self);
+	Bot = Spawn(class'MPBot', self);
 
 	if(Bot != None){
 		Bot.PlayerReplicationInfo.PlayerName = "Bot" $ Bots.Length;

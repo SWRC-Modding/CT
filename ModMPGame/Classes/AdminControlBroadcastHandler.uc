@@ -11,13 +11,18 @@ function PostBeginPlay(){
 
 function Broadcast(Actor Sender, coerce string Msg, optional name Type){
 	local String Cmd;
+	local PlayerController PC;
 
-	if(InStr(Msg, "/") == 0){
+	PC = PlayerController(Sender);
+
+	if(PC != None && InStr(Msg, "/") == 0){
 		Cmd = Right(Msg, Len(Msg) - 1);
-		Log(PlayerController(Sender).PlayerReplicationInfo.PlayerName $ ": " $ Cmd, 'Command');
-		AdminControl.ExecCmd(Cmd, PlayerController(Sender));
+		Log(PC.PlayerReplicationInfo.PlayerName $ ": " $ Cmd, 'Command');
+		AdminControl.ExecCmd(Cmd, PC);
 	}else{
-		Log(PlayerController(Sender).PlayerReplicationInfo.PlayerName $ ": " $ Msg, 'ChatMessage');
+		if(PC != None)
+			Log(PlayerController(Sender).PlayerReplicationInfo.PlayerName $ ": " $ Msg, 'ChatMessage');
+
 		Super.Broadcast(Sender, Msg, Type);
 	}
 }

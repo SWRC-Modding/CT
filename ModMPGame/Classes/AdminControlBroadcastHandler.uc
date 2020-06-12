@@ -14,8 +14,10 @@ function Broadcast(Actor Sender, coerce string Msg, optional name Type){
 
 	if(InStr(Msg, "/") == 0){
 		Cmd = Right(Msg, Len(Msg) - 1);
+		Log(PlayerController(Sender).PlayerReplicationInfo.PlayerName $ ": " $ Cmd, 'Command');
 		AdminControl.ExecCmd(Cmd, PlayerController(Sender));
 	}else{
+		Log(PlayerController(Sender).PlayerReplicationInfo.PlayerName $ ": " $ Msg, 'ChatMessage');
 		Super.Broadcast(Sender, Msg, Type);
 	}
 }

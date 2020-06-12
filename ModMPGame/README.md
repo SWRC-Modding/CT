@@ -6,7 +6,7 @@ A service implementer can decide whether everybody can execute commands or only 
 
 ## Installation
 1. Copy the content of the mod's _GameData_ directory into the one from your SWRC installation.
-2. Edit System.ini: Find the two occurences of 'ServerActors=...' (they're not next to each other!) under _Engine.GameEngine_ and replace the '=' with '+='. Then add a new entry: 'ServerActors+=ModMPGame.AdminControl'
+2. Edit System.ini: Find the two occurences of 'ServerActors=...' (they're not next to each other!) under _Engine.GameEngine_ and replace the '=' with '+='. Comment out or remove the one with _IpDrv.UdpBeacon_ and add a new entry: 'ServerActors+=ModMPGame.AdminControl'
 
 ## Default services
 

@@ -1,5 +1,6 @@
 class AdminControl extends Actor native config(ModMPGame);
 
+var() config bool          bAdminsCanPause;
 var() config array<String> ServiceClasses;
 
 var array<AdminService> Services;
@@ -9,6 +10,7 @@ function PostBeginPlay(){
 	local Class<AdminService> ServiceClass;
 	local AdminService Service;
 
+	Level.Game.bAdminCanPause = bAdminsCanPause;
 	Level.Game.BroadcastHandlerClass = "ModMPGame.AdminControlBroadcastHandler";
 
 	if(Level.Game.BroadcastHandler != None){ // If this is called after the LevelInfo has been set up, we have to replace the broadcast handler

@@ -20,7 +20,8 @@
 class MODMPGAME_API AAdminControl : public AActor
 {
 public:
-    TArrayNoInit<FString> ServiceClasses;
+    BITFIELD bAdminsCanPause:1 GCC_PACK(4);
+    TArrayNoInit<FString> ServiceClasses GCC_PACK(4);
     TArrayNoInit<class AAdminService*> Services;
     UBOOL ExecCmd(FString const& Cmd, class APlayerController* PC)
     {

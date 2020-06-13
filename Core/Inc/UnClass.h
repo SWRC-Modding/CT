@@ -226,7 +226,7 @@ class CORE_API UStruct : public UField{
 
 	// Variables.
 	char         Pad1[4]; // Padding
-	UField*      SuperField;
+	UStruct*     SuperStruct;
 	UTextBuffer* ScriptText;
 	UTextBuffer* CppText;
 	UField*      Children;

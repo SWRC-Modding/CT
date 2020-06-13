@@ -454,7 +454,7 @@ T* FindField(UStruct* Owner, const TCHAR* FieldName){
  * See if this object belongs to the specified class.
  */
 inline UBOOL UObject::IsA(UClass* SomeBase) const{
-	for(UClass* TempClass = Class; TempClass; TempClass = static_cast<UClass*>(TempClass->SuperField)){
+	for(UClass* TempClass = Class; TempClass; TempClass = static_cast<UClass*>(TempClass->SuperStruct)){
 		if(TempClass == SomeBase)
 			return 1;
 	}

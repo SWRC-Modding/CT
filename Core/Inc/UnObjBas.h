@@ -14,48 +14,48 @@
  * Flags for loading objects.
  */
 enum ELoadFlags{
-	LOAD_None			= 0x0000,	// No flags.
-	LOAD_NoFail			= 0x0001,	// Critical error if load fails.
-	LOAD_NoWarn			= 0x0002,	// Don't display warning if load fails.
-	LOAD_Throw			= 0x0008,	// Throw exceptions upon failure.
-	LOAD_Verify			= 0x0010,	// Only verify existance; don't actually load.
-	LOAD_AllowDll		= 0x0020,	// Allow plain DLLs.
-	LOAD_DisallowFiles	= 0x0040,	// Don't load from file.
-	LOAD_NoVerify		= 0x0080,   // Don't verify imports yet.
-	LOAD_Forgiving		= 0x1000,   // Forgive missing imports (set them to NULL).
-	LOAD_Quiet			= 0x2000,   // No log warnings.
-	LOAD_NoRemap		= 0x4000,   // No remapping of packages.
-	LOAD_Propagate		= 0,
+	LOAD_None          = 0x0000, // No flags.
+	LOAD_NoFail        = 0x0001, // Critical error if load fails.
+	LOAD_NoWarn        = 0x0002, // Don't display warning if load fails.
+	LOAD_Throw         = 0x0008, // Throw exceptions upon failure.
+	LOAD_Verify        = 0x0010, // Only verify existance; don't actually load.
+	LOAD_AllowDll      = 0x0020, // Allow plain DLLs.
+	LOAD_DisallowFiles = 0x0040, // Don't load from file.
+	LOAD_NoVerify      = 0x0080, // Don't verify imports yet.
+	LOAD_Forgiving     = 0x1000, // Forgive missing imports (set them to NULL).
+	LOAD_Quiet         = 0x2000, // No log warnings.
+	LOAD_NoRemap       = 0x4000, // No remapping of packages.
+	LOAD_Propagate     = 0
 };
 
 /*
  * Package flags.
  */
 enum EPackageFlags{
-	PKG_AllowDownload	= 0x0001,	// Allow downloading package.
-	PKG_ClientOptional	= 0x0002,	// Purely optional for clients.
-	PKG_ServerSideOnly	= 0x0004,   // Only needed on the server side.
-	PKG_BrokenLinks		= 0x0008,   // Loaded from linker with broken import links.
-	PKG_Unsecure		= 0x0010,   // Not trusted.
-	PKG_Need			= 0x8000,	// Client needs to download this package.
+	PKG_AllowDownload  = 0x0001, // Allow downloading package.
+	PKG_ClientOptional = 0x0002, // Purely optional for clients.
+	PKG_ServerSideOnly = 0x0004, // Only needed on the server side.
+	PKG_BrokenLinks    = 0x0008, // Loaded from linker with broken import links.
+	PKG_Unsecure       = 0x0010, // Not trusted.
+	PKG_Need           = 0x8000  // Client needs to download this package.
 };
 
 //
 // Internal enums.
 //
-enum ENativeConstructor		{ EC_NativeConstructor };
-enum EStaticConstructor		{ EC_StaticConstructor };
-enum EInternal				{ EC_Internal };
-enum ECppProperty			{ EC_CppProperty };
-enum EInPlaceConstructor	{ EC_InPlaceConstructor };
+enum ENativeConstructor  { EC_NativeConstructor };
+enum EStaticConstructor  { EC_StaticConstructor };
+enum EInternal           { EC_Internal };
+enum ECppProperty        { EC_CppProperty };
+enum EInPlaceConstructor { EC_InPlaceConstructor };
 
 /*
  * Result of GotoState.
  */
 enum EGotoState{
-	GOTOSTATE_NotFound	= 0,
-	GOTOSTATE_Success	= 1,
-	GOTOSTATE_Preempted = 2,
+	GOTOSTATE_NotFound  = 0,
+	GOTOSTATE_Success   = 1,
+	GOTOSTATE_Preempted = 2
 };
 
 /*
@@ -63,42 +63,42 @@ enum EGotoState{
  */
 enum EClassFlags{
 	// Base flags.
-	CLASS_None				 = 0x00000000,
-	CLASS_Abstract			 = 0x00000001, // Class is abstract and can't be instantiated directly.
-	CLASS_Compiled			 = 0x00000002, // Script has been compiled successfully.
-	CLASS_Config			 = 0x00000004, // Load object configuration at construction time.
-	CLASS_Transient			 = 0x00000008, // This object type can't be saved; null it out at save time.
-	CLASS_Parsed			 = 0x00000010, // Successfully parsed.
-	CLASS_Localized			 = 0x00000020, // Class contains localized text.
-	CLASS_SafeReplace		 = 0x00000040, // Objects of this class can be safely replaced with default or NULL.
-	CLASS_RuntimeStatic		 = 0x00000080, // Objects of this class are static during gameplay.
-	CLASS_NoExport			 = 0x00000100, // Don't export to C++ header.
-	CLASS_Placeable			 = 0x00000200, // Allow users to create in the editor.
-	CLASS_PerObjectConfig	 = 0x00000400, // Handle object configuration on a per-object basis, rather than per-class.
-	CLASS_NativeReplication	 = 0x00000800, // Replication handled in C++.
-	CLASS_EditInlineNew		 = 0x00001000, // Class can be constructed from editinline New button.
+	CLASS_None               = 0x00000000,
+	CLASS_Abstract           = 0x00000001, // Class is abstract and can't be instantiated directly.
+	CLASS_Compiled           = 0x00000002, // Script has been compiled successfully.
+	CLASS_Config             = 0x00000004, // Load object configuration at construction time.
+	CLASS_Transient          = 0x00000008, // This object type can't be saved; null it out at save time.
+	CLASS_Parsed             = 0x00000010, // Successfully parsed.
+	CLASS_Localized          = 0x00000020, // Class contains localized text.
+	CLASS_SafeReplace        = 0x00000040, // Objects of this class can be safely replaced with default or NULL.
+	CLASS_RuntimeStatic      = 0x00000080, // Objects of this class are static during gameplay.
+	CLASS_NoExport           = 0x00000100, // Don't export to C++ header.
+	CLASS_Placeable          = 0x00000200, // Allow users to create in the editor.
+	CLASS_PerObjectConfig    = 0x00000400, // Handle object configuration on a per-object basis, rather than per-class.
+	CLASS_NativeReplication  = 0x00000800, // Replication handled in C++.
+	CLASS_EditInlineNew      = 0x00001000, // Class can be constructed from editinline New button.
 	CLASS_CollapseCategories = 0x00002000, // Display properties in the editor without using categories.
-	CLASS_ExportStructs		 = 0x00004000, // Export structs to <package>Classes.h header file
-	CLASS_IsAUProperty		 = 0x00008000, // IsA UProperty
+	CLASS_ExportStructs      = 0x00004000, // Export structs to <package>Classes.h header file
+	CLASS_IsAUProperty       = 0x00008000, // IsA UProperty
 	CLASS_IsAUObjectProperty = 0x00010000, // IsA UObjectProperty
-	CLASS_IsAUBoolProperty	 = 0x00020000, // IsA UBoolProperty
-	CLASS_IsAUState			 = 0x00040000, // IsA UState
-	CLASS_IsAUFunction		 = 0x00080000, // IsA UFunction
+	CLASS_IsAUBoolProperty   = 0x00020000, // IsA UBoolProperty
+	CLASS_IsAUState          = 0x00040000, // IsA UState
+	CLASS_IsAUFunction       = 0x00080000, // IsA UFunction
 
-	CLASS_NeedsDefProps		 = 0x00100000, // Class needs its defaultproperties imported
-	CLASS_HasComponents		 = 0x00400000, // Class has component properties.
+	CLASS_NeedsDefProps      = 0x00100000, // Class needs its defaultproperties imported
+	CLASS_HasComponents      = 0x00400000, // Class has component properties.
 
-	CLASS_Hidden			 = 0x00800000, // Don't show this class in the editor class browser or edit inline new menus.
-	CLASS_Deprecated		 = 0x01000000, // Don't save objects of this class when serializing
-	CLASS_HideDropDown		 = 0x02000000, // Class not shown in editor drop down for class selection
+	CLASS_Hidden             = 0x00800000, // Don't show this class in the editor class browser or edit inline new menus.
+	CLASS_Deprecated         = 0x01000000, // Don't save objects of this class when serializing
+	CLASS_HideDropDown       = 0x02000000, // Class not shown in editor drop down for class selection
 
-	CLASS_Exported			 = 0x04000000, // Class has been exported to a header file
+	CLASS_Exported           = 0x04000000, // Class has been exported to a header file
 
 
 	// Flags to inherit from base class.
-	CLASS_Inherit		  = CLASS_Transient | CLASS_Config | CLASS_Localized | CLASS_SafeReplace | CLASS_RuntimeStatic | CLASS_PerObjectConfig | CLASS_Placeable | CLASS_IsAUProperty | CLASS_IsAUObjectProperty | CLASS_IsAUBoolProperty | CLASS_IsAUState | CLASS_IsAUFunction | CLASS_HasComponents | CLASS_Deprecated,
+	CLASS_Inherit         = CLASS_Transient | CLASS_Config | CLASS_Localized | CLASS_SafeReplace | CLASS_RuntimeStatic | CLASS_PerObjectConfig | CLASS_Placeable | CLASS_IsAUProperty | CLASS_IsAUObjectProperty | CLASS_IsAUBoolProperty | CLASS_IsAUState | CLASS_IsAUFunction | CLASS_HasComponents | CLASS_Deprecated,
 	CLASS_RecompilerClear = CLASS_Inherit | CLASS_Abstract | CLASS_NoExport | CLASS_NativeReplication,
-	CLASS_ScriptInherit	  = CLASS_Inherit | CLASS_EditInlineNew | CLASS_CollapseCategories,
+	CLASS_ScriptInherit   = CLASS_Inherit | CLASS_EditInlineNew | CLASS_CollapseCategories
 };
 
 /*
@@ -109,40 +109,40 @@ enum EClassFlags{
  */
 enum EPropertyFlags{
 	// Regular flags.
-	CPF_Edit			 = 0x00000001, // Property is user-settable in the editor.
-	CPF_Const			 = 0x00000002, // Actor's property always matches class's default actor property.
-	CPF_Input			 = 0x00000004, // Variable is writable by the input system.
-	CPF_ExportObject	 = 0x00000008, // Object can be exported with actor.
-	CPF_OptionalParm	 = 0x00000010, // Optional parameter (if CPF_Param is set).
-	CPF_Net				 = 0x00000020, // Property is relevant to network replication.
-	CPF_EditConstArray	 = 0x00000040, // Prevent adding/removing of items from dynamic a array in the editor.
-	CPF_Parm			 = 0x00000080, // Function/When call parameter.
-	CPF_OutParm			 = 0x00000100, // Value is copied out after function call.
-	CPF_SkipParm		 = 0x00000200, // Property is a short-circuitable evaluation function parm.
-	CPF_ReturnParm		 = 0x00000400, // Return value.
-	CPF_CoerceParm		 = 0x00000800, // Coerce args into this function parameter.
-	CPF_Native			 = 0x00001000, // Property is native: C++ code is responsible for serializing it.
-	CPF_Transient		 = 0x00002000, // Property is transient: shouldn't be saved, zero-filled at load time.
-	CPF_Config			 = 0x00004000, // Property should be loaded/saved as permanent profile.
-	CPF_Localized		 = 0x00008000, // Property should be loaded as localizable text.
-	CPF_Travel			 = 0x00010000, // Property travels across levels/servers.
-	CPF_EditConst		 = 0x00020000, // Property is uneditable in the editor.
-	CPF_GlobalConfig	 = 0x00040000, // Load config from base class, not subclass.
-	CPF_OnDemand		 = 0x00100000, // Object or dynamic array loaded on demand only.
-	CPF_New				 = 0x00200000, // Automatically create inner object.
-	CPF_NeedCtorLink	 = 0x00400000, // Fields need construction/destruction.
-	CPF_NoExport		 = 0x00800000, // Property should not be exported to the native class header file.
-	CPF_Button			 = 0x01000000, // String that has "Go" button which allows it to call functions from UEd.
-	CPF_CommentString	 = 0x02000000, // Property has a comment string visible via the property browser
-	CPF_EditInline		 = 0x04000000, // Edit this object reference inline.
-	CPF_EdFindable		 = 0x08000000, // References are set by clicking on actors in the editor viewports.
-	CPF_EditInlineUse	 = 0x10000000, // EditInline with Use button.
-	CPF_Deprecated		 = 0x20000000, // Property is deprecated.  Read it from an archive, but don't save it.
+	CPF_Edit             = 0x00000001, // Property is user-settable in the editor.
+	CPF_Const            = 0x00000002, // Actor's property always matches class's default actor property.
+	CPF_Input            = 0x00000004, // Variable is writable by the input system.
+	CPF_ExportObject     = 0x00000008, // Object can be exported with actor.
+	CPF_OptionalParm     = 0x00000010, // Optional parameter (if CPF_Param is set).
+	CPF_Net              = 0x00000020, // Property is relevant to network replication.
+	CPF_EditConstArray   = 0x00000040, // Prevent adding/removing of items from dynamic a array in the editor.
+	CPF_Parm             = 0x00000080, // Function/When call parameter.
+	CPF_OutParm          = 0x00000100, // Value is copied out after function call.
+	CPF_SkipParm         = 0x00000200, // Property is a short-circuitable evaluation function parm.
+	CPF_ReturnParm       = 0x00000400, // Return value.
+	CPF_CoerceParm       = 0x00000800, // Coerce args into this function parameter.
+	CPF_Native           = 0x00001000, // Property is native: C++ code is responsible for serializing it.
+	CPF_Transient        = 0x00002000, // Property is transient: shouldn't be saved, zero-filled at load time.
+	CPF_Config           = 0x00004000, // Property should be loaded/saved as permanent profile.
+	CPF_Localized        = 0x00008000, // Property should be loaded as localizable text.
+	CPF_Travel           = 0x00010000, // Property travels across levels/servers.
+	CPF_EditConst        = 0x00020000, // Property is uneditable in the editor.
+	CPF_GlobalConfig     = 0x00040000, // Load config from base class, not subclass.
+	CPF_OnDemand         = 0x00100000, // Object or dynamic array loaded on demand only.
+	CPF_New              = 0x00200000, // Automatically create inner object.
+	CPF_NeedCtorLink     = 0x00400000, // Fields need construction/destruction.
+	CPF_NoExport         = 0x00800000, // Property should not be exported to the native class header file.
+	CPF_Button           = 0x01000000, // String that has "Go" button which allows it to call functions from UEd.
+	CPF_CommentString    = 0x02000000, // Property has a comment string visible via the property browser
+	CPF_EditInline       = 0x04000000, // Edit this object reference inline.
+	CPF_EdFindable       = 0x08000000, // References are set by clicking on actors in the editor viewports.
+	CPF_EditInlineUse    = 0x10000000, // EditInline with Use button.
+	CPF_Deprecated       = 0x20000000, // Property is deprecated.  Read it from an archive, but don't save it.
 	CPF_EditInlineNotify = 0x40000000, // EditInline, notify outer object on editor change.
 
 	// Combinations of flags.
-	CPF_ParmFlags			  = CPF_OptionalParm | CPF_Parm | CPF_OutParm | CPF_SkipParm | CPF_ReturnParm | CPF_CoerceParm,
-	CPF_PropagateFromStruct	  = CPF_Const | CPF_Native | CPF_Transient,
+	CPF_ParmFlags             = CPF_OptionalParm | CPF_Parm | CPF_OutParm | CPF_SkipParm | CPF_ReturnParm | CPF_CoerceParm,
+	CPF_PropagateFromStruct   = CPF_Const | CPF_Native | CPF_Transient,
 	CPF_PropagateToArrayInner = CPF_ExportObject | CPF_EditInline | CPF_EditInlineUse | CPF_EditInlineNotify | CPF_Localized
 };
 
@@ -150,47 +150,47 @@ enum EPropertyFlags{
  * Flags describing an object instance.
  */
 enum EObjectFlags{
-	RF_Transactional   = 0x00000001,	// Object is transactional.
-	RF_Unreachable	   = 0x00000002,	// Object is not reachable on the object graph.
-	RF_Public		   = 0x00000004,	// Object is visible outside its package.
-	RF_TagImp		   = 0x00000008,	// Temporary import tag in load/save.
-	RF_TagExp		   = 0x00000010,	// Temporary export tag in load/save.
-	RF_SourceModified  = 0x00000020,	// Modified relative to source files.
-	RF_TagGarbage	   = 0x00000040,	// Check during garbage collection.
+	RF_Transactional   = 0x00000001, // Object is transactional.
+	RF_Unreachable     = 0x00000002, // Object is not reachable on the object graph.
+	RF_Public          = 0x00000004, // Object is visible outside its package.
+	RF_TagImp          = 0x00000008, // Temporary import tag in load/save.
+	RF_TagExp          = 0x00000010, // Temporary export tag in load/save.
+	RF_SourceModified  = 0x00000020, // Modified relative to source files.
+	RF_TagGarbage      = 0x00000040, // Check during garbage collection.
 	//
 	//
-	RF_NeedLoad		   = 0x00000200,	// During load, indicates object needs loading.
-	RF_HighlightedName = 0x00000400,	// A hardcoded name which should be syntax-highlighted.
-	RF_EliminateObject = 0x00000400,	// NULL out references to this during garbage collecion.
-	RF_InSingularFunc  = 0x00000800,	// In a singular function.
-	RF_RemappedName	   = 0x00000800,	// Name is remapped.
-	RF_Suppress		   = 0x00001000,	// warning: Mirrored in UnName.h. Suppressed log name.
-	RF_StateChanged	   = 0x00001000,	// Object did a state change.
-	RF_InEndState	   = 0x00002000,	// Within an EndState call.
-	RF_Transient	   = 0x00004000,	// Don't save object.
-	RF_Preloading	   = 0x00008000,	// Data is being preloaded from file.
-	RF_LoadForClient   = 0x00010000,	// In-file load for client.
-	RF_LoadForServer   = 0x00020000,	// In-file load for client.
-	RF_LoadForEdit	   = 0x00040000,	// In-file load for client.
-	RF_Standalone	   = 0x00080000,	// Keep object around for editing even if unreferenced.
-	RF_NotForClient	   = 0x00100000,	// Don't load this object for the game client.
-	RF_NotForServer	   = 0x00200000,	// Don't load this object for the game server.
-	RF_NotForEdit	   = 0x00400000,	// Don't load this object for the editor.
-	RF_Destroyed	   = 0x00800000,	// Object Destroy has already been called.
-	RF_NeedPostLoad	   = 0x01000000,	// Object needs to be postloaded.
-	RF_HasStack		   = 0x02000000,	// Has execution stack.
-	RF_Native		   = 0x04000000,	// Native (UClass only).
-	RF_Marked		   = 0x08000000,	// Marked (for debugging).
-	RF_ErrorShutdown   = 0x10000000,	// ShutdownAfterError called.
-	RF_DebugPostLoad   = 0x20000000,	// For debugging Serialize calls.
-	RF_DebugSerialize  = 0x40000000,	// For debugging Serialize calls.
-	RF_DebugDestroy	   = 0x80000000,	// For debugging Destroy calls.
+	RF_NeedLoad        = 0x00000200, // During load, indicates object needs loading.
+	RF_HighlightedName = 0x00000400, // A hardcoded name which should be syntax-highlighted.
+	RF_EliminateObject = 0x00000400, // NULL out references to this during garbage collecion.
+	RF_InSingularFunc  = 0x00000800, // In a singular function.
+	RF_RemappedName    = 0x00000800, // Name is remapped.
+	RF_Suppress        = 0x00001000, // warning: Mirrored in UnName.h. Suppressed log name.
+	RF_StateChanged    = 0x00001000, // Object did a state change.
+	RF_InEndState      = 0x00002000, // Within an EndState call.
+	RF_Transient       = 0x00004000, // Don't save object.
+	RF_Preloading      = 0x00008000, // Data is being preloaded from file.
+	RF_LoadForClient   = 0x00010000, // In-file load for client.
+	RF_LoadForServer   = 0x00020000, // In-file load for client.
+	RF_LoadForEdit     = 0x00040000, // In-file load for client.
+	RF_Standalone      = 0x00080000, // Keep object around for editing even if unreferenced.
+	RF_NotForClient    = 0x00100000, // Don't load this object for the game client.
+	RF_NotForServer    = 0x00200000, // Don't load this object for the game server.
+	RF_NotForEdit      = 0x00400000, // Don't load this object for the editor.
+	RF_Destroyed       = 0x00800000, // Object Destroy has already been called.
+	RF_NeedPostLoad    = 0x01000000, // Object needs to be postloaded.
+	RF_HasStack        = 0x02000000, // Has execution stack.
+	RF_Native          = 0x04000000, // Native (UClass only).
+	RF_Marked          = 0x08000000, // Marked (for debugging).
+	RF_ErrorShutdown   = 0x10000000, // ShutdownAfterError called.
+	RF_DebugPostLoad   = 0x20000000, // For debugging Serialize calls.
+	RF_DebugSerialize  = 0x40000000, // For debugging Serialize calls.
+	RF_DebugDestroy	   = 0x80000000, // For debugging Destroy calls.
 
-	RF_ContextFlags		= RF_NotForClient | RF_NotForServer | RF_NotForEdit, // All context flags.
+	RF_ContextFlags     = RF_NotForClient | RF_NotForServer | RF_NotForEdit, // All context flags.
 	RF_LoadContextFlags = RF_LoadForClient | RF_LoadForServer | RF_LoadForEdit, // Flags affecting loading.
-	RF_Load				= RF_ContextFlags | RF_LoadContextFlags | RF_Public | RF_Standalone | RF_Native | RF_SourceModified | RF_Transactional | RF_HasStack, // Flags to load from Unrealfiles.
-	RF_Keep				= RF_Native | RF_Marked, // Flags to persist across loads.
-	RF_ScriptMask		= RF_Transactional | RF_Public | RF_Transient | RF_NotForClient | RF_NotForServer | RF_NotForEdit // Script-accessible flags.
+	RF_Load             = RF_ContextFlags | RF_LoadContextFlags | RF_Public | RF_Standalone | RF_Native | RF_SourceModified | RF_Transactional | RF_HasStack, // Flags to load from Unrealfiles.
+	RF_Keep             = RF_Native | RF_Marked, // Flags to persist across loads.
+	RF_ScriptMask       = RF_Transactional | RF_Public | RF_Transient | RF_NotForClient | RF_NotForServer | RF_NotForEdit // Script-accessible flags.
 };
 
 /*----------------------------------------------------------------------------
@@ -299,8 +299,8 @@ public:
 	protected: cls(){} public:
 
 // Guard macros.
-#define unguardobjSlow		unguardfSlow(("(%s)", GetFullName()))
-#define unguardobj			unguardf(("(%s)", GetFullName()))
+#define unguardobjSlow unguardfSlow(("(%s)", GetFullName()))
+#define unguardobj     unguardf(("(%s)", GetFullName()))
 
 //Verify the a class definition and C++ definition match up.
 #define VERIFY_CLASS_OFFSET(Pre, ClassName, Member) \
@@ -313,7 +313,6 @@ public:
 #define VERIFY_CLASS_SIZE(ClassName) \
 	{if(sizeof(ClassName) != ClassName::StaticClass()->GetPropertiesSize()) \
 		appErrorf("Class %s size mismatch: Script=%i C++=%i", #ClassName, ClassName::StaticClass()->GetPropertiesSize(), sizeof(ClassName));}
-	//check(sizeof(ClassName) == ClassName::StaticClass()->GetPropertiesSize());
 
 //Declare the base UObject class.
 #define DECLARE_BASE_CLASS(TClass, TSuperClass, TStaticFlags, TPackage) \
@@ -327,7 +326,7 @@ public: \
 		{ return &PrivateStaticClass; } \
 	void* operator new(size_t Size, UObject* Outer = (UObject*)GetTransientPackage(), FName Name = NAME_None, DWORD SetFlags = 0) \
 		{ return StaticAllocateObject(StaticClass(), Outer, Name, SetFlags); } \
-	void* operator new(unsigned int Size, EInternal* Mem) \
+	void* operator new(size_t Size, EInternal* Mem) \
 		{ return (void*)Mem; } \
 	static const char* StaticPackageName(){ return #TPackage; }
 
@@ -417,36 +416,36 @@ class CORE_API UObject{
 
 private:
 	// Internal per-object variables.
-	INT						Index;					// Index of object into table.
-	UObject*				HashNext;				// Next object in this hash bin.
-	FStateFrame*			StateFrame;				// Main script execution stack.
-	ULinkerLoad*			_Linker;				// Linker it came from, or NULL if none.
-	INT						_LinkerIndex;			// Index of this object in the linker's export map.
-	UObject*				Outer;					// Object this object resides in.
-	DWORD					ObjectFlags;			// Private EObjectFlags used by object manager.
-	FName					Name;					// Name of the object.
-	UClass*					Class;	  				// Class the object belongs to.
+	INT          Index;        // Index of object into table.
+	UObject*     HashNext;     // Next object in this hash bin.
+	FStateFrame* StateFrame;   // Main script execution stack.
+	ULinkerLoad* _Linker;      // Linker it came from, or NULL if none.
+	INT          _LinkerIndex; // Index of this object in the linker's export map.
+	UObject*     Outer;        // Object this object resides in.
+	DWORD        ObjectFlags;  // Private EObjectFlags used by object manager.
+	FName        Name;         // Name of the object.
+	UClass*      Class;        // Class the object belongs to.
 
 	// Private systemwide variables.
-	static UBOOL			GObjInitialized;		// Whether initialized.
-	static UBOOL			GObjNoRegister;			// Registration disable.
-	static INT				GObjBeginLoadCount;		// Count for BeginLoad multiple loads.
-	static INT				GObjRegisterCount;  	// ProcessRegistrants entry counter.
-	static INT				GImportCount;			// Imports for EndLoad optimization.
-	static UObject*			GObjHash[4096];			// Object hash.
-	static UObject*			GAutoRegister;			// Objects to automatically register.
-	static TArray<UObject*> GObjLoaded;				// Objects that might need preloading.
-	static TArray<UObject*>	GObjRoot;				// Top of active object graph.
-	static TArray<UObject*>	GObjObjects;			// List of all objects.
-	static TArray<INT>	  GObjAvailable;			// Available object indices.
-	static TArray<UObject*>	GObjLoaders;			// Array of loaders.
-	static UPackage*		GObjTransientPkg;		// Transient package.
-	static TCHAR			GObjCachedLanguage[32];	// Language;
-	static TArray<UObject*> GObjRegistrants;		// Registrants during ProcessRegistrants call.
-	static TArray<FPreferencesInfo> GObjPreferences;// Prefereces cache.
-	static TArray<FRegistryObjectInfo> GObjDrivers;	// Drivers cache.
-	static TMultiMap<FName,FName>* GObjPackageRemap;// Remap table for loading renamed packages.
-	static TCHAR GLanguage[64];
+	static UBOOL                       GObjInitialized;        // Whether initialized.
+	static UBOOL                       GObjNoRegister;         // Registration disable.
+	static INT                         GObjBeginLoadCount;     // Count for BeginLoad multiple loads.
+	static INT                         GObjRegisterCount;      // ProcessRegistrants entry counter.
+	static INT                         GImportCount;           // Imports for EndLoad optimization.
+	static UObject*                    GObjHash[4096];         // Object hash.
+	static UObject*                    GAutoRegister;          // Objects to automatically register.
+	static TArray<UObject*>            GObjLoaded;             // Objects that might need preloading.
+	static TArray<UObject*>            GObjRoot;               // Top of active object graph.
+	static TArray<UObject*>            GObjObjects;            // List of all objects.
+	static TArray<INT>                 GObjAvailable;          // Available object indices.
+	static TArray<UObject*>            GObjLoaders;            // Array of loaders.
+	static UPackage*                   GObjTransientPkg;       // Transient package.
+	static TCHAR                       GObjCachedLanguage[32]; // Language;
+	static TArray<UObject*>            GObjRegistrants;        // Registrants during ProcessRegistrants call.
+	static TArray<FPreferencesInfo>    GObjPreferences;        // Prefereces cache.
+	static TArray<FRegistryObjectInfo> GObjDrivers;            // Drivers cache.
+	static TMultiMap<FName,FName>*     GObjPackageRemap;       // Remap table for loading renamed packages.
+	static TCHAR                       GLanguage[64];
 
 	// Private functions.
 	void AddObject(INT Index);
@@ -559,6 +558,7 @@ public:
 	void ConditionalPostLoad();
 	void ConditionalShutdownAfterError();
 	UBOOL IsA(UClass* SomeBaseClass) const;
+	UBOOL IsA(FName SomeBaseClassName) const;
 	UBOOL IsIn(UObject* SomeOuter) const;
 	UBOOL IsProbing(FName ProbeName);
 	void Rename(const TCHAR* NewName = NULL);

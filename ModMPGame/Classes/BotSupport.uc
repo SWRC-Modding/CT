@@ -4,6 +4,8 @@ class BotSupport extends AdminService native;
 #exec OBJ LOAD FILE="CTGame.u"
 #exec OBJ LOAD FILE="MPGame.u"
 
+var() config float BotAccuracy;
+
 var config bool bAutoImportPaths;
 var config bool bAutoBuildPaths;
 var config bool bShowPaths;
@@ -12,6 +14,10 @@ var bool bPathsImported; // Paths were imported using ImportPaths
 var Array<vector> NavPtFailLocations; // Used to debug Navigation points which failed to spawn
 var Array<MPBot> Bots;
 var Array<Pawn.PatrolPoint> BotPatrolRoute;
+
+function PostBeginPlay(){
+	ConsoleCommand("set MPPawn Accuracy " $ BotAccuracy);
+}
 
 function bool ExecCmd(String Cmd, optional PlayerController PC){
 	local String ErrorMsg;
@@ -65,7 +71,6 @@ function AddBot(){
 		Bot.PlayerReplicationInfo.PlayerName = "Bot" $ Bots.Length;
 		Bot.bCanGesture = false;
 		Bot.ChosenSkin = Rand(5);
-		Bot.PlayerReplicationInfo.Team.TeamIndex = 255;
 		Bots[Bots.Length] = Bot;
 		BroadcastLocalizedMessage(Level.Game.GameMessageClass, 1, Bot.PlayerReplicationInfo);
 
@@ -102,6 +107,7 @@ cpptext
 
 defaultproperties
 {
+	BotAccuracy=1.0
 	bHidden=true
 	bAutoImportPaths=true
 	bAutoBuildPaths=false

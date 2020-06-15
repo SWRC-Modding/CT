@@ -201,6 +201,13 @@ public:
 	// Basic functions.
 	FString SystemIni, UserIni;
 
+	FString GetWritableFilePath(const TCHAR* Filename){
+		if(UserIni == Filename) // The User.ini is stored in the directory of the current profile if there is one
+			return (GCurrProfilePath.Len() > 0 ? GCurrProfilePath : GGlobalSettingsPath) * FFilename(Filename).GetCleanFilename();
+
+		return GGlobalSettingsPath * FFilename(Filename).GetCleanFilename();
+	}
+
 	FConfigFile* Find(const TCHAR* InFilename, UBOOL CreateIfNotFound){
 		guard(FConfigCacheIni::Find);
 
@@ -223,7 +230,7 @@ public:
 		if(!Result && (CreateIfNotFound || GFileManager->FileSize(*Filename) >= 0)){
 			FConfigFile DefaultsOverride;
 
-			DefaultsOverride.Read(*((Filename == UserIni ? GCurrProfilePath : GGlobalSettingsPath) * Filename.GetCleanFilename()));
+			DefaultsOverride.Read(*GetWritableFilePath(*Filename));
 
 			Result = &Set(*Filename.GetCleanFilename(), FConfigFile());
 			Result->Read(*Filename, &DefaultsOverride);
@@ -502,7 +509,7 @@ public:
 
 		for(TIterator It(*this); It; ++It){
 			if(It.Value().Dirty && (!Filename || It.Key() == Filename)){
-				FString OutFilename = (It.Key() == UserIni ? GCurrProfilePath : GGlobalSettingsPath) * It.Key();
+				FString OutFilename =  GetWritableFilePath(*It.Key());
 				FConfigFile DefaultConfig;
 
 				DefaultConfig.Read(*It.Key());

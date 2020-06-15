@@ -77,4 +77,5 @@ defaultproperties
 	RequiredStates(1)=Class'CTGame.StateInvestigate'
 	RequiredStates(2)=Class'CTGame.StateIdle'
 	RequiredStates(3)=Class'CTGame.StatePatrol'
+	PlayerReplicationInfoClass=class'MPGame.MPPlayerReplicationInfo'
 }

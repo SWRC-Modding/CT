@@ -253,9 +253,21 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 		appInit(appPackage(), *CmdLine, &Log, &Error, &Warn, FConfigCacheIni::Factory, 1);
 
-		// Using Localization from SWRepublicCommando.exe
-		*GConfig->GetSectionPrivate("General", 1, 1, *(FString(appPackage()) + "." + UObject::GetLanguage())) =
-			*GConfig->GetSectionPrivate("General", 1, 1, *(FString("SWRepublicCommando.") + UObject::GetLanguage()));;
+		/*
+		 * Using Localization from SWRepublicCommando.exe
+		 * Without this there would have to be an accompanying (executable name).(lang) file that contains basic localization.
+		 * We simply use the existing one from SWRepublicCommando.exe. That way it also doesn't matter if the executable is renamed.
+		 */
+		{
+			FString LocalizationFile = FString(appPackage()) + "." + UObject::GetLanguage();
+			FString OriginalLocalizationFile = FString("SWRepublicCommando.") + UObject::GetLanguage();
+
+			*GConfig->GetSectionPrivate("General", 1, 1, *LocalizationFile) =*GConfig->GetSectionPrivate("General", 1, 1, *OriginalLocalizationFile);
+
+			// We only need an in-memory copy of the localization so there's no need to save the files to disk
+			GConfig->Detach(*LocalizationFile);
+			GConfig->Detach(*OriginalLocalizationFile);
+		}
 
 		// Using Mod.ModRenderDevice if it exists.
 		{

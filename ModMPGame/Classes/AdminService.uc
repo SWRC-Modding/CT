@@ -12,7 +12,12 @@ native static final function bool ParseIntParam(String Stream, String Match, out
 native static final function bool ParseFloatParam(String Stream, String Match, out float Value);
 native static final function bool ParseStringParam(String Stream, String Match, out String Value);
 
+// Can be overridden to check for custom commands
 native function bool ExecCmd(String Cmd, optional PlayerController PC);
+
+static final function bool IsLocalPlayer(PlayerController PC){
+	return PC != None && Viewport(PC.Player) != None;
+}
 
 cpptext
 {

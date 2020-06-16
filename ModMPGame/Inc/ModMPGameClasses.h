@@ -63,13 +63,15 @@ class MODMPGAME_API ABotSupport : public AAdminService
 {
 public:
     FLOAT BotAccuracy;
+    TArrayNoInit<class AMPBot*> Bots;
     BITFIELD bAutoImportPaths:1 GCC_PACK(4);
     BITFIELD bAutoBuildPaths:1;
     BITFIELD bShowPaths:1;
     BITFIELD bPathsImported:1;
+    BITFIELD bShowPathsOnClients:1;
     TArrayNoInit<FVector> NavPtFailLocations GCC_PACK(4);
-    TArrayNoInit<class AMPBot*> Bots;
     TArrayNoInit<FPatrolPoint> BotPatrolRoute;
+    TArrayNoInit<class AActor*> NavigationPointIcons;
     void SetupPatrolRoute()
     {
         DECLARE_NAME(SetupPatrolRoute);
@@ -94,8 +96,11 @@ class MODMPGAME_API AMPBot : public ACTBot
 {
 public:
     INT ChosenSkin;
+    FLOAT Accuracy;
+    void execUpdatePawnAccuracy(FFrame& Stack, void* Result);
     DECLARE_CLASS(AMPBot,ACTBot,0|CLASS_Config,ModMPGame)
 	virtual int Tick(FLOAT DeltaTime, ELevelTick TickType);
+    DECLARE_NATIVES(AMPBot)
 };
 
 

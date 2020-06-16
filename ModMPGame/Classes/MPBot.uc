@@ -1,6 +1,14 @@
-class MPBot extends CTBot native;
+class MPBot extends CTBot native config(ModMPGame);
 
 var int ChosenSkin;
+var float Accuracy;
+
+native final function UpdatePawnAccuracy();
+
+function SetAccuracy(float NewAcccuracy){
+	Accuracy = NewAcccuracy;
+	UpdatePawnAccuracy();
+}
 
 function PawnDied(Pawn P){
 	Super.PawnDied(P);
@@ -10,8 +18,7 @@ function PawnDied(Pawn P){
 function ServerRestartPlayer(){
 	local MPPawn MPP;
 
-	Super.ServerRestartPlayer();
-	Level.Game.ReStartPlayer(self);
+	Level.Game.RestartPlayer(self);
 
 	MPP = MPPawn(Pawn);
 
@@ -19,6 +26,8 @@ function ServerRestartPlayer(){
 		MPP.ChosenSkin = ChosenSkin;
 		MPP.DoCustomizations();
 		MPP.PatrolRoute = BotSupport(Owner).BotPatrolRoute;
+		UpdatePawnAccuracy();
+		GotoState('BotAI');
 	}
 }
 
@@ -72,7 +81,9 @@ cpptext
 
 defaultproperties
 {
+	Accuracy = 1.0
 	bIsPlayer=true
+	bSmartShot=true
 	RequiredStates(0)=Class'CTGame.StateMercAttack'
 	RequiredStates(1)=Class'CTGame.StateInvestigate'
 	RequiredStates(2)=Class'CTGame.StateIdle'

@@ -575,8 +575,9 @@ bool ABotSupport::ExecCmd(const char* Cmd, class APlayerController* PC){
 }
 
 /*
- * AMPBot::Tick
+ * MPBot
  */
+
 int AMPBot::Tick(FLOAT DeltaTime, ELevelTick TickType){
 	/*
 	 * This is really stupid but for some reason the movement code
@@ -596,6 +597,13 @@ int AMPBot::Tick(FLOAT DeltaTime, ELevelTick TickType){
 	}
 
 	return Super::Tick(DeltaTime, TickType);
+}
+
+void AMPBot::execUpdatePawnAccuracy(FFrame& Stack, void* Result){
+	P_FINISH;
+
+	if(Pawn)
+		Pawn->Accuracy = Accuracy;
 }
 
 /*

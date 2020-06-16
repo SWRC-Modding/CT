@@ -26,5 +26,10 @@ LINK_NATIVES(AAdminService);
 IMPLEMENT_CLASS(ABotSupport);
 
 IMPLEMENT_CLASS(AMPBot);
+FNativeEntry<AMPBot> AMPBot::StaticNativeMap[] = {
+	MAP_NATIVE(UpdatePawnAccuracy,0)
+	{NULL,NULL}
+};
+LINK_NATIVES(AMPBot);
 
 IMPLEMENT_CLASS(APatrolPoint);

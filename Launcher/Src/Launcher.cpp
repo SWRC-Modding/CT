@@ -96,6 +96,8 @@ static struct FExecHook : public FExec{
 			}else{
 				Ar.Logf("Target not found");
 			}
+
+			return 1;
 		}
 
 		return 0;

@@ -1,4 +1,5 @@
-#include <cstdio>
+#include <stdio.h>
+#include <conio.h>
 #include "../../Engine/Inc/Engine.h"
 
 // Variables for ServerCommandlet
@@ -15,15 +16,13 @@ DWORD WINAPI UpdateServerConsoleInput(PVOID){
 	TCHAR Cmd[1024];
 
 	while(GIsRunning && !GIsRequestingExit){
-		if(std::fgets(Cmd, sizeof(Cmd), stdin)){
+		if(_kbhit() && fgets(Cmd, sizeof(Cmd), stdin)){
 			Cmd[appStrlen(Cmd) - 1] = '\0'; // Removing newline added by fgets
 			CurrentCmd = Cmd; // Updating CurrentCmd so that it can be executed by the main thread
-							  // Nothing has been done in terms of thread safety as so far there haven't been any issues...
-
-			// Returning in case user requested exit in order to not get to fgets again
-			if(CurrentCmd == "EXIT" || CurrentCmd == "QUIT")
-				return 0;
 		}
+
+		if(!_kbhit())
+			appSleep(0.1); // To keep the cpu usage down if there's no input
 	}
 
 	return 0;
@@ -72,7 +71,7 @@ void UServerCommandletMain(){
 
 		// UEngine::Tick may load a new map and cause the timing to be reset (this is a good thing)
 		if(appSeconds() < NewTime)
-            SecondStartTime = NewTime = appSeconds();
+			SecondStartTime = NewTime = appSeconds();
 
 		OldTime = NewTime;
 

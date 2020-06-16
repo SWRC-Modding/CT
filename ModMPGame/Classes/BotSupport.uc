@@ -4,6 +4,7 @@ class BotSupport extends AdminService native;
 
 var() config float BotAccuracy;
 var Array<MPBot>   Bots;
+var() config bool  bBotsCountAsPlayers; // If this is true, adding bots will increase the player count of the server
 
 var config bool bAutoImportPaths;
 var config bool bAutoBuildPaths;
@@ -53,24 +54,19 @@ function HidePathsClient(){
 }
 
 function bool ExecCmd(String Cmd, optional PlayerController PC){
-	local String ErrorMsg;
 	local int i;
 
 	if(ParseCommand(Cmd, "ADDBOT")){
-		if(Level.Game.NumPlayers + Level.Game.NumBots < Level.Game.MaxPlayers)
-			AddBot();
-		else{
-			ErrorMsg = "Cannot add more bots. Maximum number of players is " $ Level.Game.MaxPlayers;
-
-			if(PC != None)
-				PC.ClientMessage(ErrorMsg);
-			else
-				Log(ErrorMsg);
-		}
+		AddBot();
 
 		return true;
 	}else if(ParseCommand(Cmd, "REMOVEBOT")){
 		RemoveBot();
+
+		return true;
+	}else if(ParseCommand(Cmd, "REMOVEALLBOTS")){
+		while(Bots.Length > 0)
+			RemoveBot();
 
 		return true;
 	}else if(ParseCommand(Cmd, "SETBOTACCURACY")){
@@ -96,10 +92,8 @@ function bool ExecCmd(String Cmd, optional PlayerController PC){
 
 			return true;
 		}
-	}
-
-	if(Super.ExecCmd(Cmd, PC)){
-		if(bShowPathsOnClients){
+	}else if(Super.ExecCmd(Cmd, PC)){
+		if(bShowPathsOnClients){ // A native command might have changed the navigation points so we have to regenerate the dummy actors
 			HidePathsClient();
 			ShowPathsClient();
 		}
@@ -131,6 +125,12 @@ event SetupPatrolRoute(){
 function AddBot(){
 	local MPBot Bot;
 
+	if(bBotsCountAsPlayers && Level.Game.NumPlayers >= Level.Game.MaxPlayers){
+		Log("Game is full and bBotsCountAsPlayers == true");
+
+		return;
+	}
+
 	Bot = Spawn(class'MPBot', self);
 
 	if(Bot != None){
@@ -138,22 +138,34 @@ function AddBot(){
 		Bot.PlayerReplicationInfo.PlayerName = "Bot" $ Bots.Length;
 		Bot.bCanGesture = false;
 		Bot.ChosenSkin = Rand(5);
+		Bot.GotoState('Dead', 'MPStart');
 		Bots[Bots.Length] = Bot;
+
 		BroadcastLocalizedMessage(Level.Game.GameMessageClass, 1, Bot.PlayerReplicationInfo);
 
-		Bot.GotoState('Dead', 'MPStart');
-
-		++Level.Game.NumBots;
+		if(bBotsCountAsPlayers)
+			++Level.Game.NumPlayers;
+		else
+			++Level.Game.NumBots;
 	}
 }
 
 function RemoveBot(){
-	if(Bots.Length > 0){
-		Bots[Bots.Length - 1].Pawn.Destroy();
-		Bots[Bots.Length - 1].Destroy();
-		Bots.Length = Bots.Length - 1;
+	local int i;
 
-		--Level.Game.NumBots;
+	if(Bots.Length > 0){
+		i = Bots.Length - 1;
+
+		if(Bots[i].Pawn != None)
+			Bots[i].Pawn.Destroy();
+
+		Bots[i].Destroy();
+		Bots.Length = i;
+
+		if(bBotsCountAsPlayers)
+			--Level.Game.NumPlayers;
+		else
+			--Level.Game.NumBots;
 	}
 }
 

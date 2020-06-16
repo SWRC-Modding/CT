@@ -64,7 +64,8 @@ class MODMPGAME_API ABotSupport : public AAdminService
 public:
     FLOAT BotAccuracy;
     TArrayNoInit<class AMPBot*> Bots;
-    BITFIELD bAutoImportPaths:1 GCC_PACK(4);
+    BITFIELD bBotsCountAsPlayers:1 GCC_PACK(4);
+    BITFIELD bAutoImportPaths:1;
     BITFIELD bAutoBuildPaths:1;
     BITFIELD bShowPaths:1;
     BITFIELD bPathsImported:1;

@@ -8,9 +8,6 @@ function bool ExecCmd(String Cmd, optional PlayerController PC){
 
 	if(ParseCommand(Cmd, "CMD")){
 		if(PC == None || bAllowConsoleCommands || IsLocalPlayer(PC)){ // The host can always execute console commands
-			if(PC == None)
-				Log(PC.PlayerReplicationInfo.PlayerName $ " is executing a console command (" $ Cmd $ ")");
-
 			CommandResult = ConsoleCommand(Cmd);
 
 			if(CommandResult != ""){

@@ -467,7 +467,7 @@ CORE_API extern TCHAR                   GTrue[64];                  // Localized
 CORE_API extern TCHAR                   GFalse[64];                 // Localized "false" text
 CORE_API extern TCHAR                   GNone[64];                  // Localized "none" text
 CORE_API extern TCHAR                   GCdPath[];                  // Cd path, if any
-CORE_API extern	DOUBLE                  GSecondsPerCycle;           // Seconds per CPU cycle for this PC
+CORE_API extern DOUBLE                  GSecondsPerCycle;           // Seconds per CPU cycle for this PC
 CORE_API extern DOUBLE                  GLastFNamePurgeTime;
 CORE_API extern DOUBLE                  GTempDouble;                // Used during development for timing
 CORE_API extern void                    (*GTempFunc)(void*);        // Used during development for debug hooks
@@ -507,7 +507,7 @@ CORE_API extern class FArchive*         GDummySave;                 // No-op sav
 CORE_API extern FFileStream*            GFileStream;                //  File streaming
 CORE_API extern FLOAT                   GAudioMaxRadiusMultiplier;  //  Max distance = Radius * GAudioMaxRadiusMultiplier
 CORE_API extern FLOAT                   GAudioDefaultRadius;        //  Default radius for PlayOwnedSound
-CORE_API extern	UDebugger*              GDebugger;                  //  Unrealscript Debugger
+CORE_API extern UDebugger*              GDebugger;                  //  Unrealscript Debugger
 CORE_API extern QWORD                   GMakeCacheIDIndex;          //  Cache ID
 CORE_API extern FString                 GBuildLabel;
 CORE_API extern FString                 GMachineOS;

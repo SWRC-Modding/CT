@@ -7,7 +7,7 @@ function bool ExecCmd(String Cmd, optional PlayerController PC){
 	local String CommandResult;
 
 	if(ParseCommand(Cmd, "CMD")){
-		if(PC == None || bAllowConsoleCommands || Viewport(PC.Player) != None){ // The host can always execute console commands
+		if(PC == None || bAllowConsoleCommands || IsLocalPlayer(PC)){ // The host can always execute console commands
 			if(PC == None)
 				Log(PC.PlayerReplicationInfo.PlayerName $ " is executing a console command (" $ Cmd $ ")");
 

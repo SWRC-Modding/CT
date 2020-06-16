@@ -1,26 +1,60 @@
 class BotSupport extends AdminService native;
 
-#exec OBJ LOAD FILE="Gameplay.u"
-#exec OBJ LOAD FILE="CTGame.u"
 #exec OBJ LOAD FILE="MPGame.u"
 
 var() config float BotAccuracy;
+var Array<MPBot>   Bots;
 
 var config bool bAutoImportPaths;
 var config bool bAutoBuildPaths;
 var config bool bShowPaths;
 
-var bool bPathsImported; // Paths were imported using ImportPaths
-var Array<vector> NavPtFailLocations; // Used to debug Navigation points which failed to spawn
-var Array<MPBot> Bots;
+var bool                    bPathsImported;       // Paths were imported using ImportPaths
+var bool                    bShowPathsOnClients;
+var Array<vector>           NavPtFailLocations;   // Used to debug Navigation points which failed to spawn
 var Array<Pawn.PatrolPoint> BotPatrolRoute;
+var Array<Actor>            NavigationPointIcons; // Intangible actors used to make navigation points visible to clients
 
 function PostBeginPlay(){
-	ConsoleCommand("set MPPawn Accuracy " $ BotAccuracy);
+	BotAccuracy = FClamp(BotAccuracy, 0.0, 1.0);
+}
+
+function ShowPathsClient(){
+	local NavigationPoint N;
+	local Actor A;
+
+	foreach AllActors(class'NavigationPoint', N){
+		A = Spawn(class'IntangibleActor',,, N.Location);
+
+		if(A != None){
+			A.SetDrawType(DT_Sprite);
+
+			if(PlayerStart(N) != None)
+				A.Texture = Texture'Engine.S_Player';
+			else if(CoverPoint(N) != None)
+				A.Texture = Texture'Engine.S_CoverPoint';
+			else if(PatrolPoint(N) != None)
+				A.Texture = Texture'Engine.S_LookTarget';
+			else
+				A.Texture = Texture'Engine.S_Pickup';
+
+			NavigationPointIcons[NavigationPointIcons.Length] = A;
+		}
+	}
+}
+
+function HidePathsClient(){
+	local int i;
+
+	for(i = 0; i < NavigationPointIcons.Length; ++i)
+		NavigationPointIcons[i].Destroy();
+
+	NavigationPointIcons.Length = 0;
 }
 
 function bool ExecCmd(String Cmd, optional PlayerController PC){
 	local String ErrorMsg;
+	local int i;
 
 	if(ParseCommand(Cmd, "ADDBOT")){
 		if(Level.Game.NumPlayers + Level.Game.NumBots < Level.Game.MaxPlayers)
@@ -39,9 +73,41 @@ function bool ExecCmd(String Cmd, optional PlayerController PC){
 		RemoveBot();
 
 		return true;
+	}else if(ParseCommand(Cmd, "SETBOTACCURACY")){
+		BotAccuracy = FClamp(float(Cmd), 0.0, 1.0);
+
+		for(i = 0; i < Bots.Length; ++i)
+			Bots[i].SetAccuracy(BotAccuracy);
+
+		return true;
+	}else if(!IsLocalPlayer(PC)){
+		if(ParseCommand(Cmd, "SHOWPATHS")){
+			if(!bShowPathsOnClients)
+				ShowPathsClient();
+
+			bShowPathsOnClients = true;
+
+			return true;
+		}else if(ParseCommand(Cmd, "HIDEPATHS")){
+			if(bShowPathsOnClients)
+				HidePathsClient();
+
+			bShowPathsOnClients = false;
+
+			return true;
+		}
 	}
 
-	return Super.ExecCmd(Cmd, PC);
+	if(Super.ExecCmd(Cmd, PC)){
+		if(bShowPathsOnClients){
+			HidePathsClient();
+			ShowPathsClient();
+		}
+
+		return true;
+	}
+
+	return false;
 }
 
 event SetupPatrolRoute(){
@@ -56,7 +122,7 @@ event SetupPatrolRoute(){
 			P.RunToNode = true;
 			P.ShootWhileMoving = true;
 			P.OrientToNode = true;
-			P.PatrolPriorityOverride = 0.5;
+			P.PatrolPriorityOverride = 0.3;
 			BotPatrolRoute[BotPatrolRoute.Length] = P;
 		}
 	}
@@ -68,6 +134,7 @@ function AddBot(){
 	Bot = Spawn(class'MPBot', self);
 
 	if(Bot != None){
+		Bot.Accuracy = BotAccuracy;
 		Bot.PlayerReplicationInfo.PlayerName = "Bot" $ Bots.Length;
 		Bot.bCanGesture = false;
 		Bot.ChosenSkin = Rand(5);

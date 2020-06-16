@@ -2,11 +2,11 @@ This is a mod for Star Wars Republic Commando which extends the multiplayer part
 It allows players to enter commands via the ingame chat. Every chat message starting with a '/' is treated as a command which is executed server side.
 All of the mod's functionality is implemented within _services_. Each service exists independently from the others and implements specific functionality. Which commands are available depends on the currently active services.
 Thanks to the modular design, adding a new service is just a matter of creating a new subclass of _AdminService_ and adding it to the list in _ModMPGame.ini_. Existing services can be removed from that list if they are not wanted.
-A service implementer can decide whether everybody can execute commands or only admins. The host of the server is always an admin by default.
+A service implementer can decide whether everybody can execute commands or only admins. The host of a non-dedicated server is always an admin by default.
 
 ## Installation
 1. Copy the content of the mod's _GameData_ directory into the one from your SWRC installation.
-2. Edit System.ini: Find the two occurences of 'ServerActors=...' (they're not next to each other!) under _Engine.GameEngine_ and replace the '=' with '+='. Comment out or remove the one with _IpDrv.UdpBeacon_ and add a new entry: 'ServerActors+=ModMPGame.AdminControl'
+2. Edit System.ini: Find the two occurences of 'ServerActors=...' (they're not next to each other!) under _Engine.GameEngine_ and replace the '=' with '+='. Add the following new entry: 'ServerActors+=ModMPGame.AdminControl'
 
 ## Default services
 
@@ -20,7 +20,7 @@ The login password is specified in the configuration file.
 |logout              |removes the admin permissions|
 
 ### AdminCommands
-This service adds support for basic admin commands like kicking or banning players.
+This service adds support for basic admin commands like kicking or banning players  or switching to a different map.
 
 |command                   |description  |
 |--------------------------|-------------|
@@ -42,6 +42,8 @@ Paths are stored as _.ctp_ files in the _GameData\\Maps\\Paths_ directory. If _b
 |---------------------|-------------|
 |addbot               |adds a new bot to the game|
 |removebot            |removes a bot from the game|
+|removeallbots        |removes all bots from the game|
+|setbotaccuracy _&lt;value>|sets the accuracy for the bots to a value between 0.0 and 1.0|
 |putpathnode          |spawns a PathNode at the player's current position|
 |putcoverpoint        |spawns a CoverPoint at the player's current position|
 |putpatrolpoint       |spawns a PatrolPoint at the player's current position|
@@ -52,13 +54,8 @@ Paths are stored as _.ctp_ files in the _GameData\\Maps\\Paths_ directory. If _b
 |clearpaths           |clears paths but leaves navigation points intact|
 |enableautobuildpaths |enables automatic rebuilding of paths whenever a new navigation point is placed (SLOW!!!)|
 |disableautobuildpaths|opposite of _enableautobuildpaths_|
-
-The following commands are only available for the host of a non-dedicated server:
-
-|command             |description  |
-|--------------------|-------------|
-|showpaths           |draws the navigation points and paths similar to UnrealEd's _View Paths_ option|
-|hidepaths           |the opposite of _showpaths_|
+|showpaths            |draws the navigation points and paths similar to UnrealEd's _View Paths_ option if on a non-dedicated server. Otherwise it makes the navigation points visible|
+|hidepaths            |the opposite of _showpaths_|
 
 ## For Modders
 All services inherit from _AdminService_. It contains some convenience functions for command and parameter parsing but also the _ExecCmd_ function. The service implementation can override it to add custom commands that are specific to that service. The commands are automatically dispatched by the _AdminControl_ and _ExecCmd_ returns a bool value specifying whether the entered command was recognized or not.

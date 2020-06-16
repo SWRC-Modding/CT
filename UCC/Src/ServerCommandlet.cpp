@@ -22,7 +22,7 @@ DWORD WINAPI UpdateServerConsoleInput(PVOID){
 		}
 
 		if(!_kbhit())
-			appSleep(0.1); // To keep the cpu usage down if there's no input
+			appSleep(0.1f); // To keep the cpu usage down if there's no input
 	}
 
 	return 0;

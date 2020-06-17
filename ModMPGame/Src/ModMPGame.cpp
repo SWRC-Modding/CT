@@ -508,6 +508,7 @@ bool ABotSupport::ExecCmd(const char* Cmd, class APlayerController* PC){
 				if(!It->IsA(APlayerStart::StaticClass()) &&
 				   ((PC->Pawn ? PC->Pawn->Location : PC->Location) - It->Location).SizeSquared() <= 40 * 40){
 					XLevel->DestroyActor(*It);
+					BuildPaths();
 
 					break;
 				}
@@ -515,7 +516,6 @@ bool ABotSupport::ExecCmd(const char* Cmd, class APlayerController* PC){
 
 			GIsEditor = IsEditor;
 
-			BuildPaths();
 
 			return true;
 		}else if(ParseCommand(&Cmd, "REMOVEALLNAVIGATIONPOINTS")){

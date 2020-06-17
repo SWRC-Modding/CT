@@ -191,13 +191,15 @@ void ABotSupport::ImportPaths(){
 		return;
 	}
 
-	FString Filename = GetPathFileName(Level->Title);
+	FFilename Filename = GetPathFileName(Level->GetOuter()->GetName());
 	FArchive* Ar = GFileManager->CreateFileReader(*Filename);
 	UBOOL AutoBuildPaths = bAutoBuildPaths;
 
 	bAutoBuildPaths = 0; // Importing paths potentially calls SpawnNavigationPoint many times. This avoids rebuilding for every single one.
 
 	if(Ar){
+		GLog->Logf("Importing paths from %s", *Filename.GetCleanFilename());
+
 		TArray<FNavPtInfo> NavPtInfo;
 
 		*Ar << NavPtInfo;
@@ -223,7 +225,7 @@ void ABotSupport::ImportPaths(){
 
 		delete Ar;
 	}else{
-		GLog->Logf(NAME_Error, "Cannot import paths from file '%s'", *Filename);
+		GLog->Logf(NAME_Error, "Cannot import paths from file '%s'", *Filename.GetCleanFilename());
 	}
 
 	bAutoBuildPaths = AutoBuildPaths;
@@ -266,20 +268,17 @@ void ABotSupport::ExportPaths(){
 	}
 
 	if(NavPts.Num() > 0){
-		if(Level->Title.Len() > 0 && Level->Title != "Untitled"){
-			FFilename Filename = GetPathFileName(Level->Title);
-			GFileManager->MakeDirectory(*Filename.GetPath(), 1);
-			FArchive* Ar = GFileManager->CreateFileWriter(*Filename);
+		FFilename Filename = GetPathFileName(Level->GetOuter()->GetName());
+		GFileManager->MakeDirectory(*Filename.GetPath(), 1);
+		FArchive* Ar = GFileManager->CreateFileWriter(*Filename);
 
-			if(Ar){
-				*Ar << NavPts;
+		if(Ar){
+			GLog->Logf("Exporting paths to %s", *Filename.GetCleanFilename());
+			*Ar << NavPts;
 
-				delete Ar;
-			}else{
-				GLog->Logf(NAME_Error, "Failed to open file '%s' for writing", *Filename);
-			}
+			delete Ar;
 		}else{
-			GLog->Log(NAME_Error, "LevelInfo.Title must not be empty");
+			GLog->Logf(NAME_Error, "Failed to open file '%s' for writing", *Filename.GetCleanFilename());
 		}
 	}else{
 		GLog->Log("Map does not contain any path nodes");

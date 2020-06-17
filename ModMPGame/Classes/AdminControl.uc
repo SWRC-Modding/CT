@@ -1,6 +1,6 @@
 class AdminControl extends Actor native config(ModMPGame);
 
-var() config bool          bAdminsCanPause;
+var() config bool          bAdminsCanPause; // Override for GameInfo.bAdminsCanPause to have everything in one ini; Disabled by default
 var() config array<String> ServiceClasses;
 
 var array<AdminService> Services;
@@ -26,6 +26,9 @@ function PostBeginPlay(){
 
 			continue;
 		}
+
+		if(!Level.Game.IsA(ServiceClass.default.RelevantGameInfoClass.Name))
+			continue; // Service is not relevant for current game mode so don't spawn it
 
 		Log("Spawning actor for admin service class '" $ ServiceClass $ "'");
 		Service = Spawn(ServiceClass);

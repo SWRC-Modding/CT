@@ -47,13 +47,14 @@ public:
 class MODMPGAME_API AAdminService : public AActor
 {
 public:
+    class UClass* RelevantGameInfoClass;
     BITFIELD bRequiresAdminPermissions:1 GCC_PACK(4);
     void execParseCommand(FFrame& Stack, void* Result);
     void execParseIntParam(FFrame& Stack, void* Result);
     void execParseFloatParam(FFrame& Stack, void* Result);
     void execParseStringParam(FFrame& Stack, void* Result);
     void execExecCmd(FFrame& Stack, void* Result);
-    DECLARE_CLASS(AAdminService,AActor,0,ModMPGame)
+    DECLARE_CLASS(AAdminService,AActor,0|CLASS_Config,ModMPGame)
 	virtual bool ExecCmd(const char* Cmd, class APlayerController* PC = NULL){ return false; }
     DECLARE_NATIVES(AAdminService)
 };

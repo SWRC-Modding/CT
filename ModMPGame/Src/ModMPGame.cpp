@@ -476,19 +476,19 @@ bool ABotSupport::ExecCmd(const char* Cmd, class APlayerController* PC){
 	if(ParseCommand(&Cmd, "IMPORTPATHS")){
 		ImportPaths();
 
-		return 1;
+		return true;
 	}else if(ParseCommand(&Cmd, "EXPORTPATHS")){
 		ExportPaths();
 
-		return 1;
+		return true;
 	}else if(ParseCommand(&Cmd, "BUILDPATHS")){
 		BuildPaths();
 
-		return 1;
+		return true;
 	}else if(ParseCommand(&Cmd, "CLEARPATHS")){
 		ClearPaths();
 
-		return 1;
+		return true;
 	}else if(ParseCommand(&Cmd, "ENABLEAUTOBUILDPATHS")){
 		bAutoBuildPaths = 1;
 
@@ -497,29 +497,29 @@ bool ABotSupport::ExecCmd(const char* Cmd, class APlayerController* PC){
 		bAutoBuildPaths = 0;
 
 		return true;
-	}else if(ParseCommand(&Cmd, "REMOVENAVIGATIONPOINT")){
-		UBOOL IsEditor = GIsEditor;
-
-		GIsEditor = 1;
-
-		for(TActorIterator<ANavigationPoint> It(XLevel, IT_StaticActors); It; ++It){
-			if(!It->IsA(APlayerStart::StaticClass()) &&
-			   ((PC->Pawn ? PC->Pawn->Location : PC->Location) - It->Location).SizeSquared() <= 40 * 40){
-				XLevel->DestroyActor(*It);
-
-				break;
-			}
-		}
-
-		GIsEditor = IsEditor;
-
-		BuildPaths();
-
-		return true;
 	}else if(PC){
 		UClass* PutNavPtClass = NULL;
 
-		if(ParseCommand(&Cmd, "REMOVEALLNAVIGATIONPOINTS")){
+		if(ParseCommand(&Cmd, "REMOVENAVIGATIONPOINT")){
+			UBOOL IsEditor = GIsEditor;
+
+			GIsEditor = 1;
+
+			for(TActorIterator<ANavigationPoint> It(XLevel, IT_StaticActors); It; ++It){
+				if(!It->IsA(APlayerStart::StaticClass()) &&
+				   ((PC->Pawn ? PC->Pawn->Location : PC->Location) - It->Location).SizeSquared() <= 40 * 40){
+					XLevel->DestroyActor(*It);
+
+					break;
+				}
+			}
+
+			GIsEditor = IsEditor;
+
+			BuildPaths();
+
+			return true;
+		}else if(ParseCommand(&Cmd, "REMOVEALLNAVIGATIONPOINTS")){
 			UBOOL IsEditor = GIsEditor;
 
 			GIsEditor = 1;

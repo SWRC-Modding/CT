@@ -26,5 +26,6 @@ cpptext
 
 defaultproperties
 {
+	bHidden=true
 	bRequiresAdminPermissions=true
 }

@@ -92,7 +92,9 @@ function bool ExecCmd(String Cmd, optional PlayerController PC){
 
 			return true;
 		}
-	}else if(Super.ExecCmd(Cmd, PC)){
+	}
+
+	if(Super.ExecCmd(Cmd, PC)){
 		if(bShowPathsOnClients){ // A native command might have changed the navigation points so we have to regenerate the dummy actors
 			HidePathsClient();
 			ShowPathsClient();

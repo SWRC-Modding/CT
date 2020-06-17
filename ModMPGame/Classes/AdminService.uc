@@ -1,9 +1,7 @@
-/*
- * Base c l a s s (Can't use the word c l a s s here or the compiler will parse it despite this being a comment. WTF???)
- * for all services that can be instanciated by the AdminControl.
- * When an admin enters a command it is dispatched to all existing admin services.
- */
 class AdminService extends Actor abstract native config(ModMPGame);
+
+// Service will only be spawned if the current game mode is an object of this class or one of its subclasses
+var() static config class<GameInfo> RelevantGameInfoClass;
 
 var() bool bRequiresAdminPermissions; // Commands are only forwarded to the service if the issuer is logged in as an administrator
 
@@ -27,5 +25,6 @@ cpptext
 defaultproperties
 {
 	bHidden=true
+	RelevantGameInfoClass=class'GameInfo'
 	bRequiresAdminPermissions=true
 }

@@ -193,7 +193,7 @@ public:
 
 	virtual ~FRenderResource(){}
 	virtual INT GetRevision(){ return Revision; }
-	virtual bool isUMA(){ return false; }
+	virtual bool IsUMA(){ return false; }
 	virtual bool bPersistantCache(){ return false; }
 
 	QWORD GetCacheId(){ return CacheId; }

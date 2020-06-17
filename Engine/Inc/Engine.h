@@ -35,20 +35,20 @@ ENGINE_API extern FLOAT           GEngineTime;
 	Size of the world.
 -----------------------------------------------------------------------------*/
 
-#define WORLD_MAX		524288.0	/* Maximum size of the world */
-#define HALF_WORLD_MAX	262144.0	/* Half the maximum size of the world */
-#define HALF_WORLD_MAX1	262143.0	/* Half the maximum size of the world - 1*/
-#define MIN_ORTHOZOOM	250.0		/* Limit of 2D viewport zoom in */
-#define MAX_ORTHOZOOM	16000000.0	/* Limit of 2D viewport zoom out */
+#define WORLD_MAX       524288.0   /* Maximum size of the world */
+#define HALF_WORLD_MAX  262144.0   /* Half the maximum size of the world */
+#define HALF_WORLD_MAX1 262143.0   /* Half the maximum size of the world - 1*/
+#define MIN_ORTHOZOOM   250.0      /* Limit of 2D viewport zoom in */
+#define MAX_ORTHOZOOM   16000000.0 /* Limit of 2D viewport zoom out */
 
 /*-----------------------------------------------------------------------------
 	Engine public includes.
 -----------------------------------------------------------------------------*/
 
 #include "UnObj.h"                   // Standard object definitions.
+#include "UnRenderResource.h"
 #include "UnPrim.h"                  // Primitive class.
 #include "UnModel.h"                 // Model class.
-#include "UnRenderResource.h"
 #include "UnMaterial.h"
 #include "UnTex.h"                   // Texture and palette.
 #include "UnAnim.h"

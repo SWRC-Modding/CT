@@ -46,9 +46,9 @@ struct FD3DLockedRect{
  */
 
 struct FTextureMipLevel{
-	UINT       Width;
-	UINT       Height;
-	void*      Pixels;
+	UINT  Width;
+	UINT  Height;
+	void* Pixels;
 };
 
 // Information about the current texture returned by CreateTexture and used by Lock/UnlockRect
@@ -236,27 +236,25 @@ typedef HRESULT(__stdcall*D3DTextureLockRectFunc)(FD3DTexture*, UINT, FD3DLocked
 D3DTextureLockRectFunc D3DTextureLockRect = NULL;
 
 static HRESULT __stdcall D3DTextureLockRectOverride(FD3DTexture* D3DTexture, UINT Level, FD3DLockedRect* pLockedRect, const RECT* pRect, DWORD Flags){
-	check(D3DTextureLockRect);
-	check(D3DTextureGetLevelDesc);
+	if(D3DTexture != CurrentTexture)
+		return D3DTextureLockRect(D3DTexture, Level, pLockedRect, pRect, Flags);
 
-	if(D3DTexture == CurrentTexture){
-		FD3DSurfaceDesc SurfaceDesc;
+	FD3DSurfaceDesc SurfaceDesc;
+	HRESULT GetLevelDescResult = D3DTextureGetLevelDesc(D3DTexture, Level, &SurfaceDesc);
 
-		if(SUCCEEDED(D3DTextureGetLevelDesc(D3DTexture, Level, &SurfaceDesc))){
-			FTextureMipLevel& MipLevel = CurrentTextureMipLevels[Level];
+	if(FAILED(GetLevelDescResult))
+		return GetLevelDescResult;
 
-			MipLevel.Width = SurfaceDesc.Width;
-			MipLevel.Height = SurfaceDesc.Height;
-			MipLevel.Pixels = appMalloc(SurfaceDesc.Size);
+	FTextureMipLevel& MipLevel = CurrentTextureMipLevels[Level];
 
-			pLockedRect->Pitch = MipLevel.Width * sizeof(FL6V5U5Pixel);
-			pLockedRect->pBits = MipLevel.Pixels;
+	MipLevel.Width = SurfaceDesc.Width;
+	MipLevel.Height = SurfaceDesc.Height;
+	MipLevel.Pixels = appMalloc(SurfaceDesc.Size);
 
-			return S_OK;
-		}
-	}
+	pLockedRect->Pitch = MipLevel.Width * sizeof(FL6V5U5Pixel);
+	pLockedRect->pBits = MipLevel.Pixels;
 
-	return D3DTextureLockRect(D3DTexture, Level, pLockedRect, pRect, Flags);
+	return S_OK;
 }
 
 /*
@@ -268,55 +266,49 @@ typedef HRESULT(__stdcall*D3DTextureUnlockRectFunc)(FD3DTexture*, UINT);
 D3DTextureUnlockRectFunc D3DTextureUnlockRect = NULL;
 
 static HRESULT __stdcall D3DTextureUnlockRectOverride(FD3DTexture* D3DTexture, UINT Level){
-	check(D3DTextureUnlockRect);
+	if(D3DTexture != CurrentTexture)
+		return D3DTextureUnlockRect(D3DTexture, Level);
 
-	if(D3DTexture == CurrentTexture){
-		FTextureMipLevel& MipLevel = CurrentTextureMipLevels[Level];
-		FD3DLockedRect LockedRect;
-		HRESULT Result = D3DTextureLockRect(D3DTexture, Level, &LockedRect, NULL, 0);
+	FTextureMipLevel& MipLevel = CurrentTextureMipLevels[Level];
+	FD3DLockedRect LockedRect;
+	HRESULT Result = D3DTextureLockRect(D3DTexture, Level, &LockedRect, NULL, 0);
 
-		if(SUCCEEDED(Result)){
-			check(MipLevel.Pixels);
+	if(SUCCEEDED(Result)){
+		if(CurrentTextureSourceFormat == D3DFormat_V8U8){
+			ConvertV8U8ToA8R8G8B8(MipLevel.Pixels, LockedRect.pBits, MipLevel.Width, MipLevel.Height);
+		}else if(CurrentTextureSourceFormat == D3DFormat_L6V5U5){
+			if(CurrentTextureTargetFormat == D3DFormat_V8U8)
+				ConvertL6V5U5ToV8U8(MipLevel.Pixels, LockedRect.pBits, MipLevel.Width, MipLevel.Height);
+			else if(CurrentTextureTargetFormat == D3DFormat_X8L8V8U8)
+				ConvertL6V5U5ToX8L8V8U8(MipLevel.Pixels, LockedRect.pBits, MipLevel.Width, MipLevel.Height);
+			else if(CurrentTextureTargetFormat == D3DFormat_A8R8G8B8)
+				ConvertL6V5U5ToA8R8G8B8(MipLevel.Pixels, LockedRect.pBits, MipLevel.Width, MipLevel.Height);
+			else
+				appErrorf("Internal error");
 
-			if(CurrentTextureSourceFormat == D3DFormat_V8U8){
-				check(CurrentTextureTargetFormat == D3DFormat_A8R8G8B8);
-				ConvertV8U8ToA8R8G8B8(MipLevel.Pixels, LockedRect.pBits, MipLevel.Width, MipLevel.Height);
-			}else if(CurrentTextureSourceFormat == D3DFormat_L6V5U5){
-				if(CurrentTextureTargetFormat == D3DFormat_V8U8)
-					ConvertL6V5U5ToV8U8(MipLevel.Pixels, LockedRect.pBits, MipLevel.Width, MipLevel.Height);
-				else if(CurrentTextureTargetFormat == D3DFormat_X8L8V8U8)
-					ConvertL6V5U5ToX8L8V8U8(MipLevel.Pixels, LockedRect.pBits, MipLevel.Width, MipLevel.Height);
-				else if(CurrentTextureTargetFormat == D3DFormat_A8R8G8B8)
-					ConvertL6V5U5ToA8R8G8B8(MipLevel.Pixels, LockedRect.pBits, MipLevel.Width, MipLevel.Height);
-				else
-					appErrorf("Internal error");
-
-			}else if(CurrentTextureSourceFormat == D3DFormat_X8L8V8U8){
-				if(CurrentTextureTargetFormat == D3DFormat_V8U8)
-					ConvertX8L8V8U8ToV8U8(MipLevel.Pixels, LockedRect.pBits, MipLevel.Width, MipLevel.Height);
-				else if(CurrentTextureTargetFormat == D3DFormat_A8R8G8B8)
-					ConvertX8L8V8U8ToA8R8G8B8(MipLevel.Pixels, LockedRect.pBits, MipLevel.Width, MipLevel.Height);
-				else
-					appErrorf("Internal error");
-			}else{
-				appErrorf("Unsupported driver or hardware");
-			}
-
-			Result = D3DTextureUnlockRect(D3DTexture, Level);
+		}else if(CurrentTextureSourceFormat == D3DFormat_X8L8V8U8){
+			if(CurrentTextureTargetFormat == D3DFormat_V8U8)
+				ConvertX8L8V8U8ToV8U8(MipLevel.Pixels, LockedRect.pBits, MipLevel.Width, MipLevel.Height);
+			else if(CurrentTextureTargetFormat == D3DFormat_A8R8G8B8)
+				ConvertX8L8V8U8ToA8R8G8B8(MipLevel.Pixels, LockedRect.pBits, MipLevel.Width, MipLevel.Height);
+			else
+				appErrorf("Internal error");
+		}else{
+			appErrorf("Unsupported driver or hardware");
 		}
 
-		appFree(MipLevel.Pixels);
-		MipLevel.Pixels = NULL;
-
-		if(Level == CurrentTextureMipLevels.Num() - 1){ // This is the last mip level which means the current texture is fully converted and should be set to NULL
-			CurrentTextureMipLevels.Empty();
-			CurrentTexture = NULL;
-		}
-
-		return Result;
+		Result = D3DTextureUnlockRect(D3DTexture, Level);
 	}
 
-	return D3DTextureUnlockRect(D3DTexture, Level);
+	appFree(MipLevel.Pixels);
+	MipLevel.Pixels = NULL;
+
+	if(Level == CurrentTextureMipLevels.Num() - 1){ // This is the last mip level which means the current texture is fully converted and should be set to NULL
+		CurrentTextureMipLevels.Empty();
+		CurrentTexture = NULL;
+	}
+
+	return Result;
 }
 
 /*
@@ -335,8 +327,6 @@ static HRESULT __stdcall D3DDeviceCreateTextureOverride(FD3DDevice* D3DDevice,
 														ED3DFormat Format,
 														enum ED3DPool Pool,
 														FD3DTexture** ppTexture){
-	check(D3DDeviceCreateTexture);
-
 	ED3DFormat FallbackFormat = Format == D3DFormat_L6V5U5 ? D3DFormat_X8L8V8U8 : Format;
 	HRESULT Result = D3DDeviceCreateTexture(D3DDevice,
 											Width,
@@ -349,6 +339,9 @@ static HRESULT __stdcall D3DDeviceCreateTextureOverride(FD3DDevice* D3DDevice,
 
 	if(FAILED(Result) && !IsBumpmapFormat(Format))
 		appErrorf("CreateTexture failed (Format: %i)", Format);
+
+	if(FallbackFormat == Format)
+		return Result;
 
 	if(FAILED(Result)){
 		FallbackFormat = D3DFormat_V8U8; // If X8L8V8U8 is not supported V8U8 might still be so try that
@@ -377,29 +370,28 @@ static HRESULT __stdcall D3DDeviceCreateTextureOverride(FD3DDevice* D3DDevice,
 	if(FAILED(Result))
 		appErrorf("CreateTexture failed even with fallback format (Format: %i)", FallbackFormat);
 
-	if(SUCCEEDED(Result) && FallbackFormat != Format){
-		// Patching vtables if it wasn't done already
+	// Patching vtables if it wasn't done already
 
-		if(!D3DTextureGetLevelDesc)
-			D3DTextureGetLevelDesc = static_cast<D3DTextureGetLevelDescFunc>((*reinterpret_cast<void***>(*ppTexture))[D3DVTableIndex_TextureGetLevelDesc]);
+	if(!D3DTextureGetLevelDesc)
+		D3DTextureGetLevelDesc = static_cast<D3DTextureGetLevelDescFunc>((*reinterpret_cast<void***>(*ppTexture))[D3DVTableIndex_TextureGetLevelDesc]);
 
-		if(!D3DTextureLockRect){
-			D3DTextureLockRect = static_cast<D3DTextureLockRectFunc>(PatchVTable(*reinterpret_cast<void***>(*ppTexture),
-																				 D3DVTableIndex_TextureLockRect,
-																				 D3DTextureLockRectOverride));
-		}
-
-		if(!D3DTextureUnlockRect){
-			D3DTextureUnlockRect = static_cast<D3DTextureUnlockRectFunc>(PatchVTable(*reinterpret_cast<void***>(*ppTexture),
-																					 D3DVTableIndex_TextureUnlockRect,
-																					 D3DTextureUnlockRectOverride));
-		}
-
-		CurrentTexture = *ppTexture;
-		CurrentTextureSourceFormat = Format;
-		CurrentTextureTargetFormat = FallbackFormat;
-		CurrentTextureMipLevels.Set(Levels);
+	if(!D3DTextureLockRect){
+		D3DTextureLockRect = static_cast<D3DTextureLockRectFunc>(PatchVTable(*reinterpret_cast<void***>(*ppTexture),
+																			 D3DVTableIndex_TextureLockRect,
+																			 D3DTextureLockRectOverride));
 	}
+
+	if(!D3DTextureUnlockRect){
+		D3DTextureUnlockRect = static_cast<D3DTextureUnlockRectFunc>(PatchVTable(*reinterpret_cast<void***>(*ppTexture),
+																				 D3DVTableIndex_TextureUnlockRect,
+																				 D3DTextureUnlockRectOverride));
+	}
+
+	// Updating the current texture with the newly created one
+	CurrentTexture = *ppTexture;
+	CurrentTextureSourceFormat = Format;
+	CurrentTextureTargetFormat = FallbackFormat;
+	CurrentTextureMipLevels.Set(Levels);
 
 	return Result;
 }
@@ -425,8 +417,6 @@ HRESULT __stdcall D3D8CreateDeviceOverride(FD3D8* D3D8,
 										   DWORD BehaviorFlags,
 										   struct D3DPRESENT_PARAMETERS* pPresentationParameters,
 										   class IDirect3DDevice8** ppReturnedDeviceInterface){
-	check(D3D8CreateDevice);
-
 	HRESULT Result = D3D8CreateDevice(D3D8, Adapter, DeviceType, hFocusWindow, BehaviorFlags, pPresentationParameters, ppReturnedDeviceInterface);
 
 	if(SUCCEEDED(Result)){

@@ -63,9 +63,9 @@ struct FV8U8Pixel{
 };
 
 struct FL6V5U5Pixel{
-	short          U:5;
-	short          V:5;
-	unsigned short L:6;
+	INT16  U:5;
+	INT16  V:5;
+	UINT16 L:6;
 };
 
 struct FX8L8V8U8Pixel{

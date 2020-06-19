@@ -321,7 +321,7 @@ static HRESULT __stdcall D3DDeviceCreateTextureOverride(FD3DDevice* D3DDevice,
 														enum ED3DPool Pool,
 														FD3DTexture** ppTexture){
 	// X8L8V8U8 is used as the first fallback format because no information is lost in the conversion
-	ED3DFormat FallbackFormat = Format;// == D3DFormat_L6V5U5 ? D3DFormat_X8L8V8U8 : Format;
+	ED3DFormat FallbackFormat = Format == D3DFormat_L6V5U5 ? D3DFormat_X8L8V8U8 : Format;
 	HRESULT Result = D3DDeviceCreateTexture(D3DDevice,
 											Width,
 											Height,

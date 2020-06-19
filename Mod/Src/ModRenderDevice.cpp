@@ -283,18 +283,11 @@ static HRESULT __stdcall D3DTextureUnlockRectOverride(FD3DTexture* D3DTexture, U
 				ConvertL6V5U5ToX8L8V8U8(MipLevel.Pixels, LockedRect.pBits, MipLevel.Width, MipLevel.Height);
 			else if(CurrentTextureTargetFormat == D3DFormat_A8R8G8B8)
 				ConvertL6V5U5ToA8R8G8B8(MipLevel.Pixels, LockedRect.pBits, MipLevel.Width, MipLevel.Height);
-			else
-				appErrorf("Internal error");
-
 		}else if(CurrentTextureSourceFormat == D3DFormat_X8L8V8U8){
 			if(CurrentTextureTargetFormat == D3DFormat_V8U8)
 				ConvertX8L8V8U8ToV8U8(MipLevel.Pixels, LockedRect.pBits, MipLevel.Width, MipLevel.Height);
 			else if(CurrentTextureTargetFormat == D3DFormat_A8R8G8B8)
 				ConvertX8L8V8U8ToA8R8G8B8(MipLevel.Pixels, LockedRect.pBits, MipLevel.Width, MipLevel.Height);
-			else
-				appErrorf("Internal error");
-		}else{
-			appErrorf("Unsupported driver or hardware");
 		}
 
 		Result = D3DTextureUnlockRect(D3DTexture, Level);
@@ -327,6 +320,7 @@ static HRESULT __stdcall D3DDeviceCreateTextureOverride(FD3DDevice* D3DDevice,
 														ED3DFormat Format,
 														enum ED3DPool Pool,
 														FD3DTexture** ppTexture){
+	// X8L8V8U8 is used as the first fallback format because no information is lost in the conversion
 	ED3DFormat FallbackFormat = Format == D3DFormat_L6V5U5 ? D3DFormat_X8L8V8U8 : Format;
 	HRESULT Result = D3DDeviceCreateTexture(D3DDevice,
 											Width,
@@ -341,10 +335,10 @@ static HRESULT __stdcall D3DDeviceCreateTextureOverride(FD3DDevice* D3DDevice,
 		appErrorf("CreateTexture failed (Format: %i)", Format);
 
 	if(FallbackFormat == Format)
-		return Result;
+		return Result; // No fallback format was needed so just return
 
 	if(FAILED(Result)){
-		FallbackFormat = D3DFormat_V8U8; // If X8L8V8U8 is not supported V8U8 might still be so try that
+		FallbackFormat = D3DFormat_V8U8; // If X8L8V8U8 is not supported V8U8 might still be so try that. Visually the same except for missing luminance
 		Result = D3DDeviceCreateTexture(D3DDevice,
 										Width,
 										Height,
@@ -356,7 +350,7 @@ static HRESULT __stdcall D3DDeviceCreateTextureOverride(FD3DDevice* D3DDevice,
 	}
 
 	if(FAILED(Result)){
-		FallbackFormat = D3DFormat_A8R8G8B8; // If no bumpmap format is available we fall back to ARGB
+		FallbackFormat = D3DFormat_A8R8G8B8; // If no bumpmap format is available we fall back to ARGB. Looks fine visually and should always be supported
 		Result = D3DDeviceCreateTexture(D3DDevice,
 										Width,
 										Height,

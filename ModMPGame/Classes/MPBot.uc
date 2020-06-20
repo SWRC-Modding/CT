@@ -81,7 +81,7 @@ cpptext
 
 defaultproperties
 {
-	Accuracy = 1.0
+	Accuracy=1.0
 	bIsPlayer=true
 	bSmartShot=true
 	RequiredStates(0)=Class'CTGame.StateMercAttack'

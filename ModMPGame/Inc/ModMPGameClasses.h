@@ -50,6 +50,7 @@ public:
     class UClass* RelevantGameInfoClass;
     BITFIELD bRequiresAdminPermissions:1 GCC_PACK(4);
     void execParseCommand(FFrame& Stack, void* Result);
+    void execParseToken(FFrame& Stack, void* Result);
     void execParseIntParam(FFrame& Stack, void* Result);
     void execParseFloatParam(FFrame& Stack, void* Result);
     void execParseStringParam(FFrame& Stack, void* Result);

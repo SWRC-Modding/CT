@@ -70,6 +70,20 @@ void AAdminService::execParseCommand(FFrame& Stack, void* Result){
 	}
 }
 
+void AAdminService::execParseToken(FFrame& Stack, void* Result){
+	P_GET_STR_REF(Stream);
+	P_FINISH;
+
+	const char* StreamData = **Stream;
+
+	*static_cast<FString*>(Result) = ParseToken(StreamData, 0);
+
+	while(*StreamData == ' ' || *StreamData == '\t')
+		StreamData++;
+
+	*Stream = StreamData;
+}
+
 void AAdminService::execParseIntParam(FFrame& Stack, void* Result){
 	P_GET_STR(Stream);
 	P_GET_STR(Match);

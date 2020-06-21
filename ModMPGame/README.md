@@ -25,14 +25,22 @@ The login password is specified in the configuration file.
 
 This service adds support for basic admin commands like kicking/banning players or switching to a different map.
 
-| command                              | description  |
-|--------------------------------------|--------------|
-| cmd _&lt;console command>_           | executes a console command on the server |
-| kick _&lt;player name>_              | kicks the player with the specified name from the current session |
-| ban _&lt;player name>_               | bans the ip address of the specified player |
-| promote _&lt;player name>_           | gives a player admin rights |
-| demote _&lt;player name>_            | removes a player's admin rights |
-| servertravel _&lt;map and options>_  | switches the server to the specified map with optional parameters |
+| command                                                 | description  |
+|---------------------------------------------------------|--------------|
+| cmd _&lt;console command>_                              | executes a console command on the server |
+| listplayers                                             | lists the name of each player on the server and their unique id |
+| kick _&lt;player name>_ reason="_&lt;optional reason>_" | kicks the player with the specified name from the current session |
+| kickall                                                 | kicks all players from the game |
+| kickid _&lt;id>_                                        | kicks the player with the specified id (obtained by _listplayers_) |
+| kickscore _&lt;score>_                                  | kicks all players with the specified score |
+| kickscorebelow _&lt;score>_                             | kicks all players whose score is below the specified value |
+| kickscoreabove _&lt;score>_                             | kicks all players whose score is above the specified value |
+| ban _&lt;player name>_ reason="_&lt;optional reason>_"  | bans the ip address of the specified player |
+| banid _&lt;id>_                                         | bans the ip address of player with the specified id (obtained by _listplayers_) |
+| promote _&lt;player name>_                              | gives a player admin rights |
+| demote _&lt;player name>_                               | removes a player's admin rights |
+| switchmap _&lt;map and options>_                        | switches the server to the specified map with optional parameters |
+| restartmap                                              | restarts the current map with the same game mode |
 
 ### BotSupport
 

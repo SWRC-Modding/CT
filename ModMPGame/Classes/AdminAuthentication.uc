@@ -1,14 +1,5 @@
 class AdminAuthentication extends AdminService;
 
-var() config String AdminPassword;
-
-function PostBeginPlay(){
-	Super.PostBeginPlay();
-
-	if(AdminPassword != "") // If AdminPassword is empty, the one from AccessControl is used
-		Level.Game.AccessControl.SetAdminPassword(AdminPassword);
-}
-
 function bool ExecCmd(String Cmd, optional PlayerController PC){
 	if(PC != None){
 		if(ParseCommand(Cmd, "LOGIN")){

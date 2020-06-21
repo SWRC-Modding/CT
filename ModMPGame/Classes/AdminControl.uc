@@ -12,10 +12,16 @@ function PostBeginPlay(){
 
 	Level.Game.bAdminCanPause = bAdminsCanPause;
 	Level.Game.BroadcastHandlerClass = "ModMPGame.AdminControlBroadcastHandler";
+	Level.Game.AccessControlClass = "ModMPGame.AdminAccessControl";
 
-	if(Level.Game.BroadcastHandler != None){ // If this is called after the LevelInfo has been set up, we have to replace the broadcast handler
+	if(Level.Game.BroadcastHandler != None){
 		Level.Game.BroadcastHandler.Destroy();
 		Level.Game.BroadcastHandler = Spawn(class'AdminControlBroadcastHandler');
+	}
+
+	if(Level.Game.AccessControl != None){
+		Level.Game.AccessControl.Destroy();
+		Level.Game.AccessControl = Spawn(class'AdminAccessControl');
 	}
 
 	for(i = 0; i < ServiceClasses.Length; ++i){

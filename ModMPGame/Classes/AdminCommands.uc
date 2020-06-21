@@ -6,11 +6,23 @@ function bool ExecCmd(String Cmd, optional PlayerController PC){
 	local PlayerReplicationInfo PRI;
 	local String CommandResult;
 	local int IntParam;
+	local string StringParam;
 	local Controller C;
 
 	if(ParseCommand(Cmd, "CMD")){
 		if(PC == None || bAllowConsoleCommands || IsLocalPlayer(PC)){ // The host can always execute console commands
-			CommandResult = ConsoleCommand(Cmd);
+			StringParam = Cmd;
+
+			if(IsLocalPlayer(PC)){
+				CommandResult = ConsoleCommand(Cmd);
+			}else if(ParseCommand(StringParam, "GET") || ParseCommand(StringParam, "SET")){
+				if(InStr(Caps(StringParam), "ADMINPASSWORD") == -1) // Security measure
+					CommandResult = ConsoleCommand(Cmd);
+				else
+					CommandResult = "Remote players are not allowed to access the admin password";
+			}else{
+				CommandResult = "Remote players are only allowed to use the get and set commands"; // Might still mess things up but at least some access should be provided
+			}
 
 			if(CommandResult != ""){
 				Log(CommandResult);
@@ -38,18 +50,36 @@ function bool ExecCmd(String Cmd, optional PlayerController PC){
 
 		return true;
 	}else if(ParseCommand(Cmd, "KICK")){
-		Level.Game.Kick(Cmd);
+		ParseStringParam(Cmd, "REASON=", StringParam);
+
+		for(C = Level.ControllerList; C != None; C = C.nextController){
+			if(PlayerController(C) != None && C != PC){
+				PRI = C.PlayerReplicationInfo;
+
+				if(Left(Cmd, Len(PRI.PlayerName)) ~= PRI.PlayerName) // This will kick all players whose names start with the specified string
+					AdminAccessControl(Level.Game.AccessControl).KickPlayerController(PlayerController(C), StringParam);
+			}
+		}
+
+		return true;
+	}else if(ParseCommand(Cmd, "KICKALL")){
+		for(C = Level.ControllerList; C != None; C = C.nextController){
+			if(PlayerController(C) != None && C != PC) // Don't kick yourself
+				AdminAccessControl(Level.Game.AccessControl).KickPlayerController(PlayerController(C));
+		}
 
 		return true;
 	}else if(ParseCommand(Cmd, "KICKID")){
 		IntParam = int(Cmd);
 
+		ParseStringParam(Cmd, "REASON=", StringParam);
+
 		for(C = Level.ControllerList; C != None; C = C.nextController){
-			if(PlayerController(C) != None){
+			if(PlayerController(C) != None && C != PC){
 				PRI = C.PlayerReplicationInfo;
 
 				if(PRI.PlayerID == IntParam){
-					Level.Game.Kick(PRI.PlayerName);
+					AdminAccessControl(Level.Game.AccessControl).KickPlayerController(PlayerController(C), StringParam);
 
 					break;
 				}
@@ -61,28 +91,65 @@ function bool ExecCmd(String Cmd, optional PlayerController PC){
 		IntParam = int(Cmd);
 
 		for(C = Level.ControllerList; C != None; C = C.nextController){
-			if(PlayerController(C) != None){
+			if(PlayerController(C) != None && C != PC){
 				PRI = C.PlayerReplicationInfo;
 
 				if(PRI.Score == IntParam)
-					Level.Game.Kick(PRI.PlayerName);
+					AdminAccessControl(Level.Game.AccessControl).KickPlayerController(PlayerController(C));
+			}
+		}
+
+		return true;
+	}else if(ParseCommand(Cmd, "KICKSCOREBELOW")){
+		IntParam = int(Cmd);
+
+		for(C = Level.ControllerList; C != None; C = C.nextController){
+			if(PlayerController(C) != None && C != PC){
+				PRI = C.PlayerReplicationInfo;
+
+				if(PRI.Score < IntParam)
+					AdminAccessControl(Level.Game.AccessControl).KickPlayerController(PlayerController(C));
+			}
+		}
+
+		return true;
+	}else if(ParseCommand(Cmd, "KICKSCOREABOVE")){
+		IntParam = int(Cmd);
+
+		for(C = Level.ControllerList; C != None; C = C.nextController){
+			if(PlayerController(C) != None && C != PC){
+				PRI = C.PlayerReplicationInfo;
+
+				if(PRI.Score > IntParam)
+					AdminAccessControl(Level.Game.AccessControl).KickPlayerController(PlayerController(C));
 			}
 		}
 
 		return true;
 	}else if(ParseCommand(Cmd, "BAN")){
-		Level.Game.KickBan(Cmd);
+		ParseStringParam(Cmd, "REASON=", StringParam);
+
+		for(C = Level.ControllerList; C != None; C = C.nextController){
+			if(PlayerController(C) != None && C != PC){
+				PRI = C.PlayerReplicationInfo;
+
+				if(Left(Cmd, Len(PRI.PlayerName)) ~= PRI.PlayerName) // This will ban all players whose names start with the specified string
+					AdminAccessControl(Level.Game.AccessControl).BanPlayerController(PlayerController(C), StringParam);
+			}
+		}
 
 		return true;
 	}else if(ParseCommand(Cmd, "BANID")){
 		IntParam = int(Cmd);
 
+		ParseStringParam(Cmd, "REASON=", StringParam);
+
 		for(C = Level.ControllerList; C != None; C = C.nextController){
-			if(PlayerController(C) != None){
+			if(PlayerController(C) != None && C != PC){
 				PRI = C.PlayerReplicationInfo;
 
 				if(PRI.PlayerID == IntParam){
-					Level.Game.KickBan(PRI.PlayerName);
+					AdminAccessControl(Level.Game.AccessControl).BanPlayerController(PlayerController(C), StringParam);
 
 					break;
 				}
@@ -94,8 +161,18 @@ function bool ExecCmd(String Cmd, optional PlayerController PC){
 		for(C = Level.ControllerList; C != None; C = C.nextController){
 			PRI = C.PlayerReplicationInfo;
 
-			if(PRI.PlayerName ~= Cmd){
+			if(!PRI.bAdmin && PRI.PlayerName ~= Cmd){
 				PRI.bAdmin = true;
+
+				if(PC != None)
+					StringParam = PC.PlayerReplicationInfo.PlayerName;
+				else
+					StringParam = "the server";
+
+				CommandResult = PRI.PlayerName $ " was promoted to admin by " $ StringParam;
+
+				Log(CommandResult);
+				Level.Game.Broadcast(self, CommandResult);
 
 				break;
 			}
@@ -106,8 +183,18 @@ function bool ExecCmd(String Cmd, optional PlayerController PC){
 		for(C = Level.ControllerList; C != None; C = C.nextController){
 			PRI = C.PlayerReplicationInfo;
 
-			if(PRI.PlayerName ~= Cmd){
+			if(PRI.bAdmin && PRI.PlayerName ~= Cmd){
 				PRI.bAdmin = false;
+
+				if(PC != None)
+					StringParam = PC.PlayerReplicationInfo.PlayerName;
+				else
+					StringParam = "the server";
+
+				CommandResult = PRI.PlayerName $ "'s admin priviledges were revoked by " $ StringParam;
+
+				Log(CommandResult);
+				Level.Game.Broadcast(self, CommandResult);
 
 				break;
 			}
@@ -115,10 +202,12 @@ function bool ExecCmd(String Cmd, optional PlayerController PC){
 
 		return true;
 	}else if(ParseCommand(Cmd, "SWITCHMAP")){
+		Level.Game.Broadcast(self, "Switching map");
 		Level.ServerTravel(Cmd, false);
 
 		return true;
 	}else if(ParseCommand(Cmd, "RESTARTMAP")){
+		Level.Game.Broadcast(self, "Restarting current map");
 		Level.ServerTravel("?restart", false);
 
 		return true;

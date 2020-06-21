@@ -50,14 +50,14 @@ function bool ExecCmd(String Cmd, optional PlayerController PC){
 
 		return true;
 	}else if(ParseCommand(Cmd, "KICK")){
-		ParseStringParam(Cmd, "REASON=", StringParam);
+		StringParam = ParseToken(Cmd);
 
 		for(C = Level.ControllerList; C != None; C = C.nextController){
 			if(PlayerController(C) != None && C != PC){
 				PRI = C.PlayerReplicationInfo;
 
-				if(Left(Cmd, Len(PRI.PlayerName)) ~= PRI.PlayerName) // This will kick all players whose names start with the specified string
-					AdminAccessControl(Level.Game.AccessControl).KickPlayerController(PlayerController(C), StringParam);
+				if(PRI.PlayerName ~= StringParam)
+					AdminAccessControl(Level.Game.AccessControl).KickPlayerController(PlayerController(C), Cmd);
 			}
 		}
 
@@ -70,16 +70,14 @@ function bool ExecCmd(String Cmd, optional PlayerController PC){
 
 		return true;
 	}else if(ParseCommand(Cmd, "KICKID")){
-		IntParam = int(Cmd);
-
-		ParseStringParam(Cmd, "REASON=", StringParam);
+		IntParam = int(ParseToken(Cmd));
 
 		for(C = Level.ControllerList; C != None; C = C.nextController){
 			if(PlayerController(C) != None && C != PC){
 				PRI = C.PlayerReplicationInfo;
 
 				if(PRI.PlayerID == IntParam){
-					AdminAccessControl(Level.Game.AccessControl).KickPlayerController(PlayerController(C), StringParam);
+					AdminAccessControl(Level.Game.AccessControl).KickPlayerController(PlayerController(C), Cmd);
 
 					break;
 				}
@@ -101,7 +99,7 @@ function bool ExecCmd(String Cmd, optional PlayerController PC){
 
 		return true;
 	}else if(ParseCommand(Cmd, "KICKSCOREBELOW")){
-		IntParam = int(Cmd);
+		IntParam = int(ParseToken(Cmd));
 
 		for(C = Level.ControllerList; C != None; C = C.nextController){
 			if(PlayerController(C) != None && C != PC){
@@ -127,29 +125,27 @@ function bool ExecCmd(String Cmd, optional PlayerController PC){
 
 		return true;
 	}else if(ParseCommand(Cmd, "BAN")){
-		ParseStringParam(Cmd, "REASON=", StringParam);
+		StringParam = ParseToken(Cmd);
 
 		for(C = Level.ControllerList; C != None; C = C.nextController){
 			if(PlayerController(C) != None && C != PC){
 				PRI = C.PlayerReplicationInfo;
 
-				if(Left(Cmd, Len(PRI.PlayerName)) ~= PRI.PlayerName) // This will ban all players whose names start with the specified string
-					AdminAccessControl(Level.Game.AccessControl).BanPlayerController(PlayerController(C), StringParam);
+				if(PRI.PlayerName ~= StringParam)
+					AdminAccessControl(Level.Game.AccessControl).BanPlayerController(PlayerController(C), Cmd);
 			}
 		}
 
 		return true;
 	}else if(ParseCommand(Cmd, "BANID")){
-		IntParam = int(Cmd);
-
-		ParseStringParam(Cmd, "REASON=", StringParam);
+		IntParam = int(ParseToken(Cmd));
 
 		for(C = Level.ControllerList; C != None; C = C.nextController){
 			if(PlayerController(C) != None && C != PC){
 				PRI = C.PlayerReplicationInfo;
 
 				if(PRI.PlayerID == IntParam){
-					AdminAccessControl(Level.Game.AccessControl).BanPlayerController(PlayerController(C), StringParam);
+					AdminAccessControl(Level.Game.AccessControl).BanPlayerController(PlayerController(C), Cmd);
 
 					break;
 				}

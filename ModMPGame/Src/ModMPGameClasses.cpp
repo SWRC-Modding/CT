@@ -15,6 +15,7 @@ IMPLEMENT_CLASS(AAdminControl);
 IMPLEMENT_CLASS(AAdminService);
 FNativeEntry<AAdminService> AAdminService::StaticNativeMap[] = {
 	MAP_NATIVE(ParseCommand,0)
+	MAP_NATIVE(ParseToken,0)
 	MAP_NATIVE(ParseIntParam,0)
 	MAP_NATIVE(ParseFloatParam,0)
 	MAP_NATIVE(ParseStringParam,0)

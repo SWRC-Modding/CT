@@ -2,13 +2,14 @@ class BotSupport extends AdminService native;
 
 #exec OBJ LOAD FILE="MPGame.u"
 
-var() config float BotAccuracy;
-var Array<MPBot>   Bots;
-var() config bool  bBotsCountAsPlayers; // If this is true, adding bots will increase the player count of the server
+var() config int            NumBots;             // Number of bots which are spawned when the game begins
+var() config float          BotAccuracy;
+var Array<MPBot>            Bots;
+var() config bool           bBotsCountAsPlayers; // If this is true, adding bots will increase the player count of the server
 
-var config bool bAutoImportPaths;
-var config bool bAutoBuildPaths;
-var config bool bShowPaths;
+var config bool             bAutoImportPaths;
+var config bool             bAutoBuildPaths;
+var config bool             bShowPaths;
 
 var bool                    bPathsImported;       // Paths were imported using ImportPaths
 var bool                    bShowPathsOnClients;
@@ -17,7 +18,12 @@ var Array<Pawn.PatrolPoint> BotPatrolRoute;
 var Array<Actor>            NavigationPointIcons; // Intangible actors used to make navigation points visible to clients
 
 function PostBeginPlay(){
+	local int i;
+
 	BotAccuracy = FClamp(BotAccuracy, 0.0, 1.0);
+
+	for(i = 0; i < NumBots; ++i)
+		AddBot();
 }
 
 function ShowPathsClient(){

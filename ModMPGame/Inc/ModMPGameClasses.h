@@ -64,6 +64,7 @@ public:
 class MODMPGAME_API ABotSupport : public AAdminService
 {
 public:
+    INT NumBots;
     FLOAT BotAccuracy;
     TArrayNoInit<class AMPBot*> Bots;
     BITFIELD bBotsCountAsPlayers:1 GCC_PACK(4);

@@ -19,6 +19,14 @@ static final function bool IsLocalPlayer(PlayerController PC){
 	return PC != None && Viewport(PC.Player) != None;
 }
 
+function CommandFeedback(PlayerController PC, string Msg, optional bool bLogAlways){
+	if(PC != None)
+		PC.ClientMessage(Msg);
+
+	if(PC == None || bLogAlways)
+		Log(Msg);
+}
+
 cpptext
 {
 	virtual bool ExecCmd(const char* Cmd, class APlayerController* PC = NULL){ return false; }

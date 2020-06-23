@@ -61,6 +61,11 @@ function HidePathsClient(){
 
 function bool ExecCmd(String Cmd, optional PlayerController PC){
 	local int i;
+	local class<Pawn> PawnClass;
+	local string StringParam;
+	local NavigationPoint N;
+	local vector SpawnPos;
+	local Pawn P;
 
 	if(ParseCommand(Cmd, "ADDBOT")){
 		AddBot();
@@ -80,6 +85,57 @@ function bool ExecCmd(String Cmd, optional PlayerController PC){
 
 		for(i = 0; i < Bots.Length; ++i)
 			Bots[i].SetAccuracy(BotAccuracy);
+
+		return true;
+	}else if(ParseCommand(Cmd, "SPAWN")){
+		StringParam = ParseToken(Cmd);
+
+		if(StringParam != ""){
+			PawnClass = class<Pawn>(DynamicLoadObject(StringParam, class'Class', true));
+
+			// Allowing omitting package name for convenience for 'CTCharacters' and 'Properties'
+
+			if(PawnClass == None)
+				PawnClass = class<Pawn>(DynamicLoadObject("CTCharacters." $ StringParam, class'Class', true));
+
+			if(PawnClass == None)
+				PawnClass = class<Pawn>(DynamicLoadObject("Properties." $ StringParam, class'Class', true));
+
+			if(PawnClass != None){
+				if(PC != None){
+					if(PC.Pawn != None)
+						SpawnPos = PC.Pawn.Location + vector(PC.GetViewRotation()) * (PC.Pawn.CollisionRadius + PawnClass.default.CollisionRadius + 4);
+					else
+						SpawnPos = PC.Location;
+				}else{
+					SpawnPos = Level.NavigationPointList.Location; // TODO: Pick random navigation point
+				}
+
+				P = Spawn(PawnClass,,, SpawnPos);
+
+				if(P != None){
+					P.Controller = Spawn(P.ControllerClass);
+
+					if(P.Controller != None){
+						P.Controller.Possess(P);
+						P.Controller.PlayerReplicationInfo = Spawn(class'MPPlayerReplicationInfo');
+						P.Controller.InitPlayerReplicationInfo();
+						P.Controller.PlayerReplicationInfo.PlayerName = string(P.Class.Name);
+					}
+
+					P.AddDefaultInventory();
+
+					if(ParseIntParam(Cmd, "TEAM=", i))
+						P.TeamIndex = i;
+				}else{
+					CommandFeedback(PC, "Unable to spawn pawn, try again at a different location");
+				}
+			}else{
+				CommandFeedback(PC, "Pawn class '" $ StringParam $ "' not found");
+			}
+		}else if(PC != None){
+			CommandFeedback(PC, "Expected class name");
+		}
 
 		return true;
 	}else if(!IsLocalPlayer(PC)){

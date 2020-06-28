@@ -1310,6 +1310,15 @@ public:
 		return Add(InKey, InValue);
 	}
 
+	TI& operator[](const TK& Key){
+		TI* Entry = Find(Key);
+
+		if(Entry)
+			return *Entry;
+
+		return Add(Key, TI());
+	}
+
 	INT Remove(typename TTypeInfo<TK>::ConstInitType InKey){
 		INT Count = 0;
 

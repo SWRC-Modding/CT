@@ -619,6 +619,119 @@ void AMPBot::execUpdatePawnAccuracy(FFrame& Stack, void* Result){
 		Pawn->Accuracy = Accuracy;
 }
 
+
+/*
+ * FunctionOverride
+ */
+
+TMap<UFunction*, UFunctionOverride*> FunctionOverrides;
+
+void __fastcall ScriptFunctionHook(UObject* Self, int, FFrame& Stack, void* Result){
+	/*
+     * The stack doesn't contain any information about the called function at this point.
+     * We only know that the last four bytes at the top are either a UFunction* or an FName so we need to check both.
+	 */
+	UFunction* Function;
+	FName      FunctionName;
+
+	appMemcpy(&Function, Stack.Code - sizeof(UFunction*), sizeof(UFunction*));
+
+	if(!FunctionOverrides.Find(Function)){
+		appMemcpy(&FunctionName, Stack.Code - sizeof(FName), sizeof(FName));
+
+		Function = Self->FindFunctionChecked(FunctionName);
+	}
+
+	UFunctionOverride* Override = FunctionOverrides[Function];
+
+	Override->TargetFunction->iNative = 0;
+
+	if(Self == Override->TargetObject || Override->TargetObject == NULL){
+		Stack.Object = Override->OverrideObject;
+		Override->OverrideObject->CallFunction(Stack, Result, Override->OverrideFunction);
+		Stack.Object = Self;
+	}else{
+		Self->CallFunction(Stack, Result, Override->TargetFunction);
+	}
+
+	Override->TargetFunction->iNative = 1;
+}
+
+void UFunctionOverride::Init(UObject* TargetObj, FName TargetFunc, UObject* OverrideObj, FName OverrideFunc){
+	Deinit();
+
+	TargetObject     = TargetObj->IsA(UClass::StaticClass()) ? static_cast<UClass*>(TargetObj)->GetDefaultObject() : TargetObj;
+	OverrideObject   = OverrideObj;
+	TargetFunction   = TargetObject ? TargetObject->FindFunction(TargetFunc) : NULL;
+	OverrideFunction = OverrideObject ? OverrideObject->FindFunction(OverrideFunc) : NULL;
+
+	if(TargetObject && OverrideObject && TargetFunction && OverrideFunction){
+		if(TargetFunction->iNative != 0)
+			appErrorf("Cannot override native final function %s", *TargetFunction->FriendlyName);
+
+		OriginalFunc = TargetFunction->Func;
+
+		void(__fastcall*Temp)(UObject*, int, FFrame&, void*) = ScriptFunctionHook;
+		TargetFunction->Func = *reinterpret_cast<Native*>(static_cast<void*>(&Temp));
+		TargetFunction->iNative = 1;
+
+		if(TargetObj->IsA(UClass::StaticClass()))
+			TargetObject = NULL; // Special case: Function is overridden in all objects of the specified class
+
+		FunctionOverrides[TargetFunction] = this;
+	}
+}
+
+void UFunctionOverride::Deinit(){
+	if(TargetFunction){
+		UFunctionOverride** Override = FunctionOverrides.Find(TargetFunction);
+
+		if(Override != NULL && *Override == this){
+			TargetFunction->Func    = OriginalFunc;
+			TargetFunction->iNative = 0;
+			FunctionOverrides.Remove(TargetFunction);
+		}
+	}
+
+	TargetObject     = NULL;
+	OverrideObject   = NULL;
+	TargetFunction   = NULL;
+	OverrideFunction = NULL;
+	OriginalFunc     = NULL;
+}
+
+bool UFunctionOverride::IsActive(){
+	return FunctionOverrides.Find(TargetFunction) != NULL;
+}
+
+void UFunctionOverride::Destroy(){
+	Deinit();
+	Super::Destroy();
+}
+
+void UFunctionOverride::execInit(FFrame& Stack, void* Result){
+	P_GET_OBJECT(UObject, TargetObj);
+	P_GET_NAME(TargetFunc);
+	P_GET_OBJECT(UObject, OverrideObj);
+	P_GET_NAME(OverrideFunc);
+	P_FINISH;
+
+	Init(TargetObj, TargetFunc, OverrideObj, OverrideFunc);
+}
+
+void UFunctionOverride::execDeinit(FFrame& Stack, void* Result){
+	P_FINISH;
+
+	Deinit();
+}
+
+void UFunctionOverride::execIsActive(FFrame& Stack, void* Result){
+	P_FINISH;
+
+	*static_cast<bool*>(Result) = IsActive();
+}
+
+
 /*
  * UExportPathsCommandlet
  */

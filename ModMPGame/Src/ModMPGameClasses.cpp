@@ -34,12 +34,3 @@ FNativeEntry<AMPBot> AMPBot::StaticNativeMap[] = {
 LINK_NATIVES(AMPBot);
 
 IMPLEMENT_CLASS(APatrolPoint);
-
-IMPLEMENT_CLASS(UFunctionOverride);
-FNativeEntry<UFunctionOverride> UFunctionOverride::StaticNativeMap[] = {
-	MAP_NATIVE(Init,0)
-	MAP_NATIVE(Deinit,0)
-	MAP_NATIVE(IsActive,0)
-	{NULL,NULL}
-};
-LINK_NATIVES(UFunctionOverride);

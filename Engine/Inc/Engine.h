@@ -72,6 +72,7 @@ ENGINE_API extern FLOAT           GEngineTime;
 #include "UnRenderUtil.h"
 #include "UnPath.h"
 #include "UnCDKey.h"                 // CD key validation.
+#include "UnNet.h"
 
 ENGINE_API extern class UCubemapManager*    GCubemapManager;
 ENGINE_API extern class FEngineStats        GEngineStats;

@@ -68,11 +68,14 @@ function bool ExecCmd(String Cmd, optional PlayerController PC){
 	local Pawn P;
 
 	if(ParseCommand(Cmd, "ADDBOT")){
-		AddBot();
+		ParseStringParam(Cmd, "NAME=", StringParam);
+		ParseIntParam(Cmd, "TEAM=", i);
+		AddBot(StringParam, i);
 
 		return true;
 	}else if(ParseCommand(Cmd, "REMOVEBOT")){
-		RemoveBot();
+		ParseStringParam(Cmd, "NAME=", StringParam);
+		RemoveBot(StringParam);
 
 		return true;
 	}else if(ParseCommand(Cmd, "REMOVEALLBOTS")){
@@ -195,7 +198,7 @@ event SetupPatrolRoute(){
 	}
 }
 
-function AddBot(){
+function AddBot(optional string Name, optional int Team){
 	local MPBot Bot;
 
 	if(bBotsCountAsPlayers && Level.Game.NumPlayers >= Level.Game.MaxPlayers){
@@ -208,7 +211,12 @@ function AddBot(){
 
 	if(Bot != None){
 		Bot.Accuracy = BotAccuracy;
-		Bot.PlayerReplicationInfo.PlayerName = "Bot" $ Bots.Length;
+
+		if(Name == "")
+			Bot.PlayerReplicationInfo.PlayerName = "Bot" $ Bots.Length;
+		else
+			Bot.PlayerReplicationInfo.PlayerName = Name;
+
 		Bot.bCanGesture = false;
 		Bot.ChosenSkin = Rand(5);
 		Bot.GotoState('Dead', 'MPStart');
@@ -218,27 +226,41 @@ function AddBot(){
 
 		if(bBotsCountAsPlayers)
 			++Level.Game.NumPlayers;
-		else
-			++Level.Game.NumBots;
+
+		++Level.Game.NumBots;
+
+		if(Level.Game.bTeamGame)
+			Level.Game.ChangeTeam(Bot, Team, false, false);
 	}
 }
 
-function RemoveBot(){
+function RemoveBot(optional string Name){
 	local int i;
 
 	if(Bots.Length > 0){
-		i = Bots.Length - 1;
+		if(Name == ""){
+			i = Bots.Length - 1;
+		}else{
+			do{
+				if(Bots[i].PlayerReplicationInfo.PlayerName ~= Name)
+					break;
 
-		if(Bots[i].Pawn != None)
-			Bots[i].Pawn.Destroy();
+				++i;
+			}until(i == Bots.Length);
+		}
 
-		Bots[i].Destroy();
-		Bots.Length = i;
+		if(i < Bots.Length){
+			if(Bots[i].Pawn != None)
+				Bots[i].Pawn.Destroy();
 
-		if(bBotsCountAsPlayers)
-			--Level.Game.NumPlayers;
-		else
+			Bots[i].Destroy();
+			Bots.Length = i;
+
+			if(bBotsCountAsPlayers)
+				--Level.Game.NumPlayers;
+
 			--Level.Game.NumBots;
+		}
 	}
 }
 

@@ -39,7 +39,7 @@ function bool ExecCmd(String Cmd, optional PlayerController PC){
 		for(C = Level.ControllerList; C != None; C = C.nextController){
 			if(PlayerController(C) != None){
 				PRI = C.PlayerReplicationInfo;
-				CommandResult = PRI.PlayerName $ " (" $ PRI.PlayerID $ ")";
+				CommandResult = "name=" $ PRI.PlayerName $ " id=" $ PRI.PlayerID $ " kills=" $ int(PRI.Score) $ " deaths=" $ int(PRI.Deaths);
 
 				if(PC != None)
 					PC.ClientMessage(CommandResult);

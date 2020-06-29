@@ -43,7 +43,6 @@ TryAgain:
 	Goto('TryAgain');
 MPStart:
 	Sleep(0.75 + FRand());
-	Level.Game.ChangeTeam(Self, 255, false, false);
 	ServerRestartPlayer();
 	Goto('TryAgain');
 }

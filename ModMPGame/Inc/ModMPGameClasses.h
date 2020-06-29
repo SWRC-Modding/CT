@@ -116,30 +116,6 @@ public:
 };
 
 
-class MODMPGAME_API UFunctionOverride : public UObject
-{
-public:
-    class UObject* TargetObject;
-    class UObject* OverrideObject;
-    class UFunction* TargetFunction;
-    class UFunction* OverrideFunction;
-    void execInit(FFrame& Stack, void* Result);
-    void execDeinit(FFrame& Stack, void* Result);
-    void execIsActive(FFrame& Stack, void* Result);
-    DECLARE_CLASS(UFunctionOverride,UObject,0,ModMPGame)
-
-	Native OriginalFunc;
-
-	void Init(UObject* TargetObj, FName TargetFunc, UObject* OverrideObj, FName OverrideFunc);
-	void Deinit();
-	bool IsActive();
-
-	// Overrides
-	virtual void Destroy();
-    DECLARE_NATIVES(UFunctionOverride)
-};
-
-
 
 #if SUPPORTS_PRAGMA_PACK
 #pragma pack (pop)

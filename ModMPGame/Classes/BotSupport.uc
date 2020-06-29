@@ -108,7 +108,16 @@ function bool ExecCmd(String Cmd, optional PlayerController PC){
 					else
 						SpawnPos = PC.Location;
 				}else{
-					SpawnPos = Level.NavigationPointList.Location; // TODO: Pick random navigation point
+					for(N = Level.NavigationPointList; N != None; N = N.nextNavigationPoint){
+						if(Rand(10) > 7){
+							SpawnPos = N.Location;
+
+							break;
+						}
+					}
+
+					if(N == None)
+						SpawnPos = Level.NavigationPointList.Location;
 				}
 
 				P = Spawn(PawnClass,,, SpawnPos);

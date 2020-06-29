@@ -130,7 +130,6 @@ public:
 	AMPBot::StaticClass(); \
 	APatrolPoint::StaticClass(); \
 	UExportPathsCommandlet::StaticClass(); \
-	UFunctionOverride::StaticClass(); \
 
 #endif // __STATIC_LINK
 

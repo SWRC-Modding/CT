@@ -7,22 +7,34 @@
 =============================================================================*/
 
 //
-//ANSI file output device.
+// ANSI file output device.
 //
 class FOutputDeviceFile : public FOutputDevice{
 public:
-	FOutputDeviceFile()
-	: LogAr(NULL)
-	, Opened(0)
-	, Dead(0){
-		Filename[0]=0;
+	FOutputDeviceFile(const TCHAR* InFilename = NULL) : LogAr(NULL),
+	                                                    Opened(0),
+	                                                    Dead(0){
+		if(InFilename)
+			SetFilename(InFilename);
+		else
+			Filename[0] = 0;
 	}
 
 	~FOutputDeviceFile(){
+		Close();
+	}
+
+	void SetFilename(const TCHAR* InFilename){
+		Close();
+		appStrcpy(Filename, InFilename);
+	}
+
+	void Close(){
 		if(LogAr){
 			Logf(NAME_Log, "Log file closed, %s", appTimestamp(true, true));
 			delete LogAr;
 			LogAr = NULL;
+			Opened = 0;
 		}
 	}
 
@@ -32,7 +44,7 @@ public:
 		if(!GIsCriticalError || Entry){
 			if(!FName::SafeSuppressed(Event)){
 				if(!LogAr && !Dead){
-					//Make log filename.
+					// Make log filename.
 					if(!Filename[0]){
 						appStrcpy(Filename, appBaseDir());
 						if
@@ -44,7 +56,7 @@ public:
 						}
 					}
 
-					//Open log file.
+					// Open log file.
 					LogAr = GFileManager->CreateFileWriter(Filename, FILEWRITE_AllowRead|FILEWRITE_Unbuffered|(Opened?FILEWRITE_Append:0));
 
 					if(LogAr){
@@ -69,7 +81,7 @@ public:
 			Entry = 1;
 
 			try{
-				//Ignore errors to prevent infinite-recursive exception reporting.
+				// Ignore errors to prevent infinite-recursive exception reporting.
 				Serialize(Data, Event);
 			}catch(...){}
 

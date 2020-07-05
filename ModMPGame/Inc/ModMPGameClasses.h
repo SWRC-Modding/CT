@@ -170,7 +170,6 @@ public:
 	APatrolPoint::StaticClass(); \
 	ASmallNavigationPoint::StaticClass(); \
 	AInventorySpot::StaticClass(); \
-	UExportPathsCommandlet::StaticClass(); \
 
 #endif // __STATIC_LINK
 

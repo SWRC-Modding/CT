@@ -14,19 +14,23 @@ function PostBeginPlay(){
 	local Class<AdminService> ServiceClass;
 	local AdminService Service;
 
+	SaveConfig();
+
 	Level.Game.bAdminCanPause = false;
 	Level.Game.BroadcastHandlerClass = "ModMPGame.AdminControlBroadcastHandler";
 	Level.Game.AccessControlClass = "ModMPGame.AdminAccessControl";
 
-	if(Level.Game.BroadcastHandler != None){
+	if(Level.Game.BroadcastHandler != None && !Level.Game.BroadcastHandler.IsA('AdminControlBroadcastHandler')){
 		Level.Game.BroadcastHandler.Destroy();
 		Level.Game.BroadcastHandler = Spawn(class'AdminControlBroadcastHandler');
 	}
 
-	if(Level.Game.AccessControl != None){
+	if(Level.Game.AccessControl != None && !Level.Game.AccessControl.IsA('AdminAccessControl')){
 		Level.Game.AccessControl.Destroy();
 		Level.Game.AccessControl = Spawn(class'AdminAccessControl');
 	}
+
+	Level.Game.SaveConfig();
 
 	for(i = 0; i < ServiceClasses.Length; ++i){
 		ServiceClass = Class<AdminService>(DynamicLoadObject(ServiceClasses[i], class'Class'));

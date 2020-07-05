@@ -1,5 +1,7 @@
 #include "../Inc/ModMPGame.h"
 
+#include "../../Core/Inc/FOutputDeviceFile.h"
+
 APlayerController* GetLocalPlayerController(){
 	TObjectIterator<UViewport> It;
 
@@ -10,7 +12,8 @@ APlayerController* GetLocalPlayerController(){
  * AdminControl
  */
 
-AAdminControl* GAdminControl = NULL;
+AAdminControl*    GAdminControl = NULL;
+FOutputDeviceFile AdminControlEventLog;
 
 static struct FAdminControlExec : FExec{
 	FExec* OldExec;
@@ -37,6 +40,30 @@ void AAdminControl::Spawned(){
 		GAdminControlExec.OldExec = GExec;
 		GExec = &GAdminControlExec;
 	}
+
+	if(!AdminControlEventLog.Opened){ // Only set file name if not already open
+		if(AppendEventLog){ // Everything goes into the file that is specified in the ini
+			AdminControlEventLog.SetFilename(*EventLogFile);
+		}else{ // One log file per session
+			FFilename Filename = EventLogFile;
+
+			if(Filename.GetExtension() == "")
+				Filename += ".log";
+
+			AdminControlEventLog.SetFilename(*FString::Printf("%s_%i-%i-%i_%i-%i-%i.%s",
+															  *Filename.GetBaseFilePath(),
+															  Level->Month,
+															  Level->Day,
+															  Level->Year,
+															  Level->Hour,
+															  Level->Minute,
+															  Level->Second,
+															  *Filename.GetExtension()));
+		}
+	}
+
+	AdminControlEventLog.Timestamp = EventLogTimestamp;
+	AdminControlEventLog.Logf(NAME_Init, "(Map): %s", Level->GetOuter()->GetName());
 }
 
 void AAdminControl::Destroy(){
@@ -51,9 +78,26 @@ void AAdminControl::Destroy(){
 	}
 }
 
+void AAdminControl::EventLog(const TCHAR* Msg, FName Event){
+	AdminControlEventLog.Log(static_cast<EName>(Event.GetIndex()), Msg);
+	GLog->Log(static_cast<EName>(Event.GetIndex()), Msg);
+}
+
+void AAdminControl::execEventLog(FFrame& Stack, void* Result){
+	P_GET_STR(Msg);
+	P_GET_NAME(Event);
+	P_FINISH;
+
+	EventLog(*Msg, Event);
+}
+
 /*
  * AdminService
  */
+
+void AAdminService::EventLog(const TCHAR* Msg){
+	GAdminControl->EventLog(Msg, GetClass()->GetFName());
+}
 
 void AAdminService::execParseCommand(FFrame& Stack, void* Result){
 	P_GET_STR_REF(Stream);
@@ -118,6 +162,15 @@ void AAdminService::execExecCmd(FFrame& Stack, void* Result){
 
 	*static_cast<UBOOL*>(Result) = ExecCmd(*Cmd, PC);
 }
+
+
+void AAdminService::execEventLog(FFrame& Stack, void* Result){
+	P_GET_STR(Msg);
+	P_FINISH;
+
+	EventLog(*Msg);
+}
+
 
 /*
  * BotSupport

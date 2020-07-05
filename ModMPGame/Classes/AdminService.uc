@@ -15,21 +15,26 @@ native static final function bool ParseStringParam(string Stream, string Match, 
 // Can be overridden to check for custom commands
 native function bool ExecCmd(String Cmd, optional PlayerController PC);
 
+native final function EventLog(coerce string Msg);
+
 static final function bool IsLocalPlayer(PlayerController PC){
 	return PC != None && Viewport(PC.Player) != None;
 }
 
-function CommandFeedback(PlayerController PC, string Msg, optional bool bLogAlways){
+event CommandFeedback(PlayerController PC, string Msg, optional bool DontWriteToLog){
 	if(PC != None)
 		PC.ClientMessage(Msg);
 
-	if(PC == None || bLogAlways)
-		Log(Msg);
+	if(!DontWriteToLog)
+		EventLog(Msg);
 }
 
 cpptext
 {
-	virtual bool ExecCmd(const char* Cmd, class APlayerController* PC = NULL){ return false; }
+	// AAdminService interface
+	virtual bool ExecCmd(const TCHAR* Cmd, class APlayerController* PC = NULL){ return false; }
+
+	void EventLog(const TCHAR* Msg);
 }
 
 defaultproperties

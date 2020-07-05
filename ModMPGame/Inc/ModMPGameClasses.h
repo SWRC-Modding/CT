@@ -20,9 +20,12 @@
 class MODMPGAME_API AAdminControl : public AActor
 {
 public:
-    BITFIELD bAdminsCanPause:1 GCC_PACK(4);
-    TArrayNoInit<FString> ServiceClasses GCC_PACK(4);
+    TArrayNoInit<FString> ServiceClasses;
     TArrayNoInit<class AAdminService*> Services;
+    FStringNoInit EventLogFile;
+    BITFIELD AppendEventLog:1 GCC_PACK(4);
+    BITFIELD EventLogTimestamp:1;
+    void execEventLog(FFrame& Stack, void* Result);
     UBOOL ExecCmd(FString const& Cmd, class APlayerController* PC)
     {
         DECLARE_NAME(ExecCmd);
@@ -41,6 +44,9 @@ public:
 	// Overrides
 	virtual void Spawned();
 	virtual void Destroy();
+
+	void EventLog(const TCHAR* Msg, FName Event);
+    DECLARE_NATIVES(AAdminControl)
 };
 
 
@@ -55,8 +61,25 @@ public:
     void execParseFloatParam(FFrame& Stack, void* Result);
     void execParseStringParam(FFrame& Stack, void* Result);
     void execExecCmd(FFrame& Stack, void* Result);
+    void execEventLog(FFrame& Stack, void* Result);
+    void CommandFeedback(class APlayerController* PC, FString const& Msg, UBOOL DontWriteToLog)
+    {
+        DECLARE_NAME(CommandFeedback);
+        struct {
+            class APlayerController* PC;
+            FString Msg;
+            UBOOL DontWriteToLog;
+        } Parms;
+        Parms.PC=PC;
+        Parms.Msg=Msg;
+        Parms.DontWriteToLog=DontWriteToLog;
+        ProcessEvent(NCommandFeedback, &Parms);
+    }
     DECLARE_CLASS(AAdminService,AActor,0|CLASS_Config,ModMPGame)
-	virtual bool ExecCmd(const char* Cmd, class APlayerController* PC = NULL){ return false; }
+	// AAdminService interface
+	virtual bool ExecCmd(const TCHAR* Cmd, class APlayerController* PC = NULL){ return false; }
+
+	void EventLog(const TCHAR* Msg);
     DECLARE_NATIVES(AAdminService)
 };
 
@@ -147,6 +170,7 @@ public:
 	APatrolPoint::StaticClass(); \
 	ASmallNavigationPoint::StaticClass(); \
 	AInventorySpot::StaticClass(); \
+	UExportPathsCommandlet::StaticClass(); \
 
 #endif // __STATIC_LINK
 

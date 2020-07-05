@@ -11,7 +11,14 @@
 //
 class FOutputDeviceFile : public FOutputDevice{
 public:
+	FArchive* LogAr;
+	UBOOL     Timestamp;
+	UBOOL     Opened;
+	UBOOL     Dead;
+	TCHAR     Filename[1024];
+
 	FOutputDeviceFile(const TCHAR* InFilename = NULL) : LogAr(NULL),
+	                                                    Timestamp(0),
 	                                                    Opened(0),
 	                                                    Dead(0){
 		if(InFilename)
@@ -68,6 +75,12 @@ public:
 				}
 
 				if(LogAr && Event != NAME_Title){
+					if(Timestamp){
+						WriteRaw("[");
+						WriteRaw(appTimestamp(true, true));
+						WriteRaw("] ");
+					}
+
 					WriteRaw(FName::SafeString(Event));
 					WriteRaw(": ");
 					WriteRaw(Data);
@@ -94,12 +107,7 @@ public:
 			LogAr->Flush();
 	}
 
-	FArchive* LogAr;
-	TCHAR Filename[1024];
-
 private:
-	UBOOL Opened, Dead;
-
 	void WriteRaw(const TCHAR* C){
 		LogAr->Serialize(const_cast<TCHAR*>(C), appStrlen(C)*sizeof(TCHAR));
 	}

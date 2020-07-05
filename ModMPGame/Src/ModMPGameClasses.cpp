@@ -11,6 +11,11 @@ IMPLEMENT_PACKAGE(ModMPGame)
 
 
 IMPLEMENT_CLASS(AAdminControl);
+FNativeEntry<AAdminControl> AAdminControl::StaticNativeMap[] = {
+	MAP_NATIVE(EventLog,0)
+	{NULL,NULL}
+};
+LINK_NATIVES(AAdminControl);
 
 IMPLEMENT_CLASS(AAdminService);
 FNativeEntry<AAdminService> AAdminService::StaticNativeMap[] = {
@@ -20,6 +25,7 @@ FNativeEntry<AAdminService> AAdminService::StaticNativeMap[] = {
 	MAP_NATIVE(ParseFloatParam,0)
 	MAP_NATIVE(ParseStringParam,0)
 	MAP_NATIVE(ExecCmd,0)
+	MAP_NATIVE(EventLog,0)
 	{NULL,NULL}
 };
 LINK_NATIVES(AAdminService);

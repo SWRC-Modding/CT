@@ -1,16 +1,20 @@
 class AdminControl extends Actor native config(ModMPGame);
 
-var() config bool          bAdminsCanPause; // Override for GameInfo.bAdminsCanPause to have everything in one ini; Disabled by default
 var() config array<String> ServiceClasses;
+var array<AdminService>    Services;
 
-var array<AdminService> Services;
+var() config string EventLogFile;
+var() config bool   AppendEventLog;
+var() config bool   EventLogTimestamp;
+
+native final function EventLog(coerce string Msg, name Event);
 
 function PostBeginPlay(){
 	local int i;
 	local Class<AdminService> ServiceClass;
 	local AdminService Service;
 
-	Level.Game.bAdminCanPause = bAdminsCanPause;
+	Level.Game.bAdminCanPause = false;
 	Level.Game.BroadcastHandlerClass = "ModMPGame.AdminControlBroadcastHandler";
 	Level.Game.AccessControlClass = "ModMPGame.AdminAccessControl";
 
@@ -52,15 +56,34 @@ function PostBeginPlay(){
 event bool ExecCmd(String Cmd, optional PlayerController PC){
 	local int i;
 	local bool RecognizedCmd;
+	local string CommandSource;
 
-	if(PC != None && Viewport(PC.Player) != None) // The host is always an admin and doesn't need to log in
-		PC.PlayerReplicationInfo.bAdmin = true;
+	if(Left(Cmd, 5) ~= "XLIVE" || Left(Cmd, 7) ~= "GETPING")
+		return false;
 
-	for(i = 0; i < Services.Length; ++i){
-		if(PC == None || PC.PlayerReplicationInfo.bAdmin || !Services[i].bRequiresAdminPermissions){
-			if(Services[i].ExecCmd(Cmd, PC)){
-				Services[i].SaveConfig();
-				RecognizedCmd = true;
+	if(PC != None){
+		if(Viewport(PC.Player) != None) // The host is always an admin and doesn't need to log in
+			PC.PlayerReplicationInfo.bAdmin = true;
+
+		CommandSource = PC.PlayerReplicationInfo.PlayerName;
+	}else{
+		CommandSource = "ServerConsole";
+	}
+
+	EventLog("(" $ CommandSource $ "): " $ Cmd, 'Command');
+
+	if((PC == None || PC.PlayerReplicationInfo.bAdmin) && Cmd ~= "SAVECONFIG"){
+		for(i = 0; i < Services.Length; ++i)
+			Services[i].SaveConfig();
+
+		SaveConfig();
+
+		RecognizedCmd = true;
+	}else{
+		for(i = 0; i < Services.Length; ++i){
+			if(PC == None || PC.PlayerReplicationInfo.bAdmin || !Services[i].bRequiresAdminPermissions){
+				if(Services[i].ExecCmd(Cmd, PC))
+					RecognizedCmd = true;
 			}
 		}
 	}
@@ -70,6 +93,8 @@ event bool ExecCmd(String Cmd, optional PlayerController PC){
 			PC.ClientMessage("Unrecognized command");
 		else
 			PC.ClientMessage("Unrecognized command or missing permissions");
+	}else{
+		SaveConfig();
 	}
 
 	return RecognizedCmd;
@@ -80,11 +105,16 @@ cpptext
 	// Overrides
 	virtual void Spawned();
 	virtual void Destroy();
+
+	void EventLog(const TCHAR* Msg, FName Event);
 }
 
 defaultproperties
 {
 	bHidden=true
+	EventLogFile="../Save/ServerEvents.log"
+	AppendEventLog=true
+	EventLogTimestamp=true
 	ServiceClasses(0)="ModMPGame.AdminAuthentication"
 	ServiceClasses(1)="ModMPGame.AdminCommands"
 	ServiceClasses(2)="ModMPGame.BotSupport"

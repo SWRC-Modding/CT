@@ -25,13 +25,11 @@ function bool ExecCmd(String Cmd, optional PlayerController PC){
 			}
 
 			if(CommandResult != ""){
-				Log(CommandResult);
-
 				if(PC != None)
-					PC.ClientMessage(CommandResult);
+					CommandFeedback(PC, CommandResult);
 			}
 		}else if(PC != None){
-			PC.ClientMessage("Console commands are not allowed!");
+			CommandFeedback(PC, "Console commands are not allowed!");
 		}
 
 		return true;
@@ -41,10 +39,7 @@ function bool ExecCmd(String Cmd, optional PlayerController PC){
 				PRI = C.PlayerReplicationInfo;
 				CommandResult = "name=" $ PRI.PlayerName $ " id=" $ PRI.PlayerID $ " kills=" $ int(PRI.Score) $ " deaths=" $ int(PRI.Deaths);
 
-				if(PC != None)
-					PC.ClientMessage(CommandResult);
-
-				Log(CommandResult);
+				CommandFeedback(PC, CommandResult, PC != None);
 			}
 		}
 

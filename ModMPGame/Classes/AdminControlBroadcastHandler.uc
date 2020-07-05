@@ -10,19 +10,28 @@ function PostBeginPlay(){
 }
 
 function Broadcast(Actor Sender, coerce string Msg, optional name Type){
-	local String Cmd;
+	local string Cmd;
 	local PlayerController PC;
+	local name Event;
 
 	PC = PlayerController(Sender);
 
 	if(PC != None && InStr(Msg, "/") == 0){
 		Cmd = Right(Msg, Len(Msg) - 1);
-		Log(PC.PlayerReplicationInfo.PlayerName $ ": " $ Cmd, 'Command');
 		AdminControl.ExecCmd(Cmd, PC);
 	}else{
-		if(PC != None)
-			Log(PlayerController(Sender).PlayerReplicationInfo.PlayerName $ ": " $ Msg, 'ChatMessage');
+		Cmd = "Server";
 
+		if(Type == ''){
+			Event = 'Message';
+		}else{
+			Event = Type;
+
+			if(PC != None)
+				Cmd = PC.PlayerReplicationInfo.PlayerName;
+		}
+
+		AdminControl.EventLog("(" $ Cmd $ "): " $ Msg, Event);
 		Super.Broadcast(Sender, Msg, Type);
 	}
 }

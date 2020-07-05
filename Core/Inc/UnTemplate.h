@@ -1037,7 +1037,7 @@ public:
 	FFilename(const TCHAR* In) : FString(In){}
 	FFilename(ENoInit) : FString(E_NoInit){}
 
-	//Returns the text following the last period.
+	// Returns the text following the last period.
 	FString GetExtension() const{
 		INT Pos = InStr(".", true);
 
@@ -1047,7 +1047,7 @@ public:
 		return "";
 	}
 
-	//Returns the base filename, minus any path information.
+	// Returns the base filename, minus any path information.
 	FString GetCleanFilename() const{
 		INT Pos = GetLastPathSeparator();
 
@@ -1057,7 +1057,7 @@ public:
 		return *this;
 	}
 
-	//Returns the same thing as GetCleanFilename, but without the extension
+	// Returns the same thing as GetCleanFilename, but without the extension
 	FString GetBaseFilename() const{
 		FString Wk = GetCleanFilename();
 
@@ -1069,7 +1069,17 @@ public:
 		return Wk;
 	}
 
-	//Returns the path in front of the filename
+	// Returns the path and file name without the extension
+	FString GetBaseFilePath() const{
+		INT Pos = InStr(".", true);
+
+		if(Pos != -1)
+			return Left(Pos);
+
+		return *this;
+	}
+
+	// Returns the path in front of the filename
 	FString GetPath() const{
 		INT Pos = GetLastPathSeparator();
 

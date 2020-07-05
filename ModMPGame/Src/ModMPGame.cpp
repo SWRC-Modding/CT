@@ -41,9 +41,10 @@ void AAdminControl::Spawned(){
 		GExec = &GAdminControlExec;
 	}
 
-	if(!AdminControlEventLog.Opened){ // Only set file name if not already open
+	if(!AdminControlEventLog.Opened){
 		if(AppendEventLog){ // Everything goes into the file that is specified in the ini
 			AdminControlEventLog.SetFilename(*EventLogFile);
+			AdminControlEventLog.Opened = 1; // Causes content to be appended to log file
 		}else{ // One log file per session
 			FFilename Filename = EventLogFile;
 
@@ -62,6 +63,7 @@ void AAdminControl::Spawned(){
 		}
 	}
 
+	AdminControlEventLog.Unbuffered = 1;
 	AdminControlEventLog.Timestamp = EventLogTimestamp;
 	AdminControlEventLog.Logf(NAME_Init, "(Map): %s", Level->GetOuter()->GetName());
 }

@@ -15,11 +15,13 @@ public:
 	UBOOL     Timestamp;
 	UBOOL     Opened;
 	UBOOL     Dead;
+	UBOOL     Unbuffered;
 	TCHAR     Filename[1024];
 
 	FOutputDeviceFile(const TCHAR* InFilename = NULL) : LogAr(NULL),
 	                                                    Timestamp(0),
 	                                                    Opened(0),
+	                                                    Unbuffered(0),
 	                                                    Dead(0){
 		if(InFilename)
 			SetFilename(InFilename);
@@ -85,6 +87,9 @@ public:
 					WriteRaw(": ");
 					WriteRaw(Data);
 					WriteRaw(LINE_TERMINATOR);
+
+					if(Unbuffered)
+						Flush();
 				}
 
 				if(GLogHook && GLogHook != this)

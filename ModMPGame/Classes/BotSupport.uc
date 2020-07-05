@@ -35,16 +35,7 @@ function ShowPathsClient(){
 
 		if(A != None){
 			A.SetDrawType(DT_Sprite);
-
-			if(PlayerStart(N) != None)
-				A.Texture = Texture'Engine.S_Player';
-			else if(CoverPoint(N) != None)
-				A.Texture = Texture'Engine.S_CoverPoint';
-			else if(PatrolPoint(N) != None)
-				A.Texture = Texture'Engine.S_LookTarget';
-			else
-				A.Texture = Texture'Engine.S_Pickup';
-
+			A.Texture = N.Texture;
 			NavigationPointIcons[NavigationPointIcons.Length] = A;
 		}
 	}

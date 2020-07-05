@@ -116,6 +116,22 @@ public:
 };
 
 
+class MODMPGAME_API ASmallNavigationPoint : public ANavigationPoint
+{
+public:
+    DECLARE_CLASS(ASmallNavigationPoint,ANavigationPoint,0,ModMPGame)
+    NO_DEFAULT_CONSTRUCTOR(ASmallNavigationPoint)
+};
+
+
+class MODMPGAME_API AInventorySpot : public ASmallNavigationPoint
+{
+public:
+    DECLARE_CLASS(AInventorySpot,ASmallNavigationPoint,0,ModMPGame)
+    NO_DEFAULT_CONSTRUCTOR(AInventorySpot)
+};
+
+
 
 #if SUPPORTS_PRAGMA_PACK
 #pragma pack (pop)
@@ -129,7 +145,8 @@ public:
 	ABotSupport::StaticClass(); \
 	AMPBot::StaticClass(); \
 	APatrolPoint::StaticClass(); \
-	UExportPathsCommandlet::StaticClass(); \
+	ASmallNavigationPoint::StaticClass(); \
+	AInventorySpot::StaticClass(); \
 
 #endif // __STATIC_LINK
 

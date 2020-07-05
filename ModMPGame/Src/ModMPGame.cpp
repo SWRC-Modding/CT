@@ -183,9 +183,6 @@ void ABotSupport::SpawnNavigationPoint(UClass* NavPtClass, const FVector& Locati
 			++XLevel->iFirstNetRelevantActor;
 			++XLevel->iFirstDynamicActor;
 		}
-
-		if(bAutoBuildPaths)
-			BuildPaths();
 	}else{
 		GLog->Logf(NAME_Error, "Failed to spawn %s", *NavPtClass->FriendlyName);
 		NavPtFailLocations.AddItem(Location);
@@ -207,9 +204,6 @@ void ABotSupport::ImportPaths(){
 
 	FFilename Filename = GetPathFileName(Level->GetOuter()->GetName());
 	FArchive* Ar = GFileManager->CreateFileReader(*Filename);
-	UBOOL AutoBuildPaths = bAutoBuildPaths;
-
-	bAutoBuildPaths = 0; // Importing paths potentially calls SpawnNavigationPoint many times. This avoids rebuilding for every single one.
 
 	if(Ar){
 		GLog->Logf("Importing paths from %s", *Filename.GetCleanFilename());
@@ -242,8 +236,6 @@ void ABotSupport::ImportPaths(){
 		GLog->Logf(NAME_Error, "Cannot import paths from file '%s'", *Filename.GetCleanFilename());
 	}
 
-	bAutoBuildPaths = AutoBuildPaths;
-
 	if(bPathsImported && bAutoBuildPaths)
 		BuildPaths();
 
@@ -263,7 +255,6 @@ void ABotSupport::ExportPaths(){
 	for(TActorIterator<ANavigationPoint> It(XLevel, IT_StaticActors); It; ++It){
 		if(It->IsA(APlayerStart::StaticClass()))
 			continue; // Playerstarts are always part of the map and thus not exported
-
 
 		FNavPtInfo NavPtInfo;
 		ENavPtType NavPtType;
@@ -342,13 +333,14 @@ void ABotSupport::Spawned(){
 	if(!GIsEditor) // Don't draw the Actor sprite during gameplay
 		DrawType = DT_None;
 
+	for(TActorIterator<APickup> It(XLevel, IT_DynamicActors); It; ++It)
+		SpawnNavigationPoint(AInventorySpot::StaticClass(), It->Location + FVector(0, 0, AInventorySpot::StaticClass()->GetDefaultActor()->CollisionHeight / 2));
+
 	if(bAutoImportPaths){
 		UBOOL AutoBuildPaths = bAutoBuildPaths;
 
-		bAutoBuildPaths = 1; // Paths imported at startup are always built, regardless of whether bAutoBuildPaths is set or not.
-
+		bAutoBuildPaths = 1; // Paths imported at startup are always built
 		ImportPaths();
-
 		bAutoBuildPaths = AutoBuildPaths;
 	}
 
@@ -579,6 +571,9 @@ bool ABotSupport::ExecCmd(const char* Cmd, class APlayerController* PC){
 			}
 
 			SpawnNavigationPoint(PutNavPtClass, Loc, Rot);
+
+			if(bAutoBuildPaths)
+				BuildPaths();
 
 			return true;
 		}

@@ -94,7 +94,7 @@ class CORE_API UField : public UObject{
 	NO_DEFAULT_CONSTRUCTOR(UField)
 
 	// Constants.
-	enum{ HASH_COUNT = 256 };
+	enum{ HASH_COUNT = 128 };
 
 	// Variables.
 	UField* Next;
@@ -225,7 +225,7 @@ class CORE_API UStruct : public UField{
 	NO_DEFAULT_CONSTRUCTOR(UStruct)
 
 	// Variables.
-	char         Pad1[4]; // Padding
+	UStruct*     HashNext;
 	UStruct*     SuperStruct;
 	UTextBuffer* ScriptText;
 	UTextBuffer* CppText;

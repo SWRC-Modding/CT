@@ -7,12 +7,37 @@ var() config string EventLogFile;
 var() config bool   AppendEventLog;
 var() config bool   EventLogTimestamp;
 
+var FunctionOverride PostLoginOverride;
+
 native final function EventLog(coerce string Msg, name Event);
+native final function bool WasAdminInPreviousRound(PlayerController PC);
+native final function RegisterAdmin(PlayerController PC);
+native final function UnregisterAdmin(PlayerController PC);
+
+function Promote(PlayerController PC){
+	PC.PlayerReplicationInfo.bAdmin = true;
+	RegisterAdmin(PC);
+}
+
+function Demote(PlayerController PC){
+	PC.PlayerReplicationInfo.bAdmin = false;
+	UnregisterAdmin(PC);
+}
+
+function GameInfoPostLoginOverride(PlayerController NewPlayer){
+	Level.Game.PostLogin(NewPlayer);
+
+	if(WasAdminInPreviousRound(NewPlayer))
+		Promote(NewPlayer);
+}
 
 function PostBeginPlay(){
 	local int i;
 	local Class<AdminService> ServiceClass;
 	local AdminService Service;
+
+	PostLoginOverride = new class'FunctionOverride';
+	PostLoginOverride.Init(Level.Game, 'PostLogin', self, 'GameInfoPostLoginOverride');
 
 	SaveConfig();
 
@@ -53,6 +78,7 @@ function PostBeginPlay(){
 			continue;
 		}
 
+		Service.AdminControl = self;
 		Services[Services.Length] = Service;
 	}
 }
@@ -65,14 +91,10 @@ event bool ExecCmd(String Cmd, optional PlayerController PC){
 	if(Left(Cmd, 5) ~= "XLIVE" || Left(Cmd, 7) ~= "GETPING")
 		return false;
 
-	if(PC != None){
-		if(Viewport(PC.Player) != None) // The host is always an admin and doesn't need to log in
-			PC.PlayerReplicationInfo.bAdmin = true;
-
+	if(PC != None)
 		CommandSource = PC.PlayerReplicationInfo.PlayerName;
-	}else{
+	else
 		CommandSource = "ServerConsole";
-	}
 
 	EventLog("(" $ CommandSource $ "): " $ Cmd, 'Command');
 

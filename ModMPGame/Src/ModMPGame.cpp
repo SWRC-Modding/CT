@@ -15,6 +15,9 @@ APlayerController* GetLocalPlayerController(){
 AAdminControl*    GAdminControl = NULL;
 FOutputDeviceFile AdminControlEventLog;
 
+static TMap<FString, APlayerController*> PreviousGameAdminsByIP;
+static TMap<FString, APlayerController*> CurrentGameAdminsByIP;
+
 static struct FAdminControlExec : FExec{
 	FExec* OldExec;
 
@@ -71,6 +74,9 @@ void AAdminControl::Spawned(){
 void AAdminControl::Destroy(){
 	Super::Destroy();
 
+	PreviousGameAdminsByIP = CurrentGameAdminsByIP;
+	CurrentGameAdminsByIP.Empty();
+
 	if(GAdminControl == this)
 		GAdminControl = NULL;
 
@@ -91,6 +97,43 @@ void AAdminControl::execEventLog(FFrame& Stack, void* Result){
 	P_FINISH;
 
 	EventLog(*Msg, Event);
+}
+
+static FString GetPlayerIP(UNetConnection* Con){
+	FString IP = Con->LowLevelGetRemoteAddress();
+
+	INT Pos = IP.InStr(":", true);
+
+	if(Pos != -1)
+		return IP.Left(Pos);
+
+	return IP;
+}
+
+void AAdminControl::execWasAdminInPreviousRound(FFrame& Stack, void* Result){
+	P_GET_OBJECT(APlayerController, PC);
+	P_FINISH;
+
+	if(PC->Player->IsA(UViewport::StaticClass()))
+		*static_cast<UBOOL*>(Result) = 1;
+	else
+		*static_cast<UBOOL*>(Result) = PreviousGameAdminsByIP.Find(*GetPlayerIP(static_cast<UNetConnection*>(PC->Player))) != NULL;
+}
+
+void AAdminControl::execRegisterAdmin(FFrame& Stack, void* Result){
+	P_GET_OBJECT(APlayerController, PC);
+	P_FINISH;
+
+	if(!PC->Player->IsA(UViewport::StaticClass())) // IsA(UNetConnection::StaticClass()) returns false for TcpipConnection - WTF???
+		CurrentGameAdminsByIP[*GetPlayerIP(static_cast<UNetConnection*>(PC->Player))] = PC;
+}
+
+void AAdminControl::execUnregisterAdmin(FFrame& Stack, void* Result){
+	P_GET_OBJECT(APlayerController, PC);
+	P_FINISH;
+
+	if(!PC->Player->IsA(UViewport::StaticClass())) // IsA(UNetConnection::StaticClass()) returns false for TcpipConnection - WTF???
+		CurrentGameAdminsByIP.Remove(*GetPlayerIP(static_cast<UNetConnection*>(PC->Player)));
 }
 
 /*

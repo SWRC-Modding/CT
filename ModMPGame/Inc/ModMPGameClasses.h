@@ -25,7 +25,11 @@ public:
     FStringNoInit EventLogFile;
     BITFIELD AppendEventLog:1 GCC_PACK(4);
     BITFIELD EventLogTimestamp:1;
+    class UFunctionOverride* PostLoginOverride GCC_PACK(4);
     void execEventLog(FFrame& Stack, void* Result);
+    void execWasAdminInPreviousRound(FFrame& Stack, void* Result);
+    void execRegisterAdmin(FFrame& Stack, void* Result);
+    void execUnregisterAdmin(FFrame& Stack, void* Result);
     UBOOL ExecCmd(FString const& Cmd, class APlayerController* PC)
     {
         DECLARE_NAME(ExecCmd);
@@ -55,6 +59,7 @@ class MODMPGAME_API AAdminService : public AActor
 public:
     class UClass* RelevantGameInfoClass;
     BITFIELD bRequiresAdminPermissions:1 GCC_PACK(4);
+    class AAdminControl* AdminControl GCC_PACK(4);
     void execParseCommand(FFrame& Stack, void* Result);
     void execParseToken(FFrame& Stack, void* Result);
     void execParseIntParam(FFrame& Stack, void* Result);

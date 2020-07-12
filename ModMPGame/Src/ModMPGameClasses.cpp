@@ -13,6 +13,9 @@ IMPLEMENT_PACKAGE(ModMPGame)
 IMPLEMENT_CLASS(AAdminControl);
 FNativeEntry<AAdminControl> AAdminControl::StaticNativeMap[] = {
 	MAP_NATIVE(EventLog,0)
+	MAP_NATIVE(WasAdminInPreviousRound,0)
+	MAP_NATIVE(RegisterAdmin,0)
+	MAP_NATIVE(UnregisterAdmin,0)
 	{NULL,NULL}
 };
 LINK_NATIVES(AAdminControl);

@@ -152,8 +152,8 @@ function bool ExecCmd(String Cmd, optional PlayerController PC){
 		for(C = Level.ControllerList; C != None; C = C.nextController){
 			PRI = C.PlayerReplicationInfo;
 
-			if(!PRI.bAdmin && PRI.PlayerName ~= Cmd){
-				PRI.bAdmin = true;
+			if(C.IsA('PlayerController') && !PRI.bAdmin && PRI.PlayerName ~= Cmd){
+				AdminControl.Promote(PlayerController(C));
 
 				if(PC != None)
 					StringParam = PC.PlayerReplicationInfo.PlayerName;
@@ -175,7 +175,7 @@ function bool ExecCmd(String Cmd, optional PlayerController PC){
 			PRI = C.PlayerReplicationInfo;
 
 			if(PRI.bAdmin && PRI.PlayerName ~= Cmd){
-				PRI.bAdmin = false;
+				AdminControl.Demote(PlayerController(C));
 
 				if(PC != None)
 					StringParam = PC.PlayerReplicationInfo.PlayerName;
@@ -198,7 +198,7 @@ function bool ExecCmd(String Cmd, optional PlayerController PC){
 
 		return true;
 	}else if(ParseCommand(Cmd, "RESTARTMAP")){
-		Level.Game.Broadcast(self, "Restarting current map");
+		Level.Game.Broadcast(self, "Restarting map");
 		Level.ServerTravel("?restart", false);
 
 		return true;

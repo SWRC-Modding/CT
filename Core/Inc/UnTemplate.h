@@ -1320,7 +1320,7 @@ public:
 		return Add(InKey, InValue);
 	}
 
-	TI& operator[](const TK& Key){
+	TI& operator[](typename TTypeInfo<TK>::ConstInitType Key){
 		TI* Entry = Find(Key);
 
 		if(Entry)

@@ -6,14 +6,14 @@ function bool ExecCmd(String Cmd, optional PlayerController PC){
 			if(PC.PlayerReplicationInfo.bAdmin)
 				CommandFeedback(PC, "You are already logged in!", true);
 			else if(Level.Game.AccessControl.AdminLogin(PC, Cmd))
-				PC.PlayerReplicationInfo.bAdmin = true;
+				AdminControl.Promote(PC);
 			else
 				CommandFeedback(PC, "Wrong password!");
 
 			return true;
 		}else if(ParseCommand(Cmd, "LOGOUT")){
 			if(PC.PlayerReplicationInfo.bAdmin){
-				PC.PlayerReplicationInfo.bAdmin = false;
+				AdminControl.Demote(PC);
 				CommandFeedback(PC, "You are no longer an admin!", true);
 			}else{
 				CommandFeedback(PC, "You are not logged in!", true);

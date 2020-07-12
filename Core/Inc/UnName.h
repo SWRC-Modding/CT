@@ -72,6 +72,7 @@ public:
 	DWORD GetFlags() const{ return Entry->Flags; }
 	void SetFlags(DWORD Set) const{ Entry->Flags |= Set; }
 	void ClearFlags(DWORD Clear) const{ Entry->Flags &= ~Clear; }
+	FNameEntry* GetEntry() const{ return Entry; }
 
 	bool operator==(const FName& Other) const{ return Entry == Other.Entry; }
 	bool operator!=(const FName& Other) const{ return Entry != Other.Entry; }
@@ -108,13 +109,11 @@ public:
 private:
 	FNameEntry* Entry; // Names in RC store a pointer to the name entry instead of an index into the Names array
 
-	FNameEntry* GetEntry() const{ return Entry; }
-
 	// Static subsystem variables
-	CORE_API static TArray<FNameEntry*>	Names;			 // Table of all names.
-	CORE_API static TArray<INT>         Available;       // Indices of available names.
-	CORE_API static FNameEntry*			NameHash[4096];  // Hashed names.
-	CORE_API static bool				Initialized;	 // Subsystem initialized.
+	CORE_API static TArray<FNameEntry*> Names;          // Table of all names.
+	CORE_API static TArray<INT>         Available;      // Indices of available names.
+	CORE_API static FNameEntry*         NameHash[4096]; // Hashed names.
+	CORE_API static bool                Initialized;    // Subsystem initialized.
 };
 
 inline DWORD GetTypeHash(const FName N){

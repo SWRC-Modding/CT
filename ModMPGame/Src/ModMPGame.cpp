@@ -308,8 +308,8 @@ void ABotSupport::ExportPaths(){
 	TArray<FNavPtInfo> NavPts;
 
 	for(TActorIterator<ANavigationPoint> It(XLevel, IT_StaticActors); It; ++It){
-		if(It->IsA(APlayerStart::StaticClass()))
-			continue; // Playerstarts are always part of the map and thus not exported
+		if(It->IsA(APlayerStart::StaticClass()) || It->IsA(AInventorySpot::StaticClass()))
+			continue;
 
 		FNavPtInfo NavPtInfo;
 		ENavPtType NavPtType;
@@ -385,18 +385,20 @@ void ABotSupport::ClearPaths(){
 void ABotSupport::Spawned(){
 	guard(ABotSupport::Spawned);
 
-	if(!GIsEditor) // Don't draw the Actor sprite during gameplay
-		DrawType = DT_None;
+	if(!GIsEditor){
+		DrawType = DT_None;  // Don't draw the Actor sprite during gameplay
 
-	for(TActorIterator<APickup> It(XLevel, IT_DynamicActors); It; ++It)
-		SpawnNavigationPoint(AInventorySpot::StaticClass(), It->Location + FVector(0, 0, AInventorySpot::StaticClass()->GetDefaultActor()->CollisionHeight / 2));
+		for(TActorIterator<APickup> It(XLevel, IT_DynamicActors); It; ++It){
+			SpawnNavigationPoint(AInventorySpot::StaticClass(),
+								 It->Location + FVector(0, 0, AScout::StaticClass()->GetDefaultActor()->CollisionHeight));
+		}
+	}
 
 	if(bAutoImportPaths){
-		UBOOL AutoBuildPaths = bAutoBuildPaths;
-
-		bAutoBuildPaths = 1; // Paths imported at startup are always built
 		ImportPaths();
-		bAutoBuildPaths = AutoBuildPaths;
+
+		if(bPathsImported && !bAutoBuildPaths) // Paths imported at startup are always built
+			BuildPaths();
 	}
 
 	unguard;
@@ -670,52 +672,113 @@ void AMPBot::execUpdatePawnAccuracy(FFrame& Stack, void* Result){
 }
 
 /*
- * UExportPathsCommandlet
+ * FunctionOverride
+ *
+ * This should probably be placed in a central utility package like Mod.dll but I want to avoid that kind of dependency for now
  */
-class UExportPathsCommandlet : public UCommandlet{
-	DECLARE_CLASS(UExportPathsCommandlet, UCommandlet, 0, ModMPGame);
 
-	void StaticConstructor(){
-		LogToStdout = 0;
-		IsServer = 1;
-		IsClient = 1;
-		IsEditor = 1;
-		LazyLoad = 1;
-		ShowErrorCount = 0;
-		ShowBanner = 0;
+static TMap<UFunction*, UFunctionOverride*> FunctionOverrides;
+
+void __fastcall ScriptFunctionHook(UObject* Self, int, FFrame& Stack, void* Result){
+	/*
+	 * The stack doesn't contain any information about the called function at this point.
+	 * We only know that the last four bytes at the top are either a UFunction* or an FName so we need to check both.
+	 */
+	UFunction* Function;
+	FName      FunctionName;
+
+	appMemcpy(&Function, Stack.Code - sizeof(UFunction*), sizeof(UFunction*));
+
+	if(!FunctionOverrides.Find(Function)){
+		Function = NULL;
+
+		appMemcpy(&FunctionName, Stack.Code - sizeof(FName), sizeof(FName));
+
+		// TODO: Is there a better way to check for a valid name?
+		if(!IsBadReadPtr(FunctionName.GetEntry(), sizeof(FNameEntry) - NAME_SIZE))
+			Function = Self->FindFunction(FunctionName);
+
+		if(!Function) // If the current function is not on the stack, it is an event called from C++ which is stored in Stack.Node
+			Function = static_cast<UFunction*>(Stack.Node);
 	}
 
-	virtual INT Main(const TCHAR* Parms){
-		FString MapName;
+	UFunctionOverride* Override = FunctionOverrides[Function];
+	bool IsEvent = Function == Stack.Node;
 
-		if(Parse(Parms, "map=", MapName)){
-			UPackage* Package = UObject::LoadPackage(NULL, *MapName, LOAD_NoFail);
-			ULevel* Level = NULL;
+	Function->FunctionFlags = Override->OriginalFunctionFlags;
+	Function->Func = Override->OriginalNative;
 
-			for(TObjectIterator<ULevel> It; It; ++It){
-				if(It->IsIn(Package)){
-					Level = *It;
+	if(Self == Override->TargetObject || !Override->TargetObject){
+		Stack.Object = Override->OverrideObject;
 
-					break;
-				}
-			}
-
-			if(Level){
-				ABotSupport* BotSupport = Cast<ABotSupport>(Level->SpawnActor(ABotSupport::StaticClass()));
-
-				if(BotSupport)
-					BotSupport->ExportPaths();
-				else
-					GWarn->Log(NAME_Error, "Unable to export paths");
-			}else{
-				GWarn->Logf(NAME_Error, "Package '%s' is not a map", *MapName);
-			}
+		if(IsEvent){
+			Stack.Code = &Override->OverrideFunction->Script[0];
+			Stack.Node = Override->OverrideFunction;
+			(Override->OverrideObject->*Override->OverrideFunction->Func)(Stack, Result);
+			Stack.Node = Function;
 		}else{
-			GWarn->Log(NAME_Error, "Map to export paths from must be specified with 'map=<MapName>'");
+			Override->OverrideObject->CallFunction(Stack, Result, Override->OverrideFunction);
 		}
 
-		return 0;
+		Stack.Object = Self;
+	}else{
+		if(IsEvent)
+			(Self->*Function->Func)(Stack, Result);
+		else
+			Self->CallFunction(Stack, Result, Function);
 	}
-};
 
-IMPLEMENT_CLASS(UExportPathsCommandlet);
+	void* Temp = ScriptFunctionHook;
+	appMemcpy(&Function->Func, &Temp, sizeof(Temp));
+	Function->FunctionFlags |= FUNC_Native;
+}
+
+void UFunctionOverride::execInit(FFrame& Stack, void* Result){
+	P_GET_OBJECT(UObject, InTargetObject);
+	P_GET_NAME(TargetFuncName);
+	P_GET_OBJECT(UObject, InOverrideObject);
+	P_GET_NAME(OverrideFuncName);
+	P_FINISH;
+
+	Deinit();
+
+	UBOOL OverrideForAllObjects = InTargetObject->IsA(UClass::StaticClass());
+
+	TargetObject = OverrideForAllObjects ? NULL : InTargetObject;
+	TargetFunction = (OverrideForAllObjects ? static_cast<UClass*>(InTargetObject)->GetDefaultObject() : InTargetObject)->FindFunctionChecked(TargetFuncName);
+	OverrideObject = InOverrideObject;
+	OverrideFunction = OverrideObject->FindFunctionChecked(OverrideFuncName);
+
+	OriginalFunctionFlags = TargetFunction->FunctionFlags;
+	TargetFunction->FunctionFlags |= FUNC_Native;
+	OriginalNative = TargetFunction->Func;
+	void* Temp = ScriptFunctionHook;
+	appMemcpy(&TargetFunction->Func, &Temp, sizeof(Temp));
+
+	check(!FunctionOverrides.Find(TargetFunction));
+
+	FunctionOverrides[TargetFunction] = this;
+}
+
+void UFunctionOverride::execDeinit(FFrame& Stack, void* Result){
+	P_FINISH;
+	Deinit();
+}
+
+void UFunctionOverride::Destroy(){
+	Deinit();
+	Super::Destroy();
+}
+
+void UFunctionOverride::Deinit(){
+	if(TargetFunction && FunctionOverrides.Find(TargetFunction) && FunctionOverrides[TargetFunction] == this){
+		TargetFunction->FunctionFlags = OriginalFunctionFlags;
+		TargetFunction->Func = OriginalNative;
+		FunctionOverrides.Remove(TargetFunction);
+	}
+
+	TargetObject = NULL;
+	TargetFunction = NULL;
+	OverrideObject = NULL;
+	OverrideFunction = NULL;
+}

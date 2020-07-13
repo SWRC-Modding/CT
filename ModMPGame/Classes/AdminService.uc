@@ -37,6 +37,11 @@ cpptext
 	virtual bool ExecCmd(const TCHAR* Cmd, class APlayerController* PC = NULL){ return false; }
 
 	void EventLog(const TCHAR* Msg);
+
+	/*
+	 * Admin services should prefer this function over 'ParseCommand' as it can also collect the command strings to display as help text
+	 */
+	bool CheckCommand(const TCHAR** Stream, const TCHAR* Match);
 }
 
 defaultproperties

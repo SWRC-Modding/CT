@@ -11,6 +11,13 @@ A service implementer can decide whether everybody can execute commands or only 
 
 ## Default services
 
+### General
+
+| command    | description  |
+|------------|--------------|
+| help       | displays a list of all active services and their available commands |
+| saveconfig | saves the configuration of all active services |
+
 ### AdminAuthentication
 
 The AdminAuthentication service implements the _login_ and _logout_ commands. Without it players are not able to log in as administrators and must be manually promoted by the host. It should always be present for dedicated servers.

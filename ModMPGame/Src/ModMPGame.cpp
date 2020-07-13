@@ -204,18 +204,26 @@ void AAdminService::EventLog(const TCHAR* Msg){
 	GAdminControl->EventLog(Msg, GetClass()->GetFName());
 }
 
+bool AAdminService::CheckCommand(const TCHAR** Stream, const TCHAR* Match){
+	if(AdminControl && AdminControl->bPrintCommands){
+		AdminControl->CurrentCommands.AddItem(Match);
+
+		return false;
+	}
+
+	return ParseCommand(Stream, Match) != 0;
+}
+
 void AAdminService::execParseCommand(FFrame& Stack, void* Result){
 	P_GET_STR_REF(Stream);
 	P_GET_STR(Match);
 	P_FINISH;
 
-	const char* StreamData = **Stream;
+	const TCHAR* StreamData = **Stream;
 
-	if(ParseCommand(&StreamData, *Match)){
-		*static_cast<UBOOL*>(Result) = 1;
+	if(CheckCommand(&StreamData, *Match)){
 		*Stream = StreamData;
-	}else{
-		*static_cast<UBOOL*>(Result) = 0;
+		*static_cast<UBOOL*>(Result) = 1;
 	}
 }
 
@@ -275,7 +283,6 @@ void AAdminService::execEventLog(FFrame& Stack, void* Result){
 
 	EventLog(*Msg);
 }
-
 
 /*
  * BotSupport
@@ -638,34 +645,34 @@ bool ABotSupport::ExecCmd(const char* Cmd, class APlayerController* PC){
 	if(!PC)
 		PC = GetLocalPlayerController();
 
-	if(ParseCommand(&Cmd, "IMPORTPATHS")){
+	if(CheckCommand(&Cmd, "IMPORTPATHS")){
 		ImportPaths();
 
 		return true;
-	}else if(ParseCommand(&Cmd, "EXPORTPATHS")){
+	}else if(CheckCommand(&Cmd, "EXPORTPATHS")){
 		ExportPaths();
 
 		return true;
-	}else if(ParseCommand(&Cmd, "BUILDPATHS")){
+	}else if(CheckCommand(&Cmd, "BUILDPATHS")){
 		BuildPaths();
 
 		return true;
-	}else if(ParseCommand(&Cmd, "CLEARPATHS")){
+	}else if(CheckCommand(&Cmd, "CLEARPATHS")){
 		ClearPaths();
 
 		return true;
-	}else if(ParseCommand(&Cmd, "ENABLEAUTOBUILDPATHS")){
+	}else if(CheckCommand(&Cmd, "ENABLEAUTOBUILDPATHS")){
 		bAutoBuildPaths = 1;
 
 		return true;
-	}else if(ParseCommand(&Cmd, "DISABLEAUTOBUILDPATHS")){
+	}else if(CheckCommand(&Cmd, "DISABLEAUTOBUILDPATHS")){
 		bAutoBuildPaths = 0;
 
 		return true;
 	}else if(PC){
 		UClass* PutNavPtClass = NULL;
 
-		if(ParseCommand(&Cmd, "REMOVENAVIGATIONPOINT")){
+		if(CheckCommand(&Cmd, "REMOVENAVIGATIONPOINT")){
 			UBOOL IsEditor = GIsEditor;
 
 			GIsEditor = 1;
@@ -684,7 +691,7 @@ bool ABotSupport::ExecCmd(const char* Cmd, class APlayerController* PC){
 
 
 			return true;
-		}else if(ParseCommand(&Cmd, "REMOVEALLNAVIGATIONPOINTS")){
+		}else if(CheckCommand(&Cmd, "REMOVEALLNAVIGATIONPOINTS")){
 			UBOOL IsEditor = GIsEditor;
 
 			GIsEditor = 1;
@@ -700,18 +707,18 @@ bool ABotSupport::ExecCmd(const char* Cmd, class APlayerController* PC){
 			BuildPaths();
 
 			return true;
-		}else if(ParseCommand(&Cmd, "PUTPATHNODE")){
+		}else if(CheckCommand(&Cmd, "PUTPATHNODE")){
 			PutNavPtClass = APathNode::StaticClass();
-		}else if(ParseCommand(&Cmd, "PUTCOVERPOINT")){
+		}else if(CheckCommand(&Cmd, "PUTCOVERPOINT")){
 			PutNavPtClass = ACoverPoint::StaticClass();
-		}else if(ParseCommand(&Cmd, "PUTPATROLPOINT")){
+		}else if(CheckCommand(&Cmd, "PUTPATROLPOINT")){
 			PutNavPtClass = APatrolPoint::StaticClass();
 		}else if(GIsClient){ // Commands only available ingame
-			if(ParseCommand(&Cmd, "SHOWPATHS")){
+			if(CheckCommand(&Cmd, "SHOWPATHS")){
 				bShowPaths = 1;
 
 				return true;
-			}else if(ParseCommand(&Cmd, "HIDEPATHS")){
+			}else if(CheckCommand(&Cmd, "HIDEPATHS")){
 				bShowPaths = 0;
 
 				return true;

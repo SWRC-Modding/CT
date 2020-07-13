@@ -722,7 +722,7 @@ void AMPBot::execUpdatePawnAccuracy(FFrame& Stack, void* Result){
 
 static TMap<UFunction*, UFunctionOverride*> FunctionOverrides;
 
-void __fastcall ScriptFunctionHook(UObject* Self, int, FFrame& Stack, void* Result){
+static void __fastcall ScriptFunctionHook(UObject* Self, int, FFrame& Stack, void* Result){
 	/*
 	 * The stack doesn't contain any information about the called function at this point.
 	 * We only know that the last four bytes at the top are either a UFunction* or an FName so we need to check both.
@@ -752,18 +752,16 @@ void __fastcall ScriptFunctionHook(UObject* Self, int, FFrame& Stack, void* Resu
 	Function->Func = Override->OriginalNative;
 
 	if(Self == Override->TargetObject || !Override->TargetObject){
-		Stack.Object = Override->OverrideObject;
-
 		if(IsEvent){
+			Stack.Object = Override->OverrideObject;
 			Stack.Code = &Override->OverrideFunction->Script[0];
 			Stack.Node = Override->OverrideFunction;
 			(Override->OverrideObject->*Override->OverrideFunction->Func)(Stack, Result);
 			Stack.Node = Function;
+			Stack.Object = Self;
 		}else{
 			Override->OverrideObject->CallFunction(Stack, Result, Override->OverrideFunction);
 		}
-
-		Stack.Object = Self;
 	}else{
 		if(IsEvent)
 			(Self->*Function->Func)(Stack, Result);
@@ -792,13 +790,17 @@ void UFunctionOverride::execInit(FFrame& Stack, void* Result){
 	OverrideObject = InOverrideObject;
 	OverrideFunction = OverrideObject->FindFunctionChecked(OverrideFuncName);
 
+	if(TargetFunction->iNative != 0){ // TODO: Allow this in the future
+		appErrorf("Cannot override native final function '%s' in '%s'",
+				  *TargetFunction->FriendlyName,
+				  OverrideForAllObjects ? InTargetObject->GetName() : InTargetObject->GetClass()->GetName());
+	}
+
 	OriginalFunctionFlags = TargetFunction->FunctionFlags;
 	TargetFunction->FunctionFlags |= FUNC_Native;
 	OriginalNative = TargetFunction->Func;
 	void* Temp = ScriptFunctionHook;
 	appMemcpy(&TargetFunction->Func, &Temp, sizeof(Temp));
-
-	check(!FunctionOverrides.Find(TargetFunction));
 
 	FunctionOverrides[TargetFunction] = this;
 }

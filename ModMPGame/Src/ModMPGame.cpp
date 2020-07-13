@@ -12,11 +12,32 @@ APlayerController* GetLocalPlayerController(){
  * AdminControl
  */
 
-AAdminControl*    GAdminControl = NULL;
-FOutputDeviceFile AdminControlEventLog;
+static AAdminControl*    GAdminControl = NULL;
+static FOutputDeviceFile AdminControlEventLog;
 
-static TMap<FString, APlayerController*> PreviousGameAdminsByIP;
-static TMap<FString, APlayerController*> CurrentGameAdminsByIP;
+struct FPlayerStats{
+	UBOOL bAdmin;
+	INT   Kills;
+	FLOAT Deaths;
+	FLOAT Score;
+	INT   GoalsScored;
+};
+
+static TArray<FString>                   PreviousGameAdminIDs;
+static TMap<FString, FPlayerStats>       CurrentGamePlayersByID;
+static TMap<APlayerController*, FString> PlayerIDsByController; // Only needed because PlayerController::Player is NULL when GameInfo::Logout is called
+
+// Combines ip address with cd key hash to uniquely identify a player even in the same network
+static FString GetPlayerID(UNetConnection* Con){
+	FString IP = Con->LowLevelGetRemoteAddress();
+
+	INT Pos = IP.InStr(":", true);
+
+	if(Pos != -1)
+		return IP.Left(Pos) + Con->CDKeyHash;
+
+	return IP + Con->CDKeyHash;
+}
 
 static struct FAdminControlExec : FExec{
 	FExec* OldExec;
@@ -69,16 +90,30 @@ void AAdminControl::Spawned(){
 	AdminControlEventLog.Unbuffered = 1;
 	AdminControlEventLog.Timestamp = EventLogTimestamp;
 	AdminControlEventLog.Logf(NAME_Init, "(Map): %s", Level->GetOuter()->GetName());
+
+	// Restore admins from previous round so they don't have to login again
+
+	CurrentGamePlayersByID.Empty();
+
+	for(INT i = 0; i < PreviousGameAdminIDs.Num(); ++i)
+		CurrentGamePlayersByID[*PreviousGameAdminIDs[i]].bAdmin = 1;
+
+	PlayerIDsByController.Empty();
 }
 
 void AAdminControl::Destroy(){
 	Super::Destroy();
 
-	PreviousGameAdminsByIP = CurrentGameAdminsByIP;
-	CurrentGameAdminsByIP.Empty();
+	if(GAdminControl == this){
+		PreviousGameAdminIDs.Empty();
 
-	if(GAdminControl == this)
+		for(TMap<FString, FPlayerStats>::TIterator It(CurrentGamePlayersByID); It; ++It){
+			if(It.Value().bAdmin)
+				PreviousGameAdminIDs.AddItem(It.Key());
+		}
+
 		GAdminControl = NULL;
+	}
 
 	if(GExec == &GAdminControlExec){
 		GExec = GAdminControlExec.OldExec;
@@ -99,41 +134,66 @@ void AAdminControl::execEventLog(FFrame& Stack, void* Result){
 	EventLog(*Msg, Event);
 }
 
-static FString GetPlayerIP(UNetConnection* Con){
-	FString IP = Con->LowLevelGetRemoteAddress();
-
-	INT Pos = IP.InStr(":", true);
-
-	if(Pos != -1)
-		return IP.Left(Pos);
-
-	return IP;
-}
-
-void AAdminControl::execWasAdminInPreviousRound(FFrame& Stack, void* Result){
+void AAdminControl::execSaveStats(FFrame& Stack, void* Result){
 	P_GET_OBJECT(APlayerController, PC);
 	P_FINISH;
 
-	if(PC->Player->IsA(UViewport::StaticClass()))
-		*static_cast<UBOOL*>(Result) = 1;
-	else
-		*static_cast<UBOOL*>(Result) = PreviousGameAdminsByIP.Find(*GetPlayerIP(static_cast<UNetConnection*>(PC->Player))) != NULL;
+	if(!PC)
+		return;
+
+	FString PlayerID;
+
+	if(PC->Player){ // IsA(UNetConnection::StaticClass()) returns false for TcpipConnection - WTF???
+		if(PC->Player->IsA(UViewport::StaticClass()))
+			return;
+
+		PlayerID = GetPlayerID(static_cast<UNetConnection*>(PC->Player));
+		PlayerIDsByController[PC] = PlayerID;
+	}else{ // PC->Player == NULL happens when a player leaves the server. In that case we need to look up the ID using the controller
+		FString* Tmp = PlayerIDsByController.Find(PC);
+
+		if(!Tmp)
+			return;
+
+		PlayerID = *Tmp;
+		PlayerIDsByController.Remove(PC);
+	}
+
+	FPlayerStats& Stats = CurrentGamePlayersByID[*PlayerID];
+
+	PlayerIDsByController[PC] = PlayerID;
+
+	Stats.bAdmin      = PC->PlayerReplicationInfo->bAdmin;
+	Stats.Kills       = PC->PlayerReplicationInfo->Kills;
+	Stats.Deaths      = PC->PlayerReplicationInfo->Deaths;
+	Stats.Score       = PC->PlayerReplicationInfo->Score;
+	Stats.GoalsScored = PC->PlayerReplicationInfo->GoalsScored;
 }
 
-void AAdminControl::execRegisterAdmin(FFrame& Stack, void* Result){
+void AAdminControl::execRestoreStats(FFrame& Stack, void* Result){
 	P_GET_OBJECT(APlayerController, PC);
 	P_FINISH;
 
-	if(!PC->Player->IsA(UViewport::StaticClass())) // IsA(UNetConnection::StaticClass()) returns false for TcpipConnection - WTF???
-		CurrentGameAdminsByIP[*GetPlayerIP(static_cast<UNetConnection*>(PC->Player))] = PC;
-}
+	if(!PC)
+		return;
 
-void AAdminControl::execUnregisterAdmin(FFrame& Stack, void* Result){
-	P_GET_OBJECT(APlayerController, PC);
-	P_FINISH;
+	check(PC->Player);
 
-	if(!PC->Player->IsA(UViewport::StaticClass())) // IsA(UNetConnection::StaticClass()) returns false for TcpipConnection - WTF???
-		CurrentGameAdminsByIP.Remove(*GetPlayerIP(static_cast<UNetConnection*>(PC->Player)));
+	if(PC->Player->IsA(UViewport::StaticClass())){
+		PC->PlayerReplicationInfo->bAdmin = 1; // The host is always an admin
+		// It doesn't make sense to restore anything else here as the host cannot leave and rejoin without stopping the server
+	}else{
+		FString PlayerID = GetPlayerID(static_cast<UNetConnection*>(PC->Player));
+		const FPlayerStats& Stats = CurrentGamePlayersByID[*PlayerID];
+
+		PlayerIDsByController[PC] = PlayerID;
+
+		PC->PlayerReplicationInfo->bAdmin      = Stats.bAdmin;
+		PC->PlayerReplicationInfo->Kills       = Stats.Kills;
+		PC->PlayerReplicationInfo->Deaths      = Stats.Deaths;
+		PC->PlayerReplicationInfo->Score       = Stats.Score;
+		PC->PlayerReplicationInfo->GoalsScored = Stats.GoalsScored;
+	}
 }
 
 /*

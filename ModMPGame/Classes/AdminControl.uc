@@ -8,27 +8,42 @@ var() config bool   AppendEventLog;
 var() config bool   EventLogTimestamp;
 
 var FunctionOverride PostLoginOverride;
+var FunctionOverride LogoutOverride;
 
 native final function EventLog(coerce string Msg, name Event);
-native final function bool WasAdminInPreviousRound(PlayerController PC);
-native final function RegisterAdmin(PlayerController PC);
-native final function UnregisterAdmin(PlayerController PC);
+native final function SaveStats(PlayerController PC);
+native final function RestoreStats(PlayerController PC);
 
 function Promote(PlayerController PC){
 	PC.PlayerReplicationInfo.bAdmin = true;
-	RegisterAdmin(PC);
+	SaveStats(PC);
 }
 
 function Demote(PlayerController PC){
 	PC.PlayerReplicationInfo.bAdmin = false;
-	UnregisterAdmin(PC);
+	SaveStats(PC);
 }
 
 function GameInfoPostLoginOverride(PlayerController NewPlayer){
 	Level.Game.PostLogin(NewPlayer);
 
-	if(WasAdminInPreviousRound(NewPlayer))
-		Promote(NewPlayer);
+	EventLog(NewPlayer.PlayerReplicationInfo.PlayerName $ " entered the game", 'Join');
+	RestoreStats(NewPlayer);
+}
+
+function GameInfoLogoutOverride(Controller Exiting){
+	local PlayerController PC;
+
+	PC = PlayerController(Exiting);
+
+	if(PC != None){
+		SaveStats(PC);
+
+		if(!Level.Game.bGameEnded) // No need to log this at the end of the game when all players leave automatically
+			EventLog(PC.PlayerReplicationInfo.PlayerName $ " left the game", 'Leave');
+	}
+
+	Level.Game.Logout(Exiting);
 }
 
 function PostBeginPlay(){
@@ -38,6 +53,8 @@ function PostBeginPlay(){
 
 	PostLoginOverride = new class'FunctionOverride';
 	PostLoginOverride.Init(Level.Game, 'PostLogin', self, 'GameInfoPostLoginOverride');
+	LogoutOverride = new class'FunctionOverride';
+	LogoutOverride.Init(Level.Game, 'Logout', self, 'GameInfoLogoutOverride');
 
 	SaveConfig();
 

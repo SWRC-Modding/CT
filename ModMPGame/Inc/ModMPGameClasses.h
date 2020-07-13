@@ -25,7 +25,9 @@ public:
     FStringNoInit EventLogFile;
     BITFIELD AppendEventLog:1 GCC_PACK(4);
     BITFIELD EventLogTimestamp:1;
-    class UFunctionOverride* PostLoginOverride GCC_PACK(4);
+    BITFIELD bPrintCommands:1;
+    TArrayNoInit<FString> CurrentCommands GCC_PACK(4);
+    class UFunctionOverride* PostLoginOverride;
     class UFunctionOverride* LogoutOverride;
     void execEventLog(FFrame& Stack, void* Result);
     void execSaveStats(FFrame& Stack, void* Result);
@@ -85,6 +87,11 @@ public:
 	virtual bool ExecCmd(const TCHAR* Cmd, class APlayerController* PC = NULL){ return false; }
 
 	void EventLog(const TCHAR* Msg);
+
+	/*
+	 * Admin services should prefer this function over 'ParseCommand' as it can also collect the command strings to display as help text
+	 */
+	bool CheckCommand(const TCHAR** Stream, const TCHAR* Match);
     DECLARE_NATIVES(AAdminService)
 };
 

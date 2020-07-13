@@ -7,6 +7,9 @@ var() config string EventLogFile;
 var() config bool   AppendEventLog;
 var() config bool   EventLogTimestamp;
 
+var bool          bPrintCommands;  // Commands are not executed but instead displayed (e.g. when the 'help' command is used)
+var array<string> CurrentCommands; // Only used as temporary storage when bPrintCommands == true
+
 var FunctionOverride PostLoginOverride;
 var FunctionOverride LogoutOverride;
 
@@ -100,13 +103,51 @@ function PostBeginPlay(){
 	}
 }
 
-event bool ExecCmd(String Cmd, optional PlayerController PC){
+function bool DispatchCmd(PlayerController PC, string Cmd){
+	local int i;
+	local int j;
+	local int NumLines;
+	local bool RecognizedCmd;
+	local bool bAdmin;
+
+	bAdmin = PC == None || PC.PlayerReplicationInfo.bAdmin;
+
+	for(i = 0; i < Services.Length; ++i){
+		if(Services[i].bRequiresAdminPermissions && !bAdmin)
+			continue;
+
+		if(Services[i].ExecCmd(Cmd, PC))
+			RecognizedCmd = true;
+
+		if(CurrentCommands.Length > 0){ // 'help' command was used, so display the list of commands
+			Services[i].CommandFeedback(PC, string(Services[i].Class.Name) $ ":", PC != None);
+			++NumLines;
+
+			for(j = 0; j < CurrentCommands.Length; ++j){
+				Services[i].CommandFeedback(PC, "  - " $ CurrentCommands[j], PC != None);
+				++NumLines;
+			}
+
+			CurrentCommands.Length = 0;
+		}
+	}
+
+	if(bPrintCommands && PC != None && NumLines > 6) // Not all commands fit in chat but they are in the console
+		PC.ClientMessage("Open console for the complete list of available commands");
+
+	return RecognizedCmd || bPrintCommands;
+}
+
+event bool ExecCmd(string Cmd, optional PlayerController PC){
 	local int i;
 	local bool RecognizedCmd;
 	local string CommandSource;
 
 	if(Left(Cmd, 5) ~= "XLIVE" || Left(Cmd, 7) ~= "GETPING")
 		return false;
+
+	if(Cmd ~= "HELP")
+		bPrintCommands = true;
 
 	if(PC != None)
 		CommandSource = PC.PlayerReplicationInfo.PlayerName;
@@ -123,12 +164,7 @@ event bool ExecCmd(String Cmd, optional PlayerController PC){
 
 		RecognizedCmd = true;
 	}else{
-		for(i = 0; i < Services.Length; ++i){
-			if(PC == None || PC.PlayerReplicationInfo.bAdmin || !Services[i].bRequiresAdminPermissions){
-				if(Services[i].ExecCmd(Cmd, PC))
-					RecognizedCmd = true;
-			}
-		}
+		RecognizedCmd = DispatchCmd(PC, Cmd);
 	}
 
 	if(PC != None && !RecognizedCmd){
@@ -139,6 +175,8 @@ event bool ExecCmd(String Cmd, optional PlayerController PC){
 	}else{
 		SaveConfig();
 	}
+
+	bPrintCommands = false;
 
 	return RecognizedCmd;
 }

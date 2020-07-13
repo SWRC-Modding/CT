@@ -26,10 +26,10 @@ public:
     BITFIELD AppendEventLog:1 GCC_PACK(4);
     BITFIELD EventLogTimestamp:1;
     class UFunctionOverride* PostLoginOverride GCC_PACK(4);
+    class UFunctionOverride* LogoutOverride;
     void execEventLog(FFrame& Stack, void* Result);
-    void execWasAdminInPreviousRound(FFrame& Stack, void* Result);
-    void execRegisterAdmin(FFrame& Stack, void* Result);
-    void execUnregisterAdmin(FFrame& Stack, void* Result);
+    void execSaveStats(FFrame& Stack, void* Result);
+    void execRestoreStats(FFrame& Stack, void* Result);
     UBOOL ExecCmd(FString const& Cmd, class APlayerController* PC)
     {
         DECLARE_NAME(ExecCmd);

@@ -1326,7 +1326,9 @@ public:
 		if(Entry)
 			return *Entry;
 
-		return Add(Key, TI());
+		const BYTE ZeroedDefault[sizeof(TI)] = {0}; // Retarded hack to make this work with FString since its ConstInitType is char* and not const FString&
+
+		return Add(Key, reinterpret_cast<typename TTypeInfo<TI>::ConstInitType>(ZeroedDefault));
 	}
 
 	INT Remove(typename TTypeInfo<TK>::ConstInitType InKey){

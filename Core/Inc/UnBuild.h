@@ -37,6 +37,11 @@
 #define DO_CHECK 1
 #endif
 
+// Whether to turn off all checks in performance critical routines.
+#ifndef DO_CHECK_SLOW
+#define DO_CHECK_SLOW 0
+#endif
+
 // Whether to track call-stack errors.
 #ifndef DO_GUARD
 #define DO_GUARD 1
@@ -60,26 +65,6 @@
 // Whether to use Intel assembler code.
 #ifndef ASM
 #define ASM 1
-#endif
-
-// Whether to use 3DNow! assembler code.
-#ifndef ASM3DNOW
-#define ASM3DNOW 1
-#endif
-
-// Whether to use Katmai assembler code.
-#ifndef ASMKNI
-#define ASMKNI 1
-#endif
-
-// Demo version.
-#ifndef DEMOVERSION
-#define DEMOVERSION 0
-#endif
-
-// Whether certain mesh export and conversion restrictions apply.
-#ifndef RESTRICTEXPORT
-#define RESTRICTEXPORT 1
 #endif
 
 /*-----------------------------------------------------------------------------

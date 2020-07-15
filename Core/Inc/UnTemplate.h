@@ -279,10 +279,12 @@ public:
 	}
 
 	T& operator[](INT Index){
+		checkSlow(IsValidIndex(Index));
 		return GetData()[Index];
 	}
 
 	const T& operator[](INT Index) const{
+		checkSlow(IsValidIndex(Index));
 		return GetData()[Index];
 	}
 

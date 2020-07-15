@@ -75,32 +75,23 @@ class CORE_API UCommandlet : public UObject{
 
 	virtual INT Main(const TCHAR* Parms);
 
-	/*
-	*  Entry point.
-	*
-	* For some reason LucasArts removed the 'event' prefix
-	* from functions that call UnrealScript events which
-	* results in UCommandlet::Main calling itself recursively.
-	* This rewritten main function checks for an UnrealScript function
-	* called main and calls it if found. Else it calls the virtual main function.
-	* It needs to be forceinline because otherwise the function from the dll is
-	* called which is bad...
-	*/
-	FORCEINLINE INT Main(const FString& InParms){
-		UCommandlet_eventMain_Parms Parms;
-
-		Parms.InParms = InParms;
-
-		UFunction* MainFunc = FindFunction(NAME_Main);
-
-		if(MainFunc)
-			ProcessEvent(MainFunc, &Parms);
-		else
-			return Main(*InParms);
-
-		return Parms.ReturnValue;
-    }
+	INT Main(const FString& InParms);
 };
+/*
+ * Calling UCommandlet::Main gives a 'Function Main not found' error for some commandlets which makes no sense at all
+ * This function provides a workaround by checking whether main exists without throwing an error.
+ */
+inline INT CommandletMain(UCommandlet* Commandlet, const FString& InParms){
+	UFunction* MainFunc = Commandlet->FindFunction(NAME_Main);
+	UCommandlet_eventMain_Parms Parms = {InParms, 0};
+
+	if(MainFunc)
+		Commandlet->ProcessEvent(MainFunc, &Parms);
+	else
+		Parms.ReturnValue = Commandlet->Main(*InParms);
+
+	return Parms.ReturnValue;
+}
 
 /*-----------------------------------------------------------------------------
 	ULanguage.

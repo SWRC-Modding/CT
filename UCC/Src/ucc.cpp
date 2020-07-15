@@ -113,7 +113,7 @@ int __cdecl main(int argc, char** argv){
 				if(ClassName == "Engine.Server" || ClassName == "Engine.ServerCommandlet")
 					UServerCommandletMain(); // The ServerCommandlet has a special Main function
 				else
-					ExitCode = Commandlet->Main(CommandletCmdLine);
+					ExitCode = CommandletMain(Commandlet, CommandletCmdLine);
 
 				if(Default->ShowErrorCount){
 					Warn.Log("");

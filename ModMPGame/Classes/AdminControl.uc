@@ -143,7 +143,8 @@ event bool ExecCmd(string Cmd, optional PlayerController PC){
 	local bool RecognizedCmd;
 	local string CommandSource;
 
-	if(Left(Cmd, 5) ~= "XLIVE" || Left(Cmd, 7) ~= "GETPING")
+	// Common engine commands are ignored
+	if(Left(Cmd, 5) ~= "XLIVE" || Left(Cmd, 7) ~= "GETPING" || Left(Cmd, 13) ~= "GETCURRENTRES" || Left(Cmd, 8) ~= "SETMOUSE")
 		return false;
 
 	if(Cmd ~= "HELP")
@@ -172,8 +173,6 @@ event bool ExecCmd(string Cmd, optional PlayerController PC){
 			PC.ClientMessage("Unrecognized command");
 		else
 			PC.ClientMessage("Unrecognized command or missing permissions");
-	}else{
-		SaveConfig();
 	}
 
 	bPrintCommands = false;

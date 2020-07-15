@@ -112,6 +112,16 @@
 	</References>
 	<Files>
 		<Filter
+			Name="Inc"
+			Filter="h;hpp;hxx;hm;inl;inc;xsd">
+			<File
+				RelativePath=".\Inc\Mod.h">
+			</File>
+			<File
+				RelativePath=".\Inc\ModClasses.h">
+			</File>
+		</Filter>
+		<Filter
 			Name="Src"
 			Filter="cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx"
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}">
@@ -119,14 +129,13 @@
 				RelativePath=".\Src\Mod.cpp">
 			</File>
 			<File
-				RelativePath=".\Src\ModRenderDevice.cpp">
+				RelativePath=".\Src\ModClasses.cpp">
 			</File>
-		</Filter>
-		<Filter
-			Name="Inc"
-			Filter="h;hpp">
 			<File
-				RelativePath=".\Inc\Mod.h">
+				RelativePath=".\Src\ModPrivate.h">
+			</File>
+			<File
+				RelativePath=".\Src\ModRenderDevice.cpp">
 			</File>
 		</Filter>
 	</Files>

@@ -5,6 +5,8 @@
 LINK_LIB(Mod)
 #endif
 
+#include "ModClasses.h"
+
 /*
  * Patches the given vtable with a custom function and returns the old function.
  * The vtable can be obtained like so: *reinterpret_cast<void***>(PointerToObject).

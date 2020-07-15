@@ -30,7 +30,7 @@
 		FName NMayFall(NAME_MayFall);
 		if(!IsProbing(NMayFall))
 			return;
-		UObject::ProcessEvent(NMayFall, NULL);
+		ProcessEvent(NMayFall, NULL);
 	}
 	FColor GetDebugColor(){
 		DECLARE_NAME(GetDebugColor);
@@ -38,7 +38,7 @@
 			FColor ReturnValue;
 		} Parms;
 		Parms.ReturnValue=FColor(0);
-		UObject::ProcessEvent(NGetDebugColor, &Parms);
+		ProcessEvent(NGetDebugColor, &Parms);
 		return Parms.ReturnValue;
 	}
 	void SoakStop(const FString& problem){
@@ -47,11 +47,11 @@
 			FString problem;
 		} Parms;
 		Parms.problem=problem;
-		UObject::ProcessEvent(NSoakStop, &Parms);
+		ProcessEvent(NSoakStop, &Parms);
 	}
 	void LongFall(){
 		DECLARE_NAME(LongFall);
-		UObject::ProcessEvent(NLongFall, NULL);
+		ProcessEvent(NLongFall, NULL);
 	}
 	UBOOL NotifyPhysicsVolumeChange(class APhysicsVolume* NewVolume){
 		FName NNotifyPhysicsVolumeChange(NAME_NotifyPhysicsVolumeChange);
@@ -63,7 +63,7 @@
 		} Parms;
 		Parms.NewVolume=NewVolume;
 		Parms.ReturnValue=0;
-		UObject::ProcessEvent(NNotifyPhysicsVolumeChange, &Parms);
+		ProcessEvent(NNotifyPhysicsVolumeChange, &Parms);
 		return Parms.ReturnValue;
 	}
 	UBOOL NotifyHeadVolumeChange(class APhysicsVolume* NewVolume){
@@ -76,7 +76,7 @@
 		} Parms;
 		Parms.NewVolume=NewVolume;
 		Parms.ReturnValue=0;
-		UObject::ProcessEvent(NNotifyHeadVolumeChange, &Parms);
+		ProcessEvent(NNotifyHeadVolumeChange, &Parms);
 		return Parms.ReturnValue;
 	}
 	UBOOL NotifyLanded(const FVector& HitNormal){
@@ -89,7 +89,7 @@
 		} Parms;
 		Parms.HitNormal=HitNormal;
 		Parms.ReturnValue=0;
-		UObject::ProcessEvent(NNotifyLanded, &Parms);
+		ProcessEvent(NNotifyLanded, &Parms);
 		return Parms.ReturnValue;
 	}
 	UBOOL NotifyHitWall(const FVector& HitNormal, class AActor* Wall){
@@ -104,7 +104,7 @@
 		Parms.HitNormal=HitNormal;
 		Parms.Wall=Wall;
 		Parms.ReturnValue=0;
-		UObject::ProcessEvent(NNotifyHitWall, &Parms);
+		ProcessEvent(NNotifyHitWall, &Parms);
 		return Parms.ReturnValue;
 	}
 	UBOOL NotifyBump(class AActor* Other){
@@ -117,7 +117,7 @@
 		} Parms;
 		Parms.Other=Other;
 		Parms.ReturnValue=0;
-		UObject::ProcessEvent(NNotifyBump, &Parms);
+		ProcessEvent(NNotifyBump, &Parms);
 		return Parms.ReturnValue;
 	}
 	void NotifyHitMover(const FVector& HitNormal, class AMover* Wall){
@@ -128,15 +128,15 @@
 		} Parms;
 		Parms.HitNormal=HitNormal;
 		Parms.Wall=Wall;
-		UObject::ProcessEvent(NNotifyHitMover, &Parms);
+		ProcessEvent(NNotifyHitMover, &Parms);
 	}
 	void NotifyJumpApex(){
 		DECLARE_NAME(NotifyJumpApex);
-		UObject::ProcessEvent(NNotifyJumpApex, NULL);
+		ProcessEvent(NNotifyJumpApex, NULL);
 	}
 	void NotifyMissedJump(){
 		DECLARE_NAME(NotifyMissedJump);
-		UObject::ProcessEvent(NNotifyMissedJump, NULL);
+		ProcessEvent(NNotifyMissedJump, NULL);
 	}
 	void PrepareForMove(class ANavigationPoint* Goal, class UReachSpec* Path){
 		FName NPrepareForMove(NAME_PrepareForMove);
@@ -148,7 +148,7 @@
 		} Parms;
 		Parms.Goal=Goal;
 		Parms.Path=Path;
-		UObject::ProcessEvent(NPrepareForMove, &Parms);
+		ProcessEvent(NPrepareForMove, &Parms);
 	}
 	void HearNoise(FLOAT Loudness, class AActor* NoiseMaker){
 		FName NHearNoise(NAME_HearNoise);
@@ -160,7 +160,7 @@
 		} Parms;
 		Parms.Loudness=Loudness;
 		Parms.NoiseMaker=NoiseMaker;
-		UObject::ProcessEvent(NHearNoise, &Parms);
+		ProcessEvent(NHearNoise, &Parms);
 	}
 	void SeePlayer(class APawn* Seen){
 		FName NSeePlayer(NAME_SeePlayer);
@@ -170,11 +170,11 @@
 			class APawn* Seen;
 		} Parms;
 		Parms.Seen=Seen;
-		UObject::ProcessEvent(NSeePlayer, &Parms);
+		ProcessEvent(NSeePlayer, &Parms);
 	}
 	void StopShake(){
 		DECLARE_NAME(StopShake);
-		UObject::ProcessEvent(NStopShake, NULL);
+		ProcessEvent(NStopShake, NULL);
 	}
 	void ShakeView(FLOAT InTime, FLOAT SustainTime, FLOAT OutTime, FLOAT XMag, FLOAT YMag, FLOAT ZMag, FLOAT YawMag, FLOAT PitchMag, FLOAT Frequency){
 		DECLARE_NAME(ShakeView);
@@ -198,11 +198,11 @@
 		Parms.YawMag=YawMag;
 		Parms.PitchMag=PitchMag;
 		Parms.Frequency=Frequency;
-		UObject::ProcessEvent(NShakeView, &Parms);
+		ProcessEvent(NShakeView, &Parms);
 	}
 	void ThrowScav(){
 		DECLARE_NAME(ThrowScav);
-		UObject::ProcessEvent(NThrowScav, NULL);
+		ProcessEvent(NThrowScav, NULL);
 	}
 	void SwitchGrenade(FLOAT F){
 		DECLARE_NAME(SwitchGrenade);
@@ -210,15 +210,15 @@
 			FLOAT F;
 		} Parms;
 		Parms.F=F;
-		UObject::ProcessEvent(NSwitchGrenade, &Parms);
+		ProcessEvent(NSwitchGrenade, &Parms);
 	}
 	void ServerReStartPlayer(){
 		DECLARE_NAME(ServerReStartPlayer);
-		UObject::ProcessEvent(NServerReStartPlayer, NULL);
+		ProcessEvent(NServerReStartPlayer, NULL);
 	}
 	void MonitoredPawnAlert(){
 		DECLARE_NAME(MonitoredPawnAlert);
-		UObject::ProcessEvent(NMonitoredPawnAlert, NULL);
+		ProcessEvent(NMonitoredPawnAlert, NULL);
 	}
 
 	//Functions

@@ -64,20 +64,20 @@ public:
     DECLARE_FUNCTION(execIsDataPending);
     void eventResolveFailed()
     {
-		UObject::ProcessEvent(FindFunctionChecked(IPDRV_ResolveFailed),NULL);
+		ProcessEvent(FindFunctionChecked(IPDRV_ResolveFailed),NULL);
     }
     void eventResolved(FIpAddr Addr)
     {
         InternetLink_eventResolved_Parms Parms;
         Parms.Addr=Addr;
-        UObject::ProcessEvent(FindFunctionChecked(IPDRV_Resolved),&Parms);
+        ProcessEvent(FindFunctionChecked(IPDRV_Resolved),&Parms);
     }
     DECLARE_CLASS(AInternetLink,AInternetInfo,0|CLASS_Transient,IpDrv)
 	AInternetLink();
 	void Destroy();
-	UBOOL Tick( FLOAT DeltaTime, enum ELevelTick TickType );	
-	SOCKET& GetSocket() 
-	{ 
+	UBOOL Tick( FLOAT DeltaTime, enum ELevelTick TickType );
+	SOCKET& GetSocket()
+	{
 		return *(SOCKET*)&Socket;
 	}
 	FResolveInfo*& GetResolveInfo()
@@ -143,36 +143,36 @@ public:
         TcpLink_eventReceivedBinary_Parms Parms;
         Parms.Count=Count;
         appMemcpy(&Parms.B,&B,sizeof(Parms.B));
-        UObject::ProcessEvent(FindFunctionChecked(IPDRV_ReceivedBinary),&Parms);
+        ProcessEvent(FindFunctionChecked(IPDRV_ReceivedBinary),&Parms);
     }
     void eventReceivedLine(const FString& Line)
     {
         TcpLink_eventReceivedLine_Parms Parms;
         Parms.Line=Line;
-        UObject::ProcessEvent(FindFunctionChecked(IPDRV_ReceivedLine),&Parms);
+        ProcessEvent(FindFunctionChecked(IPDRV_ReceivedLine),&Parms);
     }
     void eventReceivedText(const FString& Text)
     {
         TcpLink_eventReceivedText_Parms Parms;
         Parms.Text=Text;
-        UObject::ProcessEvent(FindFunctionChecked(IPDRV_ReceivedText),&Parms);
+        ProcessEvent(FindFunctionChecked(IPDRV_ReceivedText),&Parms);
     }
     void eventClosed()
     {
-        UObject::ProcessEvent(FindFunctionChecked(IPDRV_Closed),NULL);
+        ProcessEvent(FindFunctionChecked(IPDRV_Closed),NULL);
     }
     void eventOpened()
     {
-        UObject::ProcessEvent(FindFunctionChecked(IPDRV_Opened),NULL);
+        ProcessEvent(FindFunctionChecked(IPDRV_Opened),NULL);
     }
     void eventAccepted()
     {
-        UObject::ProcessEvent(FindFunctionChecked(IPDRV_Accepted),NULL);
+        ProcessEvent(FindFunctionChecked(IPDRV_Accepted),NULL);
     }
     DECLARE_CLASS(ATcpLink,AInternetLink,0|CLASS_Transient,IpDrv)
 	ATcpLink();
 	void PostScriptDestroyed();
-	UBOOL Tick( FLOAT DeltaTime, enum ELevelTick TickType );	
+	UBOOL Tick( FLOAT DeltaTime, enum ELevelTick TickType );
 
 	void CheckConnectionAttempt();
 	void CheckConnectionQueue();
@@ -214,26 +214,26 @@ public:
         Parms.Addr=Addr;
         Parms.Count=Count;
         appMemcpy(&Parms.B,&B,sizeof(Parms.B));
-        UObject::ProcessEvent(FindFunctionChecked(IPDRV_ReceivedBinary),&Parms);
+        ProcessEvent(FindFunctionChecked(IPDRV_ReceivedBinary),&Parms);
     }
     void eventReceivedLine(FIpAddr Addr, const FString& Line)
     {
         UdpLink_eventReceivedLine_Parms Parms;
         Parms.Addr=Addr;
         Parms.Line=Line;
-        UObject::ProcessEvent(FindFunctionChecked(IPDRV_ReceivedLine),&Parms);
+        ProcessEvent(FindFunctionChecked(IPDRV_ReceivedLine),&Parms);
     }
     void eventReceivedText(FIpAddr Addr, const FString& Text)
     {
         UdpLink_eventReceivedText_Parms Parms;
         Parms.Addr=Addr;
         Parms.Text=Text;
-        UObject::ProcessEvent(FindFunctionChecked(IPDRV_ReceivedText),&Parms);
+        ProcessEvent(FindFunctionChecked(IPDRV_ReceivedText),&Parms);
     }
     DECLARE_CLASS(AUdpLink,AInternetLink,0|CLASS_Transient,IpDrv)
 	AUdpLink();
 	void PostScriptDestroyed();
-	UBOOL Tick( FLOAT DeltaTime, enum ELevelTick TickType );	
+	UBOOL Tick( FLOAT DeltaTime, enum ELevelTick TickType );
 	FSocketData GetSocketData();
 };
 
@@ -291,8 +291,8 @@ DECLARE_NATIVE_TYPE(IpDrv,AUdpLink);
 #endif // IPDRV_NATIVE_DEFS
 
 #ifdef NATIVES_ONLY
-NATIVE_INFO(AInternetLink) GIpDrvAInternetLinkNatives[] = 
-{ 
+NATIVE_INFO(AInternetLink) GIpDrvAInternetLinkNatives[] =
+{
 	MAP_NATIVE(AInternetLink,execGetLocalIP)
 	MAP_NATIVE(AInternetLink,execStringToIpAddr)
 	MAP_NATIVE(AInternetLink,execIpAddrToString)
@@ -304,8 +304,8 @@ NATIVE_INFO(AInternetLink) GIpDrvAInternetLinkNatives[] =
 };
 IMPLEMENT_NATIVE_HANDLER(IpDrv,AInternetLink);
 
-NATIVE_INFO(ATcpLink) GIpDrvATcpLinkNatives[] = 
-{ 
+NATIVE_INFO(ATcpLink) GIpDrvATcpLinkNatives[] =
+{
 	MAP_NATIVE(ATcpLink,execReadBinary)
 	MAP_NATIVE(ATcpLink,execReadText)
 	MAP_NATIVE(ATcpLink,execSendBinary)
@@ -319,8 +319,8 @@ NATIVE_INFO(ATcpLink) GIpDrvATcpLinkNatives[] =
 };
 IMPLEMENT_NATIVE_HANDLER(IpDrv,ATcpLink);
 
-NATIVE_INFO(AUdpLink) GIpDrvAUdpLinkNatives[] = 
-{ 
+NATIVE_INFO(AUdpLink) GIpDrvAUdpLinkNatives[] =
+{
 	MAP_NATIVE(AUdpLink,execReadBinary)
 	MAP_NATIVE(AUdpLink,execReadText)
 	MAP_NATIVE(AUdpLink,execSendBinary)

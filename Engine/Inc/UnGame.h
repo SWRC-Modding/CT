@@ -105,7 +105,7 @@ class ENGINE_API UGameEngine : public UEngine{
 	FString GetLocalizedKeyName(BYTE K);
 	void InitLevelLoadingInfo(){
 		DECLARE_NAME(InitLevelLoadingInfo);
-		UObject::ProcessEvent(NInitLevelLoadingInfo, NULL);
+		ProcessEvent(NInitLevelLoadingInfo, NULL);
 	}
 	void PotentialSubtitledSoundPlayed(const FString& SoundName, FLOAT Duration, class AActor* A, INT Priority){
 		DECLARE_NAME(PotentialSubtitledSoundPlayed);
@@ -119,7 +119,7 @@ class ENGINE_API UGameEngine : public UEngine{
 		Parms.Duration=Duration;
 		Parms.A=A;
 		Parms.Priority=Priority;
-		UObject::ProcessEvent(NPotentialSubtitledSoundPlayed, &Parms);
+		ProcessEvent(NPotentialSubtitledSoundPlayed, &Parms);
 	}
 	INT GetLevelProgressIdx(const FString& Level){
 		DECLARE_NAME(GetLevelProgressIdx);
@@ -129,7 +129,7 @@ class ENGINE_API UGameEngine : public UEngine{
 		} Parms;
 		Parms.Level=Level;
 		Parms.ReturnValue=0;
-		UObject::ProcessEvent(NGetLevelProgressIdx, &Parms);
+		ProcessEvent(NGetLevelProgressIdx, &Parms);
 		return Parms.ReturnValue;
 	}
 	UBOOL HasReachedLevel(const FString& Level, INT CurrentProgress){
@@ -142,7 +142,7 @@ class ENGINE_API UGameEngine : public UEngine{
 		Parms.Level=Level;
 		Parms.CurrentProgress=CurrentProgress;
 		Parms.ReturnValue=0;
-		UObject::ProcessEvent(NHasReachedLevel, &Parms);
+		ProcessEvent(NHasReachedLevel, &Parms);
 		return Parms.ReturnValue;
 	}
 	FString GetNextLevel(INT afterThisIdx){
@@ -153,7 +153,7 @@ class ENGINE_API UGameEngine : public UEngine{
 		} Parms;
 		Parms.afterThisIdx=afterThisIdx;
 		Parms.ReturnValue=0;
-		UObject::ProcessEvent(NGetNextLevel, &Parms);
+		ProcessEvent(NGetNextLevel, &Parms);
 		return Parms.ReturnValue;
 	}
 	FString GetLevelMissionStart(const FString& Level){
@@ -164,7 +164,7 @@ class ENGINE_API UGameEngine : public UEngine{
 		} Parms;
 		Parms.Level=Level;
 		Parms.ReturnValue=0;
-		UObject::ProcessEvent(NGetLevelMissionStart, &Parms);
+		ProcessEvent(NGetLevelMissionStart, &Parms);
 		return Parms.ReturnValue;
 	}
 

@@ -16,7 +16,7 @@
 	//Events
 	void NoHelmetInit(){
 		DECLARE_NAME(NoHelmetInit);
-		UObject::ProcessEvent(NNoHelmetInit, NULL);
+		ProcessEvent(NNoHelmetInit, NULL);
 	}
 	void X_ClientValidate(const FString& C);
 	void X_ServerValidationResponse(const FString& R);
@@ -26,7 +26,7 @@
 			FString C;
 		} Parms;
 		Parms.C=C;
-		UObject::ProcessEvent(NClientValidate, &Parms);
+		ProcessEvent(NClientValidate, &Parms);
 	}
 	void ServerValidationResponse(const FString& R){
 		DECLARE_NAME(ServerValidationResponse);
@@ -34,7 +34,7 @@
 			FString R;
 		} Parms;
 		Parms.R=R;
-		UObject::ProcessEvent(NServerValidationResponse, &Parms);
+		ProcessEvent(NServerValidationResponse, &Parms);
 	}
 	void X_ClientHearSound(class AActor* Actor, class USound* S, const FVector& SoundLocation, INT Flags);
 	void ClientHearSound(class AActor* Actor, class USound* S, const FVector& SoundLocation, INT Flags){
@@ -49,11 +49,11 @@
 		Parms.S=S;
 		Parms.SoundLocation=SoundLocation;
 		Parms.Flags=Flags;
-		UObject::ProcessEvent(NClientHearSound, &Parms);
+		ProcessEvent(NClientHearSound, &Parms);
 	}
 	void KickWarning(){
 		DECLARE_NAME(KickWarning);
-		UObject::ProcessEvent(NKickWarning, NULL);
+		ProcessEvent(NKickWarning, NULL);
 	}
 	void ClientSetViewTarget(class AActor* A){
 		DECLARE_NAME(ClientSetViewTarget);
@@ -61,11 +61,11 @@
 			class AActor* A;
 		} Parms;
 		Parms.A=A;
-		UObject::ProcessEvent(NClientSetViewTarget, &Parms);
+		ProcessEvent(NClientSetViewTarget, &Parms);
 	}
 	void InitInputSystem(){
 		DECLARE_NAME(InitInputSystem);
-		UObject::ProcessEvent(NInitInputSystem, NULL);
+		ProcessEvent(NInitInputSystem, NULL);
 	}
 	void ViewFlash(FLOAT DeltaTime){
 		DECLARE_NAME(ViewFlash);
@@ -73,7 +73,7 @@
 			FLOAT DeltaTime;
 		} Parms;
 		Parms.DeltaTime=DeltaTime;
-		UObject::ProcessEvent(NViewFlash, &Parms);
+		ProcessEvent(NViewFlash, &Parms);
 	}
 	void ReceiveLocalizedMessage(class UClass* Message, INT Switch, class APlayerReplicationInfo* RelatedPRI_1, class APlayerReplicationInfo* RelatedPRI_2, class UObject* OptionalObject){
 		DECLARE_NAME(ReceiveLocalizedMessage);
@@ -89,7 +89,7 @@
 		Parms.RelatedPRI_1=RelatedPRI_1;
 		Parms.RelatedPRI_2=RelatedPRI_2;
 		Parms.OptionalObject=OptionalObject;
-		UObject::ProcessEvent(NReceiveLocalizedMessage, &Parms);
+		ProcessEvent(NReceiveLocalizedMessage, &Parms);
 	}
 	void ClientMessage(const FString& S, FName Type){
 		DECLARE_NAME(ClientMessage);
@@ -99,7 +99,7 @@
 		} Parms;
 		Parms.S=S;
 		Parms.Type=Type;
-		UObject::ProcessEvent(NClientMessage, &Parms);
+		ProcessEvent(NClientMessage, &Parms);
 	}
 	void TeamMessage(class APlayerReplicationInfo* PRI, const FString& S, FName Type){
 		DECLARE_NAME(TeamMessage);
@@ -111,15 +111,15 @@
 		Parms.PRI=PRI;
 		Parms.S=S;
 		Parms.Type=Type;
-		UObject::ProcessEvent(NTeamMessage, &Parms);
+		ProcessEvent(NTeamMessage, &Parms);
 	}
 	void PreClientTravel(){
 		DECLARE_NAME(PreClientTravel);
-		UObject::ProcessEvent(NPreClientTravel, NULL);
+		ProcessEvent(NPreClientTravel, NULL);
 	}
 	void SendClientAdjustment(){
 		DECLARE_NAME(SendClientAdjustment);
-		UObject::ProcessEvent(NSendClientAdjustment, NULL);
+		ProcessEvent(NSendClientAdjustment, NULL);
 	}
 	void ViewShake(FLOAT DeltaTime){
 		DECLARE_NAME(ViewShake);
@@ -127,11 +127,11 @@
 			FLOAT DeltaTime;
 		} Parms;
 		Parms.DeltaTime=DeltaTime;
-		UObject::ProcessEvent(NViewShake, &Parms);
+		ProcessEvent(NViewShake, &Parms);
 	}
 	void LoadMostRecent(){
 		DECLARE_NAME(LoadMostRecent);
-		UObject::ProcessEvent(NLoadMostRecent, NULL);
+		ProcessEvent(NLoadMostRecent, NULL);
 	}
 	void ShowMenu(const FString& MenuClass, const FString& Title, const FString& Text, const FString& PicName, const FString& NewLevel){
 		DECLARE_NAME(ShowMenu);
@@ -147,7 +147,7 @@
 		Parms.Text=Text;
 		Parms.PicName=PicName;
 		Parms.NewLevel=NewLevel;
-		UObject::ProcessEvent(NShowMenu, &Parms);
+		ProcessEvent(NShowMenu, &Parms);
 	}
 	void UpdateName(const FString& newName){
 		DECLARE_NAME(UpdateName);
@@ -155,7 +155,7 @@
 			FString newName;
 		} Parms;
 		Parms.newName=newName;
-		UObject::ProcessEvent(NUpdateName, &Parms);
+		ProcessEvent(NUpdateName, &Parms);
 	}
 	void SetProgressMessage(INT Index, const FString& S, const FColor& C){
 		DECLARE_NAME(SetProgressMessage);
@@ -167,7 +167,7 @@
 		Parms.Index=Index;
 		Parms.S=S;
 		Parms.C=C;
-		UObject::ProcessEvent(NSetProgressMessage, &Parms);
+		ProcessEvent(NSetProgressMessage, &Parms);
 	}
 	void SetProgressTime(FLOAT T){
 		DECLARE_NAME(SetProgressTime);
@@ -175,7 +175,7 @@
 			FLOAT T;
 		} Parms;
 		Parms.T=T;
-		UObject::ProcessEvent(NSetProgressTime, &Parms);
+		ProcessEvent(NSetProgressTime, &Parms);
 	}
 	void PlayerTick(FLOAT DeltaTime){
 		FName NPlayerTick(NAME_PlayerTick);
@@ -185,7 +185,7 @@
 			FLOAT DeltaTime;
 		} Parms;
 		Parms.DeltaTime=DeltaTime;
-		UObject::ProcessEvent(NPlayerTick, &Parms);
+		ProcessEvent(NPlayerTick, &Parms);
 	}
 	void AddCameraEffect(class UCameraEffect* NewEffect, UBOOL RemoveExisting){
 		DECLARE_NAME(AddCameraEffect);
@@ -195,7 +195,7 @@
 		} Parms;
 		Parms.NewEffect=NewEffect;
 		Parms.RemoveExisting=RemoveExisting;
-		UObject::ProcessEvent(NAddCameraEffect, &Parms);
+		ProcessEvent(NAddCameraEffect, &Parms);
 	}
 	void RemoveCameraEffect(class UCameraEffect* ExEffect){
 		DECLARE_NAME(RemoveCameraEffect);
@@ -203,7 +203,7 @@
 			class UCameraEffect* ExEffect;
 		} Parms;
 		Parms.ExEffect=ExEffect;
-		UObject::ProcessEvent(NRemoveCameraEffect, &Parms);
+		ProcessEvent(NRemoveCameraEffect, &Parms);
 	}
 	void PlayerCalcView(class AActor*& ViewActor, FVector& CameraLocation, FRotator& CameraRotation){
 		DECLARE_NAME(PlayerCalcView);
@@ -215,7 +215,7 @@
 		Parms.ViewActor=ViewActor;
 		Parms.CameraLocation=CameraLocation;
 		Parms.CameraRotation=CameraRotation;
-		UObject::ProcessEvent(NPlayerCalcView, &Parms);
+		ProcessEvent(NPlayerCalcView, &Parms);
 		ViewActor=Parms.ViewActor;
 		CameraLocation=Parms.CameraLocation;
 		CameraRotation=Parms.CameraRotation;
@@ -227,7 +227,7 @@
 			UBOOL bSet;
 		} Parms;
 		Parms.bSet=bSet;
-		UObject::ProcessEvent(NClientSetBadCDKey, &Parms);
+		ProcessEvent(NClientSetBadCDKey, &Parms);
 	}
 	void ClientSetMissingContent(UBOOL bSet, const FString& ContentName){
 		DECLARE_NAME(ClientSetMissingContent);
@@ -237,7 +237,7 @@
 		} Parms;
 		Parms.bSet=bSet;
 		Parms.ContentName=ContentName;
-		UObject::ProcessEvent(NClientSetMissingContent, &Parms);
+		ProcessEvent(NClientSetMissingContent, &Parms);
 	}
 	void ClientOpenMenu(const FString& Menu, UBOOL bDisconnect, const FString& Msg1, const FString& Msg2){
 		DECLARE_NAME(ClientOpenMenu);
@@ -251,7 +251,7 @@
 		Parms.bDisconnect=bDisconnect;
 		Parms.Msg1=Msg1;
 		Parms.Msg2=Msg2;
-		UObject::ProcessEvent(NClientOpenMenu, &Parms);
+		ProcessEvent(NClientOpenMenu, &Parms);
 	}
 	void ClientOpenXMenu(const FString& Menu, UBOOL bDisconnect, const FString& Msg1, const FString& Msg2){
 		DECLARE_NAME(ClientOpenXMenu);
@@ -265,7 +265,7 @@
 		Parms.bDisconnect=bDisconnect;
 		Parms.Msg1=Msg1;
 		Parms.Msg2=Msg2;
-		UObject::ProcessEvent(NClientOpenXMenu, &Parms);
+		ProcessEvent(NClientOpenXMenu, &Parms);
 	}
 	void ClientShowSingularMenu(const FString& Menu, const FString& Args){
 		DECLARE_NAME(ClientShowSingularMenu);
@@ -275,7 +275,7 @@
 		} Parms;
 		Parms.Menu=Menu;
 		Parms.Args=Args;
-		UObject::ProcessEvent(NClientShowSingularMenu, &Parms);
+		ProcessEvent(NClientShowSingularMenu, &Parms);
 	}
 	void ClientCloseMenu(UBOOL bCloseAll, UBOOL bCancel){
 		DECLARE_NAME(ClientCloseMenu);
@@ -285,7 +285,7 @@
 		} Parms;
 		Parms.bCloseAll=bCloseAll;
 		Parms.bCancel=bCancel;
-		UObject::ProcessEvent(NClientCloseMenu, &Parms);
+		ProcessEvent(NClientCloseMenu, &Parms);
 	}
 	void ClientCloseXMenu(UBOOL bCloseAll, UBOOL bCancel){
 		DECLARE_NAME(ClientCloseXMenu);
@@ -295,7 +295,7 @@
 		} Parms;
 		Parms.bCloseAll=bCloseAll;
 		Parms.bCancel=bCancel;
-		UObject::ProcessEvent(NClientCloseXMenu, &Parms);
+		ProcessEvent(NClientCloseXMenu, &Parms);
 	}
 	void ServerChangeVoiceChatter(class APlayerController* Player, FXboxAddr const& xbAddr, INT Handle, INT VoiceChannels, UBOOL Add){
 		DECLARE_NAME(ServerChangeVoiceChatter);
@@ -311,7 +311,7 @@
 		Parms.Handle=Handle;
 		Parms.VoiceChannels=VoiceChannels;
 		Parms.Add=Add;
-		UObject::ProcessEvent(NServerChangeVoiceChatter, &Parms);
+		ProcessEvent(NServerChangeVoiceChatter, &Parms);
 	}
 	void ServerChangeHasVoice(UBOOL bVoiceOn){
 		DECLARE_NAME(ServerChangeHasVoice);
@@ -319,7 +319,7 @@
 			UBOOL bVoiceOn;
 		} Parms;
 		Parms.bVoiceOn=bVoiceOn;
-		UObject::ProcessEvent(NServerChangeHasVoice, &Parms);
+		ProcessEvent(NServerChangeHasVoice, &Parms);
 	}
 	void ServerGetVoiceChatters(class APlayerController* Player){
 		DECLARE_NAME(ServerGetVoiceChatters);
@@ -327,11 +327,11 @@
 			class APlayerController* Player;
 		} Parms;
 		Parms.Player=Player;
-		UObject::ProcessEvent(NServerGetVoiceChatters, &Parms);
+		ProcessEvent(NServerGetVoiceChatters, &Parms);
 	}
 	void StartClientDemoRec(){
 		DECLARE_NAME(StartClientDemoRec);
-		UObject::ProcessEvent(NStartClientDemoRec, NULL);
+		ProcessEvent(NStartClientDemoRec, NULL);
 	}
 	void MenuOpen(class UClass* MenuClass, const FString& Args){
 		DECLARE_NAME(MenuOpen);
@@ -341,11 +341,11 @@
 		} Parms;
 		Parms.MenuClass=MenuClass;
 		Parms.Args=Args;
-		UObject::ProcessEvent(NMenuOpen, &Parms);
+		ProcessEvent(NMenuOpen, &Parms);
 	}
 	void MenuClose(){
 		DECLARE_NAME(MenuClose);
-		UObject::ProcessEvent(NMenuClose, NULL);
+		ProcessEvent(NMenuClose, NULL);
 	}
 	void PotentialSubtitledSoundPlayed(const FString& SoundName, FLOAT Duration, INT Priority){
 		DECLARE_NAME(PotentialSubtitledSoundPlayed);
@@ -357,7 +357,7 @@
 		Parms.SoundName=SoundName;
 		Parms.Duration=Duration;
 		Parms.Priority=Priority;
-		UObject::ProcessEvent(NPotentialSubtitledSoundPlayed, &Parms);
+		ProcessEvent(NPotentialSubtitledSoundPlayed, &Parms);
 	}
 	UBOOL InTacticalVisionMode(){
 		DECLARE_NAME(InTacticalVisionMode);
@@ -365,12 +365,12 @@
 			UBOOL ReturnValue;
 		} Parms;
 		Parms.ReturnValue=0;
-		UObject::ProcessEvent(NInTacticalVisionMode, &Parms);
+		ProcessEvent(NInTacticalVisionMode, &Parms);
 		return Parms.ReturnValue;
 	}
 	void CheckpointSaveStarted(){
 		DECLARE_NAME(CheckpointSaveStarted);
-		UObject::ProcessEvent(NCheckpointSaveStarted, NULL);
+		ProcessEvent(NCheckpointSaveStarted, NULL);
 	}
 
 	//Functions

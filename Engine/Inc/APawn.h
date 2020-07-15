@@ -72,7 +72,7 @@ public:
 	void StopTalking();
 	void SaveSquadTravelInfo(){
 		DECLARE_NAME(SaveSquadTravelInfo);
-		UObject::ProcessEvent(NSaveSquadTravelInfo, NULL);
+		ProcessEvent(NSaveSquadTravelInfo, NULL);
 	}
 	void SetWalking(UBOOL bNewIsWalking){
 		DECLARE_NAME(SetWalking);
@@ -80,7 +80,7 @@ public:
 			UBOOL bNewIsWalking;
 		} Parms;
 		Parms.bNewIsWalking=bNewIsWalking;
-		UObject::ProcessEvent(NSetWalking, &Parms);
+		ProcessEvent(NSetWalking, &Parms);
 	}
 	void ClientMessage(const FString& S, FName Type){
 		DECLARE_NAME(ClientMessage);
@@ -90,7 +90,7 @@ public:
 		} Parms;
 		Parms.S=S;
 		Parms.Type=Type;
-		UObject::ProcessEvent(NClientMessage, &Parms);
+		ProcessEvent(NClientMessage, &Parms);
 	}
 	void ModifyVelocity(FLOAT DeltaTime, const FVector& OldVelocity){
 		FName NModifyVelocity(NAME_ModifyVelocity);
@@ -102,7 +102,7 @@ public:
 		} Parms;
 		Parms.DeltaTime=DeltaTime;
 		Parms.OldVelocity=OldVelocity;
-		UObject::ProcessEvent(NModifyVelocity, &Parms);
+		ProcessEvent(NModifyVelocity, &Parms);
 	}
 	void EndCrouch(FLOAT HeightAdjust){
 		DECLARE_NAME(EndCrouch);
@@ -110,7 +110,7 @@ public:
 			FLOAT HeightAdjust;
 		} Parms;
 		Parms.HeightAdjust=HeightAdjust;
-		UObject::ProcessEvent(NEndCrouch, &Parms);
+		ProcessEvent(NEndCrouch, &Parms);
 	}
 	void StartCrouch(FLOAT HeightAdjust){
 		DECLARE_NAME(StartCrouch);
@@ -118,7 +118,7 @@ public:
 			FLOAT HeightAdjust;
 		} Parms;
 		Parms.HeightAdjust=HeightAdjust;
-		UObject::ProcessEvent(NStartCrouch, &Parms);
+		ProcessEvent(NStartCrouch, &Parms);
 	}
 	void TossWeapon(class AWeapon* WeaponToThrow, const FVector& TossVel){
 		DECLARE_NAME(TossWeapon);
@@ -128,7 +128,7 @@ public:
 		} Parms;
 		Parms.WeaponToThrow=WeaponToThrow;
 		Parms.TossVel=TossVel;
-		UObject::ProcessEvent(NTossWeapon, &Parms);
+		ProcessEvent(NTossWeapon, &Parms);
 	}
 	class AInventory* FindInventoryType(class UClass* DesiredClass){
 		DECLARE_NAME(FindInventoryType);
@@ -138,12 +138,12 @@ public:
 		} Parms;
 		Parms.DesiredClass=DesiredClass;
 		Parms.ReturnValue=0;
-		UObject::ProcessEvent(NFindInventoryType, &Parms);
+		ProcessEvent(NFindInventoryType, &Parms);
 		return Parms.ReturnValue;
 	}
 	void ChangedWeapon(){
 		DECLARE_NAME(ChangedWeapon);
-		UObject::ProcessEvent(NChangedWeapon, NULL);
+		ProcessEvent(NChangedWeapon, NULL);
 	}
 	void UpdateEyeHeight(FLOAT DeltaTime){
 		FName NUpdateEyeHeight(NAME_UpdateEyeHeight);
@@ -153,7 +153,7 @@ public:
 			FLOAT DeltaTime;
 		} Parms;
 		Parms.DeltaTime=DeltaTime;
-		UObject::ProcessEvent(NUpdateEyeHeight, &Parms);
+		ProcessEvent(NUpdateEyeHeight, &Parms);
 	}
 	FVector EyePosition(){
 		DECLARE_NAME(EyePosition);
@@ -161,16 +161,16 @@ public:
 			FVector ReturnValue;
 		} Parms;
 		Parms.ReturnValue=FVector(0);
-		UObject::ProcessEvent(NEyePosition, &Parms);
+		ProcessEvent(NEyePosition, &Parms);
 		return Parms.ReturnValue;
 	}
 	void DieAgain(){
 		DECLARE_NAME(DieAgain);
-		UObject::ProcessEvent(NDieAgain, NULL);
+		ProcessEvent(NDieAgain, NULL);
 	}
 	void BleedOut(){
 		FName NBleedOut(NAME_BleedOut);
-		UObject::ProcessEvent(NBleedOut, NULL);
+		ProcessEvent(NBleedOut, NULL);
 	}
 	void HeadVolumeChange(class APhysicsVolume* newHeadVolume){
 		FName NHeadVolumeChange(NAME_HeadVolumeChange);
@@ -180,7 +180,7 @@ public:
 			class APhysicsVolume* newHeadVolume;
 		} Parms;
 		Parms.newHeadVolume=newHeadVolume;
-		UObject::ProcessEvent(NHeadVolumeChange, &Parms);
+		ProcessEvent(NHeadVolumeChange, &Parms);
 	}
 	void SetAnimAction(FName NewAction){
 		DECLARE_NAME(SetAnimAction);
@@ -188,27 +188,27 @@ public:
 			FName NewAction;
 		} Parms;
 		Parms.NewAction=NewAction;
-		UObject::ProcessEvent(NSetAnimAction, &Parms);
+		ProcessEvent(NSetAnimAction, &Parms);
 	}
 	void PawnStopFiring(){
 		DECLARE_NAME(PawnStopFiring);
-		UObject::ProcessEvent(NPawnStopFiring, NULL);
+		ProcessEvent(NPawnStopFiring, NULL);
 	}
 	void ChangeAnimation(){
 		DECLARE_NAME(ChangeAnimation);
-		UObject::ProcessEvent(NChangeAnimation, NULL);
+		ProcessEvent(NChangeAnimation, NULL);
 	}
 	void EndJump(){
 		DECLARE_NAME(EndJump);
-		UObject::ProcessEvent(NEndJump, NULL);
+		ProcessEvent(NEndJump, NULL);
 	}
 	void PlayJump(){
 		DECLARE_NAME(PlayJump);
-		UObject::ProcessEvent(NPlayJump, NULL);
+		ProcessEvent(NPlayJump, NULL);
 	}
 	void PlayFalling(){
 		DECLARE_NAME(PlayFalling);
-		UObject::ProcessEvent(NPlayFalling, NULL);
+		ProcessEvent(NPlayFalling, NULL);
 	}
 	void PlayDodging(UBOOL bRight){
 		DECLARE_NAME(PlayDodging);
@@ -216,7 +216,7 @@ public:
 			UBOOL bRight;
 		} Parms;
 		Parms.bRight=bRight;
-		UObject::ProcessEvent(NPlayDodging, &Parms);
+		ProcessEvent(NPlayDodging, &Parms);
 	}
 	void PlayDying(class UClass* DamageType, const FVector& HitLoc, FName BoneName){
 		DECLARE_NAME(PlayDying);
@@ -228,11 +228,11 @@ public:
 		Parms.DamageType=DamageType;
 		Parms.HitLoc=HitLoc;
 		Parms.BoneName=BoneName;
-		UObject::ProcessEvent(NPlayDying, &Parms);
+		ProcessEvent(NPlayDying, &Parms);
 	}
 	void Revive(){
 		DECLARE_NAME(Revive);
-		UObject::ProcessEvent(NRevive, NULL);
+		ProcessEvent(NRevive, NULL);
 	}
 	UBOOL GoRagDoll(class UClass* DamageType, const FVector& HitLocation){
 		DECLARE_NAME(GoRagDoll);
@@ -244,7 +244,7 @@ public:
 		Parms.DamageType=DamageType;
 		Parms.HitLocation=HitLocation;
 		Parms.ReturnValue=0;
-		UObject::ProcessEvent(NGoRagDoll, &Parms);
+		ProcessEvent(NGoRagDoll, &Parms);
 		return Parms.ReturnValue;
 	}
 	void PlayIncapacitated(class UClass* DamageType, const FVector& HitLocation){
@@ -255,7 +255,7 @@ public:
 		} Parms;
 		Parms.DamageType=DamageType;
 		Parms.HitLocation=HitLocation;
-		UObject::ProcessEvent(NPlayIncapacitated, &Parms);
+		ProcessEvent(NPlayIncapacitated, &Parms);
 	}
 	UBOOL IsDeadOrIncapacitated(){
 		DECLARE_NAME(IsDeadOrIncapacitated);
@@ -263,7 +263,7 @@ public:
 			UBOOL ReturnValue;
 		} Parms;
 		Parms.ReturnValue=0;
-		UObject::ProcessEvent(NIsDeadOrIncapacitated, &Parms);
+		ProcessEvent(NIsDeadOrIncapacitated, &Parms);
 		return Parms.ReturnValue;
 	}
 	void SetShields(FLOAT NewShields){
@@ -272,11 +272,11 @@ public:
 			FLOAT NewShields;
 		} Parms;
 		Parms.NewShields=NewShields;
-		UObject::ProcessEvent(NSetShields, &Parms);
+		ProcessEvent(NSetShields, &Parms);
 	}
 	void SetHealthLevel(){
 		DECLARE_NAME(SetHealthLevel);
-		UObject::ProcessEvent(NSetHealthLevel, NULL);
+		ProcessEvent(NSetHealthLevel, NULL);
 	}
 	void DoMeleeAttack(FName AttackBone, const FVector& BoneOffset){
 		DECLARE_NAME(DoMeleeAttack);
@@ -286,7 +286,7 @@ public:
 		} Parms;
 		Parms.AttackBone=AttackBone;
 		Parms.BoneOffset=BoneOffset;
-		UObject::ProcessEvent(NDoMeleeAttack, &Parms);
+		ProcessEvent(NDoMeleeAttack, &Parms);
 	}
 	FRotator GetWeaponRotation(){
 		DECLARE_NAME(GetWeaponRotation);
@@ -294,7 +294,7 @@ public:
 			FRotator ReturnValue;
 		} Parms;
 		Parms.ReturnValue=FRotator(0);
-		UObject::ProcessEvent(NGetWeaponRotation, &Parms);
+		ProcessEvent(NGetWeaponRotation, &Parms);
 		return Parms.ReturnValue;
 	}
 	void PlayDeathCue(class UClass* DamageType){
@@ -303,7 +303,7 @@ public:
 			class UClass* DamageType;
 		} Parms;
 		Parms.DamageType=DamageType;
-		UObject::ProcessEvent(NPlayDeathCue, &Parms);
+		ProcessEvent(NPlayDeathCue, &Parms);
 	}
 	void PlaySpottedCue(class AActor* Enemy){
 		DECLARE_NAME(PlaySpottedCue);
@@ -311,7 +311,7 @@ public:
 			class AActor* Enemy;
 		} Parms;
 		Parms.Enemy=Enemy;
-		UObject::ProcessEvent(NPlaySpottedCue, &Parms);
+		ProcessEvent(NPlaySpottedCue, &Parms);
 	}
 	FString GetHudDescription(){
 		DECLARE_NAME(GetHudDescription);
@@ -319,7 +319,7 @@ public:
 			FString ReturnValue;
 		} Parms;
 		Parms.ReturnValue=0;
-		UObject::ProcessEvent(NGetHudDescription, &Parms);
+		ProcessEvent(NGetHudDescription, &Parms);
 		return Parms.ReturnValue;
 	}
 	FString GetHudNickname(){
@@ -328,7 +328,7 @@ public:
 			FString ReturnValue;
 		} Parms;
 		Parms.ReturnValue=0;
-		UObject::ProcessEvent(NGetHudNickname, &Parms);
+		ProcessEvent(NGetHudNickname, &Parms);
 		return Parms.ReturnValue;
 	}
 

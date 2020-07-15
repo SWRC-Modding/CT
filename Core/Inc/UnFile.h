@@ -206,8 +206,8 @@ CORE_API void VARARGS appThrowf(const TCHAR* Fmt, ...);
 // Performance critical timing.
 //
 #if DO_CLOCK_SLOW
-	#define clockSlow(Timer) { if(GIsClocking) Timer-=appCycles();}
-	#define unclockSlow(Timer) { if(GIsClocking) Timer+=appCycles()-12;}
+	#define clockSlow(Timer) { Timer-=appCycles();}
+	#define unclockSlow(Timer) { Timer+=appCycles() - 12;}
 #else
 	#define clockSlow(Timer) {}
 	#define unclockSlow(Timer) {}

@@ -14,13 +14,6 @@
 	virtual void PostEditUndo();
 	virtual void PostLoad();
 	virtual void PreEditUndo();
-	/*
-	 * The virtual override for ProcessEvent hides the non-virtual function from UObject which causes compile errors due to the different parameters.
-	 * This wrapper makes sure the correct function is called.
-	 */
-	FORCEINLINE void ProcessEvent(FName Event, void* Parms, void* UnusedResult = NULL){
-		UObject::ProcessEvent(Event, Parms, UnusedResult);
-	}
 	virtual void ProcessEvent(class UFunction* Function, void* Parms, void* UnusedResult = NULL);
 	virtual int ProcessRemoteFunction(class UFunction* Function, void* Parms, struct FFrame* Stack);
 	virtual void ProcessState(FLOAT DeltaSeconds);
@@ -119,6 +112,8 @@ public:
 	virtual int IsAPawn();
 	virtual int IsAProjectile();
 	virtual class APlayerController* GetTopPlayerController();
+
+	using UObject::ProcessEvent; // Prevents the non-virtual ProcessEvent from being shadowed by the virtual override
 
 	//Events
 	void AddToSquadInterest();

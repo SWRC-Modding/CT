@@ -698,7 +698,7 @@ public:
 			FLOAT ReturnValue;
 		} Parms;
 		Parms.ReturnValue=0;
-		UObject::ProcessEvent(NDefaultDuration, &Parms);
+		ProcessEvent(NDefaultDuration, &Parms);
 		return Parms.ReturnValue;
 	}
 
@@ -708,7 +708,7 @@ public:
 			class AController* Controller;
 		} Parms;
 		Parms.Controller=Controller;
-		UObject::ProcessEvent(NStartSetup, &Parms);
+		ProcessEvent(NStartSetup, &Parms);
 	}
 
 	UBOOL HasRequiredInventory(class APawn* Pawn){
@@ -719,13 +719,13 @@ public:
 		} Parms;
 		Parms.Pawn=Pawn;
 		Parms.ReturnValue=0;
-		UObject::ProcessEvent(NHasRequiredInventory, &Parms);
+		ProcessEvent(NHasRequiredInventory, &Parms);
 		return Parms.ReturnValue;
 	}
 
 	void AbortSetup(){
 		DECLARE_NAME(AbortSetup);
-		UObject::ProcessEvent(NAbortSetup, NULL);
+		ProcessEvent(NAbortSetup, NULL);
 	}
 
 	DECLARE_CLASS(AActivateItem,AActor,0,Engine)
@@ -841,7 +841,7 @@ public:
 			UBOOL ReturnValue;
 		} Parms;
 		Parms.ReturnValue=0;
-		UObject::ProcessEvent(NAreFactoriesExhausted, &Parms);
+		ProcessEvent(NAreFactoriesExhausted, &Parms);
 		return Parms.ReturnValue;
 	}
 
@@ -896,7 +896,7 @@ public:
 			class AActor* Other;
 		} Parms;
 		Parms.Other=Other;
-		UObject::ProcessEvent(NPhysicsChangedFor, &Parms);
+		ProcessEvent(NPhysicsChangedFor, &Parms);
 	}
 
 	void ActorEnteredVolume(class AActor* Other){
@@ -907,7 +907,7 @@ public:
 			class AActor* Other;
 		} Parms;
 		Parms.Other=Other;
-		UObject::ProcessEvent(NActorEnteredVolume, &Parms);
+		ProcessEvent(NActorEnteredVolume, &Parms);
 	}
 
 	void ActorLeavingVolume(class AActor* Other){
@@ -918,7 +918,7 @@ public:
 			class AActor* Other;
 		} Parms;
 		Parms.Other=Other;
-		UObject::ProcessEvent(NActorLeavingVolume, &Parms);
+		ProcessEvent(NActorLeavingVolume, &Parms);
 	}
 
 	void PawnEnteredVolume(class APawn* Other){
@@ -929,7 +929,7 @@ public:
 			class APawn* Other;
 		} Parms;
 		Parms.Other=Other;
-		UObject::ProcessEvent(NPawnEnteredVolume, &Parms);
+		ProcessEvent(NPawnEnteredVolume, &Parms);
 	}
 
 	void PawnLeavingVolume(class APawn* Other){
@@ -940,7 +940,7 @@ public:
 			class APawn* Other;
 		} Parms;
 		Parms.Other=Other;
-		UObject::ProcessEvent(NPawnLeavingVolume, &Parms);
+		ProcessEvent(NPawnLeavingVolume, &Parms);
 	}
 
 	DECLARE_CLASS(APhysicsVolume,AVolume,CLASS_NativeReplication,Engine)
@@ -1408,12 +1408,12 @@ public:
 
 	void TurnOn(){
 		DECLARE_NAME(TurnOn);
-		UObject::ProcessEvent(NTurnOn, NULL);
+		ProcessEvent(NTurnOn, NULL);
 	}
 
 	void TurnOff(){
 		DECLARE_NAME(TurnOff);
-		UObject::ProcessEvent(NTurnOff, NULL);
+		ProcessEvent(NTurnOff, NULL);
 	}
 
 	DECLARE_CLASS(AFlashlight,AActor,0,Engine)
@@ -1536,7 +1536,7 @@ public:
 	class UFont* GetConsoleFont(class UCanvas* C);
 	void WorldSpaceOverlays(){
 		DECLARE_NAME(WorldSpaceOverlays);
-		UObject::ProcessEvent(NWorldSpaceOverlays, NULL);
+		ProcessEvent(NWorldSpaceOverlays, NULL);
 	}
 
 	void CheckCountdown(class AGameReplicationInfo* GRI){
@@ -1545,7 +1545,7 @@ public:
 			class AGameReplicationInfo* GRI;
 		} Parms;
 		Parms.GRI=GRI;
-		UObject::ProcessEvent(NCheckCountdown, &Parms);
+		ProcessEvent(NCheckCountdown, &Parms);
 	}
 
 	void ConnectFailure(const FString& FailCode, const FString& URL){
@@ -1556,12 +1556,12 @@ public:
 		} Parms;
 		Parms.FailCode=FailCode;
 		Parms.URL=URL;
-		UObject::ProcessEvent(NConnectFailure, &Parms);
+		ProcessEvent(NConnectFailure, &Parms);
 	}
 
 	void ShowUpgradeMenu(){
 		DECLARE_NAME(ShowUpgradeMenu);
-		UObject::ProcessEvent(NShowUpgradeMenu, NULL);
+		ProcessEvent(NShowUpgradeMenu, NULL);
 	}
 
 	void AddCriticalMessage(const FString& Message, FLOAT Duration, const FColor& TextColor){
@@ -1574,7 +1574,7 @@ public:
 		Parms.Message=Message;
 		Parms.Duration=Duration;
 		Parms.TextColor=TextColor;
-		UObject::ProcessEvent(NAddCriticalMessage, &Parms);
+		ProcessEvent(NAddCriticalMessage, &Parms);
 	}
 
 	void PreRender(class UCanvas* Canvas){
@@ -1583,7 +1583,7 @@ public:
 			class UCanvas* Canvas;
 		} Parms;
 		Parms.Canvas=Canvas;
-		UObject::ProcessEvent(NPreRender, &Parms);
+		ProcessEvent(NPreRender, &Parms);
 	}
 
 	void DrawXLiveNotification(class UCanvas* C){
@@ -1592,7 +1592,7 @@ public:
 			class UCanvas* C;
 		} Parms;
 		Parms.C=C;
-		UObject::ProcessEvent(NDrawXLiveNotification, &Parms);
+		ProcessEvent(NDrawXLiveNotification, &Parms);
 	}
 
 	void PostRender(class UCanvas* Canvas){
@@ -1601,7 +1601,7 @@ public:
 			class UCanvas* Canvas;
 		} Parms;
 		Parms.Canvas=Canvas;
-		UObject::ProcessEvent(NPostRender, &Parms);
+		ProcessEvent(NPostRender, &Parms);
 	}
 
 	void PostRenderMenus(class UCanvas* Canvas){
@@ -1610,7 +1610,7 @@ public:
 			class UCanvas* Canvas;
 		} Parms;
 		Parms.Canvas=Canvas;
-		UObject::ProcessEvent(NPostRenderMenus, &Parms);
+		ProcessEvent(NPostRenderMenus, &Parms);
 	}
 
 	UBOOL DrawLevelAction(class UCanvas* C);
@@ -1622,7 +1622,7 @@ public:
 		} Parms;
 		Parms.I=I;
 		Parms.ReturnValue=0;
-		UObject::ProcessEvent(NLoadFontStatic, &Parms);
+		ProcessEvent(NLoadFontStatic, &Parms);
 		return Parms.ReturnValue;
 	}
 
@@ -1796,7 +1796,7 @@ public:
 	//Events
 	void GameEnding(){
 		DECLARE_NAME(GameEnding);
-		UObject::ProcessEvent(NGameEnding, NULL);
+		ProcessEvent(NGameEnding, NULL);
 	}
 
 	void KickIdler(class APlayerController* PC){
@@ -1805,7 +1805,7 @@ public:
 			class APlayerController* PC;
 		} Parms;
 		Parms.PC=PC;
-		UObject::ProcessEvent(NKickIdler, &Parms);
+		ProcessEvent(NKickIdler, &Parms);
 	}
 
 	INT GetFriendlyFirePercent(){
@@ -1814,7 +1814,7 @@ public:
 			INT ReturnValue;
 		} Parms;
 		Parms.ReturnValue=0;
-		UObject::ProcessEvent(NGetFriendlyFirePercent, &Parms);
+		ProcessEvent(NGetFriendlyFirePercent, &Parms);
 		return Parms.ReturnValue;
 	}
 
@@ -1824,13 +1824,13 @@ public:
 			INT ReturnValue;
 		} Parms;
 		Parms.ReturnValue=0;
-		UObject::ProcessEvent(NGetServerPort, &Parms);
+		ProcessEvent(NGetServerPort, &Parms);
 		return Parms.ReturnValue;
 	}
 
 	void DetailChange(){
 		DECLARE_NAME(DetailChange);
-		UObject::ProcessEvent(NDetailChange, NULL);
+		ProcessEvent(NDetailChange, NULL);
 	}
 
 	void InitGame(const FString& Options, FString& Error){
@@ -1841,7 +1841,7 @@ public:
 		} Parms;
 		Parms.Options=Options;
 		Parms.Error=Error;
-		UObject::ProcessEvent(NInitGame, &Parms);
+		ProcessEvent(NInitGame, &Parms);
 		Error=Parms.Error;
 	}
 
@@ -1851,7 +1851,7 @@ public:
 			FString ReturnValue;
 		} Parms;
 		Parms.ReturnValue=0;
-		UObject::ProcessEvent(NGetBeaconText, &Parms);
+		ProcessEvent(NGetBeaconText, &Parms);
 		return Parms.ReturnValue;
 	}
 
@@ -1867,7 +1867,7 @@ public:
 		Parms.Address=Address;
 		Parms.Error=Error;
 		Parms.FailCode=FailCode;
-		UObject::ProcessEvent(NPreLogin, &Parms);
+		ProcessEvent(NPreLogin, &Parms);
 		Error=Parms.Error;
 		FailCode=Parms.FailCode;
 	}
@@ -1882,7 +1882,7 @@ public:
 		Parms.bSpectator=bSpectator;
 		Parms.bInvited=bInvited;
 		Parms.ReturnValue=0;
-		UObject::ProcessEvent(NAtCapacity, &Parms);
+		ProcessEvent(NAtCapacity, &Parms);
 		return Parms.ReturnValue;
 	}
 
@@ -1898,7 +1898,7 @@ public:
 		Parms.Options=Options;
 		Parms.Error=Error;
 		Parms.ReturnValue=0;
-		UObject::ProcessEvent(NLogin, &Parms);
+		ProcessEvent(NLogin, &Parms);
 		Error=Parms.Error;
 		return Parms.ReturnValue;
 	}
@@ -1909,7 +1909,7 @@ public:
 			class APlayerController* NewPlayer;
 		} Parms;
 		Parms.NewPlayer=NewPlayer;
-		UObject::ProcessEvent(NPostLogin, &Parms);
+		ProcessEvent(NPostLogin, &Parms);
 	}
 
 	void AcceptInventory(class APawn* PlayerPawn){
@@ -1918,7 +1918,7 @@ public:
 			class APawn* PlayerPawn;
 		} Parms;
 		Parms.PlayerPawn=PlayerPawn;
-		UObject::ProcessEvent(NAcceptInventory, &Parms);
+		ProcessEvent(NAcceptInventory, &Parms);
 	}
 
 	void Broadcast(class AActor* Sender, const FString& Msg, FName Type){
@@ -1931,7 +1931,7 @@ public:
 		Parms.Sender=Sender;
 		Parms.Msg=Msg;
 		Parms.Type=Type;
-		UObject::ProcessEvent(NBroadcast, &Parms);
+		ProcessEvent(NBroadcast, &Parms);
 	}
 
 	void BroadcastLocalized(class AActor* Sender, class UClass* Message, INT Switch, class APlayerReplicationInfo* RelatedPRI_1, class APlayerReplicationInfo* RelatedPRI_2, class UObject* OptionalObject){
@@ -1950,7 +1950,7 @@ public:
 		Parms.RelatedPRI_1=RelatedPRI_1;
 		Parms.RelatedPRI_2=RelatedPRI_2;
 		Parms.OptionalObject=OptionalObject;
-		UObject::ProcessEvent(NBroadcastLocalized, &Parms);
+		ProcessEvent(NBroadcastLocalized, &Parms);
 	}
 
 	DECLARE_CLASS(AGameInfo,AInfo,CLASS_Config,Engine)
@@ -2054,7 +2054,7 @@ public:
 			INT ReturnValue;
 		} Parms;
 		Parms.ReturnValue=0;
-		UObject::ProcessEvent(NGetNumberofTeams, &Parms);
+		ProcessEvent(NGetNumberofTeams, &Parms);
 		return Parms.ReturnValue;
 	}
 
@@ -2110,18 +2110,18 @@ public:
 			FString ReturnValue;
 		} Parms;
 		Parms.ReturnValue=0;
-		UObject::ProcessEvent(NGetPlayerName, &Parms);
+		ProcessEvent(NGetPlayerName, &Parms);
 		return Parms.ReturnValue;
 	}
 
 	void UpdateCharacter(){
 		DECLARE_NAME(UpdateCharacter);
-		UObject::ProcessEvent(NUpdateCharacter, NULL);
+		ProcessEvent(NUpdateCharacter, NULL);
 	}
 
 	void ClientNameChange(){
 		DECLARE_NAME(ClientNameChange);
-		UObject::ProcessEvent(NClientNameChange, NULL);
+		ProcessEvent(NClientNameChange, NULL);
 	}
 
 	DECLARE_CLASS(APlayerReplicationInfo,AReplicationInfo,CLASS_NativeReplication,Engine)
@@ -2273,7 +2273,7 @@ public:
 			FColor ReturnValue;
 		} Parms;
 		Parms.ReturnValue=FColor(0);
-		UObject::ProcessEvent(NGetTeamColor, &Parms);
+		ProcessEvent(NGetTeamColor, &Parms);
 		return Parms.ReturnValue;
 	}
 
@@ -2327,7 +2327,7 @@ public:
 		} Parms;
 		Parms.SecType=SecType;
 		Parms.Data=Data;
-		UObject::ProcessEvent(NServerCallback, &Parms);
+		ProcessEvent(NServerCallback, &Parms);
 	}
 
 	DECLARE_CLASS(ASecurity,AInfo,0,Engine)
@@ -2385,7 +2385,7 @@ public:
 			class AActor* Other;
 		} Parms;
 		Parms.Other=Other;
-		UObject::ProcessEvent(NActorEntered, &Parms);
+		ProcessEvent(NActorEntered, &Parms);
 	}
 
 	void ActorLeaving(class AActor* Other){
@@ -2396,7 +2396,7 @@ public:
 			class AActor* Other;
 		} Parms;
 		Parms.Other=Other;
-		UObject::ProcessEvent(NActorLeaving, &Parms);
+		ProcessEvent(NActorLeaving, &Parms);
 	}
 
 	DECLARE_CLASS(AZoneInfo,AInfo,0,Engine)
@@ -2548,12 +2548,12 @@ public:
 
 	void FillPrecacheMaterialsArray(){
 		DECLARE_NAME(FillPrecacheMaterialsArray);
-		UObject::ProcessEvent(NFillPrecacheMaterialsArray, NULL);
+		ProcessEvent(NFillPrecacheMaterialsArray, NULL);
 	}
 
 	void FillPrecacheStaticMeshesArray(){
 		DECLARE_NAME(FillPrecacheStaticMeshesArray);
-		UObject::ProcessEvent(NFillPrecacheStaticMeshesArray, NULL);
+		ProcessEvent(NFillPrecacheStaticMeshesArray, NULL);
 	}
 
 	void ServerTravel(const FString& URL, UBOOL bItems){
@@ -2564,7 +2564,7 @@ public:
 		} Parms;
 		Parms.URL=URL;
 		Parms.bItems=bItems;
-		UObject::ProcessEvent(NServerTravel, &Parms);
+		ProcessEvent(NServerTravel, &Parms);
 	}
 
 	class APlayerController* GetLocalPlayerController(){
@@ -2573,7 +2573,7 @@ public:
 			class APlayerController* ReturnValue;
 		} Parms;
 		Parms.ReturnValue=0;
-		UObject::ProcessEvent(NGetLocalPlayerController, &Parms);
+		ProcessEvent(NGetLocalPlayerController, &Parms);
 		return Parms.ReturnValue;
 	}
 
@@ -2634,7 +2634,7 @@ public:
 		Parms.F=F;
 		Parms.bSilent=bSilent;
 		Parms.ReturnValue=0;
-		UObject::ProcessEvent(NWeaponChange, &Parms);
+		ProcessEvent(NWeaponChange, &Parms);
 		return Parms.ReturnValue;
 	}
 
@@ -2646,7 +2646,7 @@ public:
 		} Parms;
 		Parms.WeaponClass=WeaponClass;
 		Parms.ReturnValue=0;
-		UObject::ProcessEvent(NWeaponChangeClass, &Parms);
+		ProcessEvent(NWeaponChangeClass, &Parms);
 		return Parms.ReturnValue;
 	}
 
@@ -2660,7 +2660,7 @@ public:
 		Parms.CurrentChoice=CurrentChoice;
 		Parms.CurrentWeapon=CurrentWeapon;
 		Parms.ReturnValue=0;
-		UObject::ProcessEvent(NPrevWeapon, &Parms);
+		ProcessEvent(NPrevWeapon, &Parms);
 		return Parms.ReturnValue;
 	}
 
@@ -2674,7 +2674,7 @@ public:
 		Parms.CurrentChoice=CurrentChoice;
 		Parms.CurrentWeapon=CurrentWeapon;
 		Parms.ReturnValue=0;
-		UObject::ProcessEvent(NNextWeapon, &Parms);
+		ProcessEvent(NNextWeapon, &Parms);
 		return Parms.ReturnValue;
 	}
 
@@ -2974,11 +2974,11 @@ public:
 
 	void AttachMuzzleFlash(){
 		DECLARE_NAME(AttachMuzzleFlash);
-		UObject::ProcessEvent(NAttachMuzzleFlash, NULL);
+		ProcessEvent(NAttachMuzzleFlash, NULL);
 	}
 	void ThirdPersonEffects(){
 		DECLARE_NAME(ThirdPersonEffects);
-		UObject::ProcessEvent(NThirdPersonEffects, NULL);
+		ProcessEvent(NThirdPersonEffects, NULL);
 	}
 
 	DECLARE_CLASS(AWeaponAttachment,AInventoryAttachment,CLASS_NativeReplication,Engine)
@@ -3119,7 +3119,7 @@ public:
 			UBOOL ReturnValue;
 		} Parms;
 		Parms.ReturnValue=0;
-		UObject::ProcessEvent(NMarkersActive, &Parms);
+		ProcessEvent(NMarkersActive, &Parms);
 		return Parms.ReturnValue;
 	}
 
@@ -3129,7 +3129,7 @@ public:
 			BYTE ReturnValue;
 		} Parms;
 		Parms.ReturnValue=0;
-		UObject::ProcessEvent(NCurrentMarkerAction, &Parms);
+		ProcessEvent(NCurrentMarkerAction, &Parms);
 		return Parms.ReturnValue;
 	}
 
@@ -3141,7 +3141,7 @@ public:
 		} Parms;
 		Parms.Instigator=Instigator;
 		Parms.ReturnValue=0;
-		UObject::ProcessEvent(NExecuteMarker, &Parms);
+		ProcessEvent(NExecuteMarker, &Parms);
 		return Parms.ReturnValue;
 	}
 
@@ -3199,7 +3199,7 @@ public:
 			FString Args;
 		} Parms;
 		Parms.Args=Args;
-		UObject::ProcessEvent(NInit, &Parms);
+		ProcessEvent(NInit, &Parms);
 	}
 
 	void DrawMenu(class UCanvas* C, UBOOL HasFocus){
@@ -3210,17 +3210,17 @@ public:
 		} Parms;
 		Parms.C=C;
 		Parms.HasFocus=HasFocus;
-		UObject::ProcessEvent(NDrawMenu, &Parms);
+		ProcessEvent(NDrawMenu, &Parms);
 	}
 
 	void HandleInputBack(){
 		FName NHandleInputBack(NAME_HandleInputBack);
-		UObject::ProcessEvent(NHandleInputBack, NULL);
+		ProcessEvent(NHandleInputBack, NULL);
 	}
 
 	void PostLevelChange(){
 		DECLARE_NAME(PostLevelChange);
-		UObject::ProcessEvent(NPostLevelChange, NULL);
+		ProcessEvent(NPostLevelChange, NULL);
 	}
 
 	void TransferTransientElements(class AMenu* M){
@@ -3229,7 +3229,7 @@ public:
 			class AMenu* M;
 		} Parms;
 		Parms.M=M;
-		UObject::ProcessEvent(NTransferTransientElements, &Parms);
+		ProcessEvent(NTransferTransientElements, &Parms);
 	}
 
 	DECLARE_CLASS(AMenu,AActor,CLASS_Transient,Engine)
@@ -3376,7 +3376,7 @@ public:
 
 	void KeyFrameReached(){
 		DECLARE_NAME(KeyFrameReached);
-		UObject::ProcessEvent(NKeyFrameReached, NULL);
+		ProcessEvent(NKeyFrameReached, NULL);
 	}
 
 	DECLARE_CLASS(AMover,AActor,CLASS_NativeReplication,Engine)
@@ -3457,7 +3457,7 @@ public:
 		Parms.Seeker=Seeker;
 		Parms.Path=Path;
 		Parms.ReturnValue=0;
-		UObject::ProcessEvent(NSpecialCost, &Parms);
+		ProcessEvent(NSpecialCost, &Parms);
 		return Parms.ReturnValue;
 	}
 
@@ -3471,7 +3471,7 @@ public:
 		Parms.Incoming=Incoming;
 		Parms.Source=Source;
 		Parms.ReturnValue=0;
-		UObject::ProcessEvent(NAccept, &Parms);
+		ProcessEvent(NAccept, &Parms);
 		return Parms.ReturnValue;
 	}
 
@@ -3483,7 +3483,7 @@ public:
 		} Parms;
 		Parms.Other=Other;
 		Parms.ReturnValue=0;
-		UObject::ProcessEvent(NSuggestMovePreparation, &Parms);
+		ProcessEvent(NSuggestMovePreparation, &Parms);
 		return Parms.ReturnValue;
 	}
 
@@ -4102,12 +4102,12 @@ public:
 			class APawn* User;
 		} Parms;
 		Parms.User=User;
-		UObject::ProcessEvent(NReserveFor, &Parms);
+		ProcessEvent(NReserveFor, &Parms);
 	}
 
 	void Release(){
 		DECLARE_NAME(Release);
-		UObject::ProcessEvent(NRelease, NULL);
+		ProcessEvent(NRelease, NULL);
 	}
 
 	UBOOL IsAvailableFor(class APawn* User){
@@ -4118,7 +4118,7 @@ public:
 		} Parms;
 		Parms.User=User;
 		Parms.ReturnValue=0;
-		UObject::ProcessEvent(NIsAvailableFor, &Parms);
+		ProcessEvent(NIsAvailableFor, &Parms);
 		return Parms.ReturnValue;
 	}
 
@@ -4128,7 +4128,7 @@ public:
 			FVector ReturnValue;
 		} Parms;
 		Parms.ReturnValue=FVector(0);
-		UObject::ProcessEvent(NGetMuzzleLocation, &Parms);
+		ProcessEvent(NGetMuzzleLocation, &Parms);
 		return Parms.ReturnValue;
 	}
 
@@ -5271,7 +5271,7 @@ public:
 
 	void Initialized(){
 		DECLARE_NAME(Initialized);
-		UObject::ProcessEvent(NInitialized, NULL);
+		ProcessEvent(NInitialized, NULL);
 	}
 
 	DECLARE_CLASS(UInteraction,UInteractions,0,Engine)
@@ -5331,22 +5331,22 @@ public:
 
 	void NativeConsoleOpen(){
 		DECLARE_NAME(NativeConsoleOpen);
-		UObject::ProcessEvent(NNativeConsoleOpen, NULL);
+		ProcessEvent(NNativeConsoleOpen, NULL);
 	}
 
 	void PreLevelChange(){
 		DECLARE_NAME(PreLevelChange);
-		UObject::ProcessEvent(NPreLevelChange, NULL);
+		ProcessEvent(NPreLevelChange, NULL);
 	}
 
 	void PostLevelChange(){
 		DECLARE_NAME(PostLevelChange);
-		UObject::ProcessEvent(NPostLevelChange, NULL);
+		ProcessEvent(NPostLevelChange, NULL);
 	}
 
 	void NotifyLevelChange(){
 		FName NNotifyLevelChange(NAME_NotifyLevelChange);
-		UObject::ProcessEvent(NNotifyLevelChange, NULL);
+		ProcessEvent(NNotifyLevelChange, NULL);
 	}
 
 	void ManageMenuBackgroundMusic(class AMenu* NewMenu){
@@ -5355,7 +5355,7 @@ public:
 			class AMenu* NewMenu;
 		} Parms;
 		Parms.NewMenu=NewMenu;
-		UObject::ProcessEvent(NManageMenuBackgroundMusic, &Parms);
+		ProcessEvent(NManageMenuBackgroundMusic, &Parms);
 	}
 
 	void MenuOpen(class UClass* MenuClass, const FString& Args){
@@ -5366,7 +5366,7 @@ public:
 		} Parms;
 		Parms.MenuClass=MenuClass;
 		Parms.Args=Args;
-		UObject::ProcessEvent(NMenuOpen, &Parms);
+		ProcessEvent(NMenuOpen, &Parms);
 	}
 
 	void MenuOpenExisting(class AMenu* M){
@@ -5375,7 +5375,7 @@ public:
 			class AMenu* M;
 		} Parms;
 		Parms.M=M;
-		UObject::ProcessEvent(NMenuOpenExisting, &Parms);
+		ProcessEvent(NMenuOpenExisting, &Parms);
 	}
 
 	void MenuCall(class UClass* MenuClass, const FString& Args){
@@ -5386,7 +5386,7 @@ public:
 		} Parms;
 		Parms.MenuClass=MenuClass;
 		Parms.Args=Args;
-		UObject::ProcessEvent(NMenuCall, &Parms);
+		ProcessEvent(NMenuCall, &Parms);
 	}
 
 	void MenuCallExisting(class AMenu* M, const FString& Args){
@@ -5397,12 +5397,12 @@ public:
 		} Parms;
 		Parms.M=M;
 		Parms.Args=Args;
-		UObject::ProcessEvent(NMenuCallExisting, &Parms);
+		ProcessEvent(NMenuCallExisting, &Parms);
 	}
 
 	void MenuClose(){
 		DECLARE_NAME(MenuClose);
-		UObject::ProcessEvent(NMenuClose, NULL);
+		ProcessEvent(NMenuClose, NULL);
 	}
 
 	void LoadingStarted(const FString& Menu, const FString& Pic, const FString& Title, const FString& Text, UBOOL ShowHints){
@@ -5419,7 +5419,7 @@ public:
 		Parms.Title=Title;
 		Parms.Text=Text;
 		Parms.ShowHints=ShowHints;
-		UObject::ProcessEvent(NLoadingStarted, &Parms);
+		ProcessEvent(NLoadingStarted, &Parms);
 	}
 
 	void UpdateLoadingProgress(FLOAT LoadingRatioCompleted){
@@ -5428,12 +5428,12 @@ public:
 			FLOAT LoadingRatioCompleted;
 		} Parms;
 		Parms.LoadingRatioCompleted=LoadingRatioCompleted;
-		UObject::ProcessEvent(NUpdateLoadingProgress, &Parms);
+		ProcessEvent(NUpdateLoadingProgress, &Parms);
 	}
 
 	void LoadingFinished(){
 		DECLARE_NAME(LoadingFinished);
-		UObject::ProcessEvent(NLoadingFinished, NULL);
+		ProcessEvent(NLoadingFinished, NULL);
 	}
 
 	UBOOL ShowingMenu(){
@@ -5442,7 +5442,7 @@ public:
 			UBOOL ReturnValue;
 		} Parms;
 		Parms.ReturnValue=0;
-		UObject::ProcessEvent(NShowingMenu, &Parms);
+		ProcessEvent(NShowingMenu, &Parms);
 		return Parms.ReturnValue;
 	}
 
@@ -5454,7 +5454,7 @@ public:
 		} Parms;
 		Parms.MenuClassName=MenuClassName;
 		Parms.ReturnValue=0;
-		UObject::ProcessEvent(NShowingMenuClass, &Parms);
+		ProcessEvent(NShowingMenuClass, &Parms);
 		return Parms.ReturnValue;
 	}
 
@@ -5464,7 +5464,7 @@ public:
 			UBOOL bOnlyIfNotPlaying;
 		} Parms;
 		Parms.bOnlyIfNotPlaying=bOnlyIfNotPlaying;
-		UObject::ProcessEvent(NRestartMenuBackgroundMusic, &Parms);
+		ProcessEvent(NRestartMenuBackgroundMusic, &Parms);
 	}
 
 	DECLARE_CLASS(UConsole,UInteraction,CLASS_Config,Engine)
@@ -5498,7 +5498,7 @@ public:
 		Parms.InteractionName=InteractionName;
 		Parms.AttachTo=AttachTo;
 		Parms.ReturnValue=0;
-		UObject::ProcessEvent(NAddInteraction, &Parms);
+		ProcessEvent(NAddInteraction, &Parms);
 		return Parms.ReturnValue;
 	}
 
@@ -5508,7 +5508,7 @@ public:
 			class UInteraction* RemoveMe;
 		} Parms;
 		Parms.RemoveMe=RemoveMe;
-		UObject::ProcessEvent(NRemoveInteraction, &Parms);
+		ProcessEvent(NRemoveInteraction, &Parms);
 	}
 
 	void SetFocusTo(class UInteraction* Inter, class UPlayer* ViewportOwner){
@@ -5519,7 +5519,7 @@ public:
 		} Parms;
 		Parms.Inter=Inter;
 		Parms.ViewportOwner=ViewportOwner;
-		UObject::ProcessEvent(NSetFocusTo, &Parms);
+		ProcessEvent(NSetFocusTo, &Parms);
 	}
 
 	UBOOL Process_KeyType(TArray<class UInteraction*> InteractionArray, BYTE& Key, const FString& Unicode){
@@ -5534,7 +5534,7 @@ public:
 		Parms.Key=Key;
 		Parms.Unicode=Unicode;
 		Parms.ReturnValue=0;
-		UObject::ProcessEvent(NProcess_KeyType, &Parms);
+		ProcessEvent(NProcess_KeyType, &Parms);
 		Key=Parms.Key;
 		return Parms.ReturnValue;
 	}
@@ -5553,7 +5553,7 @@ public:
 		Parms.Action=Action;
 		Parms.Delta=Delta;
 		Parms.ReturnValue=0;
-		UObject::ProcessEvent(NProcess_KeyEvent, &Parms);
+		ProcessEvent(NProcess_KeyEvent, &Parms);
 		Key=Parms.Key;
 		Action=Parms.Action;
 		return Parms.ReturnValue;
@@ -5567,7 +5567,7 @@ public:
 		} Parms;
 		Parms.InteractionArray=InteractionArray;
 		Parms.Canvas=Canvas;
-		UObject::ProcessEvent(NProcess_PreRender, &Parms);
+		ProcessEvent(NProcess_PreRender, &Parms);
 	}
 
 	void Process_PostRender(TArray<class UInteraction*> InteractionArray, class UCanvas* Canvas){
@@ -5578,7 +5578,7 @@ public:
 		} Parms;
 		Parms.InteractionArray=InteractionArray;
 		Parms.Canvas=Canvas;
-		UObject::ProcessEvent(NProcess_PostRender, &Parms);
+		ProcessEvent(NProcess_PostRender, &Parms);
 	}
 
 	void Process_Tick(TArray<class UInteraction*> InteractionArray, FLOAT DeltaTime){
@@ -5589,7 +5589,7 @@ public:
 		} Parms;
 		Parms.InteractionArray=InteractionArray;
 		Parms.DeltaTime=DeltaTime;
-		UObject::ProcessEvent(NProcess_Tick, &Parms);
+		ProcessEvent(NProcess_Tick, &Parms);
 	}
 
 	void Process_Message(const FString& Msg, FLOAT MsgLife, TArray<class UInteraction*> InteractionArray){
@@ -5602,7 +5602,7 @@ public:
 		Parms.Msg=Msg;
 		Parms.MsgLife=MsgLife;
 		Parms.InteractionArray=InteractionArray;
-		UObject::ProcessEvent(NProcess_Message, &Parms);
+		ProcessEvent(NProcess_Message, &Parms);
 	}
 
 	DECLARE_CLASS(UInteractionMaster,UInteractions,CLASS_Transient,Engine)
@@ -7128,7 +7128,7 @@ public:
 			FLOAT DeltaTime;
 		} Parms;
 		Parms.DeltaTime=DeltaTime;
-		UObject::ProcessEvent(NPlayerInput, &Parms);
+		ProcessEvent(NPlayerInput, &Parms);
 	}
 
 	DECLARE_CLASS(UPlayerInput,UObject,CLASS_Transient|CLASS_Config,Engine)

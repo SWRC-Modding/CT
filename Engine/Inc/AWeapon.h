@@ -1,15 +1,15 @@
 	//Events
 	void TurretFire(){
 		DECLARE_NAME(TurretFire);
-		UObject::ProcessEvent(NTurretFire, NULL);
+		ProcessEvent(NTurretFire, NULL);
 	}
 	void LoadAttachment(){
 		DECLARE_NAME(LoadAttachment);
-		UObject::ProcessEvent(NLoadAttachment, NULL);
+		ProcessEvent(NLoadAttachment, NULL);
 	}
 	void HolsterAttachment(){
 		DECLARE_NAME(HolsterAttachment);
-		UObject::ProcessEvent(NHolsterAttachment, NULL);
+		ProcessEvent(NHolsterAttachment, NULL);
 	}
 	UBOOL IsTargeting(){
 		DECLARE_NAME(IsTargeting);
@@ -17,7 +17,7 @@
 			UBOOL ReturnValue;
 		} Parms;
 		Parms.ReturnValue=0;
-		UObject::ProcessEvent(NIsTargeting, &Parms);
+		ProcessEvent(NIsTargeting, &Parms);
 		return Parms.ReturnValue;
 	}
 	UBOOL IsTargetLocked(){
@@ -26,7 +26,7 @@
 			UBOOL ReturnValue;
 		} Parms;
 		Parms.ReturnValue=0;
-		UObject::ProcessEvent(NIsTargetLocked, &Parms);
+		ProcessEvent(NIsTargetLocked, &Parms);
 		return Parms.ReturnValue;
 	}
 	FLOAT GetTargetLockTime(){
@@ -35,7 +35,7 @@
 			FLOAT ReturnValue;
 		} Parms;
 		Parms.ReturnValue=0;
-		UObject::ProcessEvent(NGetTargetLockTime, &Parms);
+		ProcessEvent(NGetTargetLockTime, &Parms);
 		return Parms.ReturnValue;
 	}
 	FLOAT GetElapsedTargetLockTime(){
@@ -44,7 +44,7 @@
 			FLOAT ReturnValue;
 		} Parms;
 		Parms.ReturnValue=0;
-		UObject::ProcessEvent(NGetElapsedTargetLockTime, &Parms);
+		ProcessEvent(NGetElapsedTargetLockTime, &Parms);
 		return Parms.ReturnValue;
 	}
 	class UTexture* GetLockReticle(){
@@ -53,7 +53,7 @@
 			class UTexture* ReturnValue;
 		} Parms;
 		Parms.ReturnValue=0;
-		UObject::ProcessEvent(NGetLockReticle, &Parms);
+		ProcessEvent(NGetLockReticle, &Parms);
 		return Parms.ReturnValue;
 	}
 	UBOOL IsSecondaryTargetLocked(){
@@ -62,7 +62,7 @@
 			UBOOL ReturnValue;
 		} Parms;
 		Parms.ReturnValue=0;
-		UObject::ProcessEvent(NIsSecondaryTargetLocked, &Parms);
+		ProcessEvent(NIsSecondaryTargetLocked, &Parms);
 		return Parms.ReturnValue;
 	}
 	FLOAT GetSecondaryTargetLockTime(){
@@ -71,7 +71,7 @@
 			FLOAT ReturnValue;
 		} Parms;
 		Parms.ReturnValue=0;
-		UObject::ProcessEvent(NGetSecondaryTargetLockTime, &Parms);
+		ProcessEvent(NGetSecondaryTargetLockTime, &Parms);
 		return Parms.ReturnValue;
 	}
 	FLOAT GetElapsedSecondaryTargetLockTime(){
@@ -80,12 +80,12 @@
 			FLOAT ReturnValue;
 		} Parms;
 		Parms.ReturnValue=0;
-		UObject::ProcessEvent(NGetElapsedSecondaryTargetLockTime, &Parms);
+		ProcessEvent(NGetElapsedSecondaryTargetLockTime, &Parms);
 		return Parms.ReturnValue;
 	}
 	void ServerFire(){
 		DECLARE_NAME(ServerFire);
-		UObject::ProcessEvent(NServerFire, NULL);
+		ProcessEvent(NServerFire, NULL);
 	}
 	void StopFire(FLOAT Value){
 		DECLARE_NAME(StopFire);
@@ -93,11 +93,11 @@
 			FLOAT Value;
 		} Parms;
 		Parms.Value=Value;
-		UObject::ProcessEvent(NStopFire, &Parms);
+		ProcessEvent(NStopFire, &Parms);
 	}
 	void ServerStopFire(){
 		DECLARE_NAME(ServerStopFire);
-		UObject::ProcessEvent(NServerStopFire, NULL);
+		ProcessEvent(NServerStopFire, NULL);
 	}
 	FVector GetFireStart(const FVector& X, const FVector& Y, const FVector& Z){
 		DECLARE_NAME(GetFireStart);
@@ -111,28 +111,28 @@
 		Parms.Y=Y;
 		Parms.Z=Z;
 		Parms.ReturnValue=FVector(0);
-		UObject::ProcessEvent(NGetFireStart, &Parms);
+		ProcessEvent(NGetFireStart, &Parms);
 		return Parms.ReturnValue;
 	}
 	void ForceReload(){
 		DECLARE_NAME(ForceReload);
-		UObject::ProcessEvent(NForceReload, NULL);
+		ProcessEvent(NForceReload, NULL);
 	}
 	void ServerForceReload(){
 		DECLARE_NAME(ServerForceReload);
-		UObject::ProcessEvent(NServerForceReload, NULL);
+		ProcessEvent(NServerForceReload, NULL);
 	}
 	void ServerThrowGrenade(){
 		DECLARE_NAME(ServerThrowGrenade);
-		UObject::ProcessEvent(NServerThrowGrenade, NULL);
+		ProcessEvent(NServerThrowGrenade, NULL);
 	}
 	void ReleaseGrenade(){
 		DECLARE_NAME(ReleaseGrenade);
-		UObject::ProcessEvent(NReleaseGrenade, NULL);
+		ProcessEvent(NReleaseGrenade, NULL);
 	}
 	void DoMeleeAttack(){
 		DECLARE_NAME(DoMeleeAttack);
-		UObject::ProcessEvent(NDoMeleeAttack, NULL);
+		ProcessEvent(NDoMeleeAttack, NULL);
 	}
 	UBOOL CanSwitchWeapon(){
 		DECLARE_NAME(CanSwitchWeapon);
@@ -140,7 +140,7 @@
 			UBOOL ReturnValue;
 		} Parms;
 		Parms.ReturnValue=0;
-		UObject::ProcessEvent(NCanSwitchWeapon, &Parms);
+		ProcessEvent(NCanSwitchWeapon, &Parms);
 		return Parms.ReturnValue;
 	}
 	FLOAT SwitchPriority(){
@@ -149,6 +149,6 @@
 			FLOAT ReturnValue;
 		} Parms;
 		Parms.ReturnValue=0;
-		UObject::ProcessEvent(NSwitchPriority, &Parms);
+		ProcessEvent(NSwitchPriority, &Parms);
 		return Parms.ReturnValue;
 	}

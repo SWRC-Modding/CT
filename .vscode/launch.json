@@ -11,6 +11,7 @@
 			"request": "launch",
 			"program": "${workspaceFolder}/../GameData/System/Launcher.exe",
 			"args": [
+				"dm_canyon?game=MPGame.DMGame?goalscore=5?respawndelay=0?Listen",
 				"-windowed",
 				"-log"
 			],

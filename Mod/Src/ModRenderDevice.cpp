@@ -45,17 +45,14 @@ struct FD3DLockedRect{
  * That's why we detect if a texture is created with the L6V5U5 format and perform a proper conversion to X8L8V8U8 or if that is not available V8U8 and if not even that one works ARGB.
  */
 
-struct FTextureMipLevel{
-	UINT  Width;
-	UINT  Height;
-	void* Pixels;
-};
-
 // Information about the current texture returned by CreateTexture and used by Lock/UnlockRect
-static FD3DTexture*             CurrentTexture;
-static ED3DFormat               CurrentTextureSourceFormat;
-static ED3DFormat               CurrentTextureTargetFormat;
-static TArray<FTextureMipLevel> CurrentTextureMipLevels;
+static FD3DTexture* CurrentTexture;
+static ED3DFormat   CurrentTextureSourceFormat;
+static ED3DFormat   CurrentTextureTargetFormat;
+static UINT         CurrentTextureNumMipLevels;
+static UINT         CurrentMipLevelWidth;
+static UINT         CurrentMipLevelHeight;
+static void*        CurrentMipLevelPixels;
 
 struct FV8U8Pixel{
 	INT8 U;
@@ -245,14 +242,12 @@ static HRESULT __stdcall D3DTextureLockRectOverride(FD3DTexture* D3DTexture, UIN
 	if(FAILED(GetLevelDescResult))
 		return GetLevelDescResult;
 
-	FTextureMipLevel& MipLevel = CurrentTextureMipLevels[Level];
+	CurrentMipLevelWidth = SurfaceDesc.Width;
+	CurrentMipLevelHeight = SurfaceDesc.Height;
+	CurrentMipLevelPixels = appMalloc(SurfaceDesc.Size);
 
-	MipLevel.Width = SurfaceDesc.Width;
-	MipLevel.Height = SurfaceDesc.Height;
-	MipLevel.Pixels = appMalloc(SurfaceDesc.Size);
-
-	pLockedRect->Pitch = MipLevel.Width * sizeof(FL6V5U5Pixel);
-	pLockedRect->pBits = MipLevel.Pixels;
+	pLockedRect->Pitch = CurrentMipLevelWidth * sizeof(FL6V5U5Pixel);
+	pLockedRect->pBits = CurrentMipLevelPixels;
 
 	return S_OK;
 }
@@ -269,37 +264,34 @@ static HRESULT __stdcall D3DTextureUnlockRectOverride(FD3DTexture* D3DTexture, U
 	if(D3DTexture != CurrentTexture)
 		return D3DTextureUnlockRect(D3DTexture, Level);
 
-	FTextureMipLevel& MipLevel = CurrentTextureMipLevels[Level];
 	FD3DLockedRect LockedRect;
 	HRESULT Result = D3DTextureLockRect(D3DTexture, Level, &LockedRect, NULL, 0);
 
 	if(SUCCEEDED(Result)){
 		if(CurrentTextureSourceFormat == D3DFormat_V8U8){
-			ConvertV8U8ToA8R8G8B8(MipLevel.Pixels, LockedRect.pBits, MipLevel.Width, MipLevel.Height);
+			ConvertV8U8ToA8R8G8B8(CurrentMipLevelPixels, LockedRect.pBits, CurrentMipLevelWidth, CurrentMipLevelHeight);
 		}else if(CurrentTextureSourceFormat == D3DFormat_L6V5U5){
 			if(CurrentTextureTargetFormat == D3DFormat_V8U8)
-				ConvertL6V5U5ToV8U8(MipLevel.Pixels, LockedRect.pBits, MipLevel.Width, MipLevel.Height);
+				ConvertL6V5U5ToV8U8(CurrentMipLevelPixels, LockedRect.pBits, CurrentMipLevelWidth, CurrentMipLevelHeight);
 			else if(CurrentTextureTargetFormat == D3DFormat_X8L8V8U8)
-				ConvertL6V5U5ToX8L8V8U8(MipLevel.Pixels, LockedRect.pBits, MipLevel.Width, MipLevel.Height);
+				ConvertL6V5U5ToX8L8V8U8(CurrentMipLevelPixels, LockedRect.pBits, CurrentMipLevelWidth, CurrentMipLevelHeight);
 			else if(CurrentTextureTargetFormat == D3DFormat_A8R8G8B8)
-				ConvertL6V5U5ToA8R8G8B8(MipLevel.Pixels, LockedRect.pBits, MipLevel.Width, MipLevel.Height);
+				ConvertL6V5U5ToA8R8G8B8(CurrentMipLevelPixels, LockedRect.pBits, CurrentMipLevelWidth, CurrentMipLevelHeight);
 		}else if(CurrentTextureSourceFormat == D3DFormat_X8L8V8U8){
 			if(CurrentTextureTargetFormat == D3DFormat_V8U8)
-				ConvertX8L8V8U8ToV8U8(MipLevel.Pixels, LockedRect.pBits, MipLevel.Width, MipLevel.Height);
+				ConvertX8L8V8U8ToV8U8(CurrentMipLevelPixels, LockedRect.pBits, CurrentMipLevelWidth, CurrentMipLevelHeight);
 			else if(CurrentTextureTargetFormat == D3DFormat_A8R8G8B8)
-				ConvertX8L8V8U8ToA8R8G8B8(MipLevel.Pixels, LockedRect.pBits, MipLevel.Width, MipLevel.Height);
+				ConvertX8L8V8U8ToA8R8G8B8(CurrentMipLevelPixels, LockedRect.pBits, CurrentMipLevelWidth, CurrentMipLevelHeight);
 		}
 
 		Result = D3DTextureUnlockRect(D3DTexture, Level);
 	}
 
-	appFree(MipLevel.Pixels);
-	MipLevel.Pixels = NULL;
+	appFree(CurrentMipLevelPixels);
+	CurrentMipLevelPixels = NULL;
 
-	if(Level == CurrentTextureMipLevels.Num() - 1){ // This is the last mip level which means the current texture is fully converted and should be set to NULL
-		CurrentTextureMipLevels.Empty();
+	if(Level == CurrentTextureNumMipLevels - 1) // This is the last mip level which means the current texture is fully converted and should be set to NULL
 		CurrentTexture = NULL;
-	}
 
 	return Result;
 }
@@ -395,7 +387,7 @@ static HRESULT __stdcall D3DDeviceCreateTextureOverride(FD3DDevice* D3DDevice,
 	CurrentTexture = *ppTexture;
 	CurrentTextureSourceFormat = Format;
 	CurrentTextureTargetFormat = FallbackFormat;
-	CurrentTextureMipLevels.Set(Levels);
+	CurrentTextureNumMipLevels = Levels;
 
 	return Result;
 }

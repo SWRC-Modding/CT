@@ -23,7 +23,7 @@ typedef void FD3DDevice;
 typedef void FD3DTexture;
 
 enum ED3DFormat{
-	D3DFormat_A8R8G8B8 = 21, // Fallback if none of the bumpmap formats are available. Will look weird ingame but at least doesn't crash
+	D3DFormat_A8R8G8B8 = 21, // Fallback if none of the bumpmap formats are available.
 	D3DFormat_V8U8     = 60,
 	D3DFormat_L6V5U5   = 61,
 	D3DFormat_X8L8V8U8 = 62
@@ -320,25 +320,35 @@ static HRESULT __stdcall D3DDeviceCreateTextureOverride(FD3DDevice* D3DDevice,
 														ED3DFormat Format,
 														enum ED3DPool Pool,
 														FD3DTexture** ppTexture){
-	// X8L8V8U8 is used as the first fallback format because no information is lost in the conversion
-	ED3DFormat FallbackFormat = Format == D3DFormat_L6V5U5 ? D3DFormat_X8L8V8U8 : Format;
 	HRESULT Result = D3DDeviceCreateTexture(D3DDevice,
 											Width,
 											Height,
 											Levels,
 											Usage,
-											FallbackFormat,
+											Format,
 											Pool,
 											ppTexture);
 
-	if(FAILED(Result) && !IsBumpmapFormat(Format))
-		appErrorf("CreateTexture failed (Format: %i)", Format);
-
-	if(FallbackFormat == Format)
+	if(SUCCEEDED(Result))
 		return Result; // No fallback format was needed so just return
 
-	if(FAILED(Result)){
-		FallbackFormat = D3DFormat_V8U8; // If X8L8V8U8 is not supported V8U8 might still be so try that. Visually the same except for missing luminance
+	if(!IsBumpmapFormat(Format))
+		appErrorf("CreateTexture failed (Format: %i)", Format); // Should never happen but this is a better error than the engine produces
+
+	// X8L8V8U8 is used as the first fallback format because no information is lost in the conversion
+	ED3DFormat FallbackFormat = D3DFormat_X8L8V8U8;
+
+	Result = D3DDeviceCreateTexture(D3DDevice,
+									Width,
+									Height,
+									Levels,
+									Usage,
+									FallbackFormat,
+									Pool,
+									ppTexture);
+
+	if(FAILED(Result)){ // If X8L8V8U8 is not supported V8U8 might still be so try that. Visually the same except for missing luminance
+		FallbackFormat = D3DFormat_V8U8;
 		Result = D3DDeviceCreateTexture(D3DDevice,
 										Width,
 										Height,
@@ -349,8 +359,8 @@ static HRESULT __stdcall D3DDeviceCreateTextureOverride(FD3DDevice* D3DDevice,
 										ppTexture);
 	}
 
-	if(FAILED(Result)){
-		FallbackFormat = D3DFormat_A8R8G8B8; // If no bumpmap format is available we fall back to ARGB. Looks fine visually and should always be supported
+	if(FAILED(Result)){ // If no bumpmap format is available we fall back to ARGB. Looks fine visually and should always be supported
+		FallbackFormat = D3DFormat_A8R8G8B8;
 		Result = D3DDeviceCreateTexture(D3DDevice,
 										Width,
 										Height,

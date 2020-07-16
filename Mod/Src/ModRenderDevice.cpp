@@ -433,6 +433,8 @@ HRESULT __stdcall D3D8CreateDeviceOverride(FD3D8* D3D8,
 class MOD_API UModRenderDevice : public UD3DRenderDevice{
 	DECLARE_CLASS(UModRenderDevice, UD3DRenderDevice, 0, Mod)
 public:
+	static UObject* FOVChanger;
+
 	virtual UBOOL Init(){
 		UBOOL Result = Super::Init();
 
@@ -443,6 +445,8 @@ public:
 		}
 
 		if(!GIsEditor){
+			// Get a list of all supported resolutions and apply them to the config
+
 			DEVMODE dm = {0};
 
 			dm.dmSize = sizeof(dm);
@@ -467,10 +471,35 @@ public:
 								   *ResolutionList,
 								   *(FString("XInterfaceCTMenus.") + UObject::GetLanguage()));
 			}
+
+			// Create FOVChanger object. This might not be the best place but idk where else to put it...
+			if(!FOVChanger){
+				FOVChanger = ConstructObject<UObject>(LoadClass<UObject>(NULL, "Mod.FOVChanger", NULL, LOAD_NoFail | LOAD_Throw, NULL));
+				checkSlow(FOVChanger);
+				FOVChanger->AddToRoot(); // This object should never be garbage collected
+				FOVChanger->ProcessEvent(NAME_Init, NULL);
+			}
 		}
 
 		return Result;
 	}
+
+	virtual UBOOL Exec(const TCHAR* Cmd, FOutputDevice& Ar){
+		if(!GIsEditor && ParseCommand(&Cmd, "SETFOV")){
+			float FOV = appAtof(Cmd);
+
+			FOV = Clamp(FOV, 85.0f, 130.0f);
+
+			Ar.Logf("Setting field of view to %f", FOV);
+			FOVChanger->ProcessEvent(FName("SetFOV"), &FOV);
+
+			return 1;
+		}
+
+		return Super::Exec(Cmd, Ar);
+	}
 };
+
+UObject* UModRenderDevice::FOVChanger = NULL;
 
 IMPLEMENT_CLASS(UModRenderDevice)

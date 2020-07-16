@@ -1,16 +1,29 @@
 class FOVChanger extends Object;
 
-var() config float CurrentFOV;
+var() config float   CurrentFOV;
 
 var CTPlayer         Player;
+
 var FunctionOverride CTPlayerEndZoomOverride;
 var FunctionOverride CTPlayerResetFOVOverride;
 
+var FunctionOverride MenuBaseCallMenuClassOverride;
+var FunctionOverride MenuBaseOverlayMenuClassOverride;
+var FunctionOverride MenuBaseGotoMenuClassOverride;
+
 function Init(){
+	// CTPlayer
 	CTPlayerEndZoomOverride = new class'FunctionOverride';
 	CTPlayerEndZoomOverride.Init(class'CTPlayer', 'EndZoom', self, 'CTPlayerEndZoom');
 	CTPlayerResetFOVOverride = new class'FunctionOverride';
 	CTPlayerResetFOVOverride.Init(class'CTPlayer', 'ResetFOV', self, 'CTPlayerResetFOV');
+	// MenuBase
+	MenuBaseCallMenuClassOverride = new class'FunctionOverride';
+	MenuBaseCallMenuClassOverride.Init(class'MenuBase', 'CallMenuClass', self, 'MenuBaseCallMenuClass');
+	MenuBaseOverlayMenuClassOverride = new class'FunctionOverride';
+	MenuBaseOverlayMenuClassOverride.Init(class'MenuBase', 'OverlayMenuClass', self, 'MenuBaseOverlayMenuClass');
+	MenuBaseGotoMenuClassOverride = new class'FunctionOverride';
+	MenuBaseGotoMenuClassOverride.Init(class'MenuBase', 'GotoMenuClass', self, 'MenuBaseGotoMenuClass');
 }
 
 function CTPlayerEndZoom(){
@@ -69,6 +82,41 @@ function SetFOV(float NewFOV){
 	SaveConfig();
 	SetViewFOV();
 	SetWeaponFOV();
+}
+
+// Menu stuff
+
+simulated function MenuBaseCallMenuClass(String MenuClassName, optional String Args){
+	local MenuBase Menu;
+
+	if(MenuClassName == "XInterfaceCTMenus.CTGameOptionsPCMenu")
+		MenuClassName = "Mod.ModGameOptionsMenu";
+
+	Menu = MenuBase(MenuBaseCallMenuClassOverride.CurrentSelf);
+
+	Menu.CallMenu(Menu.Spawn(class<Menu>(DynamicLoadObject(MenuClassName, class'Class')), Menu.Owner), Args);
+}
+
+simulated function MenuBaseOverlayMenuClass(String MenuClassName, optional String Args){
+	local MenuBase Menu;
+
+	if(MenuClassName == "XInterfaceCTMenus.CTGameOptionsPCMenu")
+		MenuClassName = "Mod.ModGameOptionsMenu";
+
+	Menu = MenuBase(MenuBaseOverlayMenuClassOverride.CurrentSelf);
+
+	Menu.OverlayMenu(Menu.Spawn(class<Menu>(DynamicLoadObject(MenuClassName, class'Class')), Menu.Owner), Args);
+}
+
+simulated function MenuBaseGotoMenuClass(String MenuClassName, optional String Args){
+	local MenuBase Menu;
+
+	if(MenuClassName == "XInterfaceCTMenus.CTGameOptionsPCMenu")
+		MenuClassName = "Mod.ModGameOptionsMenu";
+
+	Menu = MenuBase(MenuBaseGotoMenuClassOverride.CurrentSelf);
+
+	Menu.GotoMenu(Menu.Spawn(class<Menu>(DynamicLoadObject(MenuClassName, class'Class')), Menu.Owner), Args);
 }
 
 defaultproperties

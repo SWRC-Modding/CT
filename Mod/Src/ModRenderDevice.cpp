@@ -474,7 +474,9 @@ public:
 
 			// Create FOVChanger object. This might not be the best place but idk where else to put it...
 			if(!FOVChanger){
-				FOVChanger = ConstructObject<UObject>(LoadClass<UObject>(NULL, "Mod.FOVChanger", NULL, LOAD_NoFail | LOAD_Throw, NULL));
+				FOVChanger = ConstructObject<UObject>(LoadClass<UObject>(NULL, "Mod.FOVChanger", NULL, LOAD_NoFail | LOAD_Throw, NULL),
+													  reinterpret_cast<UObject*>(-1),
+													  FName("MainFOVChanger"));
 				checkSlow(FOVChanger);
 				FOVChanger->AddToRoot(); // This object should never be garbage collected
 				FOVChanger->ProcessEvent(NAME_Init, NULL);

@@ -56,6 +56,7 @@ function bool ExecCmd(String Cmd, optional PlayerController PC){
 	local string StringParam;
 	local NavigationPoint N;
 	local vector SpawnPos;
+	local rotator SpawnRot;
 	local Pawn P;
 
 	if(ParseCommand(Cmd, "ADDBOT")){
@@ -97,13 +98,17 @@ function bool ExecCmd(String Cmd, optional PlayerController PC){
 
 			if(PawnClass != None){
 				if(PC != None){
-					if(PC.Pawn != None)
-						SpawnPos = PC.Pawn.Location + vector(PC.GetViewRotation()) * (PC.Pawn.CollisionRadius + PawnClass.default.CollisionRadius + 4);
-					else
+					if(PC.Pawn != None){
+						SpawnRot = PC.GetViewRotation();
+						SpawnRot.Pitch = 0;
+						SpawnRot.Roll = 0;
+						SpawnPos = PC.Pawn.Location + vector(SpawnRot) * (PC.Pawn.CollisionRadius + PawnClass.default.CollisionRadius + 8);
+					}else{
 						SpawnPos = PC.Location;
-				}else{
+					}
+				}else{ // Pick a random navigation point for pawns spawned from the server console
 					for(N = Level.NavigationPointList; N != None; N = N.nextNavigationPoint){
-						if(Rand(10) > 7){
+						if(!N.taken && Rand(10) > 7){
 							SpawnPos = N.Location;
 
 							break;

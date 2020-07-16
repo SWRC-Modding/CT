@@ -89,6 +89,7 @@ void AAdminControl::Spawned(){
 
 	AdminControlEventLog.Unbuffered = 1;
 	AdminControlEventLog.Timestamp = EventLogTimestamp;
+	AdminControlEventLog.CallLogHook = 0;
 	AdminControlEventLog.Logf(NAME_Init, "(Map): %s", Level->GetOuter()->GetName());
 
 	// Restore admins from previous round so they don't have to login again

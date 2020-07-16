@@ -16,12 +16,14 @@ public:
 	UBOOL     Opened;
 	UBOOL     Dead;
 	UBOOL     Unbuffered;
+	UBOOL     CallLogHook;
 	TCHAR     Filename[1024];
 
 	FOutputDeviceFile(const TCHAR* InFilename = NULL) : LogAr(NULL),
 	                                                    Timestamp(0),
 	                                                    Opened(0),
 	                                                    Unbuffered(0),
+	                                                    CallLogHook(1),
 	                                                    Dead(0){
 		if(InFilename)
 			SetFilename(InFilename);
@@ -92,7 +94,7 @@ public:
 						Flush();
 				}
 
-				if(GLogHook && GLogHook != this)
+				if(CallLogHook && GLogHook && GLogHook != this)
 					GLogHook->Serialize(Data, Event);
 			}
 		}else{

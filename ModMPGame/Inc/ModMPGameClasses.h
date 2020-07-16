@@ -27,8 +27,8 @@ public:
     BITFIELD EventLogTimestamp:1;
     BITFIELD bPrintCommands:1;
     TArrayNoInit<FString> CurrentCommands GCC_PACK(4);
-    class UFunctionOverride* PostLoginOverride;
-    class UFunctionOverride* LogoutOverride;
+    class UFunctionOverride* GameInfoPostLoginOverride;
+    class UFunctionOverride* GameInfoLogoutOverride;
     void execEventLog(FFrame& Stack, void* Result);
     void execSaveStats(FFrame& Stack, void* Result);
     void execRestoreStats(FFrame& Stack, void* Result);

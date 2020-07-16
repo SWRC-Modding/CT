@@ -24,6 +24,7 @@ public:
     class UObject* OverrideObject;
     class UFunction* TargetFunction;
     class UFunction* OverrideFunction;
+    class UObject* CurrentSelf;
     void execInit(FFrame& Stack, void* Result);
     void execDeinit(FFrame& Stack, void* Result);
     DECLARE_CLASS(UFunctionOverride,UObject,0,Mod)
@@ -47,6 +48,7 @@ public:
 
 #define AUTO_INITIALIZE_REGISTRANTS_MOD \
 	UFunctionOverride::StaticClass(); \
+	UModRenderDevice::StaticClass(); \
 
 #endif // __STATIC_LINK
 

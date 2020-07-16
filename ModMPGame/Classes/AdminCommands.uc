@@ -153,10 +153,10 @@ function bool ExecCmd(String Cmd, optional PlayerController PC){
 			PRI = C.PlayerReplicationInfo;
 
 			if(C.IsA('PlayerController') && !PRI.bAdmin && PRI.PlayerName ~= Cmd){
-				AdminControl.Promote(PlayerController(C));
+				PRI.bAdmin = true;
 
 				if(PC != None)
-					StringParam = PC.PlayerReplicationInfo.PlayerName;
+					StringParam = PRI.PlayerName;
 				else
 					StringParam = "the server";
 
@@ -175,10 +175,10 @@ function bool ExecCmd(String Cmd, optional PlayerController PC){
 			PRI = C.PlayerReplicationInfo;
 
 			if(PRI.bAdmin && PRI.PlayerName ~= Cmd){
-				AdminControl.Demote(PlayerController(C));
+				PRI.bAdmin = false;
 
 				if(PC != None)
-					StringParam = PC.PlayerReplicationInfo.PlayerName;
+					StringParam = PRI.PlayerName;
 				else
 					StringParam = "the server";
 

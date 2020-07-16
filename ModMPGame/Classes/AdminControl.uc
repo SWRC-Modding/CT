@@ -10,31 +10,21 @@ var() config bool   EventLogTimestamp;
 var bool          bPrintCommands;  // Commands are not executed but instead displayed (e.g. when the 'help' command is used)
 var array<string> CurrentCommands; // Only used as temporary storage when bPrintCommands == true
 
-var FunctionOverride PostLoginOverride;
-var FunctionOverride LogoutOverride;
+var FunctionOverride GameInfoPostLoginOverride;
+var FunctionOverride GameInfoLogoutOverride;
 
 native final function EventLog(coerce string Msg, name Event);
 native final function SaveStats(PlayerController PC);
 native final function RestoreStats(PlayerController PC);
 
-function Promote(PlayerController PC){
-	PC.PlayerReplicationInfo.bAdmin = true;
-	SaveStats(PC);
-}
-
-function Demote(PlayerController PC){
-	PC.PlayerReplicationInfo.bAdmin = false;
-	SaveStats(PC);
-}
-
-function GameInfoPostLoginOverride(PlayerController NewPlayer){
+function GameInfoPostLogin(PlayerController NewPlayer){
 	Level.Game.PostLogin(NewPlayer);
 
 	EventLog(NewPlayer.PlayerReplicationInfo.PlayerName $ " entered the game", 'Join');
 	RestoreStats(NewPlayer);
 }
 
-function GameInfoLogoutOverride(Controller Exiting){
+function GameInfoLogout(Controller Exiting){
 	local PlayerController PC;
 
 	PC = PlayerController(Exiting);
@@ -54,10 +44,10 @@ function PostBeginPlay(){
 	local Class<AdminService> ServiceClass;
 	local AdminService Service;
 
-	PostLoginOverride = new class'FunctionOverride';
-	PostLoginOverride.Init(Level.Game, 'PostLogin', self, 'GameInfoPostLoginOverride');
-	LogoutOverride = new class'FunctionOverride';
-	LogoutOverride.Init(Level.Game, 'Logout', self, 'GameInfoLogoutOverride');
+	GameInfoPostLoginOverride = new class'FunctionOverride';
+	GameInfoPostLoginOverride.Init(Level.Game, 'PostLogin', self, 'GameInfoPostLogin');
+	GameInfoLogoutOverride = new class'FunctionOverride';
+	GameInfoLogoutOverride.Init(Level.Game, 'Logout', self, 'GameInfoLogout');
 
 	SaveConfig();
 

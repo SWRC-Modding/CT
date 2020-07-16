@@ -21,6 +21,8 @@ var native const Object   OverrideObject;
 var native const Function TargetFunction;
 var native const Function OverrideFunction;
 
+var native const Object   CurrentSelf; // Only valid within the overridden function
+
 var private const noexport int OriginalNative;
 var private const noexport int OriginalFunctionFlags;
 

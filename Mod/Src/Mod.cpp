@@ -54,6 +54,10 @@ static void __fastcall ScriptFunctionHook(UObject* Self, int, FFrame& Stack, voi
 	Function->FunctionFlags = Override->OriginalFunctionFlags;
 	Function->Func = Override->OriginalNative;
 
+	checkSlow(!Override->CurrentSelf);
+
+	Override->CurrentSelf = Self;
+
 	if(Self == Override->TargetObject || !Override->TargetObject){
 		if(IsEvent){
 			Stack.Object = Override->OverrideObject;
@@ -71,6 +75,8 @@ static void __fastcall ScriptFunctionHook(UObject* Self, int, FFrame& Stack, voi
 		else
 			Self->CallFunction(Stack, Result, Function);
 	}
+
+	Override->CurrentSelf = NULL;
 
 	void* Temp = ScriptFunctionHook;
 	appMemcpy(&Function->Func, &Temp, sizeof(Temp));

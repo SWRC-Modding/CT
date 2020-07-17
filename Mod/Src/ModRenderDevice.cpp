@@ -79,6 +79,23 @@ struct FA8R8G8B8Pixel{
 	UINT8 A;
 };
 
+static int GetBytesPerPixel(ED3DFormat Format){
+	switch(Format){
+	case D3DFormat_A8R8G8B8:
+		return sizeof(FA8R8G8B8Pixel);
+	case D3DFormat_V8U8:
+		return sizeof(FV8U8Pixel);
+	case D3DFormat_L6V5U5:
+		return sizeof(FL6V5U5Pixel);
+	case D3DFormat_X8L8V8U8:
+		return sizeof(FX8L8V8U8Pixel);
+	}
+
+	appErrorf("Unknown texture format");
+
+	return 0;
+}
+
 /*
  * Integer range mapping
  */
@@ -123,7 +140,7 @@ static void ConvertV8U8ToA8R8G8B8(const void* In, void* Out, UINT Width, UINT He
 }
 
 /*
- * L6V5U5T format conversion
+ * L6V5U5 format conversion
  */
 
 static void ConvertL6V5U5ToX8L8V8U8(const void* In, void* Out, UINT Width, UINT Height){
@@ -209,7 +226,7 @@ static void ConvertX8L8V8U8ToA8R8G8B8(const void* In, void* Out, UINT Width, UIN
  * Not overridden but used to get information about the size of the different mip levels.
  */
 
-struct FD3DSurfaceDesc {
+struct FD3DSurfaceDesc{
 	ED3DFormat               Format;
 	enum ED3DResourceType    Type;
 	DWORD                    Usage;
@@ -246,7 +263,7 @@ static HRESULT __stdcall D3DTextureLockRectOverride(FD3DTexture* D3DTexture, UIN
 	CurrentMipLevelHeight = SurfaceDesc.Height;
 	CurrentMipLevelPixels = appMalloc(SurfaceDesc.Size);
 
-	pLockedRect->Pitch = CurrentMipLevelWidth * sizeof(FL6V5U5Pixel);
+	pLockedRect->Pitch = CurrentMipLevelWidth * GetBytesPerPixel(CurrentTextureSourceFormat);
 	pLockedRect->pBits = CurrentMipLevelPixels;
 
 	return S_OK;

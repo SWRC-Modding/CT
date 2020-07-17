@@ -1,6 +1,6 @@
 class FOVChanger extends Object;
 
-var() config float   CurrentFOV;
+var() config float   FOV;
 
 var CTPlayer         Player;
 
@@ -48,7 +48,7 @@ function SetViewFOV(){
 	if(Player == None)
 		return;
 
-	Player.DefaultFOV = CurrentFOV;
+	Player.DefaultFOV = FOV;
 	Player.DesiredFOV = Player.DefaultFOV;
 	Player.FOVAngle = Player.DefaultFOV;
 }
@@ -66,18 +66,18 @@ function SetWeaponFOV(){
 	   !Player.Pawn.Weapon.IsA('GunshipTurret') &&
 	   !Player.Pawn.Weapon.IsA('MissileTurret') &&
 	   !Player.Pawn.Weapon.IsA('HeavyTurret')){
-		Player.Pawn.Weapon.ZoomFOVs[0] = CurrentFOV;
+		Player.Pawn.Weapon.ZoomFOVs[0] = FOV;
 
 		// Changing the default zoom Fovs so that it will not zoom in as much with a higher Fov selected
-		Player.Pawn.Weapon.ZoomFOVs[1] = CurrentFOV - (Player.default.DefaultFOV - Player.Pawn.Weapon.default.ZoomFOVs[1]);
-		Player.Pawn.Weapon.ZoomFOVs[2] = CurrentFOV - (Player.default.DefaultFOV - Player.Pawn.Weapon.default.ZoomFOVs[2]);
-		Player.Pawn.Weapon.ZoomFOVs[3] = CurrentFOV - (Player.default.DefaultFOV - Player.Pawn.Weapon.default.ZoomFOVs[3]);
-		Player.Pawn.Weapon.SetWeapFOV(CurrentFOV);
+		Player.Pawn.Weapon.ZoomFOVs[1] = FOV - (Player.default.DefaultFOV - Player.Pawn.Weapon.default.ZoomFOVs[1]);
+		Player.Pawn.Weapon.ZoomFOVs[2] = FOV - (Player.default.DefaultFOV - Player.Pawn.Weapon.default.ZoomFOVs[2]);
+		Player.Pawn.Weapon.ZoomFOVs[3] = FOV - (Player.default.DefaultFOV - Player.Pawn.Weapon.default.ZoomFOVs[3]);
+		Player.Pawn.Weapon.SetWeapFOV(FOV);
 	}
 }
 
 function SetFOV(float NewFOV){
-	CurrentFOV = FClamp(NewFOV, 85.0, 130);
+	FOV = NewFOV;
 
 	SaveConfig();
 	SetViewFOV();
@@ -121,5 +121,5 @@ simulated function MenuBaseGotoMenuClass(String MenuClassName, optional String A
 
 defaultproperties
 {
-	CurrentFOV=85.0
+	FOV=85.0
 }

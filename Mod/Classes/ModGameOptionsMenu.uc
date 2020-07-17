@@ -118,9 +118,8 @@ simulated function float ScaleToSensitivity( int Scale )
 simulated function Refresh()
 {
 	local int i;
-	local int CurrentFOVIndex;
-	local float SmallestDiff;
-	local float Temp;
+	local float diff;
+	local float prevDiff;
 
 	i = SensitivityToScale( GetPlayerOwner().GetMouseSensitivity() );
 	Options[0].Current = i - 1;
@@ -130,27 +129,29 @@ simulated function Refresh()
 	else
 		Options[1].Current = 1;
 
-	SmallestDiff = 1000.0;
-	CurrentFOVIndex = 1000;
-
-	// The player might have set a custom FOV via the console that is not in the list, so we have to find the one that matches the closest
+	// Look for current FOV in list and get the index. If it is a custom one set via ini or console insert it into the options array.
+	// There will never be more than one custom FOV in the list at a time as this is only done to display the correct FOV
+	// even if it is not one of the default options.
 	for(i = 0; i < Options[9].Items.Length;  ++i){
-		Temp = Abs(float(Options[9].Items[i]) - class'FOVChanger'.default.CurrentFOV);
+		diff = float(Options[9].Items[i]) - class'FOVChanger'.default.FOV;
 
-		if(Temp < SmallestDiff){
-			SmallestDiff = Temp;
-			CurrentFOVIndex = i;
+		if(Abs(diff) <= 0.1) // Tolerance to deal with floating point precision
+			break;
+
+		if(diff > 0.0 && prevDiff <= 0.0){
+			Options[9].Items.Insert(i, 1);
+			Options[9].Items[i] = string(class'FOVChanger'.default.FOV);
+
+			break;
 		}
+
+		prevDiff = diff;
 	}
 
-	if(CurrentFOVIndex >= Options[9].Items.Length){
-		if(float(Options[9].Items[0]) <= class'FOVChanger'.default.CurrentFOV)
-			CurrentFOVIndex = 0;
-		else
-			CurrentFOVIndex = Options[9].Items.Length - 1;
-	}
+	if(i == Options[9].Items.Length)
+		Options[9].Items[Options[9].Items.Length] = string(class'FOVChanger'.default.FOV);
 
-	Options[9].Current = CurrentFOVIndex;
+	Options[9].Current = i;
 
 	if ( !bInMultiplayer )
 	{
@@ -308,7 +309,7 @@ simulated function ChangeOption( int i, int Delta )
 			break;
 
 		case 9:
-			GetPlayerOwner().ConsoleCommand("SETFOV " $ float(Options[9].Items[Options[9].Current]));
+			GetPlayerOwner().ConsoleCommand("SETFOV " $ Options[9].Items[Options[9].Current]);
 	}
 
 	GetPlayerOwner().PropagateSettings();

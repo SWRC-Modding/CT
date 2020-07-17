@@ -509,8 +509,6 @@ public:
 		if(!GIsEditor && ParseCommand(&Cmd, "SETFOV")){
 			float FOV = appAtof(Cmd);
 
-			FOV = Clamp(FOV, 85.0f, 130.0f);
-
 			Ar.Logf("Setting field of view to %f", FOV);
 			FOVChanger->ProcessEvent(FName("SetFOV"), &FOV);
 

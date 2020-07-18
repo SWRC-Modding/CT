@@ -3383,6 +3383,80 @@ public:
 };
 
 /*
+ * Triggers
+ */
+
+class ENGINE_API ATriggers : public AActor
+{
+public:
+    DECLARE_CLASS(ATriggers,AActor,0,Engine)
+    NO_DEFAULT_CONSTRUCTOR(ATriggers)
+};
+
+/*
+ * LineOfSightTrigger
+ */
+
+struct ALineOfSightTrigger_eventPlayerSeesMe_Parms{
+	class APlayerController* P;
+};
+
+class ENGINE_API ALineOfSightTrigger : public ATriggers{
+public:
+    FLOAT MaxViewDist;
+    FLOAT OldTickTime;
+    BITFIELD bEnabled:1;
+    BITFIELD bTriggered:1;
+    FName SeenActorTag;
+    class AActor* SeenActor;
+    INT MaxViewAngle;
+    FLOAT RequiredViewDir;
+    DECLARE_CLASS(ALineOfSightTrigger,ATriggers,0,Engine)
+
+	// Overrides
+	virtual void TickAuthoritative(FLOAT DeltaTime);
+
+	void PlayerSeesMe(class APlayerController* Player);
+};
+
+/*
+ * Trigger
+ */
+
+enum ETriggerType{
+	TT_PlayerProximity,
+	TT_PawnProximity,
+	TT_ClassProximity,
+	TT_AnyProximity,
+	TT_Shoot,
+	TT_HumanPlayerProximity,
+	TT_MAX
+};
+
+class ENGINE_API ATrigger : public ATriggers{
+public:
+	BYTE TriggerType;
+	FStringNoInit Message;
+	BITFIELD bTriggerOnceOnly:1;
+	BITFIELD bInitiallyActive:1;
+	BITFIELD bMustExceedCountSimultaneously:1;
+	INT TouchThreshold;
+	INT CurrentTouchCount;
+	class UClass* ClassProximityType;
+	FLOAT RepeatTriggerTime;
+	FLOAT ReTriggerDelay;
+	FLOAT TriggerTime;
+	FLOAT DamageThreshold;
+	FName ExitEvent;
+	FName EmptyEvent;
+	AActor* DirectTrigger;
+	BITFIELD bSavedInitialCollision:1;
+	BITFIELD bSavedInitialActive:1;
+	DECLARE_CLASS(ATrigger,ATriggers,0,Engine)
+	NO_DEFAULT_CONSTRUCTOR(ATrigger)
+};
+
+/*
  * NavigationPoint
  */
 

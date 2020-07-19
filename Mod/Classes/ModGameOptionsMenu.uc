@@ -7,7 +7,7 @@ var() MenuSprite		OptionsDescBorder;
 
 var() MenuText			OptionDesc;
 
-const NUM_OPTIONS = 10;
+const NUM_OPTIONS = 11;
 
 var() MenuText			OptionLabels[NUM_OPTIONS];
 var() MenuButtonEnum	Options[NUM_OPTIONS];
@@ -32,6 +32,8 @@ var() MenuButtonText	Done;
 
 var() bool				bInMultiplayer;
 
+var FOVChanger          FOVChanger;
+
 simulated function Init( string Args )
 {
 	Super.Init( Args );
@@ -43,6 +45,13 @@ simulated function Init( string Args )
 	}
 
 	bInMultiplayer = Level.NetMode != NM_StandAlone;
+
+	FOVChanger = FOVChanger(FindObject("Transient.MainFOVChanger", class'FOVChanger'));
+
+	if(FOVChanger != None)
+		FOVChanger.Player = CTPlayer(GetPlayerOwner());
+	else
+		Warn("FOVCHANGER OBJECT NOT FOUND!!!!!");
 
 	Refresh();
 }
@@ -152,6 +161,7 @@ simulated function Refresh()
 		Options[9].Items[Options[9].Items.Length] = string(class'FOVChanger'.default.FOV);
 
 	Options[9].Current = i;
+	Options[10].Current = FOVChanger.HudArmsFOVFactor * 10;
 
 	if ( !bInMultiplayer )
 	{
@@ -309,7 +319,13 @@ simulated function ChangeOption( int i, int Delta )
 			break;
 
 		case 9:
-			GetPlayerOwner().ConsoleCommand("SETFOV " $ Options[9].Items[Options[9].Current]);
+			FOVChanger.SetFov(float(Options[9].Items[Options[9].Current]));
+
+			break;
+
+		case 10:
+			FOVChanger.HudArmsFOVFactor = float(Options[10].Items[Options[10].Current]);
+			FOVChanger.SetFOV(FOVChanger.FOV);
 	}
 
 	GetPlayerOwner().PropagateSettings();
@@ -388,7 +404,8 @@ defaultproperties
      OptionLabels(6)=(Text="AUTO PULL MANEUVERS")
      OptionLabels(7)=(Text="TACTICAL VISOR MODE")
      OptionLabels(8)=(Text="TACTICAL MODE INTENSITY")
-     OptionLabels(9)=(Text="FOV")
+     OptionLabels(9)=(Text="FIELD OF VIEW")
+     OptionLabels(10)=(Text="WEAPON FOV FACTOR")
      Options(0)=(Items=("1","2","3","4","5","6","7","8","9","10"),Blurred=(PosX=0.77375,PosY=0.12,ScaleX=0.6,ScaleY=0.6),BackgroundBlurred=(PosX=0.77375,PosY=0.12,ScaleX=0.26,ScaleY=0.02666),OnLeft="OnLeft",OnRight="OnRight",Pass=2,Style="ButtonEnumStyle1")
      Options(1)=(Items=("YES","NO"),Blurred=(PosY=0.16),BackgroundBlurred=(PosY=0.16))
      Options(2)=(Items=("ON","OFF"))
@@ -399,6 +416,7 @@ defaultproperties
      Options(7)=(Items=("ON","OFF","CYCLE"))
      Options(8)=(Items=("0","1","2","3","4","5","6","7","8","9","10"))
      Options(9)=(Items=("85","90","95","100","105","110","115","120","125","130"))
+     Options(10)=(Items=("0","0.1","0.2","0.3","0.4","0.5","0.6","0.7","0.8","0.9","1.0"))
      OptionLeftArrows(0)=(Blurred=(WidgetTexture=Texture'GUIContent.Menu.CT_ArrowLeft',DrawColor=(B=255,G=255,R=255,A=255),DrawPivot=DP_MiddleMiddle,PosX=0.62625,PosY=0.12,ScaleX=0.5,ScaleY=0.5),Focused=(DrawColor=(B=255,G=255,R=255,A=255),ScaleX=0.65,ScaleY=0.65),bIgnoreController=1,OnSelect="OnLeft",Pass=2)
      OptionLeftArrows(1)=(Blurred=(PosX=0.62625,PosY=0.16))
      OptionLeftArrows(2)=(Blurred=(PosX=0.62625))
@@ -409,6 +427,7 @@ defaultproperties
      OptionLeftArrows(7)=(Blurred=(PosX=0.62625))
      OptionLeftArrows(8)=(Blurred=(PosX=0.62625))
      OptionLeftArrows(9)=(Blurred=(PosX=0.62625))
+     OptionLeftArrows(10)=(Blurred=(PosX=0.62625))
      OptionRightArrows(0)=(Blurred=(WidgetTexture=Texture'GUIContent.Menu.CT_ArrowRight',DrawColor=(B=255,G=255,R=255,A=255),DrawPivot=DP_MiddleMiddle,PosX=0.9225,PosY=0.12,ScaleX=0.5,ScaleY=0.5),Focused=(DrawColor=(B=255,G=255,R=255,A=255),ScaleX=0.65,ScaleY=0.65),bIgnoreController=1,OnSelect="OnRight",Pass=2)
      OptionRightArrows(1)=(Blurred=(PosX=0.9225,PosY=0.16))
      OptionRightArrows(2)=(Blurred=(PosX=0.9225))
@@ -419,12 +438,14 @@ defaultproperties
      OptionRightArrows(7)=(Blurred=(PosX=0.9225))
      OptionRightArrows(8)=(Blurred=(PosX=0.9225))
      OptionRightArrows(9)=(Blurred=(PosX=0.9225))
+     OptionRightArrows(10)=(Blurred=(PosX=0.9225))
      OptionDefaults(0)=5
      OptionDefaults(1)=1
      OptionDefaults(2)=1
      OptionDefaults(5)=1
      OptionDefaults(7)=2
      OptionDefaults(8)=2
+     OptionDefaults(10)=10
      GameLabel=(MenuFont=Font'OrbitFonts.OrbitBold15',Text="GAME",DrawColor=(A=255),DrawPivot=DP_MiddleLeft,PosX=0.05375,PosY=0.2,ScaleX=1,ScaleY=0.8,Pass=2)
      GameLabelBackground=(WidgetTexture=Texture'GUIContent.Menu.CT_ButtonFocus',DrawColor=(B=255,G=255,R=255,A=192),DrawPivot=DP_MiddleLeft,PosX=0.04375,PosY=0.2,ScaleX=0.245,ScaleY=0.04333,ScaleMode=MSCM_FitStretch,Pass=1)
      GameLabelConnector=(WidgetTexture=Texture'GUIContent.Menu.CT_ButtonFocus',DrawColor=(B=255,G=255,R=255,A=192),DrawPivot=DP_MiddleLeft,PosX=0.295,PosY=0.2,ScaleX=0.005,ScaleY=0.04333,ScaleMode=MSCM_FitStretch)

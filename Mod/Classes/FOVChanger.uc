@@ -1,11 +1,15 @@
 class FOVChanger extends Object;
 
 var() config float   FOV;
+var() config float   HudArmsFOVFactor;
+var() config bool    bLimitHudArmsFOV;
 
 var CTPlayer         Player;
 
 var FunctionOverride CTPlayerEndZoomOverride;
 var FunctionOverride CTPlayerResetFOVOverride;
+
+var FunctionOverride WeaponSetWeapFOVOverride;
 
 var FunctionOverride MenuBaseCallMenuClassOverride;
 var FunctionOverride MenuBaseOverlayMenuClassOverride;
@@ -17,6 +21,9 @@ function Init(){
 	CTPlayerEndZoomOverride.Init(class'CTPlayer', 'EndZoom', self, 'CTPlayerEndZoom');
 	CTPlayerResetFOVOverride = new class'FunctionOverride';
 	CTPlayerResetFOVOverride.Init(class'CTPlayer', 'ResetFOV', self, 'CTPlayerResetFOV');
+	// Weapon
+	WeaponSetWeapFOVOverride = new class'FunctionOverride';
+	WeaponSetWeapFOVOverride.Init(class'Weapon', 'SetWeapFOV', self, 'WeaponSetWeapFOV');
 	// MenuBase
 	MenuBaseCallMenuClassOverride = new class'FunctionOverride';
 	MenuBaseCallMenuClassOverride.Init(class'MenuBase', 'CallMenuClass', self, 'MenuBaseCallMenuClass');
@@ -31,7 +38,6 @@ function CTPlayerEndZoom(){
 
 	Player.EndZoom();
 	SetViewFOV();
-	SetWeaponFOV();
 }
 
 function CTPlayerResetFOV(){
@@ -40,40 +46,71 @@ function CTPlayerResetFOV(){
 	Player.DesiredFOV = Player.DefaultFOV;
 	Player.FOVAngle = Player.DefaultFOV;
 
-	SetWeaponFov();
+	if(Player.Pawn != None && Player.Pawn.Weapon != None)
+		Player.Pawn.Weapon.SetWeapFOV(Player.FOVAngle);
+
 	Player.NoHUDArms(false);
 }
 
-function SetViewFOV(){
-	if(Player == None)
-		return;
+function WeaponSetWeapFOV(float NewFOV){
+	local Weapon Weapon;
+	local float HudArmsFOV;
 
-	Player.DefaultFOV = FOV;
-	Player.DesiredFOV = Player.DefaultFOV;
-	Player.FOVAngle = Player.DefaultFOV;
+	Weapon = Weapon(WeaponSetWeapFOVOverride.CurrentSelf);
+	HudArmsFOV = class'CTPlayer'.default.FOVAngle + HUDArmsFOVFactor * (NewFOV - class'CTPlayer'.default.FOVAngle);
+
+	UpdateWeaponZoomFOVs(Weapon);
+
+	if(bLimitHudArmsFOV && !Weapon.bWeaponZoom){
+		if(Weapon.IsA('Boy'))
+			HudArmsFOV = FMin(HudArmsFOV, 90);
+		else if(Weapon.IsA('HeavyTurret'))
+			HudArmsFOV = FMin(HudArmsFOV, 93);
+		else if(Weapon.IsA('WookieeTurret'))
+			HudArmsFOV = FMin(HudArmsFOV, 95);
+		else if(Weapon.IsA('EWebTurret') || Weapon.IsA('MissileTurret'))
+			HudArmsFOV = FMin(HudArmsFOV, 100);
+		else if(Weapon.IsA('ATTEWalkerTurret'))
+			HudArmsFOV = FMin(HudArmsFOV, 105);
+		else if(Weapon.IsA('GunshipTurret'))
+			HudArmsFOV = FMin(HudArmsFOV, 107);
+		else if(Weapon.IsA('GeoTurret'))
+			HudArmsFOV = FMin(HudArmsFOV, 110);
+	}
+
+	Weapon.DisplayFOV = HudArmsFOV;
 }
 
-function SetWeaponFOV(){
+//====================================================================================================
+
+function UpdateWeaponZoomFOVs(Weapon Weapon){
+	Weapon.ZoomFOVs[0] = FOV;
+
+	// Changing the default zoom Fovs so that it will not zoom in as much with a higher Fov selected
+	Weapon.ZoomFOVs[1] = FOV - (Player.default.DefaultFOV - Weapon.default.ZoomFOVs[1]);
+	Weapon.ZoomFOVs[2] = FOV - (Player.default.DefaultFOV - Weapon.default.ZoomFOVs[2]);
+	Weapon.ZoomFOVs[3] = FOV - (Player.default.DefaultFOV - Weapon.default.ZoomFOVs[3]);
+}
+
+function SetViewFOV(){
+	local Weapon Weapon;
+	local float CurrentFOV;
+
 	if(Player == None)
 		return;
 
-	if(Player.Pawn != None && Player.Pawn.Weapon != None &&
-	   !Player.Pawn.Weapon.IsA('Boy') &&
-	   !Player.Pawn.Weapon.IsA('ATTEWalkerTurret') &&
-	   !Player.Pawn.Weapon.IsA('EWebTurret') &&
-	   !Player.Pawn.Weapon.IsA('GeoTurret') &&
-	   !Player.Pawn.Weapon.IsA('WookieeTurret') &&
-	   !Player.Pawn.Weapon.IsA('GunshipTurret') &&
-	   !Player.Pawn.Weapon.IsA('MissileTurret') &&
-	   !Player.Pawn.Weapon.IsA('HeavyTurret')){
-		Player.Pawn.Weapon.ZoomFOVs[0] = FOV;
-
-		// Changing the default zoom Fovs so that it will not zoom in as much with a higher Fov selected
-		Player.Pawn.Weapon.ZoomFOVs[1] = FOV - (Player.default.DefaultFOV - Player.Pawn.Weapon.default.ZoomFOVs[1]);
-		Player.Pawn.Weapon.ZoomFOVs[2] = FOV - (Player.default.DefaultFOV - Player.Pawn.Weapon.default.ZoomFOVs[2]);
-		Player.Pawn.Weapon.ZoomFOVs[3] = FOV - (Player.default.DefaultFOV - Player.Pawn.Weapon.default.ZoomFOVs[3]);
-		Player.Pawn.Weapon.SetWeapFOV(FOV);
+	if(Player.Pawn != None && Player.Pawn.Weapon != None){
+		Weapon = Player.Pawn.Weapon;
+		UpdateWeaponZoomFOVs(Weapon);
+		CurrentFOV = Weapon.ZoomFOVs[Weapon.CurrentZoomFOVIndex];
+		Weapon.SetWeapFOV(CurrentFOV);
+	}else{
+		CurrentFOV = FOV;
 	}
+
+	Player.DefaultFOV = FOV;
+	Player.DesiredFOV = CurrentFOV;
+	Player.FOVAngle = CurrentFOV;
 }
 
 function SetFOV(float NewFOV){
@@ -81,7 +118,6 @@ function SetFOV(float NewFOV){
 
 	SaveConfig();
 	SetViewFOV();
-	SetWeaponFOV();
 }
 
 // Menu stuff
@@ -122,4 +158,6 @@ simulated function MenuBaseGotoMenuClass(String MenuClassName, optional String A
 defaultproperties
 {
 	FOV=85.0
+	HUDArmsFOVFactor=1.0
+	bLimitHudArmsFOV=true
 }

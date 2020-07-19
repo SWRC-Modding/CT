@@ -329,32 +329,22 @@ static HRESULT __stdcall D3DDeviceCreateTextureOverride(FD3DDevice* D3DDevice,
 														ED3DFormat Format,
 														enum ED3DPool Pool,
 														FD3DTexture** ppTexture){
+	// X8L8V8U8 is used as the first fallback format because no information is lost in the conversion
+	ED3DFormat FallbackFormat = Format == D3DFormat_L6V5U5 ? D3DFormat_X8L8V8U8 : Format;
 	HRESULT Result = D3DDeviceCreateTexture(D3DDevice,
 											Width,
 											Height,
 											Levels,
 											Usage,
-											Format,
+											FallbackFormat,
 											Pool,
 											ppTexture);
 
-	if(SUCCEEDED(Result))
+	if(SUCCEEDED(Result)  && FallbackFormat == Format)
 		return Result; // No fallback format was needed so just return
 
-	if(!IsBumpmapFormat(Format))
+	if(FAILED(Result) && !IsBumpmapFormat(Format))
 		appErrorf("CreateTexture failed (Format: %i)", Format); // Should never happen but this is a better error than the engine produces
-
-	// X8L8V8U8 is used as the first fallback format because no information is lost in the conversion
-	ED3DFormat FallbackFormat = D3DFormat_X8L8V8U8;
-
-	Result = D3DDeviceCreateTexture(D3DDevice,
-									Width,
-									Height,
-									Levels,
-									Usage,
-									FallbackFormat,
-									Pool,
-									ppTexture);
 
 	if(FAILED(Result)){ // If X8L8V8U8 is not supported V8U8 might still be so try that. Visually the same except for missing luminance
 		FallbackFormat = D3DFormat_V8U8;

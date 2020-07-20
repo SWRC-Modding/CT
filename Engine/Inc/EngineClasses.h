@@ -3389,8 +3389,8 @@ public:
 class ENGINE_API ATriggers : public AActor
 {
 public:
-    DECLARE_CLASS(ATriggers,AActor,0,Engine)
-    NO_DEFAULT_CONSTRUCTOR(ATriggers)
+	DECLARE_CLASS(ATriggers,AActor,0,Engine)
+	NO_DEFAULT_CONSTRUCTOR(ATriggers)
 };
 
 /*
@@ -3403,15 +3403,15 @@ struct ALineOfSightTrigger_eventPlayerSeesMe_Parms{
 
 class ENGINE_API ALineOfSightTrigger : public ATriggers{
 public:
-    FLOAT MaxViewDist;
-    FLOAT OldTickTime;
-    BITFIELD bEnabled:1;
-    BITFIELD bTriggered:1;
-    FName SeenActorTag;
-    class AActor* SeenActor;
-    INT MaxViewAngle;
-    FLOAT RequiredViewDir;
-    DECLARE_CLASS(ALineOfSightTrigger,ATriggers,0,Engine)
+	FLOAT MaxViewDist;
+	FLOAT OldTickTime;
+	BITFIELD bEnabled:1;
+	BITFIELD bTriggered:1;
+	FName SeenActorTag;
+	class AActor* SeenActor;
+	INT MaxViewAngle;
+	FLOAT RequiredViewDir;
+	DECLARE_CLASS(ALineOfSightTrigger,ATriggers,0,Engine)
 
 	// Overrides
 	virtual void TickAuthoritative(FLOAT DeltaTime);
@@ -3430,6 +3430,8 @@ enum ETriggerType{
 	TT_AnyProximity,
 	TT_Shoot,
 	TT_HumanPlayerProximity,
+	TT_Use,
+	TT_SquadMemberProximity,
 	TT_MAX
 };
 

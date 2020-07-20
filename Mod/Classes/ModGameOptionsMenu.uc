@@ -416,7 +416,7 @@ defaultproperties
      Options(7)=(Items=("ON","OFF","CYCLE"))
      Options(8)=(Items=("0","1","2","3","4","5","6","7","8","9","10"))
      Options(9)=(Items=("85","90","95","100","105","110","115","120","125","130"))
-     Options(10)=(Items=("0","0.1","0.2","0.3","0.4","0.5","0.6","0.7","0.8","0.9","1.0"))
+     Options(10)=(Items=("0.0","0.1","0.2","0.3","0.4","0.5","0.6","0.7","0.8","0.9","1.0"))
      OptionLeftArrows(0)=(Blurred=(WidgetTexture=Texture'GUIContent.Menu.CT_ArrowLeft',DrawColor=(B=255,G=255,R=255,A=255),DrawPivot=DP_MiddleMiddle,PosX=0.62625,PosY=0.12,ScaleX=0.5,ScaleY=0.5),Focused=(DrawColor=(B=255,G=255,R=255,A=255),ScaleX=0.65,ScaleY=0.65),bIgnoreController=1,OnSelect="OnLeft",Pass=2)
      OptionLeftArrows(1)=(Blurred=(PosX=0.62625,PosY=0.16))
      OptionLeftArrows(2)=(Blurred=(PosX=0.62625))

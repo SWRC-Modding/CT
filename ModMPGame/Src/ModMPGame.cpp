@@ -144,7 +144,8 @@ void AAdminControl::execSaveStats(FFrame& Stack, void* Result){
 
 	FString PlayerID;
 
-	if(PC->Player){ // IsA(UNetConnection::StaticClass()) returns false for TcpipConnection - WTF???
+	if(PC->Player){
+		// IsA(UNetConnection::StaticClass()) returns false for TcpipConnection - WTF???
 		if(PC->Player->IsA(UViewport::StaticClass()))
 			return;
 
@@ -418,7 +419,7 @@ void ABotSupport::ExportPaths(){
 
 	TArray<FNavPtInfo> NavPts;
 
-	for(TActorIterator<ANavigationPoint> It(XLevel, IT_StaticActors); It; ++It){
+	for(TActorIterator<ANavigationPoint> It(XLevel); It; ++It){
 		if(It->IsA(APlayerStart::StaticClass()) || It->IsA(AInventorySpot::StaticClass()))
 			continue;
 
@@ -499,17 +500,18 @@ void ABotSupport::Spawned(){
 	if(!GIsEditor){
 		DrawType = DT_None;  // Don't draw the Actor sprite during gameplay
 
+		// Spawning inventory spots for each pickup in the level
 		for(TActorIterator<APickup> It(XLevel, IT_DynamicActors); It; ++It){
 			SpawnNavigationPoint(AInventorySpot::StaticClass(),
 								 It->Location + FVector(0, 0, AScout::StaticClass()->GetDefaultActor()->CollisionHeight));
 		}
-	}
 
-	if(bAutoImportPaths){
-		ImportPaths();
+		if(bAutoImportPaths){
+			ImportPaths();
 
-		if(bPathsImported && !bAutoBuildPaths) // Paths imported at startup are always built
-			BuildPaths();
+			if(bPathsImported && !bAutoBuildPaths) // Paths imported at startup are always built
+				BuildPaths();
+		}
 	}
 
 	unguard;
@@ -662,14 +664,6 @@ bool ABotSupport::ExecCmd(const char* Cmd, class APlayerController* PC){
 		ClearPaths();
 
 		return true;
-	}else if(CheckCommand(&Cmd, "ENABLEAUTOBUILDPATHS")){
-		bAutoBuildPaths = 1;
-
-		return true;
-	}else if(CheckCommand(&Cmd, "DISABLEAUTOBUILDPATHS")){
-		bAutoBuildPaths = 0;
-
-		return true;
 	}else if(PC){
 		UClass* PutNavPtClass = NULL;
 
@@ -781,3 +775,54 @@ void AMPBot::execUpdatePawnAccuracy(FFrame& Stack, void* Result){
 	if(Pawn)
 		Pawn->Accuracy = Accuracy;
 }
+
+/*
+ * UExportPathsCommandlet
+ */
+class UExportPathsCommandlet : public UCommandlet{
+	DECLARE_CLASS(UExportPathsCommandlet, UCommandlet, 0, ModMPGame);
+
+	void StaticConstructor(){
+		LogToStdout = 1;
+		IsServer = 1;
+		IsClient = 1;
+		IsEditor = 1;
+		LazyLoad = 1;
+		ShowErrorCount = 0;
+		ShowBanner = 0;
+	}
+
+	virtual INT Main(const TCHAR* Parms){
+		FString MapName;
+
+		if(Parse(Parms, "map=", MapName)){
+			UPackage* Package = UObject::LoadPackage(NULL, *MapName, LOAD_NoFail);
+			ULevel* Level = NULL;
+
+			for(TObjectIterator<ULevel> It; It; ++It){
+				if(It->IsIn(Package)){
+					Level = *It;
+
+					break;
+				}
+			}
+
+			if(Level){
+				ABotSupport* BotSupport = Cast<ABotSupport>(Level->SpawnActor(ABotSupport::StaticClass()));
+
+				if(BotSupport)
+					BotSupport->ExportPaths();
+				else
+					GWarn->Log(NAME_Error, "Unable to export paths");
+			}else{
+				GWarn->Logf(NAME_Error, "Package '%s' is not a map", *MapName);
+			}
+		}else{
+			GWarn->Log(NAME_Error, "Map to export paths from must be specified with 'map=<MapName>'");
+		}
+
+		return 0;
+	}
+};
+
+IMPLEMENT_CLASS(UExportPathsCommandlet);

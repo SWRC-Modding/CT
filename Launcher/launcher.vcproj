@@ -31,10 +31,11 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="$(OutDir)\$(ProjectName).exe"
+				OutputFile="$(OutDir)\CT.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
 				GenerateDebugInformation="TRUE"
+				ProgramDatabaseFile="$(OutDir)/$(TargetName).pdb"
 				SubSystem="2"
 				TargetMachine="1"/>
 			<Tool
@@ -79,10 +80,11 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="$(OutDir)\$(ProjectName).exe"
+				OutputFile="$(OutDir)\CT.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
 				GenerateDebugInformation="TRUE"
+				ProgramDatabaseFile="$(OutDir)/$(TargetName).pdb"
 				SubSystem="2"
 				TargetMachine="1"/>
 			<Tool

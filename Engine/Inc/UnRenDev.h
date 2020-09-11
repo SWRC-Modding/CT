@@ -12,6 +12,20 @@
 #define _UNRENDEV_H_
 
 /*------------------------------------------------------------------------------------
+	FRenderInterface.
+------------------------------------------------------------------------------------*/
+
+enum EHardwareEmulationMode{
+	HEM_None     = 0,
+	HEM_GeForce1 = 1,
+	HEM_XBox     = 2
+};
+
+class ENGINE_API FRenderInterface{
+	// TODO: Add virtual functions
+};
+
+/*------------------------------------------------------------------------------------
 	URenderDevice.
 ------------------------------------------------------------------------------------*/
 
@@ -42,6 +56,19 @@ enum EDescriptionFlags
 };
 
 //
+// FRenderCaps - render device capabilities exposed to the engine
+//
+struct FRenderCaps{
+	INT   MaxSimultaneousTerrainLayers;
+	INT   PixelShaderVersion;
+	UBOOL HardwareTL;
+
+	FRenderCaps() : MaxSimultaneousTerrainLayers(1),
+	                PixelShaderVersion(0),
+	                HardwareTL(0){}
+};
+
+//
 // A low-level 3D rendering device.
 //
 class ENGINE_API URenderDevice : public USubsystem{
@@ -68,34 +95,36 @@ class ENGINE_API URenderDevice : public USubsystem{
 	BITFIELD Pad1[8];
 	DWORD    Pad0[8];
 
-	//Virtual Functions
+	// Constructors.
+	void StaticConstructor();
 
-	virtual int Init() = 0;
-	virtual int SetRes(class UViewport*, int, int, int, int, int) = 0;
-	virtual void Exit(class UViewport*) = 0;
-	virtual void Flush(class UViewport*) = 0;
-	virtual void FlushResource(unsigned __int64) = 0;
-	virtual int ResourceCached(unsigned __int64){}
-	virtual struct FMemCount ResourceMem(class FRenderResource*, class UObject*){}
+	// URenderDevice low-level functions that drivers must implement.
+	virtual UBOOL Init() = 0;
+	virtual UBOOL SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL Fullscreen, INT ColorBytes = 0, UBOOL bSaveSize = true) = 0;
+	virtual void Exit(UViewport* Viewport) = 0;
+	virtual void Flush(UViewport* Viewport) = 0;
+	virtual void FlushResource(QWORD CacheId) = 0;
+	virtual UBOOL ResourceCached(QWORD CacheId){}
+	virtual struct FMemCount ResourceMem(FRenderResource*, UObject*){}
 	virtual struct FMemCount ResourceMemTotal(){}
-	virtual void UpdateGamma(class UViewport*) = 0;
+	virtual void UpdateGamma(UViewport* Viewport) = 0;
 	virtual void RestoreGamma() = 0;
-	virtual int VSyncEnabled() = 0;
-	virtual void EnableVSync(bool) = 0;
-	virtual class FRenderInterface* Lock(class UViewport*, unsigned char*, int*) = 0;
-	virtual void Unlock(class FRenderInterface*) = 0;
-	virtual void Present(class UViewport*) = 0;
-	virtual void ReadPixels(class UViewport*, class FColor*) = 0;
-	virtual void SetEmulationMode(enum EHardwareEmulationMode) = 0;
-	virtual struct FRenderCaps* GetRenderCaps() = 0;
-	virtual void RenderMovie(class UViewport *){}
+	virtual UBOOL VSyncEnabled() = 0;
+	virtual void EnableVSync(bool bEnable) = 0;
+	virtual FRenderInterface* Lock(UViewport* Viewport, BYTE* HitData, INT* HitSize) = 0;
+	virtual void Unlock(FRenderInterface* RI) = 0;
+	virtual void Present(UViewport* Viewport) = 0;
+	virtual void ReadPixels(UViewport* Viewport, FColor* Pixels) = 0;
+	virtual void SetEmulationMode(EHardwareEmulationMode Mode) = 0;
+	virtual FRenderCaps* GetRenderCaps() = 0;
+	virtual void RenderMovie(UViewport* Viewport){}
 	virtual class FMovie* GetNewMovie(enum ECodecType, class FString, int, int, int){}
 	virtual int GetStateCaching(){}
 	virtual int SetStateCaching(int){}
 	virtual int RefreshStates(){}
-	virtual int DoesSupportFSAA(int){}
+	virtual UBOOL DoesSupportFSAA(int){}
 	virtual void TakeScreenshot(const char*, class UViewport*, int, int){}
-	virtual int SupportsTextureFormat(enum ETextureFormat) = 0;
+	virtual UBOOL SupportsTextureFormat(ETextureFormat) = 0;
 };
 
 #endif

@@ -1,4 +1,6 @@
-#include "../../Core/Inc/Core.h"
+#pragma once
+
+#include "../../D3DDrv/Inc/D3DDrv.h"
 
 #ifndef MOD_API
 #define MOD_API DLL_IMPORT
@@ -14,3 +16,16 @@ LINK_LIB(Mod)
  * Returns the function pointer that was at Index previously. NULL if there was an error.
  */
 MOD_API void* PatchVTable(void** VTable, INT Index, void* NewFunc);
+
+/*
+ * ModRenderDevice.
+ * - Fixes bumpmapping crashes by converting the bumpmaps to a compatible format
+ */
+class MOD_API UModRenderDevice : public UD3DRenderDevice{
+	DECLARE_CLASS(UModRenderDevice, UD3DRenderDevice, 0, Mod)
+public:
+	static UObject* FOVChanger;
+
+	virtual UBOOL Init();
+	virtual UBOOL Exec(const TCHAR* Cmd, FOutputDevice& Ar);
+};

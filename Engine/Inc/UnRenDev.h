@@ -44,33 +44,29 @@ enum EDescriptionFlags
 //
 // A low-level 3D rendering device.
 //
-class ENGINE_API URenderDevice : public USubsystem
-{
+class ENGINE_API URenderDevice : public USubsystem{
 	DECLARE_ABSTRACT_CLASS(URenderDevice,USubsystem,CLASS_Config,Engine)
 
-	char Padding[132];
-
-	/*// Variables.
-	BYTE			DecompFormat;
-	INT				RecommendedLOD;
-	UViewport*		Viewport;
-	FString			Description;
-	DWORD			DescFlags;
-	BITFIELD		SpanBased;
-	BITFIELD		FullscreenOnly;
-	BITFIELD		SupportsFogMaps;
-	BITFIELD		SupportsDistanceFog;
-	BITFIELD		VolumetricLighting;
-	BITFIELD		ShinySurfaces;
-	BITFIELD		Coronas;
-	BITFIELD		HighDetailActors;
-	BITFIELD		SupportsTC;
-	BITFIELD		PrecacheOnFlip;
-	BITFIELD		SupportsLazyTextures;
-	BITFIELD		PrefersDeferredLoad;
-	BITFIELD		DetailTextures;
-	BITFIELD		Pad1[8];
-	DWORD			Pad0[8];*/
+	// Variables.
+	BYTE     DecompFormat;
+	INT      RecommendedLOD;
+	INT      TerrainLOD;
+	BITFIELD HighDetailActors;
+	BITFIELD SuperHighDetailActors;
+	BITFIELD DetailTextures;
+	BITFIELD PrecacheOnFlip;
+	BITFIELD SupportsCubemaps;
+	BITFIELD SupportsZBIAS;
+	BITFIELD UseCompressedLightmaps;
+	BITFIELD UseStencil;
+	BITFIELD Use16bit;
+	BITFIELD Use16bitTextures;
+	BITFIELD IsVoodoo3;
+	BITFIELD Is3dfx;
+	BITFIELD LowQualityTerrain;
+	BITFIELD SkyboxHack;
+	BITFIELD Pad1[8];
+	DWORD    Pad0[8];
 
 	//Virtual Functions
 

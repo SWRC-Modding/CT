@@ -68,6 +68,36 @@ struct FRenderCaps{
 	                HardwareTL(0){}
 };
 
+// Codec for movies. Just a placeholder since we don't know the actual enum values!
+enum ECodecType{};
+
+//
+// A movie that is rendered to a texture or the background.
+//
+class ENGINE_API FMovie{
+public:
+	UBOOL Playing;
+	int   Padding;
+
+	FMovie(FString Filename, int);
+
+	// Virtual functions
+	virtual ~FMovie(){}
+	virtual int Play(int) = 0;
+	virtual void Pause(int) = 0;
+	virtual UBOOL IsPaused() = 0;
+	virtual void StopNow() = 0;
+	virtual void StopAtEnd() = 0;
+	virtual UBOOL IsPlaying(){ return Playing; }
+	virtual INT GetWidth() = 0;
+	virtual INT GetHeight() = 0;
+	virtual void PreRender(void*, int, int) = 0;
+	virtual void RenderToRGBAArray(BYTE* Buffer) = 0;
+	virtual void RenderToNative(void*, int, int){}
+	virtual void RenderToTexture(UTexture* Texture); // Calls RenderToRGBAArray by default
+	virtual void Serialize(FArchive& Ar){}
+};
+
 //
 // A low-level 3D rendering device.
 //
@@ -118,7 +148,7 @@ class ENGINE_API URenderDevice : public USubsystem{
 	virtual void SetEmulationMode(EHardwareEmulationMode Mode) = 0;
 	virtual FRenderCaps* GetRenderCaps() = 0;
 	virtual void RenderMovie(UViewport* Viewport){}
-	virtual class FMovie* GetNewMovie(enum ECodecType, class FString, int, int, int){}
+	virtual FMovie* GetNewMovie(ECodecType Codec, FString Filename, int, int, int){}
 	virtual int GetStateCaching(){}
 	virtual int SetStateCaching(int){}
 	virtual int RefreshStates(){}

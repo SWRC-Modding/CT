@@ -1,72 +1,47 @@
 PushState
 PopState
 SetRenderTarget
-SetCubeRenderTarget
+void SetCubeRenderTarget(FDynamicCubemap*, int, int)
 SetViewport
 Clear
-LockRect
+PushHit
 PopHit
-vtpad1
+SetCullMode
 SetAmbientLight
 EnableLighting
 SetLight
-vtpad2
-vtpad3
+void SetShaderLight(int, FDynamicLight*, float)
+SetNPatchTesselation
 SetDistanceFog
-vtpad4
-vtpad5
+int EnableFog(int)
+int IsFogEnabled()
 SetGlobalColor
-vtpad6
-vtpad7
+void SetTransform(ETransformType, const FMatrix&)
+FMatrix GetTransform(ETransformType) const
 SetMaterial
-vtpad8
-vtpad9
-IsShadowInterface
-vtpad10
-CopyBackBufferToTarget
-vtpad11
-vtpad12
+int SetHardwareShaderMaterial(UHardwareShader*, FString*, UMaterial**)
+int ShowAlpha(UMaterial*)
+int IsShadowInterface()
+void SetAntiAliasing(int)
+void CopyBackBufferToTarget(FAuxRenderTarget*)
+void SetLODDiffuseFade(float)
+void SetLODSpecularFade(float)
 SetStencilOp
-vtpad13
-vtpad14
-vtpad15
-vtpad16
+- vtpad1 // Possibly stencil op related (modifies same memory)
+- vtpad2 // Possibly stencil op related (modifies same memory)
+SetPrecacheMode
+void SetZBias(int)
 SetVertexStreams
 SetDynamicStream
 SetIndexBuffer
 SetDynamicIndexBuffer
 DrawPrimitive
-PixoSetHint
-PixoResetHint
-PixoCreateTexture
-PixoIsVisible
-vtpad17
-vtpad18
-vtpad19
-vtpad20
-vtpad21
-vtpad22
-vtpad23
-vtpad24
-
-// Known signatures
-
-void CopyBackBufferToTarget(FAuxRenderTarget*)
-int EnableFog(int)
-FMatrix GetTransform(ETransformType) const
-int IsFogEnabled()
-int IsShadowInterface()
-bool IsVertexBufferBusy(FVertexStream*)
-UTexture* PixoCreateTexture(FRenderTarget*, int)
-int PixoIsVisible(FBox&)
 void PixoSetHint(unsigned long)
 void PixoResetHint(unsigned long)
-void SetAntiAliasing(int)
-void SetCubeRenderTarget(FDynamicCubemap*, int, int)
+UTexture* PixoCreateTexture(FRenderTarget*, int)
+int PixoIsVisible(FBox&)
+bool IsVertexBufferBusy(FVertexStream*)
 void SetFillMode(EFillMode)
-int SetHardwareShaderMaterial(UHardwareShader*, FString*, UMaterial**)
-void SetLODDiffuseFade(float)
-void SetLODSpecularFade(float)
-void SetShaderLight(int, FDynamicLight*, float)
-void SetTransform(ETransformType, const FMatrix&)
-int ShowAlpha(UMaterial*)
+- vtpad3 // int(void){ return 1; }
+- vtpad4 // int(void){ return 1; }
+- vtpad5 // int(void){ return 1; }

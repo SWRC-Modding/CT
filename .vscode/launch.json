@@ -9,7 +9,7 @@
 			"name": "debug",
 			"type": "cppvsdbg",
 			"request": "launch",
-			"program": "${workspaceFolder}/../GameData/System/Launcher.exe",
+			"program": "${workspaceFolder}/../GameData/System/CT.exe",
 			"args": [
 				"dm_canyon?game=MPGame.DMGame?goalscore=5?respawndelay=0?Listen",
 				"-windowed",

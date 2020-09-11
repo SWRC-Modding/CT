@@ -1,4 +1,3 @@
-#include "../../D3DDrv/Inc/D3DDrv.h"
 #include "../Inc/Mod.h"
 #include <Windows.h>
 
@@ -439,75 +438,69 @@ HRESULT __stdcall D3D8CreateDeviceOverride(FD3D8* D3D8,
  * ModRenderDevice
  */
 
-class MOD_API UModRenderDevice : public UD3DRenderDevice{
-	DECLARE_CLASS(UModRenderDevice, UD3DRenderDevice, 0, Mod)
-public:
-	static UObject* FOVChanger;
+UBOOL UModRenderDevice::Init(){
+	UBOOL Result = Super::Init();
 
-	virtual UBOOL Init(){
-		UBOOL Result = Super::Init();
-
-		if(Result){
-			D3D8CreateDevice = static_cast<D3D8CreateDeviceFunc>(PatchVTable(*reinterpret_cast<void***>(Direct3D8),
-																			 D3DVTableIndex_D3D8CreateDevice,
-																			 D3D8CreateDeviceOverride));
-		}
-
-		if(!GIsEditor){
-			// Get a list of all supported resolutions and apply them to the config
-
-			DEVMODE dm = {0};
-
-			dm.dmSize = sizeof(dm);
-
-			TArray<DWORD> AvailableResolutions;
-
-			for(int i = 0; EnumDisplaySettings(NULL, i, &dm) != 0; ++i)
-				AvailableResolutions.AddUniqueItem(MAKELONG(dm.dmPelsWidth, dm.dmPelsHeight));
-
-			if(AvailableResolutions.Num() > 0){
-				Sort(AvailableResolutions.GetData(), AvailableResolutions.Num());
-
-				FString ResolutionList = "(";
-
-				for(int i = 0; i < AvailableResolutions.Num() - 1; ++i)
-					ResolutionList += FString::Printf("\"%ix%i\",", LOWORD(AvailableResolutions[i]), HIWORD(AvailableResolutions[i]));
-
-				ResolutionList += FString::Printf("\"%ix%i\")", LOWORD(AvailableResolutions.Last()), HIWORD(AvailableResolutions.Last()));
-
-				GConfig->SetString("CTGraphicsOptionsPCMenu",
-								   "Options[2].Items",
-								   *ResolutionList,
-								   *(FString("XInterfaceCTMenus.") + UObject::GetLanguage()));
-			}
-
-			// Create FOVChanger object. This might not be the best place but idk where else to put it...
-			if(!FOVChanger){
-				FOVChanger = ConstructObject<UObject>(LoadClass<UObject>(NULL, "Mod.FOVChanger", NULL, LOAD_NoFail | LOAD_Throw, NULL),
-													  reinterpret_cast<UObject*>(-1),
-													  FName("MainFOVChanger"));
-				checkSlow(FOVChanger);
-				FOVChanger->AddToRoot(); // This object should never be garbage collected
-				FOVChanger->ProcessEvent(NAME_Init, NULL);
-			}
-		}
-
-		return Result;
+	if(Result){
+		D3D8CreateDevice = static_cast<D3D8CreateDeviceFunc>(PatchVTable(*reinterpret_cast<void***>(Direct3D8),
+																		 D3DVTableIndex_D3D8CreateDevice,
+																		 D3D8CreateDeviceOverride));
 	}
 
-	virtual UBOOL Exec(const TCHAR* Cmd, FOutputDevice& Ar){
-		if(!GIsEditor && ParseCommand(&Cmd, "SETFOV")){
-			float FOV = appAtof(Cmd);
+	if(!GIsEditor){
+		// Get a list of all supported resolutions and apply them to the config
 
-			Ar.Logf("Setting field of view to %f", FOV);
-			FOVChanger->ProcessEvent(FName("SetFOV"), &FOV);
+		DEVMODE dm = {0};
 
-			return 1;
+		dm.dmSize = sizeof(dm);
+
+		TArray<DWORD> AvailableResolutions;
+
+		for(int i = 0; EnumDisplaySettings(NULL, i, &dm) != 0; ++i)
+			AvailableResolutions.AddUniqueItem(MAKELONG(dm.dmPelsWidth, dm.dmPelsHeight));
+
+		if(AvailableResolutions.Num() > 0){
+			Sort(AvailableResolutions.GetData(), AvailableResolutions.Num());
+
+			FString ResolutionList = "(";
+
+			for(int i = 0; i < AvailableResolutions.Num() - 1; ++i)
+				ResolutionList += FString::Printf("\"%ix%i\",", LOWORD(AvailableResolutions[i]), HIWORD(AvailableResolutions[i]));
+
+			ResolutionList += FString::Printf("\"%ix%i\")", LOWORD(AvailableResolutions.Last()), HIWORD(AvailableResolutions.Last()));
+
+			GConfig->SetString("CTGraphicsOptionsPCMenu",
+							   "Options[2].Items",
+							   *ResolutionList,
+							   *(FString("XInterfaceCTMenus.") + UObject::GetLanguage()));
 		}
 
-		return Super::Exec(Cmd, Ar);
+		// Create FOVChanger object. This might not be the best place but idk where else to put it...
+		if(!FOVChanger){
+			FOVChanger = ConstructObject<UObject>(LoadClass<UObject>(NULL, "Mod.FOVChanger", NULL, LOAD_NoFail | LOAD_Throw, NULL),
+												  reinterpret_cast<UObject*>(-1),
+												  FName("MainFOVChanger"));
+			checkSlow(FOVChanger);
+			FOVChanger->AddToRoot(); // This object should never be garbage collected
+			FOVChanger->ProcessEvent(NAME_Init, NULL);
+		}
 	}
-};
+
+	return Result;
+}
+
+UBOOL UModRenderDevice::Exec(const TCHAR* Cmd, FOutputDevice& Ar){
+	if(!GIsEditor && ParseCommand(&Cmd, "SETFOV")){
+		float FOV = appAtof(Cmd);
+
+		Ar.Logf("Setting field of view to %f", FOV);
+		FOVChanger->ProcessEvent(FName("SetFOV"), &FOV);
+
+		return 1;
+	}
+
+	return Super::Exec(Cmd, Ar);
+}
 
 UObject* UModRenderDevice::FOVChanger = NULL;
 

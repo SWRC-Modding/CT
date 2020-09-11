@@ -15,24 +15,22 @@
 	FRenderInterface.
 ------------------------------------------------------------------------------------*/
 
-enum EHardwareEmulationMode{
-	HEM_None     = 0,
-	HEM_GeForce1 = 1,
-	HEM_XBox     = 2
+// Cull modes.
+enum ECullMode{
+	CM_CW,
+	CM_CCW,
+	CM_None
 };
 
-class ENGINE_API FRenderInterface{
-	// TODO: Add virtual functions
+// Transform types.
+enum ETransformType{
+	TT_LocalToWorld,
+	TT_WorldToCamera,
+	TT_CameraToScreen
 };
-
-/*------------------------------------------------------------------------------------
-	URenderDevice.
-------------------------------------------------------------------------------------*/
 
 // Primitive types for DrawPrimitive.
-
-enum EPrimitiveType
-{
+enum EPrimitiveType{
 	PT_TriangleList,
 	PT_TriangleStrip,
 	PT_TriangleFan,
@@ -40,20 +38,100 @@ enum EPrimitiveType
 	PT_LineList
 };
 
-// Flags for locking a rendering device.
-enum ELockRenderFlags
-{
-	LOCKR_ClearScreen	    = 1,
-	LOCKR_LightDiminish     = 2,
+// Vertex shaders for SetVertexStreams.
+enum EVertexShader{
+	VS_FixedFunction
 };
-enum EDescriptionFlags
-{
-	RDDESCF_Certified       = 1,
-	RDDESCF_Incompatible    = 2,
-	RDDESCF_LowDetailWorld  = 4,
-	RDDESCF_LowDetailSkins  = 8,
-	RDDESCF_LowDetailActors = 16,
+
+// Stencil buffer operations.
+enum EStencilOp{
+	SO_Keep = 1,
+	SO_Zero,
+	SO_Replace,
+	SO_IncrementSat,
+	SO_DecrementSat,
+	SO_Invert,
+	SO_Increment,
+	SO_Decrement
 };
+
+// Comparison functions.
+enum ECompareFunction{
+	CF_Never = 1,
+	CF_Less,
+	CF_Equal,
+	CF_LessEqual,
+	CF_Greater,
+	CF_NotEqual,
+	CF_GreaterEqual,
+	CF_Always
+};
+
+enum EHardwareEmulationMode{
+	HEM_None,
+	HEM_GeForce1,
+	HEM_XBox
+};
+
+// Precaching options.
+enum EPrecacheMode{
+	PRECACHE_VertexBuffers,
+	PRECACHE_All
+};
+
+class ENGINE_API FRenderInterface{
+	virtual void PushState() = 0;
+	virtual void PopState() = 0;
+	virtual UBOOL SetRenderTarget(FRenderTarget* RenderTarget) = 0;
+	virtual void SetCubeRenderTarget(class FDynamicCubemap*, int, int) = 0;
+	virtual void SetViewport(INT X, INT Y, INT Width, INT Height) = 0;
+	virtual void Clear(UBOOL UseColor = 1, FColor Color = FColor(0, 0, 0), UBOOL UseDepth = 1,  FLOAT Depth = 1.0f, UBOOL UseStencil = 1, DWORD Stencil = 0) = 0;
+	virtual void PushHit(const BYTE* Data, INT Count) = 0;
+	virtual void PopHit(INT Count, UBOOL Force) = 0;
+	virtual void SetCullMode(ECullMode CullMode) = 0;
+	virtual void SetAmbientLight(FColor Color) = 0;
+	virtual void EnableLighting(UBOOL UseDynamic, UBOOL UseStatic = 1, UBOOL Modulate2X = 0, FBaseTexture* UseLightmap = NULL, UBOOL LightingOnly = 0, FSphere LitSphere = FSphere(FVector(0, 0, 0), 0)) = 0;
+	virtual void SetLight(INT LightIndex, FDynamicLight* Light, FLOAT Scale = 1.0f) = 0;
+	virtual void SetShaderLight(int, FDynamicLight*, float) = 0;
+	virtual void SetNPatchTesselation(FLOAT Tesselation) = 0;
+	virtual void SetDistanceFog(UBOOL Enable, FLOAT FogStart, FLOAT FogEnd, FColor Color) = 0;
+	virtual UBOOL EnableFog(UBOOL Enable) = 0;
+	virtual UBOOL IsFogEnabled() = 0;
+	virtual void SetGlobalColor(FColor Color) = 0;
+	virtual void SetTransform(ETransformType Type, const FMatrix& Matrix) = 0;
+	virtual FMatrix GetTransform(ETransformType Type) const = 0;
+	virtual void SetMaterial() = 0; // TODO: Fix params
+	virtual UBOOL SetHardwareShaderMaterial(UHardwareShader*, FString*, UMaterial**) = 0;
+	virtual UBOOL ShowAlpha(UMaterial*) = 0;
+	virtual UBOOL IsShadowInterface() = 0;
+	virtual void SetAntiAliasing(int) = 0;
+	virtual void CopyBackBufferToTarget(FAuxRenderTarget*) = 0;
+	virtual void SetLODDiffuseFade(float) = 0;
+	virtual void SetLODSpecularFade(float) = 0;
+	virtual void SetStencilOp(ECompareFunction Test, DWORD Ref, DWORD Mask, EStencilOp FailOp, EStencilOp ZFailOp, EStencilOp PassOp, DWORD WriteMask);
+	virtual void vtpad1() = 0; // Possibly stencil op related (modifies same memory);
+	virtual void vtpad2() = 0; // Possibly stencil op related (modifies same memory);
+	virtual void SetPrecacheMode(EPrecacheMode PrecacheMode) = 0;
+	virtual void SetZBias(INT ZBias) = 0;
+	virtual INT SetVertexStreams(EVertexShader Shader, FVertexStream** Streams, INT NumStreams) = 0;
+	virtual INT SetDynamicStream(EVertexShader Shader, FVertexStream* Stream) = 0;
+	virtual INT SetIndexBuffer(FIndexBuffer* IndexBuffer, INT BaseIndex) = 0;
+	virtual INT SetDynamicIndexBuffer(FIndexBuffer* IndexBuffer, INT BaseIndex) = 0;
+	virtual void DrawPrimitive(EPrimitiveType PrimitiveType, INT FirstIndex, INT NumPrimitives, INT MinIndex = INDEX_NONE, INT MaxIndex = INDEX_NONE) = 0;
+	virtual void PixoSetHint(DWORD){}
+	virtual void PixoResetHint(DWORD){}
+	virtual UTexture* PixoCreateTexture(FRenderTarget*, int){ return NULL; }
+	virtual UBOOL PixoIsVisible(FBox&){ return 1; }
+	virtual bool IsVertexBufferBusy(FVertexStream*){ return false; }
+	virtual void SetFillMode(EFillMode FillMode) = 0;
+	virtual int vtpad3(){ return 1; };
+	virtual int vtpad4(){ return 1; };
+	virtual int vtpad5(){ return 1; };
+};
+
+/*------------------------------------------------------------------------------------
+	URenderDevice.
+------------------------------------------------------------------------------------*/
 
 //
 // FRenderCaps - render device capabilities exposed to the engine

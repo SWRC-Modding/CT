@@ -146,8 +146,13 @@ struct FRenderCaps{
 	                HardwareTL(0){}
 };
 
-// Codec for movies. Just a placeholder since we don't know the actual enum values!
-enum ECodecType{};
+// Codec for movies.
+enum ECodecType{
+	CODEC_None,
+	CODEC_RoQ,
+	CODEC_Unused, // Treated like CODEC_None by UD3DRenderDevice
+	CODEC_AVI
+};
 
 //
 // A movie that is rendered to a texture or the background.
@@ -174,6 +179,26 @@ public:
 	virtual void RenderToNative(void*, int, int){}
 	virtual void RenderToTexture(UTexture* Texture); // Calls RenderToRGBAArray by default
 	virtual void Serialize(FArchive& Ar){}
+};
+
+//
+// A movie using the RoQ format from the Quake engine.
+//
+class ENGINE_API FRoQMovie : public FMovie{
+public:
+	FRoQMovie(FString, int, int);
+
+	// Overrides
+	virtual ~FRoQMovie();
+	virtual UBOOL Play(int);
+	virtual void Pause(int);
+	virtual UBOOL IsPaused();
+	virtual void StopNow();
+	virtual void StopAtEnd();
+	virtual INT GetWidth();
+	virtual INT GetHeight();
+	virtual void PreRender(void*, int, int);
+	virtual void RenderToRGBAArray(BYTE*);
 };
 
 //

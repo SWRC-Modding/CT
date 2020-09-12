@@ -186,6 +186,8 @@ public:
 //
 class ENGINE_API FRoQMovie : public FMovie{
 public:
+	INT Padding[8];
+
 	FRoQMovie(FString, int, int);
 
 	// Overrides

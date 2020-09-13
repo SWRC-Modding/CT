@@ -584,14 +584,7 @@ public:
 
 	void Exit(){
 		guard(FConfigCacheIni::Exit);
-
 		Flush(1);
-
-		operator delete(this); // This is ok since the Object will not be referenced anymore after the call to exit
-
-		if(GConfig == this)
-			GConfig = NULL;
-
 		unguard;
 	}
 

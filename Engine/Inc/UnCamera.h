@@ -237,20 +237,24 @@ class ENGINE_API UViewport : public UPlayer{
 
 	// Saved-actor parameters.
 	FLOAT SavedOrthoZoom, SavedFovAngle;
-	INT SavedShowFlags, SavedRendMap, SavedMisc1, SavedMisc2;
+	INT SavedShowFlags, SavedRendMap, SavedMisc1, SavedMisc2;*/
 
 	// Constructor.
 	UViewport();
 
 	// UObject interface.
-	void Destroy();
-	void Serialize( FArchive& Ar );
+	virtual void Destroy();
+	virtual void Serialize(FArchive& Ar);
 
-	// FArchive interface.
-	void Serialize( const TCHAR* Data, EName MsgType );
+	// FOutputDevice interface.
+	virtual void Serialize(const TCHAR* Data, EName MsgType);
+
+    // FExec interface.
+    virtual UBOOL Exec(const TCHAR* Cmd, FOutputDevice& Ar);
 
 	// UPlayer interface.
-	void ReadInput( FLOAT DeltaSeconds );*/
+	virtual void ReadInput(FLOAT DeltaSeconds);
+    virtual bool CheckPad();
 
 	// UViewport interface.
 	virtual UBOOL Lock(FPlane FlashScale, FPlane FlashFog, FPlane ScreenClear, DWORD RenderLockFlags, BYTE* HitData=NULL, INT* HitSize = NULL);
@@ -277,6 +281,29 @@ class ENGINE_API UViewport : public UPlayer{
 	virtual void ProfileSetMarker(char*, INT, INT, INT, INT);
 	virtual INT ProfileBeginEvent(char*, INT, INT, INT, INT);
 	virtual INT ProfileEndEvent();
+
+	// Functions.
+	void ExecuteHits(const FHitCause& Cause, BYTE* HitData, INT HitSize, TCHAR* HitOverrideClass = NULL, FColor* HitColor = NULL, AActor** HitActor = NULL);
+	void PushHit(const struct HHitProxy& Hit, INT Size);
+	void PopHit(UBOOL bForce);
+	UBOOL IsWire();
+	void ExecMacro( const TCHAR* Filename, FOutputDevice& Ar = *GLog);
+
+	// UViewport inlines.
+	BYTE* _Screen(INT X, INT Y);//{ return ScreenPointer + (X + Y * Stride) * ColorBytes; }
+	UBOOL IsOrtho();//{ return Actor && (Actor->RendMap == REN_OrthXY || Actor->RendMap == REN_OrthXZ || Actor->RendMap == REN_OrthYZ); }
+	UBOOL IsPerspective();//{ return Actor && (Actor->RendMap == REN_Wire || Actor->RendMap == REN_Zones || Actor->RendMap == REN_Polys || Actor->RendMap == REN_PolyCuts || Actor->RendMap == REN_DynLight || Actor->RendMap == REN_PlainTex || Actor->RendMap == REN_LightingOnly || Actor->RendMap == REN_MatineePreview || (Actor->RendMap == REN_TexView && Actor->Misc1 != MVT_TEXTURE)); }
+	UBOOL IsTopView();//{ return Actor && Actor->RendMap == REN_OrthXY; }
+	UBOOL IsRealtime();//{ return Actor && (Actor->ShowFlags & (SHOW_RealTime | SHOW_PlayerCtrl)); }
+	UBOOL IsLit();//{ return Actor && (Actor->RendMap == REN_DynLight || Actor->RendMap == REN_LightingOnly || Actor->RendMap == REN_DepthComplexity || Actor->RendMap == REN_MatineePreview || (Actor->RendMap == REN_TexView && Actor->Misc1 != MVT_TEXTURE)); }
+	UBOOL IsDepthComplexity();//{ return Actor && (Actor->RendMap == REN_DepthComplexity); }
+	// Determines if the viewport is a viewport where the user can be editing the level (i.e. not a browser viewport)
+	UBOOL IsEditing();//{ return Actor && (IsOrtho() || Actor->RendMap == REN_Wire || Actor->RendMap == REN_Zones || Actor->RendMap == REN_Polys || Actor->RendMap == REN_PolyCuts || Actor->RendMap == REN_DynLight || Actor->RendMap == REN_PlainTex || Actor->RendMap == REN_LightingOnly || Actor->RendMap == REN_DepthComplexity); }
+	// Refresh all viewports.
+	static void RefreshAll();/*{
+		for(TObjectIterator<UViewport> It; It; ++It)
+			It->DirtyViewport = 1;
+	}*/
 };
 
 // Viewport hit-testing macros.

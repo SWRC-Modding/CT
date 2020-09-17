@@ -10,20 +10,6 @@
 	UCanvas.
 -----------------------------------------------------------------------------*/
 
-// Constants.
-enum {MAX_COLOR_BYTES = 9}; // Maximum expected frame buffer depth = 8 bytes = 64-bit.
-
-//
-// Flags for drawing text, not yet used.
-//
-enum ETextOut{
-	TEXTOUT_Center			= 0x01,	// Center horizontally.
-	TEXTOUT_CenterVertical	= 0x02,	// Center vertically.
-	TEXTOUT_Right			= 0x04, // Right justify.
-	TEXTOUT_Bottom			= 0x08, // Bottom justify.
-	TEXTOUT_Wrap			= 0x10,	// Word wrap.
-};
-
 //
 // Blitting types.
 //
@@ -165,13 +151,6 @@ enum ERenderType
 	REN_TexBrowser		= 17,	// Viewing a texture browser (no actor).
 	REN_MeshView		= 18,	// Viewing a mesh.
 	REN_MAX				= 20
-};
-
-// Viewport capabilities.
-enum EViewportCaps
-{
-	CC_RGB565			= 1,	// RGB 565 format (otherwise 555).
-	CC_Mask				= 0xff, // Caps mask which affects cached rendering info.
 };
 
 // ShowFlags for viewport.

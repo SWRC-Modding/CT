@@ -59,7 +59,6 @@ ENGINE_API extern FLOAT           GEngineTime;
 #include "UnPlayer.h"                // Player class.
 #include "UnEngine.h"                // Unreal engine.
 #include "UnGame.h"                  // Unreal game engine.
-#include "UnCamera.h"                // Viewport subsystem.
 #include "UnMesh.h"                  // Mesh objects.
 #include "UnSkeletalMesh.h"          // Skeletal model objects.
 #include "UnActor.h"                 // Actor inlines.
@@ -70,6 +69,7 @@ ENGINE_API extern FLOAT           GEngineTime;
 #include "UnRenderIteratorSupport.h"
 #include "UnRenDev.h"
 #include "UnRenderUtil.h"
+#include "UnCamera.h"                // Viewport subsystem.
 #include "UnPath.h"
 #include "UnCDKey.h"                 // CD key validation.
 #include "UnNet.h"

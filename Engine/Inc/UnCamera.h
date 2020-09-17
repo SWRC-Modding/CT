@@ -49,42 +49,67 @@ enum EViewportBlitFlags{
 class ENGINE_API UCanvas : public UObject{
 	DECLARE_CLASS(UCanvas,UObject,CLASS_Transient,Engine)
 	NO_DEFAULT_CONSTRUCTOR(UCanvas)
-
+public:
 	// Variables.
-	UFont*			Font;
-	FLOAT			SpaceX, SpaceY;
-	FLOAT			OrgX, OrgY;
-	FLOAT			ClipX, ClipY;
-	FLOAT			CurX, CurY;
-	FLOAT			Z;
-	BYTE			Style;
-	FLOAT			CurYL;
-	FColor			Color;
-	BITFIELD		bCenter:1;
-	BITFIELD		bNoSmooth:1;
-	INT				X, Y;
-	UFont			*SmallFont, *MedFont, *BigFont, *LargeFont;
-	UViewport*		Viewport;
-	class FSceneNode* Frame;
-	class URenderBase* Render; // Only valid during UGameEngine::Draw
+	UFont*       Font;
+	FLOAT        SpaceX, SpaceY;
+	FLOAT        OrgX, OrgY;
+	FLOAT        ClipX, ClipY;
+	FLOAT        CurX, CurY;
+	FLOAT        Z;
+	BYTE         Style;
+	FLOAT        CurYL;
+	FColor       Color;
+	BITFIELD     bCenter:1;
+	BITFIELD     bNoSmooth:1;
+	INT          SizeX, SizeY;
+	FPlane       ColorModulate;
+	UFont*       TinyFont;
+	UFont*       SmallFont;
+	UFont*       MedFont;
+	UViewport*   Viewport;
+	FCanvasUtil* pCanvasUtil;
+
+	// Overrides
+	virtual void Serialize(FArchive& Ar);
+	virtual void Destroy();
 
 	// UCanvas interface.
-	virtual void Init( UViewport* InViewport );
-	virtual void Update( FSceneNode* Frame );
-	virtual void DrawTile( UTexture* Texture, FLOAT X, FLOAT Y, FLOAT XL, FLOAT YL, FLOAT U, FLOAT V, FLOAT UL, FLOAT VL, class FSpanBuffer* SpanBuffer, FLOAT Z, FPlane Color, FPlane Fog, DWORD PolyFlags );
-	virtual void DrawIcon( UTexture* Texture, FLOAT ScreenX, FLOAT ScreenY, FLOAT XSize, FLOAT YSize, class FSpanBuffer* SpanBuffer, FLOAT Z, FPlane Color, FPlane Fog, DWORD PolyFlags );
-	virtual void DrawPattern( UTexture* Texture, FLOAT X, FLOAT Y, FLOAT XL, FLOAT YL, FLOAT Scale, FLOAT OrgX, FLOAT OrgY, class FSpanBuffer* SpanBuffer, FLOAT Z, FPlane Color, FPlane Fog, DWORD PolyFlags );
-	virtual void WrappedStrLenf( UFont* Font, INT& XL, INT& YL, const TCHAR* Fmt, ... );
-	virtual void VARARGS WrappedPrintf( UFont* Font, UBOOL Center, const TCHAR* Fmt, ... );
-	virtual void SetClip( INT X, INT Y, INT XL, INT YL );
+	void Flush();
+	void DrawActor(AActor* Actor, UBOOL Wireframe, UBOOL ClearZ, FLOAT DisplayFOV);
+	void DrawScreenActor(AActor* Actor, UBOOL Wireframe, UBOOL ClearZ, FLOAT DisplayFOV);
+	void SetScreenLight(INT Index, const FVector& Position, FColor Color, FLOAT Radius);
+	void Reset();
 
-    void eventReset(){
-        ProcessEvent(FindFunctionChecked(TEXT("Reset")),NULL);
-    }
+	// Virtual functions
+	virtual void Init(UViewport* InViewport);
+	virtual void Update();
+	virtual void DrawTile(UMaterial*, FLOAT X, FLOAT Y, FLOAT XL, FLOAT YL, FLOAT U, FLOAT V, FLOAT UL, FLOAT VL, FLOAT Z, const FPlane& Color, const FPlane& Fog);
+	virtual void DrawRotatedTile(FLOAT, FLOAT, FLOAT, UMaterial*, FLOAT X, FLOAT Y, FLOAT XL, FLOAT YL, FLOAT U, FLOAT V, FLOAT UL, FLOAT VL, FLOAT Z, const FPlane& Color, const FPlane& Fog);
+	virtual void DrawRotatedTile(FLOAT Angle, UMaterial* Material, FLOAT X, FLOAT Y, FLOAT XL, FLOAT YL, FLOAT U, FLOAT V, FLOAT UL, FLOAT VL, FLOAT Z, const FPlane& Color, const FPlane& Fog);
+	virtual void DrawCubemap(UMaterial* Material, FLOAT, FLOAT, FLOAT, FLOAT);
+	virtual void DrawIcon(UMaterial* Material, FLOAT ScreenX, FLOAT ScreenY, FLOAT XSize, FLOAT YSize, FLOAT Z, const FPlane& Color, const FPlane& Fog);
+	virtual void DrawPattern(UMaterial* Material, FLOAT X, FLOAT Y, FLOAT XL, FLOAT YL, FLOAT Scale, FLOAT OrgX, FLOAT OrgY, FLOAT Z, const FPlane& Color, const FPlane& Fog);
+	virtual void VARARGS WrappedStrLenf(UFont* Font, FLOAT ScaleX, FLOAT ScaleY, INT&, INT&, const TCHAR*, ...);
+	virtual void VARARGS WrappedStrLenf(UFont* Font, INT& XL, INT& YL, const TCHAR* Fmt, ...);
+	virtual void VARARGS WrappedPrintf(UFont* Font, FLOAT ScaleX, FLOAT ScaleY, UBOOL Center, const TCHAR* Fmt, ...);
+	virtual void VARARGS WrappedPrintf(UFont* Font, UBOOL Center, const TCHAR* Fmt, ...);
+	virtual void VARARGS WrappedIconPrintf(UFont* Font, FLOAT ScaleX, FLOAT ScaleY, UBOOL Center, const TArray<UTexture*>&, TCHAR, const TCHAR* Fmt, ...);
+	virtual void WrapStringToArray(const TCHAR* Text, TArray<FString>* OutArray, FLOAT Width, UFont* Font = NULL, TCHAR EOL = '\n');
+	virtual void ClippedStrLen(UFont* Font, FLOAT ScaleX, FLOAT ScaleY, INT& XL, INT& YL, const TCHAR* Text);
+	virtual void ClippedPrint(UFont* Font, FLOAT ScaleX, FLOAT ScaleY, UBOOL Center, const TCHAR* Text);
+	virtual void DrawTileStretched(UMaterial* Material, FLOAT Left, FLOAT Top, FLOAT AWidth, FLOAT AHeight);
+	virtual void DrawTileScaled(UMaterial* Material, FLOAT Left, FLOAT Top, FLOAT NewXScale, FLOAT NewYScale);
+	virtual void DrawTileBound(UMaterial* Material, FLOAT Left, FLOAT Top, FLOAT Width, FLOAT Height);
+	virtual void DrawTileJustified(UMaterial* Material, FLOAT Left, FLOAT Top, FLOAT Width, FLOAT Height, BYTE Justification);
+	virtual void DrawTileScaleBound(UMaterial* Material, FLOAT Left, FLOAT Top, FLOAT Width, FLOAT Height);
+	virtual void VARARGS DrawTextJustified(BYTE Justification, FLOAT x1, FLOAT y1, FLOAT x2, FLOAT y2, const TCHAR* Fmt, ...);
+	virtual void SetClip(INT X, INT Y, INT XL, INT YL);
 
 private:
-	// Internal functions.
-	void VARARGS WrappedPrint( ERenderStyle Style, INT& XL, INT& YL, UFont* Font, UBOOL Center, const TCHAR* Text );
+    // Style is probably one of ERenderStyle
+	void WrappedPrint(INT Style, INT& XL, INT& YL, UFont* Font, FLOAT ScaleX, FLOAT ScaleY, UBOOL Center, const TCHAR* Text);
+	void WrappedIconPrint(INT Style, INT& XL, INT& YL, UFont* Font, FLOAT ScaleX, FLOAT ScaleY, UBOOL Center, const TArray<UTexture*>&, TCHAR, const TCHAR* Text);
 };
 
 /*-----------------------------------------------------------------------------

@@ -13,4 +13,4 @@ LINK_LIB(Mod)
  * NOTE: This changes the vtable for all objects of the same class.
  * Returns the function pointer that was at Index previously. NULL if there was an error.
  */
-MOD_API void* PatchVTable(void** VTable, INT Index, void* NewFunc);
+MOD_API void* PatchVTable(void* Object, INT Index, void* NewFunc);

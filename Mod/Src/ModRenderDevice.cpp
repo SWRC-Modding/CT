@@ -421,14 +421,10 @@ HRESULT __stdcall D3D8CreateDeviceOverride(FD3D8* D3D8,
 										   class IDirect3DDevice8** ppReturnedDeviceInterface){
 	HRESULT Result = D3D8CreateDevice(D3D8, Adapter, DeviceType, hFocusWindow, BehaviorFlags, pPresentationParameters, ppReturnedDeviceInterface);
 
-	if(SUCCEEDED(Result)){
-		D3DDeviceCreateTextureFunc CreateTextureFunc =
-			static_cast<D3DDeviceCreateTextureFunc>(PatchVTable(*reinterpret_cast<void***>(*ppReturnedDeviceInterface),
-																						   D3DVTableIndex_DeviceCreateTexture,
-																						   D3DDeviceCreateTextureOverride));
-
-		if(CreateTextureFunc != D3DDeviceCreateTextureOverride)
-			D3DDeviceCreateTexture = CreateTextureFunc;
+	if(SUCCEEDED(Result) && !D3DDeviceCreateTexture){
+		D3DDeviceCreateTexture = static_cast<D3DDeviceCreateTextureFunc>(PatchVTable(*reinterpret_cast<void***>(*ppReturnedDeviceInterface),
+																					 D3DVTableIndex_DeviceCreateTexture,
+																					 D3DDeviceCreateTextureOverride));
 	}
 
 	return Result;
@@ -441,10 +437,10 @@ HRESULT __stdcall D3D8CreateDeviceOverride(FD3D8* D3D8,
 UBOOL UModRenderDevice::Init(){
 	UBOOL Result = Super::Init();
 
-	if(Result){
+	if(Result && !D3D8CreateDevice){
 		D3D8CreateDevice = static_cast<D3D8CreateDeviceFunc>(PatchVTable(*reinterpret_cast<void***>(Direct3D8),
-																		 D3DVTableIndex_D3D8CreateDevice,
-																		 D3D8CreateDeviceOverride));
+																		  D3DVTableIndex_D3D8CreateDevice,
+																		  D3D8CreateDeviceOverride));
 	}
 
 	if(!GIsEditor){

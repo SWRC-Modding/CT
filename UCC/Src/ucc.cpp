@@ -134,11 +134,7 @@ int __cdecl main(int argc, char** argv){
 			Warn.Log("    ucc <command> <parameters>");
 		}
 
-		// This prevents an infinite loop during garbage collection when there are compile errors with ucc make
-		if(Warn.ErrorCount == 0)
-			appPreExit();
-		else
-			ExitCode = EXIT_FAILURE;
+		appPreExit();
 
 		GIsGuarded = 0;
 	}catch(...){

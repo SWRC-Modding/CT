@@ -263,7 +263,7 @@ public:
 	UBOOL           Padding3;             //! PADDING
 	UBOOL           bShowDescriptions;
 	UBOOL           bShowLargeVertices;   // Show large vertices on brushes/meshes/etc?
-	UBOOL           Padding4;             //! PADDING
+	UBOOL           bShowHud;
 
 	UBOOL           bShowBounds;          // Show visibility bounding boxes.
 	UBOOL           bShowCollisionBounds;
@@ -274,8 +274,8 @@ public:
 	UBOOL           bShowLight;
 	UBOOL           bShowBlockingVolumes;
 	UBOOL           bShowPhysicsVolumes;
-
-	char Padding5[16];                    //! Padding
+	char            Padding5[12];         //! Padding
+	UBOOL           bShowHudArms;         // Not sure about that one. HudArms become visible again when reloading or switching weapons
 
 	// Cinematics.
 	UBOOL           bRenderCinematics;

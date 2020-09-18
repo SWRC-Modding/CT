@@ -3,8 +3,9 @@
 /*
  * PatchVTable
  */
-void* PatchVTable(void** VTable, INT Index, void* NewFunc){
+void* PatchVTable(void* Object, INT Index, void* NewFunc){
 	DWORD OldProtect;
+	void** VTable = *reinterpret_cast<void***>(Object);
 
 	if(!VirtualProtect(VTable + Index, sizeof(void*), PAGE_EXECUTE_READWRITE, &OldProtect)){
 		GLog->Logf(NAME_Error, "Unable to patch vtable: VirtualProtect failed with error code %i", GetLastError());

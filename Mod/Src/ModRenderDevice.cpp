@@ -2,6 +2,23 @@
 #include "../Inc/Mod.h"
 #include <Windows.h>
 
+/*
+ * Helper function that only patches a vtable if it wasn't done already.
+ * This is needed because the editor creates multiple render devices which in turn create new D3D8 devices that need to be patched again.
+ * However, we have no way of knowing about that in e.g. a CreateTexture call and thus we have to check each time whether the function at the
+ * vtable index is already the override function and if not patch it.
+ */
+template<typename F>
+void MaybePatchVTable(F* OutFunc, void* Object, INT Index, F NewFunc){
+	if((*reinterpret_cast<void***>(Object))[Index] == NewFunc){
+		checkSlow(OutFunc);
+
+		return;
+	}
+
+	*OutFunc = static_cast<F>(PatchVTable(Object, Index, NewFunc));
+}
+
 enum{
 	// D3D8
 	D3DVTableIndex_D3D8CreateDevice    = 15,
@@ -375,20 +392,10 @@ static HRESULT __stdcall D3DDeviceCreateTextureOverride(FD3DDevice* D3DDevice,
 
 	// Patching vtables if it wasn't done already
 
-	if(!D3DTextureGetLevelDesc)
-		D3DTextureGetLevelDesc = static_cast<D3DTextureGetLevelDescFunc>((*reinterpret_cast<void***>(*ppTexture))[D3DVTableIndex_TextureGetLevelDesc]);
+	D3DTextureGetLevelDesc = static_cast<D3DTextureGetLevelDescFunc>((*reinterpret_cast<void***>(*ppTexture))[D3DVTableIndex_TextureGetLevelDesc]);
 
-	if(!D3DTextureLockRect){
-		D3DTextureLockRect = static_cast<D3DTextureLockRectFunc>(PatchVTable(*reinterpret_cast<void***>(*ppTexture),
-																			 D3DVTableIndex_TextureLockRect,
-																			 D3DTextureLockRectOverride));
-	}
-
-	if(!D3DTextureUnlockRect){
-		D3DTextureUnlockRect = static_cast<D3DTextureUnlockRectFunc>(PatchVTable(*reinterpret_cast<void***>(*ppTexture),
-																				 D3DVTableIndex_TextureUnlockRect,
-																				 D3DTextureUnlockRectOverride));
-	}
+	MaybePatchVTable(&D3DTextureLockRect, *ppTexture, D3DVTableIndex_TextureLockRect, D3DTextureLockRectOverride);
+	MaybePatchVTable(&D3DTextureUnlockRect, *ppTexture, D3DVTableIndex_TextureUnlockRect, D3DTextureUnlockRectOverride);
 
 	// Updating the current texture with the newly created one
 	CurrentTexture = *ppTexture;
@@ -422,11 +429,8 @@ HRESULT __stdcall D3D8CreateDeviceOverride(FD3D8* D3D8,
 										   class IDirect3DDevice8** ppReturnedDeviceInterface){
 	HRESULT Result = D3D8CreateDevice(D3D8, Adapter, DeviceType, hFocusWindow, BehaviorFlags, pPresentationParameters, ppReturnedDeviceInterface);
 
-	if(SUCCEEDED(Result) && !D3DDeviceCreateTexture){
-		D3DDeviceCreateTexture = static_cast<D3DDeviceCreateTextureFunc>(PatchVTable(*reinterpret_cast<void***>(*ppReturnedDeviceInterface),
-																					 D3DVTableIndex_DeviceCreateTexture,
-																					 D3DDeviceCreateTextureOverride));
-	}
+	if(SUCCEEDED(Result))
+		MaybePatchVTable(&D3DDeviceCreateTexture, *ppReturnedDeviceInterface, D3DVTableIndex_DeviceCreateTexture, D3DDeviceCreateTextureOverride);
 
 	return Result;
 }
@@ -443,11 +447,8 @@ public:
 	virtual UBOOL Init(){
 		UBOOL Result = Super::Init();
 
-		if(Result && !D3D8CreateDevice){
-			D3D8CreateDevice = static_cast<D3D8CreateDeviceFunc>(PatchVTable(*reinterpret_cast<void***>(Direct3D8),
-																			 D3DVTableIndex_D3D8CreateDevice,
-																			 D3D8CreateDeviceOverride));
-		}
+		if(Result)
+			MaybePatchVTable(&D3D8CreateDevice, Direct3D8, D3DVTableIndex_D3D8CreateDevice, D3D8CreateDeviceOverride);
 
 		if(!GIsEditor){
 			// Get a list of all supported resolutions and apply them to the config

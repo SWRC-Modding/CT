@@ -93,7 +93,7 @@ public:
 	virtual void SetClip(INT X, INT Y, INT XL, INT YL);
 
 private:
-    // Style is probably one of ERenderStyle
+	// Style is probably one of ERenderStyle
 	void WrappedPrint(INT Style, INT& XL, INT& YL, UFont* Font, FLOAT ScaleX, FLOAT ScaleY, UBOOL Center, const TCHAR* Text);
 	void WrappedIconPrint(INT Style, INT& XL, INT& YL, UFont* Font, FLOAT ScaleX, FLOAT ScaleY, UBOOL Center, const TArray<UTexture*>&, TCHAR, const TCHAR* Text);
 };
@@ -190,54 +190,126 @@ enum EMouseButtons
 };
 
 //
+//	FViewportRenderTarget
+//
+
+class FViewportRenderTarget : public FRenderTarget{
+public:
+	UViewport* Viewport;
+
+	// Constructor.
+
+	FViewportRenderTarget(UViewport* InViewport){
+		Viewport = InViewport;
+		CacheId = MakeCacheID(CID_RenderTexture, (UObject*)Viewport);
+	}
+
+	// FBaseTexture interface.
+
+	virtual INT GetWidth();
+	virtual INT GetHeight();
+	virtual INT GetFirstMip(){ return 0; }
+	virtual INT GetNumMips(){ return 1; }
+	virtual ETextureFormat GetFormat();
+	virtual ETexClampMode GetUClamp(){ return TC_Wrap; }
+	virtual ETexClampMode GetVClamp(){ return TC_Wrap; }
+
+	// FRenderResource interface.
+
+	virtual QWORD GetCacheId(){ return CacheId; }
+	virtual INT GetRevision(){ return 1; }
+};
+
+//
 // A viewport object, which associates an actor (which defines
 // most view parameters) with a Windows window.
 //
 class ENGINE_API UViewport : public UPlayer{
 	DECLARE_ABSTRACT_CLASS(UViewport,UPlayer,CLASS_Transient,Engine)
 	DECLARE_WITHIN(UClient)
-
-	char Padding1[288];
-	FRenderInterface* RI;
-	char Padding2[64];
-
-	/*// Referenced objects.
-	class UCanvas*		 Canvas;	// Viewport's painting canvas.
-	class UInput*		 Input;		// Input system.
-	class URenderDevice* RenDev;	// Render device.
+public:
+	// Referenced objects.
+	class UCanvas*       Canvas; // Viewport's painting canvas.
+	class UInput*        Input;  // Input system.
+	class URenderDevice* RenDev; // Render device.
 
 	// Normal variables.
-	UObject*		MiscRes;		// Used in in modes like EM_TEXVIEW.
-	FName			Group;			// Group for editing.
-	FTime			LastUpdateTime;	// Time of last update.
-	INT				SizeX, SizeY;   // Buffer X & Y resolutions.
-	INT				ColorBytes;		// 1=256-color, 4=32-bit color.
-	INT				FrameCount;		// Frame count, incremented when locked.
-	DWORD			Caps;			// Capabilities (CC_).
-	UBOOL			Current;		// If this is the current input viewport.
-	UBOOL			Dragging;		// Dragging mouse.
-	DWORD			RenderFlags;	// Render locking flags (only when locked).
-	DWORD			ExtraPolyFlags;	// Additional poly flags associated with camera.
+	UObject*        MiscRes;        // Used in in modes like EM_TEXVIEW.
+	FName           Group;          // Group for editing.
+	FTime           LastUpdateTime; // Time of last update.
+	INT             DirtyViewport;  // Count how many times the viewport needs to be repainted.
+	INT             SizeX, SizeY;   // Buffer X & Y resolutions.
+	char            Padding1[12];   //! PADDING
+	FLOAT           ScaleX, ScaleY; // Scale factor.
+	INT             ColorBytes;     // 1=256-color, 4=32-bit color.
+	INT             FrameCount;     // Frame count, incremented when locked.
+	DWORD           Caps;           // Capabilities (CC_).
+	UBOOL           Current;        // If this is the current input viewport.
+	UBOOL           Dragging;       // Dragging mouse.
+	FVector         OrigCursor;     // The position where the mouse was originally clicked in the viewport.
+	UBOOL           FullscreenOnly; // Engine requires desktop set to 32 bpp for windowed mode.
+	FVector         TerrainPointAtLocation; // The 3D location currently being pointed at on the terrain
+	char            Padding2[20];   //! PADDING
+
+	FViewportRenderTarget RenderTarget; // A dummy render target that exposes the viewport's size to interfaces that take a FRenderTarget.
+
+	// The current position of the mouse both on the screen, and within this viewports client area (using the X, Y ... Z is unused)
+	FVector         MouseScreenPos, MouseClientPos;
+
+	UBOOL           bLockOnSelectedActors; // Update the location/rotation of selected actors when the camera is moved?
+	AActor*         LockedActor;           // The actor we're locked to
+
+	// Editor and debugging mode render effects, stat flags.
+	UBOOL           Padding3;             //! PADDING
+	UBOOL           bShowDescriptions;
+	UBOOL           bShowLargeVertices;   // Show large vertices on brushes/meshes/etc?
+	UBOOL           Padding4;             //! PADDING
+
+	UBOOL           bShowBounds;          // Show visibility bounding boxes.
+	UBOOL           bShowCollisionBounds;
+	UBOOL           bShowBones;           // Draw skeleton for skeletal meshes.
+	UBOOL           bHideSkin;            // Hide/draw skin for meshes.
+	UBOOL           bShowNormals;         // Draw bone-influence-number-color coded normals on mesh vertices.
+	UBOOL           bShowAnim;
+	UBOOL           bShowLight;
+	UBOOL           bShowBlockingVolumes;
+	UBOOL           bShowPhysicsVolumes;
+
+	char Padding5[16];                    //! Padding
+
+	// Cinematics.
+	UBOOL           bRenderCinematics;
+	FLOAT           CinematicsRatio;
 
 	// Level traveling.
-	ETravelType		TravelType;
-	FStringNoInit	TravelURL;
-	UBOOL			bTravelItems;
+	ETravelType     TravelType;
+	FStringNoInit   TravelURL;
+	UBOOL           bTravelItems;
 
 	// Frame buffer info; only valid when locked.
-	FTime			CurrentTime;	// Time when initially locked.
-	BYTE*			ScreenPointer;	// Pointer to screen frame buffer, or NULL if none.
-	INT				Stride;			// Stride in pixels.
+	DOUBLE          CurrentTime;   // Time when initially locked.
+	BYTE*           ScreenPointer; // Pointer to screen frame buffer, or NULL if none.
+	INT             Stride;        // Stride in pixels.
+
+	// Rendering data; only valid when locked.
+	class FRenderInterface* RI;
+	class FSceneNode*       LodSceneNode;
+
+	// Stencil mask; only valid when locked. The next unused stencil bit.
+	BYTE                    NextStencilMask;
+
+	// Precaching flag.
+	UBOOL   Precaching;
 
 	// Hit testing.
-	UBOOL			HitTesting;		// Whether hit-testing.
-	INT				HitX, HitY;		// Hit rectangle top left.
-	INT				HitXL, HitYL;	// Hit size.
-	TArray<INT>		HitSizes;		// Currently pushed hit sizes.
+	UBOOL           HitTesting;   // Whether hit-testing.
+	INT             HitX, HitY;   // Hit rectangle top left.
+	INT             HitXL, HitYL; // Hit size.
+	TArray<INT>     HitSizes;     // Currently pushed hit sizes.
 
 	// Saved-actor parameters.
 	FLOAT SavedOrthoZoom, SavedFovAngle;
-	INT SavedShowFlags, SavedRendMap, SavedMisc1, SavedMisc2;*/
+	INT SavedShowFlags, SavedRendMap, SavedMisc1, SavedMisc2;
 
 	// Constructor.
 	UViewport();
@@ -249,12 +321,12 @@ class ENGINE_API UViewport : public UPlayer{
 	// FOutputDevice interface.
 	virtual void Serialize(const TCHAR* Data, EName MsgType);
 
-    // FExec interface.
-    virtual UBOOL Exec(const TCHAR* Cmd, FOutputDevice& Ar);
+	// FExec interface.
+	virtual UBOOL Exec(const TCHAR* Cmd, FOutputDevice& Ar);
 
 	// UPlayer interface.
 	virtual void ReadInput(FLOAT DeltaSeconds);
-    virtual bool CheckPad();
+	virtual bool CheckPad();
 
 	// UViewport interface.
 	virtual UBOOL Lock(FPlane FlashScale, FPlane FlashFog, FPlane ScreenClear, DWORD RenderLockFlags, BYTE* HitData=NULL, INT* HitSize = NULL);

@@ -30,6 +30,8 @@ class WWizardDialog;
 class WWizardPage;
 class WDragInterceptor;
 
+class AActor;
+
 // Global functions.
 WINDOW_API void InitWindowing();
 WINDOW_API HBITMAP LoadFileToBitmap(const TCHAR* Filename, INT& SizeX, INT& SizeY);
@@ -280,7 +282,6 @@ class WINDOW_API WWindow : public FCommandTarget{
 	// Structors.
 	WWindow(FName InPersistentName = NAME_None, WWindow* InOwnerWindow = NULL);
 
-	virtual ~WWindow();
 	FRect GetClientRect() const;
 	void MoveWindow(FRect R, UBOOL bRepaint);
 	void MoveWindow(INT Left, INT Top, INT Width, INT Height, UBOOL bRepaint);
@@ -291,18 +292,20 @@ class WINDOW_API WWindow : public FCommandTarget{
 	FRect ClientToScreen(const FRect& InR);
 	FRect ScreenToClient(const FRect& InR);
 	FPoint GetCursorPos();
+
+	// Virtual functions
+	virtual ~WWindow();
 	virtual void Show(UBOOL Show);
 	virtual void Serialize(FArchive& Ar);
 	virtual const TCHAR* GetPackageName();
 	virtual void DoDestroy();
-	virtual void GetWindowClassName(TCHAR* Result) = 0;;
+	virtual void GetWindowClassName(TCHAR* Result) = 0;
 	virtual LONG WndProc(UINT Message, UINT wParam, LONG lParam);
 	virtual INT CallDefaultProc(UINT Message, UINT wParam, LONG lParam);
 	virtual UBOOL InterceptControlCommand(UINT Message, UINT wParam, LONG lParam);
 	virtual FString GetText();
 	virtual void SetText(const TCHAR* Text);
 	virtual INT GetLength();
-	void SetNotifyHook(FNotifyHook* InNotifyHook);
 	virtual void OnCopyData(HWND hWndSender, COPYDATASTRUCT* CD);
 	virtual void OnSetFocus(HWND hWndLosingFocus);
 	virtual void OnKillFocus(HWND hWndGaininFocus);
@@ -347,6 +350,8 @@ class WINDOW_API WWindow : public FCommandTarget{
 	virtual INT OnSetCursor();
 	virtual UBOOL OnClose();
 	virtual void OnDestroy();
+	virtual void MyDrawEdge(HDC hdc, LPRECT qrc, UBOOL bRaised);
+
 	void SaveWindowPos();
 	void MaybeDestroy();
 	void _CloseWindow();
@@ -354,7 +359,6 @@ class WINDOW_API WWindow : public FCommandTarget{
 	void PerformCreateWindowEx(DWORD dwExStyle, LPCTSTR lpWindowName, DWORD dwStyle, INT x, INT y, INT nWidth, INT nHeight, HWND hWndParent, HMENU hMenu, HINSTANCE hInstance);
 	void VerifyPosition();
 	void SetRedraw(UBOOL Redraw);
-	virtual void MyDrawEdge(HDC hdc, LPRECT qrc, UBOOL bRaised);
 
 	operator HWND() const{ return hWnd; }
 };
@@ -1332,13 +1336,17 @@ class WINDOW_API WPropertiesBase : public WWindow, public FControlSnoop{
 	WPropertiesBase(){}
 	WPropertiesBase(FName InPersistentName, WWindow* InOwnerWindow);
 
-	// WPropertiesBase interface.
+	// Overrides
+	virtual UBOOL OnClose();
+
+	// Virtual functions
 	virtual FTreeItem* GetRoot() = 0;
 	virtual INT GetDividerWidth() = 0;
 	virtual void ResizeList() = 0;
 	virtual void SetItemFocus(UBOOL FocusCurrent) = 0;
 	virtual void ForceRefresh() = 0;
 	virtual void BeginSplitterDrag() = 0;
+
 	FTreeItem* GetListItem(INT i);
 };
 
@@ -1589,29 +1597,32 @@ class WINDOW_API WProperties : public WPropertiesBase{
 	WProperties(){}
 	WProperties(FName InPersistentName, WWindow* InOwnerWindow = NULL);
 
-	void Serialize(FArchive& Ar);
-	void DoDestroy();
-	INT OnSetCursor();
-	void OnDestroy();
 	void OpenChildWindow(INT InControlId);
-	void OpenWindow(HWND hWndParent=NULL);
-	void OnActivate(UBOOL Active);
-	void OnSize(DWORD Flags, INT NewX, INT NewY);
-	void OnPaint();
-	void OnListDoubleClick();
-	void OnListSelectionChange();
-	void SnoopLeftMouseDown(WWindow* Src, FPoint P);
-	void SnoopRightMouseDown(WWindow* Src, FPoint P);
-	void SnoopChar(WWindow* Src, INT Char);
-	void SnoopKeyDown(WWindow* Src, INT Char);
-	INT GetDividerWidth();
-	virtual void BeginSplitterDrag();
-	void OnFinishSplitterDrag(WDragInterceptor* Drag, UBOOL Success);
-	virtual void SetValue(const TCHAR* Value);
-	virtual void SetItemFocus(UBOOL FocusCurrent);
+	void OpenWindow(HWND hWndParent = NULL);
+
+	// Overrides
+	virtual void SnoopChar(WWindow* Src, INT Char);
+	virtual void SnoopKeyDown(WWindow* Src, INT Char);
+	virtual void SnoopLeftMouseDown(WWindow* Src, FPoint P);
+	virtual void SnoopRightMouseDown(WWindow* Src, FPoint P);
+	virtual void Serialize(FArchive& Ar);
+	virtual void DoDestroy();
+	virtual void OnSize(DWORD Flags, INT NewX, INT NewY);
+	virtual void OnActivate(UBOOL Active);
+	virtual void OnPaint();
+	virtual void OnFinishSplitterDrag(WDragInterceptor* Drag, UBOOL Success);
+	virtual INT OnSetCursor();
+	virtual void OnDestroy();
+	virtual INT GetDividerWidth();
 	virtual void ResizeList();
+	virtual void SetItemFocus(UBOOL FocusCurrent);
 	virtual void ForceRefresh();
+	virtual void BeginSplitterDrag();
+
+	// Virtual functions
+	virtual void SetValue(const TCHAR* Value);
     virtual void ExpandAll();
+	virtual void RemoveActor(AActor* Actor);
 };
 
 /*-----------------------------------------------------------------------------
@@ -1692,8 +1703,10 @@ class WINDOW_API WObjectProperties : public WProperties{
 	WObjectProperties(){}
 	WObjectProperties(FName InPersistentName, DWORD InFlagMask, const TCHAR* InCaption, WWindow* InOwnerWindow, UBOOL InByCategory);
 
-	FTreeItem* GetRoot();
+	// Overrides
 	virtual void Show(UBOOL Show);
+	virtual FTreeItem* GetRoot();
+	virtual void RemoveActor(AActor* Actor);
 };
 
 /*-----------------------------------------------------------------------------

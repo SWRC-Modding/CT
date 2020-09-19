@@ -442,21 +442,24 @@ HRESULT __stdcall D3D8CreateDeviceOverride(FD3D8* D3D8,
 class MOD_API UModRenderDevice : public UD3DRenderDevice{
 	DECLARE_CLASS(UModRenderDevice, UD3DRenderDevice, 0, Mod)
 public:
-	static UObject* FOVChanger;
-	static FLOAT    FpsLimit;
+	typedef FLOAT(__fastcall*GetMaxTickRateFunc)(UEngine*, DWORD);
 
-	static FLOAT __fastcall EngineGetMaxTickRateOverride(UEngine* Self, int){
-		return FpsLimit;
+	static UObject*           FOVChanger;
+	static FLOAT              FpsLimit;
+	static GetMaxTickRateFunc OriginalGetMaxTickRate;
+
+	static FLOAT __fastcall EngineGetMaxTickRateOverride(UEngine* Self, DWORD Edx){
+		FLOAT MaxTickRate = OriginalGetMaxTickRate(Self, Edx);
+
+		return MaxTickRate <= 0.0f ? FpsLimit : MaxTickRate; // If the engine doesn't set it's own tick rate (i.e. GetMaxTickRate returns 0), we use FpsLimit instead
 	}
 
 	virtual UBOOL Init(){
-		UBOOL Result = Super::Init();
-
 		// Setting override function for maximum tick rate since the original always returns 0
-		if(GEngine->GetClass() == UGameEngine::StaticClass()){ // Not using IsA to allow custom subclasses to define their own tick rate
-			PatchVTable(GEngine, 49, EngineGetMaxTickRateOverride);
-			GConfig->GetFloat("Engine.GameEngine", "FpsLimit", FpsLimit);
-		}
+		MaybePatchVTable(&OriginalGetMaxTickRate, GEngine, 49, EngineGetMaxTickRateOverride);
+		GConfig->GetFloat("Engine.GameEngine", "FpsLimit", FpsLimit);
+
+		UBOOL Result = Super::Init();
 
 		if(Result)
 			MaybePatchVTable(&D3D8CreateDevice, Direct3D8, D3DVTableIndex_D3D8CreateDevice, D3D8CreateDeviceOverride);
@@ -530,7 +533,8 @@ public:
 	}
 };
 
-UObject* UModRenderDevice::FOVChanger = NULL;
-FLOAT    UModRenderDevice::FpsLimit   = 0.0f;
+UObject*                             UModRenderDevice::FOVChanger = NULL;
+FLOAT                                UModRenderDevice::FpsLimit   = 0.0f;
+UModRenderDevice::GetMaxTickRateFunc UModRenderDevice::OriginalGetMaxTickRate = NULL;
 
 IMPLEMENT_CLASS(UModRenderDevice)

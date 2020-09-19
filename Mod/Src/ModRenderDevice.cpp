@@ -453,8 +453,10 @@ public:
 		UBOOL Result = Super::Init();
 
 		// Setting override function for maximum tick rate since the original always returns 0
-		if(GEngine->GetClass() == UGameEngine::StaticClass()) // Not using IsA to allow custom subclasses to define their own tick rate
+		if(GEngine->GetClass() == UGameEngine::StaticClass()){ // Not using IsA to allow custom subclasses to define their own tick rate
 			PatchVTable(GEngine, 49, EngineGetMaxTickRateOverride);
+			GConfig->GetFloat("Engine.GameEngine", "FpsLimit", FpsLimit);
+		}
 
 		if(Result)
 			MaybePatchVTable(&D3D8CreateDevice, Direct3D8, D3DVTableIndex_D3D8CreateDevice, D3D8CreateDeviceOverride);
@@ -511,8 +513,10 @@ public:
 
 				return 1;
 			}else if(ParseCommand(&Cmd, "SETFPSLIMIT")){
-				if(appStrlen(Cmd) > 0)
-					FpsLimit = appAtof(Cmd);
+				if(appStrlen(Cmd) > 0){
+					FpsLimit = Max(0.0f, appAtof(Cmd));
+					GConfig->SetFloat("Engine.GameEngine", "FpsLimit", FpsLimit);
+				}
 
 				return 1;
 			}else if(ParseCommand(&Cmd, "GETFPSLIMIT")){

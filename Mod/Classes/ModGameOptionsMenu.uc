@@ -7,7 +7,7 @@ var() MenuSprite		OptionsDescBorder;
 
 var() MenuText			OptionDesc;
 
-const NUM_OPTIONS = 11;
+const NUM_OPTIONS = 12;
 
 var() MenuText			OptionLabels[NUM_OPTIONS];
 var() MenuButtonEnum	Options[NUM_OPTIONS];
@@ -129,6 +129,7 @@ simulated function Refresh()
 	local int i;
 	local float diff;
 	local float prevDiff;
+	local float fpsLimit;
 
 	i = SensitivityToScale( GetPlayerOwner().GetMouseSensitivity() );
 	Options[0].Current = i - 1;
@@ -162,6 +163,30 @@ simulated function Refresh()
 
 	Options[9].Current = i;
 	Options[10].Current = FOVChanger.HudArmsFOVFactor * 10;
+
+	// Same procedure for fps limit
+	fpsLimit = float(GetPlayerOwner().ConsoleCommand("GetFpsLimit"));
+
+	for(i = 0; i < Options[11].Items.Length;  ++i){
+		diff = float(Options[11].Items[i]) - fpsLimit;
+
+		if(Abs(diff) <= 0.1) // Tolerance to deal with floating point precision
+			break;
+
+		if(diff > 0.0 && prevDiff <= 0.0){
+			Options[11].Items.Insert(i, 1);
+			Options[11].Items[i] = string(fpsLimit);
+
+			break;
+		}
+
+		prevDiff = diff;
+	}
+
+	if(i == Options[11].Items.Length)
+		Options[11].Items[Options[11].Items.Length] = string(fpsLimit);
+
+	Options[11].Current = i;
 
 	if ( !bInMultiplayer )
 	{
@@ -326,6 +351,11 @@ simulated function ChangeOption( int i, int Delta )
 		case 10:
 			FOVChanger.HudArmsFOVFactor = float(Options[10].Items[Options[10].Current]);
 			FOVChanger.SetFOV(FOVChanger.FOV);
+
+			break;
+
+		case 11:
+			GetPlayerOwner().ConsoleCommand("SetFpsLimit" @ Options[11].Items[Options[11].Current]);
 	}
 
 	GetPlayerOwner().PropagateSettings();
@@ -406,6 +436,7 @@ defaultproperties
      OptionLabels(8)=(Text="TACTICAL MODE INTENSITY")
      OptionLabels(9)=(Text="FIELD OF VIEW")
      OptionLabels(10)=(Text="WEAPON FOV FACTOR")
+     OptionLabels(11)=(Text="FPS LIMIT")
      Options(0)=(Items=("1","2","3","4","5","6","7","8","9","10"),Blurred=(PosX=0.77375,PosY=0.12,ScaleX=0.6,ScaleY=0.6),BackgroundBlurred=(PosX=0.77375,PosY=0.12,ScaleX=0.26,ScaleY=0.02666),OnLeft="OnLeft",OnRight="OnRight",Pass=2,Style="ButtonEnumStyle1")
      Options(1)=(Items=("YES","NO"),Blurred=(PosY=0.16),BackgroundBlurred=(PosY=0.16))
      Options(2)=(Items=("ON","OFF"))
@@ -417,6 +448,7 @@ defaultproperties
      Options(8)=(Items=("0","1","2","3","4","5","6","7","8","9","10"))
      Options(9)=(Items=("85","90","95","100","105","110","115","120","125","130"))
      Options(10)=(Items=("0.0","0.1","0.2","0.3","0.4","0.5","0.6","0.7","0.8","0.9","1.0"))
+     Options(11)=(Items=("NONE","30","60","75","100","120","144","240","360"));
      OptionLeftArrows(0)=(Blurred=(WidgetTexture=Texture'GUIContent.Menu.CT_ArrowLeft',DrawColor=(B=255,G=255,R=255,A=255),DrawPivot=DP_MiddleMiddle,PosX=0.62625,PosY=0.12,ScaleX=0.5,ScaleY=0.5),Focused=(DrawColor=(B=255,G=255,R=255,A=255),ScaleX=0.65,ScaleY=0.65),bIgnoreController=1,OnSelect="OnLeft",Pass=2)
      OptionLeftArrows(1)=(Blurred=(PosX=0.62625,PosY=0.16))
      OptionLeftArrows(2)=(Blurred=(PosX=0.62625))
@@ -428,6 +460,7 @@ defaultproperties
      OptionLeftArrows(8)=(Blurred=(PosX=0.62625))
      OptionLeftArrows(9)=(Blurred=(PosX=0.62625))
      OptionLeftArrows(10)=(Blurred=(PosX=0.62625))
+     OptionLeftArrows(11)=(Blurred=(PosX=0.62625))
      OptionRightArrows(0)=(Blurred=(WidgetTexture=Texture'GUIContent.Menu.CT_ArrowRight',DrawColor=(B=255,G=255,R=255,A=255),DrawPivot=DP_MiddleMiddle,PosX=0.9225,PosY=0.12,ScaleX=0.5,ScaleY=0.5),Focused=(DrawColor=(B=255,G=255,R=255,A=255),ScaleX=0.65,ScaleY=0.65),bIgnoreController=1,OnSelect="OnRight",Pass=2)
      OptionRightArrows(1)=(Blurred=(PosX=0.9225,PosY=0.16))
      OptionRightArrows(2)=(Blurred=(PosX=0.9225))
@@ -439,6 +472,7 @@ defaultproperties
      OptionRightArrows(8)=(Blurred=(PosX=0.9225))
      OptionRightArrows(9)=(Blurred=(PosX=0.9225))
      OptionRightArrows(10)=(Blurred=(PosX=0.9225))
+     OptionRightArrows(11)=(Blurred=(PosX=0.9225))
      OptionDefaults(0)=5
      OptionDefaults(1)=1
      OptionDefaults(2)=1

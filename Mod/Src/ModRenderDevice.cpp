@@ -443,9 +443,18 @@ class MOD_API UModRenderDevice : public UD3DRenderDevice{
 	DECLARE_CLASS(UModRenderDevice, UD3DRenderDevice, 0, Mod)
 public:
 	static UObject* FOVChanger;
+	static FLOAT    FpsLimit;
+
+	static FLOAT __fastcall EngineGetMaxTickRateOverride(UEngine* Self, int){
+		return FpsLimit;
+	}
 
 	virtual UBOOL Init(){
 		UBOOL Result = Super::Init();
+
+		// Setting override function for maximum tick rate since the original always returns 0
+		if(GEngine->GetClass() == UGameEngine::StaticClass()) // Not using IsA to allow custom subclasses to define their own tick rate
+			PatchVTable(GEngine, 49, EngineGetMaxTickRateOverride);
 
 		if(Result)
 			MaybePatchVTable(&D3D8CreateDevice, Direct3D8, D3DVTableIndex_D3D8CreateDevice, D3D8CreateDeviceOverride);
@@ -493,13 +502,24 @@ public:
 	}
 
 	virtual UBOOL Exec(const TCHAR* Cmd, FOutputDevice& Ar){
-		if(!GIsEditor && ParseCommand(&Cmd, "SETFOV")){
-			float FOV = appAtof(Cmd);
+		if(!GIsEditor){
+			if(ParseCommand(&Cmd, "SETFOV")){
+				float FOV = appAtof(Cmd);
 
-			Ar.Logf("Setting field of view to %f", FOV);
-			FOVChanger->ProcessEvent(FName("SetFOV"), &FOV);
+				Ar.Logf("Setting field of view to %f", FOV);
+				FOVChanger->ProcessEvent(FName("SetFOV"), &FOV);
 
-			return 1;
+				return 1;
+			}else if(ParseCommand(&Cmd, "SETFPSLIMIT")){
+				if(appStrlen(Cmd) > 0)
+					FpsLimit = appAtof(Cmd);
+
+				return 1;
+			}else if(ParseCommand(&Cmd, "GETFPSLIMIT")){
+				Ar.Logf("%f", FpsLimit);
+
+				return 1;
+			}
 		}
 
 		return Super::Exec(Cmd, Ar);
@@ -507,5 +527,6 @@ public:
 };
 
 UObject* UModRenderDevice::FOVChanger = NULL;
+FLOAT    UModRenderDevice::FpsLimit   = 0.0f;
 
 IMPLEMENT_CLASS(UModRenderDevice)

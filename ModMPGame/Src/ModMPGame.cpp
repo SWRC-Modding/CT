@@ -350,6 +350,8 @@ void ABotSupport::SpawnNavigationPoint(UClass* NavPtClass, const FVector& Locati
 			++XLevel->iFirstNetRelevantActor;
 			++XLevel->iFirstDynamicActor;
 		}
+
+		bPathsHaveChanged = 1;
 	}else{
 		GLog->Logf(NAME_Error, "Failed to spawn %s", *NavPtClass->FriendlyName);
 		NavPtFailLocations.AddItem(Location);
@@ -473,6 +475,7 @@ void ABotSupport::BuildPaths(){
 	GIsEditor = 1;
 
 	GPathBuilder.definePaths(XLevel);
+	bPathsHaveChanged = 1;
 
 	GIsEditor = IsEd;
 	Level->bBegunPlay = 1; // Actor script events are only called if Level->bBegunPlay == true which is not the case when paths are loaded at startup
@@ -645,8 +648,7 @@ void ABotSupport::PostRender(class FLevelSceneNode* SceneNode, class FRenderInte
 }
 
 bool ABotSupport::ExecCmd(const char* Cmd, class APlayerController* PC){
-	if(!PC)
-		PC = GetLocalPlayerController();
+	// Commands for importing, exporting or building paths
 
 	if(CheckCommand(&Cmd, "IMPORTPATHS")){
 		ImportPaths();
@@ -664,8 +666,15 @@ bool ABotSupport::ExecCmd(const char* Cmd, class APlayerController* PC){
 		ClearPaths();
 
 		return true;
-	}else if(PC){
-		UClass* PutNavPtClass = NULL;
+	}
+
+	// Commands only available for players and not from the server console
+
+	if(!PC)
+		PC = GetLocalPlayerController();
+
+	if(PC){
+		// Commands for removing navigation points
 
 		if(CheckCommand(&Cmd, "REMOVENAVIGATIONPOINT")){
 			UBOOL IsEditor = GIsEditor;
@@ -677,6 +686,7 @@ bool ABotSupport::ExecCmd(const char* Cmd, class APlayerController* PC){
 				   ((PC->Pawn ? PC->Pawn->Location : PC->Location) - It->Location).SizeSquared() <= 40 * 40){
 					XLevel->DestroyActor(*It);
 					BuildPaths();
+					bPathsHaveChanged = 1;
 
 					break;
 				}
@@ -694,6 +704,8 @@ bool ABotSupport::ExecCmd(const char* Cmd, class APlayerController* PC){
 			for(TActorIterator<ANavigationPoint> It(XLevel, IT_StaticActors); It; ++It){
 				if(It->IsA(ANavigationPoint::StaticClass()) && !It->IsA(APlayerStart::StaticClass()))
 					XLevel->DestroyActor(*It);
+
+				bPathsHaveChanged = 1;
 			}
 
 			GIsEditor = IsEditor;
@@ -702,23 +714,18 @@ bool ABotSupport::ExecCmd(const char* Cmd, class APlayerController* PC){
 			BuildPaths();
 
 			return true;
-		}else if(CheckCommand(&Cmd, "PUTPATHNODE")){
-			PutNavPtClass = APathNode::StaticClass();
-		}else if(CheckCommand(&Cmd, "PUTCOVERPOINT")){
-			PutNavPtClass = ACoverPoint::StaticClass();
-		}else if(CheckCommand(&Cmd, "PUTPATROLPOINT")){
-			PutNavPtClass = APatrolPoint::StaticClass();
-		}else if(GIsClient){ // Commands only available ingame
-			if(CheckCommand(&Cmd, "SHOWPATHS")){
-				bShowPaths = 1;
-
-				return true;
-			}else if(CheckCommand(&Cmd, "HIDEPATHS")){
-				bShowPaths = 0;
-
-				return true;
-			}
 		}
+
+		// Commands for spawning navigation points
+
+		UClass* PutNavPtClass = NULL;
+
+		if(CheckCommand(&Cmd, "PUTPATHNODE"))
+			PutNavPtClass = APathNode::StaticClass();
+		else if(CheckCommand(&Cmd, "PUTCOVERPOINT"))
+			PutNavPtClass = ACoverPoint::StaticClass();
+		else if(CheckCommand(&Cmd, "PUTPATROLPOINT"))
+			PutNavPtClass = APatrolPoint::StaticClass();
 
 		if(PutNavPtClass){
 			FVector Loc;
@@ -738,6 +745,20 @@ bool ABotSupport::ExecCmd(const char* Cmd, class APlayerController* PC){
 				BuildPaths();
 
 			return true;
+		}
+
+		// Commands only available for the host of a non-dedicated server
+
+		if(GIsClient){
+			if(CheckCommand(&Cmd, "SHOWPATHS")){
+				bShowPaths = 1;
+
+				return true;
+			}else if(CheckCommand(&Cmd, "HIDEPATHS")){
+				bShowPaths = 0;
+
+				return true;
+			}
 		}
 	}
 

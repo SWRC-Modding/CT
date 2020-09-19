@@ -107,6 +107,7 @@ public:
     BITFIELD bAutoBuildPaths:1;
     BITFIELD bShowPaths:1;
     BITFIELD bPathsImported:1;
+    BITFIELD bPathsHaveChanged:1;
     BITFIELD bShowPathsOnClients:1;
     TArrayNoInit<FVector> NavPtFailLocations GCC_PACK(4);
     TArrayNoInit<FPatrolPoint> BotPatrolRoute;
@@ -182,6 +183,7 @@ public:
 	APatrolPoint::StaticClass(); \
 	ASmallNavigationPoint::StaticClass(); \
 	AInventorySpot::StaticClass(); \
+	UExportPathsCommandlet::StaticClass(); \
 
 #endif // __STATIC_LINK
 

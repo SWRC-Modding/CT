@@ -1,0 +1,15 @@
+{
+    "configurations": [
+        {
+            "name": "Win32",
+            "defines": [
+                "MOD_API=",
+                "MODMPGAME_API="
+            ],
+            "windowsSdkVersion": "10.0.18362.0",
+            "cppStandard": "c++03",
+            "intelliSenseMode": "msvc-x64"
+        }
+    ],
+    "version": 4
+}

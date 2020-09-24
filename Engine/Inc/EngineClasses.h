@@ -2591,6 +2591,120 @@ public:
 };
 
 /*
+ * FluidSurfaceInfo
+ */
+
+enum EFluidGridType{
+    FGT_Square,
+    FGT_Hexagonal,
+    FGT_MAX
+};
+
+class ENGINE_API AFluidSurfaceInfo : public AInfo{
+public:
+    DECLARE_CLASS(AFluidSurfaceInfo,AInfo,0,Engine)
+	NO_DEFAULT_CONSTRUCTOR(AFluidSurfaceInfo)
+
+	BYTE FluidGridType;
+	FLOAT FluidGridSpacing;
+    INT FluidXSize;
+    INT FluidYSize;
+	FLOAT FluidHeightScale;
+    FLOAT FluidSpeed;
+    FLOAT FluidDamping;
+    FLOAT FluidNoiseFrequency;
+    FRange FluidNoiseStrength;
+    BITFIELD TestRipple:1;
+    FLOAT TestRippleSpeed;
+    FLOAT TestRippleStrength;
+	FLOAT TestRippleRadius;
+    FLOAT UTiles;
+	FLOAT UOffset;
+    FLOAT VTiles;
+	FLOAT VOffset;
+	FLOAT AlphaCurveScale;
+	FLOAT AlphaHeightScale;
+	BYTE AlphaMax;
+	FLOAT ShootStrength;
+	FLOAT ShootRadius;
+	FLOAT RippleVelocityFactor;
+	FLOAT TouchStrength;
+	class UClass* ShootEffect;
+    BITFIELD OrientShootEffect:1;
+	class UClass* TouchEffect1;
+    BITFIELD OrientTouchEffect:1;
+	TArray<DWORD> ClampBitmap;
+	ATerrainInfo* ClampTerrain;
+	BITFIELD bShowBoundingBox:1;
+	BITFIELD bUseNoRenderZ:1;
+	FLOAT NoRenderZ;
+	FLOAT WarmUpTime;
+	FLOAT UpdateRate;
+	FColor FluidColor;
+    TArrayNoInit<FLOAT> Verts0;
+    TArrayNoInit<FLOAT> Verts1;
+	TArrayNoInit<BYTE>	VertAlpha;
+    INT LatestVerts;
+    FBox FluidBoundingBox;
+	FVector FluidOrigin;
+	FLOAT TimeRollover;
+    FLOAT TestRippleAng;
+	class UFluidSurfacePrimitive* Primitive;
+	TArrayNoInit<class AFluidSurfaceOscillator*> Oscillators;
+	BITFIELD bHasWarmedUp;
+
+	void Render(FDynamicActor* Actor, class FLevelSceneNode* SceneNode, TList<class FDynamicLight*>* Lights, FRenderInterface* RI);
+
+	void RenderEditorInfo(FLevelSceneNode* SceneNode,FRenderInterface* RI, FDynamicActor* FDA);
+
+	void Init();
+
+	void FillVertexBuffer(void* Dest);
+	void SimpleFillVertexBuffer(void* Dest);
+
+	void FillIndexBuffer(void* Data);
+	void SimpleFillIndexBuffer(void* Data);
+
+	void RebuildClampedBitmap();
+
+	void Pling(const FVector& Position, FLOAT Strength, FLOAT Radius);
+	void PlingVertex(INT x, INT y, FLOAT Strength);
+
+	inline UBOOL GetClampedBitmap(INT x, INT y){
+		INT BitIndex = x + y * FluidXSize;
+		return (ClampBitmap[BitIndex >> 5] & (1 << (BitIndex & 0x1f))) ? 1 : 0;
+	}
+
+	inline void SetClampedBitmap(INT x, INT y, UBOOL Clamp){
+		INT BitIndex = x + (y * FluidXSize);
+		INT Index = BitIndex >> 5;
+		DWORD Bitmask = 1 << (BitIndex & 0x1f);
+
+		if(Clamp)
+			ClampBitmap[Index] |= Bitmask;
+		else
+			ClampBitmap[Index] &= ~Bitmask;
+	}
+
+	FVector GetVertexPosLocal(INT x, INT y);
+	FVector GetVertexPosWorld(INT x, INT y);
+	void GetNearestIndex(const FVector& pos, INT& xIndex, INT& yIndex);
+
+	void UpdateSimulation(FLOAT DeltaTime);
+	void UpdateOscillatorList();
+
+
+	// Actor interface
+	virtual UBOOL Tick( FLOAT DeltaTime, enum ELevelTick TickType );
+	virtual void PostLoad();
+	virtual void PostEditChange();
+	virtual void PostEditMove();
+	virtual void Spawned();
+	virtual void Destroy();
+	virtual UPrimitive* GetPrimitive();
+};
+
+/*
  * IntangibleActor
  */
 

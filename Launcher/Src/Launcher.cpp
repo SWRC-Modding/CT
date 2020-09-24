@@ -7,31 +7,11 @@
 #include "../../Window/Inc/Window.h"
 #include "../../GameSpyMgr/Inc/GameSpyMgr.h"
 
-FOutputDeviceFile Log;
-FOutputDeviceWindowsError Error;
-FFeedbackContextCmd Warn; // TODO(Leon): Replace with FFeedbackContextWindows
-
 static struct FExecHook : public FExec{
-	FExecHook(){ GExec = this; }
-
 	UBOOL Exec(const TCHAR* Cmd, FOutputDevice& Ar){
 		guard(FExecHook::Exec);
 
 		if(ParseCommand(&Cmd, "SHOWLOG")){
-			if(!GLogWindow){
-				// Create log window if it does not yet exist
-				GLogWindow = new WLog(Log.Filename, Log.LogAr, "GameLog");
-				GLogWindow->OpenWindow(1, 0);
-
-				if(!GIsRunning)
-					GLogWindow->Log(NAME_Title, LocalizeGeneral("Start", "SWRepublicCommando"));
-				else
-					GLogWindow->Log(NAME_Title, LocalizeGeneral("Run", "SWRepublicCommando"));
-
-				if(GEngine)
-					GLogWindow->SetExec(GEngine);
-			}
-
 			GLogWindow->Show(1);
 			SetFocus(*GLogWindow);
 			GLogWindow->Display.ScrollCaret();
@@ -109,6 +89,7 @@ static struct FExecHook : public FExec{
 static void InitEngine(){
 	guard(InitEngine);
 	check(!GEngine);
+
 	DOUBLE LoadTime = appSeconds();
 
 	// First-run menu.
@@ -130,10 +111,8 @@ static void InitEngine(){
 
 	GEngine = ConstructObject<UEngine>(EngineClass);
 
-	if(GLogWindow){
-		GLogWindow->SetExec(GEngine);
-		GLogWindow->Log(NAME_Title, LocalizeGeneral("Run", "SWRepublicCommando"));
-	}
+	GLogWindow->SetExec(GEngine);
+	GLogWindow->Log(NAME_Title, LocalizeGeneral("Run", "SWRepublicCommando"));
 
 	GEngine->Init();
 	debugf("Startup time: %f seconds", appSeconds() - LoadTime);
@@ -206,10 +185,15 @@ static void MainLoop(){
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nShowCmd){
 	int ExitCode = EXIT_SUCCESS;
+	FOutputDeviceFile Log;
+	FOutputDeviceWindowsError Error;
+	FFeedbackContextCmd Warn; // TODO(Leon): Replace with FFeedbackContextWindows
 
 	GIsStarted = 1;
 
 	try{
+		GameSpyCDKeyResponseInterface CDKeyInterface;
+
 		GIsGuarded = 1;
 
 		appInit(appPackage(), lpCmdLine, &Log, &Error, &Warn, FConfigCacheIni::Factory, 1);
@@ -239,25 +223,23 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 		InitWindowing();
 
-		GameSpyCDKeyResponseInterface CDKeyInterface;
-
-		if(ParseParam(appCmdLine(), "LOG"))
-			LauncherExecHook.Exec("SHOWLOG", Log);
+		GLogWindow = new WLog(Log.Filename, Log.LogAr, "GameLog");
+		GLogWindow->OpenWindow(ParseParam(appCmdLine(), "LOG"), 0);
+		GLogWindow->Log(NAME_Title, LocalizeGeneral("Start", "SWRepublicCommando"));
 
 		InitEngine();
+
+		GExec = &LauncherExecHook;
 
 		if(GEngine && !GIsRequestingExit)
 			MainLoop();
 
-		if(GLogWindow)
-			GLogWindow->Log(NAME_Title, LocalizeGeneral("Exit", "SWRepublicCommando"));
+		GLogWindow->Log(NAME_Title, LocalizeGeneral("Exit", "SWRepublicCommando"));
 
-		if(GLogWindow){
-			if(GLogHook == GLogWindow)
-				GLogHook = NULL;
+		if(GLogHook == GLogWindow)
+			GLogHook = NULL;
 
-			delete GLogWindow;
-		}
+		delete GLogWindow;
 
 		appPreExit();
 

@@ -139,18 +139,20 @@ simulated function Refresh()
 	else
 		Options[1].Current = 1;
 
-	// Look for current FOV in list and get the index. If it is a custom one set via ini or console insert it into the options array.
-	// There will never be more than one custom FOV in the list at a time as this is only done to display the correct FOV
-	// even if it is not one of the default options.
+	// Look for current fps limit in list and get the index. If it is a custom one set via ini or console insert it into the options array.
+	// There will never be more than one custom value in the list at a time as this is only done to display the correct one even if it is not one of the default options.
+
+	fpsLimit = float(GetPlayerOwner().ConsoleCommand("GetFpsLimit"));
+
 	for(i = 0; i < Options[9].Items.Length;  ++i){
-		diff = float(Options[9].Items[i]) - class'FOVChanger'.default.FOV;
+		diff = float(Options[9].Items[i]) - fpsLimit;
 
 		if(Abs(diff) <= 0.1) // Tolerance to deal with floating point precision
 			break;
 
 		if(diff > 0.0 && prevDiff <= 0.0){
 			Options[9].Items.Insert(i, 1);
-			Options[9].Items[i] = string(class'FOVChanger'.default.FOV);
+			Options[9].Items[i] = string(fpsLimit);
 
 			break;
 		}
@@ -159,23 +161,20 @@ simulated function Refresh()
 	}
 
 	if(i == Options[9].Items.Length)
-		Options[9].Items[Options[9].Items.Length] = string(class'FOVChanger'.default.FOV);
+		Options[9].Items[Options[9].Items.Length] = string(fpsLimit);
 
 	Options[9].Current = i;
-	Options[10].Current = FOVChanger.HudArmsFOVFactor * 10;
 
-	// Same procedure for fps limit
-	fpsLimit = float(GetPlayerOwner().ConsoleCommand("GetFpsLimit"));
-
-	for(i = 0; i < Options[11].Items.Length;  ++i){
-		diff = float(Options[11].Items[i]) - fpsLimit;
+	// Same procedure for FOV
+	for(i = 0; i < Options[10].Items.Length;  ++i){
+		diff = float(Options[10].Items[i]) - class'FOVChanger'.default.FOV;
 
 		if(Abs(diff) <= 0.1) // Tolerance to deal with floating point precision
 			break;
 
 		if(diff > 0.0 && prevDiff <= 0.0){
-			Options[11].Items.Insert(i, 1);
-			Options[11].Items[i] = string(fpsLimit);
+			Options[10].Items.Insert(i, 1);
+			Options[10].Items[i] = string(class'FOVChanger'.default.FOV);
 
 			break;
 		}
@@ -183,10 +182,11 @@ simulated function Refresh()
 		prevDiff = diff;
 	}
 
-	if(i == Options[11].Items.Length)
-		Options[11].Items[Options[11].Items.Length] = string(fpsLimit);
+	if(i == Options[10].Items.Length)
+		Options[10].Items[Options[10].Items.Length] = string(class'FOVChanger'.default.FOV);
 
-	Options[11].Current = i;
+	Options[10].Current = i;
+	Options[11].Current = FOVChanger.HudArmsFOVFactor * 10;
 
 	if ( !bInMultiplayer )
 	{
@@ -236,6 +236,7 @@ simulated function Refresh()
 		DisableOption( 6 );
 		DisableOption( 7 );
 		DisableOption( 8 );
+		DisableOption( 9 );
 	}
 }
 
@@ -344,18 +345,18 @@ simulated function ChangeOption( int i, int Delta )
 			break;
 
 		case 9:
-			FOVChanger.SetFov(float(Options[9].Items[Options[9].Current]));
+			GetPlayerOwner().ConsoleCommand("SetFpsLimit" @ Options[9].Items[Options[9].Current]);
 
 			break;
 
 		case 10:
-			FOVChanger.HudArmsFOVFactor = float(Options[10].Items[Options[10].Current]);
-			FOVChanger.SetFOV(FOVChanger.FOV);
+			FOVChanger.SetFov(float(Options[10].Items[Options[10].Current]));
 
 			break;
 
 		case 11:
-			GetPlayerOwner().ConsoleCommand("SetFpsLimit" @ Options[11].Items[Options[11].Current]);
+			FOVChanger.HudArmsFOVFactor = float(Options[11].Items[Options[11].Current]);
+			FOVChanger.SetFOV(FOVChanger.FOV);
 	}
 
 	GetPlayerOwner().PropagateSettings();
@@ -434,9 +435,9 @@ defaultproperties
      OptionLabels(6)=(Text="AUTO PULL MANEUVERS")
      OptionLabels(7)=(Text="TACTICAL VISOR MODE")
      OptionLabels(8)=(Text="TACTICAL MODE INTENSITY")
-     OptionLabels(9)=(Text="FIELD OF VIEW")
-     OptionLabels(10)=(Text="WEAPON FOV FACTOR")
-     OptionLabels(11)=(Text="FPS LIMIT")
+     OptionLabels(9)=(Text="FPS LIMIT")
+     OptionLabels(10)=(Text="FIELD OF VIEW")
+     OptionLabels(11)=(Text="WEAPON FOV FACTOR")
      Options(0)=(Items=("1","2","3","4","5","6","7","8","9","10"),Blurred=(PosX=0.77375,PosY=0.12,ScaleX=0.6,ScaleY=0.6),BackgroundBlurred=(PosX=0.77375,PosY=0.12,ScaleX=0.26,ScaleY=0.02666),OnLeft="OnLeft",OnRight="OnRight",Pass=2,Style="ButtonEnumStyle1")
      Options(1)=(Items=("YES","NO"),Blurred=(PosY=0.16),BackgroundBlurred=(PosY=0.16))
      Options(2)=(Items=("ON","OFF"))
@@ -446,9 +447,9 @@ defaultproperties
      Options(6)=(Items=("YES","NO"))
      Options(7)=(Items=("ON","OFF","CYCLE"))
      Options(8)=(Items=("0","1","2","3","4","5","6","7","8","9","10"))
-     Options(9)=(Items=("85","90","95","100","105","110","115","120","125","130"))
-     Options(10)=(Items=("0.0","0.1","0.2","0.3","0.4","0.5","0.6","0.7","0.8","0.9","1.0"))
-     Options(11)=(Items=("NONE","30","60","75","100","120","144","240","360"));
+     Options(9)=(Items=("NONE","30","60","75","100","120","144","240","360"));
+     Options(10)=(Items=("85","90","95","100","105","110","115","120","125","130"))
+     Options(11)=(Items=("0.0","0.1","0.2","0.3","0.4","0.5","0.6","0.7","0.8","0.9","1.0"))
      OptionLeftArrows(0)=(Blurred=(WidgetTexture=Texture'GUIContent.Menu.CT_ArrowLeft',DrawColor=(B=255,G=255,R=255,A=255),DrawPivot=DP_MiddleMiddle,PosX=0.62625,PosY=0.12,ScaleX=0.5,ScaleY=0.5),Focused=(DrawColor=(B=255,G=255,R=255,A=255),ScaleX=0.65,ScaleY=0.65),bIgnoreController=1,OnSelect="OnLeft",Pass=2)
      OptionLeftArrows(1)=(Blurred=(PosX=0.62625,PosY=0.16))
      OptionLeftArrows(2)=(Blurred=(PosX=0.62625))
@@ -479,7 +480,7 @@ defaultproperties
      OptionDefaults(5)=1
      OptionDefaults(7)=2
      OptionDefaults(8)=2
-     OptionDefaults(10)=10
+     OptionDefaults(11)=10
      GameLabel=(MenuFont=Font'OrbitFonts.OrbitBold15',Text="GAME",DrawColor=(A=255),DrawPivot=DP_MiddleLeft,PosX=0.05375,PosY=0.2,ScaleX=1,ScaleY=0.8,Pass=2)
      GameLabelBackground=(WidgetTexture=Texture'GUIContent.Menu.CT_ButtonFocus',DrawColor=(B=255,G=255,R=255,A=192),DrawPivot=DP_MiddleLeft,PosX=0.04375,PosY=0.2,ScaleX=0.245,ScaleY=0.04333,ScaleMode=MSCM_FitStretch,Pass=1)
      GameLabelConnector=(WidgetTexture=Texture'GUIContent.Menu.CT_ButtonFocus',DrawColor=(B=255,G=255,R=255,A=192),DrawPivot=DP_MiddleLeft,PosX=0.295,PosY=0.2,ScaleX=0.005,ScaleY=0.04333,ScaleMode=MSCM_FitStretch)

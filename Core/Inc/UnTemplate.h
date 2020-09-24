@@ -1588,6 +1588,57 @@ void Sort(T* First, INT Num){
 	unguard;
 }
 
+/*----------------------------------------------------------------------------
+	TDoubleLinkedList.
+----------------------------------------------------------------------------*/
+
+//
+// Simple double-linked list template.
+//
+template<typename T>
+class TDoubleLinkedList : public T{
+public:
+	TDoubleLinkedList*  Next;
+	TDoubleLinkedList** PrevLink;
+
+	void Unlink(){
+		if( ext)
+			Next->PrevLink = PrevLink;
+
+		*PrevLink = Next;
+	}
+
+	void Link(TDoubleLinkedList*& Before){
+		if(Before)
+			Before->PrevLink = &Next;
+
+		Next     = Before;
+		PrevLink = &Before;
+		Before   = this;
+	}
+};
+
+/*----------------------------------------------------------------------------
+	TList.
+----------------------------------------------------------------------------*/
+
+//
+// Simple single-linked list template.
+//
+template<typename ElementType>
+class TList{
+public:
+	ElementType         Element;
+	TList<ElementType>* Next;
+
+	// Constructor.
+
+	TList(ElementType InElement,TList<ElementType>* InNext = NULL){
+		Element = InElement;
+		Next = InNext;
+	}
+};
+
 /*-----------------------------------------------------------------------------
 	The End.
 -----------------------------------------------------------------------------*/

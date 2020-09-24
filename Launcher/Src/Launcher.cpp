@@ -106,6 +106,22 @@ static void InitEngine(){
 
 	GConfig->SetInt("FirstRun", "FirstRun", FirstRun);
 
+	// Locate Mod.ModRenderDevice and use it if it exists.
+	{
+		FString RenderDeviceClass;
+
+		GConfig->GetString("Engine.Engine", "RenderDevice", RenderDeviceClass, "System.ini");
+
+		if(RenderDeviceClass == "D3DDrv.D3DRenderDevice"){ // Only use custom render device if there isn't another one specified
+			UClass* ModRenderDeviceClass = LoadClass<URenderDevice>(NULL, "Mod.ModRenderDevice", NULL, LOAD_NoWarn | LOAD_Quiet, NULL);
+
+			if(ModRenderDeviceClass){
+				GLog->Log("Using Mod.ModRenderDevice");
+				GConfig->SetString("Engine.Engine", "RenderDevice", "Mod.ModRenderDevice", "System.ini");
+			}
+		}
+	}
+
 	// Create game engine.
 	UClass* EngineClass = LoadClass<UEngine>(NULL, "ini:Engine.Engine.GameEngine", NULL, LOAD_NoFail, NULL);
 
@@ -204,22 +220,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		GIsScriptable = 1;
 		GLazyLoad = ParseParam(appCmdLine(), "LAZY");
 		GUseFrontEnd = ParseParam(appCmdLine(), "NOUI") == 0;
-
-		// Using Mod.ModRenderDevice if it exists.
-		{
-			FString RenderDeviceClass;
-
-			GConfig->GetString("Engine.Engine", "RenderDevice", RenderDeviceClass, "System.ini");
-
-			if(RenderDeviceClass == "D3DDrv.D3DRenderDevice"){ // Only use custom render device if there isn't another one specified
-				UClass* ModRenderDeviceClass = LoadClass<URenderDevice>(NULL, "Mod.ModRenderDevice", NULL, LOAD_NoWarn | LOAD_Quiet, NULL);
-
-				if(ModRenderDeviceClass){
-					GLog->Log("Using Mod.ModRenderDevice");
-					GConfig->SetString("Engine.Engine", "RenderDevice", "Mod.ModRenderDevice", "System.ini");
-				}
-			}
-		}
 
 		InitWindowing();
 

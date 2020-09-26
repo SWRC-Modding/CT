@@ -392,6 +392,26 @@ struct CORE_API FScriptDelegate{
 };
 
 /*-----------------------------------------------------------------------------
+	FPropertyInstance.
+-----------------------------------------------------------------------------*/
+struct CORE_API FPropertyInstance{
+	struct PropertyInfo{
+		UProperty* Property;
+		INT        ArrayIndex;
+	};
+
+	TArray<PropertyInfo> NestedProperties;
+
+	FPropertyInstance(UProperty*, INT);
+
+	void AddNesting(UProperty*, int);
+	BYTE* GetAddress(void*) const;
+	UProperty* GetProperty() const;
+	bool Matches(void*, void*) const;
+	void SetObjectValue(void*, void*) const;
+};
+
+/*-----------------------------------------------------------------------------
 	UObject.
 -----------------------------------------------------------------------------*/
 

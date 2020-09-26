@@ -61,13 +61,8 @@ MOD_API struct EditorFixes{
 		if(!GIsEditor || GIsUCC)
 			return;
 
-		void* handle = appGetDllHandle(*(FStringTemp(appBaseDir()) * appPackage() + ".exe")); // This works even if the exe was renamed
-		check(handle);
-		void** vfPtr = static_cast<void**>(appGetDllExport(handle, "??_7UUnrealEdEngine@@6BUObject@@@"));
-		check(vfPtr);
-
-		OriginalUEditorEngineTick = static_cast<void(__fastcall*)(USubsystem*, DWORD, FLOAT)>(PatchVTable(&vfPtr, 32, UEditorEngineTickOverride));
-
-		appFreeDllHandle(handle); // Not actually freeing, just decrementing the refCount in case that could break something later
+		OriginalUEditorEngineTick = static_cast<void(__fastcall*)(USubsystem*, DWORD, FLOAT)>(
+			PatchDllClassVTable(*(FStringTemp(appBaseDir()) * appPackage() + ".exe"), "UUnrealEdEngine", "UObject", 32, UEditorEngineTickOverride)
+		);
 	}
 } GEditorFixes;

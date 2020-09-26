@@ -20,6 +20,28 @@ void* PatchVTable(void* Object, INT Index, void* NewFunc){
 	return OldFunc;
 }
 
+void* PatchDllClassVTable(const TCHAR* DllName, const TCHAR* ClassName, const TCHAR* VTableName, INT Index, void* NewFunc){
+	void* Handle = appGetDllHandle(DllName);
+
+	if(!Handle){
+		GLog->Logf(NAME_Error, "Unable to patch vtable for class '%s': Failed to load library '%s'", ClassName, DllName);
+
+		return NULL;
+	}
+
+	void** VTable = static_cast<void**>(appGetDllExport(Handle, *(FStringTemp("??_7") + ClassName + "@@6B" + VTableName + "@@@")));
+
+	if(!VTable){
+		GLog->Logf(NAME_Error, "Unable to patch vtable for class '%s': Dll export for vtable '%s' not found", ClassName, VTableName);
+
+		return NULL;
+	}
+
+	appFreeDllHandle(Handle); // Decrementing reference count just in case. This might cause a crash later if the dll wasn't already loaded which is required.
+
+	return PatchVTable(&VTable, Index, NewFunc);
+}
+
 /*
  * FunctionOverride
  */

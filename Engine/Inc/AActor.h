@@ -115,602 +115,73 @@ public:
 
 	using UObject::ProcessEvent; // Prevents the non-virtual ProcessEvent from being shadowed by the virtual override
 
-	//Events
+	// Events
 	void AddToSquadInterest();
 	void RemoveFromSquadInterest();
 	void AddToTargetList();
 	void RemoveFromTargetList();
 	void ResetCollisionSize();
 	UBOOL Move(const FVector& Delta);
-
-	void AnimLoopEnd(FLOAT LoopStart){
-		DECLARE_NAME(AnimLoopEnd);
-		struct{
-			FLOAT LoopStart;
-		} Parms;
-		Parms.LoopStart=LoopStart;
-		ProcessEvent(NAnimLoopEnd, &Parms);
-	}
-
-	void AnimEnd(INT Channel){
-		FName NAnimEnd(NAME_AnimEnd);
-		if(!IsProbing(NAnimEnd))
-			return;
-		struct{
-			INT Channel;
-		} Parms;
-		Parms.Channel=Channel;
-		ProcessEvent(NAnimEnd, &Parms);
-	}
-
-	AActor* SpawnAttachment(FName BoneName, class UClass* ActorClass, class UStaticMesh* Mesh){
-		DECLARE_NAME(SpawnAttachment);
-		struct{
-			FName BoneName;
-			class UClass* ActorClass;
-			class UStaticMesh* Mesh;
-			AActor* ReturnValue;
-		} Parms;
-		Parms.BoneName=BoneName;
-		Parms.ActorClass=ActorClass;
-		Parms.Mesh=Mesh;
-		Parms.ReturnValue=0;
-		ProcessEvent(NSpawnAttachment, &Parms);
-		return Parms.ReturnValue;
-	}
-
-	void DestroyAttachment(FName BoneName){
-		DECLARE_NAME(DestroyAttachment);
-		struct{
-			FName BoneName;
-		} Parms;
-		Parms.BoneName=BoneName;
-		ProcessEvent(NDestroyAttachment, &Parms);
-	}
-
-	void KImpact(AActor* Other, const FVector& pos, const FVector& impactVel, const FVector& impactNorm, BYTE MaterialHit){
-		DECLARE_NAME(KImpact);
-		struct{
-			AActor* Other;
-			FVector pos;
-			FVector impactVel;
-			FVector impactNorm;
-			BYTE MaterialHit;
-		} Parms;
-		Parms.Other=Other;
-		Parms.pos=pos;
-		Parms.impactVel=impactVel;
-		Parms.impactNorm=impactNorm;
-		Parms.MaterialHit=MaterialHit;
-		ProcessEvent(NKImpact, &Parms);
-	}
-
-	void KVelDropBelow(){
-		DECLARE_NAME(KVelDropBelow);
-		ProcessEvent(NKVelDropBelow, NULL);
-	}
-
-	void KAtRest(){
-		DECLARE_NAME(KAtRest);
-		ProcessEvent(NKAtRest, NULL);
-	}
-
-	void KSkelConvulse(){
-		DECLARE_NAME(KSkelConvulse);
-		ProcessEvent(NKSkelConvulse, NULL);
-	}
-
-	void KApplyForce(FVector& Force, FVector& Torque){
-		DECLARE_NAME(KApplyForce);
-		struct{
-			FVector Force;
-			FVector Torque;
-		} Parms;
-		Parms.Force=Force;
-		Parms.Torque=Torque;
-		ProcessEvent(NKApplyForce, &Parms);
-		Force=Parms.Force;
-		Torque=Parms.Torque;
-	}
-
-	UBOOL KUpdateState(FKRigidBodyState& newState){
-		DECLARE_NAME(KUpdateState);
-		struct{
-			FKRigidBodyState newState;
-			UBOOL ReturnValue;
-		} Parms;
-		Parms.newState=newState;
-		Parms.ReturnValue=0;
-		ProcessEvent(NKUpdateState, &Parms);
-		newState=Parms.newState;
-		return Parms.ReturnValue;
-	}
-
-	void Destroyed(){
-		FName NDestroyed(NAME_Destroyed);
-		if(!IsProbing(NDestroyed))
-			return;
-		ProcessEvent(NDestroyed, NULL);
-	}
-
-	void GainedChild(AActor* Other){
-		FName NGainedChild(NAME_GainedChild);
-		if(!IsProbing(NGainedChild))
-			return;
-		struct{
-			AActor* Other;
-		} Parms;
-		Parms.Other=Other;
-		ProcessEvent(NGainedChild, &Parms);
-	}
-
-	void LostChild(AActor* Other){
-		FName NLostChild(NAME_LostChild);
-		if(!IsProbing(NLostChild))
-			return;
-		struct{
-			AActor* Other;
-		} Parms;
-		Parms.Other=Other;
-		ProcessEvent(NLostChild, &Parms);
-	}
-
-	void Tick(FLOAT DeltaTime){
-		FName NTick(NAME_Tick);
-		if(!IsProbing(NTick))
-			return;
-		struct{
-			FLOAT DeltaTime;
-		} Parms;
-		Parms.DeltaTime=DeltaTime;
-		ProcessEvent(NTick, &Parms);
-	}
-
-	void PostNetworkReceive(){
-		DECLARE_NAME(PostNetworkReceive);
-		ProcessEvent(NPostNetworkReceive, NULL);
-	}
-
-	void Trigger(AActor* Other, class APawn* EventInstigator){
-		FName NTrigger(NAME_Trigger);
-		if(!IsProbing(NTrigger))
-			return;
-		struct{
-			AActor* Other;
-			class APawn* EventInstigator;
-		} Parms;
-		Parms.Other=Other;
-		Parms.EventInstigator=EventInstigator;
-		ProcessEvent(NTrigger, &Parms);
-	}
-
-	void UnTrigger(AActor* Other, class APawn* EventInstigator){
-		FName NUnTrigger(NAME_UnTrigger);
-		if(!IsProbing(NUnTrigger))
-			return;
-		struct{
-			AActor* Other;
-			class APawn* EventInstigator;
-		} Parms;
-		Parms.Other=Other;
-		Parms.EventInstigator=EventInstigator;
-		ProcessEvent(NUnTrigger, &Parms);
-	}
-
-	void BeginEvent(){
-		DECLARE_NAME(BeginEvent);
-		ProcessEvent(NBeginEvent, NULL);
-	}
-
-	void EndEvent(){
-		DECLARE_NAME(EndEvent);
-		ProcessEvent(NEndEvent, NULL);
-	}
-
-	void Timer(){
-		FName NTimer(NAME_Timer);
-		if(!IsProbing(NTimer))
-			return;
-		ProcessEvent(NTimer, NULL);
-	}
-
-	void HitWall(const FVector& HitNormal, AActor* HitWall, BYTE KindOfMaterial){
-		FName NHitWall(NAME_HitWall);
-		if(!IsProbing(NHitWall))
-			return;
-		struct{
-			FVector HitNormal;
-			AActor* HitWall;
-			BYTE KindOfMaterial;
-		} Parms;
-		Parms.HitNormal=HitNormal;
-		Parms.HitWall=HitWall;
-		Parms.KindOfMaterial=KindOfMaterial;
-		ProcessEvent(NHitWall, &Parms);
-	}
-
-	void Falling(){
-		FName NFalling(NAME_Falling);
-		if(!IsProbing(NFalling))
-			return;
-		ProcessEvent(NFalling, NULL);
-	}
-
-	void Landed(const FVector& HitNormal){
-		FName NLanded(NAME_Landed);
-		if(!IsProbing(NLanded))
-			return;
-		struct{
-			FVector HitNormal;
-		} Parms;
-		Parms.HitNormal=HitNormal;
-		ProcessEvent(NLanded, &Parms);
-	}
-
-	void ZoneChange(AZoneInfo* NewZone){
-		FName NZoneChange(NAME_ZoneChange);
-		if(!IsProbing(NZoneChange))
-			return;
-		struct{
-			AZoneInfo* NewZone;
-		} Parms;
-		Parms.NewZone=NewZone;
-		ProcessEvent(NZoneChange, &Parms);
-	}
-
-	void PhysicsVolumeChange(class APhysicsVolume* NewVolume){
-		FName NPhysicsVolumeChange(NAME_PhysicsVolumeChange);
-		if(!IsProbing(NPhysicsVolumeChange))
-			return;
-		struct{
-			class APhysicsVolume* NewVolume;
-		} Parms;
-		Parms.NewVolume=NewVolume;
-		ProcessEvent(NPhysicsVolumeChange, &Parms);
-	}
-
-	void Touch(AActor* Other){
-		FName NTouch(NAME_Touch);
-		if(!IsProbing(NTouch))
-			return;
-		struct{
-			AActor* Other;
-		} Parms;
-		Parms.Other=Other;
-		ProcessEvent(NTouch, &Parms);
-	}
-
-	void PostTouch(AActor* Other){
-		FName NPostTouch(NAME_PostTouch);
-		if(!IsProbing(NPostTouch))
-			return;
-		struct{
-			AActor* Other;
-		} Parms;
-		Parms.Other=Other;
-		ProcessEvent(NPostTouch, &Parms);
-	}
-
-	void UnTouch(AActor* Other){
-		FName NUnTouch(NAME_UnTouch);
-		if(!IsProbing(NUnTouch))
-			return;
-		struct{
-			AActor* Other;
-		} Parms;
-		Parms.Other=Other;
-		ProcessEvent(NUnTouch, &Parms);
-	}
-
-	void Bump(AActor* Other){
-		FName NBump(NAME_Bump);
-		if(!IsProbing(NBump))
-			return;
-		struct{
-			AActor* Other;
-		} Parms;
-		Parms.Other=Other;
-		ProcessEvent(NBump, &Parms);
-	}
-
-	void BaseChange(){
-		FName NBaseChange(NAME_BaseChange);
-		if(!IsProbing(NBaseChange))
-			return;
-		ProcessEvent(NBaseChange, NULL);
-	}
-
-	void Attach(AActor* Other){
-		FName NAttach(NAME_Attach);
-		if(!IsProbing(NAttach))
-			return;
-		struct{
-			AActor* Other;
-		} Parms;
-		Parms.Other=Other;
-		ProcessEvent(NAttach, &Parms);
-	}
-
-	void Detach(AActor* Other){
-		FName NDetach(NAME_Detach);
-		if(!IsProbing(NDetach))
-			return;
-		struct{
-			AActor* Other;
-		} Parms;
-		Parms.Other=Other;
-		ProcessEvent(NDetach, &Parms);
-	}
-
-	UBOOL EncroachingOn(AActor* Other){
-		FName NEncroachingOn(NAME_EncroachingOn);
-		if(!IsProbing(NEncroachingOn))
-			return 0;
-		struct{
-			AActor* Other;
-			UBOOL ReturnValue;
-		} Parms;
-		Parms.Other=Other;
-		Parms.ReturnValue=0;
-		ProcessEvent(NEncroachingOn, &Parms);
-		return Parms.ReturnValue;
-	}
-
-	void EncroachedBy(AActor* Other){
-		FName NEncroachedBy(NAME_EncroachedBy);
-		if(!IsProbing(NEncroachedBy))
-			return;
-		struct{
-			AActor* Other;
-		} Parms;
-		Parms.Other=Other;
-		ProcessEvent(NEncroachedBy, &Parms);
-	}
-
-	void FinishedInterpolation(){
-		DECLARE_NAME(FinishedInterpolation);
-		ProcessEvent(NFinishedInterpolation, NULL);
-	}
-
-	void EndedRotation(){
-		FName NEndedRotation(NAME_EndedRotation);
-		if(!IsProbing(NEndedRotation))
-			return;
-		ProcessEvent(NEndedRotation, NULL);
-	}
-
-	void UsedBy(class APawn* User){
-		DECLARE_NAME(UsedBy);
-		struct{
-			class APawn* User;
-		} Parms;
-		Parms.User=User;
-		ProcessEvent(NUsedBy, &Parms);
-	}
-
-	void FellOutOfWorld(BYTE KillType){
-		DECLARE_NAME(FellOutOfWorld);
-		struct{
-			BYTE KillType;
-		} Parms;
-		Parms.KillType=KillType;
-		ProcessEvent(NFellOutOfWorld, &Parms);
-	}
-
-	void KilledBy(class APawn* EventInstigator, class UClass* DamageType){
-		DECLARE_NAME(KilledBy);
-		struct{
-			class APawn* EventInstigator;
-			class UClass* DamageType;
-		} Parms;
-		Parms.EventInstigator=EventInstigator;
-		Parms.DamageType=DamageType;
-		ProcessEvent(NKilledBy, &Parms);
-	}
-
-	FLOAT TakeDamage(FLOAT Damage, class APawn* EventInstigator, const FVector& HitLocation, const FVector& Momentum, class UClass* DamageType, FName BoneName){
-		DECLARE_NAME(TakeDamage);
-		struct{
-			FLOAT Damage;
-			class APawn* EventInstigator;
-			FVector HitLocation;
-			FVector Momentum;
-			class UClass* DamageType;
-			FName BoneName;
-			FLOAT ReturnValue;
-		} Parms;
-		Parms.Damage=Damage;
-		Parms.EventInstigator=EventInstigator;
-		Parms.HitLocation=HitLocation;
-		Parms.Momentum=Momentum;
-		Parms.DamageType=DamageType;
-		Parms.BoneName=BoneName;
-		Parms.ReturnValue=0;
-		ProcessEvent(NTakeDamage, &Parms);
-		return Parms.ReturnValue;
-	}
-
-	void TornOff(){
-		DECLARE_NAME(TornOff);
-		ProcessEvent(NTornOff, NULL);
-	}
-
+	void AnimLoopEnd(FLOAT LoopStart);
+	void AnimEnd(INT Channel);
+	AActor* SpawnAttachment(FName BoneName, class UClass* ActorClass, class UStaticMesh* Mesh);
+	void DestroyAttachment(FName BoneName);
+	void KImpact(AActor* Other, const FVector& pos, const FVector& impactVel, const FVector& impactNorm, BYTE MaterialHit);
+	void KVelDropBelow();
+	void KAtRest();
+	void KSkelConvulse();
+	void KApplyForce(FVector& Force, FVector& Torque);
+	UBOOL KUpdateState(FKRigidBodyState& newState);
+	void Destroyed();
+	void GainedChild(AActor* Other);
+	void LostChild(AActor* Other);
+	void Tick(FLOAT DeltaTime);
+	void PostNetworkReceive();
+	void Trigger(AActor* Other, class APawn* EventInstigator);
+	void UnTrigger(AActor* Other, class APawn* EventInstigator);
+	void BeginEvent();
+	void EndEvent();
+	void Timer();
+	void HitWall(const FVector& HitNormal, AActor* HitWall, BYTE KindOfMaterial);
+	void Falling();
+	void Landed(const FVector& HitNormal);
+	void ZoneChange(AZoneInfo* NewZone);
+	void PhysicsVolumeChange(class APhysicsVolume* NewVolume);
+	void Touch(AActor* Other);
+	void PostTouch(AActor* Other);
+	void UnTouch(AActor* Other);
+	void Bump(AActor* Other);
+	void BaseChange();
+	void Attach(AActor* Other);
+	void Detach(AActor* Other);
+	UBOOL EncroachingOn(AActor* Other);
+	void EncroachedBy(AActor* Other);
+	void FinishedInterpolation();
+	void EndedRotation();
+	void UsedBy(class APawn* User);
+	void FellOutOfWorld(BYTE KillType);
+	void KilledBy(class APawn* EventInstigator, class UClass* DamageType);
+	FLOAT TakeDamage(FLOAT Damage, class APawn* EventInstigator, const FVector& HitLocation, const FVector& Momentum, class UClass* DamageType, FName BoneName);
+	void TornOff();
 	FVector CalcTrajectoryVelocity(const FVector& InitialPosition, const FVector& TargetPosition, FLOAT HorizontalVelocity, UBOOL AllowFlatArcs);
-
-	UBOOL PreTeleport(class ATeleporter* InTeleporter){
-		DECLARE_NAME(PreTeleport);
-		struct{
-			class ATeleporter* InTeleporter;
-			UBOOL ReturnValue;
-		} Parms;
-		Parms.InTeleporter=InTeleporter;
-		Parms.ReturnValue=0;
-		ProcessEvent(NPreTeleport, &Parms);
-		return Parms.ReturnValue;
-	}
-
-	void PostTeleport(class ATeleporter* OutTeleporter){
-		DECLARE_NAME(PostTeleport);
-		struct{
-			class ATeleporter* OutTeleporter;
-		} Parms;
-		Parms.OutTeleporter=OutTeleporter;
-		ProcessEvent(NPostTeleport, &Parms);
-	}
-
-	void BeginPlay(){
-		FName NBeginPlay(NAME_BeginPlay);
-		if(!IsProbing(NBeginPlay))
-			return;
-		ProcessEvent(NBeginPlay, NULL);
-	}
-
-	void RenderTexture(class UScriptedTexture* Tex){
-		DECLARE_NAME(RenderTexture);
-		struct{
-			class UScriptedTexture* Tex;
-		} Parms;
-		Parms.Tex=Tex;
-		ProcessEvent(NRenderTexture, &Parms);
-	}
-
-	void PreBeginPlay(){
-		FName NPreBeginPlay(NAME_PreBeginPlay);
-		if(!IsProbing(NPreBeginPlay))
-			return;
-		ProcessEvent(NPreBeginPlay, NULL);
-	}
-
-	void BroadcastLocalizedMessage(class UClass* MessageClass, INT Switch, class APlayerReplicationInfo* RelatedPRI_1, class APlayerReplicationInfo* RelatedPRI_2, class UObject* OptionalObject){
-		DECLARE_NAME(BroadcastLocalizedMessage);
-		struct{
-			class UClass* MessageClass;
-			INT Switch;
-			class APlayerReplicationInfo* RelatedPRI_1;
-			class APlayerReplicationInfo* RelatedPRI_2;
-			class UObject* OptionalObject;
-		} Parms;
-		Parms.MessageClass=MessageClass;
-		Parms.Switch=Switch;
-		Parms.RelatedPRI_1=RelatedPRI_1;
-		Parms.RelatedPRI_2=RelatedPRI_2;
-		Parms.OptionalObject=OptionalObject;
-		ProcessEvent(NBroadcastLocalizedMessage, &Parms);
-	}
-
-	void PostBeginPlay(){
-		FName NPostBeginPlay(NAME_PostBeginPlay);
-		if(!IsProbing(NPostBeginPlay))
-			return;
-		ProcessEvent(NPostBeginPlay, NULL);
-	}
-
-	void SetInitialState(){
-		DECLARE_NAME(SetInitialState);
-		ProcessEvent(NSetInitialState, NULL);
-	}
-
-	void PostLoadBeginPlay(){
-		FName NPostLoadBeginPlay(NAME_PostLoadBeginPlay);
-		if(!IsProbing(NPostLoadBeginPlay))
-			return;
-		ProcessEvent(NPostLoadBeginPlay, NULL);
-	}
-
-	void PostNetBeginPlay(){
-		DECLARE_NAME(PostNetBeginPlay);
-		ProcessEvent(NPostNetBeginPlay, NULL);
-	}
-
-	void HurtRadius(FLOAT DamageAmount, FLOAT DamageRadius, class UClass* DamageType, FLOAT Momentum, const FVector& HitLocation, AActor* ExcludedActor){
-		DECLARE_NAME(HurtRadius);
-		struct{
-			FLOAT DamageAmount;
-			FLOAT DamageRadius;
-			class UClass* DamageType;
-			FLOAT Momentum;
-			FVector HitLocation;
-			AActor* ExcludedActor;
-		} Parms;
-		Parms.DamageAmount=DamageAmount;
-		Parms.DamageRadius=DamageRadius;
-		Parms.DamageType=DamageType;
-		Parms.Momentum=Momentum;
-		Parms.HitLocation=HitLocation;
-		Parms.ExcludedActor=ExcludedActor;
-		ProcessEvent(NHurtRadius, &Parms);
-	}
-
-	void TravelPreAccept(){
-		DECLARE_NAME(TravelPreAccept);
-		ProcessEvent(NTravelPreAccept, NULL);
-	}
-
-	void TravelPostAccept(){
-		DECLARE_NAME(TravelPostAccept);
-		ProcessEvent(NTravelPostAccept, NULL);
-	}
-
-	FString GetItemName(const FString& FullName){
-		DECLARE_NAME(GetItemName);
-		struct{
-			FString FullName;
-			FString ReturnValue;
-		} Parms;
-		Parms.FullName=FullName;
-		Parms.ReturnValue=0;
-		ProcessEvent(NGetItemName, &Parms);
-		return Parms.ReturnValue;
-	}
-
-	void TriggerEvent(FName EventName, AActor* Other, class APawn* EventInstigator){
-		DECLARE_NAME(TriggerEvent);
-		struct{
-			FName EventName;
-			AActor* Other;
-			class APawn* EventInstigator;
-		} Parms;
-		Parms.EventName=EventName;
-		Parms.Other=Other;
-		Parms.EventInstigator=EventInstigator;
-		ProcessEvent(NTriggerEvent, &Parms);
-	}
-
-	UBOOL IsInVolume(class AVolume* aVolume){
-		DECLARE_NAME(IsInVolume);
-		struct{
-			class AVolume* aVolume;
-			UBOOL ReturnValue;
-		} Parms;
-		Parms.aVolume=aVolume;
-		Parms.ReturnValue=0;
-		ProcessEvent(NIsInVolume, &Parms);
-		return Parms.ReturnValue;
-	}
-
-	UBOOL ContainsPartialEvent(const FString& StartOfEventName){
-		DECLARE_NAME(ContainsPartialEvent);
-		struct{
-			FString StartOfEventName;
-			UBOOL ReturnValue;
-		} Parms;
-		Parms.StartOfEventName=StartOfEventName;
-		Parms.ReturnValue=0;
-		ProcessEvent(NContainsPartialEvent, &Parms);
-		return Parms.ReturnValue;
-	}
-
-	UBOOL ContainsPartialTag(const FString& StartOfTagName){
-		DECLARE_NAME(ContainsPartialTag);
-		struct{
-			FString StartOfTagName;
-			UBOOL ReturnValue;
-		} Parms;
-		Parms.StartOfTagName=StartOfTagName;
-		Parms.ReturnValue=0;
-		ProcessEvent(NContainsPartialTag, &Parms);
-		return Parms.ReturnValue;
-	}
+	UBOOL PreTeleport(class ATeleporter* InTeleporter);
+	void PostTeleport(class ATeleporter* OutTeleporter);
+	void BeginPlay();
+	void RenderTexture(class UScriptedTexture* Tex);
+	void PreBeginPlay();
+	void BroadcastLocalizedMessage(class UClass* MessageClass, INT Switch, class APlayerReplicationInfo* RelatedPRI_1, class APlayerReplicationInfo* RelatedPRI_2, class UObject* OptionalObject);
+	void PostBeginPlay();
+	void SetInitialState();
+	void PostLoadBeginPlay();
+	void PostNetBeginPlay();
+	void HurtRadius(FLOAT DamageAmount, FLOAT DamageRadius, class UClass* DamageType, FLOAT Momentum, const FVector& HitLocation, AActor* ExcludedActor);
+	void TravelPreAccept();
+	void TravelPostAccept();
+	FString GetItemName(const FString& FullName);
+	void TriggerEvent(FName EventName, AActor* Other, class APawn* EventInstigator);
+	UBOOL IsInVolume(class AVolume* aVolume);
+	UBOOL ContainsPartialEvent(const FString& StartOfEventName);
+	UBOOL ContainsPartialTag(const FString& StartOfTagName);
 
 	//Functions
 	FVector AimLocation() const;

@@ -701,35 +701,41 @@ inline void appMemcpy( void* Dst, const void* Src, INT Count )
 //
 // Memory zero.
 //
-#if ASM
-#define DEFINED_appMemzero
-inline void appMemzero( void* Dest, INT Count )
-{
-	__asm
-	{
-		mov		ecx, [Count]
-		mov		edi, [Dest]
-		xor	 eax, eax
-		mov		ebx, ecx
-		shr		ecx, 2
-		and		ebx, 3
-		rep	 stosd
-		mov	 ecx, ebx
-		rep	 stosb
+inline void appMemzero(void* Dest, INT Count){
+	__asm{
+		mov ecx, [Count]
+		mov edi, [Dest]
+		xor eax, eax
+		mov ebx, ecx
+		shr ecx, 2
+		and ebx, 3
+		rep stosd
+		mov ecx, ebx
+		rep stosb
 	}
 }
-#endif
 
-#if ASM
-#define DEFINED_appDebugBreak
-FORCEINLINE void appDebugBreak()
-{
-	__asm
-	{
-		int 3
+//
+// 4 byte memset.
+//
+inline void appMemset4(void* Dest, DWORD Value, INT Count){
+	__asm{
+		mov ecx, [Count]
+		shl ecx, 2
+		mov edi, [Dest]
+		mov eax, [Value]
+		mov ebx, ecx
+		shr ecx, 2
+		and ebx, 3
+		rep stosd
+		mov ecx, ebx
+		rep stosb
 	}
 }
-#endif
+
+FORCEINLINE void appDebugBreak(){
+	__asm int 3
+}
 
 extern "C" void* __cdecl _alloca(size_t);
 #define appAlloca(size) ((size == 0) ? NULL : _alloca((size + 7) & ~7))

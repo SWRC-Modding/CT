@@ -689,44 +689,12 @@ public:
 	FStringNoInit ActivatePromptText;
 	TArrayNoInit<FString> ActivatePromptButtonFuncs;
 
-	//Events
+	// Events
 	FLOAT DurationMultiplier();
-
-	FLOAT DefaultDuration(){
-		DECLARE_NAME(DefaultDuration);
-		struct{
-			FLOAT ReturnValue;
-		} Parms;
-		Parms.ReturnValue=0;
-		ProcessEvent(NDefaultDuration, &Parms);
-		return Parms.ReturnValue;
-	}
-
-	void StartSetup(class AController* Controller){
-		DECLARE_NAME(StartSetup);
-		struct{
-			class AController* Controller;
-		} Parms;
-		Parms.Controller=Controller;
-		ProcessEvent(NStartSetup, &Parms);
-	}
-
-	UBOOL HasRequiredInventory(class APawn* Pawn){
-		DECLARE_NAME(HasRequiredInventory);
-		struct{
-			class APawn* Pawn;
-			UBOOL ReturnValue;
-		} Parms;
-		Parms.Pawn=Pawn;
-		Parms.ReturnValue=0;
-		ProcessEvent(NHasRequiredInventory, &Parms);
-		return Parms.ReturnValue;
-	}
-
-	void AbortSetup(){
-		DECLARE_NAME(AbortSetup);
-		ProcessEvent(NAbortSetup, NULL);
-	}
+	FLOAT DefaultDuration();
+	void StartSetup(class AController* Controller);
+	UBOOL HasRequiredInventory(class APawn* Pawn);
+	void AbortSetup();
 
 	DECLARE_CLASS(AActivateItem,AActor,0,Engine)
 	NO_DEFAULT_CONSTRUCTOR(AActivateItem)
@@ -835,15 +803,8 @@ public:
 
 class ENGINE_API AEngineBattleVolume : public AVolume{
 public:
-	UBOOL AreFactoriesExhausted(){
-		DECLARE_NAME(AreFactoriesExhausted);
-		struct{
-			UBOOL ReturnValue;
-		} Parms;
-		Parms.ReturnValue=0;
-		ProcessEvent(NAreFactoriesExhausted, &Parms);
-		return Parms.ReturnValue;
-	}
+	// Events
+	UBOOL AreFactoriesExhausted();
 
 	DECLARE_CLASS(AEngineBattleVolume,AVolume,0,Engine)
 	NO_DEFAULT_CONSTRUCTOR(AEngineBattleVolume)
@@ -888,60 +849,12 @@ public:
 	FLOAT KBuoyancy;
 	class APhysicsVolume* NextPhysicsVolume;
 
-	void PhysicsChangedFor(class AActor* Other){
-		FName NPhysicsChangedFor(NAME_PhysicsChangedFor);
-		if(!IsProbing(NPhysicsChangedFor))
-			return;
-		struct{
-			class AActor* Other;
-		} Parms;
-		Parms.Other=Other;
-		ProcessEvent(NPhysicsChangedFor, &Parms);
-	}
-
-	void ActorEnteredVolume(class AActor* Other){
-		FName NActorEnteredVolume(NAME_ActorEnteredVolume);
-		if(!IsProbing(NActorEnteredVolume))
-			return;
-		struct{
-			class AActor* Other;
-		} Parms;
-		Parms.Other=Other;
-		ProcessEvent(NActorEnteredVolume, &Parms);
-	}
-
-	void ActorLeavingVolume(class AActor* Other){
-		FName NActorLeavingVolume(NAME_ActorLeavingVolume);
-		if(!IsProbing(NActorLeavingVolume))
-			return;
-		struct{
-			class AActor* Other;
-		} Parms;
-		Parms.Other=Other;
-		ProcessEvent(NActorLeavingVolume, &Parms);
-	}
-
-	void PawnEnteredVolume(class APawn* Other){
-		FName NPawnEnteredVolume(NAME_PawnEnteredVolume);
-		if(!IsProbing(NPawnEnteredVolume))
-			return;
-		struct{
-			class APawn* Other;
-		} Parms;
-		Parms.Other=Other;
-		ProcessEvent(NPawnEnteredVolume, &Parms);
-	}
-
-	void PawnLeavingVolume(class APawn* Other){
-		FName NPawnLeavingVolume(NAME_PawnLeavingVolume);
-		if(!IsProbing(NPawnLeavingVolume))
-			return;
-		struct{
-			class APawn* Other;
-		} Parms;
-		Parms.Other=Other;
-		ProcessEvent(NPawnLeavingVolume, &Parms);
-	}
+	// Events
+	void PhysicsChangedFor(class AActor* Other);
+	void ActorEnteredVolume(class AActor* Other);
+	void ActorLeavingVolume(class AActor* Other);
+	void PawnEnteredVolume(class APawn* Other);
+	void PawnLeavingVolume(class APawn* Other);
 
 	DECLARE_CLASS(APhysicsVolume,AVolume,CLASS_NativeReplication,Engine)
 };
@@ -1406,15 +1319,9 @@ public:
 	class AEmitter* BeamEmitter;
 	class UMaterial* ProjectorTexture;
 
-	void TurnOn(){
-		DECLARE_NAME(TurnOn);
-		ProcessEvent(NTurnOn, NULL);
-	}
-
-	void TurnOff(){
-		DECLARE_NAME(TurnOff);
-		ProcessEvent(NTurnOff, NULL);
-	}
+	// Events
+	void TurnOn();
+	void TurnOff();
 
 	DECLARE_CLASS(AFlashlight,AActor,0,Engine)
 	NO_DEFAULT_CONSTRUCTOR(AFlashlight)
@@ -1532,99 +1439,19 @@ public:
 	class USound* SniperZoomCharging;
 	class USound* SniperZoomCharged;
 
-	//Events
+	// Events
 	class UFont* GetConsoleFont(class UCanvas* C);
-	void WorldSpaceOverlays(){
-		DECLARE_NAME(WorldSpaceOverlays);
-		ProcessEvent(NWorldSpaceOverlays, NULL);
-	}
-
-	void CheckCountdown(class AGameReplicationInfo* GRI){
-		DECLARE_NAME(CheckCountdown);
-		struct{
-			class AGameReplicationInfo* GRI;
-		} Parms;
-		Parms.GRI=GRI;
-		ProcessEvent(NCheckCountdown, &Parms);
-	}
-
-	void ConnectFailure(const FString& FailCode, const FString& URL){
-		FName NConnectFailure(NAME_ConnectFailure);
-		struct{
-			FString FailCode;
-			FString URL;
-		} Parms;
-		Parms.FailCode=FailCode;
-		Parms.URL=URL;
-		ProcessEvent(NConnectFailure, &Parms);
-	}
-
-	void ShowUpgradeMenu(){
-		DECLARE_NAME(ShowUpgradeMenu);
-		ProcessEvent(NShowUpgradeMenu, NULL);
-	}
-
-	void AddCriticalMessage(const FString& Message, FLOAT Duration, const FColor& TextColor){
-		DECLARE_NAME(AddCriticalMessage);
-		struct{
-			FString Message;
-			FLOAT Duration;
-			FColor TextColor;
-		} Parms;
-		Parms.Message=Message;
-		Parms.Duration=Duration;
-		Parms.TextColor=TextColor;
-		ProcessEvent(NAddCriticalMessage, &Parms);
-	}
-
-	void PreRender(class UCanvas* Canvas){
-		DECLARE_NAME(PreRender);
-		struct{
-			class UCanvas* Canvas;
-		} Parms;
-		Parms.Canvas=Canvas;
-		ProcessEvent(NPreRender, &Parms);
-	}
-
-	void DrawXLiveNotification(class UCanvas* C){
-		DECLARE_NAME(DrawXLiveNotification);
-		struct{
-			class UCanvas* C;
-		} Parms;
-		Parms.C=C;
-		ProcessEvent(NDrawXLiveNotification, &Parms);
-	}
-
-	void PostRender(class UCanvas* Canvas){
-		DECLARE_NAME(PostRender);
-		struct{
-			class UCanvas* Canvas;
-		} Parms;
-		Parms.Canvas=Canvas;
-		ProcessEvent(NPostRender, &Parms);
-	}
-
-	void PostRenderMenus(class UCanvas* Canvas){
-		DECLARE_NAME(PostRenderMenus);
-		struct{
-			class UCanvas* Canvas;
-		} Parms;
-		Parms.Canvas=Canvas;
-		ProcessEvent(NPostRenderMenus, &Parms);
-	}
-
+	void WorldSpaceOverlays();
+	void CheckCountdown(class AGameReplicationInfo* GRI);
+	void ConnectFailure(const FString& FailCode, const FString& URL);
+	void ShowUpgradeMenu();
+	void AddCriticalMessage(const FString& Message, FLOAT Duration, const FColor& TextColor);
+	void PreRender(class UCanvas* Canvas);
+	void DrawXLiveNotification(class UCanvas* C);
+	void PostRender(class UCanvas* Canvas);
+	void PostRenderMenus(class UCanvas* Canvas);
 	UBOOL DrawLevelAction(class UCanvas* C);
-	class UFont* LoadFontStatic(INT I){
-		DECLARE_NAME(LoadFontStatic);
-		struct{
-			INT I;
-			class UFont* ReturnValue;
-		} Parms;
-		Parms.I=I;
-		Parms.ReturnValue=0;
-		ProcessEvent(NLoadFontStatic, &Parms);
-		return Parms.ReturnValue;
-	}
+	class UFont* LoadFontStatic(INT I);
 
 	DECLARE_CLASS(AHUD,AActor,CLASS_Transient|CLASS_Config,Engine)
 };
@@ -1793,165 +1620,21 @@ public:
 	FLOAT MaxIdleTime;
 	TArrayNoInit<FMeshSetLinkup> CustomMeshSets;
 
-	//Events
-	void GameEnding(){
-		DECLARE_NAME(GameEnding);
-		ProcessEvent(NGameEnding, NULL);
-	}
-
-	void KickIdler(class APlayerController* PC){
-		DECLARE_NAME(KickIdler);
-		struct{
-			class APlayerController* PC;
-		} Parms;
-		Parms.PC=PC;
-		ProcessEvent(NKickIdler, &Parms);
-	}
-
-	INT GetFriendlyFirePercent(){
-		DECLARE_NAME(GetFriendlyFirePercent);
-		struct{
-			INT ReturnValue;
-		} Parms;
-		Parms.ReturnValue=0;
-		ProcessEvent(NGetFriendlyFirePercent, &Parms);
-		return Parms.ReturnValue;
-	}
-
-	INT GetServerPort(){
-		DECLARE_NAME(GetServerPort);
-		struct{
-			INT ReturnValue;
-		} Parms;
-		Parms.ReturnValue=0;
-		ProcessEvent(NGetServerPort, &Parms);
-		return Parms.ReturnValue;
-	}
-
-	void DetailChange(){
-		DECLARE_NAME(DetailChange);
-		ProcessEvent(NDetailChange, NULL);
-	}
-
-	void InitGame(const FString& Options, FString& Error){
-		DECLARE_NAME(InitGame);
-		struct{
-			FString Options;
-			FString Error;
-		} Parms;
-		Parms.Options=Options;
-		Parms.Error=Error;
-		ProcessEvent(NInitGame, &Parms);
-		Error=Parms.Error;
-	}
-
-	FString GetBeaconText(){
-		DECLARE_NAME(GetBeaconText);
-		struct{
-			FString ReturnValue;
-		} Parms;
-		Parms.ReturnValue=0;
-		ProcessEvent(NGetBeaconText, &Parms);
-		return Parms.ReturnValue;
-	}
-
-	void PreLogin(const FString& Options, const FString& Address, FString& Error, FString& FailCode){
-		DECLARE_NAME(PreLogin);
-		struct{
-			FString Options;
-			FString Address;
-			FString Error;
-			FString FailCode;
-		} Parms;
-		Parms.Options=Options;
-		Parms.Address=Address;
-		Parms.Error=Error;
-		Parms.FailCode=FailCode;
-		ProcessEvent(NPreLogin, &Parms);
-		Error=Parms.Error;
-		FailCode=Parms.FailCode;
-	}
-
-	UBOOL AtCapacity(UBOOL bSpectator, UBOOL bInvited){
-		DECLARE_NAME(AtCapacity);
-		struct{
-			UBOOL bSpectator;
-			UBOOL bInvited;
-			UBOOL ReturnValue;
-		} Parms;
-		Parms.bSpectator=bSpectator;
-		Parms.bInvited=bInvited;
-		Parms.ReturnValue=0;
-		ProcessEvent(NAtCapacity, &Parms);
-		return Parms.ReturnValue;
-	}
-
-	class APlayerController* Login(const FString& Portal, const FString& Options, FString& Error){
-		DECLARE_NAME(Login);
-		struct{
-			FString Portal;
-			FString Options;
-			FString Error;
-			class APlayerController* ReturnValue;
-		} Parms;
-		Parms.Portal=Portal;
-		Parms.Options=Options;
-		Parms.Error=Error;
-		Parms.ReturnValue=0;
-		ProcessEvent(NLogin, &Parms);
-		Error=Parms.Error;
-		return Parms.ReturnValue;
-	}
-
-	void PostLogin(class APlayerController* NewPlayer){
-		DECLARE_NAME(PostLogin);
-		struct{
-			class APlayerController* NewPlayer;
-		} Parms;
-		Parms.NewPlayer=NewPlayer;
-		ProcessEvent(NPostLogin, &Parms);
-	}
-
-	void AcceptInventory(class APawn* PlayerPawn){
-		DECLARE_NAME(AcceptInventory);
-		struct{
-			class APawn* PlayerPawn;
-		} Parms;
-		Parms.PlayerPawn=PlayerPawn;
-		ProcessEvent(NAcceptInventory, &Parms);
-	}
-
-	void Broadcast(class AActor* Sender, const FString& Msg, FName Type){
-		DECLARE_NAME(Broadcast);
-		struct{
-			class AActor* Sender;
-			FString Msg;
-			FName Type;
-		} Parms;
-		Parms.Sender=Sender;
-		Parms.Msg=Msg;
-		Parms.Type=Type;
-		ProcessEvent(NBroadcast, &Parms);
-	}
-
-	void BroadcastLocalized(class AActor* Sender, class UClass* Message, INT Switch, class APlayerReplicationInfo* RelatedPRI_1, class APlayerReplicationInfo* RelatedPRI_2, class UObject* OptionalObject){
-		DECLARE_NAME(BroadcastLocalized);
-		struct{
-			class AActor* Sender;
-			class UClass* Message;
-			INT Switch;
-			class APlayerReplicationInfo* RelatedPRI_1;
-			class APlayerReplicationInfo* RelatedPRI_2;
-			class UObject* OptionalObject;
-		} Parms;
-		Parms.Sender=Sender;
-		Parms.Message=Message;
-		Parms.Switch=Switch;
-		Parms.RelatedPRI_1=RelatedPRI_1;
-		Parms.RelatedPRI_2=RelatedPRI_2;
-		Parms.OptionalObject=OptionalObject;
-		ProcessEvent(NBroadcastLocalized, &Parms);
-	}
+	// Events
+	void GameEnding();
+	void KickIdler(class APlayerController* PC);
+	INT GetFriendlyFirePercent();
+	INT GetServerPort();
+	void DetailChange();
+	void InitGame(const FString& Options, FString& Error);
+	FString GetBeaconText();
+	void PreLogin(const FString& Options, const FString& Address, FString& Error, FString& FailCode);
+	UBOOL AtCapacity(UBOOL bSpectator, UBOOL bInvited);
+	class APlayerController* Login(const FString& Portal, const FString& Options, FString& Error);
+	void PostLogin(class APlayerController* NewPlayer);
+	void AcceptInventory(class APawn* PlayerPawn);
+	void Broadcast(class AActor* Sender, const FString& Msg, FName Type);
+	void BroadcastLocalized(class AActor* Sender, class UClass* Message, INT Switch, class APlayerReplicationInfo* RelatedPRI_1, class APlayerReplicationInfo* RelatedPRI_2, class UObject* OptionalObject);
 
 	DECLARE_CLASS(AGameInfo,AInfo,CLASS_Config,Engine)
 	NO_DEFAULT_CONSTRUCTOR(AGameInfo)
@@ -2047,16 +1730,8 @@ public:
 	TArrayNoInit<class APlayerReplicationInfo*> PRIArray;
 	FVector FlagPos;
 
-	//Events
-	INT GetNumberofTeams(){
-		DECLARE_NAME(GetNumberofTeams);
-		struct{
-			INT ReturnValue;
-		} Parms;
-		Parms.ReturnValue=0;
-		ProcessEvent(NGetNumberofTeams, &Parms);
-		return Parms.ReturnValue;
-	}
+	// Events
+	INT GetNumberofTeams();
 
 	DECLARE_CLASS(AGameReplicationInfo,AReplicationInfo,CLASS_Config|CLASS_NativeReplication,Engine)
 };
@@ -2103,26 +1778,10 @@ public:
 	FStringNoInit Gamertag;
 	INT Skill;
 
-	//Events
-	FString GetPlayerName(){
-		DECLARE_NAME(GetPlayerName);
-		struct{
-			FString ReturnValue;
-		} Parms;
-		Parms.ReturnValue=0;
-		ProcessEvent(NGetPlayerName, &Parms);
-		return Parms.ReturnValue;
-	}
-
-	void UpdateCharacter(){
-		DECLARE_NAME(UpdateCharacter);
-		ProcessEvent(NUpdateCharacter, NULL);
-	}
-
-	void ClientNameChange(){
-		DECLARE_NAME(ClientNameChange);
-		ProcessEvent(NClientNameChange, NULL);
-	}
+	// Events
+	FString GetPlayerName();
+	void UpdateCharacter();
+	void ClientNameChange();
 
 	DECLARE_CLASS(APlayerReplicationInfo,AReplicationInfo,CLASS_NativeReplication,Engine)
 };
@@ -2266,16 +1925,8 @@ public:
 	FStringNoInit ColorNames[2];
 	class UMaterial* TeamIcon;
 
-	//Events
-	FColor GetTeamColor(){
-		DECLARE_NAME(GetTeamColor);
-		struct{
-			FColor ReturnValue;
-		} Parms;
-		Parms.ReturnValue=FColor(0);
-		ProcessEvent(NGetTeamColor, &Parms);
-		return Parms.ReturnValue;
-	}
+	// Events
+	FColor GetTeamColor();
 
 	DECLARE_CLASS(ATeamInfo,AReplicationInfo,CLASS_NativeReplication,Engine)
 };
@@ -2318,17 +1969,8 @@ public:
 	INT LastType;
 	FStringNoInit LastParams[2];
 
-	//Events
-	void ServerCallback(INT SecType, const FString& Data){
-		DECLARE_NAME(ServerCallback);
-		struct{
-			INT SecType;
-			FString Data;
-		} Parms;
-		Parms.SecType=SecType;
-		Parms.Data=Data;
-		ProcessEvent(NServerCallback, &Parms);
-	}
+	// Events
+	void ServerCallback(INT SecType, const FString& Data);
 
 	DECLARE_CLASS(ASecurity,AInfo,0,Engine)
 };
@@ -2377,27 +2019,9 @@ public:
 	BITFIELD bLonelyZone:1;
 	TArrayNoInit<class AZoneInfo*> ManualExcludes;
 
-	void ActorEntered(class AActor* Other){
-		FName NActorEntered(NAME_ActorEntered);
-		if(!IsProbing(NActorEntered))
-			return;
-		struct{
-			class AActor* Other;
-		} Parms;
-		Parms.Other=Other;
-		ProcessEvent(NActorEntered, &Parms);
-	}
-
-	void ActorLeaving(class AActor* Other){
-		FName NActorLeaving(NAME_ActorLeaving);
-		if(!IsProbing(NActorLeaving))
-			return;
-		struct{
-			class AActor* Other;
-		} Parms;
-		Parms.Other=Other;
-		ProcessEvent(NActorLeaving, &Parms);
-	}
+	// Events
+	void ActorEntered(class AActor* Other);
+	void ActorLeaving(class AActor* Other);
 
 	DECLARE_CLASS(AZoneInfo,AInfo,0,Engine)
 };
@@ -2546,36 +2170,11 @@ public:
 	UBOOL IsSystemLink();
 	void RegenerateBlockedRegions();
 
-	void FillPrecacheMaterialsArray(){
-		DECLARE_NAME(FillPrecacheMaterialsArray);
-		ProcessEvent(NFillPrecacheMaterialsArray, NULL);
-	}
-
-	void FillPrecacheStaticMeshesArray(){
-		DECLARE_NAME(FillPrecacheStaticMeshesArray);
-		ProcessEvent(NFillPrecacheStaticMeshesArray, NULL);
-	}
-
-	void ServerTravel(const FString& URL, UBOOL bItems){
-		DECLARE_NAME(ServerTravel);
-		struct{
-			FString URL;
-			UBOOL bItems;
-		} Parms;
-		Parms.URL=URL;
-		Parms.bItems=bItems;
-		ProcessEvent(NServerTravel, &Parms);
-	}
-
-	class APlayerController* GetLocalPlayerController(){
-		DECLARE_NAME(GetLocalPlayerController);
-		struct{
-			class APlayerController* ReturnValue;
-		} Parms;
-		Parms.ReturnValue=0;
-		ProcessEvent(NGetLocalPlayerController, &Parms);
-		return Parms.ReturnValue;
-	}
+	// Events
+	void FillPrecacheMaterialsArray();
+	void FillPrecacheStaticMeshesArray();
+	void ServerTravel(const FString& URL, UBOOL bItems);
+	class APlayerController* GetLocalPlayerController();
 
 	DECLARE_CLASS(ALevelInfo,AZoneInfo,CLASS_Config|CLASS_NativeReplication,Engine)
 };
@@ -2588,6 +2187,120 @@ class ENGINE_API ASkyZoneInfo : public AZoneInfo{
 public:
 	DECLARE_CLASS(ASkyZoneInfo,AZoneInfo,0,Engine)
 	NO_DEFAULT_CONSTRUCTOR(ASkyZoneInfo)
+};
+
+/*
+ * FluidSurfaceInfo
+ */
+
+enum EFluidGridType{
+    FGT_Square,
+    FGT_Hexagonal,
+    FGT_MAX
+};
+
+class ENGINE_API AFluidSurfaceInfo : public AInfo{
+public:
+    DECLARE_CLASS(AFluidSurfaceInfo,AInfo,0,Engine)
+	NO_DEFAULT_CONSTRUCTOR(AFluidSurfaceInfo)
+
+	BYTE FluidGridType;
+	FLOAT FluidGridSpacing;
+    INT FluidXSize;
+    INT FluidYSize;
+	FLOAT FluidHeightScale;
+    FLOAT FluidSpeed;
+    FLOAT FluidDamping;
+    FLOAT FluidNoiseFrequency;
+    FRange FluidNoiseStrength;
+    BITFIELD TestRipple:1;
+    FLOAT TestRippleSpeed;
+    FLOAT TestRippleStrength;
+	FLOAT TestRippleRadius;
+    FLOAT UTiles;
+	FLOAT UOffset;
+    FLOAT VTiles;
+	FLOAT VOffset;
+	FLOAT AlphaCurveScale;
+	FLOAT AlphaHeightScale;
+	BYTE AlphaMax;
+	FLOAT ShootStrength;
+	FLOAT ShootRadius;
+	FLOAT RippleVelocityFactor;
+	FLOAT TouchStrength;
+	class UClass* ShootEffect;
+    BITFIELD OrientShootEffect:1;
+	class UClass* TouchEffect1;
+    BITFIELD OrientTouchEffect:1;
+	TArray<DWORD> ClampBitmap;
+	ATerrainInfo* ClampTerrain;
+	BITFIELD bShowBoundingBox:1;
+	BITFIELD bUseNoRenderZ:1;
+	FLOAT NoRenderZ;
+	FLOAT WarmUpTime;
+	FLOAT UpdateRate;
+	FColor FluidColor;
+    TArrayNoInit<FLOAT> Verts0;
+    TArrayNoInit<FLOAT> Verts1;
+	TArrayNoInit<BYTE>	VertAlpha;
+    INT LatestVerts;
+    FBox FluidBoundingBox;
+	FVector FluidOrigin;
+	FLOAT TimeRollover;
+    FLOAT TestRippleAng;
+	class UFluidSurfacePrimitive* Primitive;
+	TArrayNoInit<class AFluidSurfaceOscillator*> Oscillators;
+	BITFIELD bHasWarmedUp;
+
+	void Render(FDynamicActor* Actor, class FLevelSceneNode* SceneNode, TList<class FDynamicLight*>* Lights, FRenderInterface* RI);
+
+	void RenderEditorInfo(FLevelSceneNode* SceneNode,FRenderInterface* RI, FDynamicActor* FDA);
+
+	void Init();
+
+	void FillVertexBuffer(void* Dest);
+	void SimpleFillVertexBuffer(void* Dest);
+
+	void FillIndexBuffer(void* Data);
+	void SimpleFillIndexBuffer(void* Data);
+
+	void RebuildClampedBitmap();
+
+	void Pling(const FVector& Position, FLOAT Strength, FLOAT Radius);
+	void PlingVertex(INT x, INT y, FLOAT Strength);
+
+	inline UBOOL GetClampedBitmap(INT x, INT y){
+		INT BitIndex = x + y * FluidXSize;
+		return (ClampBitmap[BitIndex >> 5] & (1 << (BitIndex & 0x1f))) ? 1 : 0;
+	}
+
+	inline void SetClampedBitmap(INT x, INT y, UBOOL Clamp){
+		INT BitIndex = x + (y * FluidXSize);
+		INT Index = BitIndex >> 5;
+		DWORD Bitmask = 1 << (BitIndex & 0x1f);
+
+		if(Clamp)
+			ClampBitmap[Index] |= Bitmask;
+		else
+			ClampBitmap[Index] &= ~Bitmask;
+	}
+
+	FVector GetVertexPosLocal(INT x, INT y);
+	FVector GetVertexPosWorld(INT x, INT y);
+	void GetNearestIndex(const FVector& pos, INT& xIndex, INT& yIndex);
+
+	void UpdateSimulation(FLOAT DeltaTime);
+	void UpdateOscillatorList();
+
+
+	// Actor interface
+	virtual UBOOL Tick( FLOAT DeltaTime, enum ELevelTick TickType );
+	virtual void PostLoad();
+	virtual void PostEditChange();
+	virtual void PostEditMove();
+	virtual void Spawned();
+	virtual void Destroy();
+	virtual UPrimitive* GetPrimitive();
 };
 
 /*
@@ -2624,59 +2337,11 @@ public:
 	FStringNoInit ItemName;
 	class UMesh* AlternateHUDArmsMesh;
 
-	class AWeapon* WeaponChange(BYTE F, UBOOL bSilent){
-		DECLARE_NAME(WeaponChange);
-		struct{
-			BYTE F;
-			UBOOL bSilent;
-			class AWeapon* ReturnValue;
-		} Parms;
-		Parms.F=F;
-		Parms.bSilent=bSilent;
-		Parms.ReturnValue=0;
-		ProcessEvent(NWeaponChange, &Parms);
-		return Parms.ReturnValue;
-	}
-
-	class AWeapon* WeaponChangeClass(class UClass* WeaponClass){
-		DECLARE_NAME(WeaponChangeClass);
-		struct{
-			class UClass* WeaponClass;
-			class AWeapon* ReturnValue;
-		} Parms;
-		Parms.WeaponClass=WeaponClass;
-		Parms.ReturnValue=0;
-		ProcessEvent(NWeaponChangeClass, &Parms);
-		return Parms.ReturnValue;
-	}
-
-	class AWeapon* PrevWeapon(class AWeapon* CurrentChoice, class AWeapon* CurrentWeapon){
-		DECLARE_NAME(PrevWeapon);
-		struct{
-			class AWeapon* CurrentChoice;
-			class AWeapon* CurrentWeapon;
-			class AWeapon* ReturnValue;
-		} Parms;
-		Parms.CurrentChoice=CurrentChoice;
-		Parms.CurrentWeapon=CurrentWeapon;
-		Parms.ReturnValue=0;
-		ProcessEvent(NPrevWeapon, &Parms);
-		return Parms.ReturnValue;
-	}
-
-	class AWeapon* NextWeapon(class AWeapon* CurrentChoice, class AWeapon* CurrentWeapon){
-		DECLARE_NAME(NextWeapon);
-		struct{
-			class AWeapon* CurrentChoice;
-			class AWeapon* CurrentWeapon;
-			class AWeapon* ReturnValue;
-		} Parms;
-		Parms.CurrentChoice=CurrentChoice;
-		Parms.CurrentWeapon=CurrentWeapon;
-		Parms.ReturnValue=0;
-		ProcessEvent(NNextWeapon, &Parms);
-		return Parms.ReturnValue;
-	}
+	// Events
+	class AWeapon* WeaponChange(BYTE F, UBOOL bSilent);
+	class AWeapon* WeaponChangeClass(class UClass* WeaponClass);
+	class AWeapon* PrevWeapon(class AWeapon* CurrentChoice, class AWeapon* CurrentWeapon);
+	class AWeapon* NextWeapon(class AWeapon* CurrentChoice, class AWeapon* CurrentWeapon);
 
 	DECLARE_CLASS(AInventory,AActor,CLASS_NativeReplication,Engine)
 };
@@ -2972,14 +2637,9 @@ public:
 	FName MPPawnThrowAnim;
 	class UClass* ProjectileClass;
 
-	void AttachMuzzleFlash(){
-		DECLARE_NAME(AttachMuzzleFlash);
-		ProcessEvent(NAttachMuzzleFlash, NULL);
-	}
-	void ThirdPersonEffects(){
-		DECLARE_NAME(ThirdPersonEffects);
-		ProcessEvent(NThirdPersonEffects, NULL);
-	}
+	// Events
+	void AttachMuzzleFlash();
+	void ThirdPersonEffects();
 
 	DECLARE_CLASS(AWeaponAttachment,AInventoryAttachment,CLASS_NativeReplication,Engine)
 };
@@ -3113,37 +2773,10 @@ public:
 
 	UBOOL IsSetUpProperly();
 
-	UBOOL MarkersActive(){
-		DECLARE_NAME(MarkersActive);
-		struct{
-			UBOOL ReturnValue;
-		} Parms;
-		Parms.ReturnValue=0;
-		ProcessEvent(NMarkersActive, &Parms);
-		return Parms.ReturnValue;
-	}
-
-	BYTE CurrentMarkerAction(){
-		DECLARE_NAME(CurrentMarkerAction);
-		struct{
-			BYTE ReturnValue;
-		} Parms;
-		Parms.ReturnValue=0;
-		ProcessEvent(NCurrentMarkerAction, &Parms);
-		return Parms.ReturnValue;
-	}
-
-	UBOOL ExecuteMarker(class APawn* Instigator){
-		DECLARE_NAME(ExecuteMarker);
-		struct{
-			class APawn* Instigator;
-			UBOOL ReturnValue;
-		} Parms;
-		Parms.Instigator=Instigator;
-		Parms.ReturnValue=0;
-		ProcessEvent(NExecuteMarker, &Parms);
-		return Parms.ReturnValue;
-	}
+	// Events
+	UBOOL MarkersActive();
+	BYTE CurrentMarkerAction();
+	UBOOL ExecuteMarker(class APawn* Instigator);
 
 	DECLARE_CLASS(ASquadMarker,AMarkerIconActor,0,Engine)
 };
@@ -3193,44 +2826,12 @@ public:
 	BITFIELD bVignette:1;
 	BITFIELD bRequiresEthernetLink:1;
 
-	void Init(const FString& Args){
-		FName NInit(NAME_Init);
-		struct{
-			FString Args;
-		} Parms;
-		Parms.Args=Args;
-		ProcessEvent(NInit, &Parms);
-	}
-
-	void DrawMenu(class UCanvas* C, UBOOL HasFocus){
-		FName NDrawMenu(NAME_DrawMenu);
-		struct{
-			class UCanvas* C;
-			UBOOL HasFocus;
-		} Parms;
-		Parms.C=C;
-		Parms.HasFocus=HasFocus;
-		ProcessEvent(NDrawMenu, &Parms);
-	}
-
-	void HandleInputBack(){
-		FName NHandleInputBack(NAME_HandleInputBack);
-		ProcessEvent(NHandleInputBack, NULL);
-	}
-
-	void PostLevelChange(){
-		DECLARE_NAME(PostLevelChange);
-		ProcessEvent(NPostLevelChange, NULL);
-	}
-
-	void TransferTransientElements(class AMenu* M){
-		DECLARE_NAME(TransferTransientElements);
-		struct{
-			class AMenu* M;
-		} Parms;
-		Parms.M=M;
-		ProcessEvent(NTransferTransientElements, &Parms);
-	}
+	// Events
+	void Init(const FString& Args);
+	void DrawMenu(class UCanvas* C, UBOOL HasFocus);
+	void HandleInputBack();
+	void PostLevelChange();
+	void TransferTransientElements(class AMenu* M);
 
 	DECLARE_CLASS(AMenu,AActor,CLASS_Transient,Engine)
 	// NOTE we have to expose this directly through C++, since
@@ -3374,10 +2975,8 @@ public:
 	TArrayNoInit<class AAntiPortalActor*> AntiPortals;
 	FName AntiPortalTag;
 
-	void KeyFrameReached(){
-		DECLARE_NAME(KeyFrameReached);
-		ProcessEvent(NKeyFrameReached, NULL);
-	}
+	// Events
+	void KeyFrameReached();
 
 	DECLARE_CLASS(AMover,AActor,CLASS_NativeReplication,Engine)
 };
@@ -3523,45 +3122,10 @@ public:
 
 	void SetBlocked(UBOOL blocked);
 
-	INT SpecialCost(class APawn* Seeker, class UReachSpec* Path){
-		DECLARE_NAME(SpecialCost);
-		struct{
-			class APawn* Seeker;
-			class UReachSpec* Path;
-			INT ReturnValue;
-		} Parms;
-		Parms.Seeker=Seeker;
-		Parms.Path=Path;
-		Parms.ReturnValue=0;
-		ProcessEvent(NSpecialCost, &Parms);
-		return Parms.ReturnValue;
-	}
-
-	UBOOL Accept(class AActor* Incoming, class AActor* Source){
-		DECLARE_NAME(Accept);
-		struct{
-			class AActor* Incoming;
-			class AActor* Source;
-			UBOOL ReturnValue;
-		} Parms;
-		Parms.Incoming=Incoming;
-		Parms.Source=Source;
-		Parms.ReturnValue=0;
-		ProcessEvent(NAccept, &Parms);
-		return Parms.ReturnValue;
-	}
-
-	UBOOL SuggestMovePreparation(class APawn* Other){
-		DECLARE_NAME(SuggestMovePreparation);
-		struct{
-			class APawn* Other;
-			UBOOL ReturnValue;
-		} Parms;
-		Parms.Other=Other;
-		Parms.ReturnValue=0;
-		ProcessEvent(NSuggestMovePreparation, &Parms);
-		return Parms.ReturnValue;
-	}
+	// Events
+	INT SpecialCost(class APawn* Seeker, class UReachSpec* Path);
+	UBOOL Accept(class AActor* Incoming, class AActor* Source);
+	UBOOL SuggestMovePreparation(class APawn* Other);
 
 	// Overrides
 	virtual void Destroy();
@@ -4172,41 +3736,11 @@ public:
 	FTurretInfo CoolStateFriend;
 	FTurretInfo DeadState;
 
-	void ReserveFor(class APawn* User){
-		DECLARE_NAME(ReserveFor);
-		struct{
-			class APawn* User;
-		} Parms;
-		Parms.User=User;
-		ProcessEvent(NReserveFor, &Parms);
-	}
-
-	void Release(){
-		DECLARE_NAME(Release);
-		ProcessEvent(NRelease, NULL);
-	}
-
-	UBOOL IsAvailableFor(class APawn* User){
-		DECLARE_NAME(IsAvailableFor);
-		struct{
-			class APawn* User;
-			UBOOL ReturnValue;
-		} Parms;
-		Parms.User=User;
-		Parms.ReturnValue=0;
-		ProcessEvent(NIsAvailableFor, &Parms);
-		return Parms.ReturnValue;
-	}
-
-	FVector GetMuzzleLocation(){
-		DECLARE_NAME(GetMuzzleLocation);
-		struct{
-			FVector ReturnValue;
-		} Parms;
-		Parms.ReturnValue=FVector(0);
-		ProcessEvent(NGetMuzzleLocation, &Parms);
-		return Parms.ReturnValue;
-	}
+	// Events
+	void ReserveFor(class APawn* User);
+	void Release();
+	UBOOL IsAvailableFor(class APawn* User);
+	FVector GetMuzzleLocation();
 
 	DECLARE_CLASS(ATurret,APawn,CLASS_Config,Engine)
 
@@ -5345,10 +4879,8 @@ public:
 	class UPlayer* ViewportOwner;
 	class UInteractionMaster* Master;
 
-	void Initialized(){
-		DECLARE_NAME(Initialized);
-		ProcessEvent(NInitialized, NULL);
-	}
+	// Events
+	void Initialized();
 
 	DECLARE_CLASS(UInteraction,UInteractions,0,Engine)
 };
@@ -5405,143 +4937,23 @@ public:
 	BITFIELD bCleanupMenus:1;
 	FLOAT LastElapsedFrameTime;
 
-	void NativeConsoleOpen(){
-		DECLARE_NAME(NativeConsoleOpen);
-		ProcessEvent(NNativeConsoleOpen, NULL);
-	}
-
-	void PreLevelChange(){
-		DECLARE_NAME(PreLevelChange);
-		ProcessEvent(NPreLevelChange, NULL);
-	}
-
-	void PostLevelChange(){
-		DECLARE_NAME(PostLevelChange);
-		ProcessEvent(NPostLevelChange, NULL);
-	}
-
-	void NotifyLevelChange(){
-		FName NNotifyLevelChange(NAME_NotifyLevelChange);
-		ProcessEvent(NNotifyLevelChange, NULL);
-	}
-
-	void ManageMenuBackgroundMusic(class AMenu* NewMenu){
-		DECLARE_NAME(ManageMenuBackgroundMusic);
-		struct{
-			class AMenu* NewMenu;
-		} Parms;
-		Parms.NewMenu=NewMenu;
-		ProcessEvent(NManageMenuBackgroundMusic, &Parms);
-	}
-
-	void MenuOpen(class UClass* MenuClass, const FString& Args){
-		DECLARE_NAME(MenuOpen);
-		struct{
-			class UClass* MenuClass;
-			FString Args;
-		} Parms;
-		Parms.MenuClass=MenuClass;
-		Parms.Args=Args;
-		ProcessEvent(NMenuOpen, &Parms);
-	}
-
-	void MenuOpenExisting(class AMenu* M){
-		DECLARE_NAME(MenuOpenExisting);
-		struct{
-			class AMenu* M;
-		} Parms;
-		Parms.M=M;
-		ProcessEvent(NMenuOpenExisting, &Parms);
-	}
-
-	void MenuCall(class UClass* MenuClass, const FString& Args){
-		DECLARE_NAME(MenuCall);
-		struct{
-			class UClass* MenuClass;
-			FString Args;
-		} Parms;
-		Parms.MenuClass=MenuClass;
-		Parms.Args=Args;
-		ProcessEvent(NMenuCall, &Parms);
-	}
-
-	void MenuCallExisting(class AMenu* M, const FString& Args){
-		DECLARE_NAME(MenuCallExisting);
-		struct{
-			class AMenu* M;
-			FString Args;
-		} Parms;
-		Parms.M=M;
-		Parms.Args=Args;
-		ProcessEvent(NMenuCallExisting, &Parms);
-	}
-
-	void MenuClose(){
-		DECLARE_NAME(MenuClose);
-		ProcessEvent(NMenuClose, NULL);
-	}
-
-	void LoadingStarted(const FString& Menu, const FString& Pic, const FString& Title, const FString& Text, UBOOL ShowHints){
-		DECLARE_NAME(LoadingStarted);
-		struct{
-			FString Menu;
-			FString Pic;
-			FString Title;
-			FString Text;
-			UBOOL ShowHints;
-		} Parms;
-		Parms.Menu=Menu;
-		Parms.Pic=Pic;
-		Parms.Title=Title;
-		Parms.Text=Text;
-		Parms.ShowHints=ShowHints;
-		ProcessEvent(NLoadingStarted, &Parms);
-	}
-
-	void UpdateLoadingProgress(FLOAT LoadingRatioCompleted){
-		DECLARE_NAME(UpdateLoadingProgress);
-		struct{
-			FLOAT LoadingRatioCompleted;
-		} Parms;
-		Parms.LoadingRatioCompleted=LoadingRatioCompleted;
-		ProcessEvent(NUpdateLoadingProgress, &Parms);
-	}
-
-	void LoadingFinished(){
-		DECLARE_NAME(LoadingFinished);
-		ProcessEvent(NLoadingFinished, NULL);
-	}
-
-	UBOOL ShowingMenu(){
-		DECLARE_NAME(ShowingMenu);
-		struct{
-			UBOOL ReturnValue;
-		} Parms;
-		Parms.ReturnValue=0;
-		ProcessEvent(NShowingMenu, &Parms);
-		return Parms.ReturnValue;
-	}
-
-	UBOOL ShowingMenuClass(const FString& MenuClassName){
-		DECLARE_NAME(ShowingMenuClass);
-		struct{
-			FString MenuClassName;
-			UBOOL ReturnValue;
-		} Parms;
-		Parms.MenuClassName=MenuClassName;
-		Parms.ReturnValue=0;
-		ProcessEvent(NShowingMenuClass, &Parms);
-		return Parms.ReturnValue;
-	}
-
-	void RestartMenuBackgroundMusic(UBOOL bOnlyIfNotPlaying){
-		DECLARE_NAME(RestartMenuBackgroundMusic);
-		struct{
-			UBOOL bOnlyIfNotPlaying;
-		} Parms;
-		Parms.bOnlyIfNotPlaying=bOnlyIfNotPlaying;
-		ProcessEvent(NRestartMenuBackgroundMusic, &Parms);
-	}
+	// Events
+	void NativeConsoleOpen();
+	void PreLevelChange();
+	void PostLevelChange();
+	void NotifyLevelChange();
+	void ManageMenuBackgroundMusic(class AMenu* NewMenu);
+	void MenuOpen(class UClass* MenuClass, const FString& Args);
+	void MenuOpenExisting(class AMenu* M);
+	void MenuCall(class UClass* MenuClass, const FString& Args);
+	void MenuCallExisting(class AMenu* M, const FString& Args);
+	void MenuClose();
+	void LoadingStarted(const FString& Menu, const FString& Pic, const FString& Title, const FString& Text, UBOOL ShowHints);
+	void UpdateLoadingProgress(FLOAT LoadingRatioCompleted);
+	void LoadingFinished();
+	UBOOL ShowingMenu();
+	UBOOL ShowingMenuClass(const FString& MenuClassName);
+	void RestartMenuBackgroundMusic(UBOOL bOnlyIfNotPlaying);
 
 	DECLARE_CLASS(UConsole,UInteraction,CLASS_Config,Engine)
 
@@ -5564,122 +4976,16 @@ public:
 	TArrayNoInit<class UInteraction*> GlobalInteractions;
 	BITFIELD bRequireRawJoystick:1;
 
-	class UInteraction* AddInteraction(const FString& InteractionName, class UPlayer* AttachTo){
-		DECLARE_NAME(AddInteraction);
-		struct{
-			FString InteractionName;
-			class UPlayer* AttachTo;
-			class UInteraction* ReturnValue;
-		} Parms;
-		Parms.InteractionName=InteractionName;
-		Parms.AttachTo=AttachTo;
-		Parms.ReturnValue=0;
-		ProcessEvent(NAddInteraction, &Parms);
-		return Parms.ReturnValue;
-	}
-
-	void RemoveInteraction(class UInteraction* RemoveMe){
-		DECLARE_NAME(RemoveInteraction);
-		struct{
-			class UInteraction* RemoveMe;
-		} Parms;
-		Parms.RemoveMe=RemoveMe;
-		ProcessEvent(NRemoveInteraction, &Parms);
-	}
-
-	void SetFocusTo(class UInteraction* Inter, class UPlayer* ViewportOwner){
-		DECLARE_NAME(SetFocusTo);
-		struct{
-			class UInteraction* Inter;
-			class UPlayer* ViewportOwner;
-		} Parms;
-		Parms.Inter=Inter;
-		Parms.ViewportOwner=ViewportOwner;
-		ProcessEvent(NSetFocusTo, &Parms);
-	}
-
-	UBOOL Process_KeyType(TArray<class UInteraction*> InteractionArray, BYTE& Key, const FString& Unicode){
-		DECLARE_NAME(Process_KeyType);
-		struct{
-			TArray<class UInteraction*> InteractionArray;
-			BYTE Key;
-			FString Unicode;
-			UBOOL ReturnValue;
-		} Parms;
-		Parms.InteractionArray=InteractionArray;
-		Parms.Key=Key;
-		Parms.Unicode=Unicode;
-		Parms.ReturnValue=0;
-		ProcessEvent(NProcess_KeyType, &Parms);
-		Key=Parms.Key;
-		return Parms.ReturnValue;
-	}
-
-	UBOOL Process_KeyEvent(TArray<class UInteraction*> InteractionArray, BYTE& Key, BYTE& Action, FLOAT Delta){
-		DECLARE_NAME(Process_KeyEvent);
-		struct{
-			TArray<class UInteraction*> InteractionArray;
-			BYTE Key;
-			BYTE Action;
-			FLOAT Delta;
-			UBOOL ReturnValue;
-		} Parms;
-		Parms.InteractionArray=InteractionArray;
-		Parms.Key=Key;
-		Parms.Action=Action;
-		Parms.Delta=Delta;
-		Parms.ReturnValue=0;
-		ProcessEvent(NProcess_KeyEvent, &Parms);
-		Key=Parms.Key;
-		Action=Parms.Action;
-		return Parms.ReturnValue;
-	}
-
-	void Process_PreRender(TArray<class UInteraction*> InteractionArray, class UCanvas* Canvas){
-		DECLARE_NAME(Process_PreRender);
-		struct{
-			TArray<class UInteraction*> InteractionArray;
-			class UCanvas* Canvas;
-		} Parms;
-		Parms.InteractionArray=InteractionArray;
-		Parms.Canvas=Canvas;
-		ProcessEvent(NProcess_PreRender, &Parms);
-	}
-
-	void Process_PostRender(TArray<class UInteraction*> InteractionArray, class UCanvas* Canvas){
-		DECLARE_NAME(Process_PostRender);
-		struct{
-			TArray<class UInteraction*> InteractionArray;
-			class UCanvas* Canvas;
-		} Parms;
-		Parms.InteractionArray=InteractionArray;
-		Parms.Canvas=Canvas;
-		ProcessEvent(NProcess_PostRender, &Parms);
-	}
-
-	void Process_Tick(TArray<class UInteraction*> InteractionArray, FLOAT DeltaTime){
-		DECLARE_NAME(Process_Tick);
-		struct{
-			TArray<class UInteraction*> InteractionArray;
-			FLOAT DeltaTime;
-		} Parms;
-		Parms.InteractionArray=InteractionArray;
-		Parms.DeltaTime=DeltaTime;
-		ProcessEvent(NProcess_Tick, &Parms);
-	}
-
-	void Process_Message(const FString& Msg, FLOAT MsgLife, TArray<class UInteraction*> InteractionArray){
-		DECLARE_NAME(Process_Message);
-		struct{
-			FString Msg;
-			FLOAT MsgLife;
-			TArray<class UInteraction*> InteractionArray;
-		} Parms;
-		Parms.Msg=Msg;
-		Parms.MsgLife=MsgLife;
-		Parms.InteractionArray=InteractionArray;
-		ProcessEvent(NProcess_Message, &Parms);
-	}
+	// Events
+	class UInteraction* AddInteraction(const FString& InteractionName, class UPlayer* AttachTo);
+	void RemoveInteraction(class UInteraction* RemoveMe);
+	void SetFocusTo(class UInteraction* Inter, class UPlayer* ViewportOwner);
+	UBOOL Process_KeyType(TArray<class UInteraction*> InteractionArray, BYTE& Key, const FString& Unicode);
+	UBOOL Process_KeyEvent(TArray<class UInteraction*> InteractionArray, BYTE& Key, BYTE& Action, FLOAT Delta);
+	void Process_PreRender(TArray<class UInteraction*> InteractionArray, class UCanvas* Canvas);
+	void Process_PostRender(TArray<class UInteraction*> InteractionArray, class UCanvas* Canvas);
+	void Process_Tick(TArray<class UInteraction*> InteractionArray, FLOAT DeltaTime);
+	void Process_Message(const FString& Msg, FLOAT MsgLife, TArray<class UInteraction*> InteractionArray);
 
 	DECLARE_CLASS(UInteractionMaster,UInteractions,CLASS_Transient,Engine)
 };
@@ -7198,14 +6504,8 @@ public:
 	FLOAT DoubleClickTimer;
 	FLOAT DoubleClickTime;
 
-	void PlayerInput(FLOAT DeltaTime){
-		FName NPlayerInput(NAME_PlayerInput);
-		struct{
-			FLOAT DeltaTime;
-		} Parms;
-		Parms.DeltaTime=DeltaTime;
-		ProcessEvent(NPlayerInput, &Parms);
-	}
+	// Events
+	void PlayerInput(FLOAT DeltaTime);
 
 	DECLARE_CLASS(UPlayerInput,UObject,CLASS_Transient|CLASS_Config,Engine)
 	NO_DEFAULT_CONSTRUCTOR(UPlayerInput)

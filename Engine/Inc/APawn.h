@@ -67,270 +67,43 @@ public:
 	virtual int HurtByVolume(class AActor*);
 	virtual void physicsRotation(float,const FVector&);
 
-	//Events
+	// Events
 	void SetAnchor(class ANavigationPoint* Point);
 	void StopTalking();
-	void SaveSquadTravelInfo(){
-		DECLARE_NAME(SaveSquadTravelInfo);
-		ProcessEvent(NSaveSquadTravelInfo, NULL);
-	}
-	void SetWalking(UBOOL bNewIsWalking){
-		DECLARE_NAME(SetWalking);
-		struct{
-			UBOOL bNewIsWalking;
-		} Parms;
-		Parms.bNewIsWalking=bNewIsWalking;
-		ProcessEvent(NSetWalking, &Parms);
-	}
-	void ClientMessage(const FString& S, FName Type){
-		DECLARE_NAME(ClientMessage);
-		struct{
-			FString S;
-			FName Type;
-		} Parms;
-		Parms.S=S;
-		Parms.Type=Type;
-		ProcessEvent(NClientMessage, &Parms);
-	}
-	void ModifyVelocity(FLOAT DeltaTime, const FVector& OldVelocity){
-		FName NModifyVelocity(NAME_ModifyVelocity);
-		if(!IsProbing(NModifyVelocity))
-			return;
-		struct{
-			FLOAT DeltaTime;
-			FVector OldVelocity;
-		} Parms;
-		Parms.DeltaTime=DeltaTime;
-		Parms.OldVelocity=OldVelocity;
-		ProcessEvent(NModifyVelocity, &Parms);
-	}
-	void EndCrouch(FLOAT HeightAdjust){
-		DECLARE_NAME(EndCrouch);
-		struct{
-			FLOAT HeightAdjust;
-		} Parms;
-		Parms.HeightAdjust=HeightAdjust;
-		ProcessEvent(NEndCrouch, &Parms);
-	}
-	void StartCrouch(FLOAT HeightAdjust){
-		DECLARE_NAME(StartCrouch);
-		struct{
-			FLOAT HeightAdjust;
-		} Parms;
-		Parms.HeightAdjust=HeightAdjust;
-		ProcessEvent(NStartCrouch, &Parms);
-	}
-	void TossWeapon(class AWeapon* WeaponToThrow, const FVector& TossVel){
-		DECLARE_NAME(TossWeapon);
-		struct{
-			class AWeapon* WeaponToThrow;
-			FVector TossVel;
-		} Parms;
-		Parms.WeaponToThrow=WeaponToThrow;
-		Parms.TossVel=TossVel;
-		ProcessEvent(NTossWeapon, &Parms);
-	}
-	class AInventory* FindInventoryType(class UClass* DesiredClass){
-		DECLARE_NAME(FindInventoryType);
-		struct{
-			class UClass* DesiredClass;
-			class AInventory* ReturnValue;
-		} Parms;
-		Parms.DesiredClass=DesiredClass;
-		Parms.ReturnValue=0;
-		ProcessEvent(NFindInventoryType, &Parms);
-		return Parms.ReturnValue;
-	}
-	void ChangedWeapon(){
-		DECLARE_NAME(ChangedWeapon);
-		ProcessEvent(NChangedWeapon, NULL);
-	}
-	void UpdateEyeHeight(FLOAT DeltaTime){
-		FName NUpdateEyeHeight(NAME_UpdateEyeHeight);
-		if(!IsProbing(NUpdateEyeHeight))
-			return;
-		struct{
-			FLOAT DeltaTime;
-		} Parms;
-		Parms.DeltaTime=DeltaTime;
-		ProcessEvent(NUpdateEyeHeight, &Parms);
-	}
-	FVector EyePosition(){
-		DECLARE_NAME(EyePosition);
-		struct{
-			FVector ReturnValue;
-		} Parms;
-		Parms.ReturnValue=FVector(0);
-		ProcessEvent(NEyePosition, &Parms);
-		return Parms.ReturnValue;
-	}
-	void DieAgain(){
-		DECLARE_NAME(DieAgain);
-		ProcessEvent(NDieAgain, NULL);
-	}
-	void BleedOut(){
-		FName NBleedOut(NAME_BleedOut);
-		ProcessEvent(NBleedOut, NULL);
-	}
-	void HeadVolumeChange(class APhysicsVolume* newHeadVolume){
-		FName NHeadVolumeChange(NAME_HeadVolumeChange);
-		if(!IsProbing(NHeadVolumeChange))
-			return;
-		struct{
-			class APhysicsVolume* newHeadVolume;
-		} Parms;
-		Parms.newHeadVolume=newHeadVolume;
-		ProcessEvent(NHeadVolumeChange, &Parms);
-	}
-	void SetAnimAction(FName NewAction){
-		DECLARE_NAME(SetAnimAction);
-		struct{
-			FName NewAction;
-		} Parms;
-		Parms.NewAction=NewAction;
-		ProcessEvent(NSetAnimAction, &Parms);
-	}
-	void PawnStopFiring(){
-		DECLARE_NAME(PawnStopFiring);
-		ProcessEvent(NPawnStopFiring, NULL);
-	}
-	void ChangeAnimation(){
-		DECLARE_NAME(ChangeAnimation);
-		ProcessEvent(NChangeAnimation, NULL);
-	}
-	void EndJump(){
-		DECLARE_NAME(EndJump);
-		ProcessEvent(NEndJump, NULL);
-	}
-	void PlayJump(){
-		DECLARE_NAME(PlayJump);
-		ProcessEvent(NPlayJump, NULL);
-	}
-	void PlayFalling(){
-		DECLARE_NAME(PlayFalling);
-		ProcessEvent(NPlayFalling, NULL);
-	}
-	void PlayDodging(UBOOL bRight){
-		DECLARE_NAME(PlayDodging);
-		struct{
-			UBOOL bRight;
-		} Parms;
-		Parms.bRight=bRight;
-		ProcessEvent(NPlayDodging, &Parms);
-	}
-	void PlayDying(class UClass* DamageType, const FVector& HitLoc, FName BoneName){
-		DECLARE_NAME(PlayDying);
-		struct{
-			class UClass* DamageType;
-			FVector HitLoc;
-			FName BoneName;
-		} Parms;
-		Parms.DamageType=DamageType;
-		Parms.HitLoc=HitLoc;
-		Parms.BoneName=BoneName;
-		ProcessEvent(NPlayDying, &Parms);
-	}
-	void Revive(){
-		DECLARE_NAME(Revive);
-		ProcessEvent(NRevive, NULL);
-	}
-	UBOOL GoRagDoll(class UClass* DamageType, const FVector& HitLocation){
-		DECLARE_NAME(GoRagDoll);
-		struct{
-			class UClass* DamageType;
-			FVector HitLocation;
-			UBOOL ReturnValue;
-		} Parms;
-		Parms.DamageType=DamageType;
-		Parms.HitLocation=HitLocation;
-		Parms.ReturnValue=0;
-		ProcessEvent(NGoRagDoll, &Parms);
-		return Parms.ReturnValue;
-	}
-	void PlayIncapacitated(class UClass* DamageType, const FVector& HitLocation){
-		DECLARE_NAME(PlayIncapacitated);
-		struct{
-			class UClass* DamageType;
-			FVector HitLocation;
-		} Parms;
-		Parms.DamageType=DamageType;
-		Parms.HitLocation=HitLocation;
-		ProcessEvent(NPlayIncapacitated, &Parms);
-	}
-	UBOOL IsDeadOrIncapacitated(){
-		DECLARE_NAME(IsDeadOrIncapacitated);
-		struct{
-			UBOOL ReturnValue;
-		} Parms;
-		Parms.ReturnValue=0;
-		ProcessEvent(NIsDeadOrIncapacitated, &Parms);
-		return Parms.ReturnValue;
-	}
-	void SetShields(FLOAT NewShields){
-		DECLARE_NAME(SetShields);
-		struct{
-			FLOAT NewShields;
-		} Parms;
-		Parms.NewShields=NewShields;
-		ProcessEvent(NSetShields, &Parms);
-	}
-	void SetHealthLevel(){
-		DECLARE_NAME(SetHealthLevel);
-		ProcessEvent(NSetHealthLevel, NULL);
-	}
-	void DoMeleeAttack(FName AttackBone, const FVector& BoneOffset){
-		DECLARE_NAME(DoMeleeAttack);
-		struct{
-			FName AttackBone;
-			FVector BoneOffset;
-		} Parms;
-		Parms.AttackBone=AttackBone;
-		Parms.BoneOffset=BoneOffset;
-		ProcessEvent(NDoMeleeAttack, &Parms);
-	}
-	FRotator GetWeaponRotation(){
-		DECLARE_NAME(GetWeaponRotation);
-		struct{
-			FRotator ReturnValue;
-		} Parms;
-		Parms.ReturnValue=FRotator(0);
-		ProcessEvent(NGetWeaponRotation, &Parms);
-		return Parms.ReturnValue;
-	}
-	void PlayDeathCue(class UClass* DamageType){
-		DECLARE_NAME(PlayDeathCue);
-		struct{
-			class UClass* DamageType;
-		} Parms;
-		Parms.DamageType=DamageType;
-		ProcessEvent(NPlayDeathCue, &Parms);
-	}
-	void PlaySpottedCue(class AActor* Enemy){
-		DECLARE_NAME(PlaySpottedCue);
-		struct{
-			class AActor* Enemy;
-		} Parms;
-		Parms.Enemy=Enemy;
-		ProcessEvent(NPlaySpottedCue, &Parms);
-	}
-	FString GetHudDescription(){
-		DECLARE_NAME(GetHudDescription);
-		struct{
-			FString ReturnValue;
-		} Parms;
-		Parms.ReturnValue=0;
-		ProcessEvent(NGetHudDescription, &Parms);
-		return Parms.ReturnValue;
-	}
-	FString GetHudNickname(){
-		DECLARE_NAME(GetHudNickname);
-		struct{
-			FString ReturnValue;
-		} Parms;
-		Parms.ReturnValue=0;
-		ProcessEvent(NGetHudNickname, &Parms);
-		return Parms.ReturnValue;
-	}
+	void SaveSquadTravelInfo();
+	void SetWalking(UBOOL bNewIsWalking);
+	void ClientMessage(const FString& S, FName Type);
+	void ModifyVelocity(FLOAT DeltaTime, const FVector& OldVelocity);
+	void EndCrouch(FLOAT HeightAdjust);
+	void StartCrouch(FLOAT HeightAdjust);
+	void TossWeapon(class AWeapon* WeaponToThrow, const FVector& TossVel);
+	class AInventory* FindInventoryType(class UClass* DesiredClass);
+	void ChangedWeapon();
+	void UpdateEyeHeight(FLOAT DeltaTime);
+	FVector EyePosition();
+	void DieAgain();
+	void BleedOut();
+	void HeadVolumeChange(class APhysicsVolume* newHeadVolume);
+	void SetAnimAction(FName NewAction);
+	void PawnStopFiring();
+	void ChangeAnimation();
+	void EndJump();
+	void PlayJump();
+	void PlayFalling();
+	void PlayDodging(UBOOL bRight);
+	void PlayDying(class UClass* DamageType, const FVector& HitLoc, FName BoneName);
+	void Revive();
+	UBOOL GoRagDoll(class UClass* DamageType, const FVector& HitLocation);
+	void PlayIncapacitated(class UClass* DamageType, const FVector& HitLocation);
+	UBOOL IsDeadOrIncapacitated();
+	void SetShields(FLOAT NewShields);
+	void SetHealthLevel();
+	void DoMeleeAttack(FName AttackBone, const FVector& BoneOffset);
+	FRotator GetWeaponRotation();
+	void PlayDeathCue(class UClass* DamageType);
+	void PlaySpottedCue(class AActor* Enemy);
+	FString GetHudDescription();
+	FString GetHudNickname();
 
 	//Functions
 	int CacheNetRelevancy(int,class APlayerController*,class AActor*);

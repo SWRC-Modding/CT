@@ -12,6 +12,7 @@ var config bool             bAutoBuildPaths;
 var config bool             bShowPaths;
 
 var bool                    bPathsImported;       // Paths were imported using ImportPaths
+var bool                    bPathsHaveChanged;
 var bool                    bShowPathsOnClients;
 var Array<vector>           NavPtFailLocations;   // Used to debug Navigation points which failed to spawn
 var Array<Pawn.PatrolPoint> BotPatrolRoute;
@@ -39,6 +40,8 @@ function ShowPathsClient(){
 			NavigationPointIcons[NavigationPointIcons.Length] = A;
 		}
 	}
+
+	bPathsHaveChanged = false;
 }
 
 function HidePathsClient(){
@@ -165,7 +168,7 @@ function bool ExecCmd(String Cmd, optional PlayerController PC){
 	}
 
 	if(Super.ExecCmd(Cmd, PC)){
-		if(bShowPathsOnClients){ // A native command might have changed the navigation points so we have to regenerate the dummy actors
+		if(bPathsHaveChanged && bShowPathsOnClients){ // A native command might have changed the navigation points so we have to regenerate the dummy actors
 			HidePathsClient();
 			ShowPathsClient();
 		}

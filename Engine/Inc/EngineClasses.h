@@ -2190,6 +2190,27 @@ public:
 };
 
 /*
+ * WarpZoneInfo
+ */
+
+class ENGINE_API AWarpZoneInfo : public AZoneInfo{
+public:
+	DECLARE_CLASS(AWarpZoneInfo,AZoneInfo,0,Engine)
+	NO_DEFAULT_CONSTRUCTOR(AWarpZoneInfo)
+
+	FStringNoInit OtherSideURL;
+	FName ThisTag;
+	BITFIELD bNoTeleFrag:1;
+	INT iWarpZone;
+	FCoords WarpCoords;
+	class AWarpZoneInfo* OtherSideActor;
+	class UObject* OtherSideLevel;
+	FStringNoInit Destinations[8];
+	INT numDestinations;
+	class AWarpZoneMarker* MyMarker;
+};
+
+/*
  * FluidSurfaceInfo
  */
 

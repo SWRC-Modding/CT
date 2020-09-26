@@ -101,72 +101,14 @@ class ENGINE_API UGameEngine : public UEngine{
 	FLOAT GameInviteTimeout;
 	FLOAT NextMatchmakingQueryTime;
 
-	//Events
+	// Events
 	FString GetLocalizedKeyName(BYTE K);
-	void InitLevelLoadingInfo(){
-		DECLARE_NAME(InitLevelLoadingInfo);
-		ProcessEvent(NInitLevelLoadingInfo, NULL);
-	}
-	void PotentialSubtitledSoundPlayed(const FString& SoundName, FLOAT Duration, class AActor* A, INT Priority){
-		DECLARE_NAME(PotentialSubtitledSoundPlayed);
-		struct{
-			FString SoundName;
-			FLOAT Duration;
-			class AActor* A;
-			INT Priority;
-		} Parms;
-		Parms.SoundName=SoundName;
-		Parms.Duration=Duration;
-		Parms.A=A;
-		Parms.Priority=Priority;
-		ProcessEvent(NPotentialSubtitledSoundPlayed, &Parms);
-	}
-	INT GetLevelProgressIdx(const FString& Level){
-		DECLARE_NAME(GetLevelProgressIdx);
-		struct{
-			FString Level;
-			INT ReturnValue;
-		} Parms;
-		Parms.Level=Level;
-		Parms.ReturnValue=0;
-		ProcessEvent(NGetLevelProgressIdx, &Parms);
-		return Parms.ReturnValue;
-	}
-	UBOOL HasReachedLevel(const FString& Level, INT CurrentProgress){
-		DECLARE_NAME(HasReachedLevel);
-		struct{
-			FString Level;
-			INT CurrentProgress;
-			UBOOL ReturnValue;
-		} Parms;
-		Parms.Level=Level;
-		Parms.CurrentProgress=CurrentProgress;
-		Parms.ReturnValue=0;
-		ProcessEvent(NHasReachedLevel, &Parms);
-		return Parms.ReturnValue;
-	}
-	FString GetNextLevel(INT afterThisIdx){
-		DECLARE_NAME(GetNextLevel);
-		struct{
-			INT afterThisIdx;
-			FString ReturnValue;
-		} Parms;
-		Parms.afterThisIdx=afterThisIdx;
-		Parms.ReturnValue=0;
-		ProcessEvent(NGetNextLevel, &Parms);
-		return Parms.ReturnValue;
-	}
-	FString GetLevelMissionStart(const FString& Level){
-		DECLARE_NAME(GetLevelMissionStart);
-		struct{
-			FString Level;
-			FString ReturnValue;
-		} Parms;
-		Parms.Level=Level;
-		Parms.ReturnValue=0;
-		ProcessEvent(NGetLevelMissionStart, &Parms);
-		return Parms.ReturnValue;
-	}
+	void InitLevelLoadingInfo();
+	void PotentialSubtitledSoundPlayed(const FString& SoundName, FLOAT Duration, class AActor* A, INT Priority);
+	INT GetLevelProgressIdx(const FString& Level);
+	UBOOL HasReachedLevel(const FString& Level, INT CurrentProgress);
+	FString GetNextLevel(INT afterThisIdx);
+	FString GetLevelMissionStart(const FString& Level);
 
 	//Constructors
 	UGameEngine();

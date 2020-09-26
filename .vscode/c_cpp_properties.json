@@ -3,8 +3,20 @@
         {
             "name": "Win32",
             "defines": [
+                "CORE_API=",
+                "CTGAME_API=",
+                "CTMARKERS_API=",
+                "D3DDRV_API=",
+                "EDITOR_API=",
+                "ENGINE_API=",
+                "GAMEPLAY_API=",
+                "GAMESPYMGR_API=",
+                "IPDRV_API=",
                 "MOD_API=",
-                "MODMPGAME_API="
+                "MODMPGAME_API=",
+                "WINDOW_API=",
+                "XGAME_API=",
+                "XINTERFACE_API="
             ],
             "windowsSdkVersion": "10.0.18362.0",
             "cppStandard": "c++03",

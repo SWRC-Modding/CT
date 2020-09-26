@@ -369,11 +369,11 @@ inline BYTE* CalculateTexelPointer(BYTE* Base, ETextureFormat Format, INT Stride
 		return Base + Stride * (Y / 4) + (X * 4);
 	case TEXF_RGBA8:
 	case TEXF_RGBA7:
+	case TEXF_X8L8V8U8:
 		return Base + Stride * Y + X * 4;
 	case TEXF_RGB8:
 	case TEXF_RRRGGGBBB:
 	case TEXF_LIN_RGB8:
-	case TEXF_X8L8V8U8:
 		return Base + Stride * Y + X * 3;
 	case TEXF_RGB16:
 	case TEXF_G16:

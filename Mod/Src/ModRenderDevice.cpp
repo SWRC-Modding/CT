@@ -438,13 +438,25 @@ HRESULT __stdcall D3D8CreateDeviceOverride(FD3D8* D3D8,
  * ModRenderDevice
  */
 
+FLOAT(__fastcall*UEngineGetMaxTickRate)(UEngine*, DWORD) = NULL;
+
+static FLOAT __fastcall EngineGetMaxTickRateOverride(UEngine* Self, DWORD Edx){
+	FLOAT MaxTickRate = UEngineGetMaxTickRate(Self, Edx);
+
+	return MaxTickRate <= 0.0f ? UModRenderDevice::FpsLimit : MaxTickRate; // If the engine doesn't set it's own tick rate (i.e. GetMaxTickRate returns 0), we use FpsLimit instead
+}
+
 UBOOL UModRenderDevice::Init(){
+	// Setting override function for maximum tick rate since the original always returns 0
+	MaybePatchVTable(&UEngineGetMaxTickRate, GEngine, 49, EngineGetMaxTickRateOverride);
+	GConfig->GetFloat("Engine.GameEngine", "FpsLimit", FpsLimit);
+
 	UBOOL Result = Super::Init();
 
 	if(Result)
 		MaybePatchVTable(&D3D8CreateDevice, Direct3D8, D3DVTableIndex_D3D8CreateDevice, D3D8CreateDeviceOverride);
 
-	if(!GIsEditor){
+	if(Result && !GIsEditor){
 		// Get a list of all supported resolutions and apply them to the config
 
 		DEVMODE dm = {0};
@@ -477,7 +489,6 @@ UBOOL UModRenderDevice::Init(){
 			FOVChanger = ConstructObject<UObject>(LoadClass<UObject>(NULL, "Mod.FOVChanger", NULL, LOAD_NoFail | LOAD_Throw, NULL),
 												  reinterpret_cast<UObject*>(-1),
 												  FName("MainFOVChanger"));
-			checkSlow(FOVChanger);
 			FOVChanger->AddToRoot(); // This object should never be garbage collected
 			FOVChanger->ProcessEvent(NAME_Init, NULL);
 		}
@@ -487,18 +498,32 @@ UBOOL UModRenderDevice::Init(){
 }
 
 UBOOL UModRenderDevice::Exec(const TCHAR* Cmd, FOutputDevice& Ar){
-	if(!GIsEditor && ParseCommand(&Cmd, "SETFOV")){
-		float FOV = appAtof(Cmd);
+	if(!GIsEditor){
+		if(ParseCommand(&Cmd, "SETFOV")){
+			float FOV = appAtof(Cmd);
 
-		Ar.Logf("Setting field of view to %f", FOV);
-		FOVChanger->ProcessEvent(FName("SetFOV"), &FOV);
+			Ar.Logf("Setting field of view to %f", FOV);
+			FOVChanger->ProcessEvent(FName("SetFOV"), &FOV);
 
-		return 1;
+			return 1;
+		}else if(ParseCommand(&Cmd, "SETFPSLIMIT")){
+			if(appStrlen(Cmd) > 0){
+				FpsLimit = Max(0.0f, appAtof(Cmd));
+				GConfig->SetFloat("Engine.GameEngine", "FpsLimit", FpsLimit);
+			}
+
+			return 1;
+		}else if(ParseCommand(&Cmd, "GETFPSLIMIT")){
+			Ar.Logf("%f", FpsLimit);
+
+			return 1;
+		}
 	}
 
 	return Super::Exec(Cmd, Ar);
 }
 
 UObject* UModRenderDevice::FOVChanger = NULL;
+FLOAT    UModRenderDevice::FpsLimit   = 0.0f;
 
 IMPLEMENT_CLASS(UModRenderDevice)

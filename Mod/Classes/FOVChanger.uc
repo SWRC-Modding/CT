@@ -1,4 +1,6 @@
-class FOVChanger extends Object;
+class FOVChanger extends Object; // TODO: Rename to something more general since it does more than just changing the FOV
+
+#exec OBJ LOAD FILE="Properties.u"
 
 var() config float   FOV;
 var() config float   HudArmsFOVFactor;
@@ -31,6 +33,9 @@ function Init(){
 	MenuBaseOverlayMenuClassOverride.Init(class'MenuBase', 'OverlayMenuClass', self, 'MenuBaseOverlayMenuClass');
 	MenuBaseGotoMenuClassOverride = new class'FunctionOverride';
 	MenuBaseGotoMenuClassOverride.Init(class'MenuBase', 'GotoMenuClass', self, 'MenuBaseGotoMenuClass');
+
+	// Fixing battle droids using clone weapons in the first mission
+	class'Properties.BattleDroidBlasterTM'.default.AttachmentClass = class'Properties.BattleDroidBlasterAttachmentTM';
 }
 
 function CTPlayerEndZoom(){

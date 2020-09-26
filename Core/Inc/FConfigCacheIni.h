@@ -164,9 +164,9 @@ public:
 						int Index = DefaultValues.FindItemIndex(*It);
 
 						if(Index == INDEX_NONE){
-							appSprintf(Temp, "%s+=%s\r\n", *ValueIt.Key(), *It);
+							appSprintf(Temp, "%s+=%s\r\n", *ValueIt.Key(), **It);
 						}else{
-							appSprintf(Temp, ";  %s+=%s\r\n", *ValueIt.Key(), *It);
+							appSprintf(Temp, ";  %s+=%s\r\n", *ValueIt.Key(), **It);
 							DefaultValues.Remove(Index);
 						}
 
@@ -175,7 +175,7 @@ public:
 
 					// Writing remaining default values that have not yet been written
 					for(TArray<FString>::TIterator It(DefaultValues); It; ++It){
-						appSprintf(Temp, ";  %s+=%s\r\n", *ValueIt.Key(), *It);
+						appSprintf(Temp, ";  %s+=%s\r\n", *ValueIt.Key(), **It);
 						Text += Temp;
 					}
 				}

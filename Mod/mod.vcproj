@@ -137,6 +137,9 @@
 			<File
 				RelativePath=".\Src\ModRenderDevice.cpp">
 			</File>
+			<File
+				RelativePath=".\Src\EditorFixes.cpp">
+			</File>
 		</Filter>
 	</Files>
 	<Globals>

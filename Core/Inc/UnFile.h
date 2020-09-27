@@ -443,7 +443,6 @@ CORE_API INT appMemcmp(const void* Buf1, const void* Buf2, INT Count);
 CORE_API UBOOL appMemIsZero(const void* V, int Count);
 CORE_API DWORD appMemCrc(const void* Data, INT Length, DWORD CRC=0);
 CORE_API void appMemswap(void* Ptr1, void* Ptr2, DWORD Size);
-CORE_API void appMemset(void* Dest, INT C, INT Count);
 
 //
 // C style memory allocation stubs.
@@ -455,13 +454,13 @@ CORE_API void appMemset(void* Dest, INT C, INT Count);
 //
 // C++ style memory allocation.
 //
-inline void* __cdecl operator new(unsigned int Size, const TCHAR* Tag){
+inline void* __cdecl operator new(size_t Size, const TCHAR* Tag){
 	guardSlow(new);
 	return appMalloc(Size);
 	unguardSlow;
 }
 
-inline void* __cdecl operator new(unsigned int Size){
+inline void* __cdecl operator new(size_t Size){
 	guardSlow(new);
 	return appMalloc(Size);
 	unguardSlow;
@@ -473,13 +472,13 @@ inline void __cdecl operator delete(void* Ptr){
 	unguardSlow;
 }
 
-inline void* __cdecl operator new[](unsigned int Size, const TCHAR* Tag){
+inline void* __cdecl operator new[](size_t Size, const TCHAR* Tag){
 	guardSlow(new);
 	return appMalloc(Size);
 	unguardSlow;
 }
 
-inline void* __cdecl operator new[](unsigned int Size){
+inline void* __cdecl operator new[](size_t Size){
 	guardSlow(new);
 	return appMalloc(Size);
 	unguardSlow;

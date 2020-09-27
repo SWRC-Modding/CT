@@ -365,10 +365,8 @@ inline void appResetTimer()
 #pragma warning (push)
 #pragma warning (disable : 4035)
 #pragma warning (disable : 4715)
-inline DWORD appCycles()
-{
-	__asm
-	{
+inline DWORD appCycles(){
+	__asm{
 		rdtsc				// RDTSC  -  Pentium+ time stamp register to EDX:EAX
 							// Use only 32 bits in EAX - a Ghz cpu has a 4+ sec period.
 	}
@@ -408,8 +406,6 @@ inline DOUBLE appSeconds()
 //
 // Memory copy.
 //
-#if ASM
-#define DEFINED_appMemcpy
 /*****************************************************************************
 
  Copyright (c) 2001 Advanced Micro Devices, Inc.
@@ -479,11 +475,8 @@ MEMCPY_AMD.CPP
 // getting maximum read bandwidth, especially in DDR memory systems.
 
 // Inline assembly syntax for use with Visual C++
-inline void appMemcpy( void* Dst, const void* Src, INT Count )
-{
-	if( true ) // SSE
-	__asm
-	{
+inline void appMemcpy(void* Dst, const void* Src, INT Count){
+	__asm{
 		mov		ecx, [Count]	; number of bytes to copy
 		mov		edi, [Dst]		; destination
 		mov		esi, [Src]		; source
@@ -682,21 +675,7 @@ inline void appMemcpy( void* Dst, const void* Src, INT Count )
 		sfence				; flush the write buffer
 	//	mov		eax, [dest]	; ret value = destination pointer
 	}
-	else
-	__asm
-	{
-		mov		ecx, Count
-		mov		esi, Src
-		mov		edi, Dst
-		mov	 ebx, ecx
-		shr	 ecx, 2
-		and	 ebx, 3
-		rep	 movsd
-		mov	 ecx, ebx
-		rep	 movsb
-	}
 }
-#endif
 
 //
 // Memory zero.
@@ -716,20 +695,41 @@ inline void appMemzero(void* Dest, INT Count){
 }
 
 //
-// 4 byte memset.
+// memset.
 //
-inline void appMemset4(void* Dest, DWORD Value, INT Count){
+inline void appMemset(void* Dest, INT C, INT Count){
 	__asm{
 		mov ecx, [Count]
-		shl ecx, 2
 		mov edi, [Dest]
-		mov eax, [Value]
+		mov eax, [C]
+
+		// Setting all other bytes of eax to the same value as the first one. There's probably a better way to do that...
+		and eax, 255
+		mov ebx, eax
+		shl ebx, 8
+		or  eax, ebx
+		mov ebx, eax
+		shl ebx, 16
+		or  eax, ebx
+
 		mov ebx, ecx
 		shr ecx, 2
 		and ebx, 3
 		rep stosd
 		mov ecx, ebx
 		rep stosb
+	}
+}
+
+//
+// 4 byte memset.
+//
+inline void appMemset4(void* Dest, DWORD Value, INT Count){
+	__asm{
+		mov ecx, [Count]
+		mov edi, [Dest]
+		mov eax, [Value]
+		rep stosd
 	}
 }
 

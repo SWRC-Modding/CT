@@ -169,19 +169,19 @@ enum EVectorFlags{
 /*
  * Floating point vector.
  */
-class /*CORE_API*/ FVector{
+class FVector{
 public:
 	// Variables.
 	FLOAT X,Y,Z;
 
 	// Constructors.
-	FORCEINLINE FVector(){}
-	FORCEINLINE FVector(FLOAT In) : X(In), Y(In), Z(In){}
-	FORCEINLINE FVector(FLOAT InX, FLOAT InY, FLOAT InZ)
+	FVector(){}
+	FVector(FLOAT In) : X(In), Y(In), Z(In){}
+	FVector(FLOAT InX, FLOAT InY, FLOAT InZ)
 	:	X(InX), Y(InY), Z(InZ){}
 
 	// Binary math operators.
-	FORCEINLINE FVector operator^(const FVector& V) const{
+	FVector operator^(const FVector& V) const{
 		return FVector
 		(
 			Y * V.Z - Z * V.Y,
@@ -189,26 +189,26 @@ public:
 			X * V.Y - Y * V.X
 		);
 	}
-	FORCEINLINE FLOAT operator|(const FVector& V) const{
+	FLOAT operator|(const FVector& V) const{
 		return X*V.X + Y*V.Y + Z*V.Z;
 	}
 	friend FVector operator*(FLOAT Scale, const FVector& V){
 		return FVector(V.X * Scale, V.Y * Scale, V.Z * Scale);
 	}
-	FORCEINLINE FVector operator+(const FVector& V) const{
+	FVector operator+(const FVector& V) const{
 		return FVector(X + V.X, Y + V.Y, Z + V.Z);
 	}
-	FORCEINLINE FVector operator-(const FVector& V) const{
+	FVector operator-(const FVector& V) const{
 		return FVector(X - V.X, Y - V.Y, Z - V.Z);
 	}
-	FORCEINLINE FVector operator*(FLOAT Scale) const{
+	FVector operator*(FLOAT Scale) const{
 		return FVector(X * Scale, Y * Scale, Z * Scale);
 	}
 	FVector operator/(FLOAT Scale) const{
 		FLOAT RScale = 1.0f/Scale;
 		return FVector(X * RScale, Y * RScale, Z * RScale);
 	}
-	FORCEINLINE FVector operator*(const FVector& V) const{
+	FVector operator*(const FVector& V) const{
 		return FVector(X * V.X, Y * V.Y, Z * V.Z);
 	}
 
@@ -221,20 +221,20 @@ public:
 	}
 
 	// Unary operators.
-	FORCEINLINE FVector operator-() const{
+	FVector operator-() const{
 		return FVector(-X, -Y, -Z);
 	}
 
 	// Assignment operators.
-	FORCEINLINE FVector operator+=(const FVector& V){
+	FVector operator+=(const FVector& V){
 		X += V.X; Y += V.Y; Z += V.Z;
 		return *this;
 	}
-	FORCEINLINE FVector operator-=(const FVector& V){
+	FVector operator-=(const FVector& V){
 		X -= V.X; Y -= V.Y; Z -= V.Z;
 		return *this;
 	}
-	FORCEINLINE FVector operator*=(FLOAT Scale){
+	FVector operator*=(FLOAT Scale){
 		X *= Scale; Y *= Scale; Z *= Scale;
 		return *this;
 	}
@@ -460,19 +460,19 @@ public:
 	FLOAT W;
 
 	// Constructors.
-	FORCEINLINE FPlane(){}
-	FORCEINLINE FPlane(const FPlane& P)
+	FPlane(){}
+	FPlane(const FPlane& P)
 	:	FVector(P)
 	,	W(P.W){}
-	FORCEINLINE FPlane(const FVector& V)
+	FPlane(const FVector& V)
 	:	FVector(V)
 	,	W(0){}
-	FORCEINLINE FPlane(FLOAT InX, FLOAT InY, FLOAT InZ, FLOAT InW)
+	FPlane(FLOAT InX, FLOAT InY, FLOAT InZ, FLOAT InW)
 	:	FVector(InX,InY,InZ)
 	,	W(InW){}
-	FORCEINLINE FPlane(FVector InNormal, FLOAT InW)
+	FPlane(FVector InNormal, FLOAT InW)
 	:	FVector(InNormal), W(InW){}
-	FORCEINLINE FPlane(FVector InBase, const FVector &InNormal)
+	FPlane(FVector InBase, const FVector &InNormal)
 	:	FVector(InNormal)
 	,	W(InBase | InNormal){}
 	FPlane(FVector A, FVector B, FVector C)
@@ -480,7 +480,7 @@ public:
 	,	W(A | ((B-A)^(C-A)).SafeNormal()){}
 
 	// Functions.
-	FORCEINLINE FLOAT PlaneDot(const FVector &P) const{
+	FLOAT PlaneDot(const FVector &P) const{
 		return X*P.X + Y*P.Y + Z*P.Z - W;
 	}
 	FPlane Flip() const{
@@ -1298,10 +1298,10 @@ public:
 	FLOAT Sqrt(int i){
 		return SqrtFLOAT[i];
 	}
-	FORCEINLINE FLOAT SinTab(int i){
+	FLOAT SinTab(int i){
 		return TrigFLOAT[((i>>ANGLE_SHIFT)&(NUM_ANGLES-1))];
 	}
-	FORCEINLINE FLOAT CosTab(int i){
+	FLOAT CosTab(int i){
 		return TrigFLOAT[(((i+16384)>>ANGLE_SHIFT)&(NUM_ANGLES-1))];
 	}
 	FLOAT SinFloat(FLOAT F){
@@ -2456,7 +2456,7 @@ inline FQuat SlerpQuat(const FQuat &quat1,const FQuat &quat2, float slerp){
 /*
  * Floating point 4x4 matrix
  */
-class CORE_API FMatrix{
+class FMatrix{
 public:
 
 	static FMatrix	Identity;
@@ -2466,9 +2466,9 @@ public:
 
 	// Constructors.
 
-	FORCEINLINE FMatrix(){}
+	FMatrix(){}
 
-	FORCEINLINE FMatrix(FPlane InX,FPlane InY,FPlane InZ,FPlane InW){
+	FMatrix(FPlane InX,FPlane InY,FPlane InZ,FPlane InW){
 		M[0][0] = InX.X; M[0][1] = InX.Y;  M[0][2] = InX.Z;  M[0][3] = InX.W;
 		M[1][0] = InY.X; M[1][1] = InY.Y;  M[1][2] = InY.Z;  M[1][3] = InY.W;
 		M[2][0] = InZ.X; M[2][1] = InZ.Y;  M[2][2] = InZ.Z;  M[2][3] = InZ.W;
@@ -2487,7 +2487,7 @@ public:
 	}
 
 	//Concatenation operator.
-	FORCEINLINE FMatrix operator*(FMatrix Other) const{
+	FMatrix operator*(FMatrix Other) const{
 		FMatrix	Result;
 
 		Result.M[0][0] = M[0][0] * Other.M[0][0] + M[0][1] * Other.M[1][0] + M[0][2] * Other.M[2][0] + M[0][3] * Other.M[3][0];
@@ -2513,7 +2513,7 @@ public:
 		return Result;
 	}
 
-	FORCEINLINE void operator*=(FMatrix Other){
+	void operator*=(FMatrix Other){
 		FMatrix Result;
 		Result.M[0][0] = M[0][0] * Other.M[0][0] + M[0][1] * Other.M[1][0] + M[0][2] * Other.M[2][0] + M[0][3] * Other.M[3][0];
 		Result.M[0][1] = M[0][0] * Other.M[0][1] + M[0][1] * Other.M[1][1] + M[0][2] * Other.M[2][1] + M[0][3] * Other.M[3][1];
@@ -2554,10 +2554,10 @@ public:
 
 	// Homogeneous transform.
 
-	FORCEINLINE FPlane TransformFPlane(const FPlane &P) const{
+	FPlane TransformFPlane(const FPlane &P) const{
 		FPlane Result;
 
-#if ASM && !_DEBUG
+#if !_DEBUG
 		__asm{
 			// Setup.
 
@@ -2637,17 +2637,17 @@ public:
 	}
 
 	//Regular transform.
-	FORCEINLINE FVector TransformFVector(const FVector &V) const{
+	FVector TransformFVector(const FVector &V) const{
 		return TransformFPlane(FPlane(V.X,V.Y,V.Z,1.0f));
 	}
 
 	//Normal transform.
-	FORCEINLINE FPlane TransformNormal(const FVector& V) const{
+	FPlane TransformNormal(const FVector& V) const{
 		return TransformFPlane(FPlane(V.X,V.Y,V.Z,0.0f));
 	}
 
 	//Transpose.
-	FORCEINLINE FMatrix Transpose(){
+	FMatrix Transpose(){
 		FMatrix	Result;
 
 		Result.M[0][0] = M[0][0];

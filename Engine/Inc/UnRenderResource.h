@@ -184,7 +184,7 @@ public:
 // FRenderResource
 // Abstract rendering resource interface.
 //
-class FRenderResource{
+class ENGINE_API FRenderResource{
 public:
 	QWORD CacheId;
 	INT Revision;

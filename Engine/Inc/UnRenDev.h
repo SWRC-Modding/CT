@@ -80,6 +80,7 @@ enum EPrecacheMode{
 };
 
 class ENGINE_API FRenderInterface{
+public:
 	virtual void PushState() = 0;
 	virtual void PopState() = 0;
 	virtual UBOOL SetRenderTarget(FRenderTarget* RenderTarget) = 0;
@@ -90,7 +91,7 @@ class ENGINE_API FRenderInterface{
 	virtual void PopHit(INT Count, UBOOL Force) = 0;
 	virtual void SetCullMode(ECullMode CullMode) = 0;
 	virtual void SetAmbientLight(FColor Color) = 0;
-	virtual void EnableLighting(UBOOL UseDynamic, UBOOL UseStatic = 1, UBOOL Modulate2X = 0, FBaseTexture* UseLightmap = NULL, UBOOL LightingOnly = 0, FSphere LitSphere = FSphere(FVector(0, 0, 0), 0)) = 0;
+	virtual void EnableLighting(UBOOL UseDynamic, UBOOL UseStatic = 1, UBOOL Modulate2X = 0, FBaseTexture* UseLightmap = NULL, UBOOL LightingOnly = 0, const FSphere& LitSphere = FSphere(FVector(0, 0, 0), 0), int = 0) = 0;
 	virtual void SetLight(INT LightIndex, FDynamicLight* Light, FLOAT Scale = 1.0f) = 0;
 	virtual void SetShaderLight(int, FDynamicLight*, float) = 0;
 	virtual void SetNPatchTesselation(FLOAT Tesselation) = 0;

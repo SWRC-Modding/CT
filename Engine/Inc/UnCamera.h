@@ -404,11 +404,11 @@ struct ENGINE_API HHitProxy
 	};
 	const TCHAR* GetName() const
 	{
-		return TEXT("HHitProxy");
+		return "HHitProxy";
 	}
 	virtual UBOOL IsA( const TCHAR* Str ) const
 	{
-		return appStricmp(TEXT("HHitProxy"),Str)==0;
+		return appStricmp("HHitProxy",Str)==0;
 	}
 	virtual void Click( const FHitCause& Cause )
 	{

@@ -35,11 +35,11 @@ public:
 	{}
 	void Serialize( const TCHAR* V, EName Event )
 	{
-		TCHAR Temp[1024]=TEXT("");
+		TCHAR Temp[1024]="";
 
 		if( Event==NAME_UserPrompt && (GIsClient || GIsEditor) )
 		{
-			::MessageBox( NULL, V, (TCHAR *)*LocalizeError("Warning",TEXT("Core")), MB_OK|MB_TASKMODAL );
+			::MessageBox( NULL, V, (TCHAR *)*LocalizeError("Warning","Core"), MB_OK|MB_TASKMODAL );
 		}
 		else if( Event==NAME_Title )
 		{
@@ -47,19 +47,19 @@ public:
 		}
 		else if( Event==NAME_Heading )
 		{
-			appSprintf( Temp, TEXT("--------------------%s--------------------"), (TCHAR*)V );
+			appSprintf( Temp, "--------------------%s--------------------", (TCHAR*)V );
 			V = Temp;
 		}
 		else if( Event==NAME_SubHeading )
 		{
-			appSprintf( Temp, TEXT("%s..."), (TCHAR*)V );
+			appSprintf( Temp, "%s...", (TCHAR*)V );
 			V = Temp;
 		}
 		else if( Event==NAME_Error || Event==NAME_Warning || Event==NAME_ExecWarning || Event==NAME_ScriptWarning )
 		{
 			if( Context )
 			{
-				appSprintf( Temp, TEXT("%s : %s, %s"), *Context->GetContext(), *FName(Event), (TCHAR*)V );
+				appSprintf( Temp, "%s : %s, %s", *Context->GetContext(), *FName(Event), (TCHAR*)V );
 				V = Temp;
 			}
 			if(Event == NAME_Error)
@@ -75,7 +75,7 @@ public:
 		TCHAR TempStr[4096];
 		GET_VARARGS( TempStr, ARRAY_COUNT(TempStr), Fmt );
 		if( GIsClient || GIsEditor )
-			return( ::MessageBox( NULL, TempStr, (TCHAR *)*LocalizeError("Question",TEXT("Core")), MB_YESNO|MB_TASKMODAL ) == IDYES);
+			return( ::MessageBox( NULL, TempStr, (TCHAR *)*LocalizeError("Question","Core"), MB_YESNO|MB_TASKMODAL ) == IDYES);
 		else
 			return 0;
 	}

@@ -16,7 +16,7 @@
  * Used for loading, saving, and garbage collecting
  * in a byte order neutral way.
  */
-class /*CORE_API*/ FArchive{
+class CORE_API FArchive{
 	// Friend archivers.
 	friend FArchive& operator<<(FArchive& Ar, ANSICHAR& C);
 	friend FArchive& operator<<(FArchive& Ar, BYTE& B);

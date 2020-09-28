@@ -16,10 +16,10 @@ Revision history:
 // Socket API.
 #if _MSC_VER
 	#define __WINSOCK__ 1
-	#define SOCKET_API TEXT("WinSock")
+	#define SOCKET_API "WinSock"
 #else
 	#define __BSD_SOCKETS__ 1
-	#define SOCKET_API TEXT("Sockets")
+	#define SOCKET_API "Sockets"
 #endif
 
 // WinSock includes.
@@ -101,8 +101,8 @@ public:
 
 	// Functions.
 	FResolveInfo( const TCHAR* InHostName )
-	{	
-		debugf( TEXT("Resolving %s..."), InHostName );
+	{
+		debugf( "Resolving %s...", InHostName );
 
 		appMemcpy( HostName, TCHAR_TO_ANSI(InHostName), appStrlen(InHostName) + 1 );
 		*Error = 0;
@@ -178,13 +178,13 @@ inline int getlocalhostaddr( FOutputDevice& Out, in_addr &HostAddr )
 	int CanBindAll = 0;
 	IpSetInt( HostAddr, INADDR_ANY );
 #ifndef XBOX
-	TCHAR Home[256]=TEXT("");
-	TCHAR HostName[256]=TEXT("");
+	TCHAR Home[256]="";
+	TCHAR HostName[256]="";
 	ANSICHAR AnsiHostName[256]="";
 	if( gethostname( AnsiHostName, 256 ) )
-		Out.Logf( TEXT("%s: gethostname failed (%s)"), SOCKET_API, SocketError() );
+		Out.Logf( "%s: gethostname failed (%s)", SOCKET_API, SocketError() );
 	appStrcpy( HostName, ANSI_TO_TCHAR(AnsiHostName) );
-	if( Parse(appCmdLine(),TEXT("MULTIHOME="),Home,ARRAY_COUNT(Home)) )
+	if( Parse(appCmdLine(),"MULTIHOME=",Home,ARRAY_COUNT(Home)) )
 	{
 		TCHAR *A, *B, *C, *D;
 		A=Home;
@@ -197,7 +197,7 @@ inline int getlocalhostaddr( FOutputDevice& Out, in_addr &HostAddr )
 			IpSetBytes( HostAddr, appAtoi(A), appAtoi(B+1), appAtoi(C+1), \
 				appAtoi(D+1) );
 		}
-		else Out.Logf( TEXT("Invalid multihome IP address %s"), Home );
+		else Out.Logf( "Invalid multihome IP address %s", Home );
 	}
 	else
 	{
@@ -205,23 +205,23 @@ inline int getlocalhostaddr( FOutputDevice& Out, in_addr &HostAddr )
 		HOSTENT* HostEnt = gethostbyname( TCHAR_TO_ANSI(HostName) );
 		if( HostEnt==NULL )
 		{
-			Out.Logf( TEXT("gethostbyname failed (%s)"), SocketError() );
+			Out.Logf( "gethostbyname failed (%s)", SocketError() );
 		}
 		else if( HostEnt->h_addrtype!=PF_INET )
 		{
-			Out.Logf( TEXT("gethostbyname: non-Internet address (%s)"), \
+			Out.Logf( "gethostbyname: non-Internet address (%s)", \
 				SocketError() );
 		}
 		else
 		{
 			HostAddr = *(in_addr*)( *HostEnt->h_addr_list );
-			if( !ParseParam(appCmdLine(),TEXT("PRIMARYNET")) )
+			if( !ParseParam(appCmdLine(),"PRIMARYNET") )
 				CanBindAll = 1;
 			static UBOOL First=0;
 			if( !First )
 			{
 				First = 1;
-				debugf( NAME_Init, TEXT("%s: I am %s (%s)"), SOCKET_API, HostName, *IpString( HostAddr ) );
+				debugf( NAME_Init, "%s: I am %s (%s)", SOCKET_API, HostName, *IpString( HostAddr ) );
 			}
 		}
 		//GHostByNameCriticalSection->Unlock();
@@ -239,7 +239,7 @@ inline in_addr getlocalbindaddr( FOutputDevice& Out )
 
 	// If we can bind to all addresses, return 0.0.0.0
 	if( getlocalhostaddr( Out, BindAddr ) )
-		IpSetInt( BindAddr, INADDR_ANY );	
+		IpSetInt( BindAddr, INADDR_ANY );
 	return BindAddr;
 
 }
@@ -258,4 +258,3 @@ inline in_addr getlocalbindaddr( FOutputDevice& Out )
 /*-----------------------------------------------------------------------------
 	The End.
 -----------------------------------------------------------------------------*/
-

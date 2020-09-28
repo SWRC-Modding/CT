@@ -67,7 +67,6 @@ enum EFunctionFlags{
 	FUNC_NetFuncFlags       = FUNC_Net | FUNC_NetReliable,
 };
 
-
 enum ERuntimeUCFlags{
 	RUC_ArrayLengthSet      = 0x01,	// Setting the length of an array, not an element of the array
 };
@@ -185,7 +184,6 @@ enum ECastToken{
 	CST_RotatorToString     = 0x59,
 	CST_Max                 = 0xFF,
 };
-
 
 /*
  * Latent functions.

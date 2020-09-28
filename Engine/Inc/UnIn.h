@@ -41,7 +41,7 @@ struct FAlias
 //
 class ENGINE_API UInput : public USubsystem
 {
-	static const TCHAR* StaticConfigName() {return TEXT("User");}
+	static const TCHAR* StaticConfigName() {return "User";}
 	DECLARE_CLASS(UInput,USubsystem,CLASS_Transient|CLASS_Config,Engine)
 
 	// Variables.

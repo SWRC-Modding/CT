@@ -1070,7 +1070,7 @@ public: class FVector __thiscall FBox::GetExtent() const
 public: unsigned char __thiscall FMemCache::FCacheItem::GetExtra()
 public: class FVector& __thiscall FBox::GetExtrema(int)
 public: class FVector const& __thiscall FBox::GetExtrema(int) const
-public: class FName const__thiscall UObject::GetFName() const
+public: class FName const __thiscall UObject::GetFName() const
 public: int __thiscall FPackageFileSummary::GetFileVersion() const
 public: int __thiscall FPackageFileSummary::GetFileVersionLicensee() const
 public: unsigned long __thiscall FName::GetFlags() const
@@ -1761,7 +1761,7 @@ unsigned long __fastcall appMemCrc(void const*, int, unsigned long)
 int __fastcall appMemIsZero(void const*, int)
 void __fastcall appMemset(void*, int, int)
 void __fastcall appMemswap(void*, void*, unsigned long)
-int const__cdecl appMsgf(int, char const*, ...)
+int const __cdecl appMsgf(int, char const*, ...)
 char const* __fastcall appPackage()
 void __fastcall appPreExit()
 double __fastcall appProcessSeconds()

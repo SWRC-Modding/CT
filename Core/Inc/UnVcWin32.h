@@ -52,14 +52,12 @@ enum {CACHE_LINE_SIZE   = 32}; // Cache line size.
 #endif
 
 // Function type macros.
-#define DLL_IMPORT	__declspec(dllimport)	/* Import function from DLL */
-#define DLL_EXPORT  __declspec(dllexport)	/* Export function to DLL */
-#define DLL_EXPORT_CLASS	__declspec(dllexport)	/* Export class to DLL */
-#define VARARGS	 __cdecl					/* Functions with variable arguments */
-#define CDECL		__cdecl					/* Standard C function */
-#define STDCALL		__stdcall				/* Standard calling convention */
-#define FORCEINLINE __forceinline			/* Force code to be inline */
-#define ZEROARRAY						   /* Zero-length arrays in structs */
+#define DLL_IMPORT __declspec(dllimport) // Import function from DLL
+#define DLL_EXPORT __declspec(dllexport) // Export function to DLL
+#define VARARGS __cdecl                  // Functions with variable arguments
+#define CDECL   __cdecl                  // Standard C function
+#define STDCALL __stdcall                // Standard calling convention
+#define FORCEINLINE __forceinline        // Force code to be inline
 
 // Variable arguments.
 #define GET_VARARGS(msg,len,fmt) appGetVarArgs(msg,len,fmt)
@@ -72,31 +70,31 @@ enum {CACHE_LINE_SIZE   = 32}; // Cache line size.
 #endif
 
 // Unsigned base types.
-typedef unsigned char		BYTE;		// 8-bit  unsigned.
-typedef unsigned short		_WORD;		// 16-bit unsigned.
-typedef unsigned long		DWORD;		// 32-bit unsigned.
-typedef unsigned __int64	QWORD;		// 64-bit unsigned.
+typedef unsigned char       BYTE;   // 8-bit  unsigned.
+typedef unsigned short      _WORD;  // 16-bit unsigned.
+typedef unsigned long       DWORD;  // 32-bit unsigned.
+typedef unsigned __int64    QWORD;  // 64-bit unsigned.
 
 // Signed base types.
-typedef	signed char			SBYTE;		// 8-bit  signed.
-typedef signed short		SWORD;		// 16-bit signed.
-typedef signed int  		INT;		// 32-bit signed.
-typedef signed __int64		SQWORD;		// 64-bit signed.
+typedef	signed char         SBYTE;  // 8-bit  signed.
+typedef signed short        SWORD;  // 16-bit signed.
+typedef signed int          INT;    // 32-bit signed.
+typedef signed __int64      SQWORD; // 64-bit signed.
 
 // Character types.
-typedef char				ANSICHAR;	// An ANSI character.
-typedef unsigned short	  UNICHAR;	// A unicode character.
-typedef unsigned char		ANSICHARU;	// An ANSI character.
-typedef unsigned short	  UNICHARU;	// A unicode character.
+typedef char                ANSICHAR;  // An ANSI character.
+typedef unsigned short      UNICHAR;   // A unicode character.
+typedef unsigned char       ANSICHARU; // An ANSI character.
+typedef unsigned short      UNICHARU;  // A unicode character.
 
 // Other base types.
-typedef signed int			UBOOL;		// Boolean 0 (false) or 1 (true).
-typedef float				FLOAT;		// 32-bit IEEE floating point.
-typedef double				DOUBLE;		// 64-bit IEEE double.
-typedef unsigned long	   SIZE_T;	 // Corresponds to C SIZE_T.
+typedef signed int          UBOOL;  // Boolean 0 (false) or 1 (true).
+typedef float               FLOAT;  // 32-bit IEEE floating point.
+typedef double              DOUBLE; // 64-bit IEEE double.
+typedef unsigned long       SIZE_T; // Corresponds to C SIZE_T.
 
 // Bitfield type.
-typedef unsigned long	   BITFIELD;	// For bitfields.
+typedef unsigned long       BITFIELD; // For bitfields.
 
 // Unwanted VC++ level 4 warnings to disable.
 #pragma warning(disable : 4244) /* conversion to float, possible loss of data							*/
@@ -154,32 +152,22 @@ typedef unsigned long	   BITFIELD;	// For bitfields.
 // DLL file extension.
 #define DLLEXT ".dll"
 
-// Pathnames.
-#define PATH(s) s
-
 // NULL.
 #define NULL 0
 
 // Package implementation.
 #define IMPLEMENT_PACKAGE_PLATFORM(pkgname) \
-	extern "C" {HINSTANCE hInstance;} \
-	INT DLL_EXPORT STDCALL DllMain( HINSTANCE hInInstance, DWORD Reason, void* Reserved ) \
-	{ hInstance = hInInstance; return 1; }
+	HINSTANCE hInstance; \
+	DLL_EXPORT INT STDCALL DllMain(HINSTANCE hInInstance, DWORD Reason, void* Reserved){ \
+		hInstance = hInInstance; \
+		return 1; \
+	}
 
 // Platform support options.
-#define PLATFORM_NEEDS_ARRAY_NEW 1
-#define FORCE_ANSI_LOG		   1
 #define SUPPORTS_PRAGMA_PACK 1
-
-// OS unicode function calling.
-#define TCHAR_CALL_OS(funcW,funcA) (funcA)
-#define TCHAR_TO_ANSI(str) str
-#define ANSI_TO_TCHAR(str) str
-inline CORE_API TCHAR* winAnsiToTCHAR( char* str ) { return str; }
 
 // Bitfield alignment.
 #define GCC_PACK(n)
-#define GCC_ALIGN(n)
 
 /*----------------------------------------------------------------------------
 	Globals.
@@ -187,36 +175,12 @@ inline CORE_API TCHAR* winAnsiToTCHAR( char* str ) { return str; }
 
 // System identification.
 extern "C"{
-	extern HINSTANCE	  hInstance;
+	extern HINSTANCE hInstance;
 }
 
 /*----------------------------------------------------------------------------
 	Math functions.
 ----------------------------------------------------------------------------*/
-
-const FLOAT	SRandTemp = 1.f;
-extern INT GSRandSeed;
-
-inline FLOAT appExp( FLOAT Value ) { return expf(Value); }
-inline FLOAT appLoge( FLOAT Value ) {	return logf(Value); }
-inline FLOAT appFmod( FLOAT Y, FLOAT X ) { return fmodf(Y,X); }
-inline FLOAT appSin( FLOAT Value ) { return sinf(Value); }
-inline FLOAT appAsin( FLOAT Value ) { return asinf(Value); }
-inline FLOAT appCos( FLOAT Value ) { return cosf(Value); }
-inline FLOAT appAcos( FLOAT Value ) { return acosf(Value); }
-inline FLOAT appTan( FLOAT Value ) { return tanf(Value); }
-inline FLOAT appAtan( FLOAT Value ) { return atanf(Value); }
-inline FLOAT appAtan2( FLOAT Y, FLOAT X ) { return atan2f(Y,X); }
-//inline FLOAT appSqrt( FLOAT Value );
-inline FLOAT appPow( FLOAT A, FLOAT B ) { return powf(A,B); }
-inline UBOOL appIsNan( FLOAT A ) { return _isnan(A); }
-//inline INT appRound( FLOAT F ) { return roundf(F); }
-//inline INT appFloor( FLOAT F ) { return floorf(F); }
-inline INT appCeil( FLOAT Value ) { return (INT)ceilf(Value); }
-inline INT appRand() { return rand(); }
-inline void appRandInit(INT Seed) { srand( Seed ); }
-inline FLOAT appFrand() { return rand() / (FLOAT)RAND_MAX; }
-inline void appSRandInit( INT Seed ) { GSRandSeed = Seed; }
 
 //
 // MSM: Converts to an integer with truncation towards zero.
@@ -228,14 +192,6 @@ inline INT appTrunc(FLOAT F){
 
 inline FLOAT appFractional(FLOAT Value){
 	return Value - appTrunc(Value);
-}
-
-inline FLOAT appSRand(){
-	GSRandSeed = (GSRandSeed * 196314165) + 907633515;
-	//@todo fix type aliasing
-	FLOAT Result;
-	*(INT*)&Result = (*(INT*)&SRandTemp & 0xff800000) | (GSRandSeed & 0x007fffff);
-	return appFractional(Result);
 }
 
 //
@@ -297,8 +253,7 @@ inline FLOAT appSqrt(FLOAT F){
 	const FLOAT fOneHalf = 0.5f;
 	FLOAT temp;
 
-	__asm
-	{
+	__asm{
 		movss	xmm1,[F]
 		rsqrtss xmm0,xmm1			// 1/sqrt estimate (12 bits)
 
@@ -324,44 +279,9 @@ inline FLOAT appSqrt(FLOAT F){
 	return temp;
 }
 
-// sjs ---
-typedef union _LARGEINT{ // a win32 LARGE_INTEGER
-	struct{
-		DWORD LowPart;
-		DWORD HighPart;
-	};
-
-	QWORD QuadPart;
-} LARGEINT;
-
-#if ASM || (defined _XBOX)
-#pragma warning (push)
-#pragma warning (disable : 4035)
-extern CORE_API QWORD GBaseCyles;
-#define DEFINED_appResetTimer 1
-inline void appResetTimer()
-{
-	LARGEINT li;
-	__asm
-	{
-		xor   eax,eax	// Required so that VC++ realizes EAX is modified.
-		xor   edx,edx	// Required so that VC++ realizes EDX is modified.
-		_emit 0x0F		// RDTSC  -  Pentium+ time stamp register to EDX:EAX.
-		_emit 0x31		// Use only 32 bits in EAX - even a Ghz cpu would have a 4+ sec period.
-		mov   [li.LowPart],eax   // Save low value.
-		mov   [li.HighPart],edx   // Save high value.
-	}
-	GBaseCyles = li.QuadPart;
-}
-#pragma warning (pop)
-#endif
-// --- sjs
-
 //
 // CPU cycles, related to GSecondsPerCycle.
 //
-#if ASM
-#define DEFINED_appCycles 1
 #pragma warning (push)
 #pragma warning (disable : 4035)
 #pragma warning (disable : 4715)
@@ -374,42 +294,10 @@ inline DWORD appCycles()
 	}
 }
 #pragma warning (pop)
-#endif
-/*
-//
-// Seconds, arbitrarily based.
-//
-#if ASM || (defined _XBOX)
-#define DEFINED_appSeconds 1
-#pragma warning (push)
-#pragma warning (disable : 4035)
-extern CORE_API DOUBLE GSecondsPerCycle;
-CORE_API DOUBLE appSecondsSlow();
-inline DOUBLE appSeconds()
-{
-	LARGEINT cur; // sjs DWORD L,H;
-	__asm
-	{
-		xor   eax,eax	// Required so that VC++ realizes EAX is modified.
-		xor   edx,edx	// Required so that VC++ realizes EDX is modified.
-		_emit 0x0F		// RDTSC  -  Pentium+ time stamp register to EDX:EAX.
-		_emit 0x31		// Use only 32 bits in EAX - even a Ghz cpu would have a 4+ sec period.
-		mov   [cur.LowPart],eax   // Save low value. // sjs
-		mov   [cur.HighPart],edx   // Save high value. // sjs
-	}
-	// sjs rem'd return ((DOUBLE)L +  4294967296.0 * (DOUBLE)H) * GSecondsPerCycle;
-	QWORD delta = cur.QuadPart - GBaseCyles;
-	return (double)delta * GSecondsPerCycle;
 
-}
-#pragma warning (pop)
-#endif
-*/
 //
 // Memory copy.
 //
-#if ASM
-#define DEFINED_appMemcpy
 /*****************************************************************************
 
  Copyright (c) 2001 Advanced Micro Devices, Inc.
@@ -696,7 +584,6 @@ inline void appMemcpy( void* Dst, const void* Src, INT Count )
 		rep	 movsb
 	}
 }
-#endif
 
 //
 // Memory zero.

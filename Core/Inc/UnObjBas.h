@@ -219,7 +219,7 @@ public:
 	TCHAR* String() const{
 		TCHAR* Result = appStaticString1024();
 
-		appSprintf(Result, TEXT("%08X%08X%08X%08X"), A, B, C, D);
+		appSprintf(Result, "%08X%08X%08X%08X", A, B, C, D);
 
 		return Result;
 	}
@@ -621,7 +621,6 @@ public:
 };
 
 #define DECLARE_NAME(name) static FName N##name(#name);
-#define DECLARE_FUNCTION(func) void func(FFrame& Stack, RESULT_DECL);
 
 /*----------------------------------------------------------------------------
 	Core templates.

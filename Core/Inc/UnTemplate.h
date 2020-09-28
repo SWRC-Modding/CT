@@ -204,9 +204,16 @@ class TAllocator{};
  * This class only exists for FTransactionBase::SaveArray
  */
 class FArray{
-private:
+protected:
 	void* Data;
-	INT ArrayNum;
+	INT ArrayNum     : 29;
+	INT bIsReference : 1; // Array doesn't own the data it points to and thus is not allowed to free it
+	INT bIdk         : 1; // Only used in FStringTemp, no idea what it means
+	INT bNoShrink    : 1; // Don't shrink allocation when elements are removed
+
+	FArray(bool NoShrink = false) : Data(NULL), ArrayNum(0), bIsReference(1), bIdk(0), bNoShrink(NoShrink){}
+	FArray(void* Src, INT Count) : Data(Src), ArrayNum(Count), bIsReference(1), bIdk(0), bNoShrink(0){}
+	FArray(ENoInit){}
 };
 
 /*
@@ -214,28 +221,18 @@ private:
  * Should only be used with POD types.
  */
 template<typename T>
-class TArray{
+class TArray : public FArray{
 public:
-	TArray() : Data(NULL), ArrayNum(0), bUnreferenced(0), bIdk(0), bNoShrink(0){}
+	TArray() : FArray(){}
+	TArray(T* Src, INT Count) : FArray(Src, Count){}
+	TArray(ENoInit) : FArray(E_NoInit){}
 
-	TArray(T* Src, INT Count) : Data(Src), ArrayNum(Count), bUnreferenced(1), bIdk(0), bNoShrink(0){}
-
-	TArray(ENoInit){}
-
-	TArray(INT Size, bool NoShrink = false) : Data(NULL),
-											  ArrayNum(0),
-											  bUnreferenced(0),
-											  bIdk(0),
-											  bNoShrink(NoShrink){
-		if(NoShrink)
+	TArray(INT Size, bool NoShrink = false) : FArray(NoShrink){
+		if(bNoShrink)
 			Set(Size, Size);
 	}
 
-	TArray(const TArray<T>& other, bool NoShrink = false) : Data(NULL),
-															ArrayNum(0),
-															bUnreferenced(0),
-															bIdk(0),
-															bNoShrink(NoShrink){
+	TArray(const TArray<T>& other, bool NoShrink = false){
 		*this = other;
 	}
 
@@ -275,7 +272,7 @@ public:
 	}
 
 	bool IsAllocated() const{
-		return Data != NULL && !bUnreferenced; // Returns true if Data is not NULL and bit 29 is not set
+		return Data != NULL && !bIsReference; // Returns true if Data is not NULL and bit 29 is not set
 	}
 
 	T& operator[](INT Index){
@@ -315,7 +312,7 @@ public:
 	}
 
 	void SetNoShrink(bool NoShrink){
-		bNoShrink = NoShrink
+		bNoShrink = NoShrink;
 	}
 
 	void CountBytes(FArchive& Ar){
@@ -449,7 +446,7 @@ public:
 
 		Data = Src.Data;
 		ArrayNum = Src.ArrayNum;
-		bUnreferenced = Src.bUnreferenced;
+		bIsReference = Src.bIsReference;
 		bIdk = Src.bIdk;
 		bNoShrink = Src.bNoShrink;
 
@@ -503,7 +500,7 @@ public:
 
 	TArray<T>& operator=(const TArray<T>& Other){
 		if(this != &Other){
-			if(Other.bUnreferenced || Other.bIdk){
+			if(Other.bIsReference || Other.bIdk){
 				Transfer(const_cast<TArray<T>&>(Other));
 			}else{
 				Empty(Other.ArrayNum);
@@ -553,12 +550,6 @@ public:
 	};
 
 protected:
-	void* Data;
-	INT ArrayNum                   : 29;
-	mutable BITFIELD bUnreferenced : 1; // Array doesn't own the data it points to and thus is not allowed to free it
-	BITFIELD bIdk                  : 1; // Only used in FStringTemp, no idea what it means
-	BITFIELD bNoShrink             : 1;
-
 	INT Capacity() const{
 		if(IsAllocated())
 			return GMalloc->GetAllocationSize(Data) / sizeof(T);
@@ -566,8 +557,8 @@ protected:
 		return 0;
 	}
 
-	void Unreference() const{
-		bUnreferenced = 1;
+	void Unreference() const{ // Unreference seems like a bad name choice but we want to use the original naming...
+		const_cast<INT&>(bIsReference) = 1;
 	}
 
 	void Init(INT Index, INT Count){
@@ -606,7 +597,7 @@ protected:
 				Data = NULL;
 			}
 
-			bUnreferenced = 0; // To make sure the memory isn't leaked.
+			bIsReference = 0; // To make sure the memory isn't leaked.
 							   // This doesn't exist in the original code which means that either
 							   // the developers made a mistake or I'm missing something else about
 							   // how these flags are used...
@@ -686,7 +677,7 @@ public:
 	INT Add(INT Count = 1){
 		INT Index = TArray<T>::Add(Count);
 		if(GUndo)
-			GUndo->SaveArray(Owner, reinterpret_cast<FArray*>(this), Index, Count, 1, sizeof(T), SerializeItem, DestructItem);
+			GUndo->SaveArray(Owner, this, Index, Count, 1, sizeof(T), SerializeItem, DestructItem);
 		return Index;
 	}
 
@@ -694,19 +685,19 @@ public:
 		TArray<T>::Insert(Index, Count);
 
 		if(GUndo)
-			GUndo->SaveArray(Owner, reinterpret_cast<FArray*>(this), Index, Count, 1, sizeof(T), SerializeItem, DestructItem);
+			GUndo->SaveArray(Owner, this, Index, Count, 1, sizeof(T), SerializeItem, DestructItem);
 	}
 
 	void Remove(INT Index, INT Count = 1){
 		if(GUndo)
-			GUndo->SaveArray(Owner, reinterpret_cast<FArray*>(this), Index, Count, -1, sizeof(T), SerializeItem, DestructItem);
+			GUndo->SaveArray(Owner, this, Index, Count, -1, sizeof(T), SerializeItem, DestructItem);
 
 		TArray<T>::Remove(Index, Count);
 	}
 
 	void Empty(INT Slack = 0){
 		if(GUndo)
-			GUndo->SaveArray(Owner, reinterpret_cast<FArray*>(this), 0, ArrayNum, -1, sizeof(T), SerializeItem, DestructItem);
+			GUndo->SaveArray(Owner, this, 0, ArrayNum, -1, sizeof(T), SerializeItem, DestructItem);
 
 		TArray<T>::Empty(Slack);
 	}

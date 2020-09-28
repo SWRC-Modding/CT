@@ -296,7 +296,7 @@ private:
 		*Loader << AR_INDEX(NameIndex);
 
 		if(!NameMap.IsValidIndex(NameIndex))
-			appErrorf(TEXT("Bad name index %i/%i"), NameIndex, NameMap.Num());
+			appErrorf("Bad name index %i/%i", NameIndex, NameMap.Num());
 
 		FName Temporary = NameMap[NameIndex];
 
@@ -304,7 +304,7 @@ private:
 
 		return *this;
 
-		unguardf((TEXT("(%s %i))"), GetFullName(), Tell()));
+		unguardf(("(%s %i))", GetFullName(), Tell()));
 	}
 };
 

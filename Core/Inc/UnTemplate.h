@@ -207,9 +207,9 @@ class FArray{
 protected:
 	void* Data;
 	INT ArrayNum     : 29;
-	INT bIsReference : 1; // Array doesn't own the data it points to and thus is not allowed to free it
-	INT bIdk         : 1; // Only used in FStringTemp, no idea what it means
-	INT bNoShrink    : 1; // Don't shrink allocation when elements are removed
+	BITFIELD bIsReference : 1; // Array doesn't own the data it points to and thus is not allowed to free it
+	BITFIELD bIdk         : 1; // Only used in FStringTemp, no idea what it means
+	BITFIELD bNoShrink    : 1; // Don't shrink allocation when elements are removed
 
 	FArray(bool NoShrink = false) : Data(NULL), ArrayNum(0), bIsReference(1), bIdk(0), bNoShrink(NoShrink){}
 	FArray(void* Src, INT Count) : Data(Src), ArrayNum(Count), bIsReference(1), bIdk(0), bNoShrink(0){}
@@ -558,7 +558,7 @@ protected:
 	}
 
 	void Unreference() const{ // Unreference seems like a bad name choice but we want to use the original naming...
-		const_cast<INT&>(bIsReference) = 1;
+		const_cast<TArray<T>*>(this)->bIsReference = 1; // Need to do a const_cast because the function is const in the original code as well
 	}
 
 	void Init(INT Index, INT Count){

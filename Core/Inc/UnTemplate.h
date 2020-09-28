@@ -206,12 +206,12 @@ class TAllocator{};
 class FArray{
 protected:
 	void* Data;
-	INT ArrayNum     : 29;
+	INT ArrayNum          : 29;
 	BITFIELD bIsReference : 1; // Array doesn't own the data it points to and thus is not allowed to free it
 	BITFIELD bIdk         : 1; // Only used in FStringTemp, no idea what it means
 	BITFIELD bNoShrink    : 1; // Don't shrink allocation when elements are removed
 
-	FArray(bool NoShrink = false) : Data(NULL), ArrayNum(0), bIsReference(1), bIdk(0), bNoShrink(NoShrink){}
+	FArray(bool NoShrink = false) : Data(NULL), ArrayNum(0), bIsReference(0), bIdk(0), bNoShrink(NoShrink){}
 	FArray(void* Src, INT Count) : Data(Src), ArrayNum(Count), bIsReference(1), bIdk(0), bNoShrink(0){}
 	FArray(ENoInit){}
 };
@@ -272,7 +272,7 @@ public:
 	}
 
 	bool IsAllocated() const{
-		return Data != NULL && !bIsReference; // Returns true if Data is not NULL and bit 29 is not set
+		return Data != NULL && !bIsReference;
 	}
 
 	T& operator[](INT Index){

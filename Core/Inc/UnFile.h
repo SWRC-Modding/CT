@@ -66,34 +66,34 @@ CORE_API void appExit();
 
 CORE_API void appRequestExit(UBOOL Force);
 
-CORE_API void VARARGS appFailAssert(const ANSICHAR* Expr, const ANSICHAR* File, INT Line);
+CORE_API void __cdecl appFailAssert(const ANSICHAR* Expr, const ANSICHAR* File, INT Line);
 /*
  * Unwind the stack.
  * Called from the unguard macro when an exception is thrown in order to create a stacktrace.
  */
 CORE_API void VARARGS appUnwindf(const TCHAR* Fmt, ...);
 CORE_API const TCHAR* appGetSystemErrorMessage(INT Error = 0);
-CORE_API const void appDebugMessagef(const TCHAR* Fmt, ...);
+CORE_API void VARARGS appDebugMessagef(const TCHAR* Fmt, ...);
 /*
  * Shows a message box.
  * Type: 1 = MB_YESNO, 2 = MB_OKCANCEL, 3 = MB_OK.
  * Returns true for yes/ok, false for no/cancel.
  */
-CORE_API const UBOOL appMsgf(INT Type, const TCHAR* Fmt, ...);
-CORE_API const void appGetLastError();
-CORE_API const void EdClearLoadErrors();
-CORE_API const void EdLoadErrorf(INT Type, const TCHAR* Fmt, ...);
+CORE_API const UBOOL VARARGS appMsgf(INT Type, const TCHAR* Fmt, ...);
+CORE_API void appGetLastError();
+CORE_API void EdClearLoadErrors();
+CORE_API void VARARGS EdLoadErrorf(INT Type, const TCHAR* Fmt, ...);
 CORE_API UBOOL appIsDebuggerPresent();
 
-#define debugf				GLog->Logf
-#define appErrorf			GError->Logf
+#define debugf              GLog->Logf
+#define appErrorf           GError->Logf
 
 #if DO_GUARD_SLOW
-	#define debugfSlow		GLog->Logf
-	#define appErrorfSlow	GError->Logf
+	#define debugfSlow      GLog->Logf
+	#define appErrorfSlow   GError->Logf
 #else
-	#define debugfSlow		GNull->Logf
-	#define appErrorfSlow	GNull->Logf
+	#define debugfSlow      GNull->Logf
+	#define appErrorfSlow   GNull->Logf
 #endif
 
 /*-----------------------------------------------------------------------------
@@ -106,7 +106,6 @@ CORE_API void* appGetDllExport(void* DllHandle, const TCHAR* ExportName);
 CORE_API void appLaunchURL(const TCHAR* URL, const TCHAR* Parms = NULL, FString* Error = NULL);
 CORE_API void* appCreateProc(const TCHAR* URL, const TCHAR* Parms , UBOOL bRealTime);
 CORE_API UBOOL appGetProcReturnCode(void* ProcHandle, INT* ReturnCode);
-CORE_API void appEnableFastMath(UBOOL Enable);
 CORE_API class FGuid appCreateGuid();
 CORE_API void appCreateTempFilename(const TCHAR* Path, TCHAR* Result256);
 CORE_API void appCleanFileCache();
@@ -130,13 +129,13 @@ CORE_API FString appClipboardPaste();
 // Meant to be enabled in release builds.
 //
 #if defined(_DEBUG) || !DO_GUARD
-	#define guard(func)			{static const TCHAR __FUNC_NAME__[]=TEXT(#func);
-	#define unguard				}
-	#define unguardf(msg)		}
+	#define guard(func)   {static const TCHAR __FUNC_NAME__[]=#func;
+	#define unguard       }
+	#define unguardf(msg) }
 #else
-	#define guard(func)			{static const TCHAR __FUNC_NAME__[]=TEXT(#func); try{
-	#define unguard				}catch(TCHAR*Err){throw Err;}catch(...){appUnwindf(TEXT("%s"),__FUNC_NAME__); throw;}}
-	#define unguardf(msg)		}catch(TCHAR*Err){throw Err;}catch(...){appUnwindf(TEXT("%s"),__FUNC_NAME__); appUnwindf msg; throw;}}
+	#define guard(func)   {static const TCHAR __FUNC_NAME__[]=#func; try{
+	#define unguard       }catch(TCHAR*Err){throw Err;}catch(...){appUnwindf("%s",__FUNC_NAME__); throw;}}
+	#define unguardf(msg) }catch(TCHAR*Err){throw Err;}catch(...){appUnwindf("%s",__FUNC_NAME__); appUnwindf msg; throw;}}
 #endif
 
 //
@@ -145,14 +144,14 @@ CORE_API FString appClipboardPaste();
 // Meant to be disabled in release builds.
 //
 #if defined(_DEBUG) || !DO_GUARD || !DO_GUARD_SLOW
-	#define guardSlow(func)		{
-	#define unguardfSlow(msg)	}
-	#define unguardSlow			}
-	#define unguardfSlow(msg)	}
+	#define guardSlow(func)     {
+	#define unguardfSlow(msg)   }
+	#define unguardSlow         }
+	#define unguardfSlow(msg)   }
 #else
-	#define guardSlow(func)		guard(func)
-	#define unguardSlow			unguard
-	#define unguardfSlow(msg)	unguardf(msg)
+	#define guardSlow(func)     guard(func)
+	#define unguardSlow         unguard
+	#define unguardfSlow(msg)   unguardf(msg)
 #endif
 
 //
@@ -217,7 +216,7 @@ CORE_API void VARARGS appThrowf(const TCHAR* Fmt, ...);
 	Text format.
 -----------------------------------------------------------------------------*/
 
-CORE_API FString appFormat(FString Src, const TMultiMap<FString,FString>& Map);
+CORE_API FString appFormat(FString Src, const FConfigSection& Map);
 
 /*-----------------------------------------------------------------------------
 	Localization.
@@ -252,14 +251,13 @@ CORE_API const TCHAR* appUserName();
 	Timing functions.
 -----------------------------------------------------------------------------*/
 
-#if !DEFINED_appSeconds
 CORE_API DOUBLE appSeconds();
-#endif
-
-CORE_API void appSystemTime(INT& Year, INT& Month, INT& DayOfWeek, INT& Day, INT& Hour, INT& Min, INT& Sec, INT& MSec);
-CORE_API const TCHAR* appTimestamp(bool IncludeDate = true, bool IncludeTime = true);
 CORE_API DOUBLE appSecondsSlow();
 CORE_API void appSleep(FLOAT Seconds);
+CORE_API void appSystemTime(INT& Year, INT& Month, INT& DayOfWeek, INT& Day, INT& Hour, INT& Min, INT& Sec, INT& MSec);
+CORE_API QWORD appSystemTime64();
+CORE_API QWORD appSystemTime64ToLocaltime(QWORD Time64, INT& Year, INT& Month, INT& DayOfWeek, INT& Day, INT& Hour, INT& Min, INT& Sec, INT& MSec);
+CORE_API const TCHAR* appTimestamp(bool IncludeDate = true, bool IncludeTime = true);
 
 /*-----------------------------------------------------------------------------
 	Character type functions.
@@ -293,9 +291,8 @@ inline bool appIsAlnum(TCHAR c){
 	return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9');
 }
 
-#include <ctype.h>
 inline UBOOL appIsSpace(TCHAR c){
-    return isspace(c);
+    return c == ' ' || (c >= '\t' && c <= '\r');
 }
 
 /*-----------------------------------------------------------------------------
@@ -317,7 +314,6 @@ CORE_API INT appStrcmp(const TCHAR* String1, const TCHAR* String2);
 CORE_API INT appStricmp(const TCHAR* String1, const TCHAR* String2);
 CORE_API INT appStrncmp(const TCHAR* String1, const TCHAR* String2, INT Count);
 CORE_API TCHAR* appStaticString1024();
-CORE_API ANSICHAR* appAnsiStaticString1024();
 
 CORE_API const TCHAR* appSpc(int Num);
 CORE_API TCHAR* appStrncpy(TCHAR* Dest, const TCHAR* Src, int Max);
@@ -335,13 +331,11 @@ CORE_API INT appSprintf(TCHAR* Dest, const TCHAR* Fmt, ...);
 CORE_API void appTrimSpaces(ANSICHAR* String);
 CORE_API INT appStrPrefix(const TCHAR* Str, const TCHAR* Prefix);
 
-#define appSSCANF	sscanf
-
 CORE_API INT appGetVarArgs(TCHAR* Dest, INT Count, const TCHAR*& Fmt);
 
 typedef int QSORT_RETURN;
 typedef QSORT_RETURN(__cdecl*QSORT_COMPARE)(const void* A, const void* B);
-CORE_API void appQsort(void* Base, INT Num, INT Width, QSORT_COMPARE Compare);
+CORE_API void __cdecl appQsort(void* Base, INT Num, INT Width, QSORT_COMPARE Compare);
 
 //
 // Case insensitive string hash function.
@@ -387,41 +381,6 @@ CORE_API void ParseNext(const TCHAR** Stream);
 CORE_API UBOOL ParseParam(const TCHAR* Stream, const TCHAR* Param);
 
 /*-----------------------------------------------------------------------------
-	Math functions.
------------------------------------------------------------------------------*/
-
-CORE_API DOUBLE appExp(DOUBLE Value);
-CORE_API DOUBLE appLoge(DOUBLE Value);
-CORE_API DOUBLE appFmod(DOUBLE A, DOUBLE B);
-CORE_API DOUBLE appSin(DOUBLE Value);
-CORE_API DOUBLE appAsin(DOUBLE Value);
-CORE_API DOUBLE appCos(DOUBLE Value);
-CORE_API DOUBLE appAcos(DOUBLE Value);
-CORE_API DOUBLE appTan(DOUBLE Value);
-CORE_API DOUBLE appAtan(DOUBLE Value);
-CORE_API DOUBLE appAtan2(DOUBLE Y, DOUBLE X);
-CORE_API DOUBLE appSqrt(DOUBLE Value);
-CORE_API DOUBLE appPow(DOUBLE A, DOUBLE B);
-CORE_API UBOOL appIsNan(DOUBLE Value);
-//CORE_API void appRandInit(INT Seed);
-//CORE_API INT appRand();
-//CORE_API FLOAT appFrand();
-
-/*
-#if !DEFINED_appSRandInit
-CORE_API void appSRandInit(INT);
-#endif
-
-#if !DEFINED_appSRand
-CORE_API FLOAT appSRand();
-#endif
-
-#if !DEFINED_appCeil
-CORE_API INT appCeil(FLOAT Value);
-#endif
-*/
-
-/*-----------------------------------------------------------------------------
 	Array functions.
 -----------------------------------------------------------------------------*/
 
@@ -435,13 +394,16 @@ CORE_API UBOOL appSaveStringToFile(const FString& String, const TCHAR* Filename,
 	Memory functions.
 -----------------------------------------------------------------------------*/
 
-inline void* appMemmove(void* Dest, const void* Src, INT Count){
+FORCEINLINE void* appMemmove(void* Dest, const void* Src, INT Count){
 	return memmove(Dest, Src, Count);
 }
 
-CORE_API INT appMemcmp(const void* Buf1, const void* Buf2, INT Count);
+FORCEINLINE INT appMemcmp(const void* Buf1, const void* Buf2, INT Count){
+	return memcmp(Buf1, Buf2, Count);
+}
+
 CORE_API UBOOL appMemIsZero(const void* V, int Count);
-CORE_API DWORD appMemCrc(const void* Data, INT Length, DWORD CRC=0);
+CORE_API DWORD appMemCrc(const void* Data, INT Length, DWORD CRC = 0);
 CORE_API void appMemswap(void* Ptr1, void* Ptr2, DWORD Size);
 CORE_API void appMemset(void* Dest, INT C, INT Count);
 
@@ -492,9 +454,29 @@ inline void __cdecl operator delete[](void* Ptr){
 }
 
 /*-----------------------------------------------------------------------------
-	Math.
+	Math functions.
 -----------------------------------------------------------------------------*/
 
+inline FLOAT appExp(FLOAT Value){ return expf(Value); }
+inline FLOAT appLoge(FLOAT Value){ return logf(Value); }
+inline FLOAT appFmod(FLOAT Y, FLOAT X){ return fmodf(Y,X); }
+inline FLOAT appSin(FLOAT Value){ return sinf(Value); }
+inline FLOAT appAsin(FLOAT Value){ return asinf(Value); }
+inline FLOAT appCos(FLOAT Value){ return cosf(Value); }
+inline FLOAT appAcos(FLOAT Value){ return acosf(Value); }
+inline FLOAT appTan(FLOAT Value){ return tanf(Value); }
+inline FLOAT appAtan(FLOAT Value){ return atanf(Value); }
+inline FLOAT appAtan2(FLOAT Y, FLOAT X) { return atan2f(Y,X); }
+inline FLOAT appPow(FLOAT A, FLOAT B) {return powf(A,B); }
+inline UBOOL appIsNan(FLOAT A){ return _isnan(A); }
+inline INT appCeil(FLOAT Value){ return (INT)ceilf(Value); }
+inline INT appRand(){ return rand(); }
+inline void appRandInit(INT Seed){ srand(Seed); }
+inline FLOAT appFrand(){ return rand() / (FLOAT)RAND_MAX; }
+
+CORE_API void appSRandInit(INT Seed);
+CORE_API FLOAT appSRand();
+CORE_API INT appCeilFast16(FLOAT Value);
 CORE_API BYTE appCeilLogTwo(DWORD Arg);
 
 /*-----------------------------------------------------------------------------

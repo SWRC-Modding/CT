@@ -83,11 +83,7 @@ enum ERunningOS{
 	OS_WIN2K,
 	OS_WINXP,
 	OS_WINNT,
-	OS_LINUX_X86,
-	OS_FREEBSD_X86,
-	OS_LINUX_X86_64,
-	OS_MAC_OSX_PPC,
-	OS_UNKNOWN	= 255
+	OS_UNKNOWN = 255
 };
 
 // Multi byte character set mappings. No wchar_t in Republic Commando...
@@ -96,13 +92,9 @@ typedef ANSICHARU TCHARU;
 
 #undef TEXT
 #define TEXT(s) s
-#undef US
-#define US FString("")
 
-inline TCHAR	FromAnsi   (ANSICHAR In){ return In;                                }
-inline TCHAR	FromUnicode(UNICHAR In) { return (_WORD)In < 0x100 ? In : MAXSBYTE; }
-inline ANSICHAR	ToAnsi     (TCHAR In  ) { return (_WORD)In < 0x100 ? In : MAXSBYTE; }
-inline UNICHAR	ToUnicode  (TCHAR In  ) { return (BYTE)In;                          }
+inline TCHAR    FromUnicode(UNICHAR In){ return (_WORD)In < 0x100 ? In : MAXSBYTE; }
+inline ANSICHAR	ToAnsi(TCHAR In){ return (_WORD)In < 0x100 ? In : MAXSBYTE; }
 
 /*----------------------------------------------------------------------------
 	Forward declarations.
@@ -166,17 +158,6 @@ struct FMemCount{
 	DWORD Reserved;
 };
 
-// Native function.
-typedef void(UObject::*Native)(FFrame& TheStack, void* const Result);
-
-// Single entry in a UClass' native funtion table.
-template<typename T>
-struct FNativeEntry{
-	const TCHAR* name;
-	void(T::*Func)(FFrame&, void*);
-	INT Num;
-};
-
 // Templates.
 template<typename T>
 class TArray;
@@ -188,6 +169,17 @@ template<typename TK, typename TI>
 class TMap;
 template<typename TK, typename TI>
 class TMultiMap;
+
+// Native function.
+typedef void(UObject::*Native)(FFrame& TheStack, void* const Result);
+
+// Single entry in a UClass' native funtion table.
+template<typename T>
+struct FNativeEntry{
+	const TCHAR* name;
+	void(T::*Func)(FFrame&, void*);
+	INT Num;
+};
 
 // Globals.
 CORE_API extern class FOutputDevice* GNull;
@@ -222,13 +214,15 @@ public:
 };
 
 // Memory allocator.
-class /*CORE_API*/ FMalloc{
+class CORE_API FMalloc{
 public:
+	void AddStat(FMemCount& Count, void* Ptr, DWORD Size, UBOOL IsUsed);
+
 	virtual void Init(){}
-	virtual void* Malloc(DWORD) = 0;
-	virtual void* Realloc(void*, DWORD, DWORD) = 0;
-	virtual void Free(void*) = 0;
-	virtual DWORD GetAllocationSize(void*) = 0;
+	virtual void* Malloc(DWORD Size) = 0;
+	virtual void* Realloc(void* Ptr, DWORD Size, DWORD Slack) = 0;
+	virtual void Free(void* Ptr) = 0;
+	virtual DWORD GetAllocationSize(void* Ptr) = 0;
 	virtual void TrackMemory(bool){}
 	virtual void Compact(){}
 	virtual void DumpAllocs(){}
@@ -241,7 +235,7 @@ public:
 	virtual void IncrementWatermark(){}
 	virtual void DecrementWatermark(){}
 	virtual void SetAuxMalloc(FMalloc*){}
-	virtual void LockMem(void*, unsigned long, bool){}
+	virtual void LockMem(void* Ptr, DWORD Size, bool bLock){}
 	virtual void vtpad1() = 0;
 	virtual void vtpad2() = 0;
 	virtual void Tick(){}
@@ -361,6 +355,21 @@ struct FCopyProgress{
 	virtual UBOOL Poll(FLOAT Fraction) = 0;
 };
 
+struct FFileStats{
+	INT NumOpens;
+	INT NumSeeks;
+	INT NumSkips;
+	INT NumReads;
+	DWORD ReadsSize;
+	INT NumSerialized;
+	DWORD SerializedSize;
+
+	FFileStats();
+
+	void Clear();
+	FString Describe() const;
+};
+
 class CORE_API FFileManager{
 public:
 	virtual void Init(UBOOL Startup){}
@@ -377,10 +386,10 @@ public:
 	virtual void FindFiles(TArray<FString>& Result, const TCHAR* Filename, UBOOL Files, UBOOL Directories) = 0;
 	virtual UBOOL SetDefaultDirectory(const TCHAR* Filename) = 0;
 	virtual FString GetDefaultDirectory() = 0;
-	virtual const TCHAR* CalcHomeDir();
-	virtual int Cache(const TCHAR*);
-	virtual struct FFileStats GetStats(bool);
-	virtual QWORD GetFreeDiskSpace(const TCHAR*);
+	virtual const TCHAR* CalcHomeDir(); // Returns appBaseDir()
+	virtual int Cache(const TCHAR*){ return 0; }
+	virtual FFileStats GetStats(bool){ return FFileStats(); }
+	virtual QWORD GetFreeDiscSpace(const TCHAR*){ return 0; }
 };
 
 //
@@ -504,11 +513,11 @@ CORE_API extern UBOOL                   GBuildingScripts;
 CORE_API extern UBOOL                   GIsUTracing;
 CORE_API extern class FGlobalMath       GMath;                      // Math code
 CORE_API extern class FArchive*         GDummySave;                 // No-op save archive
-CORE_API extern FFileStream*            GFileStream;                //  File streaming
-CORE_API extern FLOAT                   GAudioMaxRadiusMultiplier;  //  Max distance = Radius * GAudioMaxRadiusMultiplier
-CORE_API extern FLOAT                   GAudioDefaultRadius;        //  Default radius for PlayOwnedSound
-CORE_API extern UDebugger*              GDebugger;                  //  Unrealscript Debugger
-CORE_API extern QWORD                   GMakeCacheIDIndex;          //  Cache ID
+CORE_API extern FFileStream*            GFileStream;                // File streaming
+CORE_API extern FLOAT                   GAudioMaxRadiusMultiplier;  // Max distance = Radius * GAudioMaxRadiusMultiplier
+CORE_API extern FLOAT                   GAudioDefaultRadius;        // Default radius for PlayOwnedSound
+CORE_API extern UDebugger*              GDebugger;                  // Unrealscript Debugger
+CORE_API extern QWORD                   GMakeCacheIDIndex;          // Cache ID
 CORE_API extern FString                 GBuildLabel;
 CORE_API extern FString                 GMachineOS;
 CORE_API extern FString                 GMachineCPU;

@@ -79,7 +79,7 @@ class ENGINE_API UCanvas : public UObject{
 	virtual void SetClip( INT X, INT Y, INT XL, INT YL );
 
     void eventReset(){
-        ProcessEvent(FindFunctionChecked(TEXT("Reset")),NULL);
+        ProcessEvent(FindFunctionChecked("Reset"),NULL);
     }
 
 private:
@@ -301,11 +301,11 @@ struct ENGINE_API HHitProxy
 	};
 	const TCHAR* GetName() const
 	{
-		return TEXT("HHitProxy");
+		return "HHitProxy";
 	}
 	virtual UBOOL IsA( const TCHAR* Str ) const
 	{
-		return appStricmp(TEXT("HHitProxy"),Str)==0;
+		return appStricmp("HHitProxy",Str)==0;
 	}
 	virtual void Click( const FHitCause& Cause )
 	{

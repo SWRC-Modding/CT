@@ -25,6 +25,11 @@ struct TTypeInfoBase{
 template<typename T>
 struct TTypeInfo : public TTypeInfoBase<T>{};
 
+template<typename T>
+struct TTypeInfo<T*> : public TTypeInfoBase<T*>{
+	static UBOOL NeedsDestructor(){ return 0; }
+};
+
 template<>
 struct TTypeInfo<BYTE> : public TTypeInfoBase<BYTE>{
 	static UBOOL NeedsDestructor(){ return 0; }
@@ -72,11 +77,6 @@ struct TTypeInfo<SQWORD> : public TTypeInfoBase<SQWORD>{
 
 template<>
 struct TTypeInfo<FName> : public TTypeInfoBase<FName>{
-	static UBOOL NeedsDestructor(){ return 0; }
-};
-
-template<>
-struct TTypeInfo<UObject*> : public TTypeInfoBase<UObject*>{
 	static UBOOL NeedsDestructor(){ return 0; }
 };
 
@@ -208,11 +208,11 @@ protected:
 	void* Data;
 	INT ArrayNum          : 29;
 	BITFIELD bIsReference : 1; // Array doesn't own the data it points to and thus is not allowed to free it
-	BITFIELD bIdk         : 1; // Only used in FStringTemp, no idea what it means
+	BITFIELD bIsTemporary : 1; // This is a temporary object (e.g. returned from a function)
 	BITFIELD bNoShrink    : 1; // Don't shrink allocation when elements are removed
 
-	FArray(bool NoShrink = false) : Data(NULL), ArrayNum(0), bIsReference(0), bIdk(0), bNoShrink(NoShrink){}
-	FArray(void* Src, INT Count) : Data(Src), ArrayNum(Count), bIsReference(1), bIdk(0), bNoShrink(0){}
+	FArray(bool NoShrink = false) : Data(NULL), ArrayNum(0), bIsReference(0), bIsTemporary(0), bNoShrink(NoShrink){}
+	FArray(void* Src, INT Count) : Data(Src), ArrayNum(Count), bIsReference(1), bIsTemporary(0), bNoShrink(0){}
 	FArray(ENoInit){}
 };
 
@@ -233,6 +233,7 @@ public:
 	}
 
 	TArray(const TArray<T>& other, bool NoShrink = false){
+		bNoShrink = NoShrink;
 		*this = other;
 	}
 
@@ -246,9 +247,100 @@ public:
 		ArrayNum = 0;
 	}
 
+	TArray<T>& operator=(const TArray<T>& Other){
+		if(this != &Other){
+			if(Other.bIsReference || Other.bIsTemporary){
+				Transfer(const_cast<TArray<T>&>(Other));
+			}else{
+				Empty(Other.ArrayNum);
+
+				// It is assumed that a type is not trivially copyable if it needs a destructor which should be true in pretty much any case
+				if(TTypeInfo<T>::NeedsDestructor()){
+					for(INT i = 0; i < Other.ArrayNum; ++i)
+						new(*this)T(Other[i]);
+				}else{
+					appMemcpy(Data, Other.Data, Other.ArrayNum * sizeof(T));
+					ArrayNum = Other.ArrayNum;
+				}
+			}
+		}
+
+		return *this;
+	}
+
+	TArray<T> operator+(const TArray<T>& Other){
+		TArray<T> Result(*this);
+
+		Result.Reserve(Result.Num() + Other.Num());
+
+		if(TTypeInfo<T>::NeedsDestructor()){
+			for(INT i = 0; i < Other.ArrayNum; ++i)
+				new(Result)T(Other[i]);
+		}else{
+			appMemcpy(static_cast<T*>(Result.Data) + Result.Num(), Other.Data, Other.ArrayNum * sizeof(T));
+			Result.ArrayNum += Other.ArrayNum;
+		}
+
+		Result.bIsTemporary = 1;
+
+		return Result;
+	}
+
+	TArray<T>& operator+=(const TArray<T>& Other){
+		Reserve(Num() + Other.Num());
+
+		if(TTypeInfo<T>::NeedsDestructor()){
+			for(INT i = 0; i < Other.ArrayNum; ++i)
+				new(*this)T(Other[i]);
+		}else{
+			appMemcpy(GetData() + Num(), Other.Data, Other.ArrayNum * sizeof(T));
+			ArrayNum += Other.ArrayNum;
+		}
+
+		return *this;
+	}
+
+	T& operator[](INT Index){
+		checkSlow(IsValidIndex(Index));
+		return GetData()[Index];
+	}
+
+	const T& operator[](INT Index) const{
+		checkSlow(IsValidIndex(Index));
+		return GetData()[Index];
+	}
+
+	void Transfer(TArray<T>& Src){
+		Realloc(0, 0);
+
+		Data = Src.Data;
+		ArrayNum = Src.ArrayNum;
+		bIsReference = Src.bIsReference;
+		bNoShrink = Src.bNoShrink;
+
+		Src.Unreference();
+	}
+
 	void Set(T* Src, INT Count){
 		Data = Src;
 		ArrayNum = Count
+	}
+
+	void Set(INT NewSize, INT Slack){
+		INT OldNum = Num();
+
+		if(NewSize >= Num()){
+			Realloc(NewSize, Slack);
+
+			if(Num() > OldNum)
+				appMemzero(static_cast<BYTE*>(Data) + OldNum, (Num() - OldNum) * sizeof(T));
+		}else{
+			Remove(NewSize, Num() - NewSize);
+		}
+	}
+
+	void Set(INT NewSize){
+		Set(NewSize, NewSize);
 	}
 
 	T* GetData(){
@@ -273,16 +365,6 @@ public:
 
 	bool IsAllocated() const{
 		return Data != NULL && !bIsReference;
-	}
-
-	T& operator[](INT Index){
-		checkSlow(IsValidIndex(Index));
-		return GetData()[Index];
-	}
-
-	const T& operator[](INT Index) const{
-		checkSlow(IsValidIndex(Index));
-		return GetData()[Index];
 	}
 
 	T& Last(INT c = 0){
@@ -441,51 +523,6 @@ public:
 		return Result;
 	}
 
-	void Transfer(TArray<T>& Src){
-		Realloc(0, 0);
-
-		Data = Src.Data;
-		ArrayNum = Src.ArrayNum;
-		bIsReference = Src.bIsReference;
-		bIdk = Src.bIdk;
-		bNoShrink = Src.bNoShrink;
-
-		Src.Unreference();
-	}
-
-	void Set(INT NewSize, INT Slack){
-		INT OldNum = Num();
-
-		if(NewSize >= Num()){
-			Realloc(NewSize, Slack);
-
-			if(Num() > OldNum)
-				appMemzero(static_cast<BYTE*>(Data) + OldNum, (Num() - OldNum) * sizeof(T));
-		}else{
-			Remove(NewSize, Num() - NewSize);
-		}
-	}
-
-	void Set(INT NewSize){
-		Set(NewSize, NewSize);
-	}
-
-	TArray<T>& operator+(const TArray<T>& Other){
-		if(this != &Other){
-			for(INT i = 0; i < Other.Num(); ++i)
-				new(*this) T(Other[i]);
-		}
-
-		return *this;
-	}
-
-	TArray<T>& operator+=(const TArray<T>& Other){
-		if(this != &Other)
-			*this = *this + Other;
-
-		return *this;
-	}
-
 	INT AddItem(const T& Item){
 		new(*this) T(Item);
 
@@ -496,27 +533,6 @@ public:
 		INT Index = FindItemIndex(Item);
 
 		return Index != INDEX_NONE ? Index : AddItem(Item);
-	}
-
-	TArray<T>& operator=(const TArray<T>& Other){
-		if(this != &Other){
-			if(Other.bIsReference || Other.bIdk){
-				Transfer(const_cast<TArray<T>&>(Other));
-			}else{
-				Empty(Other.ArrayNum);
-
-				// It is assumed that a type is not trivially copyable if it needs a destructor which should be true in pretty much any case
-				if(TTypeInfo<T>::NeedsDestructor()){
-					for(INT i = 0; i < Other.ArrayNum; ++i)
-						new(*this)T(Other[i]);
-				}else{
-					appMemcpy(Data, Other.Data, Other.ArrayNum * sizeof(T));
-					ArrayNum = Other.ArrayNum;
-				}
-			}
-		}
-
-		return *this;
 	}
 
 	TArray<T> Segment(INT Index, INT Count){
@@ -898,7 +914,7 @@ class FStringTemp;
 class CORE_API FString : protected TArray<TCHAR>{
 public:
 	FString();
-	FString(const TCHAR* In, bool What = false);
+	FString(const TCHAR* In, bool IsReference = false);
 	FString(ENoInit);
 	FString(const FString& Other);
 	FString(const FStringTemp& Other);
@@ -953,7 +969,7 @@ public:
 	FStringTemp Substitute(const FString&) const;
 
 	static FStringTemp VARARGS Printf(const TCHAR* fmt, ...);
-	static FStringTemp Chr(TCHAR);
+	static FStringTemp Chr(TCHAR c);
 
 protected:
 	FString(INT Size);
@@ -967,15 +983,12 @@ protected:
 };
 
 /*
- * Probably some sort of reference to avoid  unnecessary copies
- *
- * No idea what this class is for. The only difference to FString seems
- * to be a different binary flag used in various places (0x40000000)
- * RC is the only Unreal game that has this...
+ * Temporary string used to avoid unnecessary copies with temporary objects (e.g. when chaining the + operator)
+ * This should only be used as a return value.
  */
 class CORE_API FStringTemp : public FString{
 public:
-	FStringTemp(const TCHAR* In, bool What = false);
+	FStringTemp(const TCHAR* In, bool IsReference = false);
 	FStringTemp(INT Count);
 	FStringTemp(INT Count, const TCHAR* In);
 	FStringTemp(const FStringTemp& Other);

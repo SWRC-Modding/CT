@@ -151,9 +151,9 @@ public:
 		//GLog->Logf("FRenderInterface::GetTransform");
 		return Impl->GetTransform(Type);
 	}
-	virtual void SetMaterial(){
+	virtual void SetMaterial(int a, int b, int c, int d){
 		//GLog->Logf("FRenderInterface::SetMaterial");
-		Impl->SetMaterial();
+		Impl->SetMaterial(a, b, c, d);
 	}
 	virtual UBOOL SetHardwareShaderMaterial(UHardwareShader* a, FString* b, UMaterial** c){
 		//GLog->Logf("FRenderInterface::SetHardwareShaderMaterial");
@@ -238,6 +238,18 @@ public:
 	virtual int vtpad5(){
 		//GLog->Logf("FRenderInterface::vtpad5");
 		return Impl->vtpad5();
+	}
+	virtual int d3d1(int a, int b){
+		//GLog->Logf("FRenderInterface::d3d1");
+		return Impl->d3d1(a, b);
+	}
+	virtual int d3d2(int a){
+		//GLog->Logf("FRenderInterface::d3d2");
+		return Impl->d3d2(a);
+	}
+	virtual int d3d3(int a){
+		//GLog->Logf("FRenderInterface::d3d3");
+		return Impl->d3d3(a);
 	}
 };
 

@@ -101,7 +101,7 @@ public:
 	virtual void SetGlobalColor(FColor Color) = 0;
 	virtual void SetTransform(ETransformType Type, const FMatrix& Matrix) = 0;
 	virtual FMatrix GetTransform(ETransformType Type) const = 0;
-	virtual void SetMaterial() = 0; // TODO: Fix params
+	virtual void SetMaterial(int, int, int, int) = 0;
 	virtual UBOOL SetHardwareShaderMaterial(UHardwareShader*, FString*, UMaterial**) = 0;
 	virtual UBOOL ShowAlpha(UMaterial*) = 0;
 	virtual UBOOL IsShadowInterface() = 0;
@@ -128,6 +128,11 @@ public:
 	virtual int vtpad3(){ return 1; };
 	virtual int vtpad4(){ return 1; };
 	virtual int vtpad5(){ return 1; };
+
+	// The following virtual functions belong to FD3DRenderInterface and should be removed again
+	virtual int d3d1(int, int) = 0;
+	virtual int d3d2(int) = 0;
+	virtual int d3d3(int) = 0;
 };
 
 /*------------------------------------------------------------------------------------

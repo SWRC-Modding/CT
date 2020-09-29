@@ -81,12 +81,12 @@ enum EPrecacheMode{
 
 class ENGINE_API FRenderInterface{
 public:
-	virtual void PushState() = 0;
-	virtual void PopState() = 0;
-	virtual UBOOL SetRenderTarget(FRenderTarget* RenderTarget) = 0;
+	virtual void PushState(int) = 0;
+	virtual void PopState(int) = 0;
+	virtual UBOOL SetRenderTarget(FRenderTarget* RenderTarget, bool) = 0;
 	virtual void SetCubeRenderTarget(class FDynamicCubemap*, int, int) = 0;
 	virtual void SetViewport(INT X, INT Y, INT Width, INT Height) = 0;
-	virtual void Clear(UBOOL UseColor = 1, FColor Color = FColor(0, 0, 0), UBOOL UseDepth = 1,  FLOAT Depth = 1.0f, UBOOL UseStencil = 1, DWORD Stencil = 0) = 0;
+	virtual void Clear(UBOOL UseColor = 1, FColor Color = FColor(0, 0, 0), UBOOL UseDepth = 1, FLOAT Depth = 1.0f, UBOOL UseStencil = 1, DWORD Stencil = 0) = 0;
 	virtual void PushHit(const BYTE* Data, INT Count) = 0;
 	virtual void PopHit(INT Count, UBOOL Force) = 0;
 	virtual void SetCullMode(ECullMode CullMode) = 0;

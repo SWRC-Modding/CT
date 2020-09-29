@@ -68,17 +68,17 @@ public:
 
 	// Overrides
 
-	virtual void PushState(){
+	virtual void PushState(int a){
 		//GLog->Logf("FRenderInterface::PushState");
-		Impl->PushState();
+		Impl->PushState(a);
 	}
-	virtual void PopState(){
+	virtual void PopState(int a){
 		//GLog->Logf("FRenderInterface::PopState");
-		Impl->PopState();
+		Impl->PopState(a);
 	}
-	virtual UBOOL SetRenderTarget(FRenderTarget* RenderTarget){
+	virtual UBOOL SetRenderTarget(FRenderTarget* RenderTarget, bool a){
 		//GLog->Logf("FRenderInterface::SetRenderTarget");
-		return Impl->SetRenderTarget(RenderTarget);
+		return Impl->SetRenderTarget(RenderTarget, a);
 	}
 	virtual void SetCubeRenderTarget(class FDynamicCubemap* RenderTarget, int a, int b){
 		//GLog->Logf("FRenderInterface::SetCubeRenderTarget");

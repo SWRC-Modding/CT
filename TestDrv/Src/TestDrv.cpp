@@ -80,9 +80,9 @@ public:
 		//GLog->Logf("FRenderInterface::SetRenderTarget");
 		return Impl->SetRenderTarget(RenderTarget, a);
 	}
-	virtual void SetCubeRenderTarget(class FDynamicCubemap* RenderTarget, int a, int b){
+	virtual UBOOL SetCubeRenderTarget(class FDynamicCubemap* RenderTarget, int a, int b){
 		//GLog->Logf("FRenderInterface::SetCubeRenderTarget");
-		Impl->SetCubeRenderTarget(RenderTarget, a, b);
+		return Impl->SetCubeRenderTarget(RenderTarget, a, b);
 	}
 	virtual void SetViewport(INT X, INT Y, INT Width, INT Height){
 		//GLog->Logf("FRenderInterface::SetViewport");
@@ -151,9 +151,9 @@ public:
 		//GLog->Logf("FRenderInterface::GetTransform");
 		return Impl->GetTransform(Type);
 	}
-	virtual void SetMaterial(int a, int b, int c, int d){
+	virtual void SetMaterial(UMaterial* Material, FString* ErrorString, UMaterial** ErrorMaterial, INT* NumPasses){
 		//GLog->Logf("FRenderInterface::SetMaterial");
-		Impl->SetMaterial(a, b, c, d);
+		Impl->SetMaterial(Material, ErrorString, ErrorMaterial, NumPasses);
 	}
 	virtual UBOOL SetHardwareShaderMaterial(UHardwareShader* a, FString* b, UMaterial** c){
 		//GLog->Logf("FRenderInterface::SetHardwareShaderMaterial");

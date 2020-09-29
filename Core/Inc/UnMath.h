@@ -454,7 +454,7 @@ public:
 	FPlane.
 -----------------------------------------------------------------------------*/
 
-class CORE_API FPlane : public FVector{
+class FPlane : public FVector{
 public:
 	// Variables.
 	FLOAT W;

@@ -84,7 +84,7 @@ public:
 	virtual void PushState(int) = 0;
 	virtual void PopState(int) = 0;
 	virtual UBOOL SetRenderTarget(FRenderTarget* RenderTarget, bool) = 0;
-	virtual void SetCubeRenderTarget(class FDynamicCubemap*, int, int) = 0;
+	virtual UBOOL SetCubeRenderTarget(class FDynamicCubemap*, int, int){}
 	virtual void SetViewport(INT X, INT Y, INT Width, INT Height) = 0;
 	virtual void Clear(UBOOL UseColor = 1, FColor Color = FColor(0, 0, 0), UBOOL UseDepth = 1, FLOAT Depth = 1.0f, UBOOL UseStencil = 1, DWORD Stencil = 0) = 0;
 	virtual void PushHit(const BYTE* Data, INT Count) = 0;
@@ -93,22 +93,22 @@ public:
 	virtual void SetAmbientLight(FColor Color) = 0;
 	virtual void EnableLighting(UBOOL UseDynamic, UBOOL UseStatic = 1, UBOOL Modulate2X = 0, FBaseTexture* UseLightmap = NULL, UBOOL LightingOnly = 0, const FSphere& LitSphere = FSphere(FVector(0, 0, 0), 0), int = 0) = 0;
 	virtual void SetLight(INT LightIndex, FDynamicLight* Light, FLOAT Scale = 1.0f) = 0;
-	virtual void SetShaderLight(int, FDynamicLight*, float) = 0;
+	virtual void SetShaderLight(INT LightIndex, FDynamicLight* Light, FLOAT Scale = 1.0f){}
 	virtual void SetNPatchTesselation(FLOAT Tesselation) = 0;
 	virtual void SetDistanceFog(UBOOL Enable, FLOAT FogStart, FLOAT FogEnd, FColor Color) = 0;
-	virtual UBOOL EnableFog(UBOOL Enable) = 0;
-	virtual UBOOL IsFogEnabled() = 0;
+	virtual UBOOL EnableFog(UBOOL Enable){ return 0; }
+	virtual UBOOL IsFogEnabled(){ return 0; }
 	virtual void SetGlobalColor(FColor Color) = 0;
-	virtual void SetTransform(ETransformType Type, const FMatrix& Matrix) = 0;
-	virtual FMatrix GetTransform(ETransformType Type) const = 0;
-	virtual void SetMaterial(int, int, int, int) = 0;
-	virtual UBOOL SetHardwareShaderMaterial(UHardwareShader*, FString*, UMaterial**) = 0;
-	virtual UBOOL ShowAlpha(UMaterial*) = 0;
-	virtual UBOOL IsShadowInterface() = 0;
-	virtual void SetAntiAliasing(int) = 0;
-	virtual void CopyBackBufferToTarget(FAuxRenderTarget*) = 0;
-	virtual void SetLODDiffuseFade(float) = 0;
-	virtual void SetLODSpecularFade(float) = 0;
+	virtual void SetTransform(ETransformType Type, const FMatrix& Matrix){}
+	virtual FMatrix GetTransform(ETransformType Type) const{ return FMatrix::Identity; }
+	virtual void SetMaterial(UMaterial* Material, FString* ErrorString = NULL, UMaterial** ErrorMaterial = NULL, INT* NumPasses = NULL) = 0;
+	virtual UBOOL SetHardwareShaderMaterial(UHardwareShader* Material, FString* ErrorString = NULL, UMaterial** ErrorMaterial = NULL){ return 0; }
+	virtual UBOOL ShowAlpha(UMaterial*){ return 0; }
+	virtual UBOOL IsShadowInterface(){ return 0; }
+	virtual void SetAntiAliasing(int){}
+	virtual void CopyBackBufferToTarget(FAuxRenderTarget*){}
+	virtual void SetLODDiffuseFade(float){}
+	virtual void SetLODSpecularFade(float){}
 	virtual void SetStencilOp(ECompareFunction Test, DWORD Ref, DWORD Mask, EStencilOp FailOp, EStencilOp ZFailOp, EStencilOp PassOp, DWORD WriteMask);
 	virtual void vtpad1() = 0; // Possibly stencil op related (modifies same memory);
 	virtual void vtpad2() = 0; // Possibly stencil op related (modifies same memory);
@@ -119,12 +119,12 @@ public:
 	virtual INT SetIndexBuffer(FIndexBuffer* IndexBuffer, INT BaseIndex) = 0;
 	virtual INT SetDynamicIndexBuffer(FIndexBuffer* IndexBuffer, INT BaseIndex) = 0;
 	virtual void DrawPrimitive(EPrimitiveType PrimitiveType, INT FirstIndex, INT NumPrimitives, INT MinIndex = INDEX_NONE, INT MaxIndex = INDEX_NONE) = 0;
-	virtual void PixoSetHint(DWORD){}
-	virtual void PixoResetHint(DWORD){}
-	virtual UTexture* PixoCreateTexture(FRenderTarget*, int){ return NULL; }
+	virtual void PixoSetHint(DWORD Hint){}
+	virtual void PixoResetHint(DWORD Hint){}
+	virtual UTexture* PixoCreateTexture(FRenderTarget* RenderTarget, UBOOL CreateMips){ return NULL; }
 	virtual UBOOL PixoIsVisible(FBox&){ return 1; }
 	virtual bool IsVertexBufferBusy(FVertexStream*){ return false; }
-	virtual void SetFillMode(EFillMode FillMode) = 0;
+	virtual void SetFillMode(EFillMode FillMode){}
 	virtual int vtpad3(){ return 1; };
 	virtual int vtpad4(){ return 1; };
 	virtual int vtpad5(){ return 1; };

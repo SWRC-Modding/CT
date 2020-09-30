@@ -46,9 +46,22 @@ public:
 	INT Height;
 	TArray<FColor> ColorBuffer;
 
+	struct State{
+		FMatrix Matrices[3];
+
+		State(){
+			for(int i = 0; i < ARRAY_COUNT(Matrices); ++i)
+				Matrices[i] = FMatrix::Identity;
+		}
+	};
+
+	TArray<State> States;
+
 	FTestRenderInterface(FRenderInterface* InImpl) : Impl(InImpl){
-		Window = mfb_open("Rendering Test", 800, 600);
-		SetRes(800, 600);
+		Window = mfb_open("Rendering Test", 1024, 768);
+		SetRes(1024, 768);
+		States.Set(1);
+		States.SetNoShrink(true);
 	}
 
 	~FTestRenderInterface(){
@@ -71,10 +84,12 @@ public:
 	virtual void PushState(int a){
 		//GLog->Logf("FRenderInterface::PushState");
 		Impl->PushState(a);
+		States.AddItem(States.Last());
 	}
 	virtual void PopState(int a){
 		//GLog->Logf("FRenderInterface::PopState");
 		Impl->PopState(a);
+		States.Pop();
 	}
 	virtual UBOOL SetRenderTarget(FRenderTarget* RenderTarget, bool a){
 		//GLog->Logf("FRenderInterface::SetRenderTarget");
@@ -146,6 +161,7 @@ public:
 	virtual void SetTransform(ETransformType Type, const FMatrix& Matrix){
 		//GLog->Logf("FRenderInterface::SetTransform");
 		Impl->SetTransform(Type, Matrix);
+		States.Last().Matrices[Type] = Matrix;
 	}
 	virtual FMatrix GetTransform(ETransformType Type) const{
 		//GLog->Logf("FRenderInterface::GetTransform");
@@ -213,6 +229,7 @@ public:
 	}
 	virtual INT SetIndexBuffer(FIndexBuffer* IndexBuffer, INT BaseIndex){
 		//GLog->Logf("FRenderInterface::SetIndexBuffer");
+		appMsgf(3, "TEST");
 		return Impl->SetIndexBuffer(IndexBuffer, BaseIndex);
 	}
 	virtual INT SetDynamicIndexBuffer(FIndexBuffer* IndexBuffer, INT BaseIndex){
@@ -222,6 +239,26 @@ public:
 	virtual void DrawPrimitive(EPrimitiveType PrimitiveType, INT FirstIndex, INT NumPrimitives, INT MinIndex = INDEX_NONE, INT MaxIndex = INDEX_NONE){
 		//GLog->Logf("FRenderInterface::DrawPrimitive");
 		Impl->DrawPrimitive(PrimitiveType, FirstIndex, NumPrimitives, MinIndex, MaxIndex);
+
+		FMatrix Transform = States.Last().Matrices[0] * States.Last().Matrices[1] * States.Last().Matrices[2];
+		FVector Pos = Transform.TransformFVector(FVector(0.0f, 0.0f, 0.0f));
+
+		Pos.X /= Pos.Z;
+		Pos.Y /= Pos.Z;
+
+		if(Pos.Z > 0.0f && fabsf(Pos.X) < 1.0f && fabsf(Pos.Y) < 1.0f){
+			INT HalfWidth = Width / 2;
+			INT HalfHeight = Height / 2;
+			INT X = (INT)(Pos.X * HalfWidth + HalfWidth);
+			INT Y = (INT)(-Pos.Y * HalfHeight + HalfHeight);
+
+			for(int i = X - 1; i < X + 2; ++i){
+				for(int j = Y - 1; j < Y + 2; ++j){
+					if(i >= 0 && i < Width && j >= 0 && j < Height)
+						ColorBuffer[i + j * Width] = 0xFFFFFFFF;
+				}
+			}
+		}
 	}
 	virtual void SetFillMode(EFillMode FillMode){
 		//GLog->Logf("FRenderInterface::SetFillMode");

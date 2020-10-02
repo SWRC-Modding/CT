@@ -67,8 +67,8 @@ public:
 	virtual void SetLODDiffuseFade(float a);
 	virtual void SetLODSpecularFade(float a);
 	virtual void SetStencilOp(ECompareFunction Test, DWORD Ref, DWORD Mask, EStencilOp FailOp, EStencilOp ZFailOp, EStencilOp PassOp, DWORD WriteMask);
-	virtual void vtpad1();
-	virtual void vtpad2();
+	virtual void vtpad1(int);
+	virtual void vtpad2(int);
 	virtual void SetPrecacheMode(EPrecacheMode PrecacheMode);
 	virtual void SetZBias(INT ZBias);
 	virtual INT SetVertexStreams(EVertexShader Shader, FVertexStream** Streams, INT NumStreams);

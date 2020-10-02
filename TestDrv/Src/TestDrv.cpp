@@ -184,13 +184,13 @@ void FTestRenderInterface::SetStencilOp(ECompareFunction Test, DWORD Ref, DWORD 
 	//GLog->Logf("FRenderInterface::SetStencilOp");
 	Impl->SetStencilOp(Test, Ref, Mask, FailOp, ZFailOp, PassOp, WriteMask);
 }
-void FTestRenderInterface::vtpad1(){
+void FTestRenderInterface::vtpad1(int a){
 	//GLog->Logf("FRenderInterface::vtpad1");
-	Impl->vtpad1();
+	Impl->vtpad1(a);
 }
-void FTestRenderInterface::vtpad2(){
+void FTestRenderInterface::vtpad2(int a){
 	//GLog->Logf("FRenderInterface::vtpad2");
-	Impl->vtpad2();
+	Impl->vtpad2(a);
 }
 void FTestRenderInterface::SetPrecacheMode(EPrecacheMode PrecacheMode){
 	//GLog->Logf("FRenderInterface::SetPrecacheMode");

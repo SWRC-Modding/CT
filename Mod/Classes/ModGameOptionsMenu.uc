@@ -48,9 +48,7 @@ simulated function Init( string Args )
 
 	FOVChanger = FOVChanger(FindObject("Transient.MainFOVChanger", class'FOVChanger'));
 
-	if(FOVChanger != None)
-		FOVChanger.Player = CTPlayer(GetPlayerOwner());
-	else
+	if(FOVChanger == None)
 		Warn("FOVCHANGER OBJECT NOT FOUND!!!!!");
 
 	Refresh();
@@ -350,13 +348,13 @@ simulated function ChangeOption( int i, int Delta )
 			break;
 
 		case 10:
-			FOVChanger.SetFov(float(Options[10].Items[Options[10].Current]));
+			FOVChanger.SetFov(GetPlayerOwner(), float(Options[10].Items[Options[10].Current]));
 
 			break;
 
 		case 11:
 			FOVChanger.HudArmsFOVFactor = float(Options[11].Items[Options[11].Current]);
-			FOVChanger.SetFOV(FOVChanger.FOV);
+			FOVChanger.SetFOV(GetPlayerOwner(), FOVChanger.FOV);
 	}
 
 	GetPlayerOwner().PropagateSettings();

@@ -31,11 +31,11 @@ enum ETransformType{
 
 // Primitive types for DrawPrimitive.
 enum EPrimitiveType{
-	PT_TriangleList,
-	PT_TriangleStrip,
-	PT_TriangleFan,
-	PT_PointList,
-	PT_LineList
+	PT_PointList     = 1,
+	PT_LineList      = 2,
+	PT_TriangleList  = 5,
+	PT_TriangleStrip = 6,
+	PT_TriangleFan   = 7
 };
 
 // Vertex shaders for SetVertexStreams.

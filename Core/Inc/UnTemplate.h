@@ -228,8 +228,7 @@ public:
 	TArray(ENoInit) : FArray(E_NoInit){}
 
 	TArray(INT Size, bool NoShrink = false) : FArray(NoShrink){
-		if(bNoShrink)
-			Set(Size, Size);
+		Set(Size);
 	}
 
 	TArray(const TArray<T>& other, bool NoShrink = false){

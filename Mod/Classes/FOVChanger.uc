@@ -6,8 +6,6 @@ var() config float   FOV;
 var() config float   HudArmsFOVFactor;
 var() config bool    bLimitHudArmsFOV;
 
-var CTPlayer         Player;
-
 var FunctionOverride CTPlayerEndZoomOverride;
 var FunctionOverride CTPlayerResetFOVOverride;
 
@@ -39,13 +37,17 @@ function Init(){
 }
 
 function CTPlayerEndZoom(){
+	local CTPlayer Player;
+
 	Player = CTPlayer(CTPlayerEndZoomOverride.CurrentSelf);
 
 	Player.EndZoom();
-	SetViewFOV();
+	SetViewFOV(Player);
 }
 
 function CTPlayerResetFOV(){
+	local CTPlayer Player;
+
 	Player = CTPlayer(CTPlayerResetFOVOverride.CurrentSelf);
 
 	Player.DesiredFOV = Player.DefaultFOV;
@@ -89,15 +91,19 @@ function WeaponSetWeapFOV(float NewFOV){
 //====================================================================================================
 
 function UpdateWeaponZoomFOVs(Weapon Weapon){
+	local float DefaultFOV;
+
+	DefaultFOV = class'CTPlayer'.default.DefaultFOV;
+
 	Weapon.ZoomFOVs[0] = FOV;
 
 	// Changing the default zoom Fovs so that it will not zoom in as much with a higher Fov selected
-	Weapon.ZoomFOVs[1] = FOV - (Player.default.DefaultFOV - Weapon.default.ZoomFOVs[1]);
-	Weapon.ZoomFOVs[2] = FOV - (Player.default.DefaultFOV - Weapon.default.ZoomFOVs[2]);
-	Weapon.ZoomFOVs[3] = FOV - (Player.default.DefaultFOV - Weapon.default.ZoomFOVs[3]);
+	Weapon.ZoomFOVs[1] = FOV - (DefaultFOV - Weapon.default.ZoomFOVs[1]);
+	Weapon.ZoomFOVs[2] = FOV - (DefaultFOV - Weapon.default.ZoomFOVs[2]);
+	Weapon.ZoomFOVs[3] = FOV - (DefaultFOV - Weapon.default.ZoomFOVs[3]);
 }
 
-function SetViewFOV(){
+function SetViewFOV(PlayerController Player){
 	local Weapon Weapon;
 	local float CurrentFOV;
 
@@ -118,11 +124,11 @@ function SetViewFOV(){
 	Player.FOVAngle = CurrentFOV;
 }
 
-function SetFOV(float NewFOV){
+function SetFOV(PlayerController Player, float NewFOV){
 	FOV = NewFOV;
 
 	SaveConfig();
-	SetViewFOV();
+	SetViewFOV(Player);
 }
 
 // Menu stuff

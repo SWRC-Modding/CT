@@ -509,10 +509,20 @@ public:
 	virtual UBOOL Exec(const TCHAR* Cmd, FOutputDevice& Ar){
 		if(!GIsEditor){
 			if(ParseCommand(&Cmd, "SETFOV")){
-				float FOV = appAtof(Cmd);
+				struct{
+					APlayerController* Player;
+					FLOAT FOV;
+				} Params;
 
-				Ar.Logf("Setting field of view to %f", FOV);
-				FOVChanger->ProcessEvent(FName("SetFOV"), &FOV);
+				TObjectIterator<UViewport> It;
+
+				checkSlow(It);
+
+				Params.Player = It->Actor;
+				Params.FOV = appAtof(Cmd);
+
+				Ar.Logf("Setting field of view to %f", Params.FOV);
+				FOVChanger->ProcessEvent(FName("SetFOV"), &Params);
 
 				return 1;
 			}else if(ParseCommand(&Cmd, "SETFPSLIMIT")){

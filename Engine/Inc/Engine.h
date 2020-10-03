@@ -65,6 +65,7 @@ ENGINE_API extern FLOAT           GEngineTime;
 #include "UnAudio.h"          // Audio code.
 #include "UnDynBsp.h"         // Dynamic Bsp objects.
 #include "UnScrTex.h"         // Scripted textures.
+#include "UnMovie.h"
 #include "UnRenDev.h"         // Rendering interface definition.
 #include "UnRenderUtil.h"     // Rendering utilities.
 #include "UnCamera.h"         // Viewport subsystem.

@@ -20,14 +20,11 @@ class FFeedbackContextCmd : public FFeedbackContext{
 public:
 	// Variables
 	INT SlowTaskCount;
-	INT WarningCount, ErrorCount;
 	FContextSupplier* Context;
 	FOutputDevice* AuxOut;
 
 	// Constructor
 	FFeedbackContextCmd() : SlowTaskCount(0),
-							WarningCount(0),
-							ErrorCount(0),
 							Context(NULL),
 							AuxOut(NULL){}
 

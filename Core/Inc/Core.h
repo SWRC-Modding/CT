@@ -295,6 +295,12 @@ public:
 // A context for displaying modal warning messages.
 class FFeedbackContext : public FOutputDevice{
 public:
+	INT WarningCount;
+	INT ErrorCount;
+
+	FFeedbackContext() : WarningCount(0),
+	                     ErrorCount(0){}
+
 	virtual UBOOL VARARGS YesNof(const TCHAR* Fmt, ...) = 0;
 	virtual void BeginSlowTask(const TCHAR* Task, UBOOL StatusWindow) = 0;
 	virtual void EndSlowTask() = 0;

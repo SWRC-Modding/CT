@@ -5531,6 +5531,17 @@ public:
 	INT FrameRate;
 
 	DECLARE_CLASS(UMovieTexture,UTexture,0,Engine)
+
+	// Constructor
+	UMovieTexture();
+
+	// Overrides
+	virtual void Destroy();
+	virtual void PostEditChange();
+	virtual void ConstantTimeTick();
+
+	// Virtual functions
+	virtual void InitMovie();
 };
 
 /*

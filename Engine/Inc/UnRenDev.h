@@ -40,7 +40,8 @@ enum EPrimitiveType{
 
 // Vertex shaders for SetVertexStreams.
 enum EVertexShader{
-	VS_FixedFunction
+	VS_FixedFunction,
+	VS_HardwareShaderDefined
 };
 
 // Stencil buffer operations.
@@ -152,63 +153,6 @@ struct FRenderCaps{
 	                HardwareTL(0){}
 };
 
-// Codec for movies.
-enum ECodecType{
-	CODEC_None,
-	CODEC_RoQ,
-	CODEC_Unused, // Treated like CODEC_None by UD3DRenderDevice
-	CODEC_AVI
-};
-
-//
-// A movie that is rendered to a texture or the background.
-//
-class ENGINE_API FMovie{
-public:
-	UBOOL Playing;
-	int   Padding;
-
-	FMovie(FString Filename, int);
-
-	// Virtual functions
-	virtual ~FMovie(){}
-	virtual int Play(int) = 0;
-	virtual void Pause(int) = 0;
-	virtual UBOOL IsPaused() = 0;
-	virtual void StopNow() = 0;
-	virtual void StopAtEnd() = 0;
-	virtual UBOOL IsPlaying(){ return Playing; }
-	virtual INT GetWidth() = 0;
-	virtual INT GetHeight() = 0;
-	virtual void PreRender(void*, int, int) = 0;
-	virtual void RenderToRGBAArray(BYTE* Buffer) = 0;
-	virtual void RenderToNative(void*, int, int){}
-	virtual void RenderToTexture(UTexture* Texture); // Calls RenderToRGBAArray by default
-	virtual void Serialize(FArchive& Ar){}
-};
-
-//
-// A movie using the RoQ format from the Quake engine.
-//
-class ENGINE_API FRoQMovie : public FMovie{
-public:
-	INT Padding[8];
-
-	FRoQMovie(FString, int, int);
-
-	// Overrides
-	virtual ~FRoQMovie();
-	virtual UBOOL Play(int);
-	virtual void Pause(int);
-	virtual UBOOL IsPaused();
-	virtual void StopNow();
-	virtual void StopAtEnd();
-	virtual INT GetWidth();
-	virtual INT GetHeight();
-	virtual void PreRender(void*, int, int);
-	virtual void RenderToRGBAArray(BYTE*);
-};
-
 //
 // A low-level 3D rendering device.
 //
@@ -259,7 +203,7 @@ class ENGINE_API URenderDevice : public USubsystem{
 	virtual void SetEmulationMode(EHardwareEmulationMode Mode) = 0;
 	virtual FRenderCaps* GetRenderCaps() = 0;
 	virtual void RenderMovie(UViewport* Viewport){}
-	virtual FMovie* GetNewMovie(ECodecType Codec, FString Filename, int, int, int){}
+	virtual FMovie* GetNewMovie(ECodecType Codec, FString Filename, UBOOL UseSound, INT FrameRate, int){}
 	virtual int GetStateCaching(){}
 	virtual int SetStateCaching(int){}
 	virtual int RefreshStates(){}

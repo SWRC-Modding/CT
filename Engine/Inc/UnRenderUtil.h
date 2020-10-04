@@ -62,8 +62,7 @@ public:
 //
 //	FLineBatcher
 //
-class ENGINE_API FLineBatcher : public FVertexStream
-{
+class ENGINE_API FLineBatcher : public FVertexStream{
 public:
 
 	char Padding1[20];
@@ -72,7 +71,7 @@ public:
 
 	// Constructor/destructor.
 
-	FLineBatcher(FRenderInterface* InRI, UBOOL InZTest=1);
+	FLineBatcher(FRenderInterface* InRI, UBOOL InZTest = 1);
 	~FLineBatcher();
 
 	// Flush - Renders all buffered lines.
@@ -108,7 +107,7 @@ public:
 	virtual INT GetStride();
 	virtual INT GetComponents(FVertexComponent* OutComponents);
 	virtual void GetStreamData(void* Dest);
-	virtual void GetRawStreamData(void ** Dest, INT FirstVertex );
+	virtual void GetRawStreamData(void** Dest, INT FirstVertex );
 };
 
 // Slight hack. If we dont have a FRenderInterface handy - use GTempLineBatcher

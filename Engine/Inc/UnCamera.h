@@ -10,20 +10,6 @@
 	UCanvas.
 -----------------------------------------------------------------------------*/
 
-// Constants.
-enum {MAX_COLOR_BYTES = 9}; // Maximum expected frame buffer depth = 8 bytes = 64-bit.
-
-//
-// Flags for drawing text, not yet used.
-//
-enum ETextOut{
-	TEXTOUT_Center			= 0x01,	// Center horizontally.
-	TEXTOUT_CenterVertical	= 0x02,	// Center vertically.
-	TEXTOUT_Right			= 0x04, // Right justify.
-	TEXTOUT_Bottom			= 0x08, // Bottom justify.
-	TEXTOUT_Wrap			= 0x10,	// Word wrap.
-};
-
 //
 // Blitting types.
 //
@@ -49,42 +35,67 @@ enum EViewportBlitFlags{
 class ENGINE_API UCanvas : public UObject{
 	DECLARE_CLASS(UCanvas,UObject,CLASS_Transient,Engine)
 	NO_DEFAULT_CONSTRUCTOR(UCanvas)
-
+public:
 	// Variables.
-	UFont*			Font;
-	FLOAT			SpaceX, SpaceY;
-	FLOAT			OrgX, OrgY;
-	FLOAT			ClipX, ClipY;
-	FLOAT			CurX, CurY;
-	FLOAT			Z;
-	BYTE			Style;
-	FLOAT			CurYL;
-	FColor			Color;
-	BITFIELD		bCenter:1;
-	BITFIELD		bNoSmooth:1;
-	INT				X, Y;
-	UFont			*SmallFont, *MedFont, *BigFont, *LargeFont;
-	UViewport*		Viewport;
-	class FSceneNode* Frame;
-	class URenderBase* Render; // Only valid during UGameEngine::Draw
+	UFont*       Font;
+	FLOAT        SpaceX, SpaceY;
+	FLOAT        OrgX, OrgY;
+	FLOAT        ClipX, ClipY;
+	FLOAT        CurX, CurY;
+	FLOAT        Z;
+	BYTE         Style;
+	FLOAT        CurYL;
+	FColor       Color;
+	BITFIELD     bCenter:1;
+	BITFIELD     bNoSmooth:1;
+	INT          SizeX, SizeY;
+	FPlane       ColorModulate;
+	UFont*       TinyFont;
+	UFont*       SmallFont;
+	UFont*       MedFont;
+	UViewport*   Viewport;
+	FCanvasUtil* pCanvasUtil;
+
+	// Overrides
+	virtual void Serialize(FArchive& Ar);
+	virtual void Destroy();
 
 	// UCanvas interface.
-	virtual void Init( UViewport* InViewport );
-	virtual void Update( FSceneNode* Frame );
-	virtual void DrawTile( UTexture* Texture, FLOAT X, FLOAT Y, FLOAT XL, FLOAT YL, FLOAT U, FLOAT V, FLOAT UL, FLOAT VL, class FSpanBuffer* SpanBuffer, FLOAT Z, FPlane Color, FPlane Fog, DWORD PolyFlags );
-	virtual void DrawIcon( UTexture* Texture, FLOAT ScreenX, FLOAT ScreenY, FLOAT XSize, FLOAT YSize, class FSpanBuffer* SpanBuffer, FLOAT Z, FPlane Color, FPlane Fog, DWORD PolyFlags );
-	virtual void DrawPattern( UTexture* Texture, FLOAT X, FLOAT Y, FLOAT XL, FLOAT YL, FLOAT Scale, FLOAT OrgX, FLOAT OrgY, class FSpanBuffer* SpanBuffer, FLOAT Z, FPlane Color, FPlane Fog, DWORD PolyFlags );
-	virtual void WrappedStrLenf( UFont* Font, INT& XL, INT& YL, const TCHAR* Fmt, ... );
-	virtual void VARARGS WrappedPrintf( UFont* Font, UBOOL Center, const TCHAR* Fmt, ... );
-	virtual void SetClip( INT X, INT Y, INT XL, INT YL );
+	void Flush();
+	void DrawActor(AActor* Actor, UBOOL Wireframe, UBOOL ClearZ, FLOAT DisplayFOV);
+	void DrawScreenActor(AActor* Actor, UBOOL Wireframe, UBOOL ClearZ, FLOAT DisplayFOV);
+	void SetScreenLight(INT Index, const FVector& Position, FColor Color, FLOAT Radius);
+	void Reset();
 
-    void eventReset(){
-        ProcessEvent(FindFunctionChecked("Reset"),NULL);
-    }
+	// Virtual functions
+	virtual void Init(UViewport* InViewport);
+	virtual void Update();
+	virtual void DrawTile(UMaterial*, FLOAT X, FLOAT Y, FLOAT XL, FLOAT YL, FLOAT U, FLOAT V, FLOAT UL, FLOAT VL, FLOAT Z, const FPlane& Color, const FPlane& Fog);
+	virtual void DrawRotatedTile(FLOAT, FLOAT, FLOAT, UMaterial*, FLOAT X, FLOAT Y, FLOAT XL, FLOAT YL, FLOAT U, FLOAT V, FLOAT UL, FLOAT VL, FLOAT Z, const FPlane& Color, const FPlane& Fog);
+	virtual void DrawRotatedTile(FLOAT Angle, UMaterial* Material, FLOAT X, FLOAT Y, FLOAT XL, FLOAT YL, FLOAT U, FLOAT V, FLOAT UL, FLOAT VL, FLOAT Z, const FPlane& Color, const FPlane& Fog);
+	virtual void DrawCubemap(UMaterial* Material, FLOAT, FLOAT, FLOAT, FLOAT);
+	virtual void DrawIcon(UMaterial* Material, FLOAT ScreenX, FLOAT ScreenY, FLOAT XSize, FLOAT YSize, FLOAT Z, const FPlane& Color, const FPlane& Fog);
+	virtual void DrawPattern(UMaterial* Material, FLOAT X, FLOAT Y, FLOAT XL, FLOAT YL, FLOAT Scale, FLOAT OrgX, FLOAT OrgY, FLOAT Z, const FPlane& Color, const FPlane& Fog);
+	virtual void VARARGS WrappedStrLenf(UFont* Font, FLOAT ScaleX, FLOAT ScaleY, INT&, INT&, const TCHAR*, ...);
+	virtual void VARARGS WrappedStrLenf(UFont* Font, INT& XL, INT& YL, const TCHAR* Fmt, ...);
+	virtual void VARARGS WrappedPrintf(UFont* Font, FLOAT ScaleX, FLOAT ScaleY, UBOOL Center, const TCHAR* Fmt, ...);
+	virtual void VARARGS WrappedPrintf(UFont* Font, UBOOL Center, const TCHAR* Fmt, ...);
+	virtual void VARARGS WrappedIconPrintf(UFont* Font, FLOAT ScaleX, FLOAT ScaleY, UBOOL Center, const TArray<UTexture*>&, TCHAR, const TCHAR* Fmt, ...);
+	virtual void WrapStringToArray(const TCHAR* Text, TArray<FString>* OutArray, FLOAT Width, UFont* Font = NULL, TCHAR EOL = '\n');
+	virtual void ClippedStrLen(UFont* Font, FLOAT ScaleX, FLOAT ScaleY, INT& XL, INT& YL, const TCHAR* Text);
+	virtual void ClippedPrint(UFont* Font, FLOAT ScaleX, FLOAT ScaleY, UBOOL Center, const TCHAR* Text);
+	virtual void DrawTileStretched(UMaterial* Material, FLOAT Left, FLOAT Top, FLOAT AWidth, FLOAT AHeight);
+	virtual void DrawTileScaled(UMaterial* Material, FLOAT Left, FLOAT Top, FLOAT NewXScale, FLOAT NewYScale);
+	virtual void DrawTileBound(UMaterial* Material, FLOAT Left, FLOAT Top, FLOAT Width, FLOAT Height);
+	virtual void DrawTileJustified(UMaterial* Material, FLOAT Left, FLOAT Top, FLOAT Width, FLOAT Height, BYTE Justification);
+	virtual void DrawTileScaleBound(UMaterial* Material, FLOAT Left, FLOAT Top, FLOAT Width, FLOAT Height);
+	virtual void VARARGS DrawTextJustified(BYTE Justification, FLOAT x1, FLOAT y1, FLOAT x2, FLOAT y2, const TCHAR* Fmt, ...);
+	virtual void SetClip(INT X, INT Y, INT XL, INT YL);
 
 private:
-	// Internal functions.
-	void VARARGS WrappedPrint( ERenderStyle Style, INT& XL, INT& YL, UFont* Font, UBOOL Center, const TCHAR* Text );
+	// Style is probably one of ERenderStyle
+	void WrappedPrint(INT Style, INT& XL, INT& YL, UFont* Font, FLOAT ScaleX, FLOAT ScaleY, UBOOL Center, const TCHAR* Text);
+	void WrappedIconPrint(INT Style, INT& XL, INT& YL, UFont* Font, FLOAT ScaleX, FLOAT ScaleY, UBOOL Center, const TArray<UTexture*>&, TCHAR, const TCHAR* Text);
 };
 
 /*-----------------------------------------------------------------------------
@@ -142,13 +153,6 @@ enum ERenderType
 	REN_MAX				= 20
 };
 
-// Viewport capabilities.
-enum EViewportCaps
-{
-	CC_RGB565			= 1,	// RGB 565 format (otherwise 555).
-	CC_Mask				= 0xff, // Caps mask which affects cached rendering info.
-};
-
 // ShowFlags for viewport.
 enum EViewportShowFlags
 {
@@ -186,50 +190,122 @@ enum EMouseButtons
 };
 
 //
+//	FViewportRenderTarget
+//
+
+class FViewportRenderTarget : public FRenderTarget{
+public:
+	UViewport* Viewport;
+
+	// Constructor.
+
+	FViewportRenderTarget(UViewport* InViewport){
+		Viewport = InViewport;
+		CacheId = MakeCacheID(CID_RenderTexture, (UObject*)Viewport);
+	}
+
+	// FBaseTexture interface.
+
+	virtual INT GetWidth();
+	virtual INT GetHeight();
+	virtual INT GetFirstMip(){ return 0; }
+	virtual INT GetNumMips(){ return 1; }
+	virtual ETextureFormat GetFormat();
+	virtual ETexClampMode GetUClamp(){ return TC_Wrap; }
+	virtual ETexClampMode GetVClamp(){ return TC_Wrap; }
+
+	// FRenderResource interface.
+
+	virtual QWORD GetCacheId(){ return CacheId; }
+	virtual INT GetRevision(){ return 1; }
+};
+
+//
 // A viewport object, which associates an actor (which defines
 // most view parameters) with a Windows window.
 //
 class ENGINE_API UViewport : public UPlayer{
 	DECLARE_ABSTRACT_CLASS(UViewport,UPlayer,CLASS_Transient,Engine)
 	DECLARE_WITHIN(UClient)
-
-	char Padding1[288];
-	FRenderInterface* RI;
-	char Padding2[64];
-
-	/*// Referenced objects.
-	class UCanvas*		 Canvas;	// Viewport's painting canvas.
-	class UInput*		 Input;		// Input system.
-	class URenderDevice* RenDev;	// Render device.
+public:
+	// Referenced objects.
+	class UCanvas*       Canvas; // Viewport's painting canvas.
+	class UInput*        Input;  // Input system.
+	class URenderDevice* RenDev; // Render device.
 
 	// Normal variables.
-	UObject*		MiscRes;		// Used in in modes like EM_TEXVIEW.
-	FName			Group;			// Group for editing.
-	FTime			LastUpdateTime;	// Time of last update.
-	INT				SizeX, SizeY;   // Buffer X & Y resolutions.
-	INT				ColorBytes;		// 1=256-color, 4=32-bit color.
-	INT				FrameCount;		// Frame count, incremented when locked.
-	DWORD			Caps;			// Capabilities (CC_).
-	UBOOL			Current;		// If this is the current input viewport.
-	UBOOL			Dragging;		// Dragging mouse.
-	DWORD			RenderFlags;	// Render locking flags (only when locked).
-	DWORD			ExtraPolyFlags;	// Additional poly flags associated with camera.
+	UObject*        MiscRes;        // Used in in modes like EM_TEXVIEW.
+	FName           Group;          // Group for editing.
+	FTime           LastUpdateTime; // Time of last update.
+	INT             DirtyViewport;  // Count how many times the viewport needs to be repainted.
+	INT             SizeX, SizeY;   // Buffer X & Y resolutions.
+	char            Padding1[12];   //! PADDING
+	FLOAT           ScaleX, ScaleY; // Scale factor.
+	INT             ColorBytes;     // 1=256-color, 4=32-bit color.
+	INT             FrameCount;     // Frame count, incremented when locked.
+	DWORD           Caps;           // Capabilities (CC_).
+	UBOOL           Current;        // If this is the current input viewport.
+	UBOOL           Dragging;       // Dragging mouse.
+	FVector         OrigCursor;     // The position where the mouse was originally clicked in the viewport.
+	UBOOL           FullscreenOnly; // Engine requires desktop set to 32 bpp for windowed mode.
+	FVector         TerrainPointAtLocation; // The 3D location currently being pointed at on the terrain
+	char            Padding2[20];   //! PADDING
+
+	FViewportRenderTarget RenderTarget; // A dummy render target that exposes the viewport's size to interfaces that take a FRenderTarget.
+
+	// The current position of the mouse both on the screen, and within this viewports client area (using the X, Y ... Z is unused)
+	FVector         MouseScreenPos, MouseClientPos;
+
+	UBOOL           bLockOnSelectedActors; // Update the location/rotation of selected actors when the camera is moved?
+	AActor*         LockedActor;           // The actor we're locked to
+
+	// Editor and debugging mode render effects, stat flags.
+	UBOOL           Padding3;             //! PADDING
+	UBOOL           bShowDescriptions;
+	UBOOL           bShowLargeVertices;   // Show large vertices on brushes/meshes/etc?
+	UBOOL           bShowHud;
+
+	UBOOL           bShowBounds;          // Show visibility bounding boxes.
+	UBOOL           bShowCollisionBounds;
+	UBOOL           bShowBones;           // Draw skeleton for skeletal meshes.
+	UBOOL           bHideSkin;            // Hide/draw skin for meshes.
+	UBOOL           bShowNormals;         // Draw bone-influence-number-color coded normals on mesh vertices.
+	UBOOL           bShowAnim;
+	UBOOL           bShowLight;
+	UBOOL           bShowBlockingVolumes;
+	UBOOL           bShowPhysicsVolumes;
+	char            Padding5[12];         //! Padding
+	UBOOL           bShowHudArms;         // Not sure about that one. HudArms become visible again when reloading or switching weapons
+
+	// Cinematics.
+	UBOOL           bRenderCinematics;
+	FLOAT           CinematicsRatio;
 
 	// Level traveling.
-	ETravelType		TravelType;
-	FStringNoInit	TravelURL;
-	UBOOL			bTravelItems;
+	ETravelType     TravelType;
+	FStringNoInit   TravelURL;
+	UBOOL           bTravelItems;
 
 	// Frame buffer info; only valid when locked.
-	FTime			CurrentTime;	// Time when initially locked.
-	BYTE*			ScreenPointer;	// Pointer to screen frame buffer, or NULL if none.
-	INT				Stride;			// Stride in pixels.
+	DOUBLE          CurrentTime;   // Time when initially locked.
+	BYTE*           ScreenPointer; // Pointer to screen frame buffer, or NULL if none.
+	INT             Stride;        // Stride in pixels.
+
+	// Rendering data; only valid when locked.
+	class FRenderInterface* RI;
+	class FSceneNode*       LodSceneNode;
+
+	// Stencil mask; only valid when locked. The next unused stencil bit.
+	BYTE                    NextStencilMask;
+
+	// Precaching flag.
+	UBOOL   Precaching;
 
 	// Hit testing.
-	UBOOL			HitTesting;		// Whether hit-testing.
-	INT				HitX, HitY;		// Hit rectangle top left.
-	INT				HitXL, HitYL;	// Hit size.
-	TArray<INT>		HitSizes;		// Currently pushed hit sizes.
+	UBOOL           HitTesting;   // Whether hit-testing.
+	INT             HitX, HitY;   // Hit rectangle top left.
+	INT             HitXL, HitYL; // Hit size.
+	TArray<INT>     HitSizes;     // Currently pushed hit sizes.
 
 	// Saved-actor parameters.
 	FLOAT SavedOrthoZoom, SavedFovAngle;
@@ -239,14 +315,18 @@ class ENGINE_API UViewport : public UPlayer{
 	UViewport();
 
 	// UObject interface.
-	void Destroy();
-	void Serialize( FArchive& Ar );
+	virtual void Destroy();
+	virtual void Serialize(FArchive& Ar);
 
-	// FArchive interface.
-	void Serialize( const TCHAR* Data, EName MsgType );
+	// FOutputDevice interface.
+	virtual void Serialize(const TCHAR* Data, EName MsgType);
+
+	// FExec interface.
+	virtual UBOOL Exec(const TCHAR* Cmd, FOutputDevice& Ar);
 
 	// UPlayer interface.
-	void ReadInput( FLOAT DeltaSeconds );*/
+	virtual void ReadInput(FLOAT DeltaSeconds);
+	virtual bool CheckPad();
 
 	// UViewport interface.
 	virtual UBOOL Lock(FPlane FlashScale, FPlane FlashFog, FPlane ScreenClear, DWORD RenderLockFlags, BYTE* HitData=NULL, INT* HitSize = NULL);
@@ -273,6 +353,29 @@ class ENGINE_API UViewport : public UPlayer{
 	virtual void ProfileSetMarker(char*, INT, INT, INT, INT);
 	virtual INT ProfileBeginEvent(char*, INT, INT, INT, INT);
 	virtual INT ProfileEndEvent();
+
+	// Functions.
+	void ExecuteHits(const FHitCause& Cause, BYTE* HitData, INT HitSize, TCHAR* HitOverrideClass = NULL, FColor* HitColor = NULL, AActor** HitActor = NULL);
+	void PushHit(const struct HHitProxy& Hit, INT Size);
+	void PopHit(UBOOL bForce);
+	UBOOL IsWire();
+	void ExecMacro( const TCHAR* Filename, FOutputDevice& Ar = *GLog);
+
+	// UViewport inlines.
+	BYTE* _Screen(INT X, INT Y);//{ return ScreenPointer + (X + Y * Stride) * ColorBytes; }
+	UBOOL IsOrtho();//{ return Actor && (Actor->RendMap == REN_OrthXY || Actor->RendMap == REN_OrthXZ || Actor->RendMap == REN_OrthYZ); }
+	UBOOL IsPerspective();//{ return Actor && (Actor->RendMap == REN_Wire || Actor->RendMap == REN_Zones || Actor->RendMap == REN_Polys || Actor->RendMap == REN_PolyCuts || Actor->RendMap == REN_DynLight || Actor->RendMap == REN_PlainTex || Actor->RendMap == REN_LightingOnly || Actor->RendMap == REN_MatineePreview || (Actor->RendMap == REN_TexView && Actor->Misc1 != MVT_TEXTURE)); }
+	UBOOL IsTopView();//{ return Actor && Actor->RendMap == REN_OrthXY; }
+	UBOOL IsRealtime();//{ return Actor && (Actor->ShowFlags & (SHOW_RealTime | SHOW_PlayerCtrl)); }
+	UBOOL IsLit();//{ return Actor && (Actor->RendMap == REN_DynLight || Actor->RendMap == REN_LightingOnly || Actor->RendMap == REN_DepthComplexity || Actor->RendMap == REN_MatineePreview || (Actor->RendMap == REN_TexView && Actor->Misc1 != MVT_TEXTURE)); }
+	UBOOL IsDepthComplexity();//{ return Actor && (Actor->RendMap == REN_DepthComplexity); }
+	// Determines if the viewport is a viewport where the user can be editing the level (i.e. not a browser viewport)
+	UBOOL IsEditing();//{ return Actor && (IsOrtho() || Actor->RendMap == REN_Wire || Actor->RendMap == REN_Zones || Actor->RendMap == REN_Polys || Actor->RendMap == REN_PolyCuts || Actor->RendMap == REN_DynLight || Actor->RendMap == REN_PlainTex || Actor->RendMap == REN_LightingOnly || Actor->RendMap == REN_DepthComplexity); }
+	// Refresh all viewports.
+	static void RefreshAll();/*{
+		for(TObjectIterator<UViewport> It; It; ++It)
+			It->DirtyViewport = 1;
+	}*/
 };
 
 // Viewport hit-testing macros.

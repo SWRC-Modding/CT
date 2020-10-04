@@ -15,6 +15,10 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Launcher", "Launcher\Launch
 	ProjectSection(ProjectDependencies) = postProject
 	EndProjectSection
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "OpenGLDrv", "OpenGLDrv\OpenGLDrv.vcproj", "{D7878929-5402-468A-811D-1591523609F3}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfiguration) = preSolution
 		Debug = Debug
@@ -29,6 +33,10 @@ Global
 		{3A82AC95-BDB6-47A5-B768-5EAD0B0B5BCC}.Debug.Build.0 = Debug|Win32
 		{3A82AC95-BDB6-47A5-B768-5EAD0B0B5BCC}.Release.ActiveCfg = Release|Win32
 		{3A82AC95-BDB6-47A5-B768-5EAD0B0B5BCC}.Release.Build.0 = Release|Win32
+		{D7878929-5402-468A-811D-1591523609F3}.Debug.ActiveCfg = Debug|Win32
+		{D7878929-5402-468A-811D-1591523609F3}.Debug.Build.0 = Debug|Win32
+		{D7878929-5402-468A-811D-1591523609F3}.Release.ActiveCfg = Release|Win32
+		{D7878929-5402-468A-811D-1591523609F3}.Release.Build.0 = Release|Win32
 		{D7878929-5402-468A-811D-1591523609F3}.Debug.ActiveCfg = Debug|Win32
 		{D7878929-5402-468A-811D-1591523609F3}.Debug.Build.0 = Debug|Win32
 		{D7878929-5402-468A-811D-1591523609F3}.Release.ActiveCfg = Release|Win32

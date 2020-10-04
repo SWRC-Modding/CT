@@ -1,4 +1,3 @@
-#include "../../D3DDrv/Inc/D3DDrv.h"
 #include "../Inc/Mod.h"
 #include <Windows.h>
 
@@ -439,112 +438,102 @@ HRESULT __stdcall D3D8CreateDeviceOverride(FD3D8* D3D8,
  * ModRenderDevice
  */
 
-class MOD_API UModRenderDevice : public UD3DRenderDevice{
-	DECLARE_CLASS(UModRenderDevice, UD3DRenderDevice, 0, Mod)
-public:
-	typedef FLOAT(__fastcall*GetMaxTickRateFunc)(UEngine*, DWORD);
+FLOAT(__fastcall*UEngineGetMaxTickRate)(UEngine*, DWORD) = NULL;
 
-	static UObject*           FOVChanger;
-	static FLOAT              FpsLimit;
-	static GetMaxTickRateFunc OriginalGetMaxTickRate;
+static FLOAT __fastcall EngineGetMaxTickRateOverride(UEngine* Self, DWORD Edx){
+	FLOAT MaxTickRate = UEngineGetMaxTickRate(Self, Edx);
 
-	static FLOAT __fastcall EngineGetMaxTickRateOverride(UEngine* Self, DWORD Edx){
-		FLOAT MaxTickRate = OriginalGetMaxTickRate(Self, Edx);
+	return MaxTickRate <= 0.0f ? UModRenderDevice::FpsLimit : MaxTickRate; // If the engine doesn't set it's own tick rate (i.e. GetMaxTickRate returns 0), we use FpsLimit instead
+}
 
-		return MaxTickRate <= 0.0f ? FpsLimit : MaxTickRate; // If the engine doesn't set it's own tick rate (i.e. GetMaxTickRate returns 0), we use FpsLimit instead
-	}
+UBOOL UModRenderDevice::Init(){
+	// Setting override function for maximum tick rate since the original always returns 0
+	MaybePatchVTable(&UEngineGetMaxTickRate, GEngine, 49, EngineGetMaxTickRateOverride);
+	GConfig->GetFloat("Engine.GameEngine", "FpsLimit", FpsLimit);
 
-	virtual UBOOL Init(){
-		// Setting override function for maximum tick rate since the original always returns 0
-		MaybePatchVTable(&OriginalGetMaxTickRate, GEngine, 49, EngineGetMaxTickRateOverride);
-		GConfig->GetFloat("Engine.GameEngine", "FpsLimit", FpsLimit);
+	UBOOL Result = Super::Init();
 
-		UBOOL Result = Super::Init();
+	if(Result)
+		MaybePatchVTable(&D3D8CreateDevice, Direct3D8, D3DVTableIndex_D3D8CreateDevice, D3D8CreateDeviceOverride);
 
-		if(Result)
-			MaybePatchVTable(&D3D8CreateDevice, Direct3D8, D3DVTableIndex_D3D8CreateDevice, D3D8CreateDeviceOverride);
+	if(Result && !GIsEditor){
+		// Get a list of all supported resolutions and apply them to the config
 
-		if(!GIsEditor){
-			// Get a list of all supported resolutions and apply them to the config
+		DEVMODE dm = {0};
 
-			DEVMODE dm = {0};
+		dm.dmSize = sizeof(dm);
 
-			dm.dmSize = sizeof(dm);
+		TArray<DWORD> AvailableResolutions;
 
-			TArray<DWORD> AvailableResolutions;
+		for(int i = 0; EnumDisplaySettings(NULL, i, &dm) != 0; ++i)
+			AvailableResolutions.AddUniqueItem(MAKELONG(dm.dmPelsWidth, dm.dmPelsHeight));
 
-			for(int i = 0; EnumDisplaySettings(NULL, i, &dm) != 0; ++i)
-				AvailableResolutions.AddUniqueItem(MAKELONG(dm.dmPelsWidth, dm.dmPelsHeight));
+		if(AvailableResolutions.Num() > 0){
+			Sort(AvailableResolutions.GetData(), AvailableResolutions.Num());
 
-			if(AvailableResolutions.Num() > 0){
-				Sort(AvailableResolutions.GetData(), AvailableResolutions.Num());
+			FString ResolutionList = "(";
 
-				FString ResolutionList = "(";
+			for(int i = 0; i < AvailableResolutions.Num() - 1; ++i)
+				ResolutionList += FString::Printf("\"%ix%i\",", LOWORD(AvailableResolutions[i]), HIWORD(AvailableResolutions[i]));
 
-				for(int i = 0; i < AvailableResolutions.Num() - 1; ++i)
-					ResolutionList += FString::Printf("\"%ix%i\",", LOWORD(AvailableResolutions[i]), HIWORD(AvailableResolutions[i]));
+			ResolutionList += FString::Printf("\"%ix%i\")", LOWORD(AvailableResolutions.Last()), HIWORD(AvailableResolutions.Last()));
 
-				ResolutionList += FString::Printf("\"%ix%i\")", LOWORD(AvailableResolutions.Last()), HIWORD(AvailableResolutions.Last()));
-
-				GConfig->SetString("CTGraphicsOptionsPCMenu",
-								   "Options[2].Items",
-								   *ResolutionList,
-								   *(FString("XInterfaceCTMenus.") + UObject::GetLanguage()));
-			}
-
-			// Create FOVChanger object. This might not be the best place but idk where else to put it...
-			if(!FOVChanger){
-				FOVChanger = ConstructObject<UObject>(LoadClass<UObject>(NULL, "Mod.FOVChanger", NULL, LOAD_NoFail | LOAD_Throw, NULL),
-													  reinterpret_cast<UObject*>(-1),
-													  FName("MainFOVChanger"));
-				checkSlow(FOVChanger);
-				FOVChanger->AddToRoot(); // This object should never be garbage collected
-				FOVChanger->ProcessEvent(NAME_Init, NULL);
-			}
+			GConfig->SetString("CTGraphicsOptionsPCMenu",
+							   "Options[2].Items",
+							   *ResolutionList,
+							   *(FString("XInterfaceCTMenus.") + UObject::GetLanguage()));
 		}
 
-		return Result;
-	}
-
-	virtual UBOOL Exec(const TCHAR* Cmd, FOutputDevice& Ar){
-		if(!GIsEditor){
-			if(ParseCommand(&Cmd, "SETFOV")){
-				struct{
-					APlayerController* Player;
-					FLOAT FOV;
-				} Params;
-
-				TObjectIterator<UViewport> It;
-
-				checkSlow(It);
-
-				Params.Player = It->Actor;
-				Params.FOV = appAtof(Cmd);
-
-				Ar.Logf("Setting field of view to %f", Params.FOV);
-				FOVChanger->ProcessEvent(FName("SetFOV"), &Params);
-
-				return 1;
-			}else if(ParseCommand(&Cmd, "SETFPSLIMIT")){
-				if(appStrlen(Cmd) > 0){
-					FpsLimit = Max(0.0f, appAtof(Cmd));
-					GConfig->SetFloat("Engine.GameEngine", "FpsLimit", FpsLimit);
-				}
-
-				return 1;
-			}else if(ParseCommand(&Cmd, "GETFPSLIMIT")){
-				Ar.Logf("%f", FpsLimit);
-
-				return 1;
-			}
+		// Create FOVChanger object. This might not be the best place but idk where else to put it...
+		if(!FOVChanger){
+			FOVChanger = ConstructObject<UObject>(LoadClass<UObject>(NULL, "Mod.FOVChanger", NULL, LOAD_NoFail | LOAD_Throw, NULL),
+												  reinterpret_cast<UObject*>(-1),
+												  FName("MainFOVChanger"));
+			FOVChanger->AddToRoot(); // This object should never be garbage collected
+			FOVChanger->ProcessEvent(NAME_Init, NULL);
 		}
-
-		return Super::Exec(Cmd, Ar);
 	}
-};
 
-UObject*                             UModRenderDevice::FOVChanger = NULL;
-FLOAT                                UModRenderDevice::FpsLimit   = 0.0f;
-UModRenderDevice::GetMaxTickRateFunc UModRenderDevice::OriginalGetMaxTickRate = NULL;
+	return Result;
+}
+
+UBOOL UModRenderDevice::Exec(const TCHAR* Cmd, FOutputDevice& Ar){
+	if(!GIsEditor){
+		if(ParseCommand(&Cmd, "SETFOV")){
+			struct{
+				APlayerController* Player;
+				FLOAT FOV;
+			} Params;
+
+			TObjectIterator<UViewport> It;
+
+			checkSlow(It);
+
+			Params.Player = It->Actor;
+			Params.FOV = appAtof(Cmd);
+
+			Ar.Logf("Setting field of view to %f", Params.FOV);
+			FOVChanger->ProcessEvent(FName("SetFOV"), &Params);
+
+			return 1;
+		}else if(ParseCommand(&Cmd, "SETFPSLIMIT")){
+			if(appStrlen(Cmd) > 0){
+				FpsLimit = Max(0.0f, appAtof(Cmd));
+				GConfig->SetFloat("Engine.GameEngine", "FpsLimit", FpsLimit);
+			}
+
+			return 1;
+		}else if(ParseCommand(&Cmd, "GETFPSLIMIT")){
+			Ar.Logf("%f", FpsLimit);
+
+			return 1;
+		}
+	}
+
+	return Super::Exec(Cmd, Ar);
+}
+
+UObject* UModRenderDevice::FOVChanger = NULL;
+FLOAT    UModRenderDevice::FpsLimit   = 0.0f;
 
 IMPLEMENT_CLASS(UModRenderDevice)

@@ -45,33 +45,33 @@ ENGINE_API extern FLOAT           GEngineTime;
 	Engine public includes.
 -----------------------------------------------------------------------------*/
 
-#include "UnObj.h"                   // Standard object definitions.
-#include "UnRenderResource.h"
-#include "UnPrim.h"                  // Primitive class.
-#include "UnModel.h"                 // Model class.
-#include "UnMaterial.h"
-#include "UnTex.h"                   // Texture and palette.
-#include "UnAnim.h"
-#include "EngineClasses.h"           // All actor classes.
-#include "UnURL.h"                   // Uniform resource locators.
-#include "UnLevel.h"                 // Level object.
-#include "UnIn.h"                    // Input system.
-#include "UnPlayer.h"                // Player class.
-#include "UnEngine.h"                // Unreal engine.
-#include "UnGame.h"                  // Unreal game engine.
-#include "UnCamera.h"                // Viewport subsystem.
-#include "UnMesh.h"                  // Mesh objects.
-#include "UnSkeletalMesh.h"          // Skeletal model objects.
-#include "UnActor.h"                 // Actor inlines.
-#include "UnAudio.h"                 // Audio code.
-#include "UnDynBsp.h"                // Dynamic Bsp objects.
-#include "UnScrTex.h"                // Scripted textures.
-#include "UnRenderIterator.h"        // Enhanced Actor Render Interface
-#include "UnRenderIteratorSupport.h"
-#include "UnRenDev.h"
-#include "UnRenderUtil.h"
+#include "UnObj.h"            // Standard object definitions.
+#include "UnRenderResource.h" // Render resource objects.
+#include "UnPrim.h"           // Primitive class.
+#include "UnModel.h"          // Model class.
+#include "UnMaterial.h"       // Materials.
+#include "UnTex.h"            // Texture and palette.
+#include "UnAnim.h"           // Animation.
+#include "EngineClasses.h"    // All actor classes.
+#include "UnURL.h"            // Uniform resource locators.
+#include "UnLevel.h"          // Level object.
+#include "UnIn.h"             // Input system.
+#include "UnPlayer.h"         // Player class.
+#include "UnEngine.h"         // Unreal engine.
+#include "UnGame.h"           // Unreal game engine.
+#include "UnMesh.h"           // Mesh objects.
+#include "UnSkeletalMesh.h"   // Skeletal model objects.
+#include "UnActor.h"          // Actor inlines.
+#include "UnAudio.h"          // Audio code.
+#include "UnDynBsp.h"         // Dynamic Bsp objects.
+#include "UnScrTex.h"         // Scripted textures.
+#include "UnMovie.h"
+#include "UnRenDev.h"         // Rendering interface definition.
+#include "UnRenderUtil.h"     // Rendering utilities.
+#include "UnCamera.h"         // Viewport subsystem.
+#include "UnRender.h"         // High-level rendering definitions.
 #include "UnPath.h"
-#include "UnCDKey.h"                 // CD key validation.
+#include "UnCDKey.h"          // CD key validation.
 #include "UnNet.h"
 
 ENGINE_API extern class UCubemapManager*    GCubemapManager;

@@ -220,8 +220,8 @@ enum EFixedVertexFunction{
 //	FVertexComponent
 //
 struct FVertexComponent{
-	EComponentType       Type;
-	EFixedVertexFunction Function;
+	BYTE Type;     // EComponentType
+	BYTE Function; // EFixedVertexFunction
 
 	FVertexComponent(){}
 
@@ -231,7 +231,7 @@ struct FVertexComponent{
 	}
 };
 
-enum { MAX_VERTEX_COMPONENTS = 8 };
+enum { MAX_VERTEX_COMPONENTS = 16 };
 
 //
 //	FVertexStream

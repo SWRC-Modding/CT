@@ -236,8 +236,8 @@ public:
 	virtual void DecrementWatermark(){}
 	virtual void SetAuxMalloc(FMalloc*){}
 	virtual void LockMem(void* Ptr, DWORD Size, bool bLock){}
-	virtual void vtpad1() = 0;
-	virtual void vtpad2() = 0;
+	virtual void vtpad1(void*) = 0;
+	virtual INT vtpad2() = 0;
 	virtual void Tick(){}
 };
 

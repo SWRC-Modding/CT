@@ -45,8 +45,8 @@ public:
 	virtual void SerializeText(char const*);
 	virtual void SerializeText(FString const&);
 	virtual void Preload(UObject*){}
-	virtual void CountBytes(char, const struct FMemCount&);
 	virtual void CountBytes(void*, unsigned long);
+	virtual void CountBytes(char, const struct FMemCount&);
 	virtual FArchive& operator<<(FName& N){ return *this; }
 	virtual FArchive& operator<<(UObject*& Res){ return *this; }
 	virtual INT MapName(FName*){ return 0; }

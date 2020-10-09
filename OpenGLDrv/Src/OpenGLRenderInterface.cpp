@@ -3,6 +3,7 @@
 #include "GL/glew.h"
 
 void FOpenGLRenderInterface::Clear(UBOOL UseColor, FColor Color, UBOOL UseDepth, FLOAT Depth, UBOOL UseStencil, DWORD Stencil){
+	PRINT_FUNC;
 	GLbitfield Flags = 0;
 
 	if(UseColor){

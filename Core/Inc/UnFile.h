@@ -130,10 +130,12 @@ CORE_API FString appClipboardPaste();
 //
 #if defined(_DEBUG) || !DO_GUARD
 	#define guard(func)   {static const TCHAR __FUNC_NAME__[]=#func;
+	#define guardFunc     {static const TCHAR __FUNC_NAME__[]=__FUNCTION__;
 	#define unguard       }
 	#define unguardf(msg) }
 #else
 	#define guard(func)   {static const TCHAR __FUNC_NAME__[]=#func; try{
+	#define guardFunc     {static const TCHAR __FUNC_NAME__[]=__FUNCTION__; try{
 	#define unguard       }catch(TCHAR*Err){throw Err;}catch(...){appUnwindf("%s",__FUNC_NAME__); throw;}}
 	#define unguardf(msg) }catch(TCHAR*Err){throw Err;}catch(...){appUnwindf("%s",__FUNC_NAME__); appUnwindf msg; throw;}}
 #endif
@@ -145,11 +147,13 @@ CORE_API FString appClipboardPaste();
 //
 #if defined(_DEBUG) || !DO_GUARD || !DO_GUARD_SLOW
 	#define guardSlow(func)     {
+	#define guardFuncSlow       {
 	#define unguardfSlow(msg)   }
 	#define unguardSlow         }
 	#define unguardfSlow(msg)   }
 #else
 	#define guardSlow(func)     guard(func)
+	#define guardFuncSlow       guardFunc
 	#define unguardSlow         unguard
 	#define unguardfSlow(msg)   unguardf(msg)
 #endif

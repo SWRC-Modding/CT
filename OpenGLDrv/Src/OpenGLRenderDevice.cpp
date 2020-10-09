@@ -6,6 +6,10 @@ IMPLEMENT_CLASS(UOpenGLRenderDevice)
 
 HGLRC UOpenGLRenderDevice::CurrentContext = NULL;
 
+void UOpenGLRenderDevice::StaticConstructor(){
+	GIsOpenGL = 1;
+}
+
 void UOpenGLRenderDevice::MakeCurrent(){
 	PRINT_FUNC;
 	guardFunc;
@@ -31,6 +35,17 @@ void UOpenGLRenderDevice::UnSetRes(){
 		wglDeleteContext(OpenGLContext);
 		OpenGLContext = NULL;
 	}
+
+	unguard;
+}
+
+void UOpenGLRenderDevice::RequireExt(const TCHAR* Name){
+	guardFunc;
+
+	if(strstr((char*)glGetString(GL_EXTENSIONS), Name) != NULL)
+		debugf(NAME_Init, "Device supports: %s", Name);
+	else
+		appErrorf("Required extension '%s' is not supported", Name);
 
 	unguard;
 }
@@ -76,7 +91,7 @@ UBOOL UOpenGLRenderDevice::SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL
 	Parse(appCmdLine(), "PIXELFORMAT=", PixelFormat);
 	check(PixelFormat);
 
-	debugf(NAME_Init, TEXT("Using pixel format %i"), PixelFormat);
+	debugf(NAME_Init, "Using pixel format %i", PixelFormat);
 
 	verify(SetPixelFormat(DeviceContext, PixelFormat, &Pfd));
 
@@ -103,6 +118,9 @@ UBOOL UOpenGLRenderDevice::SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL
 	debugf(NAME_Init, "%i-bit color buffer", ColorBytes * 8);
 	debugf(NAME_Init, "%i-bit depth buffer", DepthBits);
 	debugf(NAME_Init, "%i-bit stencil buffer", StencilBits);
+
+	RequireExt("GL_ARB_texture_compression");
+	RequireExt("GL_EXT_texture_compression_s3tc");
 
 	return 1;
 

@@ -2,6 +2,9 @@
 
 #include "GL/glew.h"
 
+#define MIN_OPENGL_MAJOR_VERSION 4
+#define MIN_OPENGL_MINOR_VERSION 5
+
 IMPLEMENT_CLASS(UOpenGLRenderDevice)
 
 HGLRC UOpenGLRenderDevice::CurrentContext = NULL;
@@ -120,6 +123,15 @@ UBOOL UOpenGLRenderDevice::SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL
 	debugf(NAME_Init, "GL_RENDERER    : %s", glGetString(GL_RENDERER));
 	debugf(NAME_Init, "GL_VERSION     : %s", glGetString(GL_VERSION));
 
+	GLint MajorVersion;
+	GLint MinorVersion;
+
+	glGetIntegerv(GL_MAJOR_VERSION, &MajorVersion);
+	glGetIntegerv(GL_MINOR_VERSION, &MinorVersion);
+
+	if(MajorVersion < MIN_OPENGL_MAJOR_VERSION || (MajorVersion == MIN_OPENGL_MAJOR_VERSION && MinorVersion < MIN_OPENGL_MINOR_VERSION))
+		appErrorf("OpenGL %i.%i is required but got %i.%i", MIN_OPENGL_MAJOR_VERSION, MIN_OPENGL_MINOR_VERSION, MajorVersion, MinorVersion);
+
 	GLint DepthBits;
 	GLint StencilBits;
 
@@ -130,6 +142,7 @@ UBOOL UOpenGLRenderDevice::SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL
 	debugf(NAME_Init, "%i-bit depth buffer", DepthBits);
 	debugf(NAME_Init, "%i-bit stencil buffer", StencilBits);
 
+	// Check for required extensions
 	RequireExt("GL_ARB_texture_compression");
 	RequireExt("GL_EXT_texture_compression_s3tc");
 

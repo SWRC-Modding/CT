@@ -13,8 +13,11 @@ public:
 
 	static HGLRC CurrentContext;
 
+	void StaticConstructor();
+
 	void MakeCurrent();
 	void UnSetRes();
+	void RequireExt(const TCHAR* Name);
 
 	// Overrides
 	virtual UBOOL Exec(const TCHAR* Cmd, FOutputDevice& Ar){ PRINT_FUNC; debugf(NAME_Exec, Cmd); return 0; }

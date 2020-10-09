@@ -214,6 +214,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 		appInit(appPackage(), lpCmdLine, &Log, &Error, &Warn, FConfigCacheIni::Factory, 1);
 
+		// TEMP!!!
+		GConfig->SetString("Engine.Engine", "RenderDevice", "OpenGLDrv.OpenGLRenderDevice");
+
 		GIsClient = 1;
 		GIsServer = 1;
 		GIsEditor = 0;

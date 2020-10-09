@@ -97,6 +97,12 @@
 			<File
 				RelativePath=".\Inc\OpenGLDrv.h">
 			</File>
+			<File
+				RelativePath=".\Inc\OpenGLRenderDevice.h">
+			</File>
+			<File
+				RelativePath=".\Inc\OpenGLRenderInterface.h">
+			</File>
 		</Filter>
 		<Filter
 			Name="Src"
@@ -104,6 +110,12 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}">
 			<File
 				RelativePath=".\Src\OpenGLDrv.cpp">
+			</File>
+			<File
+				RelativePath=".\Src\OpenGLRenderDevice.cpp">
+			</File>
+			<File
+				RelativePath=".\Src\OpenGLRenderInterface.cpp">
 			</File>
 			<Filter
 				Name="GL"

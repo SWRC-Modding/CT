@@ -80,12 +80,12 @@ enum EPrecacheMode{
 	PRECACHE_All
 };
 
-class ENGINE_API FRenderInterface{
+class FRenderInterface{
 public:
 	virtual void PushState(int) = 0;
 	virtual void PopState(int) = 0;
 	virtual UBOOL SetRenderTarget(FRenderTarget* RenderTarget, bool) = 0;
-	virtual UBOOL SetCubeRenderTarget(class FDynamicCubemap*, int, int){}
+	virtual UBOOL SetCubeRenderTarget(class FDynamicCubemap*, int, int){ return 0; }
 	virtual void SetViewport(INT X, INT Y, INT Width, INT Height) = 0;
 	virtual void Clear(UBOOL UseColor = 1, FColor Color = FColor(0, 0, 0), UBOOL UseDepth = 1, FLOAT Depth = 1.0f, UBOOL UseStencil = 1, DWORD Stencil = 0) = 0;
 	virtual void PushHit(const BYTE* Data, INT Count) = 0;
@@ -110,7 +110,7 @@ public:
 	virtual void CopyBackBufferToTarget(FAuxRenderTarget*){}
 	virtual void SetLODDiffuseFade(float){}
 	virtual void SetLODSpecularFade(float){}
-	virtual void SetStencilOp(ECompareFunction Test, DWORD Ref, DWORD Mask, EStencilOp FailOp, EStencilOp ZFailOp, EStencilOp PassOp, DWORD WriteMask);
+	virtual void SetStencilOp(ECompareFunction Test, DWORD Ref, DWORD Mask, EStencilOp FailOp, EStencilOp ZFailOp, EStencilOp PassOp, DWORD WriteMask) = 0;
 	virtual void vtpad1(int) = 0; // Possibly stencil op related (modifies same memory);
 	virtual void vtpad2(int) = 0; // Possibly stencil op related (modifies same memory);
 	virtual void SetPrecacheMode(EPrecacheMode PrecacheMode) = 0;
@@ -129,11 +129,6 @@ public:
 	virtual int vtpad3(){ return 1; };
 	virtual int vtpad4(){ return 1; };
 	virtual int vtpad5(){ return 1; };
-
-	// The following virtual functions belong to FD3DRenderInterface and should be removed again
-	virtual int d3d1(int, int) = 0;
-	virtual int d3d2(int) = 0;
-	virtual int d3d3(int) = 0;
 };
 
 /*------------------------------------------------------------------------------------

@@ -14,6 +14,7 @@
                 "IPDRV_API=",
                 "MOD_API=",
                 "MODMPGAME_API=",
+                "OPENGLDRV_API=",
                 "WINDOW_API=",
                 "XGAME_API=",
                 "XINTERFACE_API="

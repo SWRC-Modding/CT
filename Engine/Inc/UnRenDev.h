@@ -126,9 +126,9 @@ public:
 	virtual UBOOL PixoIsVisible(FBox&){ return 1; }
 	virtual bool IsVertexBufferBusy(FVertexStream*){ return false; }
 	virtual void SetFillMode(EFillMode FillMode){}
-	virtual int vtpad3(){ return 1; };
-	virtual int vtpad4(){ return 1; };
-	virtual int vtpad5(){ return 1; };
+	virtual int vtpad3(){ return 1; }
+	virtual int vtpad4(){ return 1; }
+	virtual int vtpad5(){ return 1; }
 };
 
 /*------------------------------------------------------------------------------------
@@ -153,7 +153,7 @@ struct FRenderCaps{
 //
 class ENGINE_API URenderDevice : public USubsystem{
 	DECLARE_ABSTRACT_CLASS(URenderDevice,USubsystem,CLASS_Config,Engine)
-
+public:
 	// Variables.
 	BYTE     DecompFormat;
 	INT      RecommendedLOD;
@@ -185,8 +185,8 @@ class ENGINE_API URenderDevice : public USubsystem{
 	virtual void Flush(UViewport* Viewport) = 0;
 	virtual void FlushResource(QWORD CacheId) = 0;
 	virtual UBOOL ResourceCached(QWORD CacheId){}
-	virtual struct FMemCount ResourceMem(FRenderResource*, UObject*){}
-	virtual struct FMemCount ResourceMemTotal(){}
+	virtual FMemCount ResourceMem(FRenderResource*, UObject*){}
+	virtual FMemCount ResourceMemTotal(){}
 	virtual void UpdateGamma(UViewport* Viewport) = 0;
 	virtual void RestoreGamma() = 0;
 	virtual UBOOL VSyncEnabled() = 0;

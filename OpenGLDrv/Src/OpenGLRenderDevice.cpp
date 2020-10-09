@@ -44,10 +44,19 @@ void UOpenGLRenderDevice::UnSetRes(){
 void UOpenGLRenderDevice::RequireExt(const TCHAR* Name){
 	guardFunc;
 
-	if(strstr((char*)glGetString(GL_EXTENSIONS), Name) != NULL)
-		debugf(NAME_Init, "Device supports: %s", Name);
-	else
-		appErrorf("Required extension '%s' is not supported", Name);
+	GLint numExtensions = 0;
+
+	glGetIntegerv(GL_NUM_EXTENSIONS, &numExtensions);
+
+	for(GLint i = 0; i < numExtensions; ++i){
+		if(appStrcmp(Name, (const char*)glGetStringi(GL_EXTENSIONS, i)) == 0){
+			debugf(NAME_Init, "Device supports: %s", Name);
+
+			return;
+		}
+	}
+
+	appErrorf("Required OpenGL extension '%s' is not supported", Name);
 
 	unguard;
 }

@@ -7,7 +7,7 @@ IMPLEMENT_CLASS(UOpenGLRenderDevice)
 HGLRC UOpenGLRenderDevice::CurrentContext = NULL;
 
 void UOpenGLRenderDevice::StaticConstructor(){
-	GIsOpenGL = 1;
+
 }
 
 void UOpenGLRenderDevice::MakeCurrent(){
@@ -17,6 +17,7 @@ void UOpenGLRenderDevice::MakeCurrent(){
 	if(CurrentContext != OpenGLContext){
 		wglMakeCurrent(DeviceContext, OpenGLContext);
 		CurrentContext = OpenGLContext;
+		GIsOpenGL = 1;
 	}
 
 	unguard;
@@ -30,6 +31,7 @@ void UOpenGLRenderDevice::UnSetRes(){
 		if(CurrentContext == OpenGLContext){
 			CurrentContext = NULL;
 			wglMakeCurrent(NULL, NULL);
+			GIsOpenGL = 0;
 		}
 
 		wglDeleteContext(OpenGLContext);
@@ -127,8 +129,17 @@ UBOOL UOpenGLRenderDevice::SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL
 	unguard;
 }
 
+void UOpenGLRenderDevice::Exit(UViewport* Viewport){
+	PRINT_FUNC;
+	UnSetRes();
+}
+
 FRenderInterface* UOpenGLRenderDevice::Lock(UViewport* Viewport, BYTE* HitData, INT* HitSize){
 	PRINT_FUNC;
+
+	MakeCurrent();
+	glViewport(0, 0, Viewport->SizeX, Viewport->SizeY);
+
 	return &RenderInterface;
 }
 

@@ -23,7 +23,7 @@ public:
 	virtual UBOOL Exec(const TCHAR* Cmd, FOutputDevice& Ar){ PRINT_FUNC; debugf(NAME_Exec, Cmd); return 0; }
 	virtual UBOOL Init(){ PRINT_FUNC; return 1; }
 	virtual UBOOL SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL Fullscreen, INT ColorBytes = 0, UBOOL bSaveSize = 1);
-	virtual void Exit(UViewport* Viewport){ PRINT_FUNC; }
+	virtual void Exit(UViewport* Viewport);
 	virtual void Flush(UViewport* Viewport){ PRINT_FUNC; }
 	virtual void FlushResource(QWORD CacheId){ PRINT_FUNC; }
 	virtual UBOOL ResourceCached(QWORD CacheId){ PRINT_FUNC; return 0; }

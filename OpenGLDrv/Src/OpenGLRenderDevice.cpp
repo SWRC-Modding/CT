@@ -146,6 +146,20 @@ UBOOL UOpenGLRenderDevice::SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL
 	RequireExt("GL_ARB_texture_compression");
 	RequireExt("GL_EXT_texture_compression_s3tc");
 
+	if(Fullscreen){
+		HMONITOR    Monitor = MonitorFromWindow(hwnd, MONITOR_DEFAULTTOPRIMARY);
+		MONITORINFO Info    = {sizeof(MONITORINFO)};
+
+		verify(GetMonitorInfoA(Monitor, &Info));
+
+		INT Width  = Info.rcMonitor.right - Info.rcMonitor.left;
+		INT Height = Info.rcMonitor.bottom - Info.rcMonitor.top;
+
+		Viewport->ResizeViewport(BLIT_Fullscreen | BLIT_OpenGL, Width, Height);
+	}else{
+		Viewport->ResizeViewport(BLIT_OpenGL, NewX, NewY);
+	}
+
 	return 1;
 
 	unguard;

@@ -3,6 +3,8 @@
 #include "OpenGLDrv.h"
 #include "OpenGLRenderInterface.h"
 
+class FOpenGLResource;
+
 class OPENGLDRV_API UOpenGLRenderDevice : public URenderDevice{
 	DECLARE_CLASS(UOpenGLRenderDevice,URenderDevice,CLASS_Config,OpenGLDrv)
 public:
@@ -10,6 +12,9 @@ public:
 	HGLRC                  OpenGLContext;
 	FOpenGLRenderInterface RenderInterface;
 	FRenderCaps            RenderCaps;
+
+	FOpenGLResource*       ResourceList;
+	FOpenGLResource*       ResourceHash[4096];
 
 	static HGLRC CurrentContext;
 
@@ -21,15 +26,16 @@ public:
 	bool IsCurrent();
 	void UnSetRes();
 	void RequireExt(const TCHAR* Name);
+	FOpenGLResource* GetCachedResource(QWORD CacheId);
 
 	// Overrides
-	virtual UBOOL Exec(const TCHAR* Cmd, FOutputDevice& Ar){ PRINT_FUNC; debugf(NAME_Exec, Cmd); return 0; }
+	virtual UBOOL Exec(const TCHAR* Cmd, FOutputDevice& Ar){ return 0; }
 	virtual UBOOL Init(){ PRINT_FUNC; return 1; }
 	virtual UBOOL SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL Fullscreen, INT ColorBytes = 0, UBOOL bSaveSize = 1);
 	virtual void Exit(UViewport* Viewport);
-	virtual void Flush(UViewport* Viewport){ PRINT_FUNC; }
-	virtual void FlushResource(QWORD CacheId){ PRINT_FUNC; }
-	virtual UBOOL ResourceCached(QWORD CacheId){ PRINT_FUNC; return 0; }
+	virtual void Flush(UViewport* Viewport);
+	virtual void FlushResource(QWORD CacheId);
+	virtual UBOOL ResourceCached(QWORD CacheId);
 	virtual FMemCount ResourceMem(FRenderResource*, UObject*){ PRINT_FUNC; return FMemCount(); }
 	virtual FMemCount ResourceMemTotal(){ PRINT_FUNC; return FMemCount(); }
 	virtual void UpdateGamma(UViewport* Viewport){ PRINT_FUNC; }
@@ -50,4 +56,10 @@ public:
 	virtual UBOOL DoesSupportFSAA(int){ PRINT_FUNC; return 0; }
 	virtual void TakeScreenshot(const char*, class UViewport*, int, int){ PRINT_FUNC; }
 	virtual UBOOL SupportsTextureFormat(ETextureFormat){ PRINT_FUNC; return 0; }
+
+private:
+	friend class FOpenGLResource;
+
+	void AddResource(FOpenGLResource* Resource);
+	void RemoveResource(FOpenGLResource* Resource);
 };

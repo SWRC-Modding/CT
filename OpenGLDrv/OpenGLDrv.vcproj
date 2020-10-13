@@ -103,6 +103,9 @@
 			<File
 				RelativePath=".\Inc\OpenGLRenderInterface.h">
 			</File>
+			<File
+				RelativePath=".\Inc\OpenGLResource.h">
+			</File>
 		</Filter>
 		<Filter
 			Name="Src"
@@ -116,6 +119,9 @@
 			</File>
 			<File
 				RelativePath=".\Src\OpenGLRenderInterface.cpp">
+			</File>
+			<File
+				RelativePath=".\Src\OpenGLResource.cpp">
 			</File>
 			<Filter
 				Name="GL"

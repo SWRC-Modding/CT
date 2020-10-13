@@ -1,6 +1,7 @@
 #include "../Inc/OpenGLRenderDevice.h"
 
 #include "GL/glew.h"
+#include "../Inc/OpenGLResource.h"
 
 #define MIN_OPENGL_MAJOR_VERSION 4
 #define MIN_OPENGL_MINOR_VERSION 5
@@ -72,8 +73,47 @@ void UOpenGLRenderDevice::RequireExt(const TCHAR* Name){
 	unguard;
 }
 
+void UOpenGLRenderDevice::AddResource(FOpenGLResource* Resource){
+	checkSlow(Resource->HashIndex == INDEX_NONE);
+	checkSlow(Resource->HashNext == NULL);
+
+	Resource->HashIndex = GetResourceHashIndex(Resource->CacheId);
+	Resource->HashNext = ResourceHash[Resource->HashIndex];
+	ResourceHash[Resource->HashIndex] = Resource;
+}
+
+void UOpenGLRenderDevice::RemoveResource(FOpenGLResource* Resource){
+	checkSlow(Resource->RenDev == this);
+	checkSlow(Resource->HashIndex != INDEX_NONE);
+
+	FOpenGLResource** Temp = &ResourceHash[Resource->HashIndex];
+
+	while(*Temp){
+		if(*Temp == Resource){
+			*Temp = (*Temp)->HashNext;
+
+			break;
+		}
+
+		Temp = &(*Temp)->HashNext;
+	}
+}
+
+FOpenGLResource* UOpenGLRenderDevice::GetCachedResource(QWORD CacheId){
+	INT HashIndex = GetResourceHashIndex(CacheId);
+	FOpenGLResource* Resource = ResourceHash[HashIndex];
+
+	while(Resource){
+		if(Resource->CacheId == CacheId)
+			return Resource;
+
+		Resource = Resource->HashNext;
+	}
+
+	return NULL;
+}
+
 UBOOL UOpenGLRenderDevice::SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL Fullscreen, INT ColorBytes, UBOOL bSaveSize){
-	PRINT_FUNC;
 	guardFunc;
 
 	UnSetRes();
@@ -89,6 +129,8 @@ UBOOL UOpenGLRenderDevice::SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL
 		Use16bit = 0;
 
 	ColorBytes = Use16bit ? 2 : 4;
+
+	debugf("SetRes: %ix%i, %i-bit, Fullscreen: %i", NewX, NewY, ColorBytes * 8, Fullscreen);
 
 	PIXELFORMATDESCRIPTOR Pfd = {
 		sizeof(PIXELFORMATDESCRIPTOR), // size
@@ -178,8 +220,33 @@ UBOOL UOpenGLRenderDevice::SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL
 
 void UOpenGLRenderDevice::Exit(UViewport* Viewport){
 	PRINT_FUNC;
+	Flush(Viewport);
 	UnSetRes();
 }
+
+void UOpenGLRenderDevice::Flush(UViewport* Viewport){
+	for(INT i = 0; i < ARRAY_COUNT(ResourceHash); ++i){
+		FOpenGLResource* Resource = ResourceHash[i];
+
+		while(Resource){
+			delete Resource;
+		}
+	}
+
+	appMemzero(ResourceHash, sizeof(ResourceHash));
+}
+
+void UOpenGLRenderDevice::FlushResource(QWORD CacheId){
+	FOpenGLResource* Resource = GetCachedResource(CacheId);
+
+	if(Resource)
+		delete Resource;
+}
+
+UBOOL UOpenGLRenderDevice::ResourceCached(QWORD CacheId){
+	return GetCachedResource(CacheId) != NULL;
+}
+
 
 FRenderInterface* UOpenGLRenderDevice::Lock(UViewport* Viewport, BYTE* HitData, INT* HitSize){
 	PRINT_FUNC;

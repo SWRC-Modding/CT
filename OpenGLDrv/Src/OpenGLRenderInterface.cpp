@@ -2,8 +2,64 @@
 
 #include "GL/glew.h"
 
+/*
+ * FOpenGLRenderInterface::FOpenGLSavedState
+ */
+FOpenGLRenderInterface::FOpenGLSavedState::FOpenGLSavedState() : Transform(FMatrix::Identity){
+	for(INT i = 0; i < ARRAY_COUNT(Matrices); ++i)
+		Matrices[i] = FMatrix::Identity;
+}
+
+/*
+ * FOpenGLRenderInterface
+ */
+
+FOpenGLRenderInterface::FOpenGLRenderInterface(UOpenGLRenderDevice* InRenDev) : RenDev(InRenDev),
+                                                                                CurrentState(&SavedStates[0]),
+                                                                                SavedStateIndex(0){
+
+}
+
+void FOpenGLRenderInterface::PushState(int){
+	guardFunc;
+
+	++SavedStateIndex;
+	++CurrentState;
+
+	check(SavedStateIndex < MAX_STATESTACKDEPTH);
+
+	appMemcpy(CurrentState, &SavedStates[SavedStateIndex - 1], sizeof(FOpenGLSavedState));
+
+	unguard;
+}
+
+void FOpenGLRenderInterface::PopState(int){
+	guardFunc;
+
+	FOpenGLSavedState* PrevState = CurrentState;
+
+	--SavedStateIndex;
+	--CurrentState;
+
+	check(SavedStateIndex >= 0);
+
+	if(CurrentState->ViewportX != PrevState->ViewportX ||
+	   CurrentState->ViewportY != PrevState->ViewportY ||
+	   CurrentState->ViewportWidth != PrevState->ViewportWidth ||
+	   CurrentState->ViewportHeight != PrevState->ViewportHeight){
+		SetViewport(CurrentState->ViewportX, CurrentState->ViewportY, CurrentState->ViewportWidth, CurrentState->ViewportHeight);
+	}
+
+	unguard;
+}
+
+void FOpenGLRenderInterface::SetViewport(INT X, INT Y, INT Width, INT Height){
+	glViewport(X, Y, Width, Height);
+}
+
 void FOpenGLRenderInterface::Clear(UBOOL UseColor, FColor Color, UBOOL UseDepth, FLOAT Depth, UBOOL UseStencil, DWORD Stencil){
-	PRINT_FUNC;
+	guardFuncSlow;
+
 	GLbitfield Flags = 0;
 
 	if(UseColor){
@@ -22,4 +78,34 @@ void FOpenGLRenderInterface::Clear(UBOOL UseColor, FColor Color, UBOOL UseDepth,
 	}
 
 	glClear(Flags);
+
+	unguard;
+}
+
+void FOpenGLRenderInterface::SetCullMode(ECullMode CullMode){
+	GLenum NewCullMode;
+
+	if(CullMode == CM_CCW)
+		NewCullMode = GL_FRONT;
+	else
+		NewCullMode = GL_BACK;
+
+	glCullFace(NewCullMode);
+}
+
+void FOpenGLRenderInterface::SetTransform(ETransformType Type, const FMatrix& Matrix){
+	guardFuncSlow;
+
+	CurrentState->Matrices[Type] = Matrix;
+	CurrentState->Transform = CurrentState->Matrices[0] * CurrentState->Matrices[1] * CurrentState->Matrices[2];
+
+	unguard;
+}
+
+FMatrix FOpenGLRenderInterface::GetTransform(ETransformType Type) const{
+	guardFuncSlow;
+
+	return CurrentState->Matrices[Type];
+
+	unguard;
 }

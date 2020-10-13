@@ -3,6 +3,7 @@
         {
             "name": "Win32",
             "defines": [
+                "DO_GUARD_SLOW=1",
                 "CORE_API=",
                 "CTGAME_API=",
                 "CTMARKERS_API=",

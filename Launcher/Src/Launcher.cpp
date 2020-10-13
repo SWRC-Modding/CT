@@ -259,3 +259,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 	return ExitCode;
 }
+
+// Force use of dedicated GPU
+extern "C"{
+	__declspec(dllexport) DWORD NvOptimusEnablement = 1;
+	__declspec(dllexport) DWORD AmdPowerXpressRequestHighPerformance = 1;
+}

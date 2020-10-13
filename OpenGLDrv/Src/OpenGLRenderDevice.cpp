@@ -9,15 +9,18 @@ IMPLEMENT_CLASS(UOpenGLRenderDevice)
 
 HGLRC UOpenGLRenderDevice::CurrentContext = NULL;
 
+UOpenGLRenderDevice::UOpenGLRenderDevice() : RenderInterface(this){
+
+}
+
 void UOpenGLRenderDevice::StaticConstructor(){
 
 }
 
 void UOpenGLRenderDevice::MakeCurrent(){
-	PRINT_FUNC;
 	guardFunc;
 
-	if(CurrentContext != OpenGLContext){
+	if(!IsCurrent()){
 		wglMakeCurrent(DeviceContext, OpenGLContext);
 		CurrentContext = OpenGLContext;
 		GIsOpenGL = 1;
@@ -26,12 +29,17 @@ void UOpenGLRenderDevice::MakeCurrent(){
 	unguard;
 }
 
+bool UOpenGLRenderDevice::IsCurrent(){
+	checkSlow(wglGetCurrentContext() == CurrentContext);
+
+	return CurrentContext == OpenGLContext;
+}
+
 void UOpenGLRenderDevice::UnSetRes(){
-	PRINT_FUNC;
 	guardFunc;
 
 	if(OpenGLContext){
-		if(CurrentContext == OpenGLContext){
+		if(IsCurrent()){
 			CurrentContext = NULL;
 			wglMakeCurrent(NULL, NULL);
 			GIsOpenGL = 0;
@@ -146,6 +154,9 @@ UBOOL UOpenGLRenderDevice::SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL
 	RequireExt("GL_ARB_texture_compression");
 	RequireExt("GL_EXT_texture_compression_s3tc");
 
+	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_CULL_FACE);
+
 	if(Fullscreen){
 		HMONITOR    Monitor = MonitorFromWindow(hwnd, MONITOR_DEFAULTTOPRIMARY);
 		MONITORINFO Info    = {sizeof(MONITORINFO)};
@@ -174,21 +185,17 @@ FRenderInterface* UOpenGLRenderDevice::Lock(UViewport* Viewport, BYTE* HitData, 
 	PRINT_FUNC;
 
 	MakeCurrent();
-	glViewport(0, 0, Viewport->SizeX, Viewport->SizeY);
+	RenderInterface.SetViewport(0, 0, Viewport->SizeX, Viewport->SizeY);
 
 	return &RenderInterface;
 }
 
 void UOpenGLRenderDevice::Present(UViewport* Viewport){
-	PRINT_FUNC;
-
-	if(OpenGLContext == CurrentContext)
-		verify(SwapBuffers(DeviceContext));
+	checkSlow(IsCurrent());
+	verify(SwapBuffers(DeviceContext));
 }
 
 FRenderCaps* UOpenGLRenderDevice::GetRenderCaps(){
-	PRINT_FUNC;
-
 	RenderCaps.MaxSimultaneousTerrainLayers = 1;
 	RenderCaps.PixelShaderVersion = 0;
 	RenderCaps.HardwareTL = 1;

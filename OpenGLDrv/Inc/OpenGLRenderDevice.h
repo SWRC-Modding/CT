@@ -13,9 +13,12 @@ public:
 
 	static HGLRC CurrentContext;
 
+	UOpenGLRenderDevice();
+
 	void StaticConstructor();
 
 	void MakeCurrent();
+	bool IsCurrent();
 	void UnSetRes();
 	void RequireExt(const TCHAR* Name);
 

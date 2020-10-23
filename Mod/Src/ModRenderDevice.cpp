@@ -533,6 +533,18 @@ UBOOL UModRenderDevice::Exec(const TCHAR* Cmd, FOutputDevice& Ar){
 	return Super::Exec(Cmd, Ar);
 }
 
+FRenderInterface* UModRenderDevice::Lock(UViewport* Viewport, BYTE* HitData, INT* HitSize){
+	FRenderInterface* RI = Super::Lock(Viewport, HitData, HitSize);
+
+	if(GIsEditor){
+		RenderInterface.Impl = RI;
+
+		return &RenderInterface;
+	}
+
+	return RI;
+}
+
 UObject* UModRenderDevice::FOVChanger = NULL;
 FLOAT    UModRenderDevice::FpsLimit   = 0.0f;
 

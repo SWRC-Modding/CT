@@ -492,6 +492,17 @@ UBOOL UModRenderDevice::Init(){
 			FOVChanger->AddToRoot(); // This object should never be garbage collected
 			FOVChanger->ProcessEvent(NAME_Init, NULL);
 		}
+	}else if(!SelectionShader){
+		SelectionShader = new UHardwareShader();
+
+		SelectionShader->VertexShaderText = "vs.1.1\n"
+											"m4x4 r0, v0, c0\n"
+		                                    "mov oPos, r0\n";
+		SelectionShader->PixelShaderText = "ps.1.1\n"
+		                                   "mov r0,c0\n";
+		SelectionShader->VSConstants[0].Type = EVC_ObjectToScreenMatrix;
+		SelectionShader->ZTest = 1;
+		SelectionShader->ZWrite = 1;
 	}
 
 	return Result;
@@ -545,7 +556,8 @@ FRenderInterface* UModRenderDevice::Lock(UViewport* Viewport, BYTE* HitData, INT
 	return RI;
 }
 
-UObject* UModRenderDevice::FOVChanger = NULL;
-FLOAT    UModRenderDevice::FpsLimit   = 0.0f;
+UObject*         UModRenderDevice::FOVChanger = NULL;
+FLOAT            UModRenderDevice::FpsLimit   = 0.0f;
+UHardwareShader* UModRenderDevice::SelectionShader = NULL;
 
 IMPLEMENT_CLASS(UModRenderDevice)

@@ -88,10 +88,16 @@ public:
 class MOD_API UModRenderDevice : public UD3DRenderDevice{
 	DECLARE_CLASS(UModRenderDevice, UD3DRenderDevice, 0, Mod)
 public:
-	static UObject* FOVChanger;
-	static FLOAT    FpsLimit;
+	static UObject*         FOVChanger;
+	static FLOAT            FpsLimit;
+	static UHardwareShader* SelectionShader;
 
 	FModRenderInterface RenderInterface;
+
+	virtual void Serialize(FArchive& Ar){
+		Super::Serialize(Ar);
+		Ar << SelectionShader;
+	}
 
 	virtual UBOOL Init();
 	virtual UBOOL Exec(const TCHAR* Cmd, FOutputDevice& Ar);

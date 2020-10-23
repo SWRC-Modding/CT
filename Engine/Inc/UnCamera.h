@@ -379,9 +379,9 @@ public:
 };
 
 // Viewport hit-testing macros.
-#define PUSH_HIT(frame,expr) if( (frame->Viewport)->HitTesting ) (frame->Viewport)->PushHit(expr,sizeof(expr));
-#define POP_HIT(frame)       if( (frame->Viewport)->HitTesting ) (frame->Viewport)->PopHit(0);
-#define POP_HIT_FORCE(frame) if( (frame->Viewport)->HitTesting ) (frame->Viewport)->PopHit(1);
+#define PUSH_HIT(frame,expr) if((frame->Viewport)->HitTesting) (frame->Viewport)->PushHit(expr, sizeof(expr));
+#define POP_HIT(frame)       if((frame->Viewport)->HitTesting) (frame->Viewport)->PopHit(0);
+#define POP_HIT_FORCE(frame) if((frame->Viewport)->HitTesting) (frame->Viewport)->PopHit(1);
 
 /*-----------------------------------------------------------------------------
 	Base hit proxy.
@@ -389,31 +389,22 @@ public:
 
 // Hit proxy declaration macro.
 #define DECLARE_HIT_PROXY(cls,parent) \
-	const TCHAR* GetName() const \
-		{ return TEXT(#cls); } \
-	UBOOL IsA( const TCHAR* Str ) const \
-		{ return appStricmp(TEXT(#cls),Str)==0 || parent::IsA(Str); }
+	const TCHAR* GetName() const{ return #cls; } \
+	UBOOL IsA(const TCHAR* Str) const{ return appStricmp(#cls,Str)==0 || parent::IsA(Str); }
 
 // Base class for detecting user-interface hits.
-struct ENGINE_API HHitProxy
-{
-	union
-	{
+struct ENGINE_API HHitProxy{
+	union{
 		mutable INT Size;
 		HHitProxy* Parent;
 	};
-	const TCHAR* GetName() const
-	{
-		return "HHitProxy";
-	}
-	virtual UBOOL IsA( const TCHAR* Str ) const
-	{
-		return appStricmp("HHitProxy",Str)==0;
-	}
-	virtual void Click( const FHitCause& Cause )
-	{
-		Cause.Observer->Click( Cause, *this );
-	}
+
+	FColor HitColor;
+
+	virtual const TCHAR* GetName() const{ return "HHitProxy"; }
+	virtual UBOOL IsA(const TCHAR* Str) const{ return appStricmp("HHitProxy", Str) == 0; }
+	virtual void Click(const FHitCause& Cause){ Cause.Observer->Click(Cause, *this); }
+	virtual AActor* GetActor(){ return NULL; }
 };
 
 /*-----------------------------------------------------------------------------
@@ -423,8 +414,7 @@ struct ENGINE_API HHitProxy
 //
 // Client, responsible for tracking viewports.
 //
-class ENGINE_API UClient : public UObject
-{
+class ENGINE_API UClient : public UObject{
 	DECLARE_ABSTRACT_CLASS(UClient,UObject,CLASS_Config,Engine)
 
 	// Variables.
@@ -451,7 +441,6 @@ class ENGINE_API UClient : public UObject
 	INT			TextureLODSet[LODSET_MAX];
 	FLOAT		MinDesiredFrameRate;
 	INT			ParticleDensity;
-
 
 	// Constructors.
 	UClient();

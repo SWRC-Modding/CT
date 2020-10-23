@@ -5262,6 +5262,20 @@ public:
 	INT NumPSConstants;
 
 	DECLARE_CLASS(UHardwareShader,URenderedMaterial,0,Engine)
+
+	UHardwareShader();
+
+	// Overrides
+	virtual void PostLoad();
+	virtual void Destroy();
+	virtual void Serialize(FArchive& Ar);
+	virtual void PostEditChange();
+	virtual INT MaterialUSize();
+	virtual INT MaterialVSize();
+	virtual UBOOL RequiresSorting();
+
+	void Changed();
+	void InitDuplicate();
 };
 
 /*

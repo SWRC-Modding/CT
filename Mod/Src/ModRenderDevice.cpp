@@ -458,7 +458,6 @@ bool FModRenderInterface::OverrideSelectionForCurrentHitProxy() const{
 	// The following types need to use the original selection mechanism
 
 	return Type != HP_Unknown &&
-	       Type != HP_BrowserMaterial &&
 	       Type != HP_MaterialTree &&
 	       Type != HP_MatineeTimePath &&
 	       Type != HP_MatineeScene &&

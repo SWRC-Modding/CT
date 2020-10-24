@@ -1,5 +1,8 @@
 #include "../Inc/Mod.h"
+#include "../../Editor/Inc/Editor.h"
 #include <Windows.h>
+
+// TODO: Tidy up. This is a mess!
 
 /*
  * Helper function that only patches a vtable if it wasn't done already.
@@ -435,6 +438,208 @@ HRESULT __stdcall D3D8CreateDeviceOverride(FD3D8* D3D8,
 }
 
 /*
+ * FModRenderInterface
+ */
+
+FModRenderInterface::FModRenderInterface(UModRenderDevice* InRenDev){
+	RenDev = InRenDev;
+
+	HitProxyStack.SetNoShrink(true);
+	AllHitData.SetNoShrink(true);
+	HitDataIndices.SetNoShrink(true);
+}
+
+EHitProxy FModRenderInterface::CurrentHitProxyType() const{
+	return HitProxyStack.Num() > 0 ? HitProxyStack.Last().Type : HP_Unknown;
+}
+
+bool FModRenderInterface::OverrideSelectionForCurrentHitProxy() const{
+	EHitProxy Type = CurrentHitProxyType();
+
+	// The following types need to use the original selection mechanism
+
+	return Type != HP_Unknown &&
+	       Type != HP_BrowserMaterial &&
+	       Type != HP_MaterialTree &&
+	       Type != HP_MatineeTimePath &&
+	       Type != HP_MatineeScene &&
+	       Type != HP_MatineeAction &&
+	       Type != HP_MatineeSubAction;
+}
+
+bool FModRenderInterface::ProcessHitColor(FColor HitColor, INT* OutIndex){
+	INT Index;
+
+	if(RenDev->LockedViewport->ColorBytes == 2)
+		Index = (HitColor.R & 0x40) | ((HitColor.G << 6) & 0x40) | HitColor.B << 11;
+	else
+		Index = HitColor.R | HitColor.G << 8;
+
+	--Index;
+
+	if(Index >= 0 && Index < HitDataIndices.Num()){
+		if(*OutIndex < 0)
+			*OutIndex = Index;
+
+		FHitProxyInfo* Info = reinterpret_cast<FHitProxyInfo*>(&AllHitData[HitDataIndices[Index]]);
+		AActor*        HitActor = reinterpret_cast<HHitProxy*>(reinterpret_cast<BYTE*>(Info) + sizeof(FHitProxyInfo))->GetActor();
+
+		// Checking for preferred selection types
+		if(Info->Type == HP_GizmoAxis ||
+		   Info->Type == HP_BrushVertex ||
+		   Info->Type == HP_ActorVertex ||
+		   Info->Type == HP_GlobalPivot ||
+		   (HitActor && (HitActor->IsABrush()))){
+			*OutIndex = Index;
+
+			return true;
+		}
+	}
+
+	return false;
+}
+
+void FModRenderInterface::ProcessHit(INT HitProxyIndex){
+	INT HitCount = *reinterpret_cast<INT*>(reinterpret_cast<BYTE*>(Impl) + 40944); // Only way to get the hit count of the FD3DRenderInterface
+
+	if(HitProxyIndex > 0 && HitProxyIndex <= HitDataIndices.Num()){
+		_WORD ParentIndices[32];
+		INT   NumParents = 0;
+
+		// Collecting all parents of the successful hit
+		for(SWORD ParentIndex = reinterpret_cast<FHitProxyInfo*>(&AllHitData[HitDataIndices[HitProxyIndex]])->ParentIndex;
+			ParentIndex != INDEX_NONE;
+			ParentIndex = reinterpret_cast<FHitProxyInfo*>(&AllHitData[HitDataIndices[ParentIndex]])->ParentIndex){
+
+			ParentIndices[NumParents] = ParentIndex;
+			++NumParents;
+			checkSlow(NumParents <= ARRAY_COUNT(ParentIndices));
+		}
+
+		// Copying hit hierarchy to HitData
+		for(INT i = 0; i < NumParents; ++i){
+			HHitProxy* Parent = reinterpret_cast<HHitProxy*>(&AllHitData[HitDataIndices[ParentIndices[i]] + sizeof(FHitProxyInfo)]);
+
+			appMemcpy(HitData + HitCount, Parent, Parent->Size);
+
+			HitCount += Parent->Size;
+		}
+
+		HHitProxy* Hit = reinterpret_cast<HHitProxy*>(&AllHitData[HitDataIndices[HitProxyIndex] + sizeof(FHitProxyInfo)]);
+
+		appMemcpy(HitData + HitCount, Hit, Hit->Size);
+		*HitSize = HitCount + Hit->Size;
+	}else{
+		Cast<UEditorEngine>(GEngine)->Exec_Select("NONE", *GLog);
+	}
+
+	HitProxyStack.Empty();
+	AllHitData.Empty();
+	HitDataIndices.Empty();
+	HitCount = 0;
+	HitData = NULL;
+}
+
+void FModRenderInterface::PushHit(const BYTE* Data, INT Count){
+	checkSlow(GIsEditor);
+	checkSlow(UModRenderDevice::SelectionShader);
+	checkSlow(HitData);
+	checkSlow(HitSize);
+
+	const TCHAR* Name = reinterpret_cast<const HHitProxy*>(Data)->GetName();
+
+	EHitProxy HitType;
+
+	if(appStricmp(Name, "HBspSurf") == 0){
+		HitType = HP_BspSurf;
+	}else if(appStricmp(Name, "HActor") == 0){
+		HitType = HP_Actor;
+	}else if(appStricmp(Name, "HBrushVertex") == 0){
+		HitType = HP_BrushVertex;
+	}else if(appStricmp(Name, "HCoords") == 0){
+		HitType = HP_Coords;
+	}else if(appStricmp(Name, "HTerrain") == 0){
+		HitType = HP_Terrain;
+	}else if(appStricmp(Name, "HTerrainToolLayer") == 0){
+		HitType = HP_TerrainToolLayer;
+	}else if(appStricmp(Name, "HMatineeTimePath") == 0){
+		HitType = HP_MatineeTimePath;
+	}else if(appStricmp(Name, "HMatineeScene") == 0){
+		HitType = HP_MatineeScene;
+	}else if(appStricmp(Name, "HMatineeAction") == 0){
+		HitType = HP_MatineeAction;
+	}else if(appStricmp(Name, "HMatineeSubAction") == 0){
+		HitType = HP_MatineeSubAction;
+	}else if(appStricmp(Name, "HMaterialTree") == 0){
+		HitType = HP_MaterialTree;
+	}else if(appStricmp(Name, "HGizmoAxis") == 0){
+		HitType = HP_GizmoAxis;
+	}else if(appStricmp(Name, "HActorVertex") == 0){
+		HitType = HP_ActorVertex;
+	}else if(appStricmp(Name, "HBezierControlPoint") == 0){
+		HitType = HP_BezierControlPoint;
+	}else if(appStricmp(Name, "HTextureView") == 0){
+		HitType = HP_TextureView;
+	}else if(appStricmp(Name, "HGlobalPivot") == 0){
+		HitType = HP_GlobalPivot;
+	}else if(appStricmp(Name, "HBrowserMaterial") == 0){
+		HitType = HP_BrowserMaterial;
+	}else if(appStricmp(Name, "HBackdrop") == 0){
+		HitType = HP_Backdrop;
+	}else{
+		HitType = HP_Unknown;
+	}
+
+	_WORD HitDataIndex = AllHitData.Add(sizeof(FHitProxyInfo) + Count, false);
+	_WORD Index        = HitDataIndices.AddItem(HitDataIndex);
+	FHitProxyInfo Info(HitProxyStack.Num() > 0 ? HitProxyStack.Last().Index : INDEX_NONE, HitType);
+
+	appMemcpy(&AllHitData[HitDataIndex], &Info, sizeof(FHitProxyInfo));
+	appMemcpy(&AllHitData[HitDataIndex + sizeof(FHitProxyInfo)], Data, Count);
+	HitProxyStack.AddItem(FHitProxyStackEntry(Index, HitType));
+
+	if(!OverrideSelectionForCurrentHitProxy())
+		Impl->PushHit(Data, Count);
+}
+
+void FModRenderInterface::PopHit(INT Count, UBOOL Force){
+	if(!OverrideSelectionForCurrentHitProxy())
+		Impl->PopHit(Count, Force);
+
+	HitProxyStack.Pop();
+}
+
+void FModRenderInterface::DrawPrimitive(EPrimitiveType PrimitiveType, INT FirstIndex, INT NumPrimitives, INT MinIndex, INT MaxIndex){
+	if(OverrideSelectionForCurrentHitProxy()){
+		FPlane ShaderColor(0.0f, 0.0f, 0.0f, 0.0f);
+		_WORD HitDataIndex = HitProxyStack.Last().Index + 1; // Adding 1 because 0 means no hit. This is subtracted again later
+
+		if(RenDev->LockedViewport->ColorBytes == 2){
+			checkSlow(HitDataIndex < 32768);
+
+			ShaderColor.X = (HitDataIndex & 0x1F) / 31.0f;
+			ShaderColor.Y = ((HitDataIndex >> 5) & 0x1F) / 31.0f;
+			ShaderColor.Z = ((HitDataIndex >> 10) & 0x1F) / 31.0f;
+		}else{
+			checkSlow(RenDev->LockedViewport->ColorBytes == 3 || RenDev->LockedViewport->ColorBytes == 4);
+
+			ShaderColor.X = LOBYTE(HitDataIndex) / 255.0f;
+			ShaderColor.Y = HIBYTE(HitDataIndex) / 255.0f;
+		}
+
+		FHitProxyInfo* Info = reinterpret_cast<FHitProxyInfo*>(&AllHitData[HitDataIndices[HitDataIndex - 1]]);
+		AActor*        HitActor = reinterpret_cast<HHitProxy*>(reinterpret_cast<BYTE*>(Info) + sizeof(FHitProxyInfo))->GetActor();
+
+		UModRenderDevice::SelectionShader->ZTest = !(HitActor && HitActor->IsABrush()); // Disable ZTest for brushes since they are rendered on top of everything else
+		UModRenderDevice::SelectionShader->PSConstants[0].Value = ShaderColor;
+
+		SetHardwareShaderMaterial(UModRenderDevice::SelectionShader, NULL, NULL);
+	}
+
+	Impl->DrawPrimitive(PrimitiveType, FirstIndex, NumPrimitives, MinIndex, MaxIndex);
+}
+
+/*
  * ModRenderDevice
  */
 
@@ -493,6 +698,7 @@ UBOOL UModRenderDevice::Init(){
 			FOVChanger->ProcessEvent(NAME_Init, NULL);
 		}
 	}else if(!SelectionShader){
+		// Initialize shader used for selection in the editor
 		SelectionShader = new UHardwareShader();
 
 		SelectionShader->VertexShaderText = "vs.1.1\n"
@@ -501,6 +707,7 @@ UBOOL UModRenderDevice::Init(){
 		SelectionShader->PixelShaderText = "ps.1.1\n"
 		                                   "mov r0,c0\n";
 		SelectionShader->VSConstants[0].Type = EVC_ObjectToScreenMatrix;
+		SelectionShader->PSConstants[0].Type = EVC_MaterialDefined;
 		SelectionShader->ZTest = 1;
 		SelectionShader->ZWrite = 1;
 	}
@@ -509,7 +716,19 @@ UBOOL UModRenderDevice::Init(){
 }
 
 UBOOL UModRenderDevice::Exec(const TCHAR* Cmd, FOutputDevice& Ar){
-	if(!GIsEditor){
+	if(GIsEditor){
+		if(ParseCommand(&Cmd, "DEBUGSELECT")){
+			bDebugSelectionBuffer = !bDebugSelectionBuffer;
+
+			return 1;
+		}else if(ParseCommand(&Cmd, "FIXSELECT")){
+			bEnableSelectionFix = !bEnableSelectionFix;
+
+			debugf("Selection fix %s", bEnableSelectionFix ? "enabled" : "disabled");
+
+			return 1;
+		}
+	}else{
 		if(ParseCommand(&Cmd, "SETFOV")){
 			struct{
 				APlayerController* Player;
@@ -547,13 +766,118 @@ UBOOL UModRenderDevice::Exec(const TCHAR* Cmd, FOutputDevice& Ar){
 FRenderInterface* UModRenderDevice::Lock(UViewport* Viewport, BYTE* HitData, INT* HitSize){
 	FRenderInterface* RI = Super::Lock(Viewport, HitData, HitSize);
 
-	if(GIsEditor){
+	LockedViewport = Viewport;
+
+	if(bEnableSelectionFix && GIsEditor && RI && HitData){
 		RenderInterface.Impl = RI;
+		RenderInterface.HitData = HitData;
+		RenderInterface.HitSize = HitSize;
+		RenderInterface.HitCount = 0;
 
 		return &RenderInterface;
 	}
 
 	return RI;
+}
+
+void UModRenderDevice::Unlock(FRenderInterface* RI){
+	if(RI == &RenderInterface){
+		checkSlow(RenderInterface.HitData);
+		checkSlow(RenderInterface.HitSize);
+
+		void* RenderTarget = NULL; // IDirect3DSurface8
+
+		 // Calling IDirect3DDevice8::GetRenderTarget
+		static_cast<HRESULT(__stdcall*)(void*, void**)>((*reinterpret_cast<void***>(Direct3DDevice8))[32])(Direct3DDevice8, &RenderTarget);
+
+		checkSlow(RenderTarget != NULL);
+
+		FD3DSurfaceDesc Desc;
+
+		// Calling IDirect3dSurface8::GetDesc
+		static_cast<HRESULT(__stdcall*)(void*, FD3DSurfaceDesc*)>((*reinterpret_cast<void***>(RenderTarget))[8])(RenderTarget, &Desc);
+
+		FD3DLockedRect LockedRect;
+
+		// Calling IDirect3DSurface8::LockRect
+		static_cast<HRESULT(__stdcall*)(void*, FD3DLockedRect*, void*, DWORD)>((*reinterpret_cast<void***>(RenderTarget))[9])(RenderTarget, &LockedRect, NULL, 0);
+
+		INT  HitProxyIndex = INDEX_NONE;
+
+		switch(LockedViewport->ColorBytes){
+		case 2:
+			{
+				_WORD* src = (_WORD*)LockedRect.pBits;
+				src = (_WORD*)((BYTE*)src + LockedViewport->HitX * 2 + LockedViewport->HitY * LockedRect.Pitch);
+
+				for(INT Y = 0; Y < LockedViewport->HitYL; Y++, src = (_WORD*)((BYTE*)src + LockedRect.Pitch)){
+					for(INT X = 0; X < LockedViewport->HitXL; X++){
+						if(src[X] != 0x0){
+							FColor HitColor = FColor((src[X] >> 11) << 3, ((src[X] >> 6) & 0x3f) << 2, (src[X] & 0x1f) << 3);
+
+							if(RenderInterface.ProcessHitColor(HitColor, &HitProxyIndex))
+								goto end_pixel_check;
+						}
+					}
+				}
+
+				break;
+			}
+		case 3:
+			{
+				BYTE* src = (BYTE*)LockedRect.pBits;
+				src = src + LockedViewport->HitX * 3  + LockedViewport->HitY * LockedRect.Pitch;
+
+				for(INT Y = 0; Y < LockedViewport->HitYL; Y++, src += LockedRect.Pitch){
+					for(INT X = 0; X < LockedViewport->HitXL; X++){
+						if(*((DWORD*)&src[X * 3]) != 0x0){
+							FColor HitColor = FColor(src[X * 3] + 2, src[X * 3] + 1, src[X * 3]);
+
+							if(RenderInterface.ProcessHitColor(HitColor, &HitProxyIndex))
+								goto end_pixel_check;
+						}
+					}
+				}
+
+				break;
+			}
+		case 4:
+			{
+				DWORD* src = (DWORD*)LockedRect.pBits;
+				src = (DWORD*)((BYTE*)src + LockedViewport->HitX * 4 + LockedViewport->HitY * LockedRect.Pitch);
+
+				for(INT Y = -LockedViewport->HitYL; Y < LockedViewport->HitYL; Y++, src = (DWORD*)((BYTE*)src + LockedRect.Pitch)){
+					for(INT X = -LockedViewport->HitXL; X < LockedViewport->HitXL; X++){
+						if(src[X] != 0x0){
+							FColor HitColor = FColor((src[X] >> 16) & 0xff, (src[X] >> 8) & 0xff, (src[X]) & 0xff);
+
+							if(RenderInterface.ProcessHitColor(HitColor, &HitProxyIndex))
+								goto end_pixel_check;
+						}
+					}
+				}
+
+				break;
+			}
+		}
+
+end_pixel_check:
+
+		// Calling IDirect3DSurface8::UnlockRect
+		static_cast<HRESULT(__stdcall*)(void*)>((*reinterpret_cast<void***>(RenderTarget))[10])(RenderTarget);
+
+		Super::Unlock(RenderInterface.Impl);
+		RenderInterface.ProcessHit(HitProxyIndex);
+
+		if(bDebugSelectionBuffer){
+			LockedViewport->Present();
+			appSleep(5.0f);
+		}
+	}else{
+		Super::Unlock(RI);
+	}
+
+	LockedViewport = NULL;
 }
 
 UObject*         UModRenderDevice::FOVChanger = NULL;

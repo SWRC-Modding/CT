@@ -98,6 +98,9 @@
 			<File
 				RelativePath=".\Inc\ModClasses.h">
 			</File>
+			<File
+				RelativePath=".\Inc\ModRenderDevice.h">
+			</File>
 		</Filter>
 		<Filter
 			Name="Src"

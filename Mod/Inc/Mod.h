@@ -21,13 +21,65 @@ MOD_API void* PatchVTable(void* Object, INT Index, void* NewFunc);
  */
 MOD_API void* PatchDllClassVTable(const TCHAR* DllName, const TCHAR* ClassName, const TCHAR* VTableName, INT Index, void* NewFunc);
 
+enum EHitProxy{
+	HP_Unknown = -1,
+	HP_BspSurf,
+	HP_Actor,
+	HP_BrushVertex,
+	HP_Coords,
+	HP_Terrain,
+	HP_TerrainToolLayer,
+	HP_MatineeTimePath,
+	HP_MatineeScene,
+	HP_MatineeAction,
+	HP_MatineeSubAction,
+	HP_MaterialTree,
+	HP_GizmoAxis,
+	HP_ActorVertex,
+	HP_BezierControlPoint,
+	HP_TextureView,
+	HP_GlobalPivot,
+	HP_BrowserMaterial,
+	HP_Backdrop
+};
+
+struct FHitProxyStackEntry{
+	_WORD     Index;
+	EHitProxy Type;
+
+	FHitProxyStackEntry(_WORD InIndex, EHitProxy InType) : Index(InIndex),
+	                                                       Type(InType){}
+};
+
+struct FHitProxyInfo{
+	SWORD     ParentIndex; // INDEX_NONE if no parent
+	EHitProxy Type;
+
+	FHitProxyInfo(SWORD InParentIndex, EHitProxy InType) : ParentIndex(InParentIndex),
+	                                                       Type(InType){}
+};
+
+class UModRenderDevice;
+
 /*
  * ModRenderInterface
- * - Used by ModRenderDevice to
  */
 class FModRenderInterface : public FRenderInterface{
 public:
-	FRenderInterface* Impl;
+	UModRenderDevice*     RenDev;
+	FRenderInterface*     Impl;
+	TArray<FHitProxyStackEntry> HitProxyStack;  // Current stack of pushed hit proxies
+	TArray<BYTE>          AllHitData;     // Contains all hit proxies of the current frame in the order they were pushed
+	TArray<_WORD>         HitDataIndices; // Index into AllHitData
+	BYTE*                 HitData;
+	INT*                  HitSize;
+	INT                   HitCount;
+
+	FModRenderInterface(UModRenderDevice* InRenDev);
+
+	EHitProxy CurrentHitProxyType() const;
+	bool ProcessHitColor(FColor HitColor, INT* OutIndex);
+	void ProcessHit(INT HitProxyIndex);
 
 	virtual void PushState(int a){ Impl->PushState(a); }
 	virtual void PopState(int a){ Impl->PopState(a); }
@@ -35,8 +87,8 @@ public:
 	virtual UBOOL SetCubeRenderTarget(class FDynamicCubemap* RenderTarget, int a, int b){ return Impl->SetCubeRenderTarget(RenderTarget, a, b); }
 	virtual void SetViewport(INT X, INT Y, INT Width, INT Height){ Impl->SetViewport(X, Y, Width, Height); }
 	virtual void Clear(UBOOL UseColor, FColor Color, UBOOL UseDepth, FLOAT Depth, UBOOL UseStencil, DWORD Stencil){ Impl->Clear(UseColor, Color, UseDepth, Depth, UseStencil, Stencil); }
-	virtual void PushHit(const BYTE* Data, INT Count){ Impl->PushHit(Data, Count); }
-	virtual void PopHit(INT Count, UBOOL Force){ Impl->PopHit(Count, Force); }
+	virtual void PushHit(const BYTE* Data, INT Count);
+	virtual void PopHit(INT Count, UBOOL Force);
 	virtual void SetCullMode(ECullMode CullMode){ Impl->SetCullMode(CullMode); }
 	virtual void SetAmbientLight(FColor Color){ Impl->SetAmbientLight(Color); }
 	virtual void EnableLighting(UBOOL UseDynamic, UBOOL UseStatic, UBOOL Modulate2X, FBaseTexture* UseLightmap, UBOOL LightingOnly, const FSphere& LitSphere, int a){ Impl->EnableLighting(UseDynamic, UseStatic, Modulate2X, UseLightmap, LightingOnly, LitSphere, a); }
@@ -66,7 +118,7 @@ public:
 	virtual INT SetDynamicStream(EVertexShader Shader, FVertexStream* Stream){ return Impl->SetDynamicStream(Shader, Stream); }
 	virtual INT SetIndexBuffer(FIndexBuffer* IndexBuffer, INT BaseIndex){ return Impl->SetIndexBuffer(IndexBuffer, BaseIndex); }
 	virtual INT SetDynamicIndexBuffer(FIndexBuffer* IndexBuffer, INT BaseIndex){ return Impl->SetDynamicIndexBuffer(IndexBuffer, BaseIndex); }
-	virtual void DrawPrimitive(EPrimitiveType PrimitiveType, INT FirstIndex, INT NumPrimitives, INT MinIndex, INT MaxIndex){ Impl->DrawPrimitive(PrimitiveType, FirstIndex, NumPrimitives, MinIndex, MaxIndex); }
+	virtual void DrawPrimitive(EPrimitiveType PrimitiveType, INT FirstIndex, INT NumPrimitives, INT MinIndex, INT MaxIndex);
 	virtual void PixoSetHint(DWORD Hint){ Impl->PixoSetHint(Hint); }
 	virtual void PixoResetHint(DWORD Hint){ Impl->PixoResetHint(Hint); }
 	virtual UTexture* PixoCreateTexture(FRenderTarget* RenderTarget, UBOOL CreateMips){ return Impl->PixoCreateTexture(RenderTarget, CreateMips); }
@@ -79,6 +131,9 @@ public:
 	virtual int d3d1(int a, int b){ return Impl->d3d1(a, b); }
 	virtual int d3d2(int a){ return Impl->d3d2(a); }
 	virtual int d3d3(int a){ return Impl->d3d3(a); }
+
+private:
+	bool OverrideSelectionForCurrentHitProxy() const;
 };
 
 /*
@@ -92,7 +147,13 @@ public:
 	static FLOAT            FpsLimit;
 	static UHardwareShader* SelectionShader;
 
+	UViewport*          LockedViewport;
 	FModRenderInterface RenderInterface;
+	UBOOL               bEnableSelectionFix;
+	UBOOL               bDebugSelectionBuffer; // Shows the selection buffer for five seconds after a click
+
+	UModRenderDevice() : RenderInterface(this){}
+	void StaticConstructor(){ bEnableSelectionFix = 1; }
 
 	virtual void Serialize(FArchive& Ar){
 		Super::Serialize(Ar);
@@ -102,5 +163,5 @@ public:
 	virtual UBOOL Init();
 	virtual UBOOL Exec(const TCHAR* Cmd, FOutputDevice& Ar);
 	virtual FRenderInterface* Lock(UViewport* Viewport, BYTE* HitData, INT* HitSize);
-	virtual void Unlock(FRenderInterface* RI){ Super::Unlock(RI == &RenderInterface ? static_cast<FModRenderInterface*>(RI)->Impl : RI); }
+	virtual void Unlock(FRenderInterface* RI);
 };

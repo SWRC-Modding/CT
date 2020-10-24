@@ -449,7 +449,7 @@ FModRenderInterface::FModRenderInterface(UModRenderDevice* InRenDev){
 }
 
 EHitProxy FModRenderInterface::CurrentHitProxyType() const{
-	return HitProxyStack.Num() > 0 ? HitProxyStack.Last().Type : HP_Unknown;
+	return HitProxyStack.Num() > 0 ? static_cast<EHitProxy>(HitProxyStack.Last().Type) : HP_Unknown;
 }
 
 bool FModRenderInterface::OverrideSelectionForCurrentHitProxy() const{
@@ -477,11 +477,20 @@ bool FModRenderInterface::ProcessHitColor(FColor HitColor, INT* OutIndex){
 	--Index;
 
 	if(Index >= 0 && Index < AllHitData.Num() - (INT)sizeof(HHitProxy)){
+		FHitProxyInfo* Info = reinterpret_cast<FHitProxyInfo*>(&AllHitData[Index]);
+
+		if(Info->Type < HP_Unknown || Info->Type >= HP_MAX) // Happens in the texture browser sometimes. No idea why...
+			return false;
+
+		HHitProxy* HitProxy = reinterpret_cast<HHitProxy*>(&AllHitData[Index + sizeof(FHitProxyInfo)]);
+
+		if(HitProxy->Size < static_cast<INT>(sizeof(HHitProxy)) || HitProxy->Size > 256) // Detect invalid data. Stupid "fix" but idk why this would happen in the first place
+			return false;
+
+		AActor* HitActor = HitProxy->GetActor();
+
 		if(*OutIndex < 0)
 			*OutIndex = Index;
-
-		FHitProxyInfo* Info = reinterpret_cast<FHitProxyInfo*>(&AllHitData[Index]);
-		AActor*        HitActor = reinterpret_cast<HHitProxy*>(reinterpret_cast<BYTE*>(Info) + sizeof(FHitProxyInfo))->GetActor();
 
 		// Checking for preferred selection types
 		if(Info->Type == HP_GizmoAxis ||
@@ -811,8 +820,8 @@ void UModRenderDevice::Unlock(FRenderInterface* RI){
 				_WORD* src = (_WORD*)LockedRect.pBits;
 				src = (_WORD*)((BYTE*)src + LockedViewport->HitX * 2 + LockedViewport->HitY * LockedRect.Pitch);
 
-				for(INT Y = 0; Y < LockedViewport->HitYL; Y++, src = (_WORD*)((BYTE*)src + LockedRect.Pitch)){
-					for(INT X = 0; X < LockedViewport->HitXL; X++){
+				for(INT Y = -LockedViewport->HitYL; Y < LockedViewport->HitYL; Y++, src = (_WORD*)((BYTE*)src + LockedRect.Pitch)){
+					for(INT X = -LockedViewport->HitXL; X < LockedViewport->HitXL; X++){
 						if(src[X] != 0x0 && src >= LockedRect.pBits){
 							FColor HitColor = FColor((src[X] >> 11) << 3, ((src[X] >> 6) & 0x3f) << 2, (src[X] & 0x1f) << 3);
 
@@ -829,8 +838,8 @@ void UModRenderDevice::Unlock(FRenderInterface* RI){
 				BYTE* src = (BYTE*)LockedRect.pBits;
 				src = src + LockedViewport->HitX * 3  + LockedViewport->HitY * LockedRect.Pitch;
 
-				for(INT Y = 0; Y < LockedViewport->HitYL; Y++, src += LockedRect.Pitch){
-					for(INT X = 0; X < LockedViewport->HitXL; X++){
+				for(INT Y = -LockedViewport->HitYL; Y < LockedViewport->HitYL; Y++, src += LockedRect.Pitch){
+					for(INT X = -LockedViewport->HitXL; X < LockedViewport->HitXL; X++){
 						if(*((DWORD*)&src[X * 3]) != 0x0 && src >= LockedRect.pBits){
 							FColor HitColor = FColor(src[X * 3] + 2, src[X * 3] + 1, src[X * 3]);
 
@@ -870,7 +879,7 @@ end_pixel_check:
 		Super::Unlock(RenderInterface.Impl);
 		RenderInterface.ProcessHit(HitProxyIndex);
 
-		if(bDebugSelectionBuffer){
+		if(bDebugSelectionBuffer && LockedViewport){
 			LockedViewport->Present();
 			appSleep(5.0f);
 		}

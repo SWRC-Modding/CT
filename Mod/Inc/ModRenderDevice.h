@@ -21,20 +21,21 @@ enum EHitProxy{
 	HP_TextureView,
 	HP_GlobalPivot,
 	HP_BrowserMaterial,
-	HP_Backdrop
+	HP_Backdrop,
+	HP_MAX
 };
 
 struct FHitProxyStackEntry{
-	_WORD     Index;
-	EHitProxy Type;
+	_WORD Index;
+	SWORD Type; // EHitProxy
 
 	FHitProxyStackEntry(_WORD InIndex, EHitProxy InType) : Index(InIndex),
 	                                                       Type(InType){}
 };
 
 struct FHitProxyInfo{
-	SWORD     ParentIndex; // INDEX_NONE if no parent
-	EHitProxy Type;
+	SWORD ParentIndex; // INDEX_NONE if no parent
+	SWORD Type; // EHitProxy
 
 	FHitProxyInfo(SWORD InParentIndex, EHitProxy InType) : ParentIndex(InParentIndex),
 	                                                       Type(InType){}

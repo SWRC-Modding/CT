@@ -446,7 +446,6 @@ FModRenderInterface::FModRenderInterface(UModRenderDevice* InRenDev){
 
 	HitProxyStack.SetNoShrink(true);
 	AllHitData.SetNoShrink(true);
-	HitDataIndices.SetNoShrink(true);
 }
 
 EHitProxy FModRenderInterface::CurrentHitProxyType() const{
@@ -477,11 +476,11 @@ bool FModRenderInterface::ProcessHitColor(FColor HitColor, INT* OutIndex){
 
 	--Index;
 
-	if(Index >= 0 && Index < HitDataIndices.Num()){
+	if(Index >= 0 && Index < AllHitData.Num() - (INT)sizeof(HHitProxy)){
 		if(*OutIndex < 0)
 			*OutIndex = Index;
 
-		FHitProxyInfo* Info = reinterpret_cast<FHitProxyInfo*>(&AllHitData[HitDataIndices[Index]]);
+		FHitProxyInfo* Info = reinterpret_cast<FHitProxyInfo*>(&AllHitData[Index]);
 		AActor*        HitActor = reinterpret_cast<HHitProxy*>(reinterpret_cast<BYTE*>(Info) + sizeof(FHitProxyInfo))->GetActor();
 
 		// Checking for preferred selection types
@@ -502,14 +501,14 @@ bool FModRenderInterface::ProcessHitColor(FColor HitColor, INT* OutIndex){
 void FModRenderInterface::ProcessHit(INT HitProxyIndex){
 	INT HitCount = *reinterpret_cast<INT*>(reinterpret_cast<BYTE*>(Impl) + 40944); // Only way to get the hit count of the FD3DRenderInterface
 
-	if(HitProxyIndex > 0 && HitProxyIndex <= HitDataIndices.Num()){
+	if(HitProxyIndex > 0 && HitProxyIndex <= AllHitData.Num() - (INT)sizeof(HHitProxy)){
 		_WORD ParentIndices[32];
 		INT   NumParents = 0;
 
 		// Collecting all parents of the successful hit
-		for(SWORD ParentIndex = reinterpret_cast<FHitProxyInfo*>(&AllHitData[HitDataIndices[HitProxyIndex]])->ParentIndex;
+		for(SWORD ParentIndex = reinterpret_cast<FHitProxyInfo*>(&AllHitData[HitProxyIndex])->ParentIndex;
 			ParentIndex != INDEX_NONE;
-			ParentIndex = reinterpret_cast<FHitProxyInfo*>(&AllHitData[HitDataIndices[ParentIndex]])->ParentIndex){
+			ParentIndex = reinterpret_cast<FHitProxyInfo*>(&AllHitData[ParentIndex])->ParentIndex){
 
 			ParentIndices[NumParents] = ParentIndex;
 			++NumParents;
@@ -518,14 +517,14 @@ void FModRenderInterface::ProcessHit(INT HitProxyIndex){
 
 		// Copying hit hierarchy to HitData
 		for(INT i = 0; i < NumParents; ++i){
-			HHitProxy* Parent = reinterpret_cast<HHitProxy*>(&AllHitData[HitDataIndices[ParentIndices[i]] + sizeof(FHitProxyInfo)]);
+			HHitProxy* Parent = reinterpret_cast<HHitProxy*>(&AllHitData[ParentIndices[i] + sizeof(FHitProxyInfo)]);
 
 			appMemcpy(HitData + HitCount, Parent, Parent->Size);
 
 			HitCount += Parent->Size;
 		}
 
-		HHitProxy* Hit = reinterpret_cast<HHitProxy*>(&AllHitData[HitDataIndices[HitProxyIndex] + sizeof(FHitProxyInfo)]);
+		HHitProxy* Hit = reinterpret_cast<HHitProxy*>(&AllHitData[HitProxyIndex + sizeof(FHitProxyInfo)]);
 
 		appMemcpy(HitData + HitCount, Hit, Hit->Size);
 		*HitSize = HitCount + Hit->Size;
@@ -535,7 +534,6 @@ void FModRenderInterface::ProcessHit(INT HitProxyIndex){
 
 	HitProxyStack.Empty();
 	AllHitData.Empty();
-	HitDataIndices.Empty();
 	HitCount = 0;
 	HitData = NULL;
 }
@@ -591,12 +589,11 @@ void FModRenderInterface::PushHit(const BYTE* Data, INT Count){
 	}
 
 	_WORD HitDataIndex = AllHitData.Add(sizeof(FHitProxyInfo) + Count, false);
-	_WORD Index        = HitDataIndices.AddItem(HitDataIndex);
 	FHitProxyInfo Info(HitProxyStack.Num() > 0 ? HitProxyStack.Last().Index : INDEX_NONE, HitType);
 
 	appMemcpy(&AllHitData[HitDataIndex], &Info, sizeof(FHitProxyInfo));
 	appMemcpy(&AllHitData[HitDataIndex + sizeof(FHitProxyInfo)], Data, Count);
-	HitProxyStack.AddItem(FHitProxyStackEntry(Index, HitType));
+	HitProxyStack.AddItem(FHitProxyStackEntry(HitDataIndex, HitType));
 
 	if(!OverrideSelectionForCurrentHitProxy())
 		Impl->PushHit(Data, Count);
@@ -627,7 +624,7 @@ void FModRenderInterface::DrawPrimitive(EPrimitiveType PrimitiveType, INT FirstI
 			ShaderColor.Y = HIBYTE(HitDataIndex) / 255.0f;
 		}
 
-		FHitProxyInfo* Info = reinterpret_cast<FHitProxyInfo*>(&AllHitData[HitDataIndices[HitDataIndex - 1]]);
+		FHitProxyInfo* Info = reinterpret_cast<FHitProxyInfo*>(&AllHitData[HitDataIndex - 1]);
 		AActor*        HitActor = reinterpret_cast<HHitProxy*>(reinterpret_cast<BYTE*>(Info) + sizeof(FHitProxyInfo))->GetActor();
 
 		UModRenderDevice::SelectionShader->ZTest = !(HitActor && HitActor->IsABrush()); // Disable ZTest for brushes since they are rendered on top of everything else

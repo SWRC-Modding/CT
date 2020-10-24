@@ -765,7 +765,7 @@ FRenderInterface* UModRenderDevice::Lock(UViewport* Viewport, BYTE* HitData, INT
 
 	LockedViewport = Viewport;
 
-	if(bEnableSelectionFix && GIsEditor && RI && HitData){
+	if(bEnableSelectionFix && GIsEditor && RI && HitData && Cast<UEditorEngine>(GEngine)->Mode != EM_EyeDropper){
 		RenderInterface.Impl = RI;
 		RenderInterface.HitData = HitData;
 		RenderInterface.HitSize = HitSize;

@@ -488,7 +488,7 @@ bool FModRenderInterface::ProcessHitColor(FColor HitColor, INT* OutIndex){
 		   Info->Type == HP_BrushVertex ||
 		   Info->Type == HP_ActorVertex ||
 		   Info->Type == HP_GlobalPivot ||
-		   (HitActor && (HitActor->IsABrush()))){
+		   (HitActor && (HitActor->DrawType == DT_Brush || HitActor->DrawType == DT_AntiPortal))){
 			*OutIndex = Index;
 
 			return true;
@@ -627,7 +627,7 @@ void FModRenderInterface::DrawPrimitive(EPrimitiveType PrimitiveType, INT FirstI
 		FHitProxyInfo* Info = reinterpret_cast<FHitProxyInfo*>(&AllHitData[HitDataIndex - 1]);
 		AActor*        HitActor = reinterpret_cast<HHitProxy*>(reinterpret_cast<BYTE*>(Info) + sizeof(FHitProxyInfo))->GetActor();
 
-		UModRenderDevice::SelectionShader->ZTest = !(HitActor && HitActor->IsABrush()); // Disable ZTest for brushes since they are rendered on top of everything else
+		UModRenderDevice::SelectionShader->ZTest = !(HitActor && (HitActor->DrawType == DT_Brush || HitActor->DrawType == DT_AntiPortal)); // Disable ZTest for brushes since they are rendered on top of everything else
 		UModRenderDevice::SelectionShader->PSConstants[0].Value = ShaderColor;
 
 		SetHardwareShaderMaterial(UModRenderDevice::SelectionShader, NULL, NULL);

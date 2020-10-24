@@ -501,7 +501,7 @@ bool FModRenderInterface::ProcessHitColor(FColor HitColor, INT* OutIndex){
 void FModRenderInterface::ProcessHit(INT HitProxyIndex){
 	INT HitCount = *reinterpret_cast<INT*>(reinterpret_cast<BYTE*>(Impl) + 40944); // Only way to get the hit count of the FD3DRenderInterface
 
-	if(HitProxyIndex > 0 && HitProxyIndex <= AllHitData.Num() - (INT)sizeof(HHitProxy)){
+	if(HitProxyIndex >= 0 && HitProxyIndex < AllHitData.Num() - (INT)sizeof(HHitProxy)){
 		_WORD ParentIndices[32];
 		INT   NumParents = 0;
 
@@ -633,7 +633,11 @@ void FModRenderInterface::DrawPrimitive(EPrimitiveType PrimitiveType, INT FirstI
 		SetHardwareShaderMaterial(UModRenderDevice::SelectionShader, NULL, NULL);
 	}
 
+	UBOOL Fog = IsFogEnabled();
+
+	EnableFog(0);
 	Impl->DrawPrimitive(PrimitiveType, FirstIndex, NumPrimitives, MinIndex, MaxIndex);
+	EnableFog(Fog);
 }
 
 /*
@@ -809,7 +813,7 @@ void UModRenderDevice::Unlock(FRenderInterface* RI){
 
 				for(INT Y = 0; Y < LockedViewport->HitYL; Y++, src = (_WORD*)((BYTE*)src + LockedRect.Pitch)){
 					for(INT X = 0; X < LockedViewport->HitXL; X++){
-						if(src[X] != 0x0){
+						if(src[X] != 0x0 && src >= LockedRect.pBits){
 							FColor HitColor = FColor((src[X] >> 11) << 3, ((src[X] >> 6) & 0x3f) << 2, (src[X] & 0x1f) << 3);
 
 							if(RenderInterface.ProcessHitColor(HitColor, &HitProxyIndex))
@@ -827,7 +831,7 @@ void UModRenderDevice::Unlock(FRenderInterface* RI){
 
 				for(INT Y = 0; Y < LockedViewport->HitYL; Y++, src += LockedRect.Pitch){
 					for(INT X = 0; X < LockedViewport->HitXL; X++){
-						if(*((DWORD*)&src[X * 3]) != 0x0){
+						if(*((DWORD*)&src[X * 3]) != 0x0 && src >= LockedRect.pBits){
 							FColor HitColor = FColor(src[X * 3] + 2, src[X * 3] + 1, src[X * 3]);
 
 							if(RenderInterface.ProcessHitColor(HitColor, &HitProxyIndex))
@@ -845,7 +849,7 @@ void UModRenderDevice::Unlock(FRenderInterface* RI){
 
 				for(INT Y = -LockedViewport->HitYL; Y < LockedViewport->HitYL; Y++, src = (DWORD*)((BYTE*)src + LockedRect.Pitch)){
 					for(INT X = -LockedViewport->HitXL; X < LockedViewport->HitXL; X++){
-						if(src[X] != 0x0){
+						if(src[X] != 0x0 && src >= LockedRect.pBits){
 							FColor HitColor = FColor((src[X] >> 16) & 0xff, (src[X] >> 8) & 0xff, (src[X]) & 0xff);
 
 							if(RenderInterface.ProcessHitColor(HitColor, &HitProxyIndex))

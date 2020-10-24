@@ -239,9 +239,10 @@ public:
 	FTime           LastUpdateTime; // Time of last update.
 	INT             DirtyViewport;  // Count how many times the viewport needs to be repainted.
 	INT             SizeX, SizeY;   // Buffer X & Y resolutions.
-	char            Padding1[12];   //! PADDING
+	char            Padding1[8];    //! PADDING
 	FLOAT           ScaleX, ScaleY; // Scale factor.
 	INT             ColorBytes;     // 1=256-color, 4=32-bit color.
+	char            Padding2[4];    //! PADDING
 	INT             FrameCount;     // Frame count, incremented when locked.
 	DWORD           Caps;           // Capabilities (CC_).
 	UBOOL           Current;        // If this is the current input viewport.
@@ -249,7 +250,7 @@ public:
 	FVector         OrigCursor;     // The position where the mouse was originally clicked in the viewport.
 	UBOOL           FullscreenOnly; // Engine requires desktop set to 32 bpp for windowed mode.
 	FVector         TerrainPointAtLocation; // The 3D location currently being pointed at on the terrain
-	char            Padding2[20];   //! PADDING
+	char            Padding3[20];   //! PADDING
 
 	FViewportRenderTarget RenderTarget; // A dummy render target that exposes the viewport's size to interfaces that take a FRenderTarget.
 
@@ -260,7 +261,7 @@ public:
 	AActor*         LockedActor;           // The actor we're locked to
 
 	// Editor and debugging mode render effects, stat flags.
-	UBOOL           Padding3;             //! PADDING
+	UBOOL           Padding4;             //! PADDING
 	UBOOL           bShowDescriptions;
 	UBOOL           bShowLargeVertices;   // Show large vertices on brushes/meshes/etc?
 	UBOOL           bShowHud;

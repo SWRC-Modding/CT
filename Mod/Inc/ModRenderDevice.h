@@ -47,14 +47,13 @@ class UModRenderDevice;
  */
 class FModRenderInterface : public FRenderInterface{
 public:
-	UModRenderDevice*     RenDev;
-	FRenderInterface*     Impl;
+	UModRenderDevice*           RenDev;
+	FRenderInterface*           Impl;
 	TArray<FHitProxyStackEntry> HitProxyStack;  // Current stack of pushed hit proxies
-	TArray<BYTE>          AllHitData;     // Contains all hit proxies of the current frame in the order they were pushed
-	TArray<_WORD>         HitDataIndices; // Index into AllHitData
-	BYTE*                 HitData;
-	INT*                  HitSize;
-	INT                   HitCount;
+	TArray<BYTE>                AllHitData;     // Contains FHitProxyInfo followed by HHitProxy for each hit proxy that was pushed
+	BYTE*                       HitData;
+	INT*                        HitSize;
+	INT                         HitCount;
 
 	FModRenderInterface(UModRenderDevice* InRenDev);
 

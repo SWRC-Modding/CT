@@ -120,6 +120,7 @@ private:
 /*
  * ModRenderDevice.
  * - Fixes bumpmapping crashes by converting the bumpmaps to a compatible format
+ * - Adds alternative selection mechanism for much better performance in the Editor
  */
 class MOD_API UModRenderDevice : public UD3DRenderDevice{
 	DECLARE_CLASS(UModRenderDevice, UD3DRenderDevice, 0, Mod)

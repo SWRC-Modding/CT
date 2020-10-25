@@ -458,13 +458,16 @@ bool FModRenderInterface::OverrideSelectionForCurrentHitProxy() const{
 	// The following types need to use the original selection mechanism
 
 	return Type != HP_Unknown &&
-	       Type != HP_MaterialTree &&
 	       Type != HP_MatineeTimePath &&
 	       Type != HP_MatineeScene &&
 	       Type != HP_MatineeAction &&
 	       Type != HP_MatineeSubAction;
 }
 
+/*
+ * Converts a color value read from the frame buffer to an index that is stored in OutIndex.
+ * If this function returns true, it means that a 'preferred' selection type was found and the other pixels don't need to be checked anymore.
+ */
 bool FModRenderInterface::ProcessHitColor(FColor HitColor, INT* OutIndex){
 	INT Index;
 
@@ -473,7 +476,7 @@ bool FModRenderInterface::ProcessHitColor(FColor HitColor, INT* OutIndex){
 	else
 		Index = HitColor.R | HitColor.G << 8;
 
-	--Index;
+	--Index; // Index was incremented before drawing so that a value of 0 means 'no selection'. Here it is decremented again to get the actual array index.
 
 	if(Index >= 0 && Index < AllHitData.Num() - (INT)sizeof(HHitProxy)){
 		FHitProxyInfo* Info = reinterpret_cast<FHitProxyInfo*>(&AllHitData[Index]);
@@ -483,22 +486,19 @@ bool FModRenderInterface::ProcessHitColor(FColor HitColor, INT* OutIndex){
 
 		HHitProxy* HitProxy = reinterpret_cast<HHitProxy*>(&AllHitData[Index + sizeof(FHitProxyInfo)]);
 
-		if(HitProxy->Size < static_cast<INT>(sizeof(HHitProxy)) || HitProxy->Size > 256) // Detect invalid data. Stupid "fix" but idk why this would happen in the first place
+		if(HitProxy->Size < static_cast<INT>(sizeof(HHitProxy)) || HitProxy->Size > 256) // Detect invalid data. Stupid "fix" but idk why this would even happen in the first place.
 			return false;
 
 		AActor* HitActor = HitProxy->GetActor();
 
-		if(*OutIndex < 0)
-			*OutIndex = Index;
+		*OutIndex = Index;
 
-		// Checking for preferred selection types
+		// Checking for preferred selection types (the ones that are harder to hit like brushes)
 		if(Info->Type == HP_GizmoAxis ||
 		   Info->Type == HP_BrushVertex ||
 		   Info->Type == HP_ActorVertex ||
 		   Info->Type == HP_GlobalPivot ||
 		   (HitActor && (HitActor->DrawType == DT_Brush || HitActor->DrawType == DT_AntiPortal))){
-			*OutIndex = Index;
-
 			return true;
 		}
 	}
@@ -556,45 +556,44 @@ void FModRenderInterface::PushHit(const BYTE* Data, INT Count){
 
 	EHitProxy HitType;
 
-	if(appStricmp(Name, "HBspSurf") == 0){
+	if(appStricmp(Name, "HBspSurf") == 0)
 		HitType = HP_BspSurf;
-	}else if(appStricmp(Name, "HActor") == 0){
+	else if(appStricmp(Name, "HActor") == 0)
 		HitType = HP_Actor;
-	}else if(appStricmp(Name, "HBrushVertex") == 0){
+	else if(appStricmp(Name, "HBrushVertex") == 0)
 		HitType = HP_BrushVertex;
-	}else if(appStricmp(Name, "HCoords") == 0){
+	else if(appStricmp(Name, "HCoords") == 0)
 		HitType = HP_Coords;
-	}else if(appStricmp(Name, "HTerrain") == 0){
+	else if(appStricmp(Name, "HTerrain") == 0)
 		HitType = HP_Terrain;
-	}else if(appStricmp(Name, "HTerrainToolLayer") == 0){
+	else if(appStricmp(Name, "HTerrainToolLayer") == 0)
 		HitType = HP_TerrainToolLayer;
-	}else if(appStricmp(Name, "HMatineeTimePath") == 0){
+	else if(appStricmp(Name, "HMatineeTimePath") == 0)
 		HitType = HP_MatineeTimePath;
-	}else if(appStricmp(Name, "HMatineeScene") == 0){
+	else if(appStricmp(Name, "HMatineeScene") == 0)
 		HitType = HP_MatineeScene;
-	}else if(appStricmp(Name, "HMatineeAction") == 0){
+	else if(appStricmp(Name, "HMatineeAction") == 0)
 		HitType = HP_MatineeAction;
-	}else if(appStricmp(Name, "HMatineeSubAction") == 0){
+	else if(appStricmp(Name, "HMatineeSubAction") == 0)
 		HitType = HP_MatineeSubAction;
-	}else if(appStricmp(Name, "HMaterialTree") == 0){
+	else if(appStricmp(Name, "HMaterialTree") == 0)
 		HitType = HP_MaterialTree;
-	}else if(appStricmp(Name, "HGizmoAxis") == 0){
+	else if(appStricmp(Name, "HGizmoAxis") == 0)
 		HitType = HP_GizmoAxis;
-	}else if(appStricmp(Name, "HActorVertex") == 0){
+	else if(appStricmp(Name, "HActorVertex") == 0)
 		HitType = HP_ActorVertex;
-	}else if(appStricmp(Name, "HBezierControlPoint") == 0){
+	else if(appStricmp(Name, "HBezierControlPoint") == 0)
 		HitType = HP_BezierControlPoint;
-	}else if(appStricmp(Name, "HTextureView") == 0){
+	else if(appStricmp(Name, "HTextureView") == 0)
 		HitType = HP_TextureView;
-	}else if(appStricmp(Name, "HGlobalPivot") == 0){
+	else if(appStricmp(Name, "HGlobalPivot") == 0)
 		HitType = HP_GlobalPivot;
-	}else if(appStricmp(Name, "HBrowserMaterial") == 0){
+	else if(appStricmp(Name, "HBrowserMaterial") == 0)
 		HitType = HP_BrowserMaterial;
-	}else if(appStricmp(Name, "HBackdrop") == 0){
+	else if(appStricmp(Name, "HBackdrop") == 0)
 		HitType = HP_Backdrop;
-	}else{
+	else
 		HitType = HP_Unknown;
-	}
 
 	_WORD HitDataIndex = AllHitData.Add(sizeof(FHitProxyInfo) + Count, false);
 	FHitProxyInfo Info(HitProxyStack.Num() > 0 ? HitProxyStack.Last().Index : INDEX_NONE, HitType);
@@ -617,7 +616,7 @@ void FModRenderInterface::PopHit(INT Count, UBOOL Force){
 void FModRenderInterface::DrawPrimitive(EPrimitiveType PrimitiveType, INT FirstIndex, INT NumPrimitives, INT MinIndex, INT MaxIndex){
 	if(OverrideSelectionForCurrentHitProxy()){
 		FPlane ShaderColor(0.0f, 0.0f, 0.0f, 0.0f);
-		_WORD HitDataIndex = HitProxyStack.Last().Index + 1; // Adding 1 because 0 means no hit. This is subtracted again later
+		_WORD HitDataIndex = HitProxyStack.Last().Index + 1; // Adding 1 because 0 means no hit. This is subtracted again later.
 
 		if(RenDev->LockedViewport->ColorBytes == 2){
 			checkSlow(HitDataIndex < 32768);
@@ -821,10 +820,10 @@ void UModRenderDevice::Unlock(FRenderInterface* RI){
 
 				for(INT Y = -LockedViewport->HitYL; Y < LockedViewport->HitYL; Y++, src = (_WORD*)((BYTE*)src + LockedRect.Pitch)){
 					for(INT X = -LockedViewport->HitXL; X < LockedViewport->HitXL; X++){
-						if(src[X] != 0x0 && src >= LockedRect.pBits){
+						if(src + X >= LockedRect.pBits && src[X] != 0x0){
 							FColor HitColor = FColor((src[X] >> 11) << 3, ((src[X] >> 6) & 0x3f) << 2, (src[X] & 0x1f) << 3);
 
-							if(RenderInterface.ProcessHitColor(HitColor, &HitProxyIndex))
+							if(RenderInterface.ProcessHitColor(HitColor, &HitProxyIndex) || (HitProxyIndex != INDEX_NONE && X == 0 && Y == 0)) // Hits at the center of the hit area are preferred.
 								goto end_pixel_check;
 						}
 					}
@@ -839,10 +838,10 @@ void UModRenderDevice::Unlock(FRenderInterface* RI){
 
 				for(INT Y = -LockedViewport->HitYL; Y < LockedViewport->HitYL; Y++, src += LockedRect.Pitch){
 					for(INT X = -LockedViewport->HitXL; X < LockedViewport->HitXL; X++){
-						if(*((DWORD*)&src[X * 3]) != 0x0 && src >= LockedRect.pBits){
+						if(src + X >= LockedRect.pBits && *((DWORD*)&src[X * 3])){
 							FColor HitColor = FColor(src[X * 3] + 2, src[X * 3] + 1, src[X * 3]);
 
-							if(RenderInterface.ProcessHitColor(HitColor, &HitProxyIndex))
+							if(RenderInterface.ProcessHitColor(HitColor, &HitProxyIndex) || (HitProxyIndex != INDEX_NONE && X == 0 && Y == 0)) // Hits at the center of the hit area are preferred.
 								goto end_pixel_check;
 						}
 					}
@@ -857,10 +856,10 @@ void UModRenderDevice::Unlock(FRenderInterface* RI){
 
 				for(INT Y = -LockedViewport->HitYL; Y < LockedViewport->HitYL; Y++, src = (DWORD*)((BYTE*)src + LockedRect.Pitch)){
 					for(INT X = -LockedViewport->HitXL; X < LockedViewport->HitXL; X++){
-						if(src[X] != 0x0 && src >= LockedRect.pBits){
+						if(src + X >= LockedRect.pBits && src[X] != 0x0){
 							FColor HitColor = FColor((src[X] >> 16) & 0xff, (src[X] >> 8) & 0xff, (src[X]) & 0xff);
 
-							if(RenderInterface.ProcessHitColor(HitColor, &HitProxyIndex))
+							if(RenderInterface.ProcessHitColor(HitColor, &HitProxyIndex) || (HitProxyIndex != INDEX_NONE && X == 0 && Y == 0)) // Hits at the center of the hit area are preferred.
 								goto end_pixel_check;
 						}
 					}

@@ -3,7 +3,6 @@
 #include "../../D3DDrv/Inc/D3DDrv.h"
 
 enum EHitProxy{
-	HP_Unknown = -1,
 	HP_BspSurf,
 	HP_Actor,
 	HP_BrushVertex,
@@ -54,11 +53,9 @@ public:
 	TArray<BYTE>                AllHitData;     // Contains FHitProxyInfo followed by HHitProxy for each hit proxy that was pushed
 	BYTE*                       HitData;
 	INT*                        HitSize;
-	INT                         HitCount;
 
 	FModRenderInterface(UModRenderDevice* InRenDev);
 
-	EHitProxy CurrentHitProxyType() const;
 	bool ProcessHitColor(FColor HitColor, INT* OutIndex);
 	void ProcessHit(INT HitProxyIndex);
 
@@ -112,9 +109,6 @@ public:
 	virtual int d3d1(int a, int b){ return Impl->d3d1(a, b); }
 	virtual int d3d2(int a){ return Impl->d3d2(a); }
 	virtual int d3d3(int a){ return Impl->d3d3(a); }
-
-private:
-	bool OverrideSelectionForCurrentHitProxy() const;
 };
 
 /*

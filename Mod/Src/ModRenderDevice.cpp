@@ -717,9 +717,7 @@ UBOOL UModRenderDevice::Init(){
 	}else{
 		if(!GeneralSelectionShader){
 			// Initialize shader used for selection in the editor
-			GeneralSelectionShader = ConstructObject<UHardwareShader>(UHardwareShader::StaticClass(),
-			                                                          ANY_PACKAGE,
-			                                                          FName("GeneralSelectionShader"));
+			GeneralSelectionShader = new UHardwareShader();
 
 			GeneralSelectionShader->VertexShaderText = "vs.1.1\n"
 			                                           "m4x4 r0, v0, c0\n"
@@ -734,9 +732,7 @@ UBOOL UModRenderDevice::Init(){
 
 		if(!SpriteSelectionShader){
 			// Initialize shader used for selection of sprites with alpha channel in the editor
-			SpriteSelectionShader = ConstructObject<UHardwareShader>(UHardwareShader::StaticClass(),
-			                                                         ANY_PACKAGE,
-			                                                         FName("SpriteSelectionShader"));
+			SpriteSelectionShader = new UHardwareShader();
 
 			SpriteSelectionShader->VertexShaderText = "vs.1.1\n"
 			                                          "m4x4 r0, v0, c0\n"
@@ -917,7 +913,7 @@ end_pixel_check:
 
 		if(bDebugSelectionBuffer && LockedViewport){
 			LockedViewport->Present();
-			appSleep(5.0f);
+			appSleep(3.0f);
 		}
 	}else{
 		Super::Unlock(RI);

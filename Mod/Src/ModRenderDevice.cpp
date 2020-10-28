@@ -448,22 +448,6 @@ FModRenderInterface::FModRenderInterface(UModRenderDevice* InRenDev){
 	AllHitData.SetNoShrink(true);
 }
 
-EHitProxy FModRenderInterface::CurrentHitProxyType() const{
-	return HitProxyStack.Num() > 0 ? static_cast<EHitProxy>(HitProxyStack.Last().Type) : HP_Unknown;
-}
-
-bool FModRenderInterface::OverrideSelectionForCurrentHitProxy() const{
-	EHitProxy Type = CurrentHitProxyType();
-
-	// The following types need to use the original selection mechanism
-
-	return Type != HP_Unknown &&
-	       Type != HP_MatineeTimePath &&
-	       Type != HP_MatineeScene &&
-	       Type != HP_MatineeAction &&
-	       Type != HP_MatineeSubAction;
-}
-
 /*
  * Converts a color value read from the frame buffer to an index that is stored in OutIndex.
  * If this function returns true, it means that a 'preferred' selection type was found and the other pixels don't need to be checked anymore.
@@ -481,19 +465,19 @@ bool FModRenderInterface::ProcessHitColor(FColor HitColor, INT* OutIndex){
 	if(Index >= 0 && Index < AllHitData.Num() - (INT)sizeof(HHitProxy)){
 		FHitProxyInfo* Info = reinterpret_cast<FHitProxyInfo*>(&AllHitData[Index]);
 
-		if(Info->Type < HP_Unknown || Info->Type >= HP_MAX) // Happens in the texture browser sometimes. No idea why...
+		if(Info->Type < 0 || Info->Type >= HP_MAX) // Happens in the texture browser sometimes. No idea why...
 			return false;
 
 		HHitProxy* HitProxy = reinterpret_cast<HHitProxy*>(&AllHitData[Index + sizeof(FHitProxyInfo)]);
 
-		if(HitProxy->Size < static_cast<INT>(sizeof(HHitProxy)) || HitProxy->Size > 256) // Detect invalid data. Stupid "fix" but idk why this would even happen in the first place.
+		if(HitProxy->Size < static_cast<INT>(sizeof(HHitProxy)) || HitProxy->Size > 128) // Detect invalid data. Stupid "fix" but idk why this would even happen in the first place.
 			return false;
 
 		AActor* HitActor = HitProxy->GetActor();
 
 		*OutIndex = Index;
 
-		// Checking for preferred selection types (the ones that are harder to hit like brushes)
+		// Checking for preferred selection types (the ones that are harder to hit, like brushes)
 		if(Info->Type == HP_GizmoAxis ||
 		   Info->Type == HP_BrushVertex ||
 		   Info->Type == HP_ActorVertex ||
@@ -507,8 +491,6 @@ bool FModRenderInterface::ProcessHitColor(FColor HitColor, INT* OutIndex){
 }
 
 void FModRenderInterface::ProcessHit(INT HitProxyIndex){
-	INT HitCount = *reinterpret_cast<INT*>(reinterpret_cast<BYTE*>(Impl) + 40944); // Only way to get the hit count of the FD3DRenderInterface
-
 	if(HitProxyIndex >= 0 && HitProxyIndex < AllHitData.Num() - (INT)sizeof(HHitProxy)){
 		_WORD ParentIndices[32];
 		INT   NumParents = 0;
@@ -522,6 +504,8 @@ void FModRenderInterface::ProcessHit(INT HitProxyIndex){
 			++NumParents;
 			checkSlow(NumParents <= ARRAY_COUNT(ParentIndices));
 		}
+
+		INT HitCount = 0;
 
 		// Copying hit hierarchy to HitData
 		for(INT i = 0; i < NumParents; ++i){
@@ -537,12 +521,11 @@ void FModRenderInterface::ProcessHit(INT HitProxyIndex){
 		appMemcpy(HitData + HitCount, Hit, Hit->Size);
 		*HitSize = HitCount + Hit->Size;
 	}else{
-		Cast<UEditorEngine>(GEngine)->Exec_Select("NONE", *GLog);
+		CastChecked<UEditorEngine>(GEngine)->Exec_Select("NONE", *GLog);
 	}
 
 	HitProxyStack.Empty();
 	AllHitData.Empty();
-	HitCount = 0;
 	HitData = NULL;
 }
 
@@ -555,7 +538,7 @@ void FModRenderInterface::PushHit(const BYTE* Data, INT Count){
 
 	const TCHAR* Name = reinterpret_cast<const HHitProxy*>(Data)->GetName();
 
-	EHitProxy HitType;
+	EHitProxy HitType = HP_BspSurf;
 
 	if(appStricmp(Name, "HBspSurf") == 0)
 		HitType = HP_BspSurf;
@@ -594,7 +577,7 @@ void FModRenderInterface::PushHit(const BYTE* Data, INT Count){
 	else if(appStricmp(Name, "HBackdrop") == 0)
 		HitType = HP_Backdrop;
 	else
-		HitType = HP_Unknown;
+		appErrorf("Unknown hit proxy type '%s'", Name);
 
 	_WORD HitDataIndex = AllHitData.Add(sizeof(FHitProxyInfo) + Count, false);
 	FHitProxyInfo Info(HitProxyStack.Num() > 0 ? HitProxyStack.Last().Index : INDEX_NONE, HitType);
@@ -602,39 +585,19 @@ void FModRenderInterface::PushHit(const BYTE* Data, INT Count){
 	appMemcpy(&AllHitData[HitDataIndex], &Info, sizeof(FHitProxyInfo));
 	appMemcpy(&AllHitData[HitDataIndex + sizeof(FHitProxyInfo)], Data, Count);
 	HitProxyStack.AddItem(FHitProxyStackEntry(HitDataIndex, HitType));
-
-	if(!OverrideSelectionForCurrentHitProxy())
-		Impl->PushHit(Data, Count);
 }
 
 void FModRenderInterface::PopHit(INT Count, UBOOL Force){
-	if(!OverrideSelectionForCurrentHitProxy())
-		Impl->PopHit(Count, Force);
-
 	HitProxyStack.Pop();
 }
 
 void FModRenderInterface::DrawPrimitive(EPrimitiveType PrimitiveType, INT FirstIndex, INT NumPrimitives, INT MinIndex, INT MaxIndex){
-	if(OverrideSelectionForCurrentHitProxy()){
-		FPlane ShaderColor(0.0f, 0.0f, 0.0f, 0.0f);
-		_WORD HitDataIndex = HitProxyStack.Last().Index + 1; // Adding 1 because 0 means no hit. This is subtracted again later.
+	UHardwareShader* Shader;
 
-		if(RenDev->LockedViewport->ColorBytes == 2){
-			checkSlow(HitDataIndex < 32768);
-
-			ShaderColor.X = (HitDataIndex & 0x1F) / 31.0f;
-			ShaderColor.Y = ((HitDataIndex >> 5) & 0x1F) / 31.0f;
-			ShaderColor.Z = ((HitDataIndex >> 10) & 0x1F) / 31.0f;
-		}else{
-			checkSlow(RenDev->LockedViewport->ColorBytes == 3 || RenDev->LockedViewport->ColorBytes == 4);
-
-			ShaderColor.X = LOBYTE(HitDataIndex) / 255.0f;
-			ShaderColor.Y = HIBYTE(HitDataIndex) / 255.0f;
-		}
-
-		FHitProxyInfo*   Info = reinterpret_cast<FHitProxyInfo*>(&AllHitData[HitDataIndex - 1]);
-		AActor*          HitActor = reinterpret_cast<HHitProxy*>(reinterpret_cast<BYTE*>(Info) + sizeof(FHitProxyInfo))->GetActor();
-		UHardwareShader* Shader;
+	if(HitProxyStack.Num() > 0){
+		_WORD          HitDataIndex = HitProxyStack.Last().Index;
+		FHitProxyInfo* Info = reinterpret_cast<FHitProxyInfo*>(&AllHitData[HitDataIndex]);
+		AActor*        HitActor = reinterpret_cast<HHitProxy*>(reinterpret_cast<BYTE*>(Info) + sizeof(FHitProxyInfo))->GetActor();
 
 		if(HitActor && HitActor->DrawType == DT_Sprite){
 			Shader = UModRenderDevice::SpriteSelectionShader;
@@ -644,10 +607,28 @@ void FModRenderInterface::DrawPrimitive(EPrimitiveType PrimitiveType, INT FirstI
 			Shader->ZTest = !(HitActor && (HitActor->DrawType == DT_Brush || HitActor->DrawType == DT_AntiPortal)); // Disable ZTest for brushes since they are rendered on top of everything else
 		}
 
-		Shader->PSConstants[0].Value = ShaderColor;
+		// Convert index to shader color
 
-		SetHardwareShaderMaterial(Shader, NULL, NULL);
+		++HitDataIndex; // Adding 1 because 0 means no hit. This is subtracted again later.
+
+		if(RenDev->LockedViewport->ColorBytes == 2){
+			checkSlow(HitDataIndex < 32768);
+
+			Shader->PSConstants[0].Value.X = (HitDataIndex & 0x1F) / 31.0f;
+			Shader->PSConstants[0].Value.Y = ((HitDataIndex >> 5) & 0x1F) / 31.0f;
+			Shader->PSConstants[0].Value.Z = ((HitDataIndex >> 10) & 0x1F) / 31.0f;
+		}else{
+			checkSlow(RenDev->LockedViewport->ColorBytes == 3 || RenDev->LockedViewport->ColorBytes == 4);
+
+			Shader->PSConstants[0].Value.X = LOBYTE(HitDataIndex) / 255.0f;
+			Shader->PSConstants[0].Value.Y = HIBYTE(HitDataIndex) / 255.0f;
+		}
+	}else{
+		Shader = UModRenderDevice::GeneralSelectionShader;
+		Shader->PSConstants[0].Value = FPlane(0.0f, 0.0f, 0.0f, 0.0f);
 	}
+
+	SetHardwareShaderMaterial(Shader, NULL, NULL);
 
 	UBOOL Fog = IsFogEnabled();
 
@@ -814,7 +795,6 @@ FRenderInterface* UModRenderDevice::Lock(UViewport* Viewport, BYTE* HitData, INT
 		RenderInterface.Impl = RI;
 		RenderInterface.HitData = HitData;
 		RenderInterface.HitSize = HitSize;
-		RenderInterface.HitCount = 0;
 
 		return &RenderInterface;
 	}

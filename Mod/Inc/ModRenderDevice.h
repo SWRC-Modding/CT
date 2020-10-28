@@ -127,7 +127,8 @@ class MOD_API UModRenderDevice : public UD3DRenderDevice{
 public:
 	static UObject*         FOVChanger;
 	static FLOAT            FpsLimit;
-	static UHardwareShader* SelectionShader;
+	static UHardwareShader* GeneralSelectionShader;
+	static UHardwareShader* SpriteSelectionShader;
 
 	UViewport*          LockedViewport;
 	FModRenderInterface RenderInterface;
@@ -139,7 +140,7 @@ public:
 
 	virtual void Serialize(FArchive& Ar){
 		Super::Serialize(Ar);
-		Ar << SelectionShader;
+		Ar << GeneralSelectionShader << SpriteSelectionShader;
 	}
 
 	virtual UBOOL Init();

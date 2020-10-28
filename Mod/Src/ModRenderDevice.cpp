@@ -548,7 +548,8 @@ void FModRenderInterface::ProcessHit(INT HitProxyIndex){
 
 void FModRenderInterface::PushHit(const BYTE* Data, INT Count){
 	checkSlow(GIsEditor);
-	checkSlow(UModRenderDevice::SelectionShader);
+	checkSlow(UModRenderDevice::GeneralSelectionShader);
+	checkSlow(UModRenderDevice::SpriteSelectionShader);
 	checkSlow(HitData);
 	checkSlow(HitSize);
 
@@ -631,13 +632,21 @@ void FModRenderInterface::DrawPrimitive(EPrimitiveType PrimitiveType, INT FirstI
 			ShaderColor.Y = HIBYTE(HitDataIndex) / 255.0f;
 		}
 
-		FHitProxyInfo* Info = reinterpret_cast<FHitProxyInfo*>(&AllHitData[HitDataIndex - 1]);
-		AActor*        HitActor = reinterpret_cast<HHitProxy*>(reinterpret_cast<BYTE*>(Info) + sizeof(FHitProxyInfo))->GetActor();
+		FHitProxyInfo*   Info = reinterpret_cast<FHitProxyInfo*>(&AllHitData[HitDataIndex - 1]);
+		AActor*          HitActor = reinterpret_cast<HHitProxy*>(reinterpret_cast<BYTE*>(Info) + sizeof(FHitProxyInfo))->GetActor();
+		UHardwareShader* Shader;
 
-		UModRenderDevice::SelectionShader->ZTest = !(HitActor && (HitActor->DrawType == DT_Brush || HitActor->DrawType == DT_AntiPortal)); // Disable ZTest for brushes since they are rendered on top of everything else
-		UModRenderDevice::SelectionShader->PSConstants[0].Value = ShaderColor;
+		if(HitActor && HitActor->DrawType == DT_Sprite){
+			Shader = UModRenderDevice::SpriteSelectionShader;
+			Shader->Textures[0] = Cast<UBitmapMaterial>(HitActor->Texture);
+		}else{
+			Shader = UModRenderDevice::GeneralSelectionShader;
+			Shader->ZTest = !(HitActor && (HitActor->DrawType == DT_Brush || HitActor->DrawType == DT_AntiPortal)); // Disable ZTest for brushes since they are rendered on top of everything else
+		}
 
-		SetHardwareShaderMaterial(UModRenderDevice::SelectionShader, NULL, NULL);
+		Shader->PSConstants[0].Value = ShaderColor;
+
+		SetHardwareShaderMaterial(Shader, NULL, NULL);
 	}
 
 	UBOOL Fog = IsFogEnabled();
@@ -705,19 +714,48 @@ UBOOL UModRenderDevice::Init(){
 			FOVChanger->AddToRoot(); // This object should never be garbage collected
 			FOVChanger->ProcessEvent(NAME_Init, NULL);
 		}
-	}else if(!SelectionShader){
-		// Initialize shader used for selection in the editor
-		SelectionShader = new UHardwareShader();
+	}else{
+		if(!GeneralSelectionShader){
+			// Initialize shader used for selection in the editor
+			GeneralSelectionShader = ConstructObject<UHardwareShader>(UHardwareShader::StaticClass(),
+			                                                          ANY_PACKAGE,
+			                                                          FName("GeneralSelectionShader"));
 
-		SelectionShader->VertexShaderText = "vs.1.1\n"
-											"m4x4 r0, v0, c0\n"
-		                                    "mov oPos, r0\n";
-		SelectionShader->PixelShaderText = "ps.1.1\n"
-		                                   "mov r0,c0\n";
-		SelectionShader->VSConstants[0].Type = EVC_ObjectToScreenMatrix;
-		SelectionShader->PSConstants[0].Type = EVC_MaterialDefined;
-		SelectionShader->ZTest = 1;
-		SelectionShader->ZWrite = 1;
+			GeneralSelectionShader->VertexShaderText = "vs.1.1\n"
+			                                           "m4x4 r0, v0, c0\n"
+			                                           "mov oPos, r0\n";
+			GeneralSelectionShader->PixelShaderText = "ps.1.1\n"
+			                                          "mov r0, c0\n";
+			GeneralSelectionShader->VSConstants[0].Type = EVC_ObjectToScreenMatrix;
+			GeneralSelectionShader->PSConstants[0].Type = EVC_MaterialDefined;
+			GeneralSelectionShader->ZTest = 1;
+			GeneralSelectionShader->ZWrite = 1;
+		}
+
+		if(!SpriteSelectionShader){
+			// Initialize shader used for selection of sprites with alpha channel in the editor
+			SpriteSelectionShader = ConstructObject<UHardwareShader>(UHardwareShader::StaticClass(),
+			                                                         ANY_PACKAGE,
+			                                                         FName("SpriteSelectionShader"));
+
+			SpriteSelectionShader->VertexShaderText = "vs.1.1\n"
+			                                          "m4x4 r0, v0, c0\n"
+			                                          "mov oPos, r0\n"
+			                                          "mov oT0, v1";
+			SpriteSelectionShader->PixelShaderText = "ps.1.1\n"
+			                                         "tex t0\n"
+			                                         "mov r0, c0\n"
+			                                         "mad r0, t0, c1, r0\n";
+			SpriteSelectionShader->StreamMapping.AddItem(FVF_Position);
+			SpriteSelectionShader->StreamMapping.AddItem(FVF_TexCoord0);
+			SpriteSelectionShader->VSConstants[0].Type = EVC_ObjectToScreenMatrix;
+			SpriteSelectionShader->PSConstants[0].Type = EVC_MaterialDefined;
+			SpriteSelectionShader->PSConstants[1].Type = EVC_MaterialDefined;
+			SpriteSelectionShader->PSConstants[1].Value = FPlane(0.0f, 0.0f, 0.0f, 1.0f);
+			SpriteSelectionShader->ZTest = 1;
+			SpriteSelectionShader->ZWrite = 1;
+			SpriteSelectionShader->AlphaTest = 1;
+		}
 	}
 
 	return Result;
@@ -890,6 +928,7 @@ end_pixel_check:
 
 UObject*         UModRenderDevice::FOVChanger = NULL;
 FLOAT            UModRenderDevice::FpsLimit   = 0.0f;
-UHardwareShader* UModRenderDevice::SelectionShader = NULL;
+UHardwareShader* UModRenderDevice::GeneralSelectionShader = NULL;
+UHardwareShader* UModRenderDevice::SpriteSelectionShader = NULL;
 
 IMPLEMENT_CLASS(UModRenderDevice)

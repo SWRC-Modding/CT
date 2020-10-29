@@ -2,8 +2,6 @@
 #include "../../Editor/Inc/Editor.h"
 #include <Windows.h>
 
-// TODO: Tidy up. This is a mess!
-
 /*
  * Helper function that only patches a vtable if it wasn't done already.
  * This is needed because the editor creates multiple render devices which in turn create new D3D8 devices that need to be patched again.
@@ -21,40 +19,15 @@ void MaybePatchVTable(F* OutFunc, void* Object, INT Index, F NewFunc){
 	*OutFunc = static_cast<F>(PatchVTable(Object, Index, NewFunc));
 }
 
+// Virtual table indices of different d3d functions that we are trying to hook
 enum{
 	// D3D8
 	D3DVTableIndex_D3D8CreateDevice    = 15,
 	// D3DDevice
 	D3DVTableIndex_DeviceCreateTexture = 20,
 	// D3DTexture
-	D3DVTableIndex_TextureGetLevelDesc = 14,
 	D3DVTableIndex_TextureLockRect     = 16,
 	D3DVTableIndex_TextureUnlockRect   = 17
-};
-
-/*
- * Direct3D types and Functions which are used to patch the d3d object vtables.
- * We could simply include d3d8.h and inherit from the d3d interfaces but this way it is simpler and doesn't add any external dependencies.
- */
-
-typedef void FD3D8;
-typedef void FD3DDevice;
-typedef void FD3DTexture;
-
-enum ED3DFormat{
-	D3DFormat_A8R8G8B8 = 21, // Fallback if none of the bumpmap formats are available.
-	D3DFormat_V8U8     = 60,
-	D3DFormat_L6V5U5   = 61,
-	D3DFormat_X8L8V8U8 = 62
-};
-
-bool IsBumpmapFormat(ED3DFormat Format){
-	return Format >= D3DFormat_V8U8 && Format <= D3DFormat_X8L8V8U8;
-}
-
-struct FD3DLockedRect{
-	INT   Pitch;
-	void* pBits;
 };
 
 /*
@@ -65,13 +38,17 @@ struct FD3DLockedRect{
  */
 
 // Information about the current texture returned by CreateTexture and used by Lock/UnlockRect
-static FD3DTexture* CurrentTexture;
-static ED3DFormat   CurrentTextureSourceFormat;
-static ED3DFormat   CurrentTextureTargetFormat;
-static UINT         CurrentTextureNumMipLevels;
-static UINT         CurrentMipLevelWidth;
-static UINT         CurrentMipLevelHeight;
-static void*        CurrentMipLevelPixels;
+static IDirect3DTexture8* CurrentTexture;
+static D3DFORMAT          CurrentTextureSourceFormat;
+static D3DFORMAT          CurrentTextureTargetFormat;
+static UINT               CurrentTextureNumMipLevels;
+static UINT               CurrentMipLevelWidth;
+static UINT               CurrentMipLevelHeight;
+static void*              CurrentMipLevelPixels;
+
+/*
+ * Bumpmap pixel formats
+ */
 
 struct FV8U8Pixel{
 	INT8 U;
@@ -97,23 +74,6 @@ struct FA8R8G8B8Pixel{
 	UINT8 R;
 	UINT8 A;
 };
-
-static int GetBytesPerPixel(ED3DFormat Format){
-	switch(Format){
-	case D3DFormat_A8R8G8B8:
-		return sizeof(FA8R8G8B8Pixel);
-	case D3DFormat_V8U8:
-		return sizeof(FV8U8Pixel);
-	case D3DFormat_L6V5U5:
-		return sizeof(FL6V5U5Pixel);
-	case D3DFormat_X8L8V8U8:
-		return sizeof(FX8L8V8U8Pixel);
-	}
-
-	appErrorf("Unknown texture format");
-
-	return 0;
-}
 
 /*
  * Integer range mapping
@@ -240,40 +200,19 @@ static void ConvertX8L8V8U8ToA8R8G8B8(const void* In, void* Out, UINT Width, UIN
 }
 
 /*
- * GetLevelDesc
- *
- * Not overridden but used to get information about the size of the different mip levels.
- */
-
-struct FD3DSurfaceDesc{
-	ED3DFormat               Format;
-	enum ED3DResourceType    Type;
-	DWORD                    Usage;
-	enum ED3DPool            Pool;
-	UINT                     Size;
-	enum ED3DMultiSampleType MultiSampleType;
-	UINT                     Width;
-	UINT                     Height;
-};
-
-typedef HRESULT(__stdcall*D3DTextureGetLevelDescFunc)(FD3DTexture*, UINT, FD3DSurfaceDesc*);
-
-D3DTextureGetLevelDescFunc D3DTextureGetLevelDesc = NULL;
-
-/*
  * LockRect
  */
 
-typedef HRESULT(__stdcall*D3DTextureLockRectFunc)(FD3DTexture*, UINT, FD3DLockedRect*, const RECT*, DWORD);
+typedef HRESULT(__stdcall*D3DTextureLockRectFunc)(IDirect3DTexture8*, UINT, D3DLOCKED_RECT*, const RECT*, DWORD);
 
 D3DTextureLockRectFunc D3DTextureLockRect = NULL;
 
-static HRESULT __stdcall D3DTextureLockRectOverride(FD3DTexture* D3DTexture, UINT Level, FD3DLockedRect* pLockedRect, const RECT* pRect, DWORD Flags){
+static HRESULT __stdcall D3DTextureLockRectOverride(IDirect3DTexture8* D3DTexture, UINT Level, D3DLOCKED_RECT* pLockedRect, const RECT* pRect, DWORD Flags){
 	if(D3DTexture != CurrentTexture)
 		return D3DTextureLockRect(D3DTexture, Level, pLockedRect, pRect, Flags);
 
-	FD3DSurfaceDesc SurfaceDesc;
-	HRESULT GetLevelDescResult = D3DTextureGetLevelDesc(D3DTexture, Level, &SurfaceDesc);
+	D3DSURFACE_DESC SurfaceDesc;
+	HRESULT GetLevelDescResult = D3DTexture->GetLevelDesc(Level, &SurfaceDesc);
 
 	if(FAILED(GetLevelDescResult))
 		return GetLevelDescResult;
@@ -282,7 +221,26 @@ static HRESULT __stdcall D3DTextureLockRectOverride(FD3DTexture* D3DTexture, UIN
 	CurrentMipLevelHeight = SurfaceDesc.Height;
 	CurrentMipLevelPixels = appMalloc(SurfaceDesc.Size);
 
-	pLockedRect->Pitch = CurrentMipLevelWidth * GetBytesPerPixel(CurrentTextureSourceFormat);
+	INT BytesPerPixel = 0;
+
+	switch(CurrentTextureSourceFormat){
+	case D3DFMT_A8R8G8B8:
+		BytesPerPixel = sizeof(FA8R8G8B8Pixel);
+		break;
+	case D3DFMT_V8U8:
+		BytesPerPixel = sizeof(FV8U8Pixel);
+		break;
+	case D3DFMT_L6V5U5:
+		BytesPerPixel = sizeof(FL6V5U5Pixel);
+		break;
+	case D3DFMT_X8L8V8U8:
+		BytesPerPixel = sizeof(FX8L8V8U8Pixel);
+		break;
+	default:
+		appErrorf("Unexpected texture format (%i)", CurrentTextureSourceFormat);
+	}
+
+	pLockedRect->Pitch = CurrentMipLevelWidth * BytesPerPixel;
 	pLockedRect->pBits = CurrentMipLevelPixels;
 
 	return S_OK;
@@ -292,31 +250,31 @@ static HRESULT __stdcall D3DTextureLockRectOverride(FD3DTexture* D3DTexture, UIN
  * UnlockRect
  */
 
-typedef HRESULT(__stdcall*D3DTextureUnlockRectFunc)(FD3DTexture*, UINT);
+typedef HRESULT(__stdcall*D3DTextureUnlockRectFunc)(IDirect3DTexture8*, UINT);
 
 D3DTextureUnlockRectFunc D3DTextureUnlockRect = NULL;
 
-static HRESULT __stdcall D3DTextureUnlockRectOverride(FD3DTexture* D3DTexture, UINT Level){
+static HRESULT __stdcall D3DTextureUnlockRectOverride(IDirect3DTexture8* D3DTexture, UINT Level){
 	if(D3DTexture != CurrentTexture)
 		return D3DTextureUnlockRect(D3DTexture, Level);
 
-	FD3DLockedRect LockedRect;
+	D3DLOCKED_RECT LockedRect;
 	HRESULT Result = D3DTextureLockRect(D3DTexture, Level, &LockedRect, NULL, 0);
 
 	if(SUCCEEDED(Result)){
-		if(CurrentTextureSourceFormat == D3DFormat_V8U8){
+		if(CurrentTextureSourceFormat == D3DFMT_V8U8){
 			ConvertV8U8ToA8R8G8B8(CurrentMipLevelPixels, LockedRect.pBits, CurrentMipLevelWidth, CurrentMipLevelHeight);
-		}else if(CurrentTextureSourceFormat == D3DFormat_L6V5U5){
-			if(CurrentTextureTargetFormat == D3DFormat_V8U8)
+		}else if(CurrentTextureSourceFormat == D3DFMT_L6V5U5){
+			if(CurrentTextureTargetFormat == D3DFMT_V8U8)
 				ConvertL6V5U5ToV8U8(CurrentMipLevelPixels, LockedRect.pBits, CurrentMipLevelWidth, CurrentMipLevelHeight);
-			else if(CurrentTextureTargetFormat == D3DFormat_X8L8V8U8)
+			else if(CurrentTextureTargetFormat == D3DFMT_X8L8V8U8)
 				ConvertL6V5U5ToX8L8V8U8(CurrentMipLevelPixels, LockedRect.pBits, CurrentMipLevelWidth, CurrentMipLevelHeight);
-			else if(CurrentTextureTargetFormat == D3DFormat_A8R8G8B8)
+			else if(CurrentTextureTargetFormat == D3DFMT_A8R8G8B8)
 				ConvertL6V5U5ToA8R8G8B8(CurrentMipLevelPixels, LockedRect.pBits, CurrentMipLevelWidth, CurrentMipLevelHeight);
-		}else if(CurrentTextureSourceFormat == D3DFormat_X8L8V8U8){
-			if(CurrentTextureTargetFormat == D3DFormat_V8U8)
+		}else if(CurrentTextureSourceFormat == D3DFMT_X8L8V8U8){
+			if(CurrentTextureTargetFormat == D3DFMT_V8U8)
 				ConvertX8L8V8U8ToV8U8(CurrentMipLevelPixels, LockedRect.pBits, CurrentMipLevelWidth, CurrentMipLevelHeight);
-			else if(CurrentTextureTargetFormat == D3DFormat_A8R8G8B8)
+			else if(CurrentTextureTargetFormat == D3DFMT_A8R8G8B8)
 				ConvertX8L8V8U8ToA8R8G8B8(CurrentMipLevelPixels, LockedRect.pBits, CurrentMipLevelWidth, CurrentMipLevelHeight);
 		}
 
@@ -336,65 +294,63 @@ static HRESULT __stdcall D3DTextureUnlockRectOverride(FD3DTexture* D3DTexture, U
  * CreateTexture
  */
 
-typedef HRESULT(__stdcall*D3DDeviceCreateTextureFunc)(FD3DDevice*, UINT, UINT, UINT, DWORD, ED3DFormat, enum ED3DPool, FD3DTexture**);
+typedef HRESULT(__stdcall*D3DDeviceCreateTextureFunc)(IDirect3DDevice8*, UINT, UINT, UINT, DWORD, D3DFORMAT, enum ED3DPool, IDirect3DTexture8**);
 
 D3DDeviceCreateTextureFunc D3DDeviceCreateTexture = NULL;
 
-static HRESULT __stdcall D3DDeviceCreateTextureOverride(FD3DDevice* D3DDevice,
+static HRESULT __stdcall D3DDeviceCreateTextureOverride(IDirect3DDevice8* D3DDevice,
 														UINT Width,
 														UINT Height,
 														UINT Levels,
 														DWORD Usage,
-														ED3DFormat Format,
+														D3DFORMAT Format,
 														enum ED3DPool Pool,
-														FD3DTexture** ppTexture){
+														IDirect3DTexture8** ppTexture){
 	// X8L8V8U8 is used as the first fallback format because no information is lost in the conversion
-	ED3DFormat FallbackFormat = Format == D3DFormat_L6V5U5 ? D3DFormat_X8L8V8U8 : Format;
+	D3DFORMAT FallbackFormat = Format == D3DFMT_L6V5U5 ? D3DFMT_X8L8V8U8 : Format;
 	HRESULT Result = D3DDeviceCreateTexture(D3DDevice,
-											Width,
-											Height,
-											Levels,
-											Usage,
-											FallbackFormat,
-											Pool,
-											ppTexture);
+	                                        Width,
+	                                        Height,
+	                                        Levels,
+	                                        Usage,
+	                                        FallbackFormat,
+	                                        Pool,
+	                                        ppTexture);
 
 	if(SUCCEEDED(Result)  && FallbackFormat == Format)
 		return Result; // No fallback format was needed so just return
 
-	if(FAILED(Result) && !IsBumpmapFormat(Format))
-		appErrorf("CreateTexture failed (Format: %i)", Format); // Should never happen but this is a better error than the engine produces
+	if(FAILED(Result) && Format < D3DFMT_V8U8 && Format > D3DFMT_X8L8V8U8) // CreateTexture failed with a non-bumpmap format
+		appErrorf("CreateTexture failed (Format: %i)", Format);            // Should never happen but this is a better error than the engine produces
 
 	if(FAILED(Result)){ // If X8L8V8U8 is not supported V8U8 might still be so try that. Visually the same except for missing luminance
-		FallbackFormat = D3DFormat_V8U8;
+		FallbackFormat = D3DFMT_V8U8;
 		Result = D3DDeviceCreateTexture(D3DDevice,
-										Width,
-										Height,
-										Levels,
-										Usage,
-										FallbackFormat,
-										Pool,
-										ppTexture);
+		                                Width,
+		                                Height,
+		                                Levels,
+		                                Usage,
+		                                FallbackFormat,
+		                                Pool,
+		                                ppTexture);
 	}
 
 	if(FAILED(Result)){ // If no bumpmap format is available we fall back to ARGB. Looks fine visually and should always be supported
-		FallbackFormat = D3DFormat_A8R8G8B8;
+		FallbackFormat = D3DFMT_A8R8G8B8;
 		Result = D3DDeviceCreateTexture(D3DDevice,
-										Width,
-										Height,
-										Levels,
-										Usage,
-										FallbackFormat,
-										Pool,
-										ppTexture);
+		                                Width,
+		                                Height,
+		                                Levels,
+		                                Usage,
+		                                FallbackFormat,
+		                                Pool,
+		                                ppTexture);
 	}
 
 	if(FAILED(Result))
 		appErrorf("CreateTexture failed even with fallback format (Format: %i)", FallbackFormat);
 
 	// Patching vtables if it wasn't done already
-
-	D3DTextureGetLevelDesc = static_cast<D3DTextureGetLevelDescFunc>((*reinterpret_cast<void***>(*ppTexture))[D3DVTableIndex_TextureGetLevelDesc]);
 
 	MaybePatchVTable(&D3DTextureLockRect, *ppTexture, D3DVTableIndex_TextureLockRect, D3DTextureLockRectOverride);
 	MaybePatchVTable(&D3DTextureUnlockRect, *ppTexture, D3DVTableIndex_TextureUnlockRect, D3DTextureUnlockRectOverride);
@@ -412,23 +368,23 @@ static HRESULT __stdcall D3DDeviceCreateTextureOverride(FD3DDevice* D3DDevice,
  * CreateDevice
  */
 
-typedef HRESULT(__stdcall*D3D8CreateDeviceFunc)(FD3D8* D3D8,
-												UINT Adapter,
-												enum D3DDEVTYPE DeviceType,
-												HWND hFocusWindow,
-												DWORD BehaviorFlags,
-												struct D3DPRESENT_PARAMETERS* pPresentationParameters,
-												class IDirect3DDevice8** ppReturnedDeviceInterface);
+typedef HRESULT(__stdcall*D3D8CreateDeviceFunc)(IDirect3D8* D3D8,
+                                                UINT Adapter,
+                                                D3DDEVTYPE DeviceType,
+                                                HWND hFocusWindow,
+                                                DWORD BehaviorFlags,
+                                                D3DPRESENT_PARAMETERS* pPresentationParameters,
+                                                IDirect3DDevice8** ppReturnedDeviceInterface);
 
 D3D8CreateDeviceFunc D3D8CreateDevice = NULL;
 
-HRESULT __stdcall D3D8CreateDeviceOverride(FD3D8* D3D8,
-										   UINT Adapter,
-										   enum D3DDEVTYPE DeviceType,
-										   HWND hFocusWindow,
-										   DWORD BehaviorFlags,
-										   struct D3DPRESENT_PARAMETERS* pPresentationParameters,
-										   class IDirect3DDevice8** ppReturnedDeviceInterface){
+HRESULT __stdcall D3D8CreateDeviceOverride(IDirect3D8* D3D8,
+                                           UINT Adapter,
+                                           D3DDEVTYPE DeviceType,
+                                           HWND hFocusWindow,
+                                           DWORD BehaviorFlags,
+                                           D3DPRESENT_PARAMETERS* pPresentationParameters,
+                                           IDirect3DDevice8** ppReturnedDeviceInterface){
 	HRESULT Result = D3D8CreateDevice(D3D8, Adapter, DeviceType, hFocusWindow, BehaviorFlags, pPresentationParameters, ppReturnedDeviceInterface);
 
 	if(SUCCEEDED(Result))
@@ -807,22 +763,19 @@ void UModRenderDevice::Unlock(FRenderInterface* RI){
 		checkSlow(RenderInterface.HitData);
 		checkSlow(RenderInterface.HitSize);
 
-		void* RenderTarget = NULL; // IDirect3DSurface8
+		IDirect3DSurface8* RenderTarget = NULL;
 
-		 // Calling IDirect3DDevice8::GetRenderTarget
-		static_cast<HRESULT(__stdcall*)(void*, void**)>((*reinterpret_cast<void***>(Direct3DDevice8))[32])(Direct3DDevice8, &RenderTarget);
+		Direct3DDevice8->GetRenderTarget(&RenderTarget);
 
 		checkSlow(RenderTarget != NULL);
 
-		FD3DSurfaceDesc Desc;
+		D3DSURFACE_DESC Desc;
 
-		// Calling IDirect3dSurface8::GetDesc
-		static_cast<HRESULT(__stdcall*)(void*, FD3DSurfaceDesc*)>((*reinterpret_cast<void***>(RenderTarget))[8])(RenderTarget, &Desc);
+		RenderTarget->GetDesc(&Desc);
 
-		FD3DLockedRect LockedRect;
+		D3DLOCKED_RECT LockedRect;
 
-		// Calling IDirect3DSurface8::LockRect
-		static_cast<HRESULT(__stdcall*)(void*, FD3DLockedRect*, void*, DWORD)>((*reinterpret_cast<void***>(RenderTarget))[9])(RenderTarget, &LockedRect, NULL, 0);
+		RenderTarget->LockRect(&LockedRect, NULL, 0);
 
 		INT  HitProxyIndex = INDEX_NONE;
 
@@ -885,9 +838,7 @@ void UModRenderDevice::Unlock(FRenderInterface* RI){
 
 end_pixel_check:
 
-		// Calling IDirect3DSurface8::UnlockRect
-		static_cast<HRESULT(__stdcall*)(void*)>((*reinterpret_cast<void***>(RenderTarget))[10])(RenderTarget);
-
+		RenderTarget->UnlockRect();
 		Super::Unlock(RenderInterface.Impl);
 		RenderInterface.ProcessHit(HitProxyIndex);
 

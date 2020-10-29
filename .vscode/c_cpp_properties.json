@@ -18,6 +18,7 @@
                 "XGAME_API=",
                 "XINTERFACE_API="
             ],
+            "includePath": ["C:\\Program Files (x86)\\Microsoft Visual Studio .NET 2003\\Vc7\\PlatformSDK\\Include"],
             "windowsSdkVersion": "10.0.18362.0",
             "cppStandard": "c++03",
             "intelliSenseMode": "msvc-x64"

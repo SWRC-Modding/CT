@@ -2,57 +2,27 @@
 
 #include "../../D3DDrv/Inc/D3DDrv.h"
 
-enum EHitProxy{
-	HP_BspSurf,
-	HP_Actor,
-	HP_BrushVertex,
-	HP_Coords,
-	HP_Terrain,
-	HP_TerrainToolLayer,
-	HP_MatineeTimePath,
-	HP_MatineeScene,
-	HP_MatineeAction,
-	HP_MatineeSubAction,
-	HP_MaterialTree,
-	HP_GizmoAxis,
-	HP_ActorVertex,
-	HP_BezierControlPoint,
-	HP_TextureView,
-	HP_GlobalPivot,
-	HP_BrowserMaterial,
-	HP_Backdrop,
-	HP_MAX
-};
-
-struct FHitProxyStackEntry{
-	INT       Index;
-	EHitProxy Type;
-
-	FHitProxyStackEntry(INT InIndex, EHitProxy InType) : Index(InIndex),
-	                                                     Type(InType){}
-};
+class UModRenderDevice;
 
 struct FHitProxyInfo{
 	INT       ParentIndex; // INDEX_NONE if no parent
-	EHitProxy Type;
+	UBOOL     IsPreferred; // If there is more than one possible selection, prefer this one (Used with stuff that is difficult to select like the gizmo axes)
 
-	FHitProxyInfo(INT InParentIndex, EHitProxy InType) : ParentIndex(InParentIndex),
-	                                                     Type(InType){}
+	FHitProxyInfo(INT InParentIndex, UBOOL Preferred) : ParentIndex(InParentIndex),
+	                                                    IsPreferred(Preferred){}
 };
-
-class UModRenderDevice;
 
 /*
  * ModRenderInterface
  */
 class FModRenderInterface : public FRenderInterface{
 public:
-	UModRenderDevice*           RenDev;
-	FRenderInterface*           Impl;
-	TArray<FHitProxyStackEntry> HitProxyStack;  // Current stack of pushed hit proxies
-	TArray<BYTE>                AllHitData;     // Contains FHitProxyInfo followed by HHitProxy for each hit proxy that was pushed
-	BYTE*                       HitData;
-	INT*                        HitSize;
+	UModRenderDevice* RenDev;
+	FRenderInterface* Impl;
+	TArray<INT>       HitStack;   // Indicies into AllHitData of currently pushed hit proxies
+	TArray<BYTE>      AllHitData; // Contains FHitProxyInfo followed by HHitProxy for each hit proxy that was pushed during the current frame
+	BYTE*             HitData;
+	INT*              HitSize;
 
 	FModRenderInterface(UModRenderDevice* InRenDev);
 

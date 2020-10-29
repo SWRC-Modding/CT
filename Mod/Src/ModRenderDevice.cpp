@@ -400,7 +400,7 @@ HRESULT __stdcall D3D8CreateDeviceOverride(IDirect3D8* D3D8,
 FModRenderInterface::FModRenderInterface(UModRenderDevice* InRenDev){
 	RenDev = InRenDev;
 
-	HitProxyStack.SetNoShrink(true);
+	HitStack.SetNoShrink(true);
 	AllHitData.SetNoShrink(true);
 }
 
@@ -421,13 +421,8 @@ bool FModRenderInterface::ProcessHitColor(FColor HitColor, INT* OutIndex){
 		*OutIndex = Index;
 
 		// Checking for preferred selection types (the ones that are harder to hit, like brushes)
-		if(Info->Type == HP_GizmoAxis ||
-		   Info->Type == HP_BrushVertex ||
-		   Info->Type == HP_ActorVertex ||
-		   Info->Type == HP_GlobalPivot ||
-		   (HitActor && (HitActor->DrawType == DT_Brush || HitActor->DrawType == DT_AntiPortal))){
+		if(Info->IsPreferred || (HitActor && (HitActor->DrawType == DT_Brush || HitActor->DrawType == DT_AntiPortal)))
 			return true;
-		}
 	}
 
 	return false;
@@ -467,7 +462,7 @@ void FModRenderInterface::ProcessHit(INT HitProxyIndex){
 		CastChecked<UEditorEngine>(GEngine)->Exec_Select("NONE", *GLog);
 	}
 
-	HitProxyStack.Empty();
+	HitStack.Empty();
 	AllHitData.Empty();
 	HitData = NULL;
 }
@@ -480,65 +475,27 @@ void FModRenderInterface::PushHit(const BYTE* Data, INT Count){
 	checkSlow(HitSize);
 
 	const TCHAR* Name = reinterpret_cast<const HHitProxy*>(Data)->GetName();
-
-	EHitProxy HitType = HP_BspSurf;
-
-	if(appStricmp(Name, "HBspSurf") == 0)
-		HitType = HP_BspSurf;
-	else if(appStricmp(Name, "HActor") == 0)
-		HitType = HP_Actor;
-	else if(appStricmp(Name, "HBrushVertex") == 0)
-		HitType = HP_BrushVertex;
-	else if(appStricmp(Name, "HCoords") == 0)
-		HitType = HP_Coords;
-	else if(appStricmp(Name, "HTerrain") == 0)
-		HitType = HP_Terrain;
-	else if(appStricmp(Name, "HTerrainToolLayer") == 0)
-		HitType = HP_TerrainToolLayer;
-	else if(appStricmp(Name, "HMatineeTimePath") == 0)
-		HitType = HP_MatineeTimePath;
-	else if(appStricmp(Name, "HMatineeScene") == 0)
-		HitType = HP_MatineeScene;
-	else if(appStricmp(Name, "HMatineeAction") == 0)
-		HitType = HP_MatineeAction;
-	else if(appStricmp(Name, "HMatineeSubAction") == 0)
-		HitType = HP_MatineeSubAction;
-	else if(appStricmp(Name, "HMaterialTree") == 0)
-		HitType = HP_MaterialTree;
-	else if(appStricmp(Name, "HGizmoAxis") == 0)
-		HitType = HP_GizmoAxis;
-	else if(appStricmp(Name, "HActorVertex") == 0)
-		HitType = HP_ActorVertex;
-	else if(appStricmp(Name, "HBezierControlPoint") == 0)
-		HitType = HP_BezierControlPoint;
-	else if(appStricmp(Name, "HTextureView") == 0)
-		HitType = HP_TextureView;
-	else if(appStricmp(Name, "HGlobalPivot") == 0)
-		HitType = HP_GlobalPivot;
-	else if(appStricmp(Name, "HBrowserMaterial") == 0)
-		HitType = HP_BrowserMaterial;
-	else if(appStricmp(Name, "HBackdrop") == 0)
-		HitType = HP_Backdrop;
-	else
-		appErrorf("Unknown hit proxy type '%s'", Name);
-
+	UBOOL IsPreferredSelection = appStricmp(Name, "HGizmoAxis") == 0 ||
+	                             appStricmp(Name, "HBrushVertex") == 0 ||
+	                             appStricmp(Name, "HActorVertex") == 0 ||
+	                             appStricmp(Name, "HGlobalPivot") == 0;
+	FHitProxyInfo Info(HitStack.Num() > 0 ? HitStack.Last() : INDEX_NONE, IsPreferredSelection);
 	INT HitDataIndex = AllHitData.Add(sizeof(FHitProxyInfo) + Count, false);
-	FHitProxyInfo Info(HitProxyStack.Num() > 0 ? HitProxyStack.Last().Index : INDEX_NONE, HitType);
 
 	appMemcpy(&AllHitData[HitDataIndex], &Info, sizeof(FHitProxyInfo));
 	appMemcpy(&AllHitData[HitDataIndex + sizeof(FHitProxyInfo)], Data, Count);
-	HitProxyStack.AddItem(FHitProxyStackEntry(HitDataIndex, HitType));
+	HitStack.AddItem(HitDataIndex);
 }
 
 void FModRenderInterface::PopHit(INT Count, UBOOL Force){
-	HitProxyStack.Pop();
+	HitStack.Pop();
 }
 
 void FModRenderInterface::DrawPrimitive(EPrimitiveType PrimitiveType, INT FirstIndex, INT NumPrimitives, INT MinIndex, INT MaxIndex){
 	UHardwareShader* Shader;
 
-	if(HitProxyStack.Num() > 0){
-		INT            HitDataIndex = HitProxyStack.Last().Index;
+	if(HitStack.Num() > 0){
+		INT            HitDataIndex = HitStack.Last();
 		FHitProxyInfo* Info = reinterpret_cast<FHitProxyInfo*>(&AllHitData[HitDataIndex]);
 		AActor*        HitActor = reinterpret_cast<HHitProxy*>(reinterpret_cast<BYTE*>(Info) + sizeof(FHitProxyInfo))->GetActor();
 

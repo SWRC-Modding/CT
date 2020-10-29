@@ -25,16 +25,16 @@ enum EHitProxy{
 };
 
 struct FHitProxyStackEntry{
-	_WORD Index;
-	SWORD Type; // EHitProxy
+	INT       Index;
+	EHitProxy Type;
 
 	FHitProxyStackEntry(_WORD InIndex, EHitProxy InType) : Index(InIndex),
 	                                                       Type(InType){}
 };
 
 struct FHitProxyInfo{
-	SWORD ParentIndex; // INDEX_NONE if no parent
-	SWORD Type; // EHitProxy
+	INT       ParentIndex; // INDEX_NONE if no parent
+	EHitProxy Type;
 
 	FHitProxyInfo(SWORD InParentIndex, EHitProxy InType) : ParentIndex(InParentIndex),
 	                                                       Type(InType){}

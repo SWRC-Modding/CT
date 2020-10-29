@@ -409,26 +409,13 @@ FModRenderInterface::FModRenderInterface(UModRenderDevice* InRenDev){
  * If this function returns true, it means that a 'preferred' selection type was found and the other pixels don't need to be checked anymore.
  */
 bool FModRenderInterface::ProcessHitColor(FColor HitColor, INT* OutIndex){
-	INT Index;
-
-	if(RenDev->LockedViewport->ColorBytes == 2)
-		Index = (HitColor.R & 0x40) | ((HitColor.G << 6) & 0x40) | HitColor.B << 11;
-	else
-		Index = HitColor.R | HitColor.G << 8;
+	INT Index = HitColor.R | HitColor.G << 8 | HitColor.B << 16;
 
 	--Index; // Index was incremented before drawing so that a value of 0 means 'no selection'. Here it is decremented again to get the actual array index.
 
 	if(Index >= 0 && Index < AllHitData.Num() - (INT)sizeof(HHitProxy)){
 		FHitProxyInfo* Info = reinterpret_cast<FHitProxyInfo*>(&AllHitData[Index]);
-
-		if(Info->Type < 0 || Info->Type >= HP_MAX) // Happens in the texture browser sometimes. No idea why...
-			return false;
-
 		HHitProxy* HitProxy = reinterpret_cast<HHitProxy*>(&AllHitData[Index + sizeof(FHitProxyInfo)]);
-
-		if(HitProxy->Size < static_cast<INT>(sizeof(HHitProxy)) || HitProxy->Size > 128) // Detect invalid data. Stupid "fix" but idk why this would even happen in the first place.
-			return false;
-
 		AActor* HitActor = HitProxy->GetActor();
 
 		*OutIndex = Index;
@@ -448,11 +435,11 @@ bool FModRenderInterface::ProcessHitColor(FColor HitColor, INT* OutIndex){
 
 void FModRenderInterface::ProcessHit(INT HitProxyIndex){
 	if(HitProxyIndex >= 0 && HitProxyIndex < AllHitData.Num() - (INT)sizeof(HHitProxy)){
-		_WORD ParentIndices[32];
-		INT   NumParents = 0;
+		INT ParentIndices[32];
+		INT NumParents = 0;
 
 		// Collecting all parents of the successful hit
-		for(SWORD ParentIndex = reinterpret_cast<FHitProxyInfo*>(&AllHitData[HitProxyIndex])->ParentIndex;
+		for(INT ParentIndex = reinterpret_cast<FHitProxyInfo*>(&AllHitData[HitProxyIndex])->ParentIndex;
 			ParentIndex != INDEX_NONE;
 			ParentIndex = reinterpret_cast<FHitProxyInfo*>(&AllHitData[ParentIndex])->ParentIndex){
 
@@ -535,7 +522,7 @@ void FModRenderInterface::PushHit(const BYTE* Data, INT Count){
 	else
 		appErrorf("Unknown hit proxy type '%s'", Name);
 
-	_WORD HitDataIndex = AllHitData.Add(sizeof(FHitProxyInfo) + Count, false);
+	INT HitDataIndex = AllHitData.Add(sizeof(FHitProxyInfo) + Count, false);
 	FHitProxyInfo Info(HitProxyStack.Num() > 0 ? HitProxyStack.Last().Index : INDEX_NONE, HitType);
 
 	appMemcpy(&AllHitData[HitDataIndex], &Info, sizeof(FHitProxyInfo));
@@ -551,7 +538,7 @@ void FModRenderInterface::DrawPrimitive(EPrimitiveType PrimitiveType, INT FirstI
 	UHardwareShader* Shader;
 
 	if(HitProxyStack.Num() > 0){
-		_WORD          HitDataIndex = HitProxyStack.Last().Index;
+		INT            HitDataIndex = HitProxyStack.Last().Index;
 		FHitProxyInfo* Info = reinterpret_cast<FHitProxyInfo*>(&AllHitData[HitDataIndex]);
 		AActor*        HitActor = reinterpret_cast<HHitProxy*>(reinterpret_cast<BYTE*>(Info) + sizeof(FHitProxyInfo))->GetActor();
 
@@ -567,18 +554,11 @@ void FModRenderInterface::DrawPrimitive(EPrimitiveType PrimitiveType, INT FirstI
 
 		++HitDataIndex; // Adding 1 because 0 means no hit. This is subtracted again later.
 
-		if(RenDev->LockedViewport->ColorBytes == 2){
-			checkSlow(HitDataIndex < 32768);
+		checkSlow(RenDev->LockedViewport->ColorBytes == 3 || RenDev->LockedViewport->ColorBytes == 4);
 
-			Shader->PSConstants[0].Value.X = (HitDataIndex & 0x1F) / 31.0f;
-			Shader->PSConstants[0].Value.Y = ((HitDataIndex >> 5) & 0x1F) / 31.0f;
-			Shader->PSConstants[0].Value.Z = ((HitDataIndex >> 10) & 0x1F) / 31.0f;
-		}else{
-			checkSlow(RenDev->LockedViewport->ColorBytes == 3 || RenDev->LockedViewport->ColorBytes == 4);
-
-			Shader->PSConstants[0].Value.X = LOBYTE(HitDataIndex) / 255.0f;
-			Shader->PSConstants[0].Value.Y = HIBYTE(HitDataIndex) / 255.0f;
-		}
+		Shader->PSConstants[0].Value.X = static_cast<BYTE>(HitDataIndex) / 255.0f;
+		Shader->PSConstants[0].Value.Y = static_cast<BYTE>(HitDataIndex >> 8) / 255.0f;
+		Shader->PSConstants[0].Value.Z = static_cast<BYTE>(HitDataIndex >> 16) / 255.0f;
 	}else{
 		Shader = UModRenderDevice::GeneralSelectionShader;
 		Shader->PSConstants[0].Value = FPlane(0.0f, 0.0f, 0.0f, 0.0f);
@@ -781,23 +761,7 @@ void UModRenderDevice::Unlock(FRenderInterface* RI){
 
 		switch(LockedViewport->ColorBytes){
 		case 2:
-			{
-				_WORD* src = (_WORD*)LockedRect.pBits;
-				src = (_WORD*)((BYTE*)src + LockedViewport->HitX * 2 + LockedViewport->HitY * LockedRect.Pitch);
-
-				for(INT Y = -LockedViewport->HitYL; Y < LockedViewport->HitYL; Y++, src = (_WORD*)((BYTE*)src + LockedRect.Pitch)){
-					for(INT X = -LockedViewport->HitXL; X < LockedViewport->HitXL; X++){
-						if(src + X >= LockedRect.pBits && src[X] != 0x0){
-							FColor HitColor = FColor((src[X] >> 11) << 3, ((src[X] >> 6) & 0x3f) << 2, (src[X] & 0x1f) << 3);
-
-							if(RenderInterface.ProcessHitColor(HitColor, &HitProxyIndex) || (HitProxyIndex != INDEX_NONE && X == 0 && Y == 0)) // Hits at the center of the hit area are preferred.
-								goto end_pixel_check;
-						}
-					}
-				}
-
-				break;
-			}
+			appMsgf(3, "16-bit color is not supported when using the selection fix. Switch to 32 or use the 'FIXSELECT' command to toggle the fix off");
 		case 3:
 			{
 				BYTE* src = (BYTE*)LockedRect.pBits;

@@ -28,16 +28,16 @@ struct FHitProxyStackEntry{
 	INT       Index;
 	EHitProxy Type;
 
-	FHitProxyStackEntry(_WORD InIndex, EHitProxy InType) : Index(InIndex),
-	                                                       Type(InType){}
+	FHitProxyStackEntry(INT InIndex, EHitProxy InType) : Index(InIndex),
+	                                                     Type(InType){}
 };
 
 struct FHitProxyInfo{
 	INT       ParentIndex; // INDEX_NONE if no parent
 	EHitProxy Type;
 
-	FHitProxyInfo(SWORD InParentIndex, EHitProxy InType) : ParentIndex(InParentIndex),
-	                                                       Type(InType){}
+	FHitProxyInfo(INT InParentIndex, EHitProxy InType) : ParentIndex(InParentIndex),
+	                                                     Type(InType){}
 };
 
 class UModRenderDevice;

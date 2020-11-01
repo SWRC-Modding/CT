@@ -469,8 +469,8 @@ void FModRenderInterface::ProcessHit(INT HitProxyIndex){
 
 void FModRenderInterface::PushHit(const BYTE* Data, INT Count){
 	checkSlow(GIsEditor);
-	checkSlow(UModRenderDevice::GeneralSelectionShader);
-	checkSlow(UModRenderDevice::SpriteSelectionShader);
+	checkSlow(UModRenderDevice::SolidSelectionShader);
+	checkSlow(UModRenderDevice::AlphaSelectionShader);
 	checkSlow(HitData);
 	checkSlow(HitSize);
 
@@ -491,6 +491,37 @@ void FModRenderInterface::PopHit(INT Count, UBOOL Force){
 	HitStack.Pop();
 }
 
+void FModRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorString, UMaterial** ErrorMaterial, INT* NumPasses){
+	Impl->SetMaterial(Material, ErrorString, ErrorMaterial, NumPasses);
+
+	// Checking whether the current material has a texture with an alpha channel somewhere down the hierarchy.
+	// If it has, it is used to draw the selection buffer for more accuracy. If not, the polygons are completly filled.
+	while(Material){
+		if(Material->IsA<UBitmapMaterial>()){
+			UTexture* Tmp = Cast<UTexture>(Material);
+
+			if(Tmp && Tmp->bAlphaTexture)
+				CurrentTexture = static_cast<UBitmapMaterial*>(Material);
+			else
+				CurrentTexture = NULL;
+
+			return;
+		}else if(Material->IsA<UShader>()){
+			Material = static_cast<UShader*>(Material)->Diffuse;
+		}else{
+			Material = NULL;
+		}
+	}
+
+	CurrentTexture = NULL;
+}
+
+UBOOL FModRenderInterface::SetHardwareShaderMaterial(UHardwareShader* Material, FString* ErrorString, UMaterial** ErrorMaterial){
+	CurrentTexture = NULL;
+
+	return Impl->SetHardwareShaderMaterial(Material, ErrorString, ErrorMaterial);
+}
+
 void FModRenderInterface::DrawPrimitive(EPrimitiveType PrimitiveType, INT FirstIndex, INT NumPrimitives, INT MinIndex, INT MaxIndex){
 	UHardwareShader* Shader;
 
@@ -499,12 +530,19 @@ void FModRenderInterface::DrawPrimitive(EPrimitiveType PrimitiveType, INT FirstI
 		FHitProxyInfo* Info = reinterpret_cast<FHitProxyInfo*>(&AllHitData[HitDataIndex]);
 		AActor*        HitActor = reinterpret_cast<HHitProxy*>(reinterpret_cast<BYTE*>(Info) + sizeof(FHitProxyInfo))->GetActor();
 
-		if(HitActor && HitActor->DrawType == DT_Sprite){
-			Shader = UModRenderDevice::SpriteSelectionShader;
+		if(HitActor && HitActor->DrawType == DT_Sprite){ // Sprites are drawn with alpha regardless of whether UTexture::bAlphaTexture is set or not so we need to check for it
+			Shader = UModRenderDevice::AlphaSelectionShader;
 			Shader->Textures[0] = Cast<UBitmapMaterial>(HitActor->Texture);
 		}else{
-			Shader = UModRenderDevice::GeneralSelectionShader;
-			Shader->ZTest = !(HitActor && (HitActor->DrawType == DT_Brush || HitActor->DrawType == DT_AntiPortal)); // Disable ZTest for brushes since they are rendered on top of everything else
+			// Alpha is ignored in the texture browser since there it should be possible to click anywhere on a texture to select it
+			if(CurrentTexture &&
+			   appStricmp(reinterpret_cast<HHitProxy*>(&AllHitData[HitStack.Last() + sizeof(FHitProxyInfo)])->GetName(), "HBrowserMaterial") != 0){
+				Shader = UModRenderDevice::AlphaSelectionShader;
+				Shader->Textures[0] = CurrentTexture;
+			}else{
+				Shader = UModRenderDevice::SolidSelectionShader;
+				Shader->ZTest = !(HitActor && (HitActor->DrawType == DT_Brush || HitActor->DrawType == DT_AntiPortal)); // Disable ZTest for brushes since they are rendered on top of everything else
+			}
 		}
 
 		// Convert index to shader color
@@ -517,17 +555,12 @@ void FModRenderInterface::DrawPrimitive(EPrimitiveType PrimitiveType, INT FirstI
 		Shader->PSConstants[0].Value.Y = static_cast<BYTE>(HitDataIndex >> 8) / 255.0f;
 		Shader->PSConstants[0].Value.Z = static_cast<BYTE>(HitDataIndex >> 16) / 255.0f;
 	}else{
-		Shader = UModRenderDevice::GeneralSelectionShader;
+		Shader = UModRenderDevice::SolidSelectionShader;
 		Shader->PSConstants[0].Value = FPlane(0.0f, 0.0f, 0.0f, 0.0f);
 	}
 
 	SetHardwareShaderMaterial(Shader, NULL, NULL);
-
-	UBOOL Fog = IsFogEnabled();
-
-	EnableFog(0);
 	Impl->DrawPrimitive(PrimitiveType, FirstIndex, NumPrimitives, MinIndex, MaxIndex);
-	EnableFog(Fog);
 }
 
 /*
@@ -589,42 +622,42 @@ UBOOL UModRenderDevice::Init(){
 			FOVChanger->ProcessEvent(NAME_Init, NULL);
 		}
 	}else{
-		if(!GeneralSelectionShader){
+		if(!SolidSelectionShader){
 			// Initialize shader used for selection in the editor
-			GeneralSelectionShader = new UHardwareShader();
+			SolidSelectionShader = new UHardwareShader();
 
-			GeneralSelectionShader->VertexShaderText = "vs.1.1\n"
-			                                           "m4x4 r0, v0, c0\n"
-			                                           "mov oPos, r0\n";
-			GeneralSelectionShader->PixelShaderText = "ps.1.1\n"
-			                                          "mov r0, c0\n";
-			GeneralSelectionShader->VSConstants[0].Type = EVC_ObjectToScreenMatrix;
-			GeneralSelectionShader->PSConstants[0].Type = EVC_MaterialDefined;
-			GeneralSelectionShader->ZTest = 1;
-			GeneralSelectionShader->ZWrite = 1;
+			SolidSelectionShader->VertexShaderText = "vs.1.1\n"
+			                                         "m4x4 r0, v0, c0\n"
+			                                         "mov oPos, r0\n";
+			SolidSelectionShader->PixelShaderText = "ps.1.1\n"
+			                                        "mov r0, c0\n";
+			SolidSelectionShader->VSConstants[0].Type = EVC_ObjectToScreenMatrix;
+			SolidSelectionShader->PSConstants[0].Type = EVC_MaterialDefined;
+			SolidSelectionShader->ZTest = 1;
+			SolidSelectionShader->ZWrite = 1;
 		}
 
-		if(!SpriteSelectionShader){
-			// Initialize shader used for selection of sprites with alpha channel in the editor
-			SpriteSelectionShader = new UHardwareShader();
+		if(!AlphaSelectionShader){
+			// Initialize shader used for selection of objects with alpha channel in the editor
+			AlphaSelectionShader = new UHardwareShader();
 
-			SpriteSelectionShader->VertexShaderText = "vs.1.1\n"
-			                                          "m4x4 r0, v0, c0\n"
-			                                          "mov oPos, r0\n"
-			                                          "mov oT0, v1";
-			SpriteSelectionShader->PixelShaderText = "ps.1.1\n"
-			                                         "tex t0\n"
-			                                         "mov r0, c0\n"
-			                                         "mad r0, t0, c1, r0\n";
-			SpriteSelectionShader->StreamMapping.AddItem(FVF_Position);
-			SpriteSelectionShader->StreamMapping.AddItem(FVF_TexCoord0);
-			SpriteSelectionShader->VSConstants[0].Type = EVC_ObjectToScreenMatrix;
-			SpriteSelectionShader->PSConstants[0].Type = EVC_MaterialDefined;
-			SpriteSelectionShader->PSConstants[1].Type = EVC_MaterialDefined;
-			SpriteSelectionShader->PSConstants[1].Value = FPlane(0.0f, 0.0f, 0.0f, 1.0f);
-			SpriteSelectionShader->ZTest = 1;
-			SpriteSelectionShader->ZWrite = 1;
-			SpriteSelectionShader->AlphaTest = 1;
+			AlphaSelectionShader->VertexShaderText = "vs.1.1\n"
+			                                         "m4x4 r0, v0, c0\n"
+			                                         "mov oPos, r0\n"
+			                                         "mov oT0, v1\n";
+			AlphaSelectionShader->PixelShaderText = "ps.1.1\n"
+			                                        "tex t0\n"
+			                                        "mov r0, c0\n"
+			                                        "mad r0, t0, c1, r0\n";
+			AlphaSelectionShader->StreamMapping.AddItem(FVF_Position);
+			AlphaSelectionShader->StreamMapping.AddItem(FVF_TexCoord0);
+			AlphaSelectionShader->VSConstants[0].Type = EVC_ObjectToScreenMatrix;
+			AlphaSelectionShader->PSConstants[0].Type = EVC_MaterialDefined;
+			AlphaSelectionShader->PSConstants[1].Type = EVC_MaterialDefined;
+			AlphaSelectionShader->PSConstants[1].Value = FPlane(0.0f, 0.0f, 0.0f, 1.0f);
+			AlphaSelectionShader->ZTest = 1;
+			AlphaSelectionShader->ZWrite = 1;
+			AlphaSelectionShader->AlphaTest = 1;
 		}
 	}
 
@@ -684,7 +717,8 @@ FRenderInterface* UModRenderDevice::Lock(UViewport* Viewport, BYTE* HitData, INT
 
 	LockedViewport = Viewport;
 
-	if(bEnableSelectionFix && GIsEditor && RI && HitData && Cast<UEditorEngine>(GEngine)->Mode != EM_EyeDropper){
+	if(bEnableSelectionFix && GIsEditor && RI && HitData && CastChecked<UEditorEngine>(GEngine)->Mode != EM_EyeDropper){
+		RI->EnableFog(0); // No fog in the selection buffer or else there will be wrong color values.
 		RenderInterface.Impl = RI;
 		RenderInterface.HitData = HitData;
 		RenderInterface.HitSize = HitSize;
@@ -776,7 +810,7 @@ end_pixel_check:
 
 UObject*         UModRenderDevice::FOVChanger = NULL;
 FLOAT            UModRenderDevice::FpsLimit   = 0.0f;
-UHardwareShader* UModRenderDevice::GeneralSelectionShader = NULL;
-UHardwareShader* UModRenderDevice::SpriteSelectionShader = NULL;
+UHardwareShader* UModRenderDevice::SolidSelectionShader = NULL;
+UHardwareShader* UModRenderDevice::AlphaSelectionShader = NULL;
 
 IMPLEMENT_CLASS(UModRenderDevice)

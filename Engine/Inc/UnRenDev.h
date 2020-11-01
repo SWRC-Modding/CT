@@ -80,7 +80,7 @@ enum EPrecacheMode{
 	PRECACHE_All
 };
 
-class ENGINE_API FRenderInterface{
+class FRenderInterface{
 public:
 	virtual void PushState(int) = 0;
 	virtual void PopState(int) = 0;

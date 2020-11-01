@@ -594,6 +594,9 @@ public:
 	void ParseParms(const TCHAR* Parms);
 	void ProcessEvent(FName Event, void* Parms, void* UnusedResult = NULL);
 
+	template<typename T>
+	UBOOL IsA() const{ return IsA(T::StaticClass()); }
+
 	// By-name arbitrary field accessors.
 
 	UBOOL FindArrayProperty(FString Name, FArray** Array, INT* ElementSize);

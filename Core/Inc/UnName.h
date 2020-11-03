@@ -105,10 +105,10 @@ private:
 	FNameEntry* Entry; // Names in RC store a pointer to the name entry instead of an index into the Names array
 
 	// Static subsystem variables
-	static TArray<FNameEntry*> Names;          // Table of all names.
-	static TArray<INT>         Available;      // Indices of available names.
-	static FNameEntry*         NameHash[4096]; // Hashed names.
-	static bool                Initialized;    // Subsystem initialized.
+	CORE_API static TArray<FNameEntry*> Names;          // Table of all names.
+	CORE_API static TArray<INT>         Available;      // Indices of available names.
+	CORE_API static FNameEntry*         NameHash[4096]; // Hashed names.
+	CORE_API static bool                Initialized;    // Subsystem initialized.
 };
 
 inline DWORD GetTypeHash(const FName N){

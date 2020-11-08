@@ -82,16 +82,10 @@ static void __fastcall ScriptFunctionHook(UObject* Self, int, FFrame& Stack, voi
 	Override->CurrentSelf = Self;
 
 	if(Self == Override->TargetObject || !Override->TargetObject){
-		if(IsEvent){
-			Stack.Object = Override->OverrideObject;
-			Stack.Code = &Override->OverrideFunction->Script[0];
-			Stack.Node = Override->OverrideFunction;
-			(Override->OverrideObject->*Override->OverrideFunction->Func)(Stack, Result);
-			Stack.Node = Function;
-			Stack.Object = Self;
-		}else{
+		if(IsEvent)
+			Override->OverrideObject->ProcessEvent(Override->OverrideFunction, Stack.Locals);
+		else
 			Override->OverrideObject->CallFunction(Stack, Result, Override->OverrideFunction);
-		}
 	}else{
 		if(IsEvent)
 			(Self->*Function->Func)(Stack, Result);

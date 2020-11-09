@@ -431,6 +431,27 @@ class EDITOR_API UTransBuffer : public UObject{
 public:
 	DECLARE_CLASS(UTransBuffer,UObject,0,Editor)
 	NO_DEFAULT_CONSTRUCTOR(UTransBuffer)
+
+	UTransBuffer(SIZE_T InMaxMemory);
+
+	// UObject interface
+	virtual void Destroy();
+	virtual void Serialize(FArchive& Ar);
+
+	// UTransBuffer interface
+	virtual void Reset(const TCHAR* Reason);
+	virtual void Begin(const TCHAR* SessionName);
+	virtual void End();
+	virtual void Continue();
+	virtual UBOOL CanUndo(FString* Str = NULL);
+	virtual UBOOL CanRedo(FString* Str = NULL);
+	virtual int Undo();
+	virtual int Redo();
+	virtual FTransactionBase* CreateInternalTransaction();
+
+	void FinishDo();
+	void CheckState();
+	SIZE_T UndoDataSize();
 };
 
 /*

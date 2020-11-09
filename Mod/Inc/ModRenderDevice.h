@@ -34,7 +34,7 @@ public:
 	virtual void PopState(int a){ Impl->PopState(a); }
 	virtual UBOOL SetRenderTarget(FRenderTarget* RenderTarget, bool a){ return 0; }
 	virtual void SetViewport(INT X, INT Y, INT Width, INT Height){ Impl->SetViewport(X, Y, Width, Height); }
-	virtual void Clear(UBOOL UseColor, FColor Color, UBOOL UseDepth, FLOAT Depth, UBOOL UseStencil, DWORD Stencil){ Impl->Clear(UseColor, Color, UseDepth, Depth, UseStencil, Stencil); }
+	virtual void Clear(UBOOL UseColor, FColor Color, UBOOL UseDepth, FLOAT Depth, UBOOL UseStencil, DWORD Stencil){ Impl->Clear(UseColor, FColor(0x00000000), UseDepth, Depth, UseStencil, Stencil); }
 	virtual void PushHit(const BYTE* Data, INT Count);
 	virtual void PopHit(INT Count, UBOOL Force);
 	virtual void SetCullMode(ECullMode CullMode){ Impl->SetCullMode(CullMode); }
@@ -82,6 +82,9 @@ public:
 	FModRenderInterface RenderInterface;
 	UBOOL               bEnableSelectionFix;
 	UBOOL               bDebugSelectionBuffer; // Shows the selection buffer for five seconds after a click
+
+	// Saved color values from UEngine
+	FColor C_ActorArrow;
 
 	UModRenderDevice() : RenderInterface(this){}
 	void StaticConstructor(){ bEnableSelectionFix = 1; }

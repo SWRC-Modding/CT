@@ -720,13 +720,15 @@ UBOOL UModRenderDevice::Exec(const TCHAR* Cmd, FOutputDevice& Ar){
 FRenderInterface* UModRenderDevice::Lock(UViewport* Viewport, BYTE* HitData, INT* HitSize){
 	FRenderInterface* RI = Super::Lock(Viewport, HitData, HitSize);
 
-	LockedViewport = Viewport;
-
 	if(bEnableSelectionFix && GIsEditor && RI && HitData && CastChecked<UEditorEngine>(GEngine)->Mode != EM_EyeDropper){
+		LockedViewport = Viewport;
 		RI->EnableFog(0); // No fog in the selection buffer or else there will be wrong color values.
 		RenderInterface.Impl = RI;
 		RenderInterface.HitData = HitData;
 		RenderInterface.HitSize = HitSize;
+		// Storing color values
+		C_ActorArrow = GEngine->C_ActorArrow;
+		GEngine->C_ActorArrow = FColor(0x00000000);
 
 		return &RenderInterface;
 	}
@@ -735,6 +737,8 @@ FRenderInterface* UModRenderDevice::Lock(UViewport* Viewport, BYTE* HitData, INT
 }
 
 void UModRenderDevice::Unlock(FRenderInterface* RI){
+	checkSlow(LockedViewport);
+
 	if(RI == &RenderInterface){
 		checkSlow(RenderInterface.HitData);
 		checkSlow(RenderInterface.HitSize);
@@ -802,7 +806,10 @@ end_pixel_check:
 		Super::Unlock(RenderInterface.Impl);
 		RenderInterface.ProcessHit(HitProxyIndex);
 
-		if(bDebugSelectionBuffer && LockedViewport){
+		// Restoring color values
+		GEngine->C_ActorArrow = C_ActorArrow;
+
+		if(bDebugSelectionBuffer){
 			LockedViewport->Present();
 			appSleep(3.0f);
 		}

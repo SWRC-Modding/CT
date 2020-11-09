@@ -417,10 +417,12 @@ struct ENGINE_API HHitProxy{
 //
 class ENGINE_API UClient : public UObject{
 	DECLARE_ABSTRACT_CLASS(UClient,UObject,CLASS_Config,Engine)
-
+public:
 	// Variables.
 	UEngine*			Engine;
 	TArray<UViewport*>	Viewports;
+	char                Padding[192]; // PADDING!!!
+/*
 	INT					DrawCycles;
 
 	// Configurable.
@@ -442,6 +444,7 @@ class ENGINE_API UClient : public UObject{
 	INT			TextureLODSet[LODSET_MAX];
 	FLOAT		MinDesiredFrameRate;
 	INT			ParticleDensity;
+*/
 
 	// Constructors.
 	UClient();
@@ -453,14 +456,46 @@ class ENGINE_API UClient : public UObject{
 	void PostEditChange();
 
 	// UClient interface.
-	virtual void Init( UEngine* InEngine )=0;
-	virtual void Flush( UBOOL AllowPrecache );
-	virtual void ShowViewportWindows( DWORD ShowFlags, int DoShow )=0;
-	virtual void EnableViewportWindows( DWORD ShowFlags, int DoEnable )=0;
-	virtual void Tick()=0;
-	virtual UBOOL Exec( const TCHAR* Cmd, FOutputDevice& Ar=*GLog )=0;
-	virtual class UViewport* NewViewport( const FName Name )=0;
-	virtual void MakeCurrent( UViewport* NewViewport )=0;
+	virtual void Init(UEngine* InEngine) = 0;
+	virtual void Flush(UBOOL AllowPrecache);
+	virtual void UpdateGamma();
+	virtual void RestoreGamma();
+	virtual void ShowViewportWindows(DWORD ShowFlags, int DoShow) = 0;
+	virtual void EnableViewportWindows(DWORD ShowFlags, int DoEnable) = 0;
+	virtual void Tick() = 0;
+	virtual UBOOL Exec(const TCHAR* Cmd, FOutputDevice& Ar = *GLog) = 0;
+	virtual UViewport* NewViewport(const FName Name) = 0;
+	virtual void MakeCurrent(UViewport* NewViewport) = 0;
+	virtual UViewport* GetLastCurrent() = 0;
+	virtual class BaseMovie* CreateMoviePlayer();
+	virtual bool StartMovie(FString, bool);
+	virtual void StopMovie();
+	virtual bool IsMoviePlaying();
+	virtual bool UpdateMovie();
+	virtual bool CreateSaveContainer(FString, FString&) = 0;
+	virtual bool GetSaveContainer(FString, FString&) = 0;
+	virtual bool GetSavesAndContainers(FString, TArray<FString>&, TArray<FString>&) = 0;
+	virtual bool DeleteSaveAndContainer(FString) = 0;
+	virtual bool VerifySave(FString);
+	virtual bool VerifyFile(FString);
+	virtual QWORD GetFreeDiscSpace(FString);
+	virtual QWORD GetSaveGameDiscSpaceRequired();
+	virtual QWORD GetProfileDiscSpaceRequired();
+	virtual QWORD GetXboxLiveDiscSpaceRequired();
+	virtual DWORD GetSaveGamePadSize() const;
+	virtual void SetRumbleFX(unsigned char, float, float, float, float);
+	virtual bool CheckPad(unsigned char);
+	virtual void GetPadState(unsigned char, TArray<unsigned char>&, FVector&, FVector&);
+	virtual void DisassociateViewportPads();
+	virtual void DialogMenu(FString, FString, UViewport*, bool);
+	virtual void ReleaseAllPadButtons();
+	virtual void PendingToBeDestroyed(UPendingLevel*);
+
+	int GetTextureLODBias(ELODSet);
+	bool WarningLostLink();
+
+protected:
+	static void MovieFinishedCallback();
 };
 
 /*-----------------------------------------------------------------------------

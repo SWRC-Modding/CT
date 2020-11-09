@@ -1,8 +1,8 @@
 struct FProfile{
-	FString Idk1;
-	FString Idk2;
-	FString Idk3;
-	INT     Idk4;
+	FString Name;
+	FString UserIni;
+	FString Directory;
+	INT     Idk4; // Probably a UBOOL
 };
 
 // Name is misleading as this does not inherit from UObject
@@ -17,17 +17,17 @@ public:
 	void ReloadProfile(int);
 
 	virtual void Init(class UClient*, FString);
-	virtual void Tick(float);
-	virtual int Exec(const char*, FOutputDevice&);
-	virtual void Serialize(FArchive&);
+	virtual void Tick(FLOAT DeltaTime);
+	virtual int Exec(const TCHAR* Cmd, FOutputDevice& Ar);
+	virtual void Serialize(FArchive& Ar);
 	virtual void Destroy();
-	virtual FString GetProfileDirectory(FString const&);
+	virtual FString GetProfileDirectory(const FString& Name);
 
 protected:
-	INT CurrentProfile;
+	INT Idk; // Seems to be uninitialized
 	TArray<FProfile> Profiles;
-	INT Idk1;
-	FString Idk2;
+	INT CurrentProfile;
+	FString DirectoryPrefix;
 
 	static UProfileManager* msProfileMgr;
 
@@ -38,7 +38,7 @@ protected:
 	virtual int DeleteProfile(int, int, int);
 	virtual int AddProfileInfo(const FString&, int);
 
-	int FindProfileIndex(const FString&);
+	int FindProfileIndex(const FString& Name);
 	FString FindProfiles(int);
 	FString FormatProfileList(TArray<FString>&);
 	FString GetProfileFilename(const FString&, int);

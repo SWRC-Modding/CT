@@ -406,7 +406,7 @@ FModRenderInterface::FModRenderInterface(UModRenderDevice* InRenDev){
 
 /*
  * Converts a color value read from the frame buffer to an index that is stored in OutIndex.
- * If this function returns true, it means that a 'preferred' selection type was found and the other pixels don't need to be checked anymore.
+ * If this function returns true, it means that a 'preferred' selection type was found which should be used if there are more than one possible selections.
  */
 bool FModRenderInterface::ProcessHitColor(FColor HitColor, INT* OutIndex){
 	INT Index = HitColor.R | HitColor.G << 8 | HitColor.B << 16;
@@ -757,50 +757,50 @@ void UModRenderDevice::Unlock(FRenderInterface* RI){
 
 		RenderTarget->LockRect(&LockedRect, NULL, 0);
 
-		INT  HitProxyIndex = INDEX_NONE;
+		INT HitProxyIndex = INDEX_NONE;
 
-		switch(LockedViewport->ColorBytes){
-		case 2:
+		if(LockedViewport->ColorBytes != 4){
 			appMsgf(3, "16-bit color is not supported when using the selection fix. Switch to 32 or use the 'FIXSELECT' command to toggle the fix off");
-		case 3:
-			{
-				BYTE* src = (BYTE*)LockedRect.pBits;
-				src = src + LockedViewport->HitX * 3  + LockedViewport->HitY * LockedRect.Pitch;
+		}else{
+			// The actual hit test location is offset by two pixels so that it is at the center of the cross cursor.
+			INT HitX = LockedViewport->HitX + 2;
+			INT HitY = LockedViewport->HitY + 2;
+			INT PreferredHitProxyIndex = INDEX_NONE;
+			FLOAT PreferredHitDist = 999999.0f;
+			FLOAT HitDist = 999999.0f;
+			DWORD* src = (DWORD*)LockedRect.pBits;
+			src = (DWORD*)((BYTE*)src + HitX * 4 + (HitY - LockedViewport->HitYL) * LockedRect.Pitch);
 
-				for(INT Y = -LockedViewport->HitYL; Y < LockedViewport->HitYL; Y++, src += LockedRect.Pitch){
-					for(INT X = -LockedViewport->HitXL; X < LockedViewport->HitXL; X++){
-						if(src + X >= LockedRect.pBits && *((DWORD*)&src[X * 3])){
-							FColor HitColor = FColor(src[X * 3] + 2, src[X * 3] + 1, src[X * 3]);
+			/*
+			 * Hits are checked in a square area to make it easier to select stuff that is only a few pixels in size.
+			 * Some hit types are preferred over others. E.g the gizmo axes or wireframe brushes. If there is more than one possible selection, the preferred ones will be used.
+			 * If there is no preferred selection type, anything at the exact cursor position is also considered a preferred selection.
+			 */
+			for(INT Y = -LockedViewport->HitYL; Y < LockedViewport->HitYL + 1; Y++, src = (DWORD*)((BYTE*)src + LockedRect.Pitch)){
+				for(INT X = -LockedViewport->HitXL; X < LockedViewport->HitXL + 1; X++){
+					if(src + X >= LockedRect.pBits && src[X] != 0x0){
+						FColor HitColor = FColor((src[X] >> 16) & 0xff, (src[X] >> 8) & 0xff, (src[X]) & 0xff);
+						INT Index = INDEX_NONE;
+						FLOAT Dist = FVector(X, Y, 0.0f).Size2D(); // Distance of the hit from the center of the hit area. The closer it is, the higher the priority over other hits.
 
-							if(RenderInterface.ProcessHitColor(HitColor, &HitProxyIndex) || (HitProxyIndex != INDEX_NONE && X == 0 && Y == 0)) // Hits at the center of the hit area are preferred.
-								goto end_pixel_check;
+						if(RenderInterface.ProcessHitColor(HitColor, &Index)){
+							if(Dist < PreferredHitDist){
+								PreferredHitDist = Dist;
+								PreferredHitProxyIndex = Index;
+							}
+						}else if(Index >= 0){
+							if(Dist < HitDist){
+								HitDist = Dist;
+								HitProxyIndex = Index;
+							}
 						}
 					}
 				}
-
-				break;
 			}
-		case 4:
-			{
-				DWORD* src = (DWORD*)LockedRect.pBits;
-				src = (DWORD*)((BYTE*)src + LockedViewport->HitX * 4 + LockedViewport->HitY * LockedRect.Pitch);
 
-				for(INT Y = -LockedViewport->HitYL; Y < LockedViewport->HitYL; Y++, src = (DWORD*)((BYTE*)src + LockedRect.Pitch)){
-					for(INT X = -LockedViewport->HitXL; X < LockedViewport->HitXL; X++){
-						if(src + X >= LockedRect.pBits && src[X] != 0x0){
-							FColor HitColor = FColor((src[X] >> 16) & 0xff, (src[X] >> 8) & 0xff, (src[X]) & 0xff);
-
-							if(RenderInterface.ProcessHitColor(HitColor, &HitProxyIndex) || (HitProxyIndex != INDEX_NONE && X == 0 && Y == 0)) // Hits at the center of the hit area are preferred.
-								goto end_pixel_check;
-						}
-					}
-				}
-
-				break;
-			}
+			if(PreferredHitProxyIndex >= 0)
+				HitProxyIndex = PreferredHitProxyIndex;
 		}
-
-end_pixel_check:
 
 		RenderTarget->UnlockRect();
 		Super::Unlock(RenderInterface.Impl);

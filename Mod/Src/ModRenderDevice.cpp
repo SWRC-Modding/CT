@@ -459,7 +459,12 @@ void FModRenderInterface::ProcessHit(INT HitProxyIndex){
 		appMemcpy(HitData + HitCount, Hit, Hit->Size);
 		*HitSize = HitCount + Hit->Size;
 	}else{
-		CastChecked<UEditorEngine>(GEngine)->Exec_Select("NONE", *GLog);
+		// Select nothing
+		UEditorEngine* Editor = CastChecked<UEditorEngine>(GEngine);
+
+		Editor->Trans->Begin("Select None");
+		Editor->SelectNone(Editor->Level, 1, 1);
+		Editor->Trans->End();
 	}
 
 	HitStack.Empty();

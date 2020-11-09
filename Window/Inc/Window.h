@@ -1096,17 +1096,22 @@ class WINDOW_API WDialog : public WWindow{
 	WDialog(){}
 	WDialog(FName InPersistentName, INT InDialogId, WWindow* InOwnerWindow = NULL);
 
-	INT CallDefaultProc(UINT Message, UINT wParam, LONG lParam);
-	virtual INT DoModal(HINSTANCE hInst=hInstanceWindow);
-	void OpenChildWindow(INT InControlId, UBOOL Visible);
-	static UBOOL CALLBACK LocalizeTextEnumProc(HWND hInWmd, LPARAM lParam);
-	virtual void LocalizeText(const TCHAR* Section, const TCHAR* Package=GPackage);
+	// WWindow interface
 	virtual void OnInitDialog();
-	void EndDialog(INT Result);
+	virtual void Show(UBOOL Show);
+
+	// WDialog interface
+	virtual void LocalizeText(const TCHAR* Section, const TCHAR* Package=GPackage);
+
 	void EndDialogTrue();
 	void EndDialogFalse();
+	void EndDialog(INT Result);
+	INT CallDefaultProc(UINT Message, UINT wParam, LONG lParam);
+	void OpenChildWindow(INT InControlId, UBOOL Visible);
 	void CenterInOwnerWindow();
-	virtual void Show(UBOOL Show);
+	INT DoModal(HINSTANCE hInst = hInstanceWindow);
+
+	static UBOOL CALLBACK LocalizeTextEnumProc(HWND hInWmd, LPARAM lParam);
 };
 
 /*-----------------------------------------------------------------------------

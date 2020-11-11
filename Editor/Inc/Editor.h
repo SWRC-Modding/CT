@@ -431,11 +431,63 @@ class EDITOR_API UTransBuffer : public UObject{
 public:
 	DECLARE_CLASS(UTransBuffer,UObject,0,Editor)
 	NO_DEFAULT_CONSTRUCTOR(UTransBuffer)
+
+	UTransBuffer(SIZE_T InMaxMemory);
+
+	// UObject interface
+	virtual void Destroy();
+	virtual void Serialize(FArchive& Ar);
+
+	// UTransBuffer interface
+	virtual void Reset(const TCHAR* Reason);
+	virtual void Begin(const TCHAR* SessionName);
+	virtual void End();
+	virtual void Continue();
+	virtual UBOOL CanUndo(FString* Str = NULL);
+	virtual UBOOL CanRedo(FString* Str = NULL);
+	virtual int Undo();
+	virtual int Redo();
+	virtual FTransactionBase* CreateInternalTransaction();
+
+	void FinishDo();
+	void CheckState();
+	SIZE_T UndoDataSize();
 };
 
 /*
  * EditorEngine
  */
+
+// Editor mode settings.
+enum EEditorMode{
+	EM_None              = 0,  // Gameplay, editor disabled.
+	EM_ViewportMove      = 1,  // Move viewport normally.
+	EM_ViewportZoom      = 2,  // Move viewport with acceleration.
+	EM_ActorRotate       = 5,  // Rotate actors.
+	EM_ActorScale        = 8,  // Scale actors.
+	EM_TexturePan        = 11, // Pan textures.
+	EM_TextureRotate     = 13, // Rotate textures.
+	EM_TextureScale      = 14, // Scale textures.
+	EM_ActorSnapScale    = 18, // Actor snap-scale.
+	EM_TexView           = 19, // Viewing textures.
+	EM_TexBrowser        = 20, // Browsing textures.
+	EM_StaticMeshBrowser = 21, // Browsing static meshes.
+	EM_MeshView          = 22, // Viewing mesh.
+	EM_MeshBrowser       = 23, // Browsing mesh.
+	EM_BrushClip         = 24, // Brush Clipping.
+	EM_VertexEdit        = 25, // Multiple Vertex Editing.
+	EM_FaceDrag          = 26, // Face Dragging.
+	EM_Polygon           = 27, // Free hand polygon drawing
+	EM_TerrainEdit       = 28, // Terrain editing.
+	EM_PrefabBrowser     = 29, // Browsing prefabs.
+	EM_Matinee           = 30, // Movie editing.
+	EM_EyeDropper        = 31, // Eyedropper
+	EM_Animation         = 32, // Viewing animation.
+	EM_FindActor         = 33, // Find Actor
+	EM_MaterialEditor    = 34, // Material editor
+	EM_Geometry          = 35, // Geometry editing mode
+	EM_NewCameraMove     = 50
+};
 
 class EDITOR_API UEditorEngine : public UEngine{
 public:

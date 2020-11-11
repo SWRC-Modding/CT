@@ -63,9 +63,10 @@ static void __fastcall ScriptFunctionHook(UObject* Self, int, FFrame& Stack, voi
 
 		appMemcpy(&FunctionName, Stack.Code - sizeof(FName), sizeof(FName));
 
-		// TODO: Is there a better way to check for a valid name?
-		if(!IsBadReadPtr(FunctionName.GetEntry(), sizeof(FNameEntry) - NAME_SIZE))
+		if((reinterpret_cast<DWORD>(FunctionName.GetEntry()) & 0xFFFF0000) != 0 || // Seems to be enough to check for a valid name
+		   !IsBadReadPtr(FunctionName.GetEntry(), sizeof(FNameEntry) - NAME_SIZE)){ // Using IsBadReadPtr as a backup check just in case
 			Function = Self->FindFunction(FunctionName);
+		}
 
 		if(!Function) // If the current function is not on the stack, it is an event called from C++ which is stored in Stack.Node
 			Function = static_cast<UFunction*>(Stack.Node);
@@ -73,6 +74,8 @@ static void __fastcall ScriptFunctionHook(UObject* Self, int, FFrame& Stack, voi
 
 	UFunctionOverride* Override = FunctionOverrides[Function];
 	bool IsEvent = Function == Stack.Node;
+
+	checkSlow(Override);
 
 	Function->FunctionFlags = Override->OriginalFunctionFlags;
 	Function->Func = Override->OriginalNative;
@@ -82,16 +85,10 @@ static void __fastcall ScriptFunctionHook(UObject* Self, int, FFrame& Stack, voi
 	Override->CurrentSelf = Self;
 
 	if(Self == Override->TargetObject || !Override->TargetObject){
-		if(IsEvent){
-			Stack.Object = Override->OverrideObject;
-			Stack.Code = &Override->OverrideFunction->Script[0];
-			Stack.Node = Override->OverrideFunction;
-			(Override->OverrideObject->*Override->OverrideFunction->Func)(Stack, Result);
-			Stack.Node = Function;
-			Stack.Object = Self;
-		}else{
+		if(IsEvent)
+			Override->OverrideObject->ProcessEvent(Override->OverrideFunction, Stack.Locals);
+		else
 			Override->OverrideObject->CallFunction(Stack, Result, Override->OverrideFunction);
-		}
 	}else{
 		if(IsEvent)
 			(Self->*Function->Func)(Stack, Result);

@@ -322,7 +322,7 @@ public:
 
 	void Set(T* Src, INT Count){
 		Data = Src;
-		ArrayNum = Count
+		ArrayNum = Count;
 	}
 
 	void Set(INT NewSize, INT Slack){
@@ -470,7 +470,7 @@ public:
 
 	void InsertZeroed(INT Index, INT Count){
 		Insert(Index, Count);
-		appMemZero(static_cast<BYTE*>(Data) + Index * sizeof(T), Count * sizeof(T));
+		appMemzero(static_cast<BYTE*>(Data) + Index * sizeof(T), Count * sizeof(T));
 	}
 
 	INT AddZeroed(INT Count = 1){

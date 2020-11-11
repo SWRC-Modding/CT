@@ -79,7 +79,7 @@ void FOpenGLRenderInterface::Clear(UBOOL UseColor, FColor Color, UBOOL UseDepth,
 
 	glClear(Flags);
 
-	unguard;
+	unguardSlow;
 }
 
 void FOpenGLRenderInterface::SetCullMode(ECullMode CullMode){
@@ -99,7 +99,7 @@ void FOpenGLRenderInterface::SetTransform(ETransformType Type, const FMatrix& Ma
 	CurrentState->Matrices[Type] = Matrix;
 	CurrentState->Transform = CurrentState->Matrices[0] * CurrentState->Matrices[1] * CurrentState->Matrices[2];
 
-	unguard;
+	unguardSlow;
 }
 
 FMatrix FOpenGLRenderInterface::GetTransform(ETransformType Type) const{
@@ -107,5 +107,5 @@ FMatrix FOpenGLRenderInterface::GetTransform(ETransformType Type) const{
 
 	return CurrentState->Matrices[Type];
 
-	unguard;
+	unguardSlow;
 }

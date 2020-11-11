@@ -10,14 +10,20 @@ class FOpenGLRenderInterface : public FRenderInterface{
 public:
 	class FOpenGLSavedState{
 	public:
+		FRenderTarget* RenderTarget;
 
-		INT     ViewportX;
-		INT     ViewportY;
-		INT     ViewportWidth;
-		INT     ViewportHeight;
+		INT       ViewportX;
+		INT       ViewportY;
+		INT       ViewportWidth;
+		INT       ViewportHeight;
 
-		FMatrix Matrices[3]; // Matrices according to ETransformType
-		FMatrix Transform;
+		ECullMode CullMode;
+
+		FMatrix   Matrices[3]; // Matrices according to ETransformType
+		FMatrix   Transform;
+
+		UBOOL     bStencilTest;
+		UBOOL     bZWrite;
 
 		FOpenGLSavedState();
 	};
@@ -33,7 +39,7 @@ public:
 	// Overrides
 	virtual void PushState(int);
 	virtual void PopState(int);
-	virtual UBOOL SetRenderTarget(FRenderTarget* RenderTarget, bool){ PRINT_FUNC; return 1; }
+	virtual UBOOL SetRenderTarget(FRenderTarget* RenderTarget, bool);
 	virtual void SetViewport(INT X, INT Y, INT Width, INT Height);
 	virtual void Clear(UBOOL UseColor, FColor Color, UBOOL UseDepth, FLOAT Depth, UBOOL UseStencil, DWORD Stencil);
 	virtual void PushHit(const BYTE* Data, INT Count){ PRINT_FUNC; }
@@ -49,8 +55,8 @@ public:
 	virtual FMatrix GetTransform(ETransformType Type) const;
 	virtual void SetMaterial(UMaterial* Material, FString* ErrorString, UMaterial** ErrorMaterial, INT* NumPasses){ PRINT_FUNC; }
 	virtual void SetStencilOp(ECompareFunction Test, DWORD Ref, DWORD Mask, EStencilOp FailOp, EStencilOp ZFailOp, EStencilOp PassOp, DWORD WriteMask){ PRINT_FUNC; }
-	virtual void EnableStencilTest(UBOOL Enable){ PRINT_FUNC; }
-	virtual void EnableZWrite(UBOOL Enable){ PRINT_FUNC; }
+	virtual void EnableStencilTest(UBOOL Enable);
+	virtual void EnableZWrite(UBOOL Enable);
 	virtual void SetPrecacheMode(EPrecacheMode PrecacheMode){ PRINT_FUNC; }
 	virtual void SetZBias(INT ZBias){ PRINT_FUNC; }
 	virtual INT SetVertexStreams(EVertexShader Shader, FVertexStream** Streams, INT NumStreams){ PRINT_FUNC; return 0; }

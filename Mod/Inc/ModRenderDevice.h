@@ -47,10 +47,10 @@ public:
 	virtual void SetTransform(ETransformType Type, const FMatrix& Matrix){ Impl->SetTransform(Type, Matrix); }
 	virtual FMatrix GetTransform(ETransformType Type) const{ return Impl->GetTransform(Type); }
 	virtual void SetMaterial(UMaterial* Material, FString* ErrorString, UMaterial** ErrorMaterial, INT* NumPasses);
-	virtual void SetStencilOp(ECompareFunction Test, DWORD Ref, DWORD Mask, EStencilOp FailOp, EStencilOp ZFailOp, EStencilOp PassOp, DWORD WriteMask){}
 	virtual UBOOL SetHardwareShaderMaterial(UHardwareShader* Material, FString* ErrorString, UMaterial** ErrorMaterial);
-	virtual void vtpad1(int a){}
-	virtual void vtpad2(int a){}
+	virtual void SetStencilOp(ECompareFunction Test, DWORD Ref, DWORD Mask, EStencilOp FailOp, EStencilOp ZFailOp, EStencilOp PassOp, DWORD WriteMask){}
+	virtual void EnableStencilTest(UBOOL Enable){}
+	virtual void EnableZWrite(UBOOL Enable){ Impl->EnableZWrite(Enable); }
 	virtual void SetPrecacheMode(EPrecacheMode PrecacheMode){ Impl->SetPrecacheMode(PrecacheMode); }
 	virtual void SetZBias(INT ZBias){ Impl->SetZBias(ZBias); }
 	virtual INT SetVertexStreams(EVertexShader Shader, FVertexStream** Streams, INT NumStreams){ return Impl->SetVertexStreams(Shader, Streams, NumStreams); }

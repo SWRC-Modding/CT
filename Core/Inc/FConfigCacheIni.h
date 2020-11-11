@@ -16,7 +16,7 @@ public:
 	UBOOL Dirty, NoSave;
 
 	FConfigFile() : Dirty(0),
-					NoSave(0){}
+	                NoSave(ParseParam(appCmdLine(), "nosaveconfig")){}
 
 	void Read(const TCHAR* Filename, FConfigFile* DefaultsOverride = NULL){
 		guard(FConfigFile::Read);

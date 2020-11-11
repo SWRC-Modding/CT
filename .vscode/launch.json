@@ -13,7 +13,9 @@
 			"args": [
 				"dm_canyon?game=MPGame.DMGame?goalscore=5?respawndelay=0?Listen",
 				"-windowed",
-				"-log"
+				"-log",
+				"-nosaveconfig",
+				"-rendev=opengl"
 			],
 			"stopAtEntry": false,
 			"cwd": "${workspaceFolder}",

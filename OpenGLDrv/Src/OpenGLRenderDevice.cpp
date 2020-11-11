@@ -116,88 +116,92 @@ FOpenGLResource* UOpenGLRenderDevice::GetCachedResource(QWORD CacheId){
 UBOOL UOpenGLRenderDevice::SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL Fullscreen, INT ColorBytes, UBOOL bSaveSize){
 	guardFunc;
 
-	UnSetRes();
-
 	HWND hwnd = static_cast<HWND>(Viewport->GetWindow());
 	check(hwnd);
-	DeviceContext = GetDC(hwnd);
-	check(DeviceContext);
+	UBOOL Was16Bit = Use16bit;
 
 	if(ColorBytes == 2)
 		Use16bit = 1;
 	else if(ColorBytes == 4)
 		Use16bit = 0;
 
-	ColorBytes = Use16bit ? 2 : 4;
+	// Create new context if there isn't one already or if the desired color depth has changed.
+	if(!OpenGLContext || Was16Bit != Use16bit){
+		UnSetRes();
 
-	debugf("SetRes: %ix%i, %i-bit, Fullscreen: %i", NewX, NewY, ColorBytes * 8, Fullscreen);
+		DeviceContext = GetDC(hwnd);
+		check(DeviceContext);
 
-	PIXELFORMATDESCRIPTOR Pfd = {
-		sizeof(PIXELFORMATDESCRIPTOR), // size
-		1,                             // version
-		PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER,
-		PFD_TYPE_RGBA,                 // color type
-		ColorBytes <= 2 ? 16 : 32,     // prefered color depth
-		0, 0, 0, 0, 0, 0,              // color bits (ignored)
-		0,                             // alpha buffer
-		0,                             // alpha bits (ignored)
-		0,                             // accumulation buffer
-		0, 0, 0, 0,                    // accum bits (ignored)
-		ColorBytes <= 2 ? 16 : 24,     // depth buffer
-		0,                             // stencil buffer
-		0,                             // auxiliary buffers
-		PFD_MAIN_PLANE,                // main layer
-		0,                             // reserved
-		0, 0, 0,                       // layer, visible, damage masks
-	};
+		ColorBytes = Use16bit ? 2 : 4;
 
-	INT PixelFormat = ChoosePixelFormat(DeviceContext, &Pfd);
-	Parse(appCmdLine(), "PIXELFORMAT=", PixelFormat);
-	check(PixelFormat);
+		debugf("SetRes: %ix%i, %i-bit, Fullscreen: %i", NewX, NewY, ColorBytes * 8, Fullscreen);
 
-	debugf(NAME_Init, "Using pixel format %i", PixelFormat);
+		PIXELFORMATDESCRIPTOR Pfd = {
+			sizeof(PIXELFORMATDESCRIPTOR), // size
+			1,                             // version
+			PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER, // flags
+			PFD_TYPE_RGBA,                 // color type
+			ColorBytes <= 2 ? 16 : 32,     // preferred color depth
+			0, 0, 0, 0, 0, 0,              // color bits (ignored)
+			0,                             // alpha buffer
+			0,                             // alpha bits (ignored)
+			0,                             // accumulation buffer
+			0, 0, 0, 0,                    // accum bits (ignored)
+			ColorBytes <= 2 ? 16 : 24,     // depth buffer
+			0,                             // stencil buffer
+			0,                             // auxiliary buffers
+			PFD_MAIN_PLANE,                // main layer
+			0,                             // reserved
+			0, 0, 0,                       // layer, visible, damage masks
+		};
 
-	verify(SetPixelFormat(DeviceContext, PixelFormat, &Pfd));
+		INT PixelFormat = ChoosePixelFormat(DeviceContext, &Pfd);
+		Parse(appCmdLine(), "PIXELFORMAT=", PixelFormat);
+		check(PixelFormat);
 
-	OpenGLContext = wglCreateContext(DeviceContext);
+		debugf(NAME_Init, "Using pixel format %i", PixelFormat);
 
-	MakeCurrent();
+		verify(SetPixelFormat(DeviceContext, PixelFormat, &Pfd));
 
-	glewExperimental = GL_TRUE;
-	GLenum GlewStatus = glewInit();
+		OpenGLContext = wglCreateContext(DeviceContext);
 
-	if(GlewStatus != GLEW_OK)
-		appErrorf("GLEW failed to initialize: %s", glewGetErrorString(GlewStatus));
+		MakeCurrent();
 
-	debugf(NAME_Init, "GL_VENDOR      : %s", glGetString(GL_VENDOR));
-	debugf(NAME_Init, "GL_RENDERER    : %s", glGetString(GL_RENDERER));
-	debugf(NAME_Init, "GL_VERSION     : %s", glGetString(GL_VERSION));
+		glewExperimental = GL_TRUE;
+		GLenum GlewStatus = glewInit();
 
-	GLint MajorVersion;
-	GLint MinorVersion;
+		if(GlewStatus != GLEW_OK)
+			appErrorf("GLEW failed to initialize: %s", glewGetErrorString(GlewStatus));
 
-	glGetIntegerv(GL_MAJOR_VERSION, &MajorVersion);
-	glGetIntegerv(GL_MINOR_VERSION, &MinorVersion);
+		debugf(NAME_Init, "GL_VENDOR      : %s", glGetString(GL_VENDOR));
+		debugf(NAME_Init, "GL_RENDERER    : %s", glGetString(GL_RENDERER));
+		debugf(NAME_Init, "GL_VERSION     : %s", glGetString(GL_VERSION));
 
-	if(MajorVersion < MIN_OPENGL_MAJOR_VERSION || (MajorVersion == MIN_OPENGL_MAJOR_VERSION && MinorVersion < MIN_OPENGL_MINOR_VERSION))
-		appErrorf("OpenGL %i.%i is required but got %i.%i", MIN_OPENGL_MAJOR_VERSION, MIN_OPENGL_MINOR_VERSION, MajorVersion, MinorVersion);
+		GLint MajorVersion;
+		GLint MinorVersion;
 
-	GLint DepthBits;
-	GLint StencilBits;
+		glGetIntegerv(GL_MAJOR_VERSION, &MajorVersion);
+		glGetIntegerv(GL_MINOR_VERSION, &MinorVersion);
 
-	glGetIntegerv(GL_DEPTH_BITS, &DepthBits);
-	glGetIntegerv(GL_STENCIL_BITS, &StencilBits);
+		if(MajorVersion < MIN_OPENGL_MAJOR_VERSION || (MajorVersion == MIN_OPENGL_MAJOR_VERSION && MinorVersion < MIN_OPENGL_MINOR_VERSION))
+			appErrorf("OpenGL %i.%i is required but got %i.%i", MIN_OPENGL_MAJOR_VERSION, MIN_OPENGL_MINOR_VERSION, MajorVersion, MinorVersion);
 
-	debugf(NAME_Init, "%i-bit color buffer", ColorBytes * 8);
-	debugf(NAME_Init, "%i-bit depth buffer", DepthBits);
-	debugf(NAME_Init, "%i-bit stencil buffer", StencilBits);
+		GLint DepthBits;
+		GLint StencilBits;
 
-	// Check for required extensions
-	RequireExt("GL_ARB_texture_compression");
-	RequireExt("GL_EXT_texture_compression_s3tc");
+		glGetIntegerv(GL_DEPTH_BITS, &DepthBits);
+		glGetIntegerv(GL_STENCIL_BITS, &StencilBits);
 
-	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_CULL_FACE);
+		debugf(NAME_Init, "%i-bit color buffer", ColorBytes * 8);
+		debugf(NAME_Init, "%i-bit depth buffer", DepthBits);
+		debugf(NAME_Init, "%i-bit stencil buffer", StencilBits);
+
+		// Check for required extensions
+		RequireExt("GL_ARB_texture_compression");
+		RequireExt("GL_EXT_texture_compression_s3tc");
+
+		glEnable(GL_DEPTH_TEST);
+	}
 
 	if(Fullscreen){
 		HMONITOR    Monitor = MonitorFromWindow(hwnd, MONITOR_DEFAULTTOPRIMARY);

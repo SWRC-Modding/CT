@@ -49,8 +49,8 @@ public:
 	virtual FMatrix GetTransform(ETransformType Type) const;
 	virtual void SetMaterial(UMaterial* Material, FString* ErrorString, UMaterial** ErrorMaterial, INT* NumPasses){ PRINT_FUNC; }
 	virtual void SetStencilOp(ECompareFunction Test, DWORD Ref, DWORD Mask, EStencilOp FailOp, EStencilOp ZFailOp, EStencilOp PassOp, DWORD WriteMask){ PRINT_FUNC; }
-	virtual void vtpad1(int){ PRINT_FUNC; }
-	virtual void vtpad2(int){ PRINT_FUNC; }
+	virtual void EnableStencilTest(UBOOL Enable){ PRINT_FUNC; }
+	virtual void EnableZWrite(UBOOL Enable){ PRINT_FUNC; }
 	virtual void SetPrecacheMode(EPrecacheMode PrecacheMode){ PRINT_FUNC; }
 	virtual void SetZBias(INT ZBias){ PRINT_FUNC; }
 	virtual INT SetVertexStreams(EVertexShader Shader, FVertexStream** Streams, INT NumStreams){ PRINT_FUNC; return 0; }

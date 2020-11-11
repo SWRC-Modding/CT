@@ -86,6 +86,36 @@ static struct FExecHook : public FExec{
 	}
 } LauncherExecHook;
 
+static void DetectRenderDevice(){
+	FString RenderDeviceClass;
+
+	// Check for a specific render device on the command line.
+	if(Parse(appCmdLine(), "RenDev=", RenderDeviceClass)){
+		// Allow short form of known render devices.
+		if(RenderDeviceClass == "D3D")
+			RenderDeviceClass = "D3DDrv.D3DRenderDevice";
+		else if(RenderDeviceClass == "OpenGL")
+			RenderDeviceClass = "OpenGLDrv.OpenGLRenderDevice";
+		else if(RenderDeviceClass == "Mod")
+			RenderDeviceClass = "Mod.ModRenderDevice";
+
+		debugf("RenderDevice set on command line: %s", *RenderDeviceClass);
+		GConfig->SetString("Engine.Engine", "RenderDevice", *RenderDeviceClass);
+	}else{
+		// If default render device is set to D3DRenderDevice, try locating ModRenderDevice and use it if it exists.
+		GConfig->GetString("Engine.Engine", "RenderDevice", RenderDeviceClass);
+
+		if(RenderDeviceClass == "D3DDrv.D3DRenderDevice"){
+			UClass* ModRenderDeviceClass = LoadClass<URenderDevice>(NULL, "Mod.ModRenderDevice", NULL, LOAD_NoWarn | LOAD_Quiet, NULL);
+
+			if(ModRenderDeviceClass){
+				debugf("Using Mod.ModRenderDevice");
+				GConfig->SetString("Engine.Engine", "RenderDevice", "Mod.ModRenderDevice");
+			}
+		}
+	}
+}
+
 static void InitEngine(){
 	guard(InitEngine);
 	check(!GEngine);
@@ -106,21 +136,7 @@ static void InitEngine(){
 
 	GConfig->SetInt("FirstRun", "FirstRun", FirstRun);
 
-	// Locate Mod.ModRenderDevice and use it if it exists.
-	{
-		FString RenderDeviceClass;
-
-		GConfig->GetString("Engine.Engine", "RenderDevice", RenderDeviceClass, "System.ini");
-
-		if(RenderDeviceClass == "D3DDrv.D3DRenderDevice"){ // Only use custom render device if there isn't another one specified
-			UClass* ModRenderDeviceClass = LoadClass<URenderDevice>(NULL, "Mod.ModRenderDevice", NULL, LOAD_NoWarn | LOAD_Quiet, NULL);
-
-			if(ModRenderDeviceClass){
-				GLog->Log("Using Mod.ModRenderDevice");
-				GConfig->SetString("Engine.Engine", "RenderDevice", "Mod.ModRenderDevice", "System.ini");
-			}
-		}
-	}
+	DetectRenderDevice();
 
 	// Create game engine.
 	UClass* EngineClass = LoadClass<UEngine>(NULL, "ini:Engine.Engine.GameEngine", NULL, LOAD_NoFail, NULL);
@@ -213,9 +229,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		GIsGuarded = 1;
 
 		appInit(appPackage(), lpCmdLine, &Log, &Error, &Warn, FConfigCacheIni::Factory, 1);
-
-		// TEMP!!!
-		GConfig->SetString("Engine.Engine", "RenderDevice", "OpenGLDrv.OpenGLRenderDevice");
 
 		GIsClient = 1;
 		GIsServer = 1;

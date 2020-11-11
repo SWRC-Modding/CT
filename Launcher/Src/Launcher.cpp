@@ -203,7 +203,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	int ExitCode = EXIT_SUCCESS;
 	FOutputDeviceFile Log;
 	FOutputDeviceWindowsError Error;
-	FFeedbackContextCmd Warn; // TODO(Leon): Replace with FFeedbackContextWindows
+	FFeedbackContextCmd Warn;
 
 	GIsStarted = 1;
 

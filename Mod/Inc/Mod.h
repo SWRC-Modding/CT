@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../D3DDrv/Inc/D3DDrv.h"
+#include "../../Engine/Inc/Engine.h"
 
 #ifndef MOD_API
 #define MOD_API DLL_IMPORT
@@ -20,17 +20,3 @@ MOD_API void* PatchVTable(void* Object, INT Index, void* NewFunc);
  * VTableName is the name of the particular vtable to patch in case of multiple virtual inheritance.
  */
 MOD_API void* PatchDllClassVTable(const TCHAR* DllName, const TCHAR* ClassName, const TCHAR* VTableName, INT Index, void* NewFunc);
-
-/*
- * ModRenderDevice.
- * - Fixes bumpmapping crashes by converting the bumpmaps to a compatible format
- */
-class MOD_API UModRenderDevice : public UD3DRenderDevice{
-	DECLARE_CLASS(UModRenderDevice, UD3DRenderDevice, 0, Mod)
-public:
-	static UObject* FOVChanger;
-	static FLOAT    FpsLimit;
-
-	virtual UBOOL Init();
-	virtual UBOOL Exec(const TCHAR* Cmd, FOutputDevice& Ar);
-};

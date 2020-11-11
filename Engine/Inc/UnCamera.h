@@ -239,9 +239,10 @@ public:
 	FTime           LastUpdateTime; // Time of last update.
 	INT             DirtyViewport;  // Count how many times the viewport needs to be repainted.
 	INT             SizeX, SizeY;   // Buffer X & Y resolutions.
-	char            Padding1[12];   //! PADDING
+	char            Padding1[8];    //! PADDING
 	FLOAT           ScaleX, ScaleY; // Scale factor.
 	INT             ColorBytes;     // 1=256-color, 4=32-bit color.
+	char            Padding2[4];    //! PADDING
 	INT             FrameCount;     // Frame count, incremented when locked.
 	DWORD           Caps;           // Capabilities (CC_).
 	UBOOL           Current;        // If this is the current input viewport.
@@ -249,7 +250,7 @@ public:
 	FVector         OrigCursor;     // The position where the mouse was originally clicked in the viewport.
 	UBOOL           FullscreenOnly; // Engine requires desktop set to 32 bpp for windowed mode.
 	FVector         TerrainPointAtLocation; // The 3D location currently being pointed at on the terrain
-	char            Padding2[20];   //! PADDING
+	char            Padding3[20];   //! PADDING
 
 	FViewportRenderTarget RenderTarget; // A dummy render target that exposes the viewport's size to interfaces that take a FRenderTarget.
 
@@ -260,7 +261,7 @@ public:
 	AActor*         LockedActor;           // The actor we're locked to
 
 	// Editor and debugging mode render effects, stat flags.
-	UBOOL           Padding3;             //! PADDING
+	UBOOL           Padding4;             //! PADDING
 	UBOOL           bShowDescriptions;
 	UBOOL           bShowLargeVertices;   // Show large vertices on brushes/meshes/etc?
 	UBOOL           bShowHud;
@@ -379,9 +380,9 @@ public:
 };
 
 // Viewport hit-testing macros.
-#define PUSH_HIT(frame,expr) if( (frame->Viewport)->HitTesting ) (frame->Viewport)->PushHit(expr,sizeof(expr));
-#define POP_HIT(frame)       if( (frame->Viewport)->HitTesting ) (frame->Viewport)->PopHit(0);
-#define POP_HIT_FORCE(frame) if( (frame->Viewport)->HitTesting ) (frame->Viewport)->PopHit(1);
+#define PUSH_HIT(frame,expr) if((frame->Viewport)->HitTesting) (frame->Viewport)->PushHit(expr, sizeof(expr));
+#define POP_HIT(frame)       if((frame->Viewport)->HitTesting) (frame->Viewport)->PopHit(0);
+#define POP_HIT_FORCE(frame) if((frame->Viewport)->HitTesting) (frame->Viewport)->PopHit(1);
 
 /*-----------------------------------------------------------------------------
 	Base hit proxy.
@@ -389,31 +390,22 @@ public:
 
 // Hit proxy declaration macro.
 #define DECLARE_HIT_PROXY(cls,parent) \
-	const TCHAR* GetName() const \
-		{ return TEXT(#cls); } \
-	UBOOL IsA( const TCHAR* Str ) const \
-		{ return appStricmp(TEXT(#cls),Str)==0 || parent::IsA(Str); }
+	const TCHAR* GetName() const{ return #cls; } \
+	UBOOL IsA(const TCHAR* Str) const{ return appStricmp(#cls,Str)==0 || parent::IsA(Str); }
 
 // Base class for detecting user-interface hits.
-struct ENGINE_API HHitProxy
-{
-	union
-	{
+struct ENGINE_API HHitProxy{
+	union{
 		mutable INT Size;
 		HHitProxy* Parent;
 	};
-	const TCHAR* GetName() const
-	{
-		return "HHitProxy";
-	}
-	virtual UBOOL IsA( const TCHAR* Str ) const
-	{
-		return appStricmp("HHitProxy",Str)==0;
-	}
-	virtual void Click( const FHitCause& Cause )
-	{
-		Cause.Observer->Click( Cause, *this );
-	}
+
+	FColor HitColor;
+
+	virtual const TCHAR* GetName() const{ return "HHitProxy"; }
+	virtual UBOOL IsA(const TCHAR* Str) const{ return appStricmp("HHitProxy", Str) == 0; }
+	virtual void Click(const FHitCause& Cause){ Cause.Observer->Click(Cause, *this); }
+	virtual AActor* GetActor(){ return NULL; }
 };
 
 /*-----------------------------------------------------------------------------
@@ -423,13 +415,14 @@ struct ENGINE_API HHitProxy
 //
 // Client, responsible for tracking viewports.
 //
-class ENGINE_API UClient : public UObject
-{
+class ENGINE_API UClient : public UObject{
 	DECLARE_ABSTRACT_CLASS(UClient,UObject,CLASS_Config,Engine)
-
+public:
 	// Variables.
 	UEngine*			Engine;
 	TArray<UViewport*>	Viewports;
+	char                Padding[192]; // PADDING!!!
+/*
 	INT					DrawCycles;
 
 	// Configurable.
@@ -451,7 +444,7 @@ class ENGINE_API UClient : public UObject
 	INT			TextureLODSet[LODSET_MAX];
 	FLOAT		MinDesiredFrameRate;
 	INT			ParticleDensity;
-
+*/
 
 	// Constructors.
 	UClient();
@@ -463,14 +456,46 @@ class ENGINE_API UClient : public UObject
 	void PostEditChange();
 
 	// UClient interface.
-	virtual void Init( UEngine* InEngine )=0;
-	virtual void Flush( UBOOL AllowPrecache );
-	virtual void ShowViewportWindows( DWORD ShowFlags, int DoShow )=0;
-	virtual void EnableViewportWindows( DWORD ShowFlags, int DoEnable )=0;
-	virtual void Tick()=0;
-	virtual UBOOL Exec( const TCHAR* Cmd, FOutputDevice& Ar=*GLog )=0;
-	virtual class UViewport* NewViewport( const FName Name )=0;
-	virtual void MakeCurrent( UViewport* NewViewport )=0;
+	virtual void Init(UEngine* InEngine) = 0;
+	virtual void Flush(UBOOL AllowPrecache);
+	virtual void UpdateGamma();
+	virtual void RestoreGamma();
+	virtual void ShowViewportWindows(DWORD ShowFlags, int DoShow) = 0;
+	virtual void EnableViewportWindows(DWORD ShowFlags, int DoEnable) = 0;
+	virtual void Tick() = 0;
+	virtual UBOOL Exec(const TCHAR* Cmd, FOutputDevice& Ar = *GLog) = 0;
+	virtual UViewport* NewViewport(const FName Name) = 0;
+	virtual void MakeCurrent(UViewport* NewViewport) = 0;
+	virtual UViewport* GetLastCurrent() = 0;
+	virtual class BaseMovie* CreateMoviePlayer();
+	virtual bool StartMovie(FString, bool);
+	virtual void StopMovie();
+	virtual bool IsMoviePlaying();
+	virtual bool UpdateMovie();
+	virtual bool CreateSaveContainer(FString, FString&) = 0;
+	virtual bool GetSaveContainer(FString, FString&) = 0;
+	virtual bool GetSavesAndContainers(FString, TArray<FString>&, TArray<FString>&) = 0;
+	virtual bool DeleteSaveAndContainer(FString) = 0;
+	virtual bool VerifySave(FString);
+	virtual bool VerifyFile(FString);
+	virtual QWORD GetFreeDiscSpace(FString);
+	virtual QWORD GetSaveGameDiscSpaceRequired();
+	virtual QWORD GetProfileDiscSpaceRequired();
+	virtual QWORD GetXboxLiveDiscSpaceRequired();
+	virtual DWORD GetSaveGamePadSize() const;
+	virtual void SetRumbleFX(unsigned char, float, float, float, float);
+	virtual bool CheckPad(unsigned char);
+	virtual void GetPadState(unsigned char, TArray<unsigned char>&, FVector&, FVector&);
+	virtual void DisassociateViewportPads();
+	virtual void DialogMenu(FString, FString, UViewport*, bool);
+	virtual void ReleaseAllPadButtons();
+	virtual void PendingToBeDestroyed(UPendingLevel*);
+
+	int GetTextureLODBias(ELODSet);
+	bool WarningLostLink();
+
+protected:
+	static void MovieFinishedCallback();
 };
 
 /*-----------------------------------------------------------------------------

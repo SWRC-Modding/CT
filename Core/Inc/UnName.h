@@ -67,37 +67,32 @@ struct TTypeInfo<FNameEntry*> : public TTypeInfoBase<FNameEntry*>{
 class FName{
 public:
 	// Accessors
-	const TCHAR* operator*() const{ return Entry->Name; }
-	NAME_INDEX GetIndex() const{ return Entry->Index; }
-	DWORD GetFlags() const{ return Entry->Flags; }
-	void SetFlags(DWORD Set) const{ Entry->Flags |= Set; }
-	void ClearFlags(DWORD Clear) const{ Entry->Flags &= ~Clear; }
+	const TCHAR* operator*() const{ return Entry ? Entry->Name : Names[NAME_None]->Name; }
+	NAME_INDEX GetIndex() const{ return Entry ? Entry->Index : 0; }
+	DWORD GetFlags() const{ return Entry ? Entry->Flags : 0; }
+	void SetFlags(DWORD Set) const{ if(Entry)Entry->Flags |= Set; }
+	void ClearFlags(DWORD Clear) const{ if(Entry)Entry->Flags &= ~Clear; }
 	FNameEntry* GetEntry() const{ return Entry; }
 
+	bool operator!() const{ return Entry == NULL; }
+	bool operator+() const{ return Entry != NULL; }
 	bool operator==(const FName& Other) const{ return Entry == Other.Entry; }
 	bool operator!=(const FName& Other) const{ return Entry != Other.Entry; }
+	bool operator<(const FName& Other) const{ return Entry < Other.Entry; }
+	operator FString(){ return FString(*(*this), true); }
 
 	// Constructors
-	FName() : Entry(Names[NAME_None]){}
-	FName(EName N) : Entry(Names[N]){}
-	CORE_API FName(const TCHAR* Name, EFindName FindType);
-	CORE_API FName(const FString& Name, EFindName FindType);
-
-	FName(const TCHAR* Name){
-		*this = FName(Name, FNAME_Add);
-
-		if(!Entry)
-			Entry = Names[NAME_None];
-	}
-
-	FName(const FString& Name){ *this = FName(*Name); }
+	FName(){}
+	FName(EName N) : Entry(N != NAME_None ? Names[N] : NULL){}
+	FName(const TCHAR* Name, EFindName FindType = FNAME_Add);
+	FName(const FString& Name, EFindName FindType = FNAME_Add);
 
 	// Name subsystem.
-	CORE_API static void StaticInit();
-	CORE_API static void StaticExit();
-	CORE_API static void DeleteEntry(INT i);
-	CORE_API static void DisplayHash(class FOutputDevice& Ar);
-	CORE_API static void Hardcode(FNameEntry* AutoName);
+	static void StaticInit();
+	static void StaticExit();
+	static void DeleteEntry(INT i);
+	static void DisplayHash(class FOutputDevice& Ar);
+	static void Hardcode(FNameEntry* AutoName);
 
 	// Name subsystem accessors
 	static const TCHAR* SafeString(EName Index){ return Initialized ? Names[Index]->Name : "Uninitialized"; }

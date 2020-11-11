@@ -554,8 +554,6 @@ extern "C" DLL_EXPORT TCHAR GPackage[];
 #include "UnScript.h"    // Script class.
 #include "UFactory.h"    // Factory definition.
 #include "UExporter.h"   // Exporter definition.
-#include "UnCache.h"     // Cache based memory management.
-#include "UnMem.h"       // Stack based memory management.
 #include "UnCId.h"       // Cache ID's.
 #include "UnBits.h"      // Bitstream archiver.
 #include "UnMath.h"      // Vector math functions.

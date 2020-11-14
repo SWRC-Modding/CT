@@ -1,7 +1,7 @@
 #include "../Inc/OpenGLRenderDevice.h"
 
 #include "GL/glew.h"
-#include "../Inc/OpenGLResource.h"
+#include "OpenGLResource.h"
 
 #define MIN_OPENGL_MAJOR_VERSION 4
 #define MIN_OPENGL_MINOR_VERSION 5

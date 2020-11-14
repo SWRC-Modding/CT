@@ -1,4 +1,5 @@
-#include "../Inc/OpenGLResource.h"
+#include "OpenGLResource.h"
+
 #include "../Inc/OpenGLRenderDevice.h"
 
 FOpenGLResource::FOpenGLResource(UOpenGLRenderDevice* InRenDev, QWORD InCacheId) : RenDev(InRenDev),

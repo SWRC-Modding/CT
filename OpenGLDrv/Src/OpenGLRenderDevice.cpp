@@ -127,6 +127,7 @@ UBOOL UOpenGLRenderDevice::SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL
 
 	// Create new context if there isn't one already or if the desired color depth has changed.
 	if(!OpenGLContext || Was16Bit != Use16bit){
+		Flush(Viewport);
 		UnSetRes();
 
 		DeviceContext = GetDC(hwnd);

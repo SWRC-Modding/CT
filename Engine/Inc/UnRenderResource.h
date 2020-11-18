@@ -420,6 +420,39 @@ public:
 	virtual FRenderTarget* GetRenderTargetInterface(){ return this; }
 };
 
+//
+// Shader resources
+//
+
+class FShader : public FRenderResource{
+public:
+	FShader(class UHardwareShader* InShader, INT InPass) : Shader(InShader),
+	                                                       Pass(InPass){
+		CacheId = MakeCacheID(CID_RenderShader);
+	}
+
+	void IncRevision(){ ++Revision; }
+
+	class UHardwareShader* GetShader() const{ return Shader; }
+	INT GetPass() const{ return Pass; }
+
+private:
+	class UHardwareShader* Shader;
+	INT Pass;
+};
+
+
+class FPixelShader : public FShader{
+public:
+	FPixelShader(class UHardwareShader* InHardwareShader, INT InPass) : FShader(InHardwareShader, InPass){}
+};
+
+
+class FVertexShader : public FShader{
+public:
+	FVertexShader(class UHardwareShader* InHardwareShader, INT InPass) : FShader(InHardwareShader, InPass){}
+};
+
 #endif
 
 /*------------------------------------------------------------------------------------

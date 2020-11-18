@@ -5256,8 +5256,8 @@ public:
 	BYTE AlphaRef;
 	BYTE SrcBlend;
 	BYTE DestBlend;
-	INT VertexShader;
-	INT PixelShader;
+	FVertexShader* VertexShader;
+	FPixelShader* PixelShader;
 	INT NumVSConstants;
 	INT NumPSConstants;
 

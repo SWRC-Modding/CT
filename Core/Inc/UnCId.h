@@ -43,6 +43,7 @@ enum ECacheIDBase{
 	CID_RenderVertices      = 0xE1,
 	CID_RenderIndices       = 0xE2,
 	CID_CollisionData       = 0xE3,
+	CID_RenderShader        = 0xE4,
 	CID_MAX                 = 0xff,
 };
 

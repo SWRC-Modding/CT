@@ -63,7 +63,7 @@ static void __fastcall ScriptFunctionHook(UObject* Self, int, FFrame& Stack, voi
 
 		appMemcpy(&FunctionName, Stack.Code - sizeof(FName), sizeof(FName));
 
-		if((reinterpret_cast<DWORD>(FunctionName.GetEntry()) & 0xFFFF0000) != 0 || // Seems to be enough to check for a valid name
+		if((reinterpret_cast<DWORD>(FunctionName.GetEntry()) & 0xFFFF0000) != 0 && // Seems to be enough to check for a valid name
 		   !IsBadReadPtr(FunctionName.GetEntry(), sizeof(FNameEntry) - NAME_SIZE)){ // Using IsBadReadPtr as a backup check just in case
 			Function = Self->FindFunction(FunctionName);
 		}

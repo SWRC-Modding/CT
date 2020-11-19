@@ -3,6 +3,7 @@
 #include "OpenGLDrv.h"
 
 class UOpenGLRenderDevice;
+class FOpenGLRenderTarget;
 
 #define MAX_STATESTACKDEPTH 128 // TODO: Verify actually required limit
 
@@ -10,7 +11,7 @@ class FOpenGLRenderInterface : public FRenderInterface{
 public:
 	class FOpenGLSavedState{
 	public:
-		FRenderTarget* RenderTarget;
+		FOpenGLRenderTarget* RenderTarget;
 
 		INT       ViewportX;
 		INT       ViewportY;
@@ -63,5 +64,5 @@ public:
 	virtual INT SetDynamicStream(EVertexShader Shader, FVertexStream* Stream){ PRINT_FUNC; return 0; }
 	virtual INT SetIndexBuffer(FIndexBuffer* IndexBuffer, INT BaseIndex){ PRINT_FUNC; return 0; }
 	virtual INT SetDynamicIndexBuffer(FIndexBuffer* IndexBuffer, INT BaseIndex){ PRINT_FUNC; return 0; }
-	virtual void DrawPrimitive(EPrimitiveType PrimitiveType, INT FirstIndex, INT NumPrimitives, INT MinIndex, INT MaxIndex){ PRINT_FUNC; }
+	virtual void DrawPrimitive(EPrimitiveType PrimitiveType, INT FirstIndex, INT NumPrimitives, INT MinIndex, INT MaxIndex);
 };

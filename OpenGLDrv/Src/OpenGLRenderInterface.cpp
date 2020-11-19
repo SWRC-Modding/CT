@@ -1,5 +1,7 @@
 #include "../Inc/OpenGLRenderInterface.h"
 
+#include "../Inc/OpenGLRenderDevice.h"
+#include "OpenGLResource.h"
 #include "GL/glew.h"
 
 /*
@@ -44,7 +46,7 @@ void FOpenGLRenderInterface::PopState(int){
 	check(SavedStateIndex >= 0);
 
 	if(CurrentState->RenderTarget != PrevState->RenderTarget)
-		SetRenderTarget(CurrentState->RenderTarget, true);
+		CurrentState->RenderTarget->Bind();
 
 	if(CurrentState->ViewportX != PrevState->ViewportX ||
 	   CurrentState->ViewportY != PrevState->ViewportY ||
@@ -67,11 +69,28 @@ void FOpenGLRenderInterface::PopState(int){
 
 UBOOL FOpenGLRenderInterface::SetRenderTarget(FRenderTarget* RenderTarget, bool){
 	guardFunc;
-	CurrentState->RenderTarget = RenderTarget;
 
-	// TODO: Set OpenGL render target here
+	bool Updated = false;
+	QWORD CacheId = RenderTarget->GetCacheId();
+	INT Revision = RenderTarget->GetRevision();
+	FOpenGLRenderTarget* NewRenderTarget = static_cast<FOpenGLRenderTarget*>(RenDev->GetCachedResource(CacheId));
+
+	if(!NewRenderTarget)
+		NewRenderTarget = new FOpenGLRenderTarget(RenDev, CacheId);
+
+	if(NewRenderTarget->Revision != Revision){
+		Updated = true;
+		NewRenderTarget->Cache(RenderTarget);
+		NewRenderTarget->Revision = Revision;
+	}
+
+	if(CurrentState->RenderTarget != NewRenderTarget || Updated)
+		NewRenderTarget->Bind();
+
+	CurrentState->RenderTarget = NewRenderTarget;
 
 	return 1;
+
 	unguard;
 }
 
@@ -148,4 +167,8 @@ void FOpenGLRenderInterface::EnableStencilTest(UBOOL Enable){
 void FOpenGLRenderInterface::EnableZWrite(UBOOL Enable){
 	CurrentState->bZWrite = Enable;
 	glDepthMask(Enable ? GL_TRUE : GL_FALSE);
+}
+
+void FOpenGLRenderInterface::DrawPrimitive(EPrimitiveType PrimitiveType, INT FirstIndex, INT NumPrimitives, INT MinIndex, INT MaxIndex){
+	PRINT_FUNC;
 }

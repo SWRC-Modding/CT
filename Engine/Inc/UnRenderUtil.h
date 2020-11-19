@@ -378,32 +378,32 @@ public:
 //	FAuxRenderTarget
 //
 
-class FAuxRenderTarget : public FRenderTarget
-{
+class FAuxRenderTarget : public FRenderTarget{
 public:
-
-	QWORD			CacheId;
-	INT				Revision,
-					Width,
-					Height;
-	ETextureFormat	Format;
+	INT            Width;
+	INT            Height;
+	ETextureFormat Format;
 
 	// Constructor.
 
-	FAuxRenderTarget(INT InWidth,INT InHeight,ETextureFormat InFormat);
+	FAuxRenderTarget(INT InWidth, INT InHeight, ETextureFormat InFormat) : Width(InWidth),
+	                                                                       Height(InHeight),
+	                                                                       Format(InFormat){
+		CacheId = MakeCacheID(CID_RenderTexture);
+	}
 
-	// FRenderResource interface.
-
-	virtual INT GetRevision();
-	virtual QWORD GetCacheId();
+	virtual ~FAuxRenderTarget(){
+		if(GEngine && GEngine->GRenDev && GetCacheId())
+			GEngine->GRenDev->FlushResource(GetCacheId());
+	}
 
 	// FBaseTexture interface.
 
-	virtual INT GetWidth();
-	virtual INT GetHeight();
-	virtual ETexClampMode GetUClamp();
-	virtual ETexClampMode GetVClamp();
-	virtual ETextureFormat GetFormat();
-	virtual INT GetNumMips();
-	virtual INT GetFirstMip();
+	virtual INT GetWidth(){ return Width; }
+	virtual INT GetHeight(){ return Height; }
+	virtual ETexClampMode GetUClamp(){ return TC_Wrap; }
+	virtual ETexClampMode GetVClamp(){ return TC_Wrap; }
+	virtual ETextureFormat GetFormat(){ return Format; }
+	virtual INT GetNumMips(){ return 1; }
+	virtual INT GetFirstMip(){ return 0; }
 };

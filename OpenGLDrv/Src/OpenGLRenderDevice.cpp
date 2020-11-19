@@ -10,9 +10,8 @@ IMPLEMENT_CLASS(UOpenGLRenderDevice)
 
 HGLRC UOpenGLRenderDevice::CurrentContext = NULL;
 
-UOpenGLRenderDevice::UOpenGLRenderDevice() : RenderInterface(this){
-
-}
+UOpenGLRenderDevice::UOpenGLRenderDevice() : RenderInterface(this),
+                                             DummyRenderTarget(0, 0, TEXF_RGB8){}
 
 void UOpenGLRenderDevice::StaticConstructor(){
 
@@ -233,6 +232,19 @@ UBOOL UOpenGLRenderDevice::SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL
 		FramebufferShader->Cache(FramebufferShader->VertexShader, FramebufferShader->FragmentShader);
 		RemoveResource(FramebufferShader); // HACK: Removing the shader from the hash to prevent it from being destroyed when Flush is called
 		glCreateVertexArrays(1, &ScreenVAO);
+
+		// Create default render target
+
+		DummyRenderTarget.Width = NewX;
+		DummyRenderTarget.Height = NewY;
+		DefaultRenderTarget = new FOpenGLRenderTarget(this, DummyRenderTarget.GetCacheId());
+
+		DefaultRenderTarget->Cache(&DummyRenderTarget);
+		DefaultRenderTarget->Bind();
+		RemoveResource(DefaultRenderTarget); // HACK: Removing the default render target from the hash to prevent it from being destroyed when Flush is called
+
+		checkSlow(RenderInterface.CurrentState == RenderInterface.SavedStates);
+		RenderInterface.CurrentState->RenderTarget = DefaultRenderTarget;
 	}
 
 	if(Fullscreen){
@@ -296,14 +308,17 @@ FRenderInterface* UOpenGLRenderDevice::Lock(UViewport* Viewport, BYTE* HitData, 
 
 void UOpenGLRenderDevice::Present(UViewport* Viewport){
 	checkSlow(IsCurrent());
+	checkSlow(RenderInterface.CurrentState->RenderTarget == DefaultRenderTarget);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, GL_NONE);
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_STENCIL_TEST);
 	FramebufferShader->Bind();
+	glBindTexture(GL_TEXTURE_2D, DefaultRenderTarget->ColorAttachment);
 	glBindVertexArray(ScreenVAO);
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 	SwapBuffers(DeviceContext);
+	DefaultRenderTarget->Bind();
 }
 
 FRenderCaps* UOpenGLRenderDevice::GetRenderCaps(){

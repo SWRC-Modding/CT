@@ -178,7 +178,7 @@ public:
 	virtual ~FRenderResource(){}
 	virtual INT GetRevision(){ return Revision; }
 	virtual bool IsUMA(){ return false; }
-	virtual bool bPersistantCache(){ return false; }
+	virtual bool bPersistentCache(){ return false; }
 
 	QWORD GetCacheId(){ return CacheId; }
 	void Serialize(FArchive& Ar);

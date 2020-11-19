@@ -13,6 +13,7 @@ class FOpenGLResource{
 public:
 	UOpenGLRenderDevice* RenDev;
 	QWORD                CacheId;
+	INT                  Revision;
 	INT                  HashIndex;
 	FOpenGLResource*     HashNext;
 
@@ -51,4 +52,18 @@ public:
 	GLuint Handle;
 	FOpenGLShader* VertexShader;
 	FOpenGLShader* FragmentShader;
+};
+
+// FOpenGLRenderTarget
+
+class FOpenGLRenderTarget : public FOpenGLResource{
+public:
+	FOpenGLRenderTarget(UOpenGLRenderDevice* InRenDev, QWORD InCacheId);
+
+	void Cache(FRenderTarget* RenderTarget);
+	void Bind() const;
+
+	GLuint FBO;
+	GLuint ColorAttachment;
+	GLuint DepthStencilAttachment;
 };

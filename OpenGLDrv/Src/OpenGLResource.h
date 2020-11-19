@@ -59,11 +59,30 @@ public:
 class FOpenGLRenderTarget : public FOpenGLResource{
 public:
 	FOpenGLRenderTarget(UOpenGLRenderDevice* InRenDev, QWORD InCacheId);
+	virtual ~FOpenGLRenderTarget();
 
 	void Cache(FRenderTarget* RenderTarget);
+	void Free();
 	void Bind() const;
 
 	GLuint FBO;
 	GLuint ColorAttachment;
 	GLuint DepthStencilAttachment;
+};
+
+// FOpenGLIndexBuffer
+
+class FOpenGLIndexBuffer : public FOpenGLResource{
+public:
+	FOpenGLIndexBuffer(UOpenGLRenderDevice* InRenDev, QWORD InCacheId, bool IsDynamic = false);
+	virtual ~FOpenGLIndexBuffer();
+
+	void Cache(FIndexBuffer* IndexBuffer);
+	void Free();
+	void Bind() const;
+
+	GLuint EBO;
+	INT    IndexSize;
+	INT    DynamicSize;
+	bool   IsDynamic;
 };

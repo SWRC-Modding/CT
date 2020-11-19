@@ -40,12 +40,13 @@ public:
 
 // FOpenGLShaderProgram
 
-class FOpenGLShaderProgram : FOpenGLResource{
+class FOpenGLShaderProgram : public FOpenGLResource{
 public:
 	FOpenGLShaderProgram(UOpenGLRenderDevice* InRenDev, QWORD InCacheId);
 	virtual ~FOpenGLShaderProgram();
 
 	void Cache(FOpenGLShader* NewVertexShader, FOpenGLShader* NewFragmentShader);
+	void Bind() const;
 
 	GLuint Handle;
 	FOpenGLShader* VertexShader;

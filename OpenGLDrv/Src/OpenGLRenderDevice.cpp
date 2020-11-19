@@ -213,12 +213,12 @@ UBOOL UOpenGLRenderDevice::SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL
 			"#version 450\n"
 			"out vec2 texCoords;\n"
 			"void main(void){\n"
-			"    const vec4[4] vertices = vec4[](vec4(1.0, -1.0, 1.0, 0.0),\n"
-			"                                    vec4(-1.0, -1.0, 0.0, 0.0),\n"
+			"    const vec4[4] vertices = vec4[](vec4(1.0, 1.0, 1.0, 1.0),\n"
 			"                                    vec4(-1.0, 1.0, 0.0, 1.0),\n"
-			"                                    vec4(1.0, 1.0, 1.0, 1.0));\n"
+			"                                    vec4(1.0, -1.0, 1.0, 0.0),\n"
+			"                                    vec4(-1.0, -1.0, 0.0, 0.0));\n"
 			"    texCoords = vertices[gl_VertexID].zw;\n"
-			"    gl_Position = vec4(vertices[gl_VertexID].xy, 0.0, 0.0);\n"
+			"    gl_Position = vec4(vertices[gl_VertexID].xy, 0.5, 1.0);\n"
 			"}\n"
 		);
 		FramebufferShader->FragmentShader->Cache(
@@ -231,6 +231,8 @@ UBOOL UOpenGLRenderDevice::SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL
 			"}\n"
 		);
 		FramebufferShader->Cache(FramebufferShader->VertexShader, FramebufferShader->FragmentShader);
+		RemoveResource(FramebufferShader); // HACK: Removing the shader from the hash to prevent it from being destroyed when Flush is called
+		glCreateVertexArrays(1, &ScreenVAO);
 	}
 
 	if(Fullscreen){
@@ -294,7 +296,14 @@ FRenderInterface* UOpenGLRenderDevice::Lock(UViewport* Viewport, BYTE* HitData, 
 
 void UOpenGLRenderDevice::Present(UViewport* Viewport){
 	checkSlow(IsCurrent());
-	verify(SwapBuffers(DeviceContext));
+
+	glBindFramebuffer(GL_FRAMEBUFFER, GL_NONE);
+	glDisable(GL_DEPTH_TEST);
+	glDisable(GL_STENCIL_TEST);
+	FramebufferShader->Bind();
+	glBindVertexArray(ScreenVAO);
+	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+	SwapBuffers(DeviceContext);
 }
 
 FRenderCaps* UOpenGLRenderDevice::GetRenderCaps(){

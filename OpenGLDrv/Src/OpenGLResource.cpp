@@ -82,3 +82,8 @@ void FOpenGLShaderProgram::Cache(FOpenGLShader* NewVertexShader, FOpenGLShader* 
 		appErrorf("Shader program linking failed: %s", Buffer);
 	}
 }
+
+void FOpenGLShaderProgram::Bind() const{
+	checkSlow(Handle);
+	glUseProgram(Handle);
+}

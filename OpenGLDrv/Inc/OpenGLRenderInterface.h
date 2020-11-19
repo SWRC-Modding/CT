@@ -4,6 +4,7 @@
 
 class UOpenGLRenderDevice;
 class FOpenGLRenderTarget;
+class FOpenGLIndexBuffer;
 
 #define MAX_STATESTACKDEPTH 128 // TODO: Verify actually required limit
 
@@ -26,10 +27,16 @@ public:
 		UBOOL     bStencilTest;
 		UBOOL     bZWrite;
 
+		INT                 IndexBufferBaseIndex;
+		FOpenGLIndexBuffer* IndexBuffer;
+
 		FOpenGLSavedState();
 	};
 
 	UOpenGLRenderDevice* RenDev;
+
+	FOpenGLIndexBuffer* DynamicIndexBuffer16;
+	FOpenGLIndexBuffer* DynamicIndexBuffer32;
 
 	FOpenGLSavedState  SavedStates[MAX_STATESTACKDEPTH];
 	FOpenGLSavedState* CurrentState;
@@ -60,9 +67,12 @@ public:
 	virtual void EnableZWrite(UBOOL Enable);
 	virtual void SetPrecacheMode(EPrecacheMode PrecacheMode){ PRINT_FUNC; }
 	virtual void SetZBias(INT ZBias){ PRINT_FUNC; }
-	virtual INT SetVertexStreams(EVertexShader Shader, FVertexStream** Streams, INT NumStreams){ PRINT_FUNC; return 0; }
-	virtual INT SetDynamicStream(EVertexShader Shader, FVertexStream* Stream){ PRINT_FUNC; return 0; }
-	virtual INT SetIndexBuffer(FIndexBuffer* IndexBuffer, INT BaseIndex){ PRINT_FUNC; return 0; }
-	virtual INT SetDynamicIndexBuffer(FIndexBuffer* IndexBuffer, INT BaseIndex){ PRINT_FUNC; return 0; }
+	virtual INT SetVertexStreams(EVertexShader Shader, FVertexStream** Streams, INT NumStreams);
+	virtual INT SetDynamicStream(EVertexShader Shader, FVertexStream* Stream);
+	virtual INT SetIndexBuffer(FIndexBuffer* IndexBuffer, INT BaseIndex);
+	virtual INT SetDynamicIndexBuffer(FIndexBuffer* IndexBuffer, INT BaseIndex);
 	virtual void DrawPrimitive(EPrimitiveType PrimitiveType, INT FirstIndex, INT NumPrimitives, INT MinIndex, INT MaxIndex);
+
+private:
+	INT SetIndexBuffer(FIndexBuffer* IndexBuffer, INT BaseIndex, bool IsDynamic);
 };

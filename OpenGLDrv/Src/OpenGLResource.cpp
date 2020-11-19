@@ -95,29 +95,103 @@ FOpenGLRenderTarget::FOpenGLRenderTarget(UOpenGLRenderDevice* InRenDev, QWORD In
                                                                                            FBO(GL_NONE),
                                                                                            ColorAttachment(GL_NONE){}
 
+FOpenGLRenderTarget::~FOpenGLRenderTarget(){
+	Free();
+}
+
 void FOpenGLRenderTarget::Cache(FRenderTarget* RenderTarget){
-	if(!FBO)
-		glCreateFramebuffers(1, &FBO);
+	Free();
 
-	if(!ColorAttachment)
-		glCreateTextures(GL_TEXTURE_2D, 1, &ColorAttachment);
-
+	glCreateFramebuffers(1, &FBO);
+	glCreateTextures(GL_TEXTURE_2D, 1, &ColorAttachment);
 	glTextureStorage2D(ColorAttachment, 1, RenDev->Use16bit ? GL_RGB565 : GL_RGB8, RenderTarget->GetWidth(), RenderTarget->GetHeight());
-
 	glTextureParameteri(ColorAttachment, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTextureParameteri(ColorAttachment, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glNamedFramebufferTexture(FBO, GL_COLOR_ATTACHMENT0, ColorAttachment, 0);
-
-	if(!DepthStencilAttachment)
-		glCreateRenderbuffers(1, &DepthStencilAttachment);
-
+	glCreateRenderbuffers(1, &DepthStencilAttachment);
 	glNamedRenderbufferStorage(DepthStencilAttachment, GL_DEPTH24_STENCIL8, RenderTarget->GetWidth(), RenderTarget->GetHeight());
 	glNamedFramebufferRenderbuffer(FBO, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, DepthStencilAttachment);
 
 	checkSlow(glCheckNamedFramebufferStatus(FBO, GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE);
 }
 
+void FOpenGLRenderTarget::Free(){
+	if(FBO){
+		glDeleteFramebuffers(1, &FBO);
+		FBO = GL_NONE;
+	}
+
+	if(ColorAttachment){
+		glDeleteTextures(1, &ColorAttachment);
+		ColorAttachment = GL_NONE;
+	}
+
+	if(DepthStencilAttachment){
+		glDeleteRenderbuffers(1, &DepthStencilAttachment);
+		DepthStencilAttachment = GL_NONE;
+	}
+}
+
 void FOpenGLRenderTarget::Bind() const{
 	checkSlow(FBO);
 	glBindFramebuffer(GL_FRAMEBUFFER, FBO);
+}
+
+// FOpenGLIndexBuffer
+
+FOpenGLIndexBuffer::FOpenGLIndexBuffer(UOpenGLRenderDevice* InRenDev, QWORD InCacheId, bool InIsDynamic) : FOpenGLResource(InRenDev, InCacheId),
+                                                                                                           EBO(GL_NONE),
+																						                   IndexSize(0),
+																						                   DynamicSize(0),
+																										   IsDynamic(InIsDynamic){}
+
+FOpenGLIndexBuffer::~FOpenGLIndexBuffer(){
+	Free();
+
+	// TODO: Find a better place for this
+	if(RenDev->RenderInterface.DynamicIndexBuffer16 == this)
+		RenDev->RenderInterface.DynamicIndexBuffer16 = NULL;
+
+	if(RenDev->RenderInterface.DynamicIndexBuffer32 == this)
+		RenDev->RenderInterface.DynamicIndexBuffer32 = NULL;
+}
+
+void FOpenGLIndexBuffer::Cache(FIndexBuffer* IndexBuffer){
+	if(!IsDynamic)
+		Free();
+
+	if(!EBO)
+		glCreateBuffers(1, &EBO);
+
+	IndexSize = IndexBuffer->GetIndexSize();
+
+	INT BufferSize = IndexBuffer->GetSize();
+	void* Data = appMalloc(BufferSize);
+
+	IndexBuffer->GetContents(Data);
+
+	if(IsDynamic){
+		if(DynamicSize == 0 || DynamicSize < BufferSize){
+			glNamedBufferData(EBO, BufferSize, Data, GL_DYNAMIC_DRAW);
+			DynamicSize = BufferSize;
+		}else{
+			glNamedBufferSubData(EBO, 0, BufferSize, Data);
+		}
+	}else{
+		glNamedBufferStorage(EBO, BufferSize, Data, 0);
+	}
+
+	appFree(Data);
+}
+
+void FOpenGLIndexBuffer::Free(){
+	if(EBO){
+		glDeleteBuffers(1, &EBO);
+		EBO = 0;
+	}
+}
+
+void FOpenGLIndexBuffer::Bind() const{
+	checkSlow(EBO);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 }

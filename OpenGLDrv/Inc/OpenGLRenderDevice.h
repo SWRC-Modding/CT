@@ -4,6 +4,7 @@
 #include "OpenGLRenderInterface.h"
 
 class FOpenGLResource;
+class FOpenGLShaderProgram;
 
 class OPENGLDRV_API UOpenGLRenderDevice : public URenderDevice{
 	DECLARE_CLASS(UOpenGLRenderDevice,URenderDevice,CLASS_Config,OpenGLDrv)
@@ -13,7 +14,7 @@ public:
 	FOpenGLRenderInterface RenderInterface;
 	FRenderCaps            RenderCaps;
 
-	FOpenGLResource*       ResourceList;
+	FOpenGLShaderProgram*  FramebufferShader;
 	FOpenGLResource*       ResourceHash[4096];
 
 	static HGLRC CurrentContext;

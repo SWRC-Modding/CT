@@ -59,6 +59,8 @@ public:
 	virtual UBOOL SupportsTextureFormat(ETextureFormat){ PRINT_FUNC; return 0; }
 
 private:
+	unsigned int ScreenVAO;
+
 	friend class FOpenGLResource;
 
 	void AddResource(FOpenGLResource* Resource);

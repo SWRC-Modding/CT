@@ -4,6 +4,7 @@
 
 FOpenGLResource::FOpenGLResource(UOpenGLRenderDevice* InRenDev, QWORD InCacheId) : RenDev(InRenDev),
                                                                                    CacheId(InCacheId),
+                                                                                   Revision(-1),
                                                                                    HashIndex(INDEX_NONE),
                                                                                    HashNext(NULL){
 	RenDev->AddResource(this);
@@ -86,4 +87,37 @@ void FOpenGLShaderProgram::Cache(FOpenGLShader* NewVertexShader, FOpenGLShader* 
 void FOpenGLShaderProgram::Bind() const{
 	checkSlow(Handle);
 	glUseProgram(Handle);
+}
+
+// FOpenGLRenderTarget
+
+FOpenGLRenderTarget::FOpenGLRenderTarget(UOpenGLRenderDevice* InRenDev, QWORD InCacheId) : FOpenGLResource(InRenDev, InCacheId),
+                                                                                           FBO(GL_NONE),
+                                                                                           ColorAttachment(GL_NONE){}
+
+void FOpenGLRenderTarget::Cache(FRenderTarget* RenderTarget){
+	if(!FBO)
+		glCreateFramebuffers(1, &FBO);
+
+	if(!ColorAttachment)
+		glCreateTextures(GL_TEXTURE_2D, 1, &ColorAttachment);
+
+	glTextureStorage2D(ColorAttachment, 1, RenDev->Use16bit ? GL_RGB565 : GL_RGB8, RenderTarget->GetWidth(), RenderTarget->GetHeight());
+
+	glTextureParameteri(ColorAttachment, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTextureParameteri(ColorAttachment, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glNamedFramebufferTexture(FBO, GL_COLOR_ATTACHMENT0, ColorAttachment, 0);
+
+	if(!DepthStencilAttachment)
+		glCreateRenderbuffers(1, &DepthStencilAttachment);
+
+	glNamedRenderbufferStorage(DepthStencilAttachment, GL_DEPTH24_STENCIL8, RenderTarget->GetWidth(), RenderTarget->GetHeight());
+	glNamedFramebufferRenderbuffer(FBO, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, DepthStencilAttachment);
+
+	checkSlow(glCheckNamedFramebufferStatus(FBO, GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE);
+}
+
+void FOpenGLRenderTarget::Bind() const{
+	checkSlow(FBO);
+	glBindFramebuffer(GL_FRAMEBUFFER, FBO);
 }

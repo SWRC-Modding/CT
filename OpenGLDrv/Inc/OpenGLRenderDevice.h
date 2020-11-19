@@ -5,6 +5,7 @@
 
 class FOpenGLResource;
 class FOpenGLShaderProgram;
+class FOpenGLRenderTarget;
 
 class OPENGLDRV_API UOpenGLRenderDevice : public URenderDevice{
 	DECLARE_CLASS(UOpenGLRenderDevice,URenderDevice,CLASS_Config,OpenGLDrv)
@@ -15,6 +16,7 @@ public:
 	FRenderCaps            RenderCaps;
 
 	FOpenGLShaderProgram*  FramebufferShader;
+	FOpenGLRenderTarget*   DefaultRenderTarget;
 	FOpenGLResource*       ResourceHash[4096];
 
 	static HGLRC CurrentContext;
@@ -59,7 +61,8 @@ public:
 	virtual UBOOL SupportsTextureFormat(ETextureFormat){ PRINT_FUNC; return 0; }
 
 private:
-	unsigned int ScreenVAO;
+	FAuxRenderTarget DummyRenderTarget;
+	unsigned int     ScreenVAO;
 
 	friend class FOpenGLResource;
 

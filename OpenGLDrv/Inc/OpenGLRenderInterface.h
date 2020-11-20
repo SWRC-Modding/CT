@@ -6,43 +6,70 @@ class UOpenGLRenderDevice;
 class FOpenGLRenderTarget;
 class FOpenGLIndexBuffer;
 
+// GLSL equivalent types with proper alignment
+
+typedef ALIGN(4) __int32 GLSL_bool;
+typedef ALIGN(4) __int32 GLSL_int;
+typedef ALIGN(4) float GLSL_float;
+typedef ALIGN(8) struct{ GLSL_float X; GLSL_float Y; } GLSL_vec2;
+typedef ALIGN(16) FPlane GLSL_vec3;
+typedef ALIGN(16) FPlane GLSL_vec4;
+typedef ALIGN(16) FMatrix GLSL_mat4;
+
+// Macro to synchronize the GLSL uniform block with the C++ struct
+#define UNIFORM_BLOCK_CONTENTS \
+	UNIFORM_BLOCK_MEMBER(mat4, LocalToWorld) \
+	UNIFORM_BLOCK_MEMBER(mat4, WorldToCamera) \
+	UNIFORM_BLOCK_MEMBER(mat4, CameraToScreen) \
+	UNIFORM_BLOCK_MEMBER(mat4, Transform)
+
+// Global uniforms available in every shader
+struct FOpenGLGlobalUniforms{
+#define UNIFORM_BLOCK_MEMBER(type, name) GLSL_ ## type name;
+	UNIFORM_BLOCK_CONTENTS
+#undef UNIFORM_BLOCK_MEMBER
+};
+
 #define MAX_STATESTACKDEPTH 128 // TODO: Verify actually required limit
 
 class FOpenGLRenderInterface : public FRenderInterface{
 public:
 	class FOpenGLSavedState{
 	public:
-		FOpenGLRenderTarget* RenderTarget;
+		INT                   UniformRevision;
+		FOpenGLGlobalUniforms Uniforms;
 
-		INT       ViewportX;
-		INT       ViewportY;
-		INT       ViewportWidth;
-		INT       ViewportHeight;
+		FOpenGLRenderTarget*  RenderTarget;
 
-		ECullMode CullMode;
+		INT                   ViewportX;
+		INT                   ViewportY;
+		INT                   ViewportWidth;
+		INT                   ViewportHeight;
 
-		FMatrix   Matrices[3]; // Matrices according to ETransformType
-		FMatrix   Transform;
+		ECullMode             CullMode;
 
-		UBOOL     bStencilTest;
-		UBOOL     bZWrite;
+		UBOOL                 bStencilTest;
+		UBOOL                 bZWrite;
 
-		INT                 IndexBufferBaseIndex;
-		FOpenGLIndexBuffer* IndexBuffer;
-
-		FOpenGLSavedState();
+		INT                   IndexBufferBaseIndex;
+		FOpenGLIndexBuffer*   IndexBuffer;
 	};
 
 	UOpenGLRenderDevice* RenDev;
 
-	FOpenGLIndexBuffer* DynamicIndexBuffer16;
-	FOpenGLIndexBuffer* DynamicIndexBuffer32;
+	FOpenGLSavedState    SavedStates[MAX_STATESTACKDEPTH];
+	FOpenGLSavedState*   CurrentState;
 
-	FOpenGLSavedState  SavedStates[MAX_STATESTACKDEPTH];
-	FOpenGLSavedState* CurrentState;
-	INT                SavedStateIndex;
+	INT                  SavedStateIndex;
+	UBOOL                NeedUniformUpdate;
+	unsigned int         GlobalUBO;
+
+	FOpenGLIndexBuffer*  DynamicIndexBuffer16;
+	FOpenGLIndexBuffer*  DynamicIndexBuffer32;
 
 	FOpenGLRenderInterface(UOpenGLRenderDevice* InRenDev);
+
+	void UpdateShaderUniforms();
 
 	// Overrides
 	virtual void PushState(int);

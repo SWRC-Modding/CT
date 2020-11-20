@@ -16,6 +16,13 @@ FOpenGLResource::~FOpenGLResource(){
 
 // FOpenGLShader
 
+static const GLchar* GLSLVersionString = "#version 450\n";
+static const GLchar* GLSLGlobalUniforms = "layout(std140, binding = 0) uniform Globals{\n"
+#define UNIFORM_BLOCK_MEMBER(type, name) "\t" #type " " #name ";\n"
+                                              UNIFORM_BLOCK_CONTENTS
+#undef UNIFORM_BLOCK_MEMBER
+                                          "};\n";
+
 FOpenGLShader::FOpenGLShader(UOpenGLRenderDevice* InRenDev, QWORD InCacheId, EOpenGLShaderType InType) : FOpenGLResource(InRenDev, InCacheId),
                                                                                                          Type(InType),
                                                                                                          Handle(GL_NONE){}
@@ -29,7 +36,9 @@ void FOpenGLShader::Cache(const TCHAR* Source){
 	if(!Handle)
 		Handle = glCreateShader(Type == OST_Vertex ? GL_VERTEX_SHADER : GL_FRAGMENT_SHADER);
 
-	glShaderSource(Handle, 1, &Source, NULL);
+	const GLchar* CombinedSource[] = {GLSLVersionString, GLSLGlobalUniforms, Source};
+
+	glShaderSource(Handle, ARRAY_COUNT(CombinedSource), CombinedSource, NULL);
 	glCompileShader(Handle);
 
 	GLint Status;

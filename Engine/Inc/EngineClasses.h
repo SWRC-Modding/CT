@@ -5468,7 +5468,7 @@ public:
 
 class ENGINE_API UScriptedTexture : public UBitmapMaterial{
 public:
-	INT RenderTarget;
+	FRenderTarget* RenderTarget;
 	class UViewport* RenderViewport;
 	class AActor* Client;
 	INT Revision;
@@ -5484,9 +5484,11 @@ public:
 	virtual void PostEditChange();
 };
 
-// Tex Scaler
-class ENGINE_API UTexScaler : public UTexModifier
-{
+/*
+ * TexScaler
+ */
+
+class ENGINE_API UTexScaler : public UTexModifier{
 public:
 	FMatrix M;
 	FLOAT UScale;
@@ -5494,7 +5496,6 @@ public:
 	FLOAT UOffset;
 	FLOAT VOffset;
 
-	// Declare the class
 	DECLARE_CLASS(UTexScaler,UTexModifier,0,Engine)
 
 	// UTexModifier interface

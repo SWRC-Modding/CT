@@ -23,8 +23,6 @@ public:
 
 	UOpenGLRenderDevice();
 
-	void StaticConstructor();
-
 	void MakeCurrent();
 	bool IsCurrent();
 	void UnSetRes();
@@ -33,6 +31,7 @@ public:
 
 	// Overrides
 	virtual UBOOL Exec(const TCHAR* Cmd, FOutputDevice& Ar){ return 0; }
+	virtual void Destroy();
 	virtual UBOOL Init(){ PRINT_FUNC; return 1; }
 	virtual UBOOL SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL Fullscreen, INT ColorBytes = 0, UBOOL bSaveSize = 1);
 	virtual void Exit(UViewport* Viewport);
@@ -61,10 +60,10 @@ public:
 	virtual UBOOL SupportsTextureFormat(ETextureFormat){ PRINT_FUNC; return 0; }
 
 private:
-	FAuxRenderTarget DummyRenderTarget;
-	unsigned int     ScreenVAO;
+	unsigned int ScreenVAO;
 
 	friend class FOpenGLResource;
+	friend class FOpenGLRenderInterface;
 
 	void AddResource(FOpenGLResource* Resource);
 	void RemoveResource(FOpenGLResource* Resource);

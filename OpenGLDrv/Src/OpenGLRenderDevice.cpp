@@ -209,22 +209,18 @@ UBOOL UOpenGLRenderDevice::SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL
 		FramebufferShader->FragmentShader = new FOpenGLShader(this, MakeCacheID(CID_RenderShader), OST_Fragment);
 
 		FramebufferShader->VertexShader->Cache(
-			"out vec2 texCoords;\n"
 			"void main(void){\n"
 			"    const vec4[4] vertices = vec4[](vec4(1.0, 1.0, 1.0, 1.0),\n"
 			"                                    vec4(-1.0, 1.0, 0.0, 1.0),\n"
 			"                                    vec4(1.0, -1.0, 1.0, 0.0),\n"
 			"                                    vec4(-1.0, -1.0, 0.0, 0.0));\n"
-			"    texCoords = vertices[gl_VertexID].zw;\n"
+			"    TexCoord0 = vertices[gl_VertexID].zw;\n"
 			"    gl_Position = vec4(vertices[gl_VertexID].xy, 0.5, 1.0);\n"
 			"}\n"
 		);
 		FramebufferShader->FragmentShader->Cache(
-			"uniform sampler2D screen;\n"
-			"in vec2 texCoords;\n"
-			"out vec4 fragColor;\n"
 			"void main(void){\n"
-			"    fragColor = texture2D(screen, texCoords);\n"
+			"    FragColor = texture2D(Texture0, TexCoord0);\n"
 			"}\n"
 		);
 		FramebufferShader->Cache(FramebufferShader->VertexShader, FramebufferShader->FragmentShader);
@@ -312,7 +308,7 @@ void UOpenGLRenderDevice::Present(UViewport* Viewport){
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_STENCIL_TEST);
 	FramebufferShader->Bind();
-	glBindTexture(GL_TEXTURE_2D, DefaultRenderTarget->ColorAttachment);
+	glBindTextureUnit(GL_TEXTURE0, DefaultRenderTarget->ColorAttachment);
 	glBindVertexArray(ScreenVAO);
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 	SwapBuffers(DeviceContext);

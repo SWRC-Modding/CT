@@ -141,9 +141,9 @@ void FOpenGLRenderTarget::Bind() const{
 
 FOpenGLIndexBuffer::FOpenGLIndexBuffer(UOpenGLRenderDevice* InRenDev, QWORD InCacheId, bool InIsDynamic) : FOpenGLResource(InRenDev, InCacheId),
                                                                                                            EBO(GL_NONE),
-																						                   IndexSize(0),
-																						                   DynamicSize(0),
-																										   IsDynamic(InIsDynamic){}
+                                                                                                           IndexSize(0),
+                                                                                                           DynamicSize(0),
+                                                                                                           IsDynamic(InIsDynamic){}
 
 FOpenGLIndexBuffer::~FOpenGLIndexBuffer(){
 	Free();
@@ -171,7 +171,7 @@ void FOpenGLIndexBuffer::Cache(FIndexBuffer* IndexBuffer){
 	IndexBuffer->GetContents(Data);
 
 	if(IsDynamic){
-		if(DynamicSize == 0 || DynamicSize < BufferSize){
+		if(DynamicSize < BufferSize){
 			glNamedBufferData(EBO, BufferSize, Data, GL_DYNAMIC_DRAW);
 			DynamicSize = BufferSize;
 		}else{

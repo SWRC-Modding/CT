@@ -737,9 +737,8 @@ FRenderInterface* UModRenderDevice::Lock(UViewport* Viewport, BYTE* HitData, INT
 }
 
 void UModRenderDevice::Unlock(FRenderInterface* RI){
-	checkSlow(LockedViewport);
-
 	if(RI == &RenderInterface){
+		checkSlow(LockedViewport);
 		checkSlow(RenderInterface.HitData);
 		checkSlow(RenderInterface.HitSize);
 

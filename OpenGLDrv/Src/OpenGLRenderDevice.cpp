@@ -209,7 +209,6 @@ UBOOL UOpenGLRenderDevice::SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL
 		FramebufferShader->FragmentShader = new FOpenGLShader(this, MakeCacheID(CID_RenderShader), OST_Fragment);
 
 		FramebufferShader->VertexShader->Cache(
-			"#version 450\n"
 			"out vec2 texCoords;\n"
 			"void main(void){\n"
 			"    const vec4[4] vertices = vec4[](vec4(1.0, 1.0, 1.0, 1.0),\n"
@@ -221,7 +220,6 @@ UBOOL UOpenGLRenderDevice::SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL
 			"}\n"
 		);
 		FramebufferShader->FragmentShader->Cache(
-			"#version 450\n"
 			"uniform sampler2D screen;\n"
 			"in vec2 texCoords;\n"
 			"out vec4 fragColor;\n"
@@ -319,6 +317,7 @@ void UOpenGLRenderDevice::Present(UViewport* Viewport){
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 	SwapBuffers(DeviceContext);
 	DefaultRenderTarget->Bind();
+	RenderInterface.CurrentState->UniformRevision = 0; // Reset uniform revision to avoid overflow even if it is unlikely to happen
 }
 
 FRenderCaps* UOpenGLRenderDevice::GetRenderCaps(){

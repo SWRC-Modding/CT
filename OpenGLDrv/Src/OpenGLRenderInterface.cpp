@@ -5,21 +5,29 @@
 #include "GL/glew.h"
 
 /*
- * FOpenGLRenderInterface::FOpenGLSavedState
- */
-FOpenGLRenderInterface::FOpenGLSavedState::FOpenGLSavedState() : Transform(FMatrix::Identity){
-	for(INT i = 0; i < ARRAY_COUNT(Matrices); ++i)
-		Matrices[i] = FMatrix::Identity;
-}
-
-/*
  * FOpenGLRenderInterface
  */
 
 FOpenGLRenderInterface::FOpenGLRenderInterface(UOpenGLRenderDevice* InRenDev) : RenDev(InRenDev),
                                                                                 CurrentState(&SavedStates[0]),
-                                                                                SavedStateIndex(0){
+                                                                                SavedStateIndex(0),
+                                                                                GlobalUBO(GL_NONE){}
 
+void FOpenGLRenderInterface::UpdateShaderUniforms(){
+	// This is done here to avoid a possibly unnecessary matrix multiplication each time SetTransform is called
+	CurrentState->Uniforms.Transform = CurrentState->Uniforms.LocalToWorld *
+	                                   CurrentState->Uniforms.WorldToCamera *
+	                                   CurrentState->Uniforms.CameraToScreen;
+
+	if(!GlobalUBO){
+		glCreateBuffers(1, &GlobalUBO);
+		glNamedBufferStorage(GlobalUBO, sizeof(FOpenGLGlobalUniforms), &CurrentState->Uniforms, GL_DYNAMIC_STORAGE_BIT);
+		glBindBufferBase(GL_UNIFORM_BUFFER, 0, GlobalUBO); // Binding index 0 is reserved for the global uniform block
+	}else{
+		glNamedBufferSubData(GlobalUBO, 0, sizeof(FOpenGLGlobalUniforms), &CurrentState->Uniforms);
+	}
+
+	NeedUniformUpdate = 0;
 }
 
 void FOpenGLRenderInterface::PushState(int){
@@ -70,6 +78,8 @@ void FOpenGLRenderInterface::PopState(int){
 		else
 			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, GL_NONE);
 	}
+
+	NeedUniformUpdate = CurrentState->UniformRevision != PrevState->UniformRevision;
 
 	unguard;
 }
@@ -150,16 +160,35 @@ void FOpenGLRenderInterface::SetCullMode(ECullMode CullMode){
 }
 
 void FOpenGLRenderInterface::SetTransform(ETransformType Type, const FMatrix& Matrix){
-	checkSlow(Type < ARRAY_COUNT(CurrentState->Matrices));
+	checkSlow(Type < 3);
 
-	CurrentState->Matrices[Type] = Matrix;
-	CurrentState->Transform = CurrentState->Matrices[0] * CurrentState->Matrices[1] * CurrentState->Matrices[2];
+	switch(Type){
+	case TT_LocalToWorld:
+		CurrentState->Uniforms.LocalToWorld = Matrix;
+		break;
+	case TT_WorldToCamera:
+		CurrentState->Uniforms.WorldToCamera = Matrix;
+		break;
+	case TT_CameraToScreen:
+		CurrentState->Uniforms.CameraToScreen = Matrix;
+	}
+
+	++CurrentState->UniformRevision;
 }
 
 FMatrix FOpenGLRenderInterface::GetTransform(ETransformType Type) const{
-	checkSlow(Type < ARRAY_COUNT(CurrentState->Matrices));
+	checkSlow(Type < 3);
 
-	return CurrentState->Matrices[Type];
+	switch(Type){
+	case TT_LocalToWorld:
+		return CurrentState->Uniforms.LocalToWorld;
+	case TT_WorldToCamera:
+		return CurrentState->Uniforms.WorldToCamera;
+	case TT_CameraToScreen:
+		return CurrentState->Uniforms.CameraToScreen;
+	}
+
+	return FMatrix::Identity;
 }
 
 void FOpenGLRenderInterface::EnableStencilTest(UBOOL Enable){
@@ -245,4 +274,7 @@ INT FOpenGLRenderInterface::SetDynamicIndexBuffer(FIndexBuffer* IndexBuffer, INT
 
 void FOpenGLRenderInterface::DrawPrimitive(EPrimitiveType PrimitiveType, INT FirstIndex, INT NumPrimitives, INT MinIndex, INT MaxIndex){
 	PRINT_FUNC;
+
+	if(NeedUniformUpdate)
+		UpdateShaderUniforms();
 }

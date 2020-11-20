@@ -58,6 +58,7 @@ enum {CACHE_LINE_SIZE   = 32}; // Cache line size.
 #define CDECL   __cdecl                  // Standard C function
 #define STDCALL __stdcall                // Standard calling convention
 #define FORCEINLINE __forceinline        // Force code to be inline
+#define ALIGN(x) __declspec(align(x))    // Specify type alignment
 
 // Variable arguments.
 #define GET_VARARGS(msg,len,fmt) appGetVarArgs(msg,len,fmt)

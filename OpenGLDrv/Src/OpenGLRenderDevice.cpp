@@ -10,12 +10,7 @@ IMPLEMENT_CLASS(UOpenGLRenderDevice)
 
 HGLRC UOpenGLRenderDevice::CurrentContext = NULL;
 
-UOpenGLRenderDevice::UOpenGLRenderDevice() : RenderInterface(this),
-                                             DummyRenderTarget(0, 0, TEXF_RGB8){}
-
-void UOpenGLRenderDevice::StaticConstructor(){
-
-}
+UOpenGLRenderDevice::UOpenGLRenderDevice() : RenderInterface(this){}
 
 void UOpenGLRenderDevice::MakeCurrent(){
 	guardFunc;
@@ -110,6 +105,18 @@ FOpenGLResource* UOpenGLRenderDevice::GetCachedResource(QWORD CacheId){
 	}
 
 	return NULL;
+}
+
+void UOpenGLRenderDevice::Destroy(){
+	Super::Destroy();
+
+	// The following resources must be manually freed since they are not contained in the resource hash
+
+	if(FramebufferShader)
+		delete FramebufferShader;
+
+	if(DefaultRenderTarget)
+		delete DefaultRenderTarget;
 }
 
 UBOOL UOpenGLRenderDevice::SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL Fullscreen, INT ColorBytes, UBOOL bSaveSize){
@@ -224,13 +231,14 @@ UBOOL UOpenGLRenderDevice::SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL
 			"}\n"
 		);
 		FramebufferShader->Cache(FramebufferShader->VertexShader, FramebufferShader->FragmentShader);
+		FramebufferShader->VertexShader = NULL;
+		FramebufferShader->FragmentShader = NULL;
 		RemoveResource(FramebufferShader); // HACK: Removing the shader from the hash to prevent it from being destroyed when Flush is called
 		glCreateVertexArrays(1, &ScreenVAO);
 
 		// Create default render target
 
-		DummyRenderTarget.Width = NewX;
-		DummyRenderTarget.Height = NewY;
+		FAuxRenderTarget DummyRenderTarget(NewX, NewY, TEXF_RGB8);
 		DefaultRenderTarget = new FOpenGLRenderTarget(this, DummyRenderTarget.GetCacheId());
 
 		DefaultRenderTarget->Cache(&DummyRenderTarget);
@@ -308,7 +316,7 @@ void UOpenGLRenderDevice::Present(UViewport* Viewport){
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_STENCIL_TEST);
 	FramebufferShader->Bind();
-	glBindTextureUnit(GL_TEXTURE0, DefaultRenderTarget->ColorAttachment);
+	glBindTextureUnit(0, DefaultRenderTarget->ColorAttachment);
 	glBindVertexArray(ScreenVAO);
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 	SwapBuffers(DeviceContext);

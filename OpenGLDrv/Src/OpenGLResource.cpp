@@ -208,13 +208,6 @@ FOpenGLIndexBuffer::FOpenGLIndexBuffer(UOpenGLRenderDevice* InRenDev, QWORD InCa
 
 FOpenGLIndexBuffer::~FOpenGLIndexBuffer(){
 	Free();
-
-	// TODO: Find a better place for this
-	if(RenDev->RenderInterface.DynamicIndexBuffer16 == this)
-		RenDev->RenderInterface.DynamicIndexBuffer16 = NULL;
-
-	if(RenDev->RenderInterface.DynamicIndexBuffer32 == this)
-		RenDev->RenderInterface.DynamicIndexBuffer32 = NULL;
 }
 
 void FOpenGLIndexBuffer::Cache(FIndexBuffer* IndexBuffer){
@@ -233,13 +226,15 @@ void FOpenGLIndexBuffer::Cache(FIndexBuffer* IndexBuffer){
 
 	if(IsDynamic){
 		if(DynamicSize < BufferSize){
+			DynamicSize = BufferSize * 2;
+			debugf("Allocating %i byte dynamic %i-bit index buffer", DynamicSize, IndexSize * 8);
 			glNamedBufferData(EBO, BufferSize, Data, GL_DYNAMIC_DRAW);
-			DynamicSize = BufferSize;
 		}else{
 			glNamedBufferSubData(EBO, 0, BufferSize, Data);
 		}
 	}else{
 		glNamedBufferStorage(EBO, BufferSize, Data, 0);
+		DynamicSize = BufferSize;
 	}
 
 	appFree(Data);
@@ -255,4 +250,60 @@ void FOpenGLIndexBuffer::Free(){
 void FOpenGLIndexBuffer::Bind() const{
 	checkSlow(EBO);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+}
+
+// FOpenGLVertexStream
+
+FOpenGLVertexStream::FOpenGLVertexStream(UOpenGLRenderDevice* InRenDev, QWORD InCacheId, bool InIsDynamic) : FOpenGLResource(InRenDev, InCacheId),
+                                                                                                             VBO(GL_NONE),
+                                                                                                             Stride(0),
+                                                                                                             DynamicSize(0),
+                                                                                                             IsDynamic(InIsDynamic){}
+
+FOpenGLVertexStream::~FOpenGLVertexStream(){
+	Free();
+}
+
+void FOpenGLVertexStream::Cache(FVertexStream* VertexStream){
+	if(!IsDynamic){
+		Free();
+		//IsDynamic = VertexStream->HintDynamic() != 0;
+	}
+
+	if(!VBO)
+		glCreateBuffers(1, &VBO);
+
+	Stride = VertexStream->GetStride();
+
+	INT BufferSize = VertexStream->GetSize();
+	void* Data = appMalloc(BufferSize);
+
+	VertexStream->GetStreamData(Data);
+
+	if(IsDynamic){
+		if(DynamicSize < BufferSize){
+			DynamicSize = BufferSize * 2;
+			debugf("Allocating %i byte dynamic vertex buffer", DynamicSize);
+			glNamedBufferData(VBO, BufferSize, Data, GL_DYNAMIC_DRAW);
+		}else{
+			glNamedBufferSubData(VBO, 0, BufferSize, Data);
+		}
+	}else{
+		glNamedBufferStorage(VBO, BufferSize, Data, 0);
+		DynamicSize = BufferSize;
+	}
+
+	appFree(Data);
+}
+
+void FOpenGLVertexStream::Free(){
+	if(VBO){
+		glDeleteBuffers(1, &VBO);
+		VBO = 0;
+	}
+}
+
+void FOpenGLVertexStream::Bind(unsigned int Index) const{
+	checkSlow(VBO);
+	glBindVertexBuffer(Index, VBO, 0, Stride);
 }

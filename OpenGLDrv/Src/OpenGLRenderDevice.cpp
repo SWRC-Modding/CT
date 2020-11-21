@@ -209,6 +209,27 @@ UBOOL UOpenGLRenderDevice::SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL
 
 		glEnable(GL_DEPTH_TEST);
 
+		// Create default shader for drawing everything that doesn't use a custom one
+
+		DefaultShader = new FOpenGLShaderProgram(this, MakeCacheID(CID_RenderShader));
+		DefaultShader->VertexShader = new FOpenGLShader(this, MakeCacheID(CID_RenderShader), OST_Vertex);
+		DefaultShader->FragmentShader = new FOpenGLShader(this, MakeCacheID(CID_RenderShader), OST_Fragment);
+
+		DefaultShader->VertexShader->Cache(
+			"void main(void){\n"
+			"    gl_Position = Transform * vec4(InPosition, 1.0);\n"
+			"}\n"
+		);
+		DefaultShader->FragmentShader->Cache(
+			"void main(void){\n"
+			"    FragColor = vec4(1.0, 1.0, 1.0, 1.0);\n"
+			"}\n"
+		);
+		DefaultShader->Cache(DefaultShader->VertexShader, DefaultShader->FragmentShader);
+		DefaultShader->VertexShader = NULL;
+		DefaultShader->FragmentShader = NULL;
+		RemoveResource(DefaultShader); // HACK: Removing the shader from the hash to prevent it from being destroyed when Flush is called
+
 		// Create shader for displaying an off-screen framebuffer
 
 		FramebufferShader = new FOpenGLShaderProgram(this, MakeCacheID(CID_RenderShader));
@@ -246,7 +267,10 @@ UBOOL UOpenGLRenderDevice::SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL
 		RemoveResource(DefaultRenderTarget); // HACK: Removing the default render target from the hash to prevent it from being destroyed when Flush is called
 
 		checkSlow(RenderInterface.CurrentState == RenderInterface.SavedStates);
-		RenderInterface.CurrentState->RenderTarget = DefaultRenderTarget;
+		RenderInterface.CurrentState->RenderTarget = NULL;//DefaultRenderTarget;
+
+		// TODO: Remove!!!
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	}
 
 	if(Fullscreen){
@@ -275,6 +299,8 @@ void UOpenGLRenderDevice::Exit(UViewport* Viewport){
 }
 
 void UOpenGLRenderDevice::Flush(UViewport* Viewport){
+	RenderInterface.FlushResources();
+
 	for(INT i = 0; i < ARRAY_COUNT(ResourceHash); ++i){
 		FOpenGLResource* Resource = ResourceHash[i];
 
@@ -302,6 +328,8 @@ UBOOL UOpenGLRenderDevice::ResourceCached(QWORD CacheId){
 FRenderInterface* UOpenGLRenderDevice::Lock(UViewport* Viewport, BYTE* HitData, INT* HitSize){
 	PRINT_FUNC;
 
+	check(RenderInterface.SavedStateIndex == 0);
+
 	MakeCurrent();
 	RenderInterface.SetViewport(0, 0, Viewport->SizeX, Viewport->SizeY);
 
@@ -310,17 +338,18 @@ FRenderInterface* UOpenGLRenderDevice::Lock(UViewport* Viewport, BYTE* HitData, 
 
 void UOpenGLRenderDevice::Present(UViewport* Viewport){
 	checkSlow(IsCurrent());
-	checkSlow(RenderInterface.CurrentState->RenderTarget == DefaultRenderTarget);
+	//checkSlow(RenderInterface.CurrentState->RenderTarget == DefaultRenderTarget);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, GL_NONE);
-	glDisable(GL_DEPTH_TEST);
-	glDisable(GL_STENCIL_TEST);
-	FramebufferShader->Bind();
-	glBindTextureUnit(0, DefaultRenderTarget->ColorAttachment);
-	glBindVertexArray(ScreenVAO);
-	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+	// glDisable(GL_DEPTH_TEST);
+	// glDisable(GL_STENCIL_TEST);
+	// FramebufferShader->Bind();
+	// glBindTextureUnit(0, DefaultRenderTarget->ColorAttachment);
+	// glBindVertexArray(ScreenVAO);
+	// glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 	SwapBuffers(DeviceContext);
-	DefaultRenderTarget->Bind();
+	glClear(GL_COLOR_BUFFER_BIT);
+	//DefaultRenderTarget->Bind();
 	RenderInterface.CurrentState->UniformRevision = 0; // Reset uniform revision to avoid overflow even if it is unlikely to happen
 }
 

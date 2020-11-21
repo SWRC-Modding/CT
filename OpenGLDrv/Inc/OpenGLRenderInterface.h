@@ -5,6 +5,7 @@
 class UOpenGLRenderDevice;
 class FOpenGLRenderTarget;
 class FOpenGLIndexBuffer;
+class FOpenGLVertexStream;
 
 // GLSL equivalent types with proper alignment
 
@@ -31,11 +32,21 @@ struct FOpenGLGlobalUniforms{
 };
 
 #define MAX_STATESTACKDEPTH 128 // TODO: Verify actually required limit
+#define MAX_VERTEX_STREAMS MAX_VERTEX_COMPONENTS
 
+struct FStreamDeclaration{
+	FVertexComponent Components[MAX_VERTEX_COMPONENTS];
+	INT              NumComponents;
+
+	void Init(FVertexStream* VertexStream){ NumComponents = VertexStream->GetComponents(Components); }
+};
+
+/*
+ * OpenGL RenderInterface
+ */
 class FOpenGLRenderInterface : public FRenderInterface{
 public:
-	class FOpenGLSavedState{
-	public:
+	struct FOpenGLSavedState{
 		INT                   UniformRevision;
 		FOpenGLGlobalUniforms Uniforms;
 
@@ -67,8 +78,15 @@ public:
 	FOpenGLIndexBuffer*  DynamicIndexBuffer16;
 	FOpenGLIndexBuffer*  DynamicIndexBuffer32;
 
+	INT                       NumVertexStreams;
+	FStreamDeclaration        VertexStreamDeclarations[MAX_VERTEX_STREAMS];
+	FOpenGLVertexStream*      VertexStreams[MAX_VERTEX_STREAMS];
+	FOpenGLVertexStream*      DynamicVertexStream;
+	TMap<DWORD, unsigned int> VAOsByDeclId;
+
 	FOpenGLRenderInterface(UOpenGLRenderDevice* InRenDev);
 
+	void FlushResources();
 	void UpdateShaderUniforms();
 
 	// Overrides
@@ -102,4 +120,6 @@ public:
 
 private:
 	INT SetIndexBuffer(FIndexBuffer* IndexBuffer, INT BaseIndex, bool IsDynamic);
+	INT SetVertexStreams(EVertexShader Shader, FVertexStream** Streams, INT NumStreams, bool IsDynamic);
+	void SetupVAO(unsigned int VAO);
 };

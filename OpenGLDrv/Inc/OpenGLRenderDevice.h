@@ -15,6 +15,7 @@ public:
 	FOpenGLRenderInterface RenderInterface;
 	FRenderCaps            RenderCaps;
 
+	FOpenGLShaderProgram*  DefaultShader;
 	FOpenGLShaderProgram*  FramebufferShader;
 	FOpenGLRenderTarget*   DefaultRenderTarget;
 	FOpenGLResource*       ResourceHash[4096];

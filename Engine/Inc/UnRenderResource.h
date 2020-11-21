@@ -192,7 +192,8 @@ enum EComponentType{
 	CT_Float3,
 	CT_Float2,
 	CT_Float1,
-	CT_Color
+	CT_Color,
+	CT_MAX
 };
 
 //

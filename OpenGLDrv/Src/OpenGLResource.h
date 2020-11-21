@@ -74,7 +74,7 @@ public:
 
 class FOpenGLIndexBuffer : public FOpenGLResource{
 public:
-	FOpenGLIndexBuffer(UOpenGLRenderDevice* InRenDev, QWORD InCacheId, bool IsDynamic = false);
+	FOpenGLIndexBuffer(UOpenGLRenderDevice* InRenDev, QWORD InCacheId, bool InIsDynamic = false);
 	virtual ~FOpenGLIndexBuffer();
 
 	void Cache(FIndexBuffer* IndexBuffer);
@@ -83,6 +83,23 @@ public:
 
 	GLuint EBO;
 	INT    IndexSize;
+	INT    DynamicSize;
+	bool   IsDynamic;
+};
+
+// FOpenGLVertexStream
+
+class FOpenGLVertexStream : public FOpenGLResource{
+public:
+	FOpenGLVertexStream(UOpenGLRenderDevice* InRenDev, QWORD InCacheId, bool InIsDynamic = false);
+	virtual ~FOpenGLVertexStream();
+
+	void Cache(FVertexStream* VertexStream);
+	void Free();
+	void Bind(unsigned int Index) const;
+
+	GLuint VBO;
+	INT    Stride;
 	INT    DynamicSize;
 	bool   IsDynamic;
 };

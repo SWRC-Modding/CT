@@ -419,32 +419,52 @@ class ENGINE_API UClient : public UObject{
 	DECLARE_ABSTRACT_CLASS(UClient,UObject,CLASS_Config,Engine)
 public:
 	// Variables.
-	UEngine*			Engine;
-	TArray<UViewport*>	Viewports;
-	char                Padding[192]; // PADDING!!!
-/*
-	INT					DrawCycles;
+	UEngine*           Engine;
+	TArray<UViewport*> Viewports;
 
 	// Configurable.
-	BITFIELD	CaptureMouse;
-	BITFIELD	CurvedSurfaces;
-	BITFIELD	ScreenFlashes;
-	BITFIELD	NoLighting;
-	BITFIELD	Decals;
-	BITFIELD	NoDynamicLights;
-	BITFIELD    NoFractalAnim;
-	INT			WindowedViewportX;
-	INT			WindowedViewportY;
-	INT			WindowedColorBits;
-	INT			FullscreenViewportX;
-	INT			FullscreenViewportY;
-	INT			FullscreenColorBits;
-	FLOAT		Brightness;
-	FLOAT		MipFactor;
-	INT			TextureLODSet[LODSET_MAX];
-	FLOAT		MinDesiredFrameRate;
-	INT			ParticleDensity;
-*/
+	BITFIELD           CaptureMouse;
+	BITFIELD           ScreenFlashes;
+	BITFIELD           NoLighting;
+	BITFIELD           Decals;
+	BITFIELD           NoDynamicLights;
+	BITFIELD           NoFractalAnim;
+	BITFIELD           Coronas;
+	BITFIELD           DecoLayers;
+	BITFIELD           Projectors;
+	BITFIELD           ReportDynamicUploads;
+	BITFIELD           Shadows;
+	BITFIELD           FrameFXDisabled;
+	BITFIELD           NoHud;
+	BITFIELD           NoDistort;
+	BITFIELD           BlurEnabled;
+	BYTE               BloomQuality;
+	BYTE               BumpmappingQuality;
+	INT                Bloom;
+	INT                BloomFilter;
+	INT                FilmGrain;
+	INT                LightOpt;
+	INT                LightEnvFlag;
+	INT                HWCull;
+	INT                ShadowsPerFrame;
+	INT                ShadowLength;
+	INT                X;
+	INT                Y;
+	INT                Z;
+	INT                WindowedViewportX;
+	INT                WindowedViewportY;
+	INT                FullscreenViewportX;
+	INT                FullscreenViewportY;
+	INT                FullscreenColorBits;
+	FLOAT              Gamma;
+	char               Padding1[4]; // PADDING!!!
+	BYTE               TextureLODSet[LODSET_MAX];
+	char               Padding2[20]; // PADDING!!!
+	FLOAT              MinDesiredFramerate;
+	UViewport*         LastCurrent;
+	INT                DropLODBy;
+	INT                FSAA;
+	char               Padding3[12]; // PADDING!!!
 
 	// Constructors.
 	UClient();

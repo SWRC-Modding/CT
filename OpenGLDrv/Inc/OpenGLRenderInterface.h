@@ -13,7 +13,7 @@ typedef ALIGN(4) __int32 GLSL_bool;
 typedef ALIGN(4) __int32 GLSL_int;
 typedef ALIGN(4) float GLSL_float;
 typedef ALIGN(8) struct{ GLSL_float X; GLSL_float Y; } GLSL_vec2;
-typedef ALIGN(16) FPlane GLSL_vec3;
+typedef ALIGN(16) FVector GLSL_vec3;
 typedef ALIGN(16) FPlane GLSL_vec4;
 typedef ALIGN(16) FMatrix GLSL_mat4;
 
@@ -121,5 +121,4 @@ public:
 private:
 	INT SetIndexBuffer(FIndexBuffer* IndexBuffer, INT BaseIndex, bool IsDynamic);
 	INT SetVertexStreams(EVertexShader Shader, FVertexStream** Streams, INT NumStreams, bool IsDynamic);
-	void SetupVAO(unsigned int VAO);
 };

@@ -180,6 +180,8 @@ void FOpenGLRenderTarget::Cache(FRenderTarget* RenderTarget){
 	glNamedFramebufferRenderbuffer(FBO, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, DepthStencilAttachment);
 
 	checkSlow(glCheckNamedFramebufferStatus(FBO, GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE);
+
+	Revision = RenderTarget->GetRevision();
 }
 
 void FOpenGLRenderTarget::Free(){
@@ -242,6 +244,8 @@ void FOpenGLIndexBuffer::Cache(FIndexBuffer* IndexBuffer){
 	void* Data = glMapNamedBuffer(EBO, GL_WRITE_ONLY);
 	IndexBuffer->GetContents(Data);
 	glUnmapNamedBuffer(EBO);
+
+	Revision = IndexBuffer->GetRevision();
 }
 
 void FOpenGLIndexBuffer::Free(){
@@ -296,6 +300,8 @@ void FOpenGLVertexStream::Cache(FVertexStream* VertexStream){
 	void* Data = glMapNamedBuffer(VBO, GL_WRITE_ONLY);
 	VertexStream->GetStreamData(Data);
 	glUnmapNamedBuffer(VBO);
+
+	Revision = VertexStream->GetRevision();
 }
 
 void FOpenGLVertexStream::Free(){

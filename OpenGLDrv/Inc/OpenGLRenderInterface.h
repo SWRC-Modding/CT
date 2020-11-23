@@ -92,7 +92,7 @@ public:
 	// Overrides
 	virtual void PushState(int);
 	virtual void PopState(int);
-	virtual UBOOL SetRenderTarget(FRenderTarget* RenderTarget, bool);
+	virtual UBOOL SetRenderTarget(FRenderTarget* RenderTarget, bool bFSAA);
 	virtual void SetViewport(INT X, INT Y, INT Width, INT Height);
 	virtual void Clear(UBOOL UseColor, FColor Color, UBOOL UseDepth, FLOAT Depth, UBOOL UseStencil, DWORD Stencil);
 	virtual void PushHit(const BYTE* Data, INT Count){ PRINT_FUNC; }

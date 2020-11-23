@@ -380,15 +380,23 @@ public:
 
 class FAuxRenderTarget : public FRenderTarget{
 public:
+	bool           bFSAA;
+	bool           bMatchBackBuffer;
 	INT            Width;
 	INT            Height;
 	ETextureFormat Format;
 
 	// Constructor.
 
-	FAuxRenderTarget(INT InWidth, INT InHeight, ETextureFormat InFormat) : Width(InWidth),
-	                                                                       Height(InHeight),
-	                                                                       Format(InFormat){
+	FAuxRenderTarget(INT InWidth,
+	                 INT InHeight,
+	                 ETextureFormat InFormat,
+	                 bool InFSAA = false,
+	                 bool InMatchBackBuffer = false) : Width(InWidth),
+	                                                   Height(InHeight),
+	                                                   Format(InFormat),
+	                                                   bFSAA(InFSAA),
+	                                                   bMatchBackBuffer(InMatchBackBuffer){
 		CacheId = MakeCacheID(CID_RenderTexture);
 	}
 

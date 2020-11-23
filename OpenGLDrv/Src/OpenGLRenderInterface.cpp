@@ -275,7 +275,7 @@ INT FOpenGLRenderInterface::SetVertexStreams(EVertexShader Shader, FVertexStream
 		if(IsDynamic || Stream->Revision != Streams[i]->GetRevision()){
 			Stream->Cache(Streams[i]);
 			Stream->Revision = Streams[i]->GetRevision();
-			Size += Stream->DynamicSize;
+			Size += Stream->BufferSize;
 		}
 
 		VertexStreams[i] = Stream;

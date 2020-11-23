@@ -83,7 +83,7 @@ public:
 
 	GLuint EBO;
 	INT    IndexSize;
-	INT    DynamicSize;
+	INT    BufferSize;
 	bool   IsDynamic;
 };
 
@@ -100,6 +100,6 @@ public:
 
 	GLuint VBO;
 	INT    Stride;
-	INT    DynamicSize;
+	INT    BufferSize;
 	bool   IsDynamic;
 };

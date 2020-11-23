@@ -117,7 +117,7 @@ void FOpenGLRenderInterface::PopState(int){
 	unguard;
 }
 
-UBOOL FOpenGLRenderInterface::SetRenderTarget(FRenderTarget* RenderTarget, bool){
+UBOOL FOpenGLRenderInterface::SetRenderTarget(FRenderTarget* RenderTarget, bool bFSAA){
 	guardFunc;
 
 	// bool Updated = false;

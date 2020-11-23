@@ -13,10 +13,11 @@
 // Single config file.
 class FConfigFile : public TMap<FString, FConfigSection>{
 public:
-	UBOOL Dirty, NoSave;
+	UBOOL Dirty;
+	UBOOL NoSave;
 
 	FConfigFile() : Dirty(0),
-					NoSave(0){}
+                    NoSave(0){}
 
 	void Read(const TCHAR* Filename, FConfigFile* DefaultsOverride = NULL){
 		guard(FConfigFile::Read);
@@ -25,95 +26,94 @@ public:
 
 		FString Text;
 
-		if(appLoadFileToString(Text, Filename)){
-			TCHAR* Ptr = const_cast<TCHAR*>(*Text);
-			FConfigSection* CurrentSection = NULL;
-			const FConfigSection* CurrentOverrideSection = NULL;
-			bool Done = false;
-			bool EmptySection = false;
+		if(!appLoadFileToString(Text, Filename))
+			return;
 
-			while(!Done){
-				while(*Ptr == '\r' || *Ptr == '\n')
-					Ptr++;
+		TCHAR* Ptr = const_cast<TCHAR*>(*Text);
+		FConfigSection* CurrentSection = NULL;
+		const FConfigSection* CurrentOverrideSection = NULL;
+		bool Done = false;
+		bool EmptySection = false;
 
-				TCHAR* Start = Ptr;
+		while(!Done){
+			while(*Ptr == '\r' || *Ptr == '\n')
+				Ptr++;
 
-				while(*Ptr && *Ptr != '\r' && *Ptr != '\n')
-					Ptr++;
+			TCHAR* Start = Ptr;
 
-				if(*Ptr == 0)
-					Done = true;
+			while(*Ptr && *Ptr != '\r' && *Ptr != '\n')
+				Ptr++;
 
-				*Ptr++ = 0;
+			if(*Ptr == 0)
+				Done = true;
 
-				// Skip comments
-				if(*Start == ';')
+			*Ptr++ = 0;
+
+			// Skip comments
+			if(*Start == ';')
+				continue;
+
+			if(Start[0] == '[' && Start[appStrlen(Start) - 1] == ']'){
+				if(CurrentOverrideSection && EmptySection)
+					*CurrentSection = *CurrentOverrideSection;
+
+				Start++;
+				Start[appStrlen(Start) - 1] = 0;
+				CurrentSection = Find(Start);
+
+				if(!CurrentSection)
+					CurrentSection = &Set(Start, FConfigSection());
+
+				if(DefaultsOverride)
+					CurrentOverrideSection = DefaultsOverride->Find(Start);
+
+				EmptySection = true;
+			}else if(CurrentSection && *Start){
+				TCHAR* Value = appStrstr(Start, "=");
+
+				if(Value){
+					bool IsArrayValue = *(Value - 1) == '+'; // RC uses '+=' for arrays
+
+					if(IsArrayValue)
+						*(Value - 1) = 0;
+
+					*Value++ = 0;
+
+					if(*Value == '\"' && Value[appStrlen(Value) - 1] == '\"'){
+						Value++;
+						Value[appStrlen(Value) - 1] = 0;
+					}
+
+					if(CurrentOverrideSection && !CurrentSection->Find(Start)){
+						TArray<FString> OverrideValues;
+						CurrentOverrideSection->MultiFind(Start, OverrideValues);
+
+						if(OverrideValues.Num() > 1 || IsArrayValue){
+							if(OverrideValues.FindItemIndex(Value) == INDEX_NONE) // Only add Value if it is not already contained in OverrideValues
+								CurrentSection->Add(Start, Value);
+
+							for(TArray<FString>::TIterator It(OverrideValues); It; ++It)
+								CurrentSection->Add(Start, **It);
+						}else{
+							CurrentSection->Add(Start, OverrideValues.Num() == 1 ? *OverrideValues[0] : Value);
+						}
+					}else{
+						CurrentSection->Add(Start, Value);
+					}
+
+					EmptySection = false;
+				}
+			}
+		}
+
+		// Inserting remaining sections from defaults override which do not exist in the file read from disk
+		if(DefaultsOverride){
+			for(TIterator It(*DefaultsOverride); It; ++It){
+				if(Find(It.Key()))
 					continue;
 
-				if(Start[0] == '[' && Start[appStrlen(Start) - 1] == ']'){
-					if(CurrentOverrideSection && EmptySection)
-						*CurrentSection = *CurrentOverrideSection;
-
-					Start++;
-					Start[appStrlen(Start) - 1] = 0;
-					CurrentSection = Find(Start);
-
-					if(!CurrentSection)
-						CurrentSection = &Set(Start, FConfigSection());
-
-					if(DefaultsOverride)
-						CurrentOverrideSection = DefaultsOverride->Find(Start);
-
-					EmptySection = true;
-				}else if(CurrentSection && *Start){
-					TCHAR* Value = appStrstr(Start, "=");
-
-					if(Value){
-						bool IsArrayValue = *(Value - 1) == '+'; // RC uses '+=' for arrays
-
-						if(IsArrayValue)
-							*(Value - 1) = 0;
-
-						*Value++ = 0;
-
-						if(*Value == '\"' && Value[appStrlen(Value) - 1] == '\"'){
-							Value++;
-							Value[appStrlen(Value) - 1] = 0;
-						}
-
-						if(CurrentOverrideSection && !CurrentSection->Find(Start)){
-							TArray<FString> OverrideValues;
-							CurrentOverrideSection->MultiFind(Start, OverrideValues);
-
-							if(OverrideValues.Num() > 1 || IsArrayValue){
-								if(OverrideValues.FindItemIndex(Value) == INDEX_NONE) // Only add Value if it is not already contained in OverrideValues
-									CurrentSection->Add(Start, Value);
-
-								for(TArray<FString>::TIterator It(OverrideValues); It; ++It)
-									CurrentSection->Add(Start, **It);
-							}else{
-								CurrentSection->Add(Start, OverrideValues.Num() == 1 ? *OverrideValues[0] : Value);
-							}
-						}else{
-							CurrentSection->Add(Start, Value);
-						}
-
-						EmptySection = false;
-					}
-				}
+				Set(*It.Key(), It.Value());
 			}
-
-			// Inserting remaining sections from defaults override which do not exist in the file read from disk
-			if(DefaultsOverride){
-				for(TIterator It(*DefaultsOverride); It; ++It){
-					if(Find(It.Key()))
-						continue;
-
-					Set(*It.Key(), It.Value());
-				}
-			}
-		}else if(DefaultsOverride){
-			*this = *DefaultsOverride;
 		}
 
 		unguard;

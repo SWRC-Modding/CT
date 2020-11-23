@@ -232,7 +232,6 @@ void FOpenGLIndexBuffer::Cache(FIndexBuffer* IndexBuffer){
 	if(IsDynamic){
 		if(BufferSize < NewBufferSize){
 			BufferSize = NewBufferSize * 2;
-			debugf("Allocating %i byte dynamic %i-bit index buffer", BufferSize, IndexSize * 8);
 			glNamedBufferData(EBO, BufferSize, NULL, GL_DYNAMIC_DRAW);
 		}
 	}else{
@@ -272,7 +271,7 @@ FOpenGLVertexStream::~FOpenGLVertexStream(){
 void FOpenGLVertexStream::Cache(FVertexStream* VertexStream){
 	if(!IsDynamic){
 		Free();
-		//IsDynamic = VertexStream->HintDynamic() != 0;
+		IsDynamic = VertexStream->HintDynamic() != 0;
 	}
 
 	if(!VBO)
@@ -287,7 +286,6 @@ void FOpenGLVertexStream::Cache(FVertexStream* VertexStream){
 	if(IsDynamic){
 		if(BufferSize < NewBufferSize){
 			BufferSize = NewBufferSize * 2;
-			debugf("Allocating %i byte dynamic vertex buffer", BufferSize);
 			glNamedBufferData(VBO, BufferSize, NULL, GL_DYNAMIC_DRAW);
 		}
 	}else{

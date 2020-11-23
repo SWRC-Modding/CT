@@ -131,7 +131,6 @@ UBOOL FOpenGLRenderInterface::SetRenderTarget(FRenderTarget* RenderTarget, bool 
 	// if(NewRenderTarget->Revision != Revision){
 	// 	Updated = true;
 	// 	NewRenderTarget->Cache(RenderTarget);
-	// 	NewRenderTarget->Revision = Revision;
 	// }
 
 	// if(CurrentState->RenderTarget != NewRenderTarget || Updated)
@@ -274,7 +273,6 @@ INT FOpenGLRenderInterface::SetVertexStreams(EVertexShader Shader, FVertexStream
 
 		if(IsDynamic || Stream->Revision != Streams[i]->GetRevision()){
 			Stream->Cache(Streams[i]);
-			Stream->Revision = Streams[i]->GetRevision();
 			Size += Stream->BufferSize;
 		}
 
@@ -285,7 +283,7 @@ INT FOpenGLRenderInterface::SetVertexStreams(EVertexShader Shader, FVertexStream
 	// Check if there is an existing VAO for this format by hashing the shader declarations
 	GLuint& VAO = VAOsByDeclId[appMemCrc(VertexStreamDeclarations, sizeof(VertexStreamDeclarations))];
 
-	// Create and setup VAO if none was found matching the vertex
+	// Create and setup VAO if none was found matching the vertex format
 	if(!VAO){
 		glCreateVertexArrays(1, &VAO);
 
@@ -393,7 +391,6 @@ INT FOpenGLRenderInterface::SetIndexBuffer(FIndexBuffer* IndexBuffer, INT BaseIn
 		if(IsDynamic || Buffer->Revision != IndexBuffer->GetRevision() || Buffer->IndexSize != IndexSize){
 			RequiresCaching = true;
 			Buffer->Cache(IndexBuffer);
-			Buffer->Revision = IndexBuffer->GetRevision();
 		}
 
 		CurrentState->IndexBufferBaseIndex = BaseIndex;

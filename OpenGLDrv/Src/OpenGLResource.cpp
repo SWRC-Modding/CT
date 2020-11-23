@@ -16,35 +16,39 @@ FOpenGLResource::~FOpenGLResource(){
 
 // FOpenGLShader
 
-static const GLchar* GLSLVersion = "#version 450\n";
-static const GLchar* GlobalUniformBlock = "layout(std140, binding = 0) uniform Globals{\n"
+static const GLchar* GLSLVersion    = "#version 450\n";
+static const GLchar* GlobalUniforms = "layout(std140, binding = 0) uniform Globals{\n"
 #define UNIFORM_BLOCK_MEMBER(type, name)  "\t" #type " " #name ";\n"
-                                               UNIFORM_BLOCK_CONTENTS
+                                           UNIFORM_BLOCK_CONTENTS
 #undef UNIFORM_BLOCK_MEMBER
-                                           "};\n"
-                                           "layout(binding = 0) uniform sampler2D Texture0;\n"
-                                           "layout(binding = 1) uniform sampler2D Texture1;\n"
-                                           "layout(binding = 2) uniform sampler2D Texture2;\n"
-                                           "layout(binding = 3) uniform sampler2D Texture3;\n"
-                                           "layout(binding = 4) uniform sampler2D Texture4;\n"
-                                           "layout(binding = 5) uniform sampler2D Texture5;\n"
-                                           "layout(binding = 6) uniform sampler2D Texture6;\n"
-                                           "layout(binding = 7) uniform sampler2D Texture7;\n";
+                                      "};\n"
+                                      "layout(binding = 0) uniform sampler2D Texture0;\n"
+                                      "layout(binding = 1) uniform sampler2D Texture1;\n"
+                                      "layout(binding = 2) uniform sampler2D Texture2;\n"
+                                      "layout(binding = 3) uniform sampler2D Texture3;\n"
+                                      "layout(binding = 4) uniform sampler2D Texture4;\n"
+                                      "layout(binding = 5) uniform sampler2D Texture5;\n"
+                                      "layout(binding = 6) uniform sampler2D Texture6;\n"
+                                      "layout(binding = 7) uniform sampler2D Texture7;\n";
 
 static const GLchar* VertexShaderVariables = "layout(location = 0) in vec3 InPosition;\n"
                                              "layout(location = 1) in vec3 InNormal;\n"
-                                             "layout(location = 2) in vec2 InTexCoord0;\n"
-                                             "layout(location = 3) in vec2 InTexCoord1;\n"
-                                             "layout(location = 4) in vec2 InTexCoord2;\n"
-                                             "layout(location = 5) in vec2 InTexCoord3;\n"
-                                             "layout(location = 6) in vec2 InTexCoord4;\n"
-                                             "layout(location = 7) in vec2 InTexCoord5;\n"
-                                             "layout(location = 8) in vec2 InTexCoord6;\n"
-                                             "layout(location = 9) in vec2 InTexCoord7;\n"
-                                             "layout(location = 10) in vec3 InTangent;\n"
-                                             "layout(location = 11) in vec3 InBinormal;\n"
+                                             "layout(location = 2) in vec4 InDiffuse;\n"
+                                             "layout(location = 3) in vec4 InSpecular;\n"
+                                             "layout(location = 4) in vec2 InTexCoord0;\n"
+                                             "layout(location = 5) in vec2 InTexCoord1;\n"
+                                             "layout(location = 6) in vec2 InTexCoord2;\n"
+                                             "layout(location = 7) in vec2 InTexCoord3;\n"
+                                             "layout(location = 8) in vec2 InTexCoord4;\n"
+                                             "layout(location = 9) in vec2 InTexCoord5;\n"
+                                             "layout(location = 10) in vec2 InTexCoord6;\n"
+                                             "layout(location = 11) in vec2 InTexCoord7;\n"
+                                             "layout(location = 12) in vec3 InTangent;\n"
+                                             "layout(location = 13) in vec3 InBinormal;\n"
                                              "out vec3 Position;\n"
                                              "out vec3 Normal;\n"
+                                             "out vec4 Diffuse;\n"
+                                             "out vec4 Specular;\n"
                                              "out vec2 TexCoord0;\n"
                                              "out vec2 TexCoord1;\n"
                                              "out vec2 TexCoord2;\n"
@@ -58,6 +62,8 @@ static const GLchar* VertexShaderVariables = "layout(location = 0) in vec3 InPos
 
 static const GLchar* FragmentShaderVariables = "in vec3 Position;\n"
                                                "in vec3 Normal;\n"
+                                               "in vec4 Diffuse;\n"
+                                               "in vec4 Specular;\n"
                                                "in vec2 TexCoord0;\n"
                                                "in vec2 TexCoord1;\n"
                                                "in vec2 TexCoord2;\n"
@@ -85,7 +91,7 @@ void FOpenGLShader::Cache(const TCHAR* Source){
 
 	const GLchar* CombinedSource[] = {
 		GLSLVersion,
-		GlobalUniformBlock,
+		GlobalUniforms,
 		Type == OST_Vertex ? VertexShaderVariables : FragmentShaderVariables,
 		Source
 	};

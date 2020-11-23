@@ -4153,6 +4153,25 @@ public:
  * FrameFX
  */
 
+class FFrameGrid{
+public:
+	virtual ~FFrameGrid();
+	virtual INT Tick(FLOAT DeltaTime, ELevelTick TickType);
+
+	void FillIndexBuffer(void*);
+	void FillVertexBuffer(void*);
+	void GetNearestIndex(const FVector&, int&, int&);
+	FVector GetVertexPosLocal(int, int);
+	FVector GetVertexPosWorld(int, int);
+	void Init();
+	void Render(class UMaterial*, class FBaseTexture*, class FRenderInterface*);
+	void SimpleFillIndexBuffer(void*);
+	void SimpleFillVertexBuffer(void*);
+	void SonicPulse(const FVector&, float, float);
+	void SonicPulseVertex(int, int, float);
+	void UpdateSimulation(float);
+};
+
 class ENGINE_API UFrameFX : public UObject{
 public:
 	BYTE Blur;

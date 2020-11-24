@@ -63,6 +63,9 @@ public:
 private:
 	unsigned int     ScreenVAO;
 	FAuxRenderTarget ScreenRenderTarget;
+	UBOOL            bIsFullscreen;
+	INT              SavedViewportWidth;
+	INT              SavedViewportHeight;
 
 	friend class FOpenGLResource;
 	friend class FOpenGLRenderInterface;

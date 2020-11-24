@@ -274,6 +274,7 @@ UBOOL UOpenGLRenderDevice::SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL
 	}
 
 	RenderInterface.SetRenderTarget(&ScreenRenderTarget, false);
+	RenderInterface.SetViewport(0, 0, NewX, NewY);
 
 	if(Fullscreen){
 		HMONITOR    Monitor = MonitorFromWindow(hwnd, MONITOR_DEFAULTTOPRIMARY);
@@ -285,8 +286,14 @@ UBOOL UOpenGLRenderDevice::SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL
 		INT Height = Info.rcMonitor.bottom - Info.rcMonitor.top;
 
 		Viewport->ResizeViewport(BLIT_Fullscreen | BLIT_OpenGL, Width, Height);
+		SavedViewportWidth = Viewport->SizeX;
+		SavedViewportHeight = Viewport->SizeY;
+		Viewport->SizeX = NewX;
+		Viewport->SizeY = NewY;
+		bIsFullscreen = 1;
 	}else{
 		Viewport->ResizeViewport(BLIT_OpenGL, NewX, NewY);
+		bIsFullscreen = 0;
 	}
 
 	return 1;
@@ -337,7 +344,6 @@ FRenderInterface* UOpenGLRenderDevice::Lock(UViewport* Viewport, BYTE* HitData, 
 		It->ShowFlags &= ~SHOW_Backdrop;
 
 	MakeCurrent();
-	RenderInterface.SetViewport(0, 0, Viewport->SizeX, Viewport->SizeY);
 
 	// Render target might be deleted when Flush is called so check for that and set it again
 	if(!RenderInterface.CurrentState->RenderTarget)
@@ -356,8 +362,15 @@ void UOpenGLRenderDevice::Present(UViewport* Viewport){
 
 	check(Framebuffer);
 
+	RenderInterface.PushState(0);
 	FramebufferShader->Bind();
 	glBindFramebuffer(GL_FRAMEBUFFER, GL_NONE);
+
+	if(bIsFullscreen)
+		RenderInterface.SetViewport(0, 0, SavedViewportWidth, SavedViewportHeight);
+	else
+		RenderInterface.SetViewport(0, 0, Viewport->SizeX, Viewport->SizeY);
+
 	glBindTextureUnit(0, Framebuffer->ColorAttachment);
 	glDisable(GL_DEPTH_TEST);
 	glBindVertexArray(ScreenVAO);
@@ -366,6 +379,8 @@ void UOpenGLRenderDevice::Present(UViewport* Viewport){
 	SwapBuffers(DeviceContext);
 
 	Framebuffer->Bind();
+
+	RenderInterface.PopState(0);
 
 	// TODO: REMOVE!!!
 	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);

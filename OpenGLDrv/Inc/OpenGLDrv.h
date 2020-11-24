@@ -8,4 +8,4 @@ LINK_LIB(OpenGLDrv)
 #endif
 
 // REMOVE!!!
-#define PRINT_FUNC debugf(NAME_Log, "######################################################################################" __FUNCTION__)
+#define PRINT_FUNC //debugf(NAME_Log, "######################################################################################" __FUNCTION__)

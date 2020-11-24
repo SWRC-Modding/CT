@@ -12,11 +12,6 @@
 	Low level includes.
 ----------------------------------------------------------------------------*/
 
-// API definition.
-#ifndef CORE_API
-#define CORE_API DLL_IMPORT
-#endif
-
 //===========================================================================================
 #ifdef DISABLE_LINK_LIB
 #define LINK_LIB(name)
@@ -26,37 +21,14 @@
 #endif
 //===========================================================================================
 
+// API definition.
+#ifndef CORE_API
+#define CORE_API DLL_IMPORT
 LINK_LIB(Core)
+#endif
 
 // Build options.
 #include "UnBuild.h"
-
-// Time.
-#define FIXTIME 4294967296.0f
-class FTime{
-	typedef __int64 TIMETYP;
-public:
-			FTime      ()              { v = 0; }
-			FTime      (float f)       { v = (TIMETYP)(f * FIXTIME); }
-			FTime      (double d)      { v = (TIMETYP)(d * FIXTIME); }
-	float   GetFloat   ()              { return v / FIXTIME; }
-	FTime   operator+  (float f) const { return FTime(v + (TIMETYP)(f * FIXTIME)); }
-	float   operator-  (FTime t) const { return (v - t.v) / FIXTIME; }
-	FTime   operator*  (float f) const { return FTime(v * f); }
-	FTime   operator/  (float f) const { return FTime(v / f); }
-	FTime&  operator+= (float f)       { v = v + (TIMETYP)(f * FIXTIME); return *this; }
-	FTime&  operator*= (float f)       { v = (TIMETYP)(v * f); return *this; }
-	FTime&  operator/= (float f)       { v = (TIMETYP)(v / f); return *this; }
-	int     operator== (FTime t)       { return v == t.v; }
-	int     operator!= (FTime t)       { return v != t.v; }
-	int     operator>  (FTime t)       { return v > t.v; }
-	FTime&  operator=  (const FTime& t){ v=t.v; return *this; }
-
-private:
-	TIMETYP v;
-
-	FTime(TIMETYP i) : v(i){}
-};
 
 // Compiler specific include.
 #ifdef _MSC_VER
@@ -89,9 +61,6 @@ enum ERunningOS{
 // Multi byte character set mappings. No wchar_t in Republic Commando...
 typedef ANSICHAR  TCHAR;
 typedef ANSICHARU TCHARU;
-
-#undef TEXT
-#define TEXT(s) s
 
 inline TCHAR    FromUnicode(UNICHAR In){ return (_WORD)In < 0x100 ? In : MAXSBYTE; }
 inline ANSICHAR	ToAnsi(TCHAR In){ return (_WORD)In < 0x100 ? In : MAXSBYTE; }
@@ -129,8 +98,8 @@ class		ULinkerSave;
 class	UPackage;
 class	USubsystem;
 class		USystem;
+class		URenderDevice;
 class	UTextBuffer;
-class	 URenderDevice;
 class	UPackageMap;
 class	UDebugger; //DEBUGGER
 
@@ -518,7 +487,7 @@ CORE_API extern UBOOL                   GEdShowFogInViewports;      // Show dist
 CORE_API extern UBOOL                   GBuildingScripts;
 CORE_API extern UBOOL                   GIsUTracing;
 CORE_API extern class FGlobalMath       GMath;                      // Math code
-CORE_API extern class FArchive*         GDummySave;                 // No-op save archive
+CORE_API extern FArchive*               GDummySave;                 // No-op save archive
 CORE_API extern FFileStream*            GFileStream;                // File streaming
 CORE_API extern FLOAT                   GAudioMaxRadiusMultiplier;  // Max distance = Radius * GAudioMaxRadiusMultiplier
 CORE_API extern FLOAT                   GAudioDefaultRadius;        // Default radius for PlayOwnedSound

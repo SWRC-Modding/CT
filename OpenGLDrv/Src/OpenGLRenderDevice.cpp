@@ -12,6 +12,10 @@ HGLRC UOpenGLRenderDevice::CurrentContext = NULL;
 
 UOpenGLRenderDevice::UOpenGLRenderDevice() : RenderInterface(this){}
 
+void UOpenGLRenderDevice::StaticConstructor(){
+	SupportsZBIAS = 1;
+}
+
 void UOpenGLRenderDevice::MakeCurrent(){
 	guardFunc;
 

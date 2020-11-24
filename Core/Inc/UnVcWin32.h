@@ -97,6 +97,9 @@ typedef unsigned long       SIZE_T; // Corresponds to C SIZE_T.
 // Bitfield type.
 typedef unsigned long       BITFIELD; // For bitfields.
 
+// Time.
+typedef DOUBLE              FTime;
+
 // Unwanted VC++ level 4 warnings to disable.
 #pragma warning(disable : 4244) /* conversion to float, possible loss of data							*/
 #pragma warning(disable : 4699) /* creating precompiled header											*/

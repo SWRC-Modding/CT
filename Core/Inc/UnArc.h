@@ -26,9 +26,9 @@ class CORE_API FArchive{
 	friend FArchive& operator<<(FArchive& Ar, DWORD& D);
 	friend FArchive& operator<<(FArchive& Ar, INT& I);
 	friend FArchive& operator<<(FArchive& Ar, FLOAT& F);
+	friend FArchive& operator<<(FArchive& Ar, DOUBLE& D);
 	friend FArchive& operator<<(FArchive &Ar, QWORD& Q);
 	friend FArchive& operator<<(FArchive& Ar, SQWORD& S);
-	friend FArchive& operator<<(FArchive& Ar, FTime& F);
 public:
 	// FArchive interface.
 	virtual ~FArchive(){}
@@ -162,6 +162,12 @@ inline FArchive& operator<<(FArchive& Ar, FLOAT& F){
 	return Ar;
 }
 
+inline FArchive& operator<<(FArchive& Ar, DOUBLE& D){
+	Ar.Serialize(&D, sizeof(D));
+
+	return Ar;
+}
+
 inline FArchive& operator<<(FArchive &Ar, QWORD& Q){
 	Ar.Serialize(&Q, sizeof(Q));
 
@@ -173,8 +179,6 @@ inline FArchive& operator<<(FArchive& Ar, SQWORD& S){
 
 	return Ar;
 }
-
-FArchive& operator<<(FArchive& Ar, FTime& F);
 
 /*-----------------------------------------------------------------------------
 	FArchive macros.

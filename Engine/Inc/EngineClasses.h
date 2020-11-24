@@ -4153,8 +4153,19 @@ public:
  * FrameFX
  */
 
-class FFrameGrid{
+class FFrameGrid{ // This seems to be almost the same as AFluidSurfaceInfo
 public:
+	BYTE          FluidGridType;
+	char          Padding1[31]; // PADDING!!!
+	FRange        NoiseStrength;
+	char          Padding2[40]; // PADDING!!!
+	TArray<FLOAT> Verts0;
+	TArray<FLOAT> Verts1;
+	TArray<BYTE>  VertsAlpha;
+	char          Padding3[44]; // PADDING!!!
+
+	FFrameGrid();
+
 	virtual ~FFrameGrid();
 	virtual INT Tick(FLOAT DeltaTime, ELevelTick TickType);
 
@@ -4199,13 +4210,13 @@ public:
 	// --------- Member Variables ---------
 	// Static working targets (shared even in splitscreen)
 	static const int MaxMips = 6;
-	static class FAuxRenderTarget * MipTargets[MaxMips];
-	static class FAuxRenderTarget * WorkingTarget;
-	static class FAuxRenderTarget * AccumulatorTarget;
-	static class FAuxRenderTarget * AntiAliasTarget;
+	static class FAuxRenderTarget* MipTargets[MaxMips];
+	static class FAuxRenderTarget* WorkingTarget;
+	static class FAuxRenderTarget* AccumulatorTarget;
+	static class FAuxRenderTarget* AntiAliasTarget;
 
 	// Static Frame Grid variables
-	static class FFrameGrid * FrameGrid;
+	static class FFrameGrid* FrameGrid;
 
 	// --------- UObject interface ---------
 	void Destroy();

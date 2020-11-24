@@ -10,7 +10,8 @@ IMPLEMENT_CLASS(UOpenGLRenderDevice)
 
 HGLRC UOpenGLRenderDevice::CurrentContext = NULL;
 
-UOpenGLRenderDevice::UOpenGLRenderDevice() : RenderInterface(this){}
+UOpenGLRenderDevice::UOpenGLRenderDevice() : RenderInterface(this),
+                                             ScreenRenderTarget(0, 0, TEXF_RGBA8, false, true){}
 
 void UOpenGLRenderDevice::StaticConstructor(){
 	SupportsZBIAS = 1;
@@ -116,15 +117,18 @@ void UOpenGLRenderDevice::Destroy(){
 
 	// The following resources must be manually freed since they are not contained in the resource hash
 
+	if(DefaultShader)
+		delete DefaultShader;
+
 	if(FramebufferShader)
 		delete FramebufferShader;
-
-	if(DefaultRenderTarget)
-		delete DefaultRenderTarget;
 }
 
 UBOOL UOpenGLRenderDevice::SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL Fullscreen, INT ColorBytes, UBOOL bSaveSize){
 	guardFunc;
+
+	check(RenderInterface.CurrentState == RenderInterface.SavedStates);
+	check(RenderInterface.SavedStateIndex == 0);
 
 	HWND hwnd = static_cast<HWND>(Viewport->GetWindow());
 	check(hwnd);
@@ -150,7 +154,7 @@ UBOOL UOpenGLRenderDevice::SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL
 		PIXELFORMATDESCRIPTOR Pfd = {
 			sizeof(PIXELFORMATDESCRIPTOR), // size
 			1,                             // version
-			PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER, // flags
+			PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER | PFD_DEPTH_DONTCARE, // flags
 			PFD_TYPE_RGBA,                 // color type
 			ColorBytes <= 2 ? 16 : 32,     // preferred color depth
 			0, 0, 0, 0, 0, 0,              // color bits (ignored)
@@ -158,7 +162,7 @@ UBOOL UOpenGLRenderDevice::SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL
 			0,                             // alpha bits (ignored)
 			0,                             // accumulation buffer
 			0, 0, 0, 0,                    // accum bits (ignored)
-			ColorBytes <= 2 ? 16 : 24,     // depth buffer
+			0,                             // depth buffer
 			0,                             // stencil buffer
 			0,                             // auxiliary buffers
 			PFD_MAIN_PLANE,                // main layer
@@ -204,8 +208,6 @@ UBOOL UOpenGLRenderDevice::SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL
 		glGetIntegerv(GL_STENCIL_BITS, &StencilBits);
 
 		debugf(NAME_Init, "%i-bit color buffer", ColorBytes * 8);
-		debugf(NAME_Init, "%i-bit depth buffer", DepthBits);
-		debugf(NAME_Init, "%i-bit stencil buffer", StencilBits);
 
 		// Check for required extensions
 		RequireExt("GL_ARB_texture_compression");
@@ -260,22 +262,18 @@ UBOOL UOpenGLRenderDevice::SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL
 		FramebufferShader->FragmentShader = NULL;
 		RemoveResource(FramebufferShader); // HACK: Removing the shader from the hash to prevent it from being destroyed when Flush is called
 		glCreateVertexArrays(1, &ScreenVAO);
-
-		// Create default render target
-
-		FAuxRenderTarget DummyRenderTarget(NewX, NewY, TEXF_RGB8);
-		DefaultRenderTarget = new FOpenGLRenderTarget(this, DummyRenderTarget.GetCacheId());
-
-		DefaultRenderTarget->Cache(&DummyRenderTarget);
-		DefaultRenderTarget->Bind();
-		RemoveResource(DefaultRenderTarget); // HACK: Removing the default render target from the hash to prevent it from being destroyed when Flush is called
-
-		checkSlow(RenderInterface.CurrentState == RenderInterface.SavedStates);
-		RenderInterface.CurrentState->RenderTarget = NULL;//DefaultRenderTarget;
-
-		// TODO: Remove!!!
-		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	}else{
+		MakeCurrent();
 	}
+
+	// Resize screen render target if necessary
+	if(ScreenRenderTarget.Width != NewX || ScreenRenderTarget.Height != NewY){
+		ScreenRenderTarget.Width = NewX;
+		ScreenRenderTarget.Height = NewY;
+		++ScreenRenderTarget.Revision;
+	}
+
+	RenderInterface.SetRenderTarget(&ScreenRenderTarget, false);
 
 	if(Fullscreen){
 		HMONITOR    Monitor = MonitorFromWindow(hwnd, MONITOR_DEFAULTTOPRIMARY);
@@ -328,33 +326,51 @@ UBOOL UOpenGLRenderDevice::ResourceCached(QWORD CacheId){
 	return GetCachedResource(CacheId) != NULL;
 }
 
-
 FRenderInterface* UOpenGLRenderDevice::Lock(UViewport* Viewport, BYTE* HitData, INT* HitSize){
 	PRINT_FUNC;
 
 	check(RenderInterface.SavedStateIndex == 0);
 
+	// Makes stuff easier to see when rendering as wireframe
+	// TODO: REMOVE!!!
+	for(TObjectIterator<APlayerController> It; It; ++It)
+		It->ShowFlags &= ~SHOW_Backdrop;
+
 	MakeCurrent();
 	RenderInterface.SetViewport(0, 0, Viewport->SizeX, Viewport->SizeY);
+
+	// Render target might be deleted when Flush is called so check for that and set it again
+	if(!RenderInterface.CurrentState->RenderTarget)
+		RenderInterface.SetRenderTarget(&ScreenRenderTarget, false);
 
 	return &RenderInterface;
 }
 
 void UOpenGLRenderDevice::Present(UViewport* Viewport){
 	checkSlow(IsCurrent());
-	//checkSlow(RenderInterface.CurrentState->RenderTarget == DefaultRenderTarget);
 
+	// TODO: REMOVE!!!
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
+	FOpenGLRenderTarget* Framebuffer = RenderInterface.CurrentState->RenderTarget;
+
+	check(Framebuffer);
+
+	FramebufferShader->Bind();
 	glBindFramebuffer(GL_FRAMEBUFFER, GL_NONE);
-	// glDisable(GL_DEPTH_TEST);
-	// glDisable(GL_STENCIL_TEST);
-	// FramebufferShader->Bind();
-	// glBindTextureUnit(0, DefaultRenderTarget->ColorAttachment);
-	// glBindVertexArray(ScreenVAO);
-	// glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+	glBindTextureUnit(0, Framebuffer->ColorAttachment);
+	glDisable(GL_DEPTH_TEST);
+	glBindVertexArray(ScreenVAO);
+	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+	glEnable(GL_DEPTH_TEST);
 	SwapBuffers(DeviceContext);
-	glClear(GL_COLOR_BUFFER_BIT);
-	//DefaultRenderTarget->Bind();
-	RenderInterface.CurrentState->UniformRevision = 0; // Reset uniform revision to avoid overflow even if it is unlikely to happen
+
+	Framebuffer->Bind();
+
+	// TODO: REMOVE!!!
+	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
+	check(glGetError() == GL_NO_ERROR);
 }
 
 FRenderCaps* UOpenGLRenderDevice::GetRenderCaps(){

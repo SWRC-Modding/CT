@@ -11,11 +11,16 @@
 FOpenGLRenderInterface::FOpenGLRenderInterface(UOpenGLRenderDevice* InRenDev) : RenDev(InRenDev),
                                                                                 CurrentState(&SavedStates[0]),
                                                                                 SavedStateIndex(0),
-                                                                                GlobalUBO(GL_NONE){}
+                                                                                GlobalUBO(GL_NONE){
+	CurrentState->Uniforms.LocalToWorld = FMatrix::Identity;
+	CurrentState->Uniforms.WorldToCamera = FMatrix::Identity;
+	CurrentState->Uniforms.CameraToScreen = FMatrix::Identity;
+}
 
 void FOpenGLRenderInterface::FlushResources(){
 	check(SavedStateIndex == 0);
 
+	CurrentState->RenderTarget = NULL;
 	CurrentState->IndexBuffer = NULL;
 	CurrentState->IndexBufferBaseIndex = 0;
 
@@ -82,12 +87,8 @@ void FOpenGLRenderInterface::PopState(int){
 
 	check(SavedStateIndex >= 0);
 
-	// if(CurrentState->RenderTarget != PrevState->RenderTarget){
-	// 	if(CurrentState->RenderTarget)
-	// 		CurrentState->RenderTarget->Bind();
-	// 	else
-	// 		glBindFramebuffer(GL_FRAMEBUFFER, GL_NONE);
-	// }
+	if(CurrentState->RenderTarget != PrevState->RenderTarget)
+		CurrentState->RenderTarget->Bind();
 
 	if(CurrentState->ViewportX != PrevState->ViewportX ||
 	   CurrentState->ViewportY != PrevState->ViewportY ||
@@ -120,23 +121,23 @@ void FOpenGLRenderInterface::PopState(int){
 UBOOL FOpenGLRenderInterface::SetRenderTarget(FRenderTarget* RenderTarget, bool bFSAA){
 	guardFunc;
 
-	// bool Updated = false;
-	// QWORD CacheId = RenderTarget->GetCacheId();
-	// INT Revision = RenderTarget->GetRevision();
-	// FOpenGLRenderTarget* NewRenderTarget = static_cast<FOpenGLRenderTarget*>(RenDev->GetCachedResource(CacheId));
+	bool Updated = false;
+	QWORD CacheId = RenderTarget->GetCacheId();
+	INT Revision = RenderTarget->GetRevision();
+	FOpenGLRenderTarget* NewRenderTarget = static_cast<FOpenGLRenderTarget*>(RenDev->GetCachedResource(CacheId));
 
-	// if(!NewRenderTarget)
-	// 	NewRenderTarget = new FOpenGLRenderTarget(RenDev, CacheId);
+	if(!NewRenderTarget)
+		NewRenderTarget = new FOpenGLRenderTarget(RenDev, CacheId);
 
-	// if(NewRenderTarget->Revision != Revision){
-	// 	Updated = true;
-	// 	NewRenderTarget->Cache(RenderTarget);
-	// }
+	if(NewRenderTarget->Revision != Revision){
+		Updated = true;
+		NewRenderTarget->Cache(RenderTarget);
+	}
 
-	// if(CurrentState->RenderTarget != NewRenderTarget || Updated)
-	// 	NewRenderTarget->Bind();
+	if(CurrentState->RenderTarget != NewRenderTarget || Updated)
+		NewRenderTarget->Bind();
 
-	// CurrentState->RenderTarget = NewRenderTarget;
+	CurrentState->RenderTarget = NewRenderTarget;
 
 	return 1;
 

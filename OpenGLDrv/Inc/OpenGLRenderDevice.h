@@ -17,7 +17,6 @@ public:
 
 	FOpenGLShaderProgram*  DefaultShader;
 	FOpenGLShaderProgram*  FramebufferShader;
-	FOpenGLRenderTarget*   DefaultRenderTarget;
 	FOpenGLResource*       ResourceHash[4096];
 
 	static HGLRC CurrentContext;
@@ -62,7 +61,8 @@ public:
 	virtual UBOOL SupportsTextureFormat(ETextureFormat){ PRINT_FUNC; return 0; }
 
 private:
-	unsigned int ScreenVAO;
+	unsigned int     ScreenVAO;
+	FAuxRenderTarget ScreenRenderTarget;
 
 	friend class FOpenGLResource;
 	friend class FOpenGLRenderInterface;

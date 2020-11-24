@@ -23,6 +23,7 @@ public:
 	static HGLRC CurrentContext;
 
 	UOpenGLRenderDevice();
+	void StaticConstructor();
 
 	void MakeCurrent();
 	bool IsCurrent();

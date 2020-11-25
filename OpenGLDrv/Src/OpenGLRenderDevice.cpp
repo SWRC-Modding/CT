@@ -14,6 +14,7 @@ UOpenGLRenderDevice::UOpenGLRenderDevice() : RenderInterface(this),
                                              ScreenRenderTarget(0, 0, TEXF_RGBA8, false, true){}
 
 void UOpenGLRenderDevice::StaticConstructor(){
+	new(GetClass(), "KeepAspectRatio", RF_Public) UBoolProperty(CPP_PROPERTY(bKeepAspectRatio), "Options", CPF_Config);
 	SupportsZBIAS = 1;
 }
 
@@ -244,12 +245,8 @@ UBOOL UOpenGLRenderDevice::SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL
 
 		FramebufferShader->VertexShader->Cache(
 			"void main(void){\n"
-			"    const vec4[4] vertices = vec4[](vec4(1.0, 1.0, 1.0, 1.0),\n"
-			"                                    vec4(-1.0, 1.0, 0.0, 1.0),\n"
-			"                                    vec4(1.0, -1.0, 1.0, 0.0),\n"
-			"                                    vec4(-1.0, -1.0, 0.0, 0.0));\n"
-			"    TexCoord0 = vertices[gl_VertexID].zw;\n"
-			"    gl_Position = vec4(vertices[gl_VertexID].xy, 0.5, 1.0);\n"
+			"    TexCoord0 = InTexCoord0;\n"
+			"    gl_Position = vec4(InPosition.xy, 0.5, 1.0);\n"
 			"}\n"
 		);
 		FramebufferShader->FragmentShader->Cache(
@@ -261,7 +258,6 @@ UBOOL UOpenGLRenderDevice::SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL
 		FramebufferShader->VertexShader = NULL;
 		FramebufferShader->FragmentShader = NULL;
 		RemoveResource(FramebufferShader); // HACK: Removing the shader from the hash to prevent it from being destroyed when Flush is called
-		glCreateVertexArrays(1, &ScreenVAO);
 	}else{
 		MakeCurrent();
 	}
@@ -349,8 +345,59 @@ FRenderInterface* UOpenGLRenderDevice::Lock(UViewport* Viewport, BYTE* HitData, 
 	if(!RenderInterface.CurrentState->RenderTarget)
 		RenderInterface.SetRenderTarget(&ScreenRenderTarget, false);
 
+	RenderInterface.PushState(0);
+
 	return &RenderInterface;
 }
+
+void UOpenGLRenderDevice::Unlock(FRenderInterface* RI){
+	RI->PopState(0);
+}
+
+class FFullscreenQuadVertexStream : public FVertexStream{
+public:
+	struct Vertex{
+		FLOAT X;
+		FLOAT Y;
+		FLOAT U;
+		FLOAT V;
+	} Vertices[4];
+
+	FFullscreenQuadVertexStream(FLOAT XScale, FLOAT YScale){
+		Vertices[0].X = 1.0f * XScale;
+		Vertices[0].Y = 1.0f * YScale;
+		Vertices[0].U = 1.0f;
+		Vertices[0].V = 1.0f;
+		Vertices[1].X = -1.0f * XScale;
+		Vertices[1].Y = 1.0f * YScale;
+		Vertices[1].U = 0.0f;
+		Vertices[1].V = 1.0f;
+		Vertices[2].X = 1.0f * XScale;
+		Vertices[2].Y = -1.0f * YScale;
+		Vertices[2].U = 1.0f;
+		Vertices[2].V = 0.0f;
+		Vertices[3].X = -1.0f * XScale;
+		Vertices[3].Y = -1.0f * YScale;
+		Vertices[3].U = 0.0f;
+		Vertices[3].V = 0.0f;
+
+		CacheId = MakeCacheID(CID_RenderVertices);
+	}
+
+	virtual INT GetStride(){ return sizeof(Vertex); }
+	virtual INT GetSize(){ return sizeof(Vertices); }
+
+	virtual INT GetComponents(FVertexComponent* Components){
+		Components[0].Function = FVF_Position;
+		Components[0].Type     = CT_Float2;
+		Components[1].Function = FVF_TexCoord0;
+		Components[1].Type     = CT_Float2;
+
+		return 2;
+	}
+
+	virtual void GetStreamData(void* Dest){ appMemcpy(Dest, Vertices, sizeof(Vertices)); }
+};
 
 void UOpenGLRenderDevice::Present(UViewport* Viewport){
 	checkSlow(IsCurrent());
@@ -363,18 +410,52 @@ void UOpenGLRenderDevice::Present(UViewport* Viewport){
 	check(Framebuffer);
 
 	RenderInterface.PushState(0);
-	FramebufferShader->Bind();
 	glBindFramebuffer(GL_FRAMEBUFFER, GL_NONE);
 
-	if(bIsFullscreen)
-		RenderInterface.SetViewport(0, 0, SavedViewportWidth, SavedViewportHeight);
-	else
-		RenderInterface.SetViewport(0, 0, Viewport->SizeX, Viewport->SizeY);
+	// TODO: Add width and height members to FOpenGLRenderTarget...
+	INT FramebufferWidth = RenderInterface.CurrentState->ViewportWidth;
+	INT FramebufferHeight = RenderInterface.CurrentState->ViewportHeight;
+	INT ViewportWidth;
+	INT ViewportHeight;
+
+	if(bIsFullscreen){
+		ViewportWidth  = SavedViewportWidth;
+		ViewportHeight = SavedViewportHeight;
+	}else{
+		ViewportWidth  =  Viewport->SizeX;
+		ViewportHeight =  Viewport->SizeY;
+	}
+
+	RenderInterface.SetViewport(0, 0, ViewportWidth, ViewportHeight);
+
+	FLOAT XScale = 1.0f;
+	FLOAT YScale = 1.0f;
+
+	if(bKeepAspectRatio){
+		FLOAT ViewportAspectRatio = static_cast<FLOAT>(ViewportWidth) / ViewportHeight;
+		FLOAT FramebufferAspectRatio = static_cast<FLOAT>(FramebufferWidth) / FramebufferHeight;
+
+		if(FramebufferAspectRatio < ViewportAspectRatio){
+			FLOAT Scale = static_cast<FLOAT>(ViewportHeight) / FramebufferHeight;
+
+			XScale = FramebufferWidth * Scale / ViewportWidth;
+		}else{
+			FLOAT Scale = static_cast<FLOAT>(ViewportWidth) / FramebufferWidth;
+
+			YScale = FramebufferHeight * Scale / ViewportHeight;
+		}
+
+		// Clear black bars
+		RenderInterface.Clear(1, FColor(0, 0, 0), 0, 0.0f, 0, 0);
+	}
+
+	FFullscreenQuadVertexStream FullscreenQuad(XScale, YScale);
 
 	glBindTextureUnit(0, Framebuffer->ColorAttachment);
 	glDisable(GL_DEPTH_TEST);
-	glBindVertexArray(ScreenVAO);
-	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+	RenderInterface.SetDynamicStream(VS_FixedFunction, &FullscreenQuad);
+	FramebufferShader->Bind();
+	RenderInterface.DrawPrimitive(PT_TriangleStrip, 0, 2, INDEX_NONE, INDEX_NONE);
 	glEnable(GL_DEPTH_TEST);
 	SwapBuffers(DeviceContext);
 

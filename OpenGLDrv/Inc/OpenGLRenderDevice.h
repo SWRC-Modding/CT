@@ -46,7 +46,7 @@ public:
 	virtual UBOOL VSyncEnabled(){ PRINT_FUNC; return 0; }
 	virtual void EnableVSync(bool bEnable){ PRINT_FUNC; }
 	virtual FRenderInterface* Lock(UViewport* Viewport, BYTE* HitData, INT* HitSize);
-	virtual void Unlock(FRenderInterface* RI){ PRINT_FUNC; }
+	virtual void Unlock(FRenderInterface* RI);
 	virtual void Present(UViewport* Viewport);
 	virtual void ReadPixels(UViewport* Viewport, FColor* Pixels){ PRINT_FUNC; }
 	virtual void SetEmulationMode(EHardwareEmulationMode Mode){ PRINT_FUNC; }
@@ -61,8 +61,8 @@ public:
 	virtual UBOOL SupportsTextureFormat(ETextureFormat){ PRINT_FUNC; return 0; }
 
 private:
-	unsigned int     ScreenVAO;
 	FAuxRenderTarget ScreenRenderTarget;
+	UBOOL            bKeepAspectRatio;
 	UBOOL            bIsFullscreen;
 	INT              SavedViewportWidth;
 	INT              SavedViewportHeight;

@@ -292,8 +292,6 @@ INT FOpenGLRenderInterface::SetVertexStreams(EVertexShader Shader, FVertexStream
 			const FStreamDeclaration& Decl = VertexStreamDeclarations[StreamIndex];
 			GLuint Offset = 0;
 
-			glEnableVertexArrayAttrib(VAO, StreamIndex);
-
 			for(INT i = 0; i < Decl.NumComponents; ++i){
 				BYTE Function = Decl.Components[i].Function; // EFixedVertexFunction
 				BYTE Type     = Decl.Components[i].Type;     // EComponentType
@@ -326,6 +324,7 @@ INT FOpenGLRenderInterface::SetVertexStreams(EVertexShader Shader, FVertexStream
 					appErrorf("Unexpected EComponentType (%i)", Type);
 				}
 
+				glEnableVertexArrayAttrib(VAO, Function);
 				glVertexArrayAttribBinding(VAO, Function, StreamIndex);
 			}
 		}

@@ -287,6 +287,17 @@ UBOOL UOpenGLRenderDevice::SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL
 		Viewport->SizeX = NewX;
 		Viewport->SizeY = NewY;
 		bIsFullscreen = 1;
+
+		if(bSaveSize){
+			UClient* Client = Viewport->GetOuterUClient();
+
+			check(Client);
+
+			// NOTE: We have to do it like this since the bSaveSize parameter for ResizeViewport seems to have no effect
+			Client->FullscreenViewportX = Viewport->SizeX;
+			Client->FullscreenViewportY = Viewport->SizeY;
+			Client->SaveConfig();
+		}
 	}else{
 		Viewport->ResizeViewport(BLIT_OpenGL, NewX, NewY);
 		bIsFullscreen = 0;

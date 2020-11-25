@@ -335,7 +335,7 @@ public:
 	virtual void Present();
 	virtual UBOOL SetDrag(UBOOL NewDrag);
 	virtual UBOOL IsFullscreen() = 0;
-	virtual UBOOL ResizeViewport(DWORD BlitType, INT X = INDEX_NONE, INT Y = INDEX_NONE, INT ColorBytes = INDEX_NONE) = 0;
+	virtual UBOOL ResizeViewport(DWORD BlitType, INT X = INDEX_NONE, INT Y = INDEX_NONE, UBOOL bSaveSize = 1) = 0;
 	virtual void SetModeCursor() = 0;
 	virtual void UpdateWindowFrame() = 0;
 	virtual void OpenWindow(DWORD ParentWindow, UBOOL Temporary, INT NewX, INT NewY, INT OpenX, INT OpenY) = 0;

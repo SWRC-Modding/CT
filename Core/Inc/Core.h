@@ -118,6 +118,7 @@ class FRepLink;
 class FArray;
 class FLazyLoader;
 class FString;
+class FConfigString;
 class FMalloc;
 struct FFrame;
 
@@ -211,7 +212,7 @@ public:
 };
 
 // Single section in a config file.
-typedef TMultiMap<FName, FString> FConfigSection;
+typedef TMultiMap<FName, FConfigString> FConfigSection;
 
 // Configuration database cache.
 class FConfigCache{
@@ -219,8 +220,8 @@ public:
 	virtual UBOOL GetBool(const TCHAR* Section, const TCHAR* Key, UBOOL& Value, const TCHAR* Filename = NULL) = 0;
 	virtual UBOOL GetInt(const TCHAR* Section, const TCHAR* Key, INT& Value, const TCHAR* Filename = NULL) = 0;
 	virtual UBOOL GetFloat(const TCHAR* Section, const TCHAR* Key, FLOAT& Value, const TCHAR* Filename = NULL) = 0;
+	virtual UBOOL GetFString(const TCHAR* Section, const TCHAR* Key, FString& Str, const TCHAR* Filename = NULL) = 0;
 	virtual UBOOL GetString(const TCHAR* Section, const TCHAR* Key, TCHAR* Value, INT Size, const TCHAR* Filename = NULL) = 0;
-	virtual UBOOL GetString(const TCHAR* Section, const TCHAR* Key, FString& Str, const TCHAR* Filename = NULL) = 0;
 	virtual const TCHAR* GetStr(const TCHAR* Section, const TCHAR* Key, const TCHAR* Filename = NULL) = 0;
 	virtual UBOOL GetSection(const TCHAR* Section, TCHAR* Value, INT Size, const TCHAR* Filename = NULL) = 0;
 	virtual FConfigSection* GetSectionPrivate(const TCHAR* Section, UBOOL Force, UBOOL Const, const TCHAR* Filename = NULL) = 0;

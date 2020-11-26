@@ -10,10 +10,21 @@
 	Config cache.
 -----------------------------------------------------------------------------*/
 
+/*
+ * Config files work slightly different in SWRC than they do in other unreal games:
+ * - Default ini files are stored in the System directory. Those are considered read only.
+ * - When a config file is saved, it is written to the Save directory.
+ * - Values from the config files in the Save directory override the default values from System.
+ * - A saved config file has each value that is identical to the default commented out.
+ * - In order to actually be used, the file must exist in 'System'. Only 'Save' is not enough.
+ * - Array values are assigned using '+='. Using '=' will not add a new value but overwrite the most recently added item.
+ */
+
 // Single config file.
 class FConfigFile : public TMap<FString, FConfigSection>{
 public:
-	UBOOL Dirty, NoSave;
+	UBOOL Dirty;
+	UBOOL NoSave;
 
 	FConfigFile() : Dirty(0),
 	                NoSave(ParseParam(appCmdLine(), "nosaveconfig")){}
@@ -25,101 +36,103 @@ public:
 
 		FString Text;
 
-		if(appLoadFileToString(Text, Filename)){
-			TCHAR* Ptr = const_cast<TCHAR*>(*Text);
-			FConfigSection* CurrentSection = NULL;
-			const FConfigSection* CurrentOverrideSection = NULL;
-			bool Done = false;
-			bool EmptySection = false;
+		if(!appLoadFileToString(Text, Filename))
+			return;
 
-			while(!Done){
-				while(*Ptr == '\r' || *Ptr == '\n')
-					Ptr++;
+		TCHAR* Ptr = const_cast<TCHAR*>(*Text);
+		FConfigSection* CurrentSection = NULL;
+		bool Done = false;
 
-				TCHAR* Start = Ptr;
+		while(!Done){
+			while(*Ptr == '\r' || *Ptr == '\n')
+				Ptr++;
 
-				while(*Ptr && *Ptr != '\r' && *Ptr != '\n')
-					Ptr++;
+			TCHAR* Start = Ptr;
 
-				if(*Ptr == 0)
-					Done = true;
+			while(*Ptr && *Ptr != '\r' && *Ptr != '\n')
+				Ptr++;
 
-				*Ptr++ = 0;
+			Done = *Ptr == '\0';
+			*Ptr++ = '\0';
 
-				// Skip comments
-				if(*Start == ';')
-					continue;
+			// Skip comments
+			if(*Start == ';')
+				continue;
 
-				if(Start[0] == '[' && Start[appStrlen(Start) - 1] == ']'){
-					if(CurrentOverrideSection && EmptySection)
-						*CurrentSection = *CurrentOverrideSection;
+			if(Start[0] == '[' && Start[appStrlen(Start) - 1] == ']'){
+				Start++;
+				Start[appStrlen(Start) - 1] = '\0';
+				CurrentSection = &(*this)[Start];
+			}else if(CurrentSection && *Start){
+				TCHAR* Value      = appStrstr(Start, "=");
+				bool IsArrayValue = false;
 
-					Start++;
-					Start[appStrlen(Start) - 1] = 0;
-					CurrentSection = Find(Start);
+				if(Value){
+					IsArrayValue = Value[-1] == '+'; // RC uses '+=' for arrays
 
-					if(!CurrentSection)
-						CurrentSection = &Set(Start, FConfigSection());
+					if(IsArrayValue)
+						Value[-1] = '\0';
 
-					if(DefaultsOverride)
-						CurrentOverrideSection = DefaultsOverride->Find(Start);
+					*Value++ = '\0';
 
-					EmptySection = true;
-				}else if(CurrentSection && *Start){
-					TCHAR* Value = appStrstr(Start, "=");
-
-					if(Value){
-						bool IsArrayValue = *(Value - 1) == '+'; // RC uses '+=' for arrays
-
-						if(IsArrayValue)
-							*(Value - 1) = 0;
-
-						*Value++ = 0;
-
-						if(*Value == '\"' && Value[appStrlen(Value) - 1] == '\"'){
-							Value++;
-							Value[appStrlen(Value) - 1] = 0;
-						}
-
-						if(CurrentOverrideSection && !CurrentSection->Find(Start)){
-							TArray<FString> OverrideValues;
-							CurrentOverrideSection->MultiFind(Start, OverrideValues);
-
-							if(OverrideValues.Num() > 1 || IsArrayValue){
-								if(OverrideValues.FindItemIndex(Value) == INDEX_NONE) // Only add Value if it is not already contained in OverrideValues
-									CurrentSection->Add(Start, Value);
-
-								for(TArray<FString>::TIterator It(OverrideValues); It; ++It)
-									CurrentSection->Add(Start, **It);
-							}else{
-								CurrentSection->Add(Start, OverrideValues.Num() == 1 ? *OverrideValues[0] : Value);
-							}
-						}else{
-							CurrentSection->Add(Start, Value);
-						}
-
-						EmptySection = false;
+					if(*Value == '\"' && Value[appStrlen(Value) - 1] == '\"'){
+						Value++;
+						Value[appStrlen(Value) - 1] = '\0';
 					}
+				}else{
+					Value = "";
+				}
+
+				if(IsArrayValue){
+					CurrentSection->Add(Start, FConfigString(Value, true, DefaultsOverride == NULL));
+				}else{
+					/*
+					 * The following prevents a value from being tagged as modified if it is assigned more than once in the same file.
+					 * e.g.
+					 * Value=123
+					 * Value=456
+					 */
+					FConfigString& NewValue = (*CurrentSection)[Start];
+
+					NewValue = FConfigString(Value, false);
+					NewValue.SetModified(DefaultsOverride == NULL);
 				}
 			}
+		}
 
-			// Inserting remaining sections from defaults override which do not exist in the file read from disk
-			if(DefaultsOverride){
-				for(TIterator It(*DefaultsOverride); It; ++It){
-					if(Find(It.Key()))
-						continue;
+		if(!DefaultsOverride)
+			return;
 
-					Set(*It.Key(), It.Value());
+		// Insert values from override
+		for(TIterator SectionIt(*DefaultsOverride); SectionIt; ++SectionIt){
+			FConfigSection* Section = Find(SectionIt.Key());
+			FConfigSection* OverrideSection = &SectionIt.Value();
+
+			if(Section){
+				TArray<FConfigString> Values(0, true);
+
+				for(FConfigSection::TIterator It(*OverrideSection); It; ++It){
+					OverrideSection->MultiFind(It.Key(), Values);
+
+					for(INT i = 0; i < Values.Num(); ++i){
+						if(Values[i].IsArrayValue())
+							Section->AddUnique(It.Key(), Values[i]);
+						else
+							Section->Set(It.Key(), Values[i]);
+					}
+
+					Values.Empty();
 				}
+			}else{
+				// Section doesn't exist in the default config so just take the entire one from the override
+				Set(*SectionIt.Key(), SectionIt.Value());
 			}
-		}else if(DefaultsOverride){
-			*this = *DefaultsOverride;
 		}
 
 		unguard;
 	}
 
-	UBOOL Write(const TCHAR* Filename, const FConfigFile* Defaults = NULL){
+	UBOOL Write(const TCHAR* Filename){
 		guard(FConfigFile::Write);
 
 		if(!Dirty || NoSave)
@@ -134,53 +147,20 @@ public:
 			appSprintf(Temp, "[%s]\r\n", *SectionIt.Key());
 			Text += Temp;
 
-			// Array values are are all processed at once and added to this array.
-			// When encountering a key that is contained in this array we can simply skip it.
-			TArray<FName> AlreadyProcessed;
-			const FConfigSection* DefaultSection = Defaults ? Defaults->Find(SectionIt.Key()) : NULL;
-
-			for(FConfigSection::TIterator ValueIt(SectionIt.Value()); ValueIt; ++ValueIt){
-				if(AlreadyProcessed.FindItemIndex(ValueIt.Key()) != INDEX_NONE)
-					continue;
-
-				TArray<FString> Values;
-				TArray<FString> DefaultValues;
-
-				if(DefaultSection)
-					DefaultSection->MultiFind(ValueIt.Key(), DefaultValues);
-
-				SectionIt.Value().MultiFind(ValueIt.Key(), Values);
-
-				// Values that are the same as in the default config are commented out using ';'
-				if(Values.Num() == 1 && DefaultValues.Num() <= 1){ // If there is only one single value '=' is used instead of "+="
-					if(DefaultSection && DefaultValues.Num() == 1 && Values[0] == DefaultValues[0])
-						appSprintf(Temp, ";  %s=%s\r\n", *ValueIt.Key(), *Values[0]);
+			for(FConfigSection::TIterator It(SectionIt.Value()); It; ++It){
+				if(It.Value().IsArrayValue()){
+					if(It.Value().WasModified())
+						appSprintf(Temp, "%s+=%s\r\n", *It.Key(), *It.Value());
 					else
-						appSprintf(Temp, "%s=%s\r\n", *ValueIt.Key(), *Values[0]);
-
-					Text += Temp;
+						appSprintf(Temp, ";  %s+=%s\r\n", *It.Key(), *It.Value());
 				}else{
-					for(TArray<FString>::TIterator It(Values); It; ++It){
-						int Index = DefaultValues.FindItemIndex(*It);
-
-						if(Index == INDEX_NONE){
-							appSprintf(Temp, "%s+=%s\r\n", *ValueIt.Key(), **It);
-						}else{
-							appSprintf(Temp, ";  %s+=%s\r\n", *ValueIt.Key(), **It);
-							DefaultValues.Remove(Index);
-						}
-
-						Text += Temp;
-					}
-
-					// Writing remaining default values that have not yet been written
-					for(TArray<FString>::TIterator It(DefaultValues); It; ++It){
-						appSprintf(Temp, ";  %s+=%s\r\n", *ValueIt.Key(), **It);
-						Text += Temp;
-					}
+					if(It.Value().WasModified())
+						appSprintf(Temp, "%s=%s\r\n", *It.Key(), *It.Value());
+					else
+						appSprintf(Temp, ";  %s=%s\r\n", *It.Key(), *It.Value());
 				}
 
-				AlreadyProcessed.AddUniqueItem(ValueIt.Key());
+				Text += Temp;
 			}
 
 			Text += "\r\n";
@@ -305,7 +285,7 @@ public:
 		unguard;
 	}
 
-	UBOOL GetString(const TCHAR* Section, const TCHAR* Key, FString& Str, const TCHAR* Filename){
+	UBOOL GetFString(const TCHAR* Section, const TCHAR* Key, FString& Str, const TCHAR* Filename){
 		guard(FConfigCacheIni::GetString);
 
 		Str = "";
@@ -401,7 +381,7 @@ public:
 		unguard;
 	}
 
-	TMultiMap<FName,FString>* GetSectionPrivate(const TCHAR* Section, UBOOL Force, UBOOL Const, const TCHAR* Filename){
+	FConfigSection* GetSectionPrivate(const TCHAR* Section, UBOOL Force, UBOOL Const, const TCHAR* Filename){
 		guard(FConfigCacheIni::GetSectionPrivate);
 
 		FConfigFile* File = Find(Filename, Force);
@@ -510,22 +490,21 @@ public:
 		for(TIterator It(*this); It; ++It){
 			if(It.Value().Dirty && (!Filename || It.Key() == Filename)){
 				FString OutFilename =  GetWritableFilePath(*It.Key());
-				FConfigFile DefaultConfig;
-
-				DefaultConfig.Read(*It.Key());
 
 				if(Section){ // Only the specified section is updated in the file on disk
 					FConfigSection* Sec = GetSectionPrivate(Section, 0, 1, *It.Key());
 
 					if(Sec){
+						// Read file from disk, update specified section only and write it back
 						FConfigFile OverrideConfig;
 
 						OverrideConfig.Read(*OutFilename);
 						OverrideConfig.Set(Section, *Sec);
-						OverrideConfig.Write(*OutFilename, &DefaultConfig);
+						OverrideConfig.Write(*OutFilename);
 					}
 				}else{
-					It.Value().Write(*OutFilename, &DefaultConfig);
+					// No section specified so just write the entire file
+					It.Value().Write(*OutFilename);
 				}
 			}
 		}

@@ -10,6 +10,9 @@ class FOpenGLRenderTarget;
 class OPENGLDRV_API UOpenGLRenderDevice : public URenderDevice{
 	DECLARE_CLASS(UOpenGLRenderDevice,URenderDevice,CLASS_Config,OpenGLDrv)
 public:
+	UBOOL                  bUseDesktopResolution;
+	UBOOL                  bKeepAspectRatio;
+
 	HDC                    DeviceContext;
 	HGLRC                  OpenGLContext;
 	FOpenGLRenderInterface RenderInterface;
@@ -62,7 +65,7 @@ public:
 
 private:
 	FAuxRenderTarget ScreenRenderTarget;
-	UBOOL            bKeepAspectRatio;
+	UBOOL            bFirstRun;
 	UBOOL            bIsFullscreen;
 	INT              SavedViewportWidth;
 	INT              SavedViewportHeight;

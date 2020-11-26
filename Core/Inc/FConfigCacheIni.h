@@ -10,6 +10,16 @@
 	Config cache.
 -----------------------------------------------------------------------------*/
 
+/*
+ * Config files work slightly different in SWRC than they do in other unreal games:
+ * - Default ini files are stored in the System directory. Those are considered read only.
+ * - When a config file is saved, it is written to the Save directory.
+ * - Values from the config files in the Save directory override the default values from System.
+ * - A saved config file has each value that is identical to the default commented out.
+ * - In order to actually be used, the file must exist in 'System'. Only 'Save' is not enough.
+ * - Array values are assigned using '+='. Using '=' will not add a new value but overwrite the most recently added item.
+ */
+
 // Single config file.
 class FConfigFile : public TMap<FString, FConfigSection>{
 public:
@@ -42,10 +52,8 @@ public:
 			while(*Ptr && *Ptr != '\r' && *Ptr != '\n')
 				Ptr++;
 
-			if(*Ptr == 0)
-				Done = true;
-
-			*Ptr++ = 0;
+			Done = *Ptr == '\0';
+			*Ptr++ = '\0';
 
 			// Skip comments
 			if(*Start == ';')
@@ -53,30 +61,41 @@ public:
 
 			if(Start[0] == '[' && Start[appStrlen(Start) - 1] == ']'){
 				Start++;
-				Start[appStrlen(Start) - 1] = 0;
+				Start[appStrlen(Start) - 1] = '\0';
 				CurrentSection = &(*this)[Start];
 			}else if(CurrentSection && *Start){
-				TCHAR* Value = appStrstr(Start, "=");
+				TCHAR* Value      = appStrstr(Start, "=");
+				bool IsArrayValue = false;
 
 				if(Value){
-					bool IsArrayValue = Value[-1] == '+'; // RC uses '+=' for arrays
+					IsArrayValue = Value[-1] == '+'; // RC uses '+=' for arrays
 
 					if(IsArrayValue)
-						Value[-1] = 0;
+						Value[-1] = '\0';
 
-					*Value++ = 0;
+					*Value++ = '\0';
 
 					if(*Value == '\"' && Value[appStrlen(Value) - 1] == '\"'){
 						Value++;
-						Value[appStrlen(Value) - 1] = 0;
+						Value[appStrlen(Value) - 1] = '\0';
 					}
-
-					if(IsArrayValue)
-						CurrentSection->Add(Start, FConfigString(Value, true, DefaultsOverride == NULL));
-					else
-						CurrentSection->Set(Start, FConfigString(Value, false, DefaultsOverride == NULL));
 				}else{
-					CurrentSection->Set(Start, FConfigString("", false, DefaultsOverride == NULL));
+					Value = "";
+				}
+
+				if(IsArrayValue){
+					CurrentSection->Add(Start, FConfigString(Value, true, DefaultsOverride == NULL));
+				}else{
+					/*
+					 * The following prevents a value from being tagged as modified if it is assigned more than once in the same file.
+					 * e.g.
+					 * Value=123
+					 * Value=456
+					 */
+					FConfigString& NewValue = (*CurrentSection)[Start];
+
+					NewValue = FConfigString(Value, false);
+					NewValue.SetModified(DefaultsOverride == NULL);
 				}
 			}
 		}
@@ -113,7 +132,7 @@ public:
 		unguard;
 	}
 
-	UBOOL Write(const TCHAR* Filename, const FConfigFile* Defaults = NULL){
+	UBOOL Write(const TCHAR* Filename){
 		guard(FConfigFile::Write);
 
 		if(!Dirty || NoSave)
@@ -128,53 +147,20 @@ public:
 			appSprintf(Temp, "[%s]\r\n", *SectionIt.Key());
 			Text += Temp;
 
-			// Array values are are all processed at once and added to this array.
-			// When encountering a key that is contained in this array we can simply skip it.
-			TArray<FName> AlreadyProcessed;
-			const FConfigSection* DefaultSection = Defaults ? Defaults->Find(SectionIt.Key()) : NULL;
-
-			for(FConfigSection::TIterator ValueIt(SectionIt.Value()); ValueIt; ++ValueIt){
-				if(AlreadyProcessed.FindItemIndex(ValueIt.Key()) != INDEX_NONE)
-					continue;
-
-				TArray<FConfigString> Values;
-				TArray<FConfigString> DefaultValues;
-
-				if(DefaultSection)
-					DefaultSection->MultiFind(ValueIt.Key(), DefaultValues);
-
-				SectionIt.Value().MultiFind(ValueIt.Key(), Values);
-
-				// Values that are the same as in the default config are commented out using ';'
-				if(Values.Num() == 1 && DefaultValues.Num() <= 1){ // If there is only one single value '=' is used instead of "+="
-					if(DefaultSection && DefaultValues.Num() == 1 && Values[0] == DefaultValues[0])
-						appSprintf(Temp, ";  %s=%s\r\n", *ValueIt.Key(), *Values[0]);
+			for(FConfigSection::TIterator It(SectionIt.Value()); It; ++It){
+				if(It.Value().IsArrayValue()){
+					if(It.Value().WasModified())
+						appSprintf(Temp, "%s+=%s\r\n", *It.Key(), *It.Value());
 					else
-						appSprintf(Temp, "%s=%s\r\n", *ValueIt.Key(), *Values[0]);
-
-					Text += Temp;
+						appSprintf(Temp, ";  %s+=%s\r\n", *It.Key(), *It.Value());
 				}else{
-					for(TArray<FConfigString>::TIterator It(Values); It; ++It){
-						int Index = DefaultValues.FindItemIndex(*It);
-
-						if(Index == INDEX_NONE){
-							appSprintf(Temp, "%s+=%s\r\n", *ValueIt.Key(), **It);
-						}else{
-							appSprintf(Temp, ";  %s+=%s\r\n", *ValueIt.Key(), **It);
-							DefaultValues.Remove(Index);
-						}
-
-						Text += Temp;
-					}
-
-					// Writing remaining default values that have not yet been written
-					for(TArray<FConfigString>::TIterator It(DefaultValues); It; ++It){
-						appSprintf(Temp, ";  %s+=%s\r\n", *ValueIt.Key(), **It);
-						Text += Temp;
-					}
+					if(It.Value().WasModified())
+						appSprintf(Temp, "%s=%s\r\n", *It.Key(), *It.Value());
+					else
+						appSprintf(Temp, ";  %s=%s\r\n", *It.Key(), *It.Value());
 				}
 
-				AlreadyProcessed.AddUniqueItem(ValueIt.Key());
+				Text += Temp;
 			}
 
 			Text += "\r\n";
@@ -504,22 +490,21 @@ public:
 		for(TIterator It(*this); It; ++It){
 			if(It.Value().Dirty && (!Filename || It.Key() == Filename)){
 				FString OutFilename =  GetWritableFilePath(*It.Key());
-				FConfigFile DefaultConfig;
-
-				DefaultConfig.Read(*It.Key());
 
 				if(Section){ // Only the specified section is updated in the file on disk
 					FConfigSection* Sec = GetSectionPrivate(Section, 0, 1, *It.Key());
 
 					if(Sec){
+						// Read file from disk, update specified section only and write it back
 						FConfigFile OverrideConfig;
 
 						OverrideConfig.Read(*OutFilename);
 						OverrideConfig.Set(Section, *Sec);
-						OverrideConfig.Write(*OutFilename, &DefaultConfig);
+						OverrideConfig.Write(*OutFilename);
 					}
 				}else{
-					It.Value().Write(*OutFilename, &DefaultConfig);
+					// No section specified so just write the entire file
+					It.Value().Write(*OutFilename);
 				}
 			}
 		}

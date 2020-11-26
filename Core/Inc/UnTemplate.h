@@ -1265,7 +1265,6 @@ private:
 template<typename TK, typename TI>
 class TMapBase{
 protected:
-public:
 	class TPair{
 	public:
 		INT HashNext;

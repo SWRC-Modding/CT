@@ -32,7 +32,7 @@ DWORD WINAPI UpdateServerConsoleInput(PVOID){
 void UServerCommandletMain(){
 	FString Language;
 
-	if(GConfig->GetString("Engine.Engine", "Language", Language, "System.ini"))
+	if(GConfig->GetFString("Engine.Engine", "Language", Language, "System.ini"))
 		UObject::SetLanguage(*Language);
 
 	UClass* EngineClass = LoadClass<UEngine>(NULL, "ini:Engine.Engine.GameEngine", NULL, LOAD_NoFail, NULL);

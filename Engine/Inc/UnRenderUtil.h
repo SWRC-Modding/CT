@@ -400,10 +400,7 @@ public:
 		CacheId = MakeCacheID(CID_RenderTexture);
 	}
 
-	virtual ~FAuxRenderTarget(){
-		if(GEngine && GEngine->GRenDev && GetCacheId())
-			GEngine->GRenDev->FlushResource(GetCacheId());
-	}
+	virtual ~FAuxRenderTarget(); // Implemented in UnCamera.h since it needs UClient
 
 	// FBaseTexture interface.
 

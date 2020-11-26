@@ -1028,9 +1028,9 @@ public:
 
 	FConfigString& operator=(const TCHAR* Other){
 		// If the new value is different from the current one, set the modified flag.
-		if(Data && appStrcmp(static_cast<TCHAR*>(Data), Other) != 0){
+		if(!Data || appStrcmp(static_cast<TCHAR*>(Data), Other) != 0){
+			bModified = Data != NULL;
 			FString::operator=(Other);
-			bModified = true;
 		}
 
 		return *this;
@@ -1048,6 +1048,7 @@ public:
 		return *this;
 	}
 
+	void SetModified(bool InModified){ bModified = InModified; }
 	bool WasModified() const{ return bModified; }
 	bool IsArrayValue() const{ return bArrayValue; }
 

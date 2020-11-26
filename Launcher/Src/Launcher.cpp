@@ -103,7 +103,7 @@ static void DetectRenderDevice(){
 		GConfig->SetString("Engine.Engine", "RenderDevice", *RenderDeviceClass);
 	}else{
 		// If default render device is set to D3DRenderDevice, try locating ModRenderDevice and use it if it exists.
-		GConfig->GetString("Engine.Engine", "RenderDevice", RenderDeviceClass);
+		GConfig->GetFString("Engine.Engine", "RenderDevice", RenderDeviceClass);
 
 		if(RenderDeviceClass == "D3DDrv.D3DRenderDevice"){
 			UClass* ModRenderDeviceClass = LoadClass<URenderDevice>(NULL, "Mod.ModRenderDevice", NULL, LOAD_NoWarn | LOAD_Quiet, NULL);

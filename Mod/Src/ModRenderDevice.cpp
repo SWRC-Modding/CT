@@ -535,7 +535,8 @@ void FModRenderInterface::DrawPrimitive(EPrimitiveType PrimitiveType, INT FirstI
 		FHitProxyInfo* Info = reinterpret_cast<FHitProxyInfo*>(&AllHitData[HitDataIndex]);
 		AActor*        HitActor = reinterpret_cast<HHitProxy*>(reinterpret_cast<BYTE*>(Info) + sizeof(FHitProxyInfo))->GetActor();
 
-		if(HitActor && HitActor->DrawType == DT_Sprite){ // Sprites are drawn with alpha regardless of whether UTexture::bAlphaTexture is set or not so we need to check for it
+		// Sprites are drawn with alpha regardless of whether UTexture::bAlphaTexture is set or not so we need to check for it
+		if(HitActor && (HitActor->DrawType == DT_Sprite || HitActor->DrawType == DT_Particle)){
 			Shader = UModRenderDevice::AlphaSelectionShader;
 			Shader->Textures[0] = Cast<UBitmapMaterial>(HitActor->Texture);
 		}else{

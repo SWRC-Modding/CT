@@ -179,9 +179,10 @@ protected:
 
 public:
 	// Basic functions.
-	FString SystemIni, UserIni;
+	FString SystemIni;
+	FString UserIni;
 
-	FString GetWritableFilePath(const TCHAR* Filename){
+	FStringTemp GetWritableFilePath(const TCHAR* Filename){
 		if(UserIni == Filename) // The User.ini is stored in the directory of the current profile if there is one
 			return (GCurrProfilePath.Len() > 0 ? GCurrProfilePath : GGlobalSettingsPath) * FFilename(Filename).GetCleanFilename();
 
@@ -471,7 +472,7 @@ public:
 		if(!Sec)
 			Sec = &File->Set(Section, FConfigSection());
 
-		FString* Str = Sec->Find(Key);
+		FConfigString* Str = Sec->Find(Key);
 
 		if(!Str){
 			Sec->Add(Key, Value);

@@ -475,7 +475,7 @@ public:
 		FConfigString* Str = Sec->Find(Key);
 
 		if(!Str){
-			Sec->Add(Key, Value);
+			Sec->Add(Key, FConfigString(Value, false, true));
 			File->Dirty = 1;
 		}else if(appStricmp(**Str,Value)!=0){
 			File->Dirty = (appStrcmp(**Str,Value)!=0);

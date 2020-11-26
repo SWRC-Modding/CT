@@ -994,7 +994,7 @@ public:
 	FStringTemp(const FString& Other);
 	~FStringTemp();
 
-	FStringTemp& operator=(FStringTemp const&);
+	FStringTemp& operator=(const FStringTemp&);
 };
 
 struct CORE_API FStringNoInit : public FString{
@@ -1006,6 +1006,54 @@ public:
 	FStringNoInit& operator=(const FStringNoInit&);
 	FStringNoInit& operator=(const FString&);
 	FStringNoInit& operator=(const TCHAR*);
+};
+
+/*
+ * String that contains the value of a configuration variable.
+ * Only intended to be used with FConfigSection.
+ * The original code has an extra four bytes for each configuration entry. The first one seems to be a flag indicating
+ * whether the value was modified. The other three are either uninitialized padding bytes or they have some other purpose.
+ * Luckily only the FString portion is used so we can use those four bytes for our own implementation.
+ */
+class FConfigString : public FString{
+public:
+	FConfigString() : bModified(false), bArrayValue(false){}
+	FConfigString(const TCHAR* Src, bool InArrayValue = false, bool InModified = false) : FString(Src),
+	                                                                                      bModified(InModified),
+	                                                                                      bArrayValue(InArrayValue){
+		bIsTemporary = 1; // Avoids unnecessary copies when inserting the value into a config map.
+	}
+
+	~FConfigString(){ FString::~FString(); }
+
+	FConfigString& operator=(const TCHAR* Other){
+		// If the new value is different from the current one, set the modified flag.
+		if(Data && appStrcmp(static_cast<TCHAR*>(Data), Other) != 0){
+			FString::operator=(Other);
+			bModified = true;
+		}
+
+		return *this;
+	}
+
+	FConfigString& operator=(const FConfigString& Other){
+		*this = *Other;
+
+		return *this;
+	}
+
+	FConfigString& operator=(const FString& Other){
+		*this = *Other;
+
+		return *this;
+	}
+
+	bool WasModified() const{ return bModified; }
+	bool IsArrayValue() const{ return bArrayValue; }
+
+private:
+	bool bModified;
+	bool bArrayValue;
 };
 
 inline DWORD GetTypeHash(const FString& S){
@@ -1216,18 +1264,15 @@ private:
 template<typename TK, typename TI>
 class TMapBase{
 protected:
+public:
 	class TPair{
 	public:
 		INT HashNext;
-		TK Key;
-		TI Value;
-		void* Null; //Seems to be a pointer but no idea what it stores
-					//It's null most of the time
-					//When passing a TMap to the original code this value is not used,
-					//so investigating it any further is just a waste of time...
+		TK  Key;
+		TI  Value;
 
 		TPair(typename TTypeInfo<TK>::ConstInitType InKey, typename TTypeInfo<TI>::ConstInitType InValue) : Key(InKey),
-																											Value(InValue){}
+		                                                                                                    Value(InValue){}
 		TPair(){}
 
 		friend FArchive& operator<<(FArchive& Ar, TPair& F){
@@ -1274,20 +1319,23 @@ protected:
 		}
 		return Pair.Value;
 	}
-
+public:
 	TArray<TPair> Pairs;
 	INT* Hash;
 	INT HashCount;
 
 public:
 	TMapBase() : Hash(NULL),
-				 HashCount(8){
+	             HashCount(8){
 		Rehash();
 	}
 
 	TMapBase(const TMapBase& Other) : Pairs(Other.Pairs),
-									  HashCount(Other.HashCount),
-									  Hash(NULL){
+	                                  HashCount(Other.HashCount),
+	                                  Hash(NULL){
+		if(HashCount < 8)
+			HashCount = 8;
+
 		Rehash();
 	}
 
@@ -1410,7 +1458,7 @@ public:
 
 	class TIterator{
 	public:
-		TIterator(TMapBase& InMap) : Pairs(InMap.Pairs), Index(0) {}
+		TIterator(TMapBase& InMap) : Pairs(InMap.Pairs), Index(0){}
 		void operator++()          { ++Index; }
 		void RemoveCurrent()       { Pairs.Remove(Index--); }
 		operator UBOOL() const     { return Index<Pairs.Num(); }
@@ -1421,8 +1469,6 @@ public:
 		TArray<TPair>& Pairs;
 		INT Index;
 	};
-
-	friend class TIterator;
 };
 
 template<typename TK, typename TI>

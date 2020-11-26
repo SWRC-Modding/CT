@@ -31,9 +31,7 @@ public:
 
 		TCHAR* Ptr = const_cast<TCHAR*>(*Text);
 		FConfigSection* CurrentSection = NULL;
-		const FConfigSection* CurrentOverrideSection = NULL;
 		bool Done = false;
-		bool EmptySection = false;
 
 		while(!Done){
 			while(*Ptr == '\r' || *Ptr == '\n')
@@ -54,28 +52,17 @@ public:
 				continue;
 
 			if(Start[0] == '[' && Start[appStrlen(Start) - 1] == ']'){
-				if(CurrentOverrideSection && EmptySection)
-					*CurrentSection = *CurrentOverrideSection;
-
 				Start++;
 				Start[appStrlen(Start) - 1] = 0;
-				CurrentSection = Find(Start);
-
-				if(!CurrentSection)
-					CurrentSection = &Set(Start, FConfigSection());
-
-				if(DefaultsOverride)
-					CurrentOverrideSection = DefaultsOverride->Find(Start);
-
-				EmptySection = true;
+				CurrentSection = &(*this)[Start];
 			}else if(CurrentSection && *Start){
 				TCHAR* Value = appStrstr(Start, "=");
 
 				if(Value){
-					bool IsArrayValue = *(Value - 1) == '+'; // RC uses '+=' for arrays
+					bool IsArrayValue = Value[-1] == '+'; // RC uses '+=' for arrays
 
 					if(IsArrayValue)
-						*(Value - 1) = 0;
+						Value[-1] = 0;
 
 					*Value++ = 0;
 
@@ -84,35 +71,42 @@ public:
 						Value[appStrlen(Value) - 1] = 0;
 					}
 
-					if(CurrentOverrideSection && !CurrentSection->Find(Start)){
-						TArray<FString> OverrideValues;
-						CurrentOverrideSection->MultiFind(Start, OverrideValues);
-
-						if(OverrideValues.Num() > 1 || IsArrayValue){
-							if(OverrideValues.FindItemIndex(Value) == INDEX_NONE) // Only add Value if it is not already contained in OverrideValues
-								CurrentSection->Add(Start, Value);
-
-							for(TArray<FString>::TIterator It(OverrideValues); It; ++It)
-								CurrentSection->Add(Start, **It);
-						}else{
-							CurrentSection->Add(Start, OverrideValues.Num() == 1 ? *OverrideValues[0] : Value);
-						}
-					}else{
-						CurrentSection->Add(Start, Value);
-					}
-
-					EmptySection = false;
+					if(IsArrayValue)
+						CurrentSection->Add(Start, FConfigString(Value, true, DefaultsOverride == NULL));
+					else
+						CurrentSection->Set(Start, FConfigString(Value, false, DefaultsOverride == NULL));
+				}else{
+					CurrentSection->Set(Start, FConfigString("", false, DefaultsOverride == NULL));
 				}
 			}
 		}
 
-		// Inserting remaining sections from defaults override which do not exist in the file read from disk
-		if(DefaultsOverride){
-			for(TIterator It(*DefaultsOverride); It; ++It){
-				if(Find(It.Key()))
-					continue;
+		if(!DefaultsOverride)
+			return;
 
-				Set(*It.Key(), It.Value());
+		// Insert values from override
+		for(TIterator SectionIt(*DefaultsOverride); SectionIt; ++SectionIt){
+			FConfigSection* Section = Find(SectionIt.Key());
+			FConfigSection* OverrideSection = &SectionIt.Value();
+
+			if(Section){
+				TArray<FConfigString> Values(0, true);
+
+				for(FConfigSection::TIterator It(*OverrideSection); It; ++It){
+					OverrideSection->MultiFind(It.Key(), Values);
+
+					for(INT i = 0; i < Values.Num(); ++i){
+						if(Values[i].IsArrayValue())
+							Section->AddUnique(It.Key(), Values[i]);
+						else
+							Section->Set(It.Key(), Values[i]);
+					}
+
+					Values.Empty();
+				}
+			}else{
+				// Section doesn't exist in the default config so just take the entire one from the override
+				Set(*SectionIt.Key(), SectionIt.Value());
 			}
 		}
 
@@ -143,8 +137,8 @@ public:
 				if(AlreadyProcessed.FindItemIndex(ValueIt.Key()) != INDEX_NONE)
 					continue;
 
-				TArray<FString> Values;
-				TArray<FString> DefaultValues;
+				TArray<FConfigString> Values;
+				TArray<FConfigString> DefaultValues;
 
 				if(DefaultSection)
 					DefaultSection->MultiFind(ValueIt.Key(), DefaultValues);
@@ -160,7 +154,7 @@ public:
 
 					Text += Temp;
 				}else{
-					for(TArray<FString>::TIterator It(Values); It; ++It){
+					for(TArray<FConfigString>::TIterator It(Values); It; ++It){
 						int Index = DefaultValues.FindItemIndex(*It);
 
 						if(Index == INDEX_NONE){
@@ -174,7 +168,7 @@ public:
 					}
 
 					// Writing remaining default values that have not yet been written
-					for(TArray<FString>::TIterator It(DefaultValues); It; ++It){
+					for(TArray<FConfigString>::TIterator It(DefaultValues); It; ++It){
 						appSprintf(Temp, ";  %s+=%s\r\n", *ValueIt.Key(), **It);
 						Text += Temp;
 					}
@@ -305,7 +299,7 @@ public:
 		unguard;
 	}
 
-	UBOOL GetString(const TCHAR* Section, const TCHAR* Key, FString& Str, const TCHAR* Filename){
+	UBOOL GetFString(const TCHAR* Section, const TCHAR* Key, FString& Str, const TCHAR* Filename){
 		guard(FConfigCacheIni::GetString);
 
 		Str = "";
@@ -401,7 +395,7 @@ public:
 		unguard;
 	}
 
-	TMultiMap<FName,FString>* GetSectionPrivate(const TCHAR* Section, UBOOL Force, UBOOL Const, const TCHAR* Filename){
+	FConfigSection* GetSectionPrivate(const TCHAR* Section, UBOOL Force, UBOOL Const, const TCHAR* Filename){
 		guard(FConfigCacheIni::GetSectionPrivate);
 
 		FConfigFile* File = Find(Filename, Force);

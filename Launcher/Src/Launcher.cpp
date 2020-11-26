@@ -110,7 +110,7 @@ static void InitEngine(){
 	{
 		FString RenderDeviceClass;
 
-		GConfig->GetString("Engine.Engine", "RenderDevice", RenderDeviceClass, "System.ini");
+		GConfig->GetFString("Engine.Engine", "RenderDevice", RenderDeviceClass, "System.ini");
 
 		if(RenderDeviceClass == "D3DDrv.D3DRenderDevice"){ // Only use custom render device if there isn't another one specified
 			UClass* ModRenderDeviceClass = LoadClass<URenderDevice>(NULL, "Mod.ModRenderDevice", NULL, LOAD_NoWarn | LOAD_Quiet, NULL);

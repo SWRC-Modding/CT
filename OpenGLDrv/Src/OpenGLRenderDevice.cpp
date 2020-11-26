@@ -14,8 +14,12 @@ UOpenGLRenderDevice::UOpenGLRenderDevice() : RenderInterface(this),
                                              ScreenRenderTarget(0, 0, TEXF_RGBA8, false, true){}
 
 void UOpenGLRenderDevice::StaticConstructor(){
+	new(GetClass(), "UseDesktopResolution", RF_Public) UBoolProperty(CPP_PROPERTY(bUseDesktopResolution), "Options", CPF_Config);
 	new(GetClass(), "KeepAspectRatio", RF_Public) UBoolProperty(CPP_PROPERTY(bKeepAspectRatio), "Options", CPF_Config);
+	new(GetClass(), "FirstRun", RF_Public) UBoolProperty(CPP_PROPERTY(bFirstRun), "", CPF_Config);
+
 	SupportsZBIAS = 1;
+	bFirstRun = 1;
 }
 
 void UOpenGLRenderDevice::MakeCurrent(){
@@ -128,8 +132,12 @@ void UOpenGLRenderDevice::Destroy(){
 UBOOL UOpenGLRenderDevice::SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL Fullscreen, INT ColorBytes, UBOOL bSaveSize){
 	guardFunc;
 
-	check(RenderInterface.CurrentState == RenderInterface.SavedStates);
-	check(RenderInterface.SavedStateIndex == 0);
+	if(bFirstRun){
+		// Use desktop resolution when using the OpenGL renderer for the first time
+		bUseDesktopResolution = 1;
+		bFirstRun = 0;
+		SaveConfig();
+	}
 
 	HWND hwnd = static_cast<HWND>(Viewport->GetWindow());
 	check(hwnd);
@@ -262,16 +270,7 @@ UBOOL UOpenGLRenderDevice::SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL
 		MakeCurrent();
 	}
 
-	// Resize screen render target if necessary
-	if(ScreenRenderTarget.Width != NewX || ScreenRenderTarget.Height != NewY){
-		ScreenRenderTarget.Width = NewX;
-		ScreenRenderTarget.Height = NewY;
-		++ScreenRenderTarget.Revision;
-	}
-
-	RenderInterface.SetRenderTarget(&ScreenRenderTarget, false);
-	RenderInterface.SetViewport(0, 0, NewX, NewY);
-
+	// Set window size
 	if(Fullscreen){
 		HMONITOR    Monitor = MonitorFromWindow(hwnd, MONITOR_DEFAULTTOPRIMARY);
 		MONITORINFO Info    = {sizeof(MONITORINFO)};
@@ -280,6 +279,11 @@ UBOOL UOpenGLRenderDevice::SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL
 
 		INT Width  = Info.rcMonitor.right - Info.rcMonitor.left;
 		INT Height = Info.rcMonitor.bottom - Info.rcMonitor.top;
+
+		if(bUseDesktopResolution){
+			NewX = Width;
+			NewY = Height;
+		}
 
 		Viewport->ResizeViewport(BLIT_Fullscreen | BLIT_OpenGL, Width, Height);
 		SavedViewportWidth = Viewport->SizeX;
@@ -302,6 +306,16 @@ UBOOL UOpenGLRenderDevice::SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL
 		Viewport->ResizeViewport(BLIT_OpenGL, NewX, NewY);
 		bIsFullscreen = 0;
 	}
+
+	// Resize screen render target if necessary
+	if(ScreenRenderTarget.Width != NewX || ScreenRenderTarget.Height != NewY){
+		ScreenRenderTarget.Width = NewX;
+		ScreenRenderTarget.Height = NewY;
+		++ScreenRenderTarget.Revision;
+	}
+
+	RenderInterface.SetRenderTarget(&ScreenRenderTarget, false);
+	RenderInterface.SetViewport(0, 0, NewX, NewY);
 
 	return 1;
 

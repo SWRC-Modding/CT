@@ -10,7 +10,6 @@
 
 FOpenGLRenderInterface::FOpenGLRenderInterface(UOpenGLRenderDevice* InRenDev) : RenDev(InRenDev),
                                                                                 CurrentState(&SavedStates[0]),
-                                                                                SavedStateIndex(0),
                                                                                 GlobalUBO(GL_NONE){
 	CurrentState->Uniforms.LocalToWorld = FMatrix::Identity;
 	CurrentState->Uniforms.WorldToCamera = FMatrix::Identity;
@@ -18,11 +17,14 @@ FOpenGLRenderInterface::FOpenGLRenderInterface(UOpenGLRenderDevice* InRenDev) : 
 }
 
 void FOpenGLRenderInterface::FlushResources(){
-	check(SavedStateIndex == 0);
+	check(CurrentState == &SavedStates[0]);
 
 	CurrentState->RenderTarget = NULL;
 	CurrentState->IndexBuffer = NULL;
 	CurrentState->IndexBufferBaseIndex = 0;
+	CurrentState->VAO = GL_NONE;
+	CurrentState->NumVertexStreams = 0;
+	GlobalUBO = GL_NONE;
 
 	if(DynamicIndexBuffer16){
 		delete DynamicIndexBuffer16;
@@ -67,12 +69,52 @@ void FOpenGLRenderInterface::UpdateShaderUniforms(){
 void FOpenGLRenderInterface::PushState(int){
 	guardFunc;
 
-	++SavedStateIndex;
+	// Restore popped state only if needed rather than doing these checks each time PopState is called
+	if(PoppedState){
+		if(CurrentState->RenderTarget != PoppedState->RenderTarget)
+			CurrentState->RenderTarget->Bind();
+
+		if(CurrentState->ViewportX != PoppedState->ViewportX ||
+		   CurrentState->ViewportY != PoppedState->ViewportY ||
+		   CurrentState->ViewportWidth != PoppedState->ViewportWidth ||
+		   CurrentState->ViewportHeight != PoppedState->ViewportHeight){
+			SetViewport(CurrentState->ViewportX, CurrentState->ViewportY, CurrentState->ViewportWidth, CurrentState->ViewportHeight);
+		}
+
+		if(CurrentState->CullMode != PoppedState->CullMode)
+			SetCullMode(CurrentState->CullMode);
+
+		if(CurrentState->bStencilTest != PoppedState->bStencilTest)
+			EnableStencilTest(CurrentState->bStencilTest);
+
+		if(CurrentState->bZWrite != PoppedState->bZWrite)
+			EnableZWrite(CurrentState->bZWrite);
+
+		if(CurrentState->VAO != PoppedState->VAO)
+			glBindVertexArray(CurrentState->VAO);
+
+		for(INT i = 0; i < PoppedState->NumVertexStreams; ++i)
+			glBindVertexBuffer(i, GL_NONE, 0, 0);
+
+		for(INT i = 0; i < CurrentState->NumVertexStreams; ++i)
+			CurrentState->VertexStreams[i]->Bind(i);
+
+		if(CurrentState->IndexBuffer != PoppedState->IndexBuffer){
+			if(CurrentState->IndexBuffer)
+				CurrentState->IndexBuffer->Bind();
+			else
+				glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, GL_NONE);
+		}
+
+		NeedUniformUpdate = CurrentState->UniformRevision != PoppedState->UniformRevision;
+		PoppedState = NULL;
+	}
+
 	++CurrentState;
 
-	check(SavedStateIndex < MAX_STATESTACKDEPTH);
+	check(CurrentState <= &SavedStates[MAX_STATESTACKDEPTH]);
 
-	appMemcpy(CurrentState, &SavedStates[SavedStateIndex - 1], sizeof(FOpenGLSavedState));
+	appMemcpy(CurrentState, CurrentState - 1, sizeof(FOpenGLSavedState));
 
 	unguard;
 }
@@ -80,40 +122,12 @@ void FOpenGLRenderInterface::PushState(int){
 void FOpenGLRenderInterface::PopState(int){
 	guardFunc;
 
-	FOpenGLSavedState* PrevState = CurrentState;
+	if(!PoppedState)
+		PoppedState = CurrentState;
 
-	--SavedStateIndex;
 	--CurrentState;
 
-	check(SavedStateIndex >= 0);
-
-	if(CurrentState->RenderTarget != PrevState->RenderTarget)
-		CurrentState->RenderTarget->Bind();
-
-	if(CurrentState->ViewportX != PrevState->ViewportX ||
-	   CurrentState->ViewportY != PrevState->ViewportY ||
-	   CurrentState->ViewportWidth != PrevState->ViewportWidth ||
-	   CurrentState->ViewportHeight != PrevState->ViewportHeight){
-		SetViewport(CurrentState->ViewportX, CurrentState->ViewportY, CurrentState->ViewportWidth, CurrentState->ViewportHeight);
-	}
-
-	if(CurrentState->CullMode != PrevState->CullMode)
-		SetCullMode(CurrentState->CullMode);
-
-	if(CurrentState->bStencilTest != PrevState->bStencilTest)
-		EnableStencilTest(CurrentState->bStencilTest);
-
-	if(CurrentState->bZWrite != PrevState->bZWrite)
-		EnableZWrite(CurrentState->bZWrite);
-
-	if(CurrentState->IndexBuffer != PrevState->IndexBuffer){
-		if(CurrentState->IndexBuffer)
-			CurrentState->IndexBuffer->Bind();
-		else
-			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, GL_NONE);
-	}
-
-	NeedUniformUpdate = CurrentState->UniformRevision != PrevState->UniformRevision;
+	check(CurrentState >= &SavedStates[0]);
 
 	unguard;
 }
@@ -244,14 +258,12 @@ INT FOpenGLRenderInterface::SetVertexStreams(EVertexShader Shader, FVertexStream
 
 	checkSlow(!IsDynamic || NumStreams == 1);
 
+	INT PrevNumStreams = CurrentState->NumVertexStreams;
+
 	// NOTE: Stream declarations must be completely zeroed to get consistent hash values when looking up the VAO later
 	appMemzero(VertexStreamDeclarations, sizeof(VertexStreamDeclarations));
 
-	// Unbind previous vertex buffers
-	for(INT i = 0; i < NumVertexStreams; ++i)
-		glBindVertexBuffer(i, GL_NONE, 0, 0);
-
-	NumVertexStreams = NumStreams;
+	CurrentState->NumVertexStreams = NumStreams;
 
 	INT Size = 0;
 
@@ -277,7 +289,7 @@ INT FOpenGLRenderInterface::SetVertexStreams(EVertexShader Shader, FVertexStream
 			Size += Stream->BufferSize;
 		}
 
-		VertexStreams[i] = Stream;
+		CurrentState->VertexStreams[i] = Stream;
 		VertexStreamDeclarations[i].Init(Streams[i]);
 	}
 
@@ -288,7 +300,7 @@ INT FOpenGLRenderInterface::SetVertexStreams(EVertexShader Shader, FVertexStream
 	if(!VAO){
 		glCreateVertexArrays(1, &VAO);
 
-		for(INT StreamIndex = 0; StreamIndex < NumVertexStreams; ++StreamIndex){
+		for(INT StreamIndex = 0; StreamIndex < CurrentState->NumVertexStreams; ++StreamIndex){
 			const FStreamDeclaration& Decl = VertexStreamDeclarations[StreamIndex];
 			GLuint Offset = 0;
 
@@ -330,16 +342,22 @@ INT FOpenGLRenderInterface::SetVertexStreams(EVertexShader Shader, FVertexStream
 		}
 	}
 
-	glBindVertexArray(VAO);
+	if(VAO != CurrentState->VAO){
+		glBindVertexArray(VAO);
+		CurrentState->VAO = VAO;
+
+		if(CurrentState->IndexBuffer)
+			CurrentState->IndexBuffer->Bind();
+	}else{
+		// Unbind previous vertex buffers
+		for(INT i = NumStreams; i < PrevNumStreams; ++i)
+			glBindVertexBuffer(i, GL_NONE, 0, 0);
+	}
+
+	for(INT i = 0; i < CurrentState->NumVertexStreams; ++i)
+		CurrentState->VertexStreams[i]->Bind(i);
 
 	NeedUniformUpdate = 1; // Uniform buffer state is also stored in the VAO so we need to update it
-
-	// The element array buffer state is stored in the vao so we need to rebind it since the newly bound vao might have a different one or none at all
-	if(CurrentState->IndexBuffer)
-		CurrentState->IndexBuffer->Bind();
-
-	for(INT i = 0; i < NumVertexStreams; ++i)
-		VertexStreams[i]->Bind(i);
 
 	RenDev->DefaultShader->Bind();
 

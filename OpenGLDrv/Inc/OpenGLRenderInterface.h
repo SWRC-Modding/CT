@@ -64,23 +64,25 @@ public:
 
 		INT                   IndexBufferBaseIndex;
 		FOpenGLIndexBuffer*   IndexBuffer;
+
+		unsigned int          VAO;
+		INT                   NumVertexStreams;
+		FOpenGLVertexStream*  VertexStreams[MAX_VERTEX_STREAMS];
 	};
 
-	UOpenGLRenderDevice* RenDev;
+	UOpenGLRenderDevice*      RenDev;
 
-	FOpenGLSavedState    SavedStates[MAX_STATESTACKDEPTH];
-	FOpenGLSavedState*   CurrentState;
+	FOpenGLSavedState         SavedStates[MAX_STATESTACKDEPTH];
+	FOpenGLSavedState*        CurrentState;
+	FOpenGLSavedState*        PoppedState;
 
-	INT                  SavedStateIndex;
-	UBOOL                NeedUniformUpdate;
-	unsigned int         GlobalUBO;
+	UBOOL                     NeedUniformUpdate;
+	unsigned int              GlobalUBO;
 
-	FOpenGLIndexBuffer*  DynamicIndexBuffer16;
-	FOpenGLIndexBuffer*  DynamicIndexBuffer32;
+	FOpenGLIndexBuffer*       DynamicIndexBuffer16;
+	FOpenGLIndexBuffer*       DynamicIndexBuffer32;
 
-	INT                       NumVertexStreams;
 	FStreamDeclaration        VertexStreamDeclarations[MAX_VERTEX_STREAMS];
-	FOpenGLVertexStream*      VertexStreams[MAX_VERTEX_STREAMS];
 	FOpenGLVertexStream*      DynamicVertexStream;
 	TMap<DWORD, unsigned int> VAOsByDeclId;
 

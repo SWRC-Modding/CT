@@ -357,7 +357,7 @@ UBOOL UOpenGLRenderDevice::ResourceCached(QWORD CacheId){
 FRenderInterface* UOpenGLRenderDevice::Lock(UViewport* Viewport, BYTE* HitData, INT* HitSize){
 	PRINT_FUNC;
 
-	check(RenderInterface.SavedStateIndex == 0);
+	check(RenderInterface.CurrentState == &RenderInterface.SavedStates[0]);
 
 	// Makes stuff easier to see when rendering as wireframe
 	// TODO: REMOVE!!!

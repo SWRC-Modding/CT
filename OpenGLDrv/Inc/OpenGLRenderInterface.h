@@ -31,7 +31,7 @@ struct FOpenGLGlobalUniforms{
 #undef UNIFORM_BLOCK_MEMBER
 };
 
-#define MAX_STATESTACKDEPTH 128 // TODO: Verify actually required limit
+#define MAX_STATESTACKDEPTH 16
 #define MAX_VERTEX_STREAMS MAX_VERTEX_COMPONENTS
 
 struct FStreamDeclaration{

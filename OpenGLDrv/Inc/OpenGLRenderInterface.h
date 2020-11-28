@@ -6,6 +6,7 @@ class UOpenGLRenderDevice;
 class FOpenGLRenderTarget;
 class FOpenGLIndexBuffer;
 class FOpenGLVertexStream;
+class FOpenGLShaderProgram;
 
 // GLSL equivalent types with proper alignment
 
@@ -58,9 +59,13 @@ public:
 		INT                   ViewportHeight;
 
 		ECullMode             CullMode;
+		EFillMode             FillMode;
 
 		UBOOL                 bStencilTest;
 		UBOOL                 bZWrite;
+		UBOOL                 bZTest;
+
+		FOpenGLShaderProgram* Shader;
 
 		INT                   IndexBufferBaseIndex;
 		FOpenGLIndexBuffer*   IndexBuffer;
@@ -119,6 +124,10 @@ public:
 	virtual INT SetIndexBuffer(FIndexBuffer* IndexBuffer, INT BaseIndex);
 	virtual INT SetDynamicIndexBuffer(FIndexBuffer* IndexBuffer, INT BaseIndex);
 	virtual void DrawPrimitive(EPrimitiveType PrimitiveType, INT FirstIndex, INT NumPrimitives, INT MinIndex, INT MaxIndex);
+	virtual void SetFillMode(EFillMode FillMode);
+
+	void EnableZTest(UBOOL Enable);
+	void SetShader(FOpenGLShaderProgram* Shader);
 
 private:
 	INT SetIndexBuffer(FIndexBuffer* IndexBuffer, INT BaseIndex, bool IsDynamic);

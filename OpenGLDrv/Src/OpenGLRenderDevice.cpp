@@ -222,8 +222,6 @@ UBOOL UOpenGLRenderDevice::SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL
 		RequireExt("GL_ARB_texture_compression");
 		RequireExt("GL_EXT_texture_compression_s3tc");
 
-		glEnable(GL_DEPTH_TEST);
-
 		// Create default shader for drawing everything that doesn't use a custom one
 
 		DefaultShader = new FOpenGLShaderProgram(this, MakeCacheID(CID_RenderShader));
@@ -266,6 +264,13 @@ UBOOL UOpenGLRenderDevice::SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL
 		FramebufferShader->VertexShader = NULL;
 		FramebufferShader->FragmentShader = NULL;
 		RemoveResource(FramebufferShader); // HACK: Removing the shader from the hash to prevent it from being destroyed when Flush is called
+
+		// Setup initial state
+
+		RenderInterface.EnableZTest(1);
+		RenderInterface.SetShader(DefaultShader);
+		RenderInterface.SetCullMode(CM_CW);
+		RenderInterface.SetFillMode(FM_Wireframe); // TODO: Change to FM_Solid
 	}else{
 		MakeCurrent();
 	}
@@ -427,9 +432,6 @@ public:
 void UOpenGLRenderDevice::Present(UViewport* Viewport){
 	checkSlow(IsCurrent());
 
-	// TODO: REMOVE!!!
-	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-
 	FOpenGLRenderTarget* Framebuffer = RenderInterface.CurrentState->RenderTarget;
 
 	check(Framebuffer);
@@ -477,19 +479,14 @@ void UOpenGLRenderDevice::Present(UViewport* Viewport){
 	FFullscreenQuadVertexStream FullscreenQuad(XScale, YScale);
 
 	glBindTextureUnit(0, Framebuffer->ColorAttachment);
-	glDisable(GL_DEPTH_TEST);
+	RenderInterface.SetFillMode(FM_Solid);
+	RenderInterface.EnableZTest(0);
 	RenderInterface.SetDynamicStream(VS_FixedFunction, &FullscreenQuad);
-	FramebufferShader->Bind();
+	RenderInterface.SetShader(FramebufferShader);
 	RenderInterface.DrawPrimitive(PT_TriangleStrip, 0, 2, INDEX_NONE, INDEX_NONE);
-	glEnable(GL_DEPTH_TEST);
 	SwapBuffers(DeviceContext);
-
 	Framebuffer->Bind();
-
 	RenderInterface.PopState(0);
-
-	// TODO: REMOVE!!!
-	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
 	check(glGetError() == GL_NO_ERROR);
 }

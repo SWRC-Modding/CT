@@ -69,7 +69,7 @@ void FOpenGLRenderInterface::UpdateShaderUniforms(){
 void FOpenGLRenderInterface::PushState(int){
 	guardFunc;
 
-	// Restore popped state only if needed rather than doing these checks each time PopState is called
+	// Restore OpenGL state only if needed rather than doing these checks each time PopState is called
 	if(PoppedState){
 		if(CurrentState->RenderTarget != PoppedState->RenderTarget)
 			CurrentState->RenderTarget->Bind();
@@ -84,11 +84,20 @@ void FOpenGLRenderInterface::PushState(int){
 		if(CurrentState->CullMode != PoppedState->CullMode)
 			SetCullMode(CurrentState->CullMode);
 
+		if(CurrentState->FillMode != PoppedState->FillMode)
+			SetFillMode(CurrentState->FillMode);
+
 		if(CurrentState->bStencilTest != PoppedState->bStencilTest)
 			EnableStencilTest(CurrentState->bStencilTest);
 
 		if(CurrentState->bZWrite != PoppedState->bZWrite)
 			EnableZWrite(CurrentState->bZWrite);
+
+		if(CurrentState->bZTest != PoppedState->bZTest)
+			EnableZTest(CurrentState->bZTest);
+
+		if(CurrentState->Shader != PoppedState->Shader)
+			SetShader(CurrentState->Shader);
 
 		if(CurrentState->VAO != PoppedState->VAO)
 			glBindVertexArray(CurrentState->VAO);
@@ -359,8 +368,6 @@ INT FOpenGLRenderInterface::SetVertexStreams(EVertexShader Shader, FVertexStream
 
 	NeedUniformUpdate = 1; // Uniform buffer state is also stored in the VAO so we need to update it
 
-	RenDev->DefaultShader->Bind();
-
 	return 0;
 }
 
@@ -479,4 +486,25 @@ void FOpenGLRenderInterface::DrawPrimitive(EPrimitiveType PrimitiveType, INT Fir
 	}else{
 		glDrawArrays(Mode, 0, Count);
 	}
+}
+
+void FOpenGLRenderInterface::SetFillMode(EFillMode FillMode){
+	CurrentState->FillMode = FillMode;
+
+	glPolygonMode(GL_FRONT_AND_BACK, FillMode == FM_Wireframe ? GL_LINE : GL_FILL);
+}
+
+void FOpenGLRenderInterface::EnableZTest(UBOOL Enable){
+	CurrentState->bZTest = Enable;
+
+	if(Enable)
+		glEnable(GL_DEPTH_TEST);
+	else
+		glDisable(GL_DEPTH_TEST);
+}
+
+void FOpenGLRenderInterface::SetShader(FOpenGLShaderProgram* Shader){
+	CurrentState->Shader = Shader;
+
+	Shader->Bind();
 }

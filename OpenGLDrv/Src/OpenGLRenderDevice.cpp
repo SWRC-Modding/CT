@@ -8,8 +8,6 @@
 
 IMPLEMENT_CLASS(UOpenGLRenderDevice)
 
-HGLRC UOpenGLRenderDevice::CurrentContext = NULL;
-
 UOpenGLRenderDevice::UOpenGLRenderDevice() : RenderInterface(this),
                                              ScreenRenderTarget(0, 0, TEXF_RGBA8, false, true){}
 
@@ -27,7 +25,6 @@ void UOpenGLRenderDevice::MakeCurrent(){
 
 	if(!IsCurrent()){
 		wglMakeCurrent(DeviceContext, OpenGLContext);
-		CurrentContext = OpenGLContext;
 		GIsOpenGL = 1;
 	}
 
@@ -35,9 +32,7 @@ void UOpenGLRenderDevice::MakeCurrent(){
 }
 
 bool UOpenGLRenderDevice::IsCurrent(){
-	checkSlow(wglGetCurrentContext() == CurrentContext);
-
-	return CurrentContext == OpenGLContext;
+	return OpenGLContext != NULL && wglGetCurrentContext() == OpenGLContext;
 }
 
 void UOpenGLRenderDevice::UnSetRes(){
@@ -45,7 +40,6 @@ void UOpenGLRenderDevice::UnSetRes(){
 
 	if(OpenGLContext){
 		if(IsCurrent()){
-			CurrentContext = NULL;
 			wglMakeCurrent(NULL, NULL);
 			GIsOpenGL = 0;
 		}

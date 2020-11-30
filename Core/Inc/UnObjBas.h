@@ -581,7 +581,6 @@ public:
 	UBOOL IsA(FName SomeBaseClassName) const;
 	UBOOL IsIn(UObject* SomeOuter) const;
 	UBOOL IsProbing(FName ProbeName);
-	void Rename(const TCHAR* NewName = NULL);
 	UField* FindObjectField(FName InName, UBOOL Global = 0);
 	UFunction* FindFunction(FName InName, UBOOL Global = 0);
 	UFunction* FindFunctionChecked(FName InName, UBOOL Global = 0);

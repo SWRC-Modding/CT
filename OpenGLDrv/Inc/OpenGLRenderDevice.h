@@ -22,8 +22,6 @@ public:
 	FOpenGLShaderProgram*  FramebufferShader;
 	FOpenGLResource*       ResourceHash[4096];
 
-	static HGLRC CurrentContext;
-
 	UOpenGLRenderDevice();
 	void StaticConstructor();
 

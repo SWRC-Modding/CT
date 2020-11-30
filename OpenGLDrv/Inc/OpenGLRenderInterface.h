@@ -97,23 +97,23 @@ public:
 	void UpdateShaderUniforms();
 
 	// Overrides
-	virtual void PushState(int);
-	virtual void PopState(int);
+	virtual void PushState(INT Flags = 0);
+	virtual void PopState(INT Flags = 0);
 	virtual UBOOL SetRenderTarget(FRenderTarget* RenderTarget, bool bFSAA);
 	virtual void SetViewport(INT X, INT Y, INT Width, INT Height);
-	virtual void Clear(UBOOL UseColor, FColor Color, UBOOL UseDepth, FLOAT Depth, UBOOL UseStencil, DWORD Stencil);
+	virtual void Clear(UBOOL UseColor = 1, FColor Color = FColor(0, 0, 0), UBOOL UseDepth = 1, FLOAT Depth = 1.0f, UBOOL UseStencil = 1, DWORD Stencil = 0);
 	virtual void PushHit(const BYTE* Data, INT Count){ PRINT_FUNC; }
 	virtual void PopHit(INT Count, UBOOL Force){ PRINT_FUNC; }
 	virtual void SetCullMode(ECullMode CullMode);
 	virtual void SetAmbientLight(FColor Color){ PRINT_FUNC; }
-	virtual void EnableLighting(UBOOL UseDynamic, UBOOL UseStatic, UBOOL Modulate2X, FBaseTexture* UseLightmap, UBOOL LightingOnly, const FSphere& LitSphere, int){ PRINT_FUNC; }
-	virtual void SetLight(INT LightIndex, FDynamicLight* Light, FLOAT Scale){ PRINT_FUNC; }
+	virtual void EnableLighting(UBOOL UseDynamic, UBOOL UseStatic = 1, UBOOL Modulate2X = 0, FBaseTexture* UseLightmap = NULL, UBOOL LightingOnly = 0, const FSphere& LitSphere = FSphere(FVector(0, 0, 0), 0), int = 0){ PRINT_FUNC; }
+	virtual void SetLight(INT LightIndex, FDynamicLight* Light, FLOAT Scale = 1.0f){ PRINT_FUNC; }
 	virtual void SetNPatchTesselation(FLOAT Tesselation){ PRINT_FUNC; }
 	virtual void SetDistanceFog(UBOOL Enable, FLOAT FogStart, FLOAT FogEnd, FColor Color){ PRINT_FUNC; }
 	virtual void SetGlobalColor(FColor Color){ PRINT_FUNC; }
 	virtual void SetTransform(ETransformType Type, const FMatrix& Matrix);
 	virtual FMatrix GetTransform(ETransformType Type) const;
-	virtual void SetMaterial(UMaterial* Material, FString* ErrorString, UMaterial** ErrorMaterial, INT* NumPasses){ PRINT_FUNC; }
+	virtual void SetMaterial(UMaterial* Material, FString* ErrorString = NULL, UMaterial** ErrorMaterial = NULL, INT* NumPasses = NULL){ PRINT_FUNC; }
 	virtual void SetStencilOp(ECompareFunction Test, DWORD Ref, DWORD Mask, EStencilOp FailOp, EStencilOp ZFailOp, EStencilOp PassOp, DWORD WriteMask){ PRINT_FUNC; }
 	virtual void EnableStencilTest(UBOOL Enable);
 	virtual void EnableZWrite(UBOOL Enable);
@@ -123,7 +123,7 @@ public:
 	virtual INT SetDynamicStream(EVertexShader Shader, FVertexStream* Stream);
 	virtual INT SetIndexBuffer(FIndexBuffer* IndexBuffer, INT BaseIndex);
 	virtual INT SetDynamicIndexBuffer(FIndexBuffer* IndexBuffer, INT BaseIndex);
-	virtual void DrawPrimitive(EPrimitiveType PrimitiveType, INT FirstIndex, INT NumPrimitives, INT MinIndex, INT MaxIndex);
+	virtual void DrawPrimitive(EPrimitiveType PrimitiveType, INT FirstIndex, INT NumPrimitives, INT MinIndex = INDEX_NONE, INT MaxIndex = INDEX_NONE);
 	virtual void SetFillMode(EFillMode FillMode);
 
 	void EnableZTest(UBOOL Enable);

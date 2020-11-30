@@ -369,13 +369,13 @@ FRenderInterface* UOpenGLRenderDevice::Lock(UViewport* Viewport, BYTE* HitData, 
 	if(!RenderInterface.CurrentState->RenderTarget)
 		RenderInterface.SetRenderTarget(&ScreenRenderTarget, false);
 
-	RenderInterface.PushState(0);
+	RenderInterface.PushState();
 
 	return &RenderInterface;
 }
 
 void UOpenGLRenderDevice::Unlock(FRenderInterface* RI){
-	RI->PopState(0);
+	RI->PopState();
 }
 
 class FFullscreenQuadVertexStream : public FVertexStream{
@@ -430,7 +430,7 @@ void UOpenGLRenderDevice::Present(UViewport* Viewport){
 
 	check(Framebuffer);
 
-	RenderInterface.PushState(0);
+	RenderInterface.PushState();
 	glBindFramebuffer(GL_FRAMEBUFFER, GL_NONE);
 
 	// TODO: Add width and height members to FOpenGLRenderTarget...
@@ -467,7 +467,7 @@ void UOpenGLRenderDevice::Present(UViewport* Viewport){
 		}
 
 		// Clear black bars
-		RenderInterface.Clear(1, FColor(0, 0, 0), 0, 0.0f, 0, 0);
+		RenderInterface.Clear(1, FColor(0, 0, 0));
 	}
 
 	FFullscreenQuadVertexStream FullscreenQuad(XScale, YScale);
@@ -477,10 +477,10 @@ void UOpenGLRenderDevice::Present(UViewport* Viewport){
 	RenderInterface.EnableZTest(0);
 	RenderInterface.SetDynamicStream(VS_FixedFunction, &FullscreenQuad);
 	RenderInterface.SetShader(FramebufferShader);
-	RenderInterface.DrawPrimitive(PT_TriangleStrip, 0, 2, INDEX_NONE, INDEX_NONE);
+	RenderInterface.DrawPrimitive(PT_TriangleStrip, 0, 2);
 	SwapBuffers(DeviceContext);
 	Framebuffer->Bind();
-	RenderInterface.PopState(0);
+	RenderInterface.PopState();
 
 	check(glGetError() == GL_NO_ERROR);
 }

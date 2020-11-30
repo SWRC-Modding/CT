@@ -66,7 +66,7 @@ void FOpenGLRenderInterface::UpdateShaderUniforms(){
 	NeedUniformUpdate = 0;
 }
 
-void FOpenGLRenderInterface::PushState(int){
+void FOpenGLRenderInterface::PushState(INT Flags){
 	guardFunc;
 
 	// Restore OpenGL state only if needed rather than doing these checks each time PopState is called
@@ -128,7 +128,7 @@ void FOpenGLRenderInterface::PushState(int){
 	unguard;
 }
 
-void FOpenGLRenderInterface::PopState(int){
+void FOpenGLRenderInterface::PopState(INT Flags){
 	guardFunc;
 
 	if(!PoppedState)

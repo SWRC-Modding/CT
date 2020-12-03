@@ -1011,50 +1011,43 @@ public:
 /*
  * String that contains the value of a configuration variable.
  * Only intended to be used with FConfigSection.
- * The original code has an extra four bytes for each configuration entry. The first one seems to be a flag indicating
- * whether the value was modified. The other three are either uninitialized padding bytes or they have some other purpose.
- * Luckily only the FString portion is used so we can use those four bytes for our own implementation.
+ * It has an additional bool member that is set to true when the value of the config entry has changed.
  */
 class FConfigString : public FString{
 public:
-	FConfigString() : bModified(false), bArrayValue(false){}
-	FConfigString(const TCHAR* Src, bool InArrayValue = false, bool InModified = false) : FString(Src),
-	                                                                                      bModified(InModified),
-	                                                                                      bArrayValue(InArrayValue){
-		bIsTemporary = 1; // Avoids unnecessary copies when inserting the value into a config map.
-	}
-
+	FConfigString() : bDirty(false){}
+	FConfigString(const TCHAR* Src) : FString(Src),
+	                                  bDirty(false){}
+	FConfigString(const FString& Src) : FString(Src),
+	                                    bDirty(false){}
+	FConfigString(const FConfigString& Src) : FString(Src),
+	                                          bDirty(Src.bDirty){}
 	~FConfigString(){ FString::~FString(); }
 
-	FConfigString& operator=(const TCHAR* Other){
-		// If the new value is different from the current one, set the modified flag.
-		if(!Data || appStrcmp(static_cast<TCHAR*>(Data), Other) != 0){
-			bModified = Data != NULL;
-			FString::operator=(Other);
-		}
-
-		return *this;
-	}
-
 	FConfigString& operator=(const FConfigString& Other){
-		*this = *Other;
+		FString::operator=(Other);
+		bDirty = Other.bDirty;
 
 		return *this;
 	}
 
 	FConfigString& operator=(const FString& Other){
-		*this = *Other;
+		FString::operator=(Other);
 
 		return *this;
 	}
 
-	void SetModified(bool InModified){ bModified = InModified; }
-	bool WasModified() const{ return bModified; }
-	bool IsArrayValue() const{ return bArrayValue; }
+	FConfigString& operator=(const TCHAR* Other){
+		FString::operator=(Other);
+
+		return *this;
+	}
+
+	void SetDirty(bool InDirty){ bDirty = InDirty; }
+	bool Dirty() const{ return bDirty; }
 
 private:
-	bool bModified;
-	bool bArrayValue;
+	bool bDirty;
 };
 
 inline DWORD GetTypeHash(const FString& S){
@@ -1067,6 +1060,9 @@ struct TTypeInfo<FString> : public TTypeInfoBase<FString>{
 	static const TCHAR* ToInit(const FString& In) {return *In;}
 	static UBOOL DefinitelyNeedsDestructor(){ return 0; }
 };
+
+template<>
+struct TTypeInfo<FConfigString> : public TTypeInfo<FString>{};
 
 //
 // String exchanger.
@@ -1092,7 +1088,7 @@ public:
 	FFilename(ENoInit) : FString(E_NoInit){}
 
 	// Returns the text following the last period.
-	FString GetExtension() const{
+	FStringTemp GetExtension() const{
 		INT Pos = InStr(".", true);
 
 		if(Pos != -1)
@@ -1102,7 +1098,7 @@ public:
 	}
 
 	// Returns the base filename, minus any path information.
-	FString GetCleanFilename() const{
+	FStringTemp GetCleanFilename() const{
 		INT Pos = GetLastPathSeparator();
 
 		if(Pos != -1)
@@ -1112,7 +1108,7 @@ public:
 	}
 
 	// Returns the same thing as GetCleanFilename, but without the extension
-	FString GetBaseFilename() const{
+	FStringTemp GetBaseFilename() const{
 		FString Wk = GetCleanFilename();
 
 		INT Pos = Wk.InStr(".", true);
@@ -1124,7 +1120,7 @@ public:
 	}
 
 	// Returns the path and file name without the extension
-	FString GetBaseFilePath() const{
+	FStringTemp GetBaseFilePath() const{
 		INT Pos = InStr(".", true);
 
 		if(Pos != -1)
@@ -1134,7 +1130,7 @@ public:
 	}
 
 	// Returns the path in front of the filename
-	FString GetPath() const{
+	FStringTemp GetPath() const{
 		INT Pos = GetLastPathSeparator();
 
 		if(Pos != -1)
@@ -1280,24 +1276,23 @@ protected:
 		}
 	};
 
+	TArray<TPair> Pairs;
+	INT*          Hash;
+	INT           HashCount;
+
 	void Rehash(){
-		INT* NewHash = new INT[HashCount];
+		Hash = static_cast<INT*>(appRealloc(Hash, HashCount * sizeof(INT), 0));
 
 		for(INT i = 0; i < HashCount; ++i)
-			NewHash[i] = INDEX_NONE;
+			Hash[i] = INDEX_NONE;
 
 		for(INT i = 0; i < Pairs.Num(); ++i){
-			TPair& Pair    = Pairs[i];
-			INT    iHash   = (GetTypeHash(Pair.Key) & (HashCount - 1));
+			TPair& Pair   = Pairs[i];
+			INT    iHash  = (GetTypeHash(Pair.Key) & (HashCount - 1));
 
-			Pair.HashNext  = NewHash[iHash];
-			NewHash[iHash] = i;
+			Pair.HashNext = Hash[iHash];
+			Hash[iHash]   = i;
 		}
-
-		if(Hash)
-			appFree(Hash);
-
-		Hash = NewHash;
 	}
 
 	void Relax(){
@@ -1319,10 +1314,6 @@ protected:
 		}
 		return Pair.Value;
 	}
-public:
-	TArray<TPair> Pairs;
-	INT* Hash;
-	INT HashCount;
 
 public:
 	TMapBase() : Hash(NULL),
@@ -1333,7 +1324,7 @@ public:
 	TMapBase(const TMapBase& Other) : Pairs(Other.Pairs),
 	                                  HashCount(Other.HashCount),
 	                                  Hash(NULL){
-		if(HashCount < 8)
+		if(HashCount < 8) // Need to check this in case the other map was zero initialized without the constructor being called
 			HashCount = 8;
 
 		Rehash();

@@ -23,16 +23,16 @@
 // Single config file.
 class FConfigFile : public TMap<FString, FConfigSection>{
 public:
-	UBOOL Dirty;
-	UBOOL NoSave;
+	bool Dirty;
+	bool NoSave;
+	bool Quotes;
 
-	FConfigFile() : Dirty(0),
-	                NoSave(ParseParam(appCmdLine(), "nosaveconfig")){}
+	FConfigFile() : Dirty(false),
+	                NoSave(ParseParam(appCmdLine(), "nosaveconfig") != 0),
+	                Quotes(false){}
 
-	void Read(const TCHAR* Filename, FConfigFile* DefaultsOverride = NULL){
+	void Read(const TCHAR* Filename, bool IsDefault){
 		guard(FConfigFile::Read);
-
-		Empty();
 
 		FString Text;
 
@@ -55,22 +55,18 @@ public:
 			Done = *Ptr == '\0';
 			*Ptr++ = '\0';
 
-			// Skip comments
-			if(*Start == ';')
-				continue;
-
 			if(Start[0] == '[' && Start[appStrlen(Start) - 1] == ']'){
 				Start++;
 				Start[appStrlen(Start) - 1] = '\0';
 				CurrentSection = &(*this)[Start];
 			}else if(CurrentSection && *Start){
-				TCHAR* Value      = appStrstr(Start, "=");
-				bool IsArrayValue = false;
+				TCHAR* Value        = appStrstr(Start, "=");
+				bool IsArrayElement = false;
 
 				if(Value){
-					IsArrayValue = Value[-1] == '+'; // RC uses '+=' for arrays
+					IsArrayElement = Value > Start && Value[-1] == '+'; // RC uses '+=' for arrays
 
-					if(IsArrayValue)
+					if(IsArrayElement)
 						Value[-1] = '\0';
 
 					*Value++ = '\0';
@@ -83,90 +79,86 @@ public:
 					Value = "";
 				}
 
-				if(IsArrayValue){
-					CurrentSection->Add(Start, FConfigString(Value, true, DefaultsOverride == NULL));
-				}else{
-					/*
-					 * The following prevents a value from being tagged as modified if it is assigned more than once in the same file.
-					 * e.g.
-					 * Value=123
-					 * Value=456
-					 */
-					FConfigString& NewValue = (*CurrentSection)[Start];
-
-					NewValue = FConfigString(Value, false);
-					NewValue.SetModified(DefaultsOverride == NULL);
-				}
-			}
-		}
-
-		if(!DefaultsOverride)
-			return;
-
-		// Insert values from override
-		for(TIterator SectionIt(*DefaultsOverride); SectionIt; ++SectionIt){
-			FConfigSection* Section = Find(SectionIt.Key());
-			FConfigSection* OverrideSection = &SectionIt.Value();
-
-			if(Section){
-				TArray<FConfigString> Values(0, true);
-
-				for(FConfigSection::TIterator It(*OverrideSection); It; ++It){
-					OverrideSection->MultiFind(It.Key(), Values);
-
-					for(INT i = 0; i < Values.Num(); ++i){
-						if(Values[i].IsArrayValue())
-							Section->AddUnique(It.Key(), Values[i]);
-						else
-							Section->Set(It.Key(), Values[i]);
-					}
-
-					Values.Empty();
-				}
-			}else{
-				// Section doesn't exist in the default config so just take the entire one from the override
-				Set(*SectionIt.Key(), SectionIt.Value());
+				SetString(CurrentSection, Start, Value, IsArrayElement, IsDefault);
 			}
 		}
 
 		unguard;
 	}
 
-	UBOOL Write(const TCHAR* Filename){
+	UBOOL Write(const TCHAR* Filename, const TCHAR* Section = NULL){
 		guard(FConfigFile::Write);
 
 		if(!Dirty || NoSave)
 			return 1;
 
-		Dirty = 0;
+		Dirty = false;
 
 		FString Text;
-		char Temp[1024];
 
 		for(TIterator SectionIt(*this); SectionIt; ++SectionIt){
-			appSprintf(Temp, "[%s]\r\n", *SectionIt.Key());
-			Text += Temp;
+			bool IsSpecifiedSection = (Section == NULL || SectionIt.Key() != Section);
+
+			Text += FString::Printf("[%s]\r\n", *SectionIt.Key());
 
 			for(FConfigSection::TIterator It(SectionIt.Value()); It; ++It){
-				if(It.Value().IsArrayValue()){
-					if(It.Value().WasModified())
-						appSprintf(Temp, "%s+=%s\r\n", *It.Key(), *It.Value());
-					else
-						appSprintf(Temp, ";  %s+=%s\r\n", *It.Key(), *It.Value());
-				}else{
-					if(It.Value().WasModified())
-						appSprintf(Temp, "%s=%s\r\n", *It.Key(), *It.Value());
-					else
-						appSprintf(Temp, ";  %s=%s\r\n", *It.Key(), *It.Value());
-				}
+				if(!It.Value().Dirty() && IsSpecifiedSection)
+					Text += ";  ";
 
-				Text += Temp;
+				Text += *It.Key();
+
+				TArray<FConfigString> Values;
+
+				SectionIt.Value().MultiFind(It.Key(), Values);
+
+				if(Values.Num() > 1)
+					Text += "+=";
+				else
+					Text += "=";
+
+				if(Quotes){
+					Text += "\"";
+					Text += It.Value();
+					Text += "\"\r\n";
+				}else{
+					Text += It.Value() + "\r\n";
+				}
 			}
 
 			Text += "\r\n";
 		}
 
 		return appSaveStringToFile(Text, Filename);
+
+		unguard;
+	}
+
+	void SetString(FConfigSection* Section, const TCHAR* Key, const TCHAR* Value, bool IsArrayElement = false, bool IsDefault = false){
+		guard(FConfigFile::SetString);
+
+		if(Key[0] == ';') // Skip comments
+			return;
+
+		FName          KeyName(Key);
+		FConfigString* Str = Section->Find(KeyName);
+
+		if(!Str || IsArrayElement){
+			Str = &Section->Add(KeyName, Value);
+		}else{
+			if(appStricmp(**Str, Value) == 0)
+				return;
+
+			FLOAT F1 = appAtof(Value);
+			FLOAT F2 = appAtof(**Str);
+
+			if(F1 == F2 && F2 != 0.0f)
+				return;
+
+			*Str = Value;
+		}
+
+		Dirty = !IsDefault;
+		Str->SetDirty(!IsDefault);
 
 		unguard;
 	}
@@ -189,7 +181,7 @@ public:
 		return GGlobalSettingsPath * FFilename(Filename).GetCleanFilename();
 	}
 
-	FConfigFile* Find(const TCHAR* InFilename, UBOOL CreateIfNotFound){
+	FConfigFile* Find(const TCHAR* InFilename, bool CreateIfNotFound){
 		guard(FConfigCacheIni::Find);
 
 		// If filename not specified, use default.
@@ -209,12 +201,16 @@ public:
 		FConfigFile* Result = TMap<FString, FConfigFile>::Find(Filename.GetCleanFilename());
 
 		if(!Result && (CreateIfNotFound || GFileManager->FileSize(*Filename) >= 0)){
-			FConfigFile DefaultsOverride;
-
-			DefaultsOverride.Read(*GetWritableFilePath(*Filename));
-
 			Result = &Set(*Filename.GetCleanFilename(), FConfigFile());
-			Result->Read(*Filename, &DefaultsOverride);
+			Result->Read(*Filename, true);
+
+			if(Filename.GetExtension() == "ini"){
+				FString OverrideFilename = GetWritableFilePath(*Filename);
+
+				// Check for override and read it if found.
+				if(GFileManager->FileSize(*OverrideFilename) >= 0)
+					Result->Read(*OverrideFilename, false);
+			}
 		}
 
 		return Result;
@@ -291,7 +287,7 @@ public:
 
 		Str = "";
 
-		FConfigFile* File = Find(Filename, 1);
+		FConfigFile* File = Find(Filename, false);
 
 		if(!File )
 			return 0;
@@ -317,7 +313,8 @@ public:
 		guard(FConfigCacheIni::GetString);
 
 		*Value = 0;
-		FConfigFile* File = Find(Filename, 1);
+
+		FConfigFile* File = Find(Filename, false);
 
 		if(!File)
 			return 0;
@@ -342,13 +339,9 @@ public:
 	const TCHAR* GetStr(const TCHAR* Section, const TCHAR* Key, const TCHAR* Filename){
 		guard(FConfigCacheIni::GetStr);
 
-		// Seems like LucasArts changed the behavior of appStaticString1024.
-		// It looks like it somehow overflows when used repeatedly which was the case here.
-		static char Buffer[1024];
+		TCHAR* Result = appStaticString1024();
 
-		TCHAR* Result = Buffer;//appStaticString1024();
-
-		if(GetString(Section, Key, Result, ARRAY_COUNT(Buffer), Filename)){}
+		if(GetString(Section, Key, Result, 1024, Filename))
 			return Result;
 
 		return NULL;
@@ -360,7 +353,7 @@ public:
 		guard(FConfigCacheIni::GetSection);
 
 		*Result = 0;
-		FConfigFile* File = Find(Filename, 0);
+		FConfigFile* File = Find(Filename, false);
 
 		if(!File)
 			return 0;
@@ -385,7 +378,7 @@ public:
 	FConfigSection* GetSectionPrivate(const TCHAR* Section, UBOOL Force, UBOOL Const, const TCHAR* Filename){
 		guard(FConfigCacheIni::GetSectionPrivate);
 
-		FConfigFile* File = Find(Filename, Force);
+		FConfigFile* File = Find(Filename, Force != 0);
 
 		if(!File)
 			return NULL;
@@ -396,7 +389,7 @@ public:
 			Sec = &File->Set(Section, FConfigSection());
 
 		if(Sec && (Force || !Const))
-			File->Dirty = 1;
+			File->Dirty = true;
 
 		return Sec;
 
@@ -406,14 +399,14 @@ public:
 	void EmptySection(const TCHAR* Section, const TCHAR* Filename){
 		guard(FConfigCacheIni::EmptySection);
 
-		FConfigFile* File = Find(Filename, 0);
+		FConfigFile* File = Find(Filename, false);
 
 		if(File){
 			FConfigSection* Sec = File->Find(Section);
 
 			if(Sec && FConfigSection::TIterator(*Sec)){
 				Sec->Empty();
-				File->Dirty = 1;
+				File->Dirty = true;
 			}
 		}
 
@@ -457,7 +450,7 @@ public:
 		guard(FConfigCacheIni::SetFloat);
 
 		TCHAR Text[30];
-		appSprintf(Text, "%f", Value);
+		appSprintf(Text, "%g", Value);
 		SetString(Section, Key, Text, Filename);
 
 		unguard;
@@ -466,48 +459,23 @@ public:
 	void SetString(const TCHAR* Section, const TCHAR* Key, const TCHAR* Value, const TCHAR* Filename){
 		guard(FConfigCacheIni::SetString);
 
-		FConfigFile* File = Find(Filename, 1);
-		FConfigSection* Sec  = File->Find(Section);
+		FConfigFile* File = Find(Filename, true);
+		FConfigSection* Sec = File->Find(Section);
 
 		if(!Sec)
 			Sec = &File->Set(Section, FConfigSection());
 
-		FConfigString* Str = Sec->Find(Key);
-
-		if(!Str){
-			Sec->Add(Key, FConfigString(Value, false, true));
-			File->Dirty = 1;
-		}else if(appStricmp(**Str,Value)!=0){
-			File->Dirty = (appStrcmp(**Str,Value)!=0);
-			*Str = Value;
-		}
+		File->SetString(Sec, Key, Value);
 
 		unguard;
 	}
 
-	void Flush(UBOOL Read, const TCHAR* Filename = NULL, const char* Section = NULL){
+	void Flush(UBOOL Read, const TCHAR* Filename = NULL, const TCHAR* Section = NULL){
 		guard(FConfigCacheIni::Flush);
 
 		for(TIterator It(*this); It; ++It){
-			if(It.Value().Dirty && (!Filename || It.Key() == Filename)){
-				FString OutFilename =  GetWritableFilePath(*It.Key());
-
-				if(Section){ // Only the specified section is updated in the file on disk
-					FConfigSection* Sec = GetSectionPrivate(Section, 0, 1, *It.Key());
-
-					if(Sec){
-						// Read file from disk, update specified section only and write it back
-						FConfigFile OverrideConfig;
-
-						OverrideConfig.Read(*OutFilename);
-						OverrideConfig.Set(Section, *Sec);
-						OverrideConfig.Write(*OutFilename);
-					}
-				}else{
-					// No section specified so just write the entire file
-					It.Value().Write(*OutFilename);
-				}
-			}
+			if(!Filename || It.Key() == Filename)
+				It.Value().Write(*GetWritableFilePath(*It.Key()), Section);
 		}
 
 		if(Read){
@@ -523,7 +491,7 @@ public:
 	void UnloadFile(const TCHAR* Filename){
 		guard(FConfigCacheIni::UnloadFile);
 
-		FConfigFile* File = Find(Filename, 1);
+		FConfigFile* File = Find(Filename, true);
 
 		if(File)
 			Remove(Filename);
@@ -545,10 +513,10 @@ public:
 	void Detach(const TCHAR* Filename){
 		guard(FConfigCacheIni::Cancel);
 
-		FConfigFile* File = Find(Filename, 1);
+		FConfigFile* File = Find(Filename, true);
 
 		if(File)
-			File->NoSave = 1;
+			File->NoSave = true;
 
 		unguard;
 	}

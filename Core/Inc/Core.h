@@ -592,7 +592,7 @@ public:
 	}
 };
 
-CORE_API extern TArray<FEdLoadError>	GEdLoadErrors; /*  For keeping track of load errors in the editor */
+CORE_API extern TArray<FEdLoadError> GEdLoadErrors; /*  For keeping track of load errors in the editor */
 
 /*
  * Archive for counting memory usage.

@@ -60,6 +60,13 @@ public:
 	virtual void TakeScreenshot(const char*, class UViewport*, int, int){ PRINT_FUNC; }
 	virtual UBOOL SupportsTextureFormat(ETextureFormat){ PRINT_FUNC; return 0; }
 
+	void* GetScratchBuffer(INT Size){
+		if(Scratch.Num() < Size)
+			Scratch.Set(Size);
+
+		return Scratch.GetData();
+	}
+
 private:
 	FAuxRenderTarget          ScreenRenderTarget;
 	UBOOL                     bFirstRun;
@@ -71,6 +78,8 @@ private:
 	FOpenGLIndexBuffer*       DynamicIndexBuffer32;
 	FOpenGLVertexStream*      DynamicVertexStream;
 	TMap<DWORD, unsigned int> VAOsByDeclId;
+
+	TArray<BYTE>              Scratch;
 	FOpenGLResource*          ResourceHash[4096];
 
 	friend class FOpenGLResource;

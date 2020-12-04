@@ -111,6 +111,80 @@ FOpenGLResource* UOpenGLRenderDevice::GetCachedResource(QWORD CacheId){
 	return NULL;
 }
 
+unsigned int UOpenGLRenderDevice::GetVAO(const FStreamDeclaration* Declarations, INT NumStreams){
+	// Check if there is an existing VAO for this format by hashing the shader declarations
+	GLuint& VAO = VAOsByDeclId[appMemCrc(Declarations, sizeof(FStreamDeclaration) * NumStreams)];
+
+	// Create and setup VAO if none was found matching the vertex format
+	if(!VAO){
+		glCreateVertexArrays(1, &VAO);
+
+		for(INT StreamIndex = 0; StreamIndex < NumStreams; ++StreamIndex){
+			const FStreamDeclaration& Decl = Declarations[StreamIndex];
+			GLuint Offset = 0;
+
+			for(INT i = 0; i < Decl.NumComponents; ++i){
+				BYTE Function = Decl.Components[i].Function; // EFixedVertexFunction
+				BYTE Type     = Decl.Components[i].Type;     // EComponentType
+
+				checkSlow(Function < FVF_MAX);
+				checkSlow(Type < CT_MAX);
+
+				switch(Type){
+				case CT_Float4:
+					glVertexArrayAttribFormat(VAO, Function, 4, GL_FLOAT, GL_FALSE, Offset);
+					Offset += sizeof(FLOAT) * 4;
+					break;
+				case CT_Float3:
+					glVertexArrayAttribFormat(VAO, Function, 3, GL_FLOAT, GL_FALSE, Offset);
+					Offset += sizeof(FLOAT) * 3;
+					break;
+				case CT_Float2:
+					glVertexArrayAttribFormat(VAO, Function, 2, GL_FLOAT, GL_FALSE, Offset);
+					Offset += sizeof(FLOAT) * 2;
+					break;
+				case CT_Float1:
+					glVertexArrayAttribFormat(VAO, Function, 1, GL_FLOAT, GL_FALSE, Offset);
+					Offset += sizeof(FLOAT);
+					break;
+				case CT_Color:
+					glVertexArrayAttribFormat(VAO, Function, 4, GL_UNSIGNED_BYTE, GL_TRUE, Offset);
+					Offset += sizeof(FColor);
+					break;
+				default:
+					appErrorf("Unexpected EComponentType (%i)", Type);
+				}
+
+				glEnableVertexArrayAttrib(VAO, Function);
+				glVertexArrayAttribBinding(VAO, Function, StreamIndex);
+			}
+		}
+	}
+
+	return VAO;
+}
+
+FOpenGLIndexBuffer* UOpenGLRenderDevice::GetDynamicIndexBuffer(INT IndexSize){
+	if(IndexSize == sizeof(DWORD)){
+		if(!DynamicIndexBuffer32)
+			DynamicIndexBuffer32 = new FOpenGLIndexBuffer(this, MakeCacheID(CID_RenderIndices), true);
+
+		return DynamicIndexBuffer32;
+	}else{
+		if(!DynamicIndexBuffer16)
+			DynamicIndexBuffer16 = new FOpenGLIndexBuffer(this, MakeCacheID(CID_RenderIndices), true);
+
+		return DynamicIndexBuffer16;
+	}
+}
+
+FOpenGLVertexStream* UOpenGLRenderDevice::GetDynamicVertexStream(){
+	if(!DynamicVertexStream)
+		DynamicVertexStream = new FOpenGLVertexStream(this, MakeCacheID(CID_RenderVertices), true);
+
+	return DynamicVertexStream;
+}
+
 void UOpenGLRenderDevice::Destroy(){
 	Super::Destroy();
 
@@ -340,6 +414,17 @@ void UOpenGLRenderDevice::Flush(UViewport* Viewport){
 	}
 
 	appMemzero(ResourceHash, sizeof(ResourceHash));
+
+	DynamicIndexBuffer32 = NULL;
+	DynamicIndexBuffer16 = NULL;
+	DynamicVertexStream  = NULL;
+
+	for(TMap<DWORD, unsigned int>::TIterator It(VAOsByDeclId); It; ++It){
+		if(It.Value())
+			glDeleteVertexArrays(1, &It.Value());
+	}
+
+	VAOsByDeclId.Empty();
 }
 
 void UOpenGLRenderDevice::FlushResource(QWORD CacheId){

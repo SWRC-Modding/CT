@@ -9,7 +9,8 @@
 IMPLEMENT_CLASS(UOpenGLRenderDevice)
 
 UOpenGLRenderDevice::UOpenGLRenderDevice() : RenderInterface(this),
-                                             ScreenRenderTarget(0, 0, TEXF_RGBA8, false, true){}
+                                             ScreenRenderTarget(0, 0, TEXF_RGBA8, false, true),
+                                             Scratch(1024, true){}
 
 void UOpenGLRenderDevice::StaticConstructor(){
 	new(GetClass(), "UseDesktopResolution", RF_Public) UBoolProperty(CPP_PROPERTY(bUseDesktopResolution), "Options", CPF_Config);

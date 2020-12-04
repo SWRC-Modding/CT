@@ -226,25 +226,23 @@ void FOpenGLIndexBuffer::Cache(FIndexBuffer* IndexBuffer){
 		glCreateBuffers(1, &EBO);
 
 	INT NewBufferSize = IndexBuffer->GetSize();
+	void* Data = RenDev->GetScratchBuffer(NewBufferSize);
 
-	checkSlow(NewBufferSize > 0);
-
-	IndexSize = IndexBuffer->GetIndexSize();
+	IndexBuffer->GetContents(Data);
 
 	if(IsDynamic){
 		if(BufferSize < NewBufferSize){
 			BufferSize = NewBufferSize * 2;
 			glNamedBufferData(EBO, BufferSize, NULL, GL_DYNAMIC_DRAW);
 		}
+
+		glNamedBufferSubData(EBO, 0, NewBufferSize, Data);
 	}else{
 		BufferSize = NewBufferSize;
-		glNamedBufferStorage(EBO, BufferSize, NULL, GL_MAP_WRITE_BIT);
+		glNamedBufferStorage(EBO, NewBufferSize, Data, 0);
 	}
 
-	void* Data = glMapNamedBuffer(EBO, GL_WRITE_ONLY);
-	IndexBuffer->GetContents(Data);
-	glUnmapNamedBuffer(EBO);
-
+	IndexSize = IndexBuffer->GetIndexSize();
 	Revision = IndexBuffer->GetRevision();
 }
 
@@ -282,25 +280,23 @@ void FOpenGLVertexStream::Cache(FVertexStream* VertexStream){
 		glCreateBuffers(1, &VBO);
 
 	INT NewBufferSize = VertexStream->GetSize();
+	void* Data = RenDev->GetScratchBuffer(NewBufferSize);
 
-	checkSlow(NewBufferSize > 0);
-
-	Stride = VertexStream->GetStride();
+	VertexStream->GetStreamData(Data);
 
 	if(IsDynamic){
 		if(BufferSize < NewBufferSize){
 			BufferSize = NewBufferSize * 2;
 			glNamedBufferData(VBO, BufferSize, NULL, GL_DYNAMIC_DRAW);
 		}
+
+		glNamedBufferSubData(VBO, 0, NewBufferSize, Data);
 	}else{
 		BufferSize = NewBufferSize;
-		glNamedBufferStorage(VBO, BufferSize, NULL, GL_MAP_WRITE_BIT);
+		glNamedBufferStorage(VBO, BufferSize, Data, GL_MAP_WRITE_BIT);
 	}
 
-	void* Data = glMapNamedBuffer(VBO, GL_WRITE_ONLY);
-	VertexStream->GetStreamData(Data);
-	glUnmapNamedBuffer(VBO);
-
+	Stride = VertexStream->GetStride();
 	Revision = VertexStream->GetRevision();
 }
 

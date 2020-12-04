@@ -29,28 +29,6 @@ void FOpenGLRenderInterface::FlushResources(){
 	CurrentState->IndexBufferBaseIndex = 0;
 	CurrentState->VAO = GL_NONE;
 	CurrentState->NumVertexStreams = 0;
-
-	if(DynamicIndexBuffer16){
-		delete DynamicIndexBuffer16;
-		DynamicIndexBuffer16 = NULL;
-	}
-
-	if(DynamicIndexBuffer32){
-		delete DynamicIndexBuffer32;
-		DynamicIndexBuffer32 = NULL;
-	}
-
-	if(DynamicVertexStream){
-		delete DynamicVertexStream;
-		DynamicVertexStream = NULL;
-	}
-
-	for(TMap<DWORD, unsigned int>::TIterator It(VAOsByDeclId); It; ++It){
-		if(It.Value())
-			glDeleteVertexArrays(1, &It.Value());
-	}
-
-	VAOsByDeclId.Empty();
 }
 
 void FOpenGLRenderInterface::UpdateShaderUniforms(){
@@ -271,25 +249,17 @@ INT FOpenGLRenderInterface::SetVertexStreams(EVertexShader Shader, FVertexStream
 
 	checkSlow(!IsDynamic || NumStreams == 1);
 
-	INT PrevNumStreams = CurrentState->NumVertexStreams;
-
 	// NOTE: Stream declarations must be completely zeroed to get consistent hash values when looking up the VAO later
 	appMemzero(VertexStreamDeclarations, sizeof(VertexStreamDeclarations));
-
-	CurrentState->NumVertexStreams = NumStreams;
 
 	INT Size = 0;
 
 	for(INT i = 0; i < NumStreams; ++i){
-		QWORD CacheId = Streams[i]->GetCacheId();
-
+		QWORD                CacheId = Streams[i]->GetCacheId();
 		FOpenGLVertexStream* Stream;
 
 		if(IsDynamic){
-			if(!DynamicVertexStream)
-				DynamicVertexStream = new FOpenGLVertexStream(RenDev, MakeCacheID(CID_RenderVertices), true);
-
-			Stream = DynamicVertexStream;
+			Stream = RenDev->GetDynamicVertexStream();
 		}else{
 			Stream = static_cast<FOpenGLVertexStream*>(RenDev->GetCachedResource(CacheId));
 
@@ -306,54 +276,10 @@ INT FOpenGLRenderInterface::SetVertexStreams(EVertexShader Shader, FVertexStream
 		VertexStreamDeclarations[i].Init(Streams[i]);
 	}
 
-	// Check if there is an existing VAO for this format by hashing the shader declarations
-	GLuint& VAO = VAOsByDeclId[appMemCrc(VertexStreamDeclarations, sizeof(VertexStreamDeclarations))];
+	CurrentState->NumVertexStreams = NumStreams;
 
-	// Create and setup VAO if none was found matching the vertex format
-	if(!VAO){
-		glCreateVertexArrays(1, &VAO);
-
-		for(INT StreamIndex = 0; StreamIndex < CurrentState->NumVertexStreams; ++StreamIndex){
-			const FStreamDeclaration& Decl = VertexStreamDeclarations[StreamIndex];
-			GLuint Offset = 0;
-
-			for(INT i = 0; i < Decl.NumComponents; ++i){
-				BYTE Function = Decl.Components[i].Function; // EFixedVertexFunction
-				BYTE Type     = Decl.Components[i].Type;     // EComponentType
-
-				checkSlow(Function < FVF_MAX);
-				checkSlow(Type < CT_MAX);
-
-				switch(Type){
-				case CT_Float4:
-					glVertexArrayAttribFormat(VAO, Function, 4, GL_FLOAT, GL_FALSE, Offset);
-					Offset += sizeof(FLOAT) * 4;
-					break;
-				case CT_Float3:
-					glVertexArrayAttribFormat(VAO, Function, 3, GL_FLOAT, GL_FALSE, Offset);
-					Offset += sizeof(FLOAT) * 3;
-					break;
-				case CT_Float2:
-					glVertexArrayAttribFormat(VAO, Function, 2, GL_FLOAT, GL_FALSE, Offset);
-					Offset += sizeof(FLOAT) * 2;
-					break;
-				case CT_Float1:
-					glVertexArrayAttribFormat(VAO, Function, 1, GL_FLOAT, GL_FALSE, Offset);
-					Offset += sizeof(FLOAT);
-					break;
-				case CT_Color:
-					glVertexArrayAttribFormat(VAO, Function, 4, GL_UNSIGNED_BYTE, GL_TRUE, Offset);
-					Offset += sizeof(FColor);
-					break;
-				default:
-					appErrorf("Unexpected EComponentType (%i)", Type);
-				}
-
-				glEnableVertexArrayAttrib(VAO, Function);
-				glVertexArrayAttribBinding(VAO, Function, StreamIndex);
-			}
-		}
-	}
+	// Look up VAO by format
+	GLuint VAO = RenDev->GetVAO(VertexStreamDeclarations, CurrentState->NumVertexStreams);
 
 	if(VAO != CurrentState->VAO){
 		glBindVertexArray(VAO);
@@ -361,10 +287,6 @@ INT FOpenGLRenderInterface::SetVertexStreams(EVertexShader Shader, FVertexStream
 
 		if(CurrentState->IndexBuffer)
 			CurrentState->IndexBuffer->Bind();
-	}else{
-		// Unbind previous vertex buffers
-		for(INT i = NumStreams; i < PrevNumStreams; ++i)
-			glBindVertexBuffer(i, GL_NONE, 0, 0);
 	}
 
 	for(INT i = 0; i < CurrentState->NumVertexStreams; ++i)
@@ -397,17 +319,7 @@ INT FOpenGLRenderInterface::SetIndexBuffer(FIndexBuffer* IndexBuffer, INT BaseIn
 		checkSlow(IndexSize == sizeof(_WORD) || IndexSize == sizeof(DWORD));
 
 		if(IsDynamic){
-			if(IndexSize == sizeof(DWORD)){
-				if(!DynamicIndexBuffer32)
-					DynamicIndexBuffer32 = new FOpenGLIndexBuffer(RenDev, MakeCacheID(CID_RenderIndices), true);
-
-				Buffer = DynamicIndexBuffer32;
-			}else{
-				if(!DynamicIndexBuffer16)
-					DynamicIndexBuffer16 = new FOpenGLIndexBuffer(RenDev, MakeCacheID(CID_RenderIndices), true);
-
-				Buffer = DynamicIndexBuffer16;
-			}
+			Buffer = RenDev->GetDynamicIndexBuffer(IndexSize);
 		}else{
 			QWORD CacheId = IndexBuffer->GetCacheId();
 

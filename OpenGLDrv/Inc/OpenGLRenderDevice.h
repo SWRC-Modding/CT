@@ -20,7 +20,6 @@ public:
 
 	FOpenGLShaderProgram*  DefaultShader;
 	FOpenGLShaderProgram*  FramebufferShader;
-	FOpenGLResource*       ResourceHash[4096];
 
 	UOpenGLRenderDevice();
 	void StaticConstructor();
@@ -62,15 +61,25 @@ public:
 	virtual UBOOL SupportsTextureFormat(ETextureFormat){ PRINT_FUNC; return 0; }
 
 private:
-	FAuxRenderTarget ScreenRenderTarget;
-	UBOOL            bFirstRun;
-	UBOOL            bIsFullscreen;
-	INT              SavedViewportWidth;
-	INT              SavedViewportHeight;
+	FAuxRenderTarget          ScreenRenderTarget;
+	UBOOL                     bFirstRun;
+	UBOOL                     bIsFullscreen;
+	INT                       SavedViewportWidth;
+	INT                       SavedViewportHeight;
+
+	FOpenGLIndexBuffer*       DynamicIndexBuffer16;
+	FOpenGLIndexBuffer*       DynamicIndexBuffer32;
+	FOpenGLVertexStream*      DynamicVertexStream;
+	TMap<DWORD, unsigned int> VAOsByDeclId;
+	FOpenGLResource*          ResourceHash[4096];
 
 	friend class FOpenGLResource;
 	friend class FOpenGLRenderInterface;
 
 	void AddResource(FOpenGLResource* Resource);
 	void RemoveResource(FOpenGLResource* Resource);
+
+	unsigned int GetVAO(const FStreamDeclaration* Declarations, INT NumStreams);
+	FOpenGLIndexBuffer* GetDynamicIndexBuffer(INT IndexSize);
+	FOpenGLVertexStream* GetDynamicVertexStream();
 };

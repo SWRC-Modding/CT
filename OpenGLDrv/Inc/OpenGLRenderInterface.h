@@ -75,21 +75,16 @@ public:
 		FOpenGLVertexStream*  VertexStreams[MAX_VERTEX_STREAMS];
 	};
 
-	UOpenGLRenderDevice*      RenDev;
+	UOpenGLRenderDevice* RenDev;
 
-	FOpenGLSavedState         SavedStates[MAX_STATESTACKDEPTH];
-	FOpenGLSavedState*        CurrentState;
-	FOpenGLSavedState*        PoppedState;
+	FOpenGLSavedState    SavedStates[MAX_STATESTACKDEPTH];
+	FOpenGLSavedState*   CurrentState;
+	FOpenGLSavedState*   PoppedState;
 
-	UBOOL                     NeedUniformUpdate;
-	unsigned int              GlobalUBO;
+	UBOOL                NeedUniformUpdate;
+	unsigned int         GlobalUBO;
 
-	FOpenGLIndexBuffer*       DynamicIndexBuffer16;
-	FOpenGLIndexBuffer*       DynamicIndexBuffer32;
-
-	FStreamDeclaration        VertexStreamDeclarations[MAX_VERTEX_STREAMS];
-	FOpenGLVertexStream*      DynamicVertexStream;
-	TMap<DWORD, unsigned int> VAOsByDeclId;
+	FStreamDeclaration   VertexStreamDeclarations[MAX_VERTEX_STREAMS];
 
 	FOpenGLRenderInterface(UOpenGLRenderDevice* InRenDev);
 

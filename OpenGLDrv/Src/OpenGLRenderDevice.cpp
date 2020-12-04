@@ -139,7 +139,7 @@ UBOOL UOpenGLRenderDevice::SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL
 
 	if(ColorBytes == 2)
 		Use16bit = 1;
-	else if(ColorBytes == 4)
+	else
 		Use16bit = 0;
 
 	// Create new context if there isn't one already or if the desired color depth has changed.
@@ -159,7 +159,7 @@ UBOOL UOpenGLRenderDevice::SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL
 			1,                             // version
 			PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER | PFD_DEPTH_DONTCARE, // flags
 			PFD_TYPE_RGBA,                 // color type
-			ColorBytes <= 2 ? 16 : 32,     // preferred color depth
+			Use16bit ? 16 : 32,            // preferred color depth
 			0, 0, 0, 0, 0, 0,              // color bits (ignored)
 			0,                             // alpha buffer
 			0,                             // alpha bits (ignored)

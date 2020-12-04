@@ -19,12 +19,16 @@ FOpenGLRenderInterface::FOpenGLRenderInterface(UOpenGLRenderDevice* InRenDev) : 
 void FOpenGLRenderInterface::FlushResources(){
 	check(CurrentState == &SavedStates[0]);
 
+	if(GlobalUBO){
+		glDeleteBuffers(1, &GlobalUBO);
+		GlobalUBO = GL_NONE;
+	}
+
 	CurrentState->RenderTarget = NULL;
 	CurrentState->IndexBuffer = NULL;
 	CurrentState->IndexBufferBaseIndex = 0;
 	CurrentState->VAO = GL_NONE;
 	CurrentState->NumVertexStreams = 0;
-	GlobalUBO = GL_NONE;
 
 	if(DynamicIndexBuffer16){
 		delete DynamicIndexBuffer16;

@@ -2,10 +2,22 @@
 
 #include "OpenGLDrv.h"
 #include "OpenGLRenderInterface.h"
+#include "Shader.h"
 
 class FOpenGLResource;
-class FOpenGLShaderProgram;
+class FOpenGLShader;
 class FOpenGLRenderTarget;
+
+#define DEFAULT_SHADERS \
+	SHADER(Default) \
+	SHADER(Framebuffer)
+
+enum EShader{
+	#define SHADER(x) SHADER_ ## x,
+	DEFAULT_SHADERS
+	#undef SHADER
+	SHADER_MAX
+};
 
 class OPENGLDRV_API UOpenGLRenderDevice : public URenderDevice{
 	DECLARE_CLASS(UOpenGLRenderDevice,URenderDevice,CLASS_Config,OpenGLDrv)
@@ -18,9 +30,6 @@ public:
 	FOpenGLRenderInterface RenderInterface;
 	FRenderCaps            RenderCaps;
 
-	FOpenGLShaderProgram*  DefaultShader;
-	FOpenGLShaderProgram*  FramebufferShader;
-
 	UOpenGLRenderDevice();
 	void StaticConstructor();
 
@@ -31,8 +40,7 @@ public:
 	FOpenGLResource* GetCachedResource(QWORD CacheId);
 
 	// Overrides
-	virtual UBOOL Exec(const TCHAR* Cmd, FOutputDevice& Ar){ return 0; }
-	virtual void Destroy();
+	virtual UBOOL Exec(const TCHAR* Cmd, FOutputDevice& Ar);
 	virtual UBOOL Init(){ return 1; }
 	virtual UBOOL SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL Fullscreen, INT ColorBytes = 0, UBOOL bSaveSize = 1);
 	virtual void Exit(UViewport* Viewport);
@@ -67,6 +75,9 @@ public:
 		return Scratch.GetData();
 	}
 
+	FShaderGLSL* GetShader(EShader Shader){ return &DefaultShaders[Shader]; }
+	void LoadShaders();
+
 private:
 	FAuxRenderTarget          ScreenRenderTarget;
 	UBOOL                     bFirstRun;
@@ -82,6 +93,10 @@ private:
 	TArray<BYTE>              Scratch;
 	FOpenGLResource*          ResourceHash[4096];
 
+	FStringNoInit             ShaderDir;
+
+	FShaderGLSL               DefaultShaders[SHADER_MAX];
+
 	friend class FOpenGLResource;
 	friend class FOpenGLRenderInterface;
 
@@ -91,4 +106,6 @@ private:
 	unsigned int GetVAO(const FStreamDeclaration* Declarations, INT NumStreams);
 	FOpenGLIndexBuffer* GetDynamicIndexBuffer(INT IndexSize);
 	FOpenGLVertexStream* GetDynamicVertexStream();
+
+	void LoadShader(FShaderGLSL* Shader, const TCHAR* Name);
 };

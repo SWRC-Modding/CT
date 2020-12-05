@@ -8,17 +8,44 @@
 
 IMPLEMENT_CLASS(UOpenGLRenderDevice)
 
+static const TCHAR* DefaultVertexShader   = "void main(void){\n"
+                                                "\tgl_Position = Transform * vec4(InPosition, 1.0);\n"
+                                            "}\n";
+static const TCHAR* DefaultFragmentShader = "void main(void){\n"
+                                                "\tFragColor = vec4(1.0, 1.0, 1.0, 1.0);\n"
+                                            "}\n";
+
+static const TCHAR* FramebufferVertexShader   = "void main(void){\n"
+			                                        "\tTexCoord0 = InTexCoord0;\n"
+			                                        "\tgl_Position = vec4(InPosition.xy, 0.5, 1.0);\n"
+			                                    "}\n";
+static const TCHAR* FramebufferFragmentShader = "void main(void){\n"
+			                                        "\tFragColor = texture2D(Texture0, TexCoord0);\n"
+			                                    "}\n";
+
 UOpenGLRenderDevice::UOpenGLRenderDevice() : RenderInterface(this),
                                              ScreenRenderTarget(0, 0, TEXF_RGBA8, false, true),
-                                             Scratch(1024, true){}
+                                             Scratch(1024, true){
+	// Initialize default shaders
+	#define SHADER(x) \
+		DefaultShaders[SHADER_ ## x].SetVertexShaderText(FString(x ## VertexShader, true)); \
+		DefaultShaders[SHADER_ ## x].SetFragmentShaderText(FString(x ## FragmentShader, true));
+	DEFAULT_SHADERS
+	#undef SHADER
+
+	// Load shaders from disk if they exist or save them if not
+	LoadShaders();
+}
 
 void UOpenGLRenderDevice::StaticConstructor(){
+	SupportsZBIAS = 1;
+	bFirstRun = 1;
+	ShaderDir = "../Shaders";
+
 	new(GetClass(), "UseDesktopResolution", RF_Public) UBoolProperty(CPP_PROPERTY(bUseDesktopResolution), "Options", CPF_Config);
 	new(GetClass(), "KeepAspectRatio", RF_Public) UBoolProperty(CPP_PROPERTY(bKeepAspectRatio), "Options", CPF_Config);
 	new(GetClass(), "FirstRun", RF_Public) UBoolProperty(CPP_PROPERTY(bFirstRun), "", CPF_Config);
-
-	SupportsZBIAS = 1;
-	bFirstRun = 1;
+	new(GetClass(), "ShaderDir", RF_Public) UStrProperty(CPP_PROPERTY(ShaderDir), "", CPF_Config);
 }
 
 void UOpenGLRenderDevice::MakeCurrent(){
@@ -186,16 +213,15 @@ FOpenGLVertexStream* UOpenGLRenderDevice::GetDynamicVertexStream(){
 	return DynamicVertexStream;
 }
 
-void UOpenGLRenderDevice::Destroy(){
-	Super::Destroy();
+UBOOL UOpenGLRenderDevice::Exec(const TCHAR* Cmd, FOutputDevice& Ar){
+	if(ParseCommand(&Cmd, "LOADSHADERS")){
+		Ar.Log("Reloading shaders from disk");
+		LoadShaders();
 
-	// The following resources must be manually freed since they are not contained in the resource hash
+		return 1;
+	}
 
-	if(DefaultShader)
-		delete DefaultShader;
-
-	if(FramebufferShader)
-		delete FramebufferShader;
+	return 0;
 }
 
 UBOOL UOpenGLRenderDevice::SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL Fullscreen, INT ColorBytes, UBOOL bSaveSize){
@@ -290,53 +316,10 @@ UBOOL UOpenGLRenderDevice::SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL
 		RequireExt("GL_ARB_texture_compression");
 		RequireExt("GL_EXT_texture_compression_s3tc");
 
-		// Create default shader for drawing everything that doesn't use a custom one
-
-		DefaultShader = new FOpenGLShaderProgram(this, MakeCacheID(CID_RenderShader));
-		DefaultShader->VertexShader = new FOpenGLShader(this, MakeCacheID(CID_RenderShader), OST_Vertex);
-		DefaultShader->FragmentShader = new FOpenGLShader(this, MakeCacheID(CID_RenderShader), OST_Fragment);
-
-		DefaultShader->VertexShader->Cache(
-			"void main(void){\n"
-			"    gl_Position = Transform * vec4(InPosition, 1.0);\n"
-			"}\n"
-		);
-		DefaultShader->FragmentShader->Cache(
-			"void main(void){\n"
-			"    FragColor = vec4(1.0, 1.0, 1.0, 1.0);\n"
-			"}\n"
-		);
-		DefaultShader->Cache(DefaultShader->VertexShader, DefaultShader->FragmentShader);
-		DefaultShader->VertexShader = NULL;
-		DefaultShader->FragmentShader = NULL;
-		RemoveResource(DefaultShader); // HACK: Removing the shader from the hash to prevent it from being destroyed when Flush is called
-
-		// Create shader for displaying an off-screen framebuffer
-
-		FramebufferShader = new FOpenGLShaderProgram(this, MakeCacheID(CID_RenderShader));
-		FramebufferShader->VertexShader = new FOpenGLShader(this, MakeCacheID(CID_RenderShader), OST_Vertex);
-		FramebufferShader->FragmentShader = new FOpenGLShader(this, MakeCacheID(CID_RenderShader), OST_Fragment);
-
-		FramebufferShader->VertexShader->Cache(
-			"void main(void){\n"
-			"    TexCoord0 = InTexCoord0;\n"
-			"    gl_Position = vec4(InPosition.xy, 0.5, 1.0);\n"
-			"}\n"
-		);
-		FramebufferShader->FragmentShader->Cache(
-			"void main(void){\n"
-			"    FragColor = texture2D(Texture0, TexCoord0);\n"
-			"}\n"
-		);
-		FramebufferShader->Cache(FramebufferShader->VertexShader, FramebufferShader->FragmentShader);
-		FramebufferShader->VertexShader = NULL;
-		FramebufferShader->FragmentShader = NULL;
-		RemoveResource(FramebufferShader); // HACK: Removing the shader from the hash to prevent it from being destroyed when Flush is called
-
 		// Setup initial state
 
 		RenderInterface.EnableZTest(1);
-		RenderInterface.SetShader(DefaultShader);
+		RenderInterface.SetShader(GetShader(SHADER_Default));
 		RenderInterface.SetCullMode(CM_CW);
 		RenderInterface.SetFillMode(FM_Wireframe); // TODO: Change to FM_Solid
 	}else{
@@ -447,9 +430,18 @@ FRenderInterface* UOpenGLRenderDevice::Lock(UViewport* Viewport, BYTE* HitData, 
 
 	MakeCurrent();
 
-	// Render target might be deleted when Flush is called so check for that and set it again
+	// Render target and default shader might be deleted when Flush is called so check for that and set them again
+
 	if(!RenderInterface.CurrentState->RenderTarget)
 		RenderInterface.SetRenderTarget(&ScreenRenderTarget, false);
+
+	FShaderGLSL* DefaultShader = GetShader(SHADER_Default);
+	FOpenGLShader* CurrentShader = RenderInterface.CurrentState->Shader;
+
+	checkSlow(CurrentShader->CacheId == DefaultShader->GetCacheId());
+
+	if(!CurrentShader || (CurrentShader->Revision != DefaultShader->GetRevision())) // Update default shader in case it was reloaded
+		RenderInterface.SetShader(DefaultShader);
 
 	RenderInterface.PushState();
 
@@ -558,7 +550,7 @@ void UOpenGLRenderDevice::Present(UViewport* Viewport){
 	RenderInterface.SetFillMode(FM_Solid);
 	RenderInterface.EnableZTest(0);
 	RenderInterface.SetDynamicStream(VS_FixedFunction, &FullscreenQuad);
-	RenderInterface.SetShader(FramebufferShader);
+	RenderInterface.SetShader(GetShader(SHADER_Framebuffer));
 	RenderInterface.DrawPrimitive(PT_TriangleStrip, 0, 2);
 	SwapBuffers(DeviceContext);
 	Framebuffer->Bind();
@@ -573,4 +565,29 @@ FRenderCaps* UOpenGLRenderDevice::GetRenderCaps(){
 	RenderCaps.HardwareTL = 1;
 
 	return &RenderCaps;
+}
+
+void UOpenGLRenderDevice::LoadShaders(){
+	#define SHADER(x) LoadShader(&DefaultShaders[SHADER_ ## x], #x);
+	DEFAULT_SHADERS
+	#undef SHADER
+}
+
+void UOpenGLRenderDevice::LoadShader(FShaderGLSL* Shader, const TCHAR* Name){
+	FStringTemp ShaderText(0);
+	FString Filename = ShaderDir * Name + ".vsh";
+
+	GFileManager->MakeDirectory(*ShaderDir);
+
+	if(appLoadFileToString(ShaderText, *Filename))
+		Shader->SetVertexShaderText(ShaderText);
+	else
+		appSaveStringToFile(Shader->GetVertexShaderText(), *Filename);
+
+	Filename = ShaderDir * Name + ".fsh";
+
+	if(appLoadFileToString(ShaderText, *Filename))
+		Shader->SetFragmentShaderText(ShaderText);
+	else
+		appSaveStringToFile(Shader->GetFragmentShaderText(), *Filename);
 }

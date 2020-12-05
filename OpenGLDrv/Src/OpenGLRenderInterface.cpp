@@ -245,8 +245,6 @@ void FOpenGLRenderInterface::EnableZWrite(UBOOL Enable){
 }
 
 INT FOpenGLRenderInterface::SetVertexStreams(EVertexShader Shader, FVertexStream** Streams, INT NumStreams, bool IsDynamic){
-	PRINT_FUNC;
-
 	checkSlow(!IsDynamic || NumStreams == 1);
 
 	// NOTE: Stream declarations must be completely zeroed to get consistent hash values when looking up the VAO later
@@ -255,7 +253,7 @@ INT FOpenGLRenderInterface::SetVertexStreams(EVertexShader Shader, FVertexStream
 	INT Size = 0;
 
 	for(INT i = 0; i < NumStreams; ++i){
-		QWORD                CacheId = Streams[i]->GetCacheId();
+		QWORD CacheId = Streams[i]->GetCacheId();
 		FOpenGLVertexStream* Stream;
 
 		if(IsDynamic){
@@ -287,23 +285,21 @@ INT FOpenGLRenderInterface::SetVertexStreams(EVertexShader Shader, FVertexStream
 
 		if(CurrentState->IndexBuffer)
 			CurrentState->IndexBuffer->Bind();
+
+		NeedUniformUpdate = 1;
 	}
 
 	for(INT i = 0; i < CurrentState->NumVertexStreams; ++i)
 		CurrentState->VertexStreams[i]->Bind(i);
 
-	NeedUniformUpdate = 1; // Uniform buffer state is also stored in the VAO so we need to update it
-
 	return 0;
 }
 
 INT FOpenGLRenderInterface::SetVertexStreams(EVertexShader Shader, FVertexStream** Streams, INT NumStreams){
-	PRINT_FUNC;
 	return SetVertexStreams(Shader, Streams, NumStreams, false);
 }
 
 INT FOpenGLRenderInterface::SetDynamicStream(EVertexShader Shader, FVertexStream* Stream){
-	PRINT_FUNC;
 	SetVertexStreams(Shader, &Stream, 1, true);
 
 	return 0;
@@ -358,8 +354,6 @@ INT FOpenGLRenderInterface::SetDynamicIndexBuffer(FIndexBuffer* IndexBuffer, INT
 }
 
 void FOpenGLRenderInterface::DrawPrimitive(EPrimitiveType PrimitiveType, INT FirstIndex, INT NumPrimitives, INT MinIndex, INT MaxIndex){
-	PRINT_FUNC;
-
 	if(NeedUniformUpdate)
 		UpdateShaderUniforms();
 

@@ -76,84 +76,85 @@ static const GLchar* FragmentShaderVariables = "in vec3 Position;\n"
                                                "in vec3 Binormal;\n"
                                                "out vec4 FragColor;\n";
 
-FOpenGLShader::FOpenGLShader(UOpenGLRenderDevice* InRenDev, QWORD InCacheId, EOpenGLShaderType InType) : FOpenGLResource(InRenDev, InCacheId),
-                                                                                                         Type(InType),
-                                                                                                         Handle(GL_NONE){}
+FOpenGLShader::FOpenGLShader(UOpenGLRenderDevice* InRenDev, QWORD InCacheId) : FOpenGLResource(InRenDev, InCacheId),
+                                                                                               Program(GL_NONE){}
 
 FOpenGLShader::~FOpenGLShader(){
-	if(Handle)
-		glDeleteShader(Handle);
+	if(Program)
+		glDeleteProgram(Program);
 }
 
-void FOpenGLShader::Cache(const TCHAR* Source){
-	if(!Handle)
-		Handle = glCreateShader(Type == OST_Vertex ? GL_VERTEX_SHADER : GL_FRAGMENT_SHADER);
+void FOpenGLShader::Cache(FShaderGLSL* Shader){
+	if(!Program)
+		Program = glCreateProgram();
 
-	const GLchar* CombinedSource[] = {
-		GLSLVersion,
-		GlobalUniforms,
-		Type == OST_Vertex ? VertexShaderVariables : FragmentShaderVariables,
-		Source
-	};
+	GLuint VertexShader = CompileShader(Shader->GetVertexShaderText(), GL_VERTEX_SHADER);
+	GLuint FragmentShader = CompileShader(Shader->GetFragmentShaderText(), GL_FRAGMENT_SHADER);
 
-	glShaderSource(Handle, ARRAY_COUNT(CombinedSource), CombinedSource, NULL);
-	glCompileShader(Handle);
+	if(!VertexShader || !FragmentShader){
+		if(VertexShader)
+			glDeleteShader(VertexShader);
 
-	GLint Status;
+		if(FragmentShader)
+			glDeleteShader(FragmentShader);
 
-	glGetShaderiv(Handle, GL_COMPILE_STATUS, &Status);
-
-	if(!Status){
-		GLchar Buffer[512];
-
-		glGetShaderInfoLog(Handle, ARRAY_COUNT(Buffer), NULL, Buffer);
-		appErrorf("%s shader compilation failed: %s", Type == OST_Vertex ? "Vertex" : "Fragment", Buffer);
+		return;
 	}
-}
 
-// FOpenGLShaderProgram
-
-FOpenGLShaderProgram::FOpenGLShaderProgram(UOpenGLRenderDevice* InRenDev, QWORD InCacheId) : FOpenGLResource(InRenDev, InCacheId),
-                                                                                             Handle(GL_NONE),
-                                                                                             VertexShader(NULL),
-                                                                                             FragmentShader(NULL){}
-
-FOpenGLShaderProgram::~FOpenGLShaderProgram(){
-	if(Handle)
-		glDeleteProgram(Handle);
-}
-
-void FOpenGLShaderProgram::Cache(FOpenGLShader* NewVertexShader, FOpenGLShader* NewFragmentShader){
-	checkSlow(NewVertexShader->Type == OST_Vertex);
-	checkSlow(NewFragmentShader->Type == OST_Fragment);
-
-	FragmentShader = NewFragmentShader;
-	VertexShader = NewVertexShader;
-
-	if(!Handle)
-		Handle = glCreateProgram();
-
-	glAttachShader(Handle, VertexShader->Handle);
-	glAttachShader(Handle, FragmentShader->Handle);
-	glLinkProgram(Handle);
-	glDetachShader(Handle, VertexShader->Handle);
-	glDetachShader(Handle, FragmentShader->Handle);
+	glAttachShader(Program, VertexShader);
+	glAttachShader(Program, FragmentShader);
+	glLinkProgram(Program);
+	glDetachShader(Program, VertexShader);
+	glDetachShader(Program, FragmentShader);
+	glDeleteShader(VertexShader);
+	glDeleteShader(FragmentShader);
 
 	GLint Status;
 
-	glGetProgramiv(Handle, GL_LINK_STATUS, &Status);
+	glGetProgramiv(Program, GL_LINK_STATUS, &Status);
 
 	if(!Status){
 		GLchar Buffer[512];
 
-		glGetProgramInfoLog(Handle, ARRAY_COUNT(Buffer), NULL, Buffer);
+		glGetProgramInfoLog(Program, ARRAY_COUNT(Buffer), NULL, Buffer);
 		appErrorf("Shader program linking failed: %s", Buffer);
 	}
 }
 
-void FOpenGLShaderProgram::Bind() const{
-	checkSlow(Handle);
-	glUseProgram(Handle);
+void FOpenGLShader::Bind() const{
+	checkSlow(Program);
+	glUseProgram(Program);
+}
+
+GLuint FOpenGLShader::CompileShader(const TCHAR* Text, GLenum Type){
+	GLuint Shader = glCreateShader(Type);
+
+	const GLchar* CombinedSource[] = {
+		GLSLVersion,
+		GlobalUniforms,
+		Type == GL_VERTEX_SHADER ? VertexShaderVariables : FragmentShaderVariables,
+		Text
+	};
+
+	glShaderSource(Shader, ARRAY_COUNT(CombinedSource), CombinedSource, NULL);
+	glCompileShader(Shader);
+
+	GLint Status;
+
+	glGetShaderiv(Shader, GL_COMPILE_STATUS, &Status);
+
+	if(!Status){
+		GLchar Buffer[512];
+
+		// TODO: Add 'dev' mode where a compile error doesn't cause the program to quit
+		glGetShaderInfoLog(Shader, ARRAY_COUNT(Buffer), NULL, Buffer);
+		appErrorf("%s shader compilation failed: %s", Type == GL_VERTEX_SHADER ? "Vertex" : "Fragment", Buffer);
+
+		glDeleteShader(Shader);
+		Shader = GL_NONE;
+	}
+
+	return Shader;
 }
 
 // FOpenGLRenderTarget

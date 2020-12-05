@@ -25,6 +25,7 @@ void FOpenGLRenderInterface::FlushResources(){
 	}
 
 	CurrentState->RenderTarget = NULL;
+	CurrentState->Shader = NULL;
 	CurrentState->IndexBuffer = NULL;
 	CurrentState->IndexBufferBaseIndex = 0;
 	CurrentState->VAO = GL_NONE;
@@ -79,7 +80,7 @@ void FOpenGLRenderInterface::PushState(INT Flags){
 			EnableZTest(CurrentState->bZTest);
 
 		if(CurrentState->Shader != PoppedState->Shader)
-			SetShader(CurrentState->Shader);
+			CurrentState->Shader->Bind();
 
 		if(CurrentState->VAO != PoppedState->VAO)
 			glBindVertexArray(CurrentState->VAO);
@@ -413,8 +414,18 @@ void FOpenGLRenderInterface::EnableZTest(UBOOL Enable){
 		glDisable(GL_DEPTH_TEST);
 }
 
-void FOpenGLRenderInterface::SetShader(FOpenGLShaderProgram* Shader){
-	CurrentState->Shader = Shader;
+void FOpenGLRenderInterface::SetShader(FShaderGLSL* NewShader){
+	QWORD CacheId = NewShader->GetCacheId();
+	FOpenGLShader* Shader = static_cast<FOpenGLShader*>(RenDev->GetCachedResource(CacheId));
 
+	if(!Shader)
+		Shader = new FOpenGLShader(RenDev, CacheId);
+
+	if(Shader->Revision != NewShader->GetRevision()){
+		Shader->Cache(NewShader);
+		Shader->Revision = NewShader->GetRevision();
+	}
+
+	CurrentState->Shader = Shader;
 	Shader->Bind();
 }

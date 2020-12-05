@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../Inc/OpenGLDrv.h"
+#include "../Inc/Shader.h"
 #include "GL/glew.h"
 
 inline INT GetResourceHashIndex(QWORD CacheId){
@@ -23,35 +24,18 @@ public:
 
 // FOpenGLShader
 
-enum EOpenGLShaderType{
-	OST_Vertex,
-	OST_Fragment
-};
-
 class FOpenGLShader : public FOpenGLResource{
 public:
-	FOpenGLShader(UOpenGLRenderDevice* InRenDev, QWORD InCacheId, EOpenGLShaderType InType);
+	FOpenGLShader(UOpenGLRenderDevice* InRenDev, QWORD InCacheId);
 	virtual ~FOpenGLShader();
 
-	void Cache(const TCHAR* Source);
-
-	EOpenGLShaderType Type;
-	GLuint Handle;
-};
-
-// FOpenGLShaderProgram
-
-class FOpenGLShaderProgram : public FOpenGLResource{
-public:
-	FOpenGLShaderProgram(UOpenGLRenderDevice* InRenDev, QWORD InCacheId);
-	virtual ~FOpenGLShaderProgram();
-
-	void Cache(FOpenGLShader* NewVertexShader, FOpenGLShader* NewFragmentShader);
+	void Cache(FShaderGLSL* Shader);
 	void Bind() const;
 
-	GLuint Handle;
-	FOpenGLShader* VertexShader;
-	FOpenGLShader* FragmentShader;
+	GLuint Program;
+
+private:
+	GLuint CompileShader(const TCHAR* Text, GLenum Type);
 };
 
 // FOpenGLRenderTarget

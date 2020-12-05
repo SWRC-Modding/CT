@@ -1,12 +1,13 @@
 #pragma once
 
 #include "OpenGLDrv.h"
+#include "Shader.h"
 
 class UOpenGLRenderDevice;
 class FOpenGLRenderTarget;
 class FOpenGLIndexBuffer;
 class FOpenGLVertexStream;
-class FOpenGLShaderProgram;
+class FOpenGLShader;
 
 // GLSL equivalent types with proper alignment
 
@@ -65,7 +66,7 @@ public:
 		UBOOL                 bZWrite;
 		UBOOL                 bZTest;
 
-		FOpenGLShaderProgram* Shader;
+		FOpenGLShader*        Shader;
 
 		INT                   IndexBufferBaseIndex;
 		FOpenGLIndexBuffer*   IndexBuffer;
@@ -122,7 +123,7 @@ public:
 	virtual void SetFillMode(EFillMode FillMode);
 
 	void EnableZTest(UBOOL Enable);
-	void SetShader(FOpenGLShaderProgram* Shader);
+	void SetShader(FShaderGLSL* NewShader);
 
 private:
 	INT SetIndexBuffer(FIndexBuffer* IndexBuffer, INT BaseIndex, bool IsDynamic);

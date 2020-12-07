@@ -24,8 +24,7 @@ static const TCHAR* FramebufferFragmentShader = "void fs_main(void){\n"
 			                                    "}\n";
 
 UOpenGLRenderDevice::UOpenGLRenderDevice() : RenderInterface(this),
-                                             ScreenRenderTarget(0, 0, TEXF_RGBA8, false, true),
-                                             Scratch(1024, true){
+                                             ScreenRenderTarget(0, 0, TEXF_RGBA8, false, true){
 	LoadShaders();
 }
 
@@ -430,7 +429,7 @@ FRenderInterface* UOpenGLRenderDevice::Lock(UViewport* Viewport, BYTE* HitData, 
 	FShaderGLSL* DefaultShader = GetShader(SHADER_Default);
 	FOpenGLShader* CurrentShader = RenderInterface.CurrentState->Shader;
 
-	checkSlow(CurrentShader->CacheId == DefaultShader->GetCacheId());
+	checkSlow(!CurrentShader || CurrentShader->CacheId == DefaultShader->GetCacheId());
 
 	if(!CurrentShader || (CurrentShader->Revision != DefaultShader->GetRevision())) // Update default shader in case it was reloaded
 		RenderInterface.SetShader(DefaultShader);

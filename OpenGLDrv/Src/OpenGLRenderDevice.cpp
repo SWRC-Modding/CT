@@ -9,10 +9,11 @@
 IMPLEMENT_CLASS(UOpenGLRenderDevice)
 
 static const TCHAR* DefaultVertexShader   = "void vs_main(void){\n"
+                                                "\tDiffuse = InDiffuse;\n"
                                                 "\tgl_Position = Transform * vec4(InPosition, 1.0);\n"
                                             "}\n";
 static const TCHAR* DefaultFragmentShader = "void fs_main(void){\n"
-                                                "\tFragColor = vec4(1.0, 1.0, 1.0, 1.0);\n"
+                                                "\tFragColor = Diffuse;\n"
                                             "}\n";
 
 static const TCHAR* FramebufferVertexShader   = "void vs_main(void){\n"
@@ -167,7 +168,7 @@ unsigned int UOpenGLRenderDevice::GetVAO(const FStreamDeclaration* Declarations,
 					Offset += sizeof(FLOAT);
 					break;
 				case CT_Color:
-					glVertexArrayAttribFormat(VAO, Function, 4, GL_UNSIGNED_BYTE, GL_TRUE, Offset);
+					glVertexArrayAttribFormat(VAO, Function, GL_BGRA, GL_UNSIGNED_BYTE, GL_TRUE, Offset);
 					Offset += sizeof(FColor);
 					break;
 				default:
@@ -295,15 +296,10 @@ UBOOL UOpenGLRenderDevice::SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL
 		if(MajorVersion < MIN_OPENGL_MAJOR_VERSION || (MajorVersion == MIN_OPENGL_MAJOR_VERSION && MinorVersion < MIN_OPENGL_MINOR_VERSION))
 			appErrorf("OpenGL %i.%i is required but got %i.%i", MIN_OPENGL_MAJOR_VERSION, MIN_OPENGL_MINOR_VERSION, MajorVersion, MinorVersion);
 
-		GLint DepthBits;
-		GLint StencilBits;
-
-		glGetIntegerv(GL_DEPTH_BITS, &DepthBits);
-		glGetIntegerv(GL_STENCIL_BITS, &StencilBits);
-
 		debugf(NAME_Init, "%i-bit color buffer", ColorBytes * 8);
 
 		// Check for required extensions
+		RequireExt("GL_ARB_vertex_array_bgra");
 		RequireExt("GL_ARB_texture_compression");
 		RequireExt("GL_EXT_texture_compression_s3tc");
 

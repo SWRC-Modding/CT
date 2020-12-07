@@ -16,7 +16,6 @@ FOpenGLResource::~FOpenGLResource(){
 
 // FOpenGLShader
 
-static const GLchar* GLSLVersion    = "#version 450\n";
 static const GLchar* GlobalUniforms = "layout(std140, binding = 0) uniform Globals{\n"
 #define UNIFORM_BLOCK_MEMBER(type, name)  "\t" #type " " #name ";\n"
                                            UNIFORM_BLOCK_CONTENTS
@@ -87,8 +86,11 @@ FOpenGLShader::~FOpenGLShader(){
 }
 
 void FOpenGLShader::Cache(FShaderGLSL* Shader){
-	GLuint VertexShader = CompileShader(Shader->GetVertexShaderText(), Shader->GetVertexShaderMain(), GL_VERTEX_SHADER);
-	GLuint FragmentShader = CompileShader(Shader->GetFragmentShaderText(), Shader->GetFragmentShaderMain(), GL_FRAGMENT_SHADER);
+	GLuint VertexShader = CompileShader(Shader->GetName(), Shader->GetVertexShaderText(), Shader->GetVertexShaderMain(), GL_VERTEX_SHADER);
+	GLuint FragmentShader = CompileShader(Shader->GetName(), Shader->GetFragmentShaderText(), Shader->GetFragmentShaderMain(), GL_FRAGMENT_SHADER);
+
+	// Set revision even if compilation if unsuccessful to avoid recompiling the invalid shader each time it is set
+	Revision = Shader->GetRevision();
 
 	if(!VertexShader || !FragmentShader){
 		if(VertexShader)
@@ -118,7 +120,7 @@ void FOpenGLShader::Cache(FShaderGLSL* Shader){
 		GLchar Buffer[512];
 
 		glGetProgramInfoLog(NewProgram, ARRAY_COUNT(Buffer), NULL, Buffer);
-		debugf("Shader program linking failed: %s", Buffer);
+		debugf("Shader program linking failed for %s: %s", Shader->GetName(), Buffer);
 		glDeleteProgram(NewProgram);
 	}else{
 		if(Program)
@@ -133,14 +135,15 @@ void FOpenGLShader::Bind() const{
 	glUseProgram(Program);
 }
 
-GLuint FOpenGLShader::CompileShader(const TCHAR* Text, const TCHAR* Main, GLenum Type){
+GLuint FOpenGLShader::CompileShader(const TCHAR* Name, const TCHAR* Text, const TCHAR* Main, GLenum Type){
 	GLuint Shader = glCreateShader(Type);
 
 	const GLchar* CombinedSource[] = {
-		GLSLVersion,
+		"#version 450\n\n",
 		GlobalUniforms,
 		Type == GL_VERTEX_SHADER ? VertexShaderVariables : FragmentShaderVariables,
 		Main,
+		"#line 1\n",
 		Text
 	};
 
@@ -155,7 +158,7 @@ GLuint FOpenGLShader::CompileShader(const TCHAR* Text, const TCHAR* Main, GLenum
 		GLchar Buffer[512];
 
 		glGetShaderInfoLog(Shader, ARRAY_COUNT(Buffer), NULL, Buffer);
-		debugf("%s shader compilation failed: %s", Type == GL_VERTEX_SHADER ? "Vertex" : "Fragment", Buffer);
+		debugf("Shader compilation failed for %s%s: %s", Name, Type == GL_VERTEX_SHADER ? VERTEX_SHADER_EXTENSION : FRAGMENT_SHADER_EXTENSION, Buffer);
 
 		glDeleteShader(Shader);
 		Shader = GL_NONE;

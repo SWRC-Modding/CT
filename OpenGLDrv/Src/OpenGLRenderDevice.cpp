@@ -559,6 +559,7 @@ FRenderCaps* UOpenGLRenderDevice::GetRenderCaps(){
 void UOpenGLRenderDevice::LoadShaders(){
 	// Init default shaders with the default implementation
 	#define SHADER(x) \
+		DefaultShaders[SHADER_ ## x].SetName(FString(#x, true)); \
 		DefaultShaders[SHADER_ ## x].SetVertexShaderText(FString(x ## VertexShader, true)); \
 		DefaultShaders[SHADER_ ## x].SetFragmentShaderText(FString(x ## FragmentShader, true));
 	DEFAULT_SHADERS
@@ -571,7 +572,7 @@ void UOpenGLRenderDevice::LoadShaders(){
 
 void UOpenGLRenderDevice::LoadShader(FShaderGLSL* Shader, const TCHAR* Name){
 	FStringTemp ShaderText(0);
-	FString Filename = ShaderDir * Name + ".vsh";
+	FString Filename = ShaderDir * Name + VERTEX_SHADER_EXTENSION;
 
 	GFileManager->MakeDirectory(*ShaderDir);
 
@@ -580,7 +581,7 @@ void UOpenGLRenderDevice::LoadShader(FShaderGLSL* Shader, const TCHAR* Name){
 	else
 		appSaveStringToFile(Shader->GetVertexShaderText(), *Filename);
 
-	Filename = ShaderDir * Name + ".fsh";
+	Filename = ShaderDir * Name + FRAGMENT_SHADER_EXTENSION;
 
 	if(appLoadFileToString(ShaderText, *Filename))
 		Shader->SetFragmentShaderText(ShaderText);

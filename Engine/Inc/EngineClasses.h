@@ -5590,6 +5590,16 @@ public:
 };
 
 /*
+ * VertexColor
+ */
+
+class ENGINE_API UVertexColor : public URenderedMaterial{
+public:
+	DECLARE_CLASS(UVertexColor,URenderedMaterial,0,Engine)
+	NO_DEFAULT_CONSTRUCTOR(UVertexColor)
+};
+
+/*
  * ConstantMaterial
  */
 

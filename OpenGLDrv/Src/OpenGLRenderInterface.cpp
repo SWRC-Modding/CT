@@ -231,6 +231,10 @@ FMatrix FOpenGLRenderInterface::GetTransform(ETransformType Type) const{
 	return FMatrix::Identity;
 }
 
+void FOpenGLRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorString, UMaterial** ErrorMaterial, INT* NumPasses){
+
+}
+
 void FOpenGLRenderInterface::EnableStencilTest(UBOOL Enable){
 	CurrentState->bStencilTest = Enable;
 

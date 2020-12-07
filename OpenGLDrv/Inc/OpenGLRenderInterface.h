@@ -24,7 +24,11 @@ typedef ALIGN(16) FMatrix GLSL_mat4;
 	UNIFORM_BLOCK_MEMBER(mat4, LocalToWorld) \
 	UNIFORM_BLOCK_MEMBER(mat4, WorldToCamera) \
 	UNIFORM_BLOCK_MEMBER(mat4, CameraToScreen) \
-	UNIFORM_BLOCK_MEMBER(mat4, Transform)
+	UNIFORM_BLOCK_MEMBER(mat4, Transform) \
+	UNIFORM_BLOCK_MEMBER(float, Time) \
+	UNIFORM_BLOCK_MEMBER(float, CosTime) \
+	UNIFORM_BLOCK_MEMBER(float, SinTime) \
+	UNIFORM_BLOCK_MEMBER(float, TanTime)
 
 // Global uniforms available in every shader
 struct FOpenGLGlobalUniforms{
@@ -124,6 +128,8 @@ public:
 
 	void EnableZTest(UBOOL Enable);
 	void SetShader(FShaderGLSL* NewShader);
+
+	void SetupPerFrameShaderConstants();
 
 private:
 	INT SetIndexBuffer(FIndexBuffer* IndexBuffer, INT BaseIndex, bool IsDynamic);

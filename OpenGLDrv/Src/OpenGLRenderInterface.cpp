@@ -427,3 +427,12 @@ void FOpenGLRenderInterface::SetShader(FShaderGLSL* NewShader){
 	CurrentState->Shader = Shader;
 	Shader->Bind();
 }
+
+void FOpenGLRenderInterface::SetupPerFrameShaderConstants(){
+	FLOAT Time = appFmod(static_cast<FLOAT>(appSeconds()), 120.0f);
+
+	CurrentState->Uniforms.Time = Time;
+	CurrentState->Uniforms.SinTime = appSin(Time);
+	CurrentState->Uniforms.CosTime = appCos(Time);
+	CurrentState->Uniforms.TanTime = appTan(Time);
+}

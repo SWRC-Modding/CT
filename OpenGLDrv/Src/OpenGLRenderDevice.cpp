@@ -26,14 +26,6 @@ static const TCHAR* FramebufferFragmentShader = "void fs_main(void){\n"
 UOpenGLRenderDevice::UOpenGLRenderDevice() : RenderInterface(this),
                                              ScreenRenderTarget(0, 0, TEXF_RGBA8, false, true),
                                              Scratch(1024, true){
-	// Initialize default shaders
-	#define SHADER(x) \
-		DefaultShaders[SHADER_ ## x].SetVertexShaderText(FString(x ## VertexShader, true)); \
-		DefaultShaders[SHADER_ ## x].SetFragmentShaderText(FString(x ## FragmentShader, true));
-	DEFAULT_SHADERS
-	#undef SHADER
-
-	// Load shaders from disk if they exist or save them if not
 	LoadShaders();
 }
 
@@ -566,6 +558,13 @@ FRenderCaps* UOpenGLRenderDevice::GetRenderCaps(){
 }
 
 void UOpenGLRenderDevice::LoadShaders(){
+	// Init default shaders with the default implementation
+	#define SHADER(x) \
+		DefaultShaders[SHADER_ ## x].SetVertexShaderText(FString(x ## VertexShader, true)); \
+		DefaultShaders[SHADER_ ## x].SetFragmentShaderText(FString(x ## FragmentShader, true));
+	DEFAULT_SHADERS
+	#undef SHADER
+	// Load shaders from disk or save them if they don't exist
 	#define SHADER(x) LoadShader(&DefaultShaders[SHADER_ ## x], #x);
 	DEFAULT_SHADERS
 	#undef SHADER

@@ -58,7 +58,8 @@ static const GLchar* VertexShaderVariables = "layout(location = 0) in vec3 InPos
                                              "out vec2 TexCoord6;\n"
                                              "out vec2 TexCoord7;\n"
                                              "out vec3 Tangent;\n"
-                                             "out vec3 Binormal;\n";
+                                             "out vec3 Binormal;\n\n"
+                                             "void vs_main(void);\n\n";
 
 static const GLchar* FragmentShaderVariables = "in vec3 Position;\n"
                                                "in vec3 Normal;\n"
@@ -74,7 +75,8 @@ static const GLchar* FragmentShaderVariables = "in vec3 Position;\n"
                                                "in vec2 TexCoord7;\n"
                                                "in vec3 Tangent;\n"
                                                "in vec3 Binormal;\n"
-                                               "out vec4 FragColor;\n";
+                                               "out vec4 FragColor;\n\n"
+                                               "void fs_main(void);\n\n";
 
 FOpenGLShader::FOpenGLShader(UOpenGLRenderDevice* InRenDev, QWORD InCacheId) : FOpenGLResource(InRenDev, InCacheId),
                                                                                                Program(GL_NONE){}
@@ -88,8 +90,8 @@ void FOpenGLShader::Cache(FShaderGLSL* Shader){
 	if(!Program)
 		Program = glCreateProgram();
 
-	GLuint VertexShader = CompileShader(Shader->GetVertexShaderText(), GL_VERTEX_SHADER);
-	GLuint FragmentShader = CompileShader(Shader->GetFragmentShaderText(), GL_FRAGMENT_SHADER);
+	GLuint VertexShader = CompileShader(Shader->GetVertexShaderText(), Shader->GetVertexShaderMain(), GL_VERTEX_SHADER);
+	GLuint FragmentShader = CompileShader(Shader->GetFragmentShaderText(), Shader->GetFragmentShaderMain(), GL_FRAGMENT_SHADER);
 
 	if(!VertexShader || !FragmentShader){
 		if(VertexShader)
@@ -126,13 +128,14 @@ void FOpenGLShader::Bind() const{
 	glUseProgram(Program);
 }
 
-GLuint FOpenGLShader::CompileShader(const TCHAR* Text, GLenum Type){
+GLuint FOpenGLShader::CompileShader(const TCHAR* Text, const TCHAR* Main, GLenum Type){
 	GLuint Shader = glCreateShader(Type);
 
 	const GLchar* CombinedSource[] = {
 		GLSLVersion,
 		GlobalUniforms,
 		Type == GL_VERTEX_SHADER ? VertexShaderVariables : FragmentShaderVariables,
+		Main,
 		Text
 	};
 

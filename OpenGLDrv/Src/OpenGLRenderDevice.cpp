@@ -8,18 +8,18 @@
 
 IMPLEMENT_CLASS(UOpenGLRenderDevice)
 
-static const TCHAR* DefaultVertexShader   = "void main(void){\n"
+static const TCHAR* DefaultVertexShader   = "void vs_main(void){\n"
                                                 "\tgl_Position = Transform * vec4(InPosition, 1.0);\n"
                                             "}\n";
-static const TCHAR* DefaultFragmentShader = "void main(void){\n"
+static const TCHAR* DefaultFragmentShader = "void fs_main(void){\n"
                                                 "\tFragColor = vec4(1.0, 1.0, 1.0, 1.0);\n"
                                             "}\n";
 
-static const TCHAR* FramebufferVertexShader   = "void main(void){\n"
+static const TCHAR* FramebufferVertexShader   = "void vs_main(void){\n"
 			                                        "\tTexCoord0 = InTexCoord0;\n"
 			                                        "\tgl_Position = vec4(InPosition.xy, 0.5, 1.0);\n"
 			                                    "}\n";
-static const TCHAR* FramebufferFragmentShader = "void main(void){\n"
+static const TCHAR* FramebufferFragmentShader = "void fs_main(void){\n"
 			                                        "\tFragColor = texture2D(Texture0, TexCoord0);\n"
 			                                    "}\n";
 
@@ -478,8 +478,6 @@ public:
 		Vertices[3].Y = -1.0f * YScale;
 		Vertices[3].U = 0.0f;
 		Vertices[3].V = 0.0f;
-
-		CacheId = MakeCacheID(CID_RenderVertices);
 	}
 
 	virtual INT GetStride(){ return sizeof(Vertex); }

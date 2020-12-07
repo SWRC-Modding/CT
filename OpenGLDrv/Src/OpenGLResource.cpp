@@ -87,9 +87,6 @@ FOpenGLShader::~FOpenGLShader(){
 }
 
 void FOpenGLShader::Cache(FShaderGLSL* Shader){
-	if(!Program)
-		Program = glCreateProgram();
-
 	GLuint VertexShader = CompileShader(Shader->GetVertexShaderText(), Shader->GetVertexShaderMain(), GL_VERTEX_SHADER);
 	GLuint FragmentShader = CompileShader(Shader->GetFragmentShaderText(), Shader->GetFragmentShaderMain(), GL_FRAGMENT_SHADER);
 
@@ -103,23 +100,31 @@ void FOpenGLShader::Cache(FShaderGLSL* Shader){
 		return;
 	}
 
-	glAttachShader(Program, VertexShader);
-	glAttachShader(Program, FragmentShader);
-	glLinkProgram(Program);
-	glDetachShader(Program, VertexShader);
-	glDetachShader(Program, FragmentShader);
+	GLuint NewProgram = glCreateProgram();
+
+	glAttachShader(NewProgram, VertexShader);
+	glAttachShader(NewProgram, FragmentShader);
+	glLinkProgram(NewProgram);
+	glDetachShader(NewProgram, VertexShader);
+	glDetachShader(NewProgram, FragmentShader);
 	glDeleteShader(VertexShader);
 	glDeleteShader(FragmentShader);
 
 	GLint Status;
 
-	glGetProgramiv(Program, GL_LINK_STATUS, &Status);
+	glGetProgramiv(NewProgram, GL_LINK_STATUS, &Status);
 
 	if(!Status){
 		GLchar Buffer[512];
 
-		glGetProgramInfoLog(Program, ARRAY_COUNT(Buffer), NULL, Buffer);
-		appErrorf("Shader program linking failed: %s", Buffer);
+		glGetProgramInfoLog(NewProgram, ARRAY_COUNT(Buffer), NULL, Buffer);
+		debugf("Shader program linking failed: %s", Buffer);
+		glDeleteProgram(NewProgram);
+	}else{
+		if(Program)
+			glDeleteProgram(Program);
+
+		Program = NewProgram;
 	}
 }
 
@@ -149,9 +154,8 @@ GLuint FOpenGLShader::CompileShader(const TCHAR* Text, const TCHAR* Main, GLenum
 	if(!Status){
 		GLchar Buffer[512];
 
-		// TODO: Add 'dev' mode where a compile error doesn't cause the program to quit
 		glGetShaderInfoLog(Shader, ARRAY_COUNT(Buffer), NULL, Buffer);
-		appErrorf("%s shader compilation failed: %s", Type == GL_VERTEX_SHADER ? "Vertex" : "Fragment", Buffer);
+		debugf("%s shader compilation failed: %s", Type == GL_VERTEX_SHADER ? "Vertex" : "Fragment", Buffer);
 
 		glDeleteShader(Shader);
 		Shader = GL_NONE;

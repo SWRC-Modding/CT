@@ -421,10 +421,8 @@ void FOpenGLRenderInterface::SetShader(FShaderGLSL* NewShader){
 	if(!Shader)
 		Shader = new FOpenGLShader(RenDev, CacheId);
 
-	if(Shader->Revision != NewShader->GetRevision()){
+	if(Shader->Revision != NewShader->GetRevision())
 		Shader->Cache(NewShader);
-		Shader->Revision = NewShader->GetRevision();
-	}
 
 	CurrentState->Shader = Shader;
 	Shader->Bind();

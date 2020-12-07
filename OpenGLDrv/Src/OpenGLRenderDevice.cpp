@@ -434,6 +434,7 @@ FRenderInterface* UOpenGLRenderDevice::Lock(UViewport* Viewport, BYTE* HitData, 
 	if(!CurrentShader || (CurrentShader->Revision != DefaultShader->GetRevision())) // Update default shader in case it was reloaded
 		RenderInterface.SetShader(DefaultShader);
 
+	RenderInterface.SetupPerFrameShaderConstants();
 	RenderInterface.PushState();
 
 	return &RenderInterface;

@@ -36,7 +36,6 @@ public:
 	void MakeCurrent();
 	bool IsCurrent();
 	void UnSetRes();
-	void RequireExt(const TCHAR* Name);
 	FOpenGLResource* GetCachedResource(QWORD CacheId);
 
 	// Overrides

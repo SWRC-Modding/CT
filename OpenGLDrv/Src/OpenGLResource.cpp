@@ -304,7 +304,7 @@ void FOpenGLVertexStream::Cache(FVertexStream* VertexStream){
 		glNamedBufferSubData(VBO, 0, NewBufferSize, Data);
 	}else{
 		BufferSize = NewBufferSize;
-		glNamedBufferStorage(VBO, BufferSize, Data, GL_MAP_WRITE_BIT);
+		glNamedBufferStorage(VBO, BufferSize, Data, 0);
 	}
 
 	Stride = VertexStream->GetStride();

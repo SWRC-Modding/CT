@@ -35,7 +35,7 @@ public:
 	GLuint Program;
 
 private:
-	GLuint CompileShader(const TCHAR* Name, const TCHAR* Text, const TCHAR* Main, GLenum Type);
+	GLuint CompileShader(FShaderGLSL* Shader, GLenum Type);
 };
 
 // FOpenGLRenderTarget

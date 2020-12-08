@@ -8,22 +8,6 @@
 
 IMPLEMENT_CLASS(UOpenGLRenderDevice)
 
-static const TCHAR* DefaultVertexShader   = "void vs_main(void){\n"
-                                                "\tDiffuse = InDiffuse;\n"
-                                                "\tgl_Position = Transform * vec4(InPosition, 1.0);\n"
-                                            "}\n";
-static const TCHAR* DefaultFragmentShader = "void fs_main(void){\n"
-                                                "\tFragColor = Diffuse;\n"
-                                            "}\n";
-
-static const TCHAR* FramebufferVertexShader   = "void vs_main(void){\n"
-			                                        "\tTexCoord0 = InTexCoord0;\n"
-			                                        "\tgl_Position = vec4(InPosition.xy, 0.5, 1.0);\n"
-			                                    "}\n";
-static const TCHAR* FramebufferFragmentShader = "void fs_main(void){\n"
-			                                        "\tFragColor = texture2D(Texture0, TexCoord0);\n"
-			                                    "}\n";
-
 UOpenGLRenderDevice::UOpenGLRenderDevice() : RenderInterface(this),
                                              ScreenRenderTarget(0, 0, TEXF_RGBA8, false, true){
 	LoadShaders();
@@ -542,6 +526,24 @@ FRenderCaps* UOpenGLRenderDevice::GetRenderCaps(){
 }
 
 void UOpenGLRenderDevice::LoadShaders(){
+	// Default shader implementations
+
+	static const TCHAR* DefaultVertexShader   = "vec4 default_vs_main(void){\n"
+	                                                "\tDiffuse = InDiffuse;\n"
+	                                                "\treturn Transform * vec4(InPosition, 1.0);\n"
+	                                            "}\n";
+	static const TCHAR* DefaultFragmentShader = "vec4 default_fs_main(void){\n"
+	                                                "\treturn Diffuse;\n"
+	                                            "}\n";
+
+	static const TCHAR* FramebufferVertexShader   = "vec4 framebuffer_vs_main(void){\n"
+	                                                    "\tTexCoord0 = InTexCoord0;\n"
+	                                                    "\treturn vec4(InPosition.xy, 0.5, 1.0);\n"
+	                                                "}\n";
+	static const TCHAR* FramebufferFragmentShader = "vec4 framebuffer_fs_main(void){\n"
+	                                                    "\treturn texture2D(Texture0, TexCoord0);\n"
+	                                                "}\n";
+
 	// Init default shaders with the default implementation
 	#define SHADER(x) \
 		DefaultShaders[SHADER_ ## x].SetName(FString(#x, true)); \

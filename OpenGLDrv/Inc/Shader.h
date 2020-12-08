@@ -7,9 +7,7 @@
 
 class FShaderGLSL : public FRenderResource{
 public:
-	FShaderGLSL() : Name("__unnamed_internal__", true),
-	                VertexShaderMain("void main(void){ vs_main(); }\n\n", true),
-	                FragmentShaderMain("void main(void){ fs_main(); }\n\n", true){
+	FShaderGLSL() : Name("__unnamed_internal__", true){
 		CacheId = MakeCacheID(CID_RenderShader);
 	}
 
@@ -40,11 +38,26 @@ public:
 	const TCHAR* GetName() const{ return *Name; }
 	const TCHAR* GetVertexShaderText() const{ return *VertexShaderText; }
 	const TCHAR* GetFragmentShaderText() const{ return *FragmentShaderText; }
-	const TCHAR* GetVertexShaderMain() const{ return *VertexShaderMain; }
-	const TCHAR* GetFragmentShaderMain() const{ return *FragmentShaderMain; }
+
+	FStringTemp GetVertexShaderMain() const{
+		if(VertexShaderMain.Len() > 0)
+			return VertexShaderMain;
+
+		return FStringTemp("void main(void){\n", true) + "\tgl_Position = " + GetVertexShaderEntryPointName() + "();\n}\n";
+	}
+
+	FStringTemp GetFragmentShaderMain() const{
+		if(FragmentShaderMain.Len() > 0)
+			return FragmentShaderMain;
+
+		return FStringTemp("void main(void){\n", true) + "\tFragColor = " + GetFragmentShaderEntryPointName() + "();\n}\n";
+	}
+
+	FStringTemp GetVertexShaderEntryPointName() const{ return Name.Locs() + "_vs_main"; }
+	FStringTemp GetFragmentShaderEntryPointName() const{ return Name.Locs() + "_fs_main"; }
 
 private:
-	FString Name; // For error reporting
+	FString Name;
 	FString VertexShaderText;
 	FString FragmentShaderText;
 	FString VertexShaderMain;

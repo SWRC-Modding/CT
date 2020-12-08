@@ -71,26 +71,6 @@ void UOpenGLRenderDevice::UnSetRes(){
 	unguard;
 }
 
-void UOpenGLRenderDevice::RequireExt(const TCHAR* Name){
-	guardFunc;
-
-	GLint numExtensions = 0;
-
-	glGetIntegerv(GL_NUM_EXTENSIONS, &numExtensions);
-
-	for(GLint i = 0; i < numExtensions; ++i){
-		if(appStrcmp(Name, (const char*)glGetStringi(GL_EXTENSIONS, i)) == 0){
-			debugf(NAME_Init, "Device supports: %s", Name);
-
-			return;
-		}
-	}
-
-	appErrorf("Required OpenGL extension '%s' is not supported", Name);
-
-	unguard;
-}
-
 void UOpenGLRenderDevice::AddResource(FOpenGLResource* Resource){
 	checkSlow(Resource->HashIndex == INDEX_NONE);
 	checkSlow(Resource->HashNext == NULL);
@@ -299,9 +279,17 @@ UBOOL UOpenGLRenderDevice::SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL
 		debugf(NAME_Init, "%i-bit color buffer", ColorBytes * 8);
 
 		// Check for required extensions
-		RequireExt("GL_ARB_vertex_array_bgra");
-		RequireExt("GL_ARB_texture_compression");
-		RequireExt("GL_EXT_texture_compression_s3tc");
+
+		#define CHECK_EXT(ext) \
+			if(!GLEW_ ## ext) \
+				appErrorf("Required OpenGL extension '%s' is not supported", #ext);
+
+		CHECK_EXT(ARB_direct_state_access);
+		CHECK_EXT(ARB_vertex_array_bgra);
+		CHECK_EXT(ARB_texture_compression);
+		CHECK_EXT(EXT_texture_compression_s3tc);
+
+		#undef CHECK_EXT
 
 		// Setup initial state
 

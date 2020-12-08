@@ -57,8 +57,7 @@ static const GLchar* VertexShaderVariables = "layout(location = 0) in vec3 InPos
                                              "out vec2 TexCoord6;\n"
                                              "out vec2 TexCoord7;\n"
                                              "out vec3 Tangent;\n"
-                                             "out vec3 Binormal;\n\n"
-                                             "void vs_main(void);\n\n";
+                                             "out vec3 Binormal;\n\n";
 
 static const GLchar* FragmentShaderVariables = "in vec3 Position;\n"
                                                "in vec3 Normal;\n"
@@ -74,8 +73,7 @@ static const GLchar* FragmentShaderVariables = "in vec3 Position;\n"
                                                "in vec2 TexCoord7;\n"
                                                "in vec3 Tangent;\n"
                                                "in vec3 Binormal;\n"
-                                               "out vec4 FragColor;\n\n"
-                                               "void fs_main(void);\n\n";
+                                               "out vec4 FragColor;\n\n";
 
 FOpenGLShader::FOpenGLShader(UOpenGLRenderDevice* InRenDev, QWORD InCacheId) : FOpenGLResource(InRenDev, InCacheId),
                                                                                                Program(GL_NONE){}
@@ -86,8 +84,8 @@ FOpenGLShader::~FOpenGLShader(){
 }
 
 void FOpenGLShader::Cache(FShaderGLSL* Shader){
-	GLuint VertexShader = CompileShader(Shader->GetName(), Shader->GetVertexShaderText(), Shader->GetVertexShaderMain(), GL_VERTEX_SHADER);
-	GLuint FragmentShader = CompileShader(Shader->GetName(), Shader->GetFragmentShaderText(), Shader->GetFragmentShaderMain(), GL_FRAGMENT_SHADER);
+	GLuint VertexShader = CompileShader(Shader, GL_VERTEX_SHADER);
+	GLuint FragmentShader = CompileShader(Shader, GL_FRAGMENT_SHADER);
 
 	// Set revision even if compilation if unsuccessful to avoid recompiling the invalid shader each time it is set
 	Revision = Shader->GetRevision();
@@ -135,36 +133,57 @@ void FOpenGLShader::Bind() const{
 	glUseProgram(Program);
 }
 
-GLuint FOpenGLShader::CompileShader(const TCHAR* Name, const TCHAR* Text, const TCHAR* Main, GLenum Type){
-	GLuint Shader = glCreateShader(Type);
+GLuint FOpenGLShader::CompileShader(FShaderGLSL* Shader, GLenum Type){
+	GLuint Handle = glCreateShader(Type);
+	const TCHAR* Variables = NULL;
+	FString EntryPoint;
+	FString Main;
+	const TCHAR* Text = NULL;
+	const TCHAR* Ext = NULL;
+
+	if(Type == GL_VERTEX_SHADER){
+		Variables = VertexShaderVariables;
+		EntryPoint = Shader->GetVertexShaderEntryPointName();
+		Main = Shader->GetVertexShaderMain();
+		Text = Shader->GetVertexShaderText();
+		Ext = VERTEX_SHADER_EXTENSION;
+	}else if(Type == GL_FRAGMENT_SHADER){
+		Variables = FragmentShaderVariables;
+		EntryPoint = Shader->GetFragmentShaderEntryPointName();
+		Main = Shader->GetFragmentShaderMain();
+		Text = Shader->GetFragmentShaderText();
+		Ext = FRAGMENT_SHADER_EXTENSION;
+	}else{
+		appErrorf("Unsupported shader type (%i)", Type);
+	}
 
 	const GLchar* CombinedSource[] = {
 		"#version 450\n\n",
 		GlobalUniforms,
-		Type == GL_VERTEX_SHADER ? VertexShaderVariables : FragmentShaderVariables,
-		Main,
+		Variables,
+		*(FStringTemp("vec4 ", true) + EntryPoint + "();\n\n"), // Forward declaration so that default main can call the shader specific main
+		*Main,
 		"#line 1\n",
 		Text
 	};
 
-	glShaderSource(Shader, ARRAY_COUNT(CombinedSource), CombinedSource, NULL);
-	glCompileShader(Shader);
+	glShaderSource(Handle, ARRAY_COUNT(CombinedSource), CombinedSource, NULL);
+	glCompileShader(Handle);
 
 	GLint Status;
 
-	glGetShaderiv(Shader, GL_COMPILE_STATUS, &Status);
+	glGetShaderiv(Handle, GL_COMPILE_STATUS, &Status);
 
 	if(!Status){
 		GLchar Buffer[512];
 
-		glGetShaderInfoLog(Shader, ARRAY_COUNT(Buffer), NULL, Buffer);
-		debugf("Shader compilation failed for %s%s: %s", Name, Type == GL_VERTEX_SHADER ? VERTEX_SHADER_EXTENSION : FRAGMENT_SHADER_EXTENSION, Buffer);
-
-		glDeleteShader(Shader);
-		Shader = GL_NONE;
+		glGetShaderInfoLog(Handle, ARRAY_COUNT(Buffer), NULL, Buffer);
+		debugf("Shader compilation failed for %s%s: %s", Shader->GetName(), Ext, Buffer);
+		glDeleteShader(Handle);
+		Handle = GL_NONE;
 	}
 
-	return Shader;
+	return Handle;
 }
 
 // FOpenGLRenderTarget

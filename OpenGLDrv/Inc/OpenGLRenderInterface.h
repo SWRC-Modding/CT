@@ -70,6 +70,8 @@ public:
 		UBOOL                 bZWrite;
 		UBOOL                 bZTest;
 
+		INT                   ZBias;
+
 		FOpenGLShader*        Shader;
 
 		INT                   IndexBufferBaseIndex;
@@ -118,7 +120,7 @@ public:
 	virtual void EnableStencilTest(UBOOL Enable);
 	virtual void EnableZWrite(UBOOL Enable);
 	virtual void SetPrecacheMode(EPrecacheMode PrecacheMode){}
-	virtual void SetZBias(INT ZBias){}
+	virtual void SetZBias(INT ZBias);
 	virtual INT SetVertexStreams(EVertexShader Shader, FVertexStream** Streams, INT NumStreams);
 	virtual INT SetDynamicStream(EVertexShader Shader, FVertexStream* Stream);
 	virtual INT SetIndexBuffer(FIndexBuffer* IndexBuffer, INT BaseIndex);

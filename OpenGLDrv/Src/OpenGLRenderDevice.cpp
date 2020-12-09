@@ -277,6 +277,9 @@ UBOOL UOpenGLRenderDevice::SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL
 
 		// Setup initial state
 
+		glEnable(GL_POLYGON_OFFSET_FILL);
+		glEnable(GL_POLYGON_OFFSET_LINE); // TODO: Remove once we don't render as wireframe
+
 		RenderInterface.EnableZTest(1);
 		RenderInterface.SetShader(GetShader(SHADER_Default));
 		RenderInterface.SetCullMode(CM_CW);

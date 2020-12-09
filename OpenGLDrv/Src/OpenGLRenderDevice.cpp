@@ -541,7 +541,7 @@ void UOpenGLRenderDevice::LoadShaders(){
 	                                                    "\treturn vec4(InPosition.xy, 0.5, 1.0);\n"
 	                                                "}\n";
 	static const TCHAR* FramebufferFragmentShader = "vec4 framebuffer_fs_main(void){\n"
-	                                                    "\treturn texture2D(Texture0, TexCoord0);\n"
+	                                                    "\treturn texture2D(Texture0, TexCoord0.xy);\n"
 	                                                "}\n";
 
 	// Init default shaders with the default implementation

@@ -76,6 +76,9 @@ void FOpenGLRenderInterface::PushState(INT Flags){
 		if(CurrentState->bZWrite != PoppedState->bZWrite)
 			EnableZWrite(CurrentState->bZWrite);
 
+		if(CurrentState->ZBias != PoppedState->ZBias)
+			SetZBias(CurrentState->ZBias);
+
 		if(CurrentState->bZTest != PoppedState->bZTest)
 			EnableZTest(CurrentState->bZTest);
 
@@ -247,6 +250,11 @@ void FOpenGLRenderInterface::EnableStencilTest(UBOOL Enable){
 void FOpenGLRenderInterface::EnableZWrite(UBOOL Enable){
 	CurrentState->bZWrite = Enable;
 	glDepthMask(Enable ? GL_TRUE : GL_FALSE);
+}
+
+void FOpenGLRenderInterface::SetZBias(INT ZBias){
+	glPolygonOffset(-ZBias, -ZBias);
+	CurrentState->ZBias = ZBias;
 }
 
 INT FOpenGLRenderInterface::SetVertexStreams(EVertexShader Shader, FVertexStream** Streams, INT NumStreams, bool IsDynamic){

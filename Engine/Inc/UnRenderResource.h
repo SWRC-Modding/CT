@@ -296,7 +296,7 @@ enum ETexClampMode{
 //  IsDXTC
 //
 inline UBOOL IsDXTC( ETextureFormat Format ){
-	return ( (Format == TEXF_DXT1) || (Format == TEXF_DXT3) || (Format == TEXF_DXT5) );
+	return Format == TEXF_DXT1 || Format == TEXF_DXT3 || Format == TEXF_DXT5;
 }
 
 
@@ -389,7 +389,7 @@ class FTexture : public FBaseTexture{
 public:
 	virtual FTexture* GetTextureInterface(){ return this; }
 	virtual void* GetRawTextureData(INT MipIndex) = 0;
-	virtual void GetTextureData(INT MipIndex,void* Dest,INT DestStride,ETextureFormat DestFormat,UBOOL ColoredMips=0) = 0;
+	virtual void GetTextureData(INT MipIndex,void* Dest, INT DestStride, ETextureFormat DestFormat, UBOOL ColoredMips=0, int = 1) = 0;
 	virtual void UnloadRawTextureData( INT MipIndex ) = 0;
 	virtual UTexture* GetUTexture() = 0;
 };

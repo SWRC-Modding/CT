@@ -15,6 +15,7 @@ UOpenGLRenderDevice::UOpenGLRenderDevice() : RenderInterface(this),
 
 void UOpenGLRenderDevice::StaticConstructor(){
 	SupportsZBIAS = 1;
+	UseStencil = 1;
 	bFirstRun = 1;
 	ShaderDir = "../Shaders";
 
@@ -29,7 +30,8 @@ void UOpenGLRenderDevice::MakeCurrent(){
 
 	if(!IsCurrent()){
 		wglMakeCurrent(DeviceContext, OpenGLContext);
-		GIsOpenGL = 1;
+		// NOTE: This must be set to 0 in order to avoid inconsistencies with RGBA and BGRA colors.
+		GIsOpenGL = 0;
 	}
 
 	unguard;
@@ -180,6 +182,23 @@ UBOOL UOpenGLRenderDevice::Exec(const TCHAR* Cmd, FOutputDevice& Ar){
 	return 0;
 }
 
+void GLAPIENTRY MessageCallback(GLenum source,
+                                GLenum type,
+                                GLuint id,
+                                GLenum severity,
+                                GLsizei length,
+                                const GLchar* message,
+                                const void* userParam){
+	if(type == GL_DEBUG_TYPE_ERROR)
+		appMsgf(3, "GL CALLBACK: %s type = 0x%x, severity = 0x%x, message = %s", "** GL ERROR **", type, severity, message);
+	// else if(type == GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR)
+	// 	debugf("GL CALLBACK: %s type = 0x%x, severity = 0x%x, message = %s", "** GL DEPRECATED ERROR **", type, severity, message);
+	// else if(type == GL_DEBUG_TYPE_PERFORMANCE)
+	// 	debugf("GL CALLBACK: %s type = 0x%x, severity = 0x%x, message = %s", "** GL PERFORMANCE ERROR **", type, severity, message);
+	// else
+	// 	debugf("GL CALLBACK: %s type = 0x%x, severity = 0x%x, message = %s", "** GL PERFORMANCE ERROR **", type, severity, message);
+}
+
 UBOOL UOpenGLRenderDevice::SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL Fullscreen, INT ColorBytes, UBOOL bSaveSize){
 	guardFunc;
 
@@ -247,6 +266,9 @@ UBOOL UOpenGLRenderDevice::SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL
 		if(GlewStatus != GLEW_OK)
 			appErrorf("GLEW failed to initialize: %s", glewGetErrorString(GlewStatus));
 
+		glEnable(GL_DEBUG_OUTPUT);
+		glDebugMessageCallback(MessageCallback, NULL);
+
 		debugf(NAME_Init, "GL_VENDOR      : %s", glGetString(GL_VENDOR));
 		debugf(NAME_Init, "GL_RENDERER    : %s", glGetString(GL_RENDERER));
 		debugf(NAME_Init, "GL_VERSION     : %s", glGetString(GL_VERSION));
@@ -277,13 +299,16 @@ UBOOL UOpenGLRenderDevice::SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL
 
 		// Setup initial state
 
+		glEnable(GL_BLEND);
+		glEnable(GL_DEPTH_TEST);
+		glEnable(GL_STENCIL_TEST);
 		glEnable(GL_POLYGON_OFFSET_FILL);
 		glEnable(GL_POLYGON_OFFSET_LINE); // TODO: Remove once we don't render as wireframe
 
 		RenderInterface.EnableZTest(1);
 		RenderInterface.SetShader(GetShader(SHADER_Default));
 		RenderInterface.SetCullMode(CM_CW);
-		RenderInterface.SetFillMode(FM_Wireframe); // TODO: Change to FM_Solid
+		RenderInterface.SetFillMode(FM_Solid);
 	}else{
 		MakeCurrent();
 	}
@@ -384,11 +409,6 @@ UBOOL UOpenGLRenderDevice::ResourceCached(QWORD CacheId){
 
 FRenderInterface* UOpenGLRenderDevice::Lock(UViewport* Viewport, BYTE* HitData, INT* HitSize){
 	check(RenderInterface.CurrentState == &RenderInterface.SavedStates[0]);
-
-	// Makes stuff easier to see when rendering as wireframe
-	// TODO: REMOVE!!!
-	for(TObjectIterator<APlayerController> It; It; ++It)
-		It->ShowFlags &= ~SHOW_Backdrop;
 
 	MakeCurrent();
 

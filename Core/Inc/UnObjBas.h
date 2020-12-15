@@ -691,7 +691,7 @@ UClass* LoadClass(UObject* Outer, const TCHAR* Name, const TCHAR* Filename, DWOR
 // Get default object of a class.
 template<typename T>
 T* GetDefault(){
-	return static_cast<T*>(&T::StaticClass()->Defaults[0]);
+	return static_cast<T*>(T::StaticClass()->GetDefaultObject());
 }
 
 /*----------------------------------------------------------------------------

@@ -337,7 +337,78 @@ void FOpenGLVertexStream::Free(){
 	}
 }
 
-void FOpenGLVertexStream::Bind(unsigned int Index) const{
+void FOpenGLVertexStream::Bind(GLuint BindingIndex) const{
 	checkSlow(VBO);
-	glBindVertexBuffer(Index, VBO, 0, Stride);
+	glBindVertexBuffer(BindingIndex, VBO, 0, Stride);
+}
+
+// FOpenGLTexture
+
+FOpenGLTexture::FOpenGLTexture(UOpenGLRenderDevice* InRenDev, QWORD InCacheId) : FOpenGLResource(InRenDev, InCacheId),
+                                                                                 Handle(GL_NONE){}
+
+FOpenGLTexture::~FOpenGLTexture(){
+	if(Handle)
+		glDeleteTextures(1, &Handle);
+}
+
+void FOpenGLTexture::Cache(FTexture* Texture){
+	if(Handle)
+		glDeleteTextures(1, &Handle);
+
+	INT Width = Texture->GetWidth();
+	INT Height = Texture->GetHeight();
+
+	if(Width == 0 || Height == 0){
+		static FSolidColorTexture ErrorTexture(FColor(255, 0, 255));
+
+		Texture = &ErrorTexture;
+		Width = Texture->GetWidth();
+		Height = Texture->GetHeight();
+	}
+
+	glCreateTextures(GL_TEXTURE_2D, 1, &Handle);
+
+	ETextureFormat SrcFormat = Texture->GetFormat();
+	INT Size = GetBytesPerPixel(SrcFormat, Width * Height);
+
+	if(IsDXTC(SrcFormat)){
+		GLenum GLFormat;
+
+		if(SrcFormat == TEXF_DXT1)
+			GLFormat = GL_COMPRESSED_RGBA_S3TC_DXT1_EXT;
+		else if(SrcFormat == TEXF_DXT3)
+			GLFormat = GL_COMPRESSED_RGBA_S3TC_DXT3_EXT;
+		else
+			GLFormat = GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
+
+		void* Data = Texture->GetRawTextureData(0);
+
+		checkSlow(Data);
+
+		glCompressedTextureImage2DEXT(Handle, GL_TEXTURE_2D, 0, GLFormat, Width, Height, 0, Size, Data);
+		Texture->UnloadRawTextureData(0);
+	}else{
+		void* Data = Texture->GetRawTextureData(0);
+
+		if(!Data){
+			Data = RenDev->GetScratchBuffer(Size);
+			Texture->GetTextureData(0, Data, 0, SrcFormat);
+		}
+
+		glTextureStorage2D(Handle, 1, GL_RGBA8, Width, Height);
+		glTextureSubImage2D(Handle, 0, 0, 0, Width, Height, GL_BGRA, GL_UNSIGNED_BYTE, Data);
+		Texture->UnloadRawTextureData(0);
+	}
+
+	glGenerateTextureMipmap(Handle);
+	glTextureParameteri(Handle, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glTextureParameteri(Handle, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	Revision = Texture->GetRevision();
+}
+
+void FOpenGLTexture::Bind(GLuint TextureUnit){
+	checkSlow(Handle);
+	glBindTextureUnit(TextureUnit, Handle);
 }

@@ -367,7 +367,7 @@ public:
 
 	// FTexture interface.
 
-	virtual void GetTextureData(INT MipIndex,void* Dest,INT DestStride,ETextureFormat DestFormat,UBOOL ColoredMips);
+	virtual void GetTextureData(INT MipIndex,void* Dest,INT DestStride,ETextureFormat DestFormat,UBOOL ColoredMips, int);
 	virtual void* GetRawTextureData(INT MipIndex);
 	virtual void UnloadRawTextureData( INT MipIndex ) {}
 

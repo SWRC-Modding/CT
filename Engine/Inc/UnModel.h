@@ -99,7 +99,7 @@ public:
 
 	virtual void* GetRawTextureData(INT MipIndex){ return NULL; }
 	virtual void UnloadRawTextureData(INT MipIndex){}
-	virtual void GetTextureData(INT MipIndex, void* Dest, INT DestStride, ETextureFormat DestFormat, UBOOL ColoredMips);
+	virtual void GetTextureData(INT MipIndex, void* Dest, INT DestStride, ETextureFormat DestFormat, UBOOL ColoredMips, int);
 	virtual UTexture* GetUTexture(){ return NULL; }
 
 	// FBaseTexture interface.
@@ -141,7 +141,7 @@ public:
 
 	virtual void* GetRawTextureData(INT MipIndex);
 	virtual void UnloadRawTextureData(INT MipIndex);
-	virtual void GetTextureData(INT MipIndex,void* Dest, INT DestStride, ETextureFormat DestFormat, UBOOL ColoredMips);
+	virtual void GetTextureData(INT MipIndex,void* Dest, INT DestStride, ETextureFormat DestFormat, UBOOL ColoredMips, int);
 	virtual UTexture* GetUTexture(){ return NULL; }
 
 	// FBaseTexture interface.

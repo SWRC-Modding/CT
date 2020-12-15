@@ -5197,6 +5197,19 @@ public:
 };
 
 /*
+ * ColorModifier
+ */
+
+class ENGINE_API UOpacityModifier : public UModifier{
+public:
+	class UMaterial* Opacity;
+	BITFIELD bOverrideTexModifier:1;
+
+	DECLARE_CLASS(UOpacityModifier,UModifier,0,Engine)
+	NO_DEFAULT_CONSTRUCTOR(UOpacityModifier)
+};
+
+/*
  * HardwareShader
  */
 
@@ -5512,6 +5525,95 @@ public:
 	virtual class FBaseTexture* GetRenderInterface();
 	virtual void Destroy();
 	virtual void PostEditChange();
+};
+
+/*
+ * TerrainMaterial
+ */
+
+struct ENGINE_API FTerrainMaterialLayer{
+	class UMaterial* Texture;
+	class UBitmapMaterial* AlphaWeight;
+	FMatrix TextureMatrix;
+};
+
+class ENGINE_API UTerrainMaterial : public URenderedMaterial{
+public:
+	TArrayNoInit<FTerrainMaterialLayer> Layers;
+	BYTE RenderMethod;
+	BITFIELD FirstPass:1;
+
+	DECLARE_CLASS(UTerrainMaterial,URenderedMaterial,0,Engine)
+
+	virtual UMaterial* CheckFallback();
+	virtual UBOOL HasFallback();
+};
+
+/*
+ * ProjectorMaterial
+ */
+
+class ENGINE_API UProjectorMaterial : public URenderedMaterial{
+public:
+	class UBitmapMaterial* Gradient;
+	class UMaterial* Projected;
+	class UMaterial* BaseMaterial;
+	BYTE BaseMaterialBlending;
+	BYTE FrameBufferBlending;
+	FMatrix Matrix;
+	FMatrix GradientMatrix;
+	BITFIELD bProjected:1;
+	BITFIELD bProjectOnUnlit:1;
+	BITFIELD bGradient:1;
+	BITFIELD bProjectOnAlpha:1;
+	BITFIELD bProjectOnBackfaces:1;
+	BITFIELD bStaticProjector:1;
+	BITFIELD bTwoSided:1;
+
+	DECLARE_CLASS(UProjectorMaterial,URenderedMaterial,0,Engine)
+	NO_DEFAULT_CONSTRUCTOR(UProjectorMaterial)
+};
+
+/*
+ * ProjectorMultiMaterial
+ */
+
+struct FProjectorRenderEntry{
+	class UMaterial* ProjectedTexture;
+	FMatrix Matrix;
+	FVector Direction;
+	FVector Origin;
+	FLOAT InvMaxTraceDist;
+	BITFIELD bProjectOnBackFaces:1;
+};
+
+class ENGINE_API UProjectorMultiMaterial : public URenderedMaterial{
+public:
+	TArrayNoInit<FProjectorRenderEntry> RenderEntries;
+	INT RemainingEntries;
+	class UMaterial* BaseMaterial;
+	BYTE FrameBufferBlending;
+	class UTexture* DefaultOpacity;
+	class UHardwareShader* AddShaders[4];
+	class UHardwareShader* BlendShaders[4];
+	class UHardwareShader* ModShaders[4];
+
+	DECLARE_CLASS(UProjectorMultiMaterial,URenderedMaterial,0,Engine)
+	NO_DEFAULT_CONSTRUCTOR(UProjectorMultiMaterial)
+
+	inline UHardwareShader* GetHardwareShader(int NumProjectors){
+		switch(FrameBufferBlending){
+		case PB_Add:
+			return AddShaders[NumProjectors - 1];
+		case PB_AlphaBlend:
+			return BlendShaders[NumProjectors - 1];
+		case PB_Modulate:
+		case PB_Modulate2X:
+			return ModShaders[NumProjectors - 1];
+		}
+
+		return NULL;
+	}
 };
 
 /*

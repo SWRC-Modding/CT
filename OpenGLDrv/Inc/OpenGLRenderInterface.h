@@ -47,6 +47,15 @@ struct FStreamDeclaration{
 	void Init(FVertexStream* VertexStream){ NumComponents = VertexStream->GetComponents(Components); }
 };
 
+struct FModifierInfo{
+	bool ZWrite;
+	bool ZTest;
+	bool AlphaTest;
+	bool TwoSided;
+	FMatrix Matrix;
+	EFrameBufferBlending Blending;
+};
+
 /*
  * OpenGL RenderInterface
  */
@@ -80,7 +89,21 @@ public:
 		unsigned int          VAO;
 		INT                   NumVertexStreams;
 		FOpenGLVertexStream*  VertexStreams[MAX_VERTEX_STREAMS];
+
+		EFrameBufferBlending  FramebufferBlending;
 	};
+
+	void SetMaterialBlending(FModifierInfo* ModifierInfo){
+		EnableZWrite(ModifierInfo->ZWrite);
+		EnableZTest(ModifierInfo->ZTest);
+
+		if(ModifierInfo->TwoSided)
+			SetCullMode(CM_None);
+
+		SetFramebufferBlending(ModifierInfo->Blending);
+	}
+
+	FModifierInfo        ModifierInfo;
 
 	UOpenGLRenderDevice* RenDev;
 
@@ -116,7 +139,7 @@ public:
 	virtual void SetTransform(ETransformType Type, const FMatrix& Matrix);
 	virtual FMatrix GetTransform(ETransformType Type) const;
 	virtual void SetMaterial(UMaterial* Material, FString* ErrorString = NULL, UMaterial** ErrorMaterial = NULL, INT* NumPasses = NULL);
-	virtual void SetStencilOp(ECompareFunction Test, DWORD Ref, DWORD Mask, EStencilOp FailOp, EStencilOp ZFailOp, EStencilOp PassOp, DWORD WriteMask){}
+	virtual void SetStencilOp(ECompareFunction Test, DWORD Ref, DWORD Mask, EStencilOp FailOp, EStencilOp ZFailOp, EStencilOp PassOp, DWORD WriteMask);
 	virtual void EnableStencilTest(UBOOL Enable);
 	virtual void EnableZWrite(UBOOL Enable);
 	virtual void SetPrecacheMode(EPrecacheMode PrecacheMode){}
@@ -130,6 +153,7 @@ public:
 
 	void EnableZTest(UBOOL Enable);
 	void SetShader(FShaderGLSL* NewShader);
+	void SetFramebufferBlending(EFrameBufferBlending Blending);
 
 	void SetupPerFrameShaderConstants();
 
@@ -137,3 +161,37 @@ private:
 	INT SetIndexBuffer(FIndexBuffer* IndexBuffer, INT BaseIndex, bool IsDynamic);
 	INT SetVertexStreams(EVertexShader Shader, FVertexStream** Streams, INT NumStreams, bool IsDynamic);
 };
+
+template<typename T>
+bool CheckMaterial(UMaterial*& Material, FModifierInfo* ModifierInfo){
+	if(Material->IsA<T>())
+		return true;
+
+	UModifier* Modifier = Cast<UModifier>(Material);
+
+	while(Modifier){
+		if(Modifier->IsA<UTexModifier>()){
+			FMatrix* Matrix = static_cast<UTexModifier*>(Modifier)->GetMatrix(GEngineTime);
+
+			if(Matrix)
+				ModifierInfo->Matrix *= *Matrix;
+		}else if(Modifier->IsA<UFinalBlend>()){
+			UFinalBlend* FinalBlend = static_cast<UFinalBlend*>(Modifier);
+
+			ModifierInfo->ZWrite    |= FinalBlend->ZWrite != 0;
+			ModifierInfo->ZTest     |= FinalBlend->ZTest != 0;
+			ModifierInfo->AlphaTest |= FinalBlend->AlphaTest != 0;
+			ModifierInfo->TwoSided  |= FinalBlend->TwoSided != 0;
+			ModifierInfo->Blending   = static_cast<EFrameBufferBlending>(FinalBlend->FrameBufferBlending);
+		}else if(Modifier->IsA<UColorModifier>()){
+
+		}else if(Modifier->IsA<UOpacityModifier>()){
+
+		}
+
+		Material = Modifier->Material;
+		Modifier = Cast<UModifier>(Material);
+	}
+
+	return Cast<T>(Material) != NULL;
+}

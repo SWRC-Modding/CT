@@ -64,23 +64,11 @@ void FOpenGLRenderInterface::PushState(INT Flags){
 			SetViewport(CurrentState->ViewportX, CurrentState->ViewportY, CurrentState->ViewportWidth, CurrentState->ViewportHeight);
 		}
 
-		if(CurrentState->CullMode != PoppedState->CullMode)
-			SetCullMode(CurrentState->CullMode);
-
-		if(CurrentState->FillMode != PoppedState->FillMode)
-			SetFillMode(CurrentState->FillMode);
-
 		if(CurrentState->bStencilTest != PoppedState->bStencilTest)
 			EnableStencilTest(CurrentState->bStencilTest);
 
-		if(CurrentState->bZWrite != PoppedState->bZWrite)
-			EnableZWrite(CurrentState->bZWrite);
-
 		if(CurrentState->ZBias != PoppedState->ZBias)
 			SetZBias(CurrentState->ZBias);
-
-		if(CurrentState->bZTest != PoppedState->bZTest)
-			EnableZTest(CurrentState->bZTest);
 
 		if(CurrentState->Shader != PoppedState->Shader)
 			CurrentState->Shader->Bind();
@@ -235,16 +223,159 @@ FMatrix FOpenGLRenderInterface::GetTransform(ETransformType Type) const{
 }
 
 void FOpenGLRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorString, UMaterial** ErrorMaterial, INT* NumPasses){
+	static INT Count = 0;
 
+	if(Count == 0){
+		ModifierInfo.ZWrite = true;
+		ModifierInfo.ZTest = true;
+		ModifierInfo.AlphaTest = true;
+		ModifierInfo.TwoSided = false;
+		ModifierInfo.Matrix = FMatrix::Identity;
+		ModifierInfo.Blending = FB_Overwrite;
+	}
+
+	if(!Material)
+		Material = static_cast<UMaterial*>(UMaterial::StaticClass()->GetDefaultObject());
+
+	if(CheckMaterial<UShader>(Material, &ModifierInfo)){
+		++Count;
+		SetMaterial(static_cast<UShader*>(Material)->Diffuse);
+		--Count;
+	}else if(CheckMaterial<UCombiner>(Material, &ModifierInfo)){
+		++Count;
+		SetMaterial(static_cast<UCombiner*>(Material)->Material1);
+		--Count;
+	}else if(CheckMaterial<UConstantMaterial>(Material, &ModifierInfo)){
+		++Count;
+		SetMaterial(static_cast<UMaterial*>(UMaterial::StaticClass()->GetDefaultObject()));
+		--Count;
+	}else if(CheckMaterial<UBitmapMaterial>(Material, &ModifierInfo)){
+		UBitmapMaterial* Bitmap = static_cast<UBitmapMaterial*>(Material);
+		FBaseTexture* BaseTex = Bitmap->GetRenderInterface();
+		FTexture* Tex = BaseTex ? BaseTex->GetTextureInterface() : NULL;
+
+		FRenderTarget* RenderTarget = BaseTex ? BaseTex->GetRenderTargetInterface() : NULL;
+
+		if(RenderTarget){
+			FOpenGLRenderTarget* GLRenderTarget = static_cast<FOpenGLRenderTarget*>(RenDev->GetCachedResource(RenderTarget->GetCacheId()));
+
+			checkSlow(GLRenderTarget);
+
+			glBindTextureUnit(0, GLRenderTarget->ColorAttachment);
+
+			return;
+		}
+
+		if(!Tex){
+			++Count;
+			SetMaterial(static_cast<UMaterial*>(UMaterial::StaticClass()->GetDefaultObject()));
+			--Count;
+
+			return;
+		}
+
+		UTexture* Texture = Cast<UTexture>(Bitmap);
+
+		if(Texture){
+			if(Texture->bAlphaTexture || Texture->bMasked)
+				ModifierInfo.Blending = FB_AlphaBlend;
+
+			if(Texture->bTwoSided)
+				ModifierInfo.TwoSided = true;
+		}
+
+		QWORD CacheId = Tex->GetCacheId();
+		FOpenGLTexture* GLTexture = static_cast<FOpenGLTexture*>(RenDev->GetCachedResource(CacheId));
+
+		if(!GLTexture)
+			GLTexture = new FOpenGLTexture(RenDev, CacheId);
+
+		if(GLTexture->Revision != Tex->GetRevision())
+			GLTexture->Cache(Tex);
+
+		GLTexture->Bind(0);
+	}else if(CheckMaterial<UTerrainMaterial>(Material, &ModifierInfo)){
+		++Count;
+		SetMaterial(static_cast<UTerrainMaterial*>(Material)->Layers[0].Texture);
+		--Count;
+	}else if(CheckMaterial<UParticleMaterial>(Material, &ModifierInfo)){
+		ModifierInfo.Blending = FB_AlphaBlend;
+		++Count;
+		SetMaterial(static_cast<UParticleMaterial*>(Material)->BitmapMaterial);
+		--Count;
+	}else if(CheckMaterial<UProjectorMultiMaterial>(Material, &ModifierInfo)){
+		++Count;
+		SetMaterial(static_cast<UProjectorMultiMaterial*>(Material)->BaseMaterial);
+		--Count;
+	}else if(CheckMaterial<UProjectorMaterial>(Material, &ModifierInfo)){
+		++Count;
+		SetMaterial(static_cast<UProjectorMaterial*>(Material)->Projected);
+		--Count;
+	}else if(CheckMaterial<UHardwareShaderWrapper>(Material, &ModifierInfo)){
+		++Count;
+		SetMaterial(static_cast<UHardwareShaderWrapper*>(Material)->ShaderImplementation);
+		--Count;
+	}else if(CheckMaterial<UHardwareShader>(Material, &ModifierInfo)){
+		++Count;
+		SetMaterial(static_cast<UHardwareShader*>(Material)->Textures[0]);
+		--Count;
+	}
+}
+
+static GLenum GetStencilFunc(ECompareFunction Test){
+	switch(Test){
+	case CF_Never:
+		return GL_NEVER;
+	case CF_Less:
+		return GL_LESS;
+	case CF_Equal:
+		return GL_EQUAL;
+	case CF_LessEqual:
+		return GL_LEQUAL;
+	case CF_Greater:
+		return GL_GREATER;
+	case CF_NotEqual:
+		return GL_NOTEQUAL;
+	case CF_GreaterEqual:
+		return GL_GEQUAL;
+	case CF_Always:
+		return GL_ALWAYS;
+	}
+
+	return GL_NEVER;
+};
+
+static GLenum GetStencilOp(EStencilOp StencilOp){
+	switch(StencilOp){
+	case SO_Keep:
+		return GL_KEEP;
+	case SO_Zero:
+		return GL_ZERO;
+	case SO_Replace:
+		return GL_REPLACE;
+	case SO_IncrementSat:
+		return GL_INCR_WRAP;
+	case SO_DecrementSat:
+		return GL_DECR_WRAP;
+	case SO_Invert:
+		return GL_INVERT;
+	case SO_Increment:
+		return GL_INCR;
+	case SO_Decrement:
+		return GL_DECR;
+	}
+
+	return GL_KEEP;
+}
+
+void FOpenGLRenderInterface::SetStencilOp(ECompareFunction Test, DWORD Ref, DWORD Mask, EStencilOp FailOp, EStencilOp ZFailOp, EStencilOp PassOp, DWORD WriteMask){
+	glStencilOp(GetStencilOp(FailOp), GetStencilOp(ZFailOp), GetStencilOp(PassOp));
+	glStencilFunc(GetStencilFunc(Test), Ref, WriteMask);
 }
 
 void FOpenGLRenderInterface::EnableStencilTest(UBOOL Enable){
 	CurrentState->bStencilTest = Enable;
-
-	if(Enable)
-		glEnable(GL_STENCIL_TEST);
-	else
-		glDisable(GL_STENCIL_TEST);
+	glStencilMask(Enable ? 0xFF : 0x00);
 }
 
 void FOpenGLRenderInterface::EnableZWrite(UBOOL Enable){
@@ -370,6 +501,8 @@ void FOpenGLRenderInterface::DrawPrimitive(EPrimitiveType PrimitiveType, INT Fir
 	if(NeedUniformUpdate)
 		UpdateShaderUniforms();
 
+	SetMaterialBlending(&ModifierInfo);
+
 	GLenum Mode = 0;
 	INT    Count = NumPrimitives;
 
@@ -419,11 +552,7 @@ void FOpenGLRenderInterface::SetFillMode(EFillMode FillMode){
 
 void FOpenGLRenderInterface::EnableZTest(UBOOL Enable){
 	CurrentState->bZTest = Enable;
-
-	if(Enable)
-		glEnable(GL_DEPTH_TEST);
-	else
-		glDisable(GL_DEPTH_TEST);
+	glDepthFunc(Enable ? GL_LEQUAL : GL_ALWAYS);
 }
 
 void FOpenGLRenderInterface::SetShader(FShaderGLSL* NewShader){
@@ -438,6 +567,17 @@ void FOpenGLRenderInterface::SetShader(FShaderGLSL* NewShader){
 
 	CurrentState->Shader = Shader;
 	Shader->Bind();
+}
+
+void FOpenGLRenderInterface::SetFramebufferBlending(EFrameBufferBlending Blending){
+	CurrentState->FramebufferBlending = Blending;
+
+	if(Blending == FB_AlphaBlend)
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	else if(Blending == FB_Invisible)
+		glBlendFunc(GL_ZERO, GL_ONE);
+	else
+		glBlendFunc(GL_ONE, GL_ZERO);
 }
 
 void FOpenGLRenderInterface::SetupPerFrameShaderConstants(){

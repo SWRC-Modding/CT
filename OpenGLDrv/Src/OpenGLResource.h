@@ -80,10 +80,23 @@ public:
 
 	void Cache(FVertexStream* VertexStream);
 	void Free();
-	void Bind(unsigned int Index) const;
+	void Bind(GLuint BindingIndex) const;
 
 	GLuint VBO;
 	INT    Stride;
 	INT    BufferSize;
 	bool   IsDynamic;
+};
+
+// FOpenGLTexture
+
+class FOpenGLTexture : public FOpenGLResource{
+public:
+	FOpenGLTexture(UOpenGLRenderDevice* InRenDev, QWORD InCacheId);
+	virtual ~FOpenGLTexture();
+
+	void Cache(FTexture* Texture);
+	void Bind(GLuint TextureUnit);
+
+	GLuint Handle;
 };

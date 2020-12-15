@@ -164,7 +164,7 @@ public:
 
 	virtual void* GetRawTextureData(INT MipIndex);
 	virtual void UnloadRawTextureData( INT MipIndex );
-	virtual void GetTextureData(INT MipIndex,void* Dest,INT DestStride,ETextureFormat DestFormat,UBOOL ColoredMips=0);
+	virtual void GetTextureData(INT MipIndex,void* Dest,INT DestStride,ETextureFormat DestFormat,UBOOL ColoredMips=0, int = 0);
 	virtual UTexture* GetUTexture();
 };
 

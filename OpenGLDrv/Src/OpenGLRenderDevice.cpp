@@ -191,12 +191,6 @@ void GLAPIENTRY MessageCallback(GLenum source,
                                 const void* userParam){
 	if(type == GL_DEBUG_TYPE_ERROR)
 		appMsgf(3, "GL CALLBACK: %s type = 0x%x, severity = 0x%x, message = %s", "** GL ERROR **", type, severity, message);
-	// else if(type == GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR)
-	// 	debugf("GL CALLBACK: %s type = 0x%x, severity = 0x%x, message = %s", "** GL DEPRECATED ERROR **", type, severity, message);
-	// else if(type == GL_DEBUG_TYPE_PERFORMANCE)
-	// 	debugf("GL CALLBACK: %s type = 0x%x, severity = 0x%x, message = %s", "** GL PERFORMANCE ERROR **", type, severity, message);
-	// else
-	// 	debugf("GL CALLBACK: %s type = 0x%x, severity = 0x%x, message = %s", "** GL PERFORMANCE ERROR **", type, severity, message);
 }
 
 UBOOL UOpenGLRenderDevice::SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL Fullscreen, INT ColorBytes, UBOOL bSaveSize){
@@ -267,6 +261,7 @@ UBOOL UOpenGLRenderDevice::SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL
 			appErrorf("GLEW failed to initialize: %s", glewGetErrorString(GlewStatus));
 
 		glEnable(GL_DEBUG_OUTPUT);
+		glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
 		glDebugMessageCallback(MessageCallback, NULL);
 
 		debugf(NAME_Init, "GL_VENDOR      : %s", glGetString(GL_VENDOR));
@@ -303,12 +298,16 @@ UBOOL UOpenGLRenderDevice::SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL
 		glEnable(GL_DEPTH_TEST);
 		glEnable(GL_STENCIL_TEST);
 		glEnable(GL_POLYGON_OFFSET_FILL);
-		glEnable(GL_POLYGON_OFFSET_LINE); // TODO: Remove once we don't render as wireframe
 
 		RenderInterface.EnableZTest(1);
-		RenderInterface.SetShader(GetShader(SHADER_Default));
+		RenderInterface.SetShader(&FixedFunctionShader);
 		RenderInterface.SetCullMode(CM_CW);
 		RenderInterface.SetFillMode(FM_Solid);
+
+		// Set default values for unspecified vertex attributes
+
+		glVertexAttrib4f(FVF_Diffuse, 1.0f, 1.0f, 1.0f, 1.0f);
+		glVertexAttrib4f(FVF_Specular, 1.0f, 1.0f, 1.0f, 1.0f);
 	}else{
 		MakeCurrent();
 	}
@@ -371,6 +370,9 @@ void UOpenGLRenderDevice::Exit(UViewport* Viewport){
 }
 
 void UOpenGLRenderDevice::Flush(UViewport* Viewport){
+	if(Viewport && Viewport->Actor)
+		Viewport->Actor->FrameFX->FreeRenderTargets();
+
 	RenderInterface.FlushResources();
 
 	for(INT i = 0; i < ARRAY_COUNT(ResourceHash); ++i){
@@ -417,7 +419,7 @@ FRenderInterface* UOpenGLRenderDevice::Lock(UViewport* Viewport, BYTE* HitData, 
 	if(!RenderInterface.CurrentState->RenderTarget)
 		RenderInterface.SetRenderTarget(&ScreenRenderTarget, false);
 
-	FShaderGLSL* DefaultShader = GetShader(SHADER_Default);
+	FShaderGLSL* DefaultShader = &FixedFunctionShader;
 	FOpenGLShader* CurrentShader = RenderInterface.CurrentState->Shader;
 
 	checkSlow(!CurrentShader || CurrentShader->CacheId == DefaultShader->GetCacheId());
@@ -483,59 +485,59 @@ void UOpenGLRenderDevice::Present(UViewport* Viewport){
 
 	FOpenGLRenderTarget* Framebuffer = RenderInterface.CurrentState->RenderTarget;
 
-	check(Framebuffer);
+	if(Framebuffer){
+		RenderInterface.PushState();
+		glBindFramebuffer(GL_FRAMEBUFFER, GL_NONE);
 
-	RenderInterface.PushState();
-	glBindFramebuffer(GL_FRAMEBUFFER, GL_NONE);
+		INT FramebufferWidth = Framebuffer->Width;
+		INT FramebufferHeight = Framebuffer->Height;
+		INT ViewportWidth;
+		INT ViewportHeight;
 
-	// TODO: Add width and height members to FOpenGLRenderTarget...
-	INT FramebufferWidth = RenderInterface.CurrentState->ViewportWidth;
-	INT FramebufferHeight = RenderInterface.CurrentState->ViewportHeight;
-	INT ViewportWidth;
-	INT ViewportHeight;
-
-	if(bIsFullscreen){
-		ViewportWidth  = SavedViewportWidth;
-		ViewportHeight = SavedViewportHeight;
-	}else{
-		ViewportWidth  =  Viewport->SizeX;
-		ViewportHeight =  Viewport->SizeY;
-	}
-
-	RenderInterface.SetViewport(0, 0, ViewportWidth, ViewportHeight);
-
-	FLOAT XScale = 1.0f;
-	FLOAT YScale = 1.0f;
-
-	if(bKeepAspectRatio){
-		FLOAT ViewportAspectRatio = static_cast<FLOAT>(ViewportWidth) / ViewportHeight;
-		FLOAT FramebufferAspectRatio = static_cast<FLOAT>(FramebufferWidth) / FramebufferHeight;
-
-		if(FramebufferAspectRatio < ViewportAspectRatio){
-			FLOAT Scale = static_cast<FLOAT>(ViewportHeight) / FramebufferHeight;
-
-			XScale = FramebufferWidth * Scale / ViewportWidth;
+		if(bIsFullscreen){
+			ViewportWidth  = SavedViewportWidth;
+			ViewportHeight = SavedViewportHeight;
 		}else{
-			FLOAT Scale = static_cast<FLOAT>(ViewportWidth) / FramebufferWidth;
-
-			YScale = FramebufferHeight * Scale / ViewportHeight;
+			ViewportWidth  = Viewport->SizeX;
+			ViewportHeight = Viewport->SizeY;
 		}
 
-		// Clear black bars
-		RenderInterface.Clear(1, FColor(0, 0, 0));
+		RenderInterface.SetViewport(0, 0, ViewportWidth, ViewportHeight);
+
+		FLOAT XScale = 1.0f;
+		FLOAT YScale = 1.0f;
+
+		if(bKeepAspectRatio){
+			FLOAT ViewportAspectRatio = static_cast<FLOAT>(ViewportWidth) / ViewportHeight;
+			FLOAT FramebufferAspectRatio = static_cast<FLOAT>(FramebufferWidth) / FramebufferHeight;
+
+			if(FramebufferAspectRatio < ViewportAspectRatio){
+				FLOAT Scale = static_cast<FLOAT>(ViewportHeight) / FramebufferHeight;
+
+				XScale = FramebufferWidth * Scale / ViewportWidth;
+			}else{
+				FLOAT Scale = static_cast<FLOAT>(ViewportWidth) / FramebufferWidth;
+
+				YScale = FramebufferHeight * Scale / ViewportHeight;
+			}
+
+			// Clear black bars
+			RenderInterface.Clear(1, FColor(0, 0, 0));
+		}
+
+		FFullscreenQuadVertexStream FullscreenQuad(XScale, YScale);
+
+		glBindTextureUnit(0, Framebuffer->ColorAttachment);
+		RenderInterface.SetFillMode(FM_Solid);
+		RenderInterface.EnableZTest(0);
+		RenderInterface.SetDynamicStream(VS_FixedFunction, &FullscreenQuad);
+		RenderInterface.SetShader(&FramebufferShader);
+		RenderInterface.DrawPrimitive(PT_TriangleStrip, 0, 2);
+		Framebuffer->Bind();
+		RenderInterface.PopState();
 	}
 
-	FFullscreenQuadVertexStream FullscreenQuad(XScale, YScale);
-
-	glBindTextureUnit(0, Framebuffer->ColorAttachment);
-	RenderInterface.SetFillMode(FM_Solid);
-	RenderInterface.EnableZTest(0);
-	RenderInterface.SetDynamicStream(VS_FixedFunction, &FullscreenQuad);
-	RenderInterface.SetShader(GetShader(SHADER_Framebuffer));
-	RenderInterface.DrawPrimitive(PT_TriangleStrip, 0, 2);
 	SwapBuffers(DeviceContext);
-	Framebuffer->Bind();
-	RenderInterface.PopState();
 
 	check(glGetError() == GL_NO_ERROR);
 }
@@ -549,40 +551,22 @@ FRenderCaps* UOpenGLRenderDevice::GetRenderCaps(){
 }
 
 void UOpenGLRenderDevice::LoadShaders(){
-	// Default shader implementations
-
-	static const TCHAR* DefaultVertexShader   = "vec4 default_vs_main(void){\n"
-	                                                "\tDiffuse = InDiffuse;\n"
-	                                                "\treturn Transform * vec4(InPosition, 1.0);\n"
-	                                            "}\n";
-	static const TCHAR* DefaultFragmentShader = "vec4 default_fs_main(void){\n"
-	                                                "\treturn Diffuse;\n"
-	                                            "}\n";
-
-	static const TCHAR* FramebufferVertexShader   = "vec4 framebuffer_vs_main(void){\n"
-	                                                    "\tTexCoord0 = InTexCoord0;\n"
-	                                                    "\treturn vec4(InPosition.xy, 0.5, 1.0);\n"
-	                                                "}\n";
-	static const TCHAR* FramebufferFragmentShader = "vec4 framebuffer_fs_main(void){\n"
-	                                                    "\treturn texture2D(Texture0, TexCoord0.xy);\n"
-	                                                "}\n";
-
 	// Init default shaders with the default implementation
-	#define SHADER(x) \
-		DefaultShaders[SHADER_ ## x].SetName(FString(#x, true)); \
-		DefaultShaders[SHADER_ ## x].SetVertexShaderText(FString(x ## VertexShader, true)); \
-		DefaultShaders[SHADER_ ## x].SetFragmentShaderText(FString(x ## FragmentShader, true));
-	DEFAULT_SHADERS
-	#undef SHADER
-	// Load shaders from disk or save them if they don't exist
-	#define SHADER(x) LoadShader(&DefaultShaders[SHADER_ ## x], #x);
-	DEFAULT_SHADERS
-	#undef SHADER
+
+	FixedFunctionShader.SetName("FixedFunction");
+	FixedFunctionShader.SetVertexShaderText(CommonShaderHeaderText + VertexShaderVarsText + FixedFunctionVertexShaderText);
+	FixedFunctionShader.SetFragmentShaderText(CommonShaderHeaderText + FragmentShaderVarsText + FixedFunctionFragmentShaderText);
+	LoadShader(&FixedFunctionShader);
+
+	FramebufferShader.SetName("Framebuffer");
+	FramebufferShader.SetVertexShaderText(CommonShaderHeaderText + VertexShaderVarsText + FramebufferVertexShaderText);
+	FramebufferShader.SetFragmentShaderText(CommonShaderHeaderText + FragmentShaderVarsText + FramebufferFragmentShaderText);
+	LoadShader(&FramebufferShader);
 }
 
-void UOpenGLRenderDevice::LoadShader(FShaderGLSL* Shader, const TCHAR* Name){
+void UOpenGLRenderDevice::LoadShader(FShaderGLSL* Shader){
 	FStringTemp ShaderText(0);
-	FString Filename = ShaderDir * Name + VERTEX_SHADER_EXTENSION;
+	FString Filename = ShaderDir * Shader->GetName() + VERTEX_SHADER_FILE_EXTENSION;
 
 	GFileManager->MakeDirectory(*ShaderDir);
 
@@ -591,10 +575,214 @@ void UOpenGLRenderDevice::LoadShader(FShaderGLSL* Shader, const TCHAR* Name){
 	else
 		appSaveStringToFile(Shader->GetVertexShaderText(), *Filename);
 
-	Filename = ShaderDir * Name + FRAGMENT_SHADER_EXTENSION;
+	Filename = ShaderDir * Shader->GetName() + FRAGMENT_SHADER_FILE_EXTENSION;
 
 	if(appLoadFileToString(ShaderText, *Filename))
 		Shader->SetFragmentShaderText(ShaderText);
 	else
 		appSaveStringToFile(Shader->GetFragmentShaderText(), *Filename);
 }
+
+// Default shader code
+
+FString UOpenGLRenderDevice::CommonShaderHeaderText(
+	"#version 450\n\n"
+	"// Global shared uniforms\n\n"
+	"layout(std140, binding = 0) uniform Globals{\n"
+#define UNIFORM_BLOCK_MEMBER(type, name) "\t" #type " " #name ";\n"
+	UNIFORM_BLOCK_CONTENTS
+#undef UNIFORM_BLOCK_MEMBER
+	"};\n\n"
+	"// Textures\n\n"
+	"layout(binding = 0) uniform sampler2D Texture0;\n"
+	"layout(binding = 1) uniform sampler2D Texture1;\n"
+	"layout(binding = 2) uniform sampler2D Texture2;\n"
+	"layout(binding = 3) uniform sampler2D Texture3;\n"
+	"layout(binding = 4) uniform sampler2D Texture4;\n"
+	"layout(binding = 5) uniform sampler2D Texture5;\n"
+	"layout(binding = 6) uniform sampler2D Texture6;\n"
+	"layout(binding = 7) uniform sampler2D Texture7;\n\n", true);
+
+FString UOpenGLRenderDevice::VertexShaderVarsText(
+	"// Vertex attributes\n\n"
+	"layout(location = 0)  in vec3 InPosition;\n"
+	"layout(location = 1)  in vec3 InNormal;\n"
+	"layout(location = 2)  in vec4 InDiffuse;\n"
+	"layout(location = 3)  in vec4 InSpecular;\n"
+	"layout(location = 4)  in vec4 InTexCoord0;\n"
+	"layout(location = 5)  in vec4 InTexCoord1;\n"
+	"layout(location = 6)  in vec4 InTexCoord2;\n"
+	"layout(location = 7)  in vec4 InTexCoord3;\n"
+	"layout(location = 8)  in vec4 InTexCoord4;\n"
+	"layout(location = 9)  in vec4 InTexCoord5;\n"
+	"layout(location = 10) in vec4 InTexCoord6;\n"
+	"layout(location = 11) in vec4 InTexCoord7;\n"
+	"layout(location = 12) in vec3 InTangent;\n"
+	"layout(location = 13) in vec3 InBinormal;\n\n"
+	"// Variables\n\n"
+	"out vec3 Position;\n"
+	"out vec3 Normal;\n"
+	"out vec4 Diffuse;\n"
+	"out vec4 Specular;\n"
+	"out vec4 TexCoord0;\n"
+	"out vec4 TexCoord1;\n"
+	"out vec4 TexCoord2;\n"
+	"out vec4 TexCoord3;\n"
+	"out vec4 TexCoord4;\n"
+	"out vec4 TexCoord5;\n"
+	"out vec4 TexCoord6;\n"
+	"out vec4 TexCoord7;\n"
+	"out vec3 Tangent;\n"
+	"out vec3 Binormal;\n\n", true);
+
+FString UOpenGLRenderDevice::FragmentShaderVarsText(
+	"// Variables\n\n"
+	"in vec3 Position;\n"
+	"in vec3 Normal;\n"
+	"in vec4 Diffuse;\n"
+	"in vec4 Specular;\n"
+	"in vec4 TexCoord0;\n"
+	"in vec4 TexCoord1;\n"
+	"in vec4 TexCoord2;\n"
+	"in vec4 TexCoord3;\n"
+	"in vec4 TexCoord4;\n"
+	"in vec4 TexCoord5;\n"
+	"in vec4 TexCoord6;\n"
+	"in vec4 TexCoord7;\n"
+	"in vec3 Tangent;\n"
+	"in vec3 Binormal;\n"
+	"out vec4 FragColor;\n\n", true);
+
+FString UOpenGLRenderDevice::FixedFunctionVertexShaderText(
+	"void main(void){\n"
+		"\tPosition = (LocalToWorld * vec4(InPosition, 1.0)).xyz;\n"
+		"\tNormal = (LocalToWorld * vec4(InNormal, 0.0)).xyz;\n"
+		"\tDiffuse = InDiffuse;\n"
+		"\tSpecular = InSpecular;\n"
+		"\tTexCoord0 = InTexCoord0;\n"
+		"\tTexCoord1 = InTexCoord1;\n"
+		"\tTexCoord2 = InTexCoord2;\n"
+		"\tTexCoord3 = InTexCoord3;\n"
+		"\tTexCoord4 = InTexCoord4;\n"
+		"\tTexCoord5 = InTexCoord5;\n"
+		"\tTexCoord6 = InTexCoord6;\n"
+		"\tTexCoord7 = InTexCoord7;\n\n"
+		"\tgl_Position = Transform * vec4(InPosition, 1.0);\n"
+	"}\n", true);
+
+FString UOpenGLRenderDevice::FixedFunctionFragmentShaderText(
+"// Shader specific uniforms\n"
+"\n"
+"layout(location = 0) uniform float AlphaRef;\n"
+"layout(location = 1) uniform vec4 ConstantColor;\n"
+"\n"
+"// Subroutine types\n"
+"\n"
+"subroutine vec4 TexCoordSource(void);\n"
+"subroutine vec4 DiffuseColor(void);\n"
+"subroutine vec4 CombinerMask(void);\n"
+"subroutine vec4 MaterialColor(void);\n"
+"subroutine vec4 OutputColor(void);\n"
+"\n"
+"// Subroutine uniforms\n"
+"layout(location = 0) subroutine uniform TexCoordSource texture0_coord;\n"
+"layout(location = 1) subroutine uniform TexCoordSource texture1_coord;\n"
+"layout(location = 2) subroutine uniform TexCoordSource texture2_coord;\n"
+"layout(location = 3) subroutine uniform TexCoordSource texture3_coord;\n"
+"layout(location = 4) subroutine uniform TexCoordSource texture4_coord;\n"
+"layout(location = 5) subroutine uniform TexCoordSource texture5_coord;\n"
+"layout(location = 6) subroutine uniform TexCoordSource texture6_coord;\n"
+"layout(location = 7) subroutine uniform TexCoordSource texture7_coord;\n"
+"layout(location = 8) subroutine uniform DiffuseColor diffuse_color;\n"
+"layout(location = 9) subroutine uniform DiffuseColor combiner_material1;\n"
+"layout(location = 10) subroutine uniform DiffuseColor combiner_material2;\n"
+"layout(location = 11) subroutine uniform DiffuseColor combiner_mask_color;\n"
+"layout(location = 12) subroutine uniform CombinerMask combiner_mask;\n"
+"layout(location = 13) subroutine uniform MaterialColor material_color;\n"
+"layout(location = 14) subroutine uniform OutputColor final_color;\n"
+"\n"
+"// TexCoordSource\n"
+"\n"
+"layout(index = 0) subroutine(TexCoordSource) vec4 tex_coord0(void){ return TexCoord0; }\n"
+"layout(index = 1) subroutine(TexCoordSource) vec4 tex_coord1(void){ return TexCoord1; }\n"
+"layout(index = 2) subroutine(TexCoordSource) vec4 tex_coord2(void){ return TexCoord2; }\n"
+"layout(index = 3) subroutine(TexCoordSource) vec4 tex_coord3(void){ return TexCoord3; }\n"
+"layout(index = 4) subroutine(TexCoordSource) vec4 tex_coord4(void){ return TexCoord4; }\n"
+"layout(index = 5) subroutine(TexCoordSource) vec4 tex_coord5(void){ return TexCoord5; }\n"
+"layout(index = 6) subroutine(TexCoordSource) vec4 tex_coord6(void){ return TexCoord6; }\n"
+"layout(index = 7) subroutine(TexCoordSource) vec4 tex_coord7(void){ return TexCoord7; }\n"
+"\n"
+"// DiffuseColor\n"
+"\n"
+"layout(index = 8) subroutine(DiffuseColor) vec4 constant_color(void){\n"
+"\treturn ConstantColor;\n"
+"}\n"
+"\n"
+"layout(index = 9) subroutine(DiffuseColor) vec4 vertex_color(void){\n"
+"\treturn Diffuse;\n"
+"}\n"
+"\n"
+"layout(index = 10) subroutine(DiffuseColor) vec4 texture0_color(void){ return texture2D(Texture0, texture0_coord().xy); }\n"
+"layout(index = 11) subroutine(DiffuseColor) vec4 texture1_color(void){ return texture2D(Texture1, texture1_coord().xy); }\n"
+"layout(index = 12) subroutine(DiffuseColor) vec4 texture2_color(void){ return texture2D(Texture2, texture2_coord().xy); }\n"
+"layout(index = 13) subroutine(DiffuseColor) vec4 texture3_color(void){ return texture2D(Texture3, texture3_coord().xy); }\n"
+"layout(index = 14) subroutine(DiffuseColor) vec4 texture4_color(void){ return texture2D(Texture4, texture4_coord().xy); }\n"
+"layout(index = 15) subroutine(DiffuseColor) vec4 texture5_color(void){ return texture2D(Texture5, texture5_coord().xy); }\n"
+"layout(index = 16) subroutine(DiffuseColor) vec4 texture6_color(void){ return texture2D(Texture6, texture6_coord().xy); }\n"
+"layout(index = 17) subroutine(DiffuseColor) vec4 texture7_color(void){ return texture2D(Texture7, texture7_coord().xy); }\n"
+"\n"
+"// CombinerMask\n"
+"\n"
+"layout(index = 18) subroutine(CombinerMask) vec4 combiner_mask_default(void){\n"
+"\treturn combiner_mask_color();\n"
+"}\n"
+"\n"
+"layout(index = 19) subroutine(CombinerMask) vec4 combiner_mask_inverted(void){\n"
+"\treturn 1.0 - combiner_mask_color();\n"
+"}\n"
+"\n"
+"// MaterialColor\n"
+"\n"
+"layout(index = 20) subroutine(MaterialColor) vec4 combiner_main(void){\n"
+"\tvec4 col1 = combiner_material1();\n"
+"\tvec4 col2 = combiner_material2();\n"
+"\tvec4 mask = combiner_mask();\n"
+"\n"
+"\treturn mix(col1, col2, mask.w);\n"
+"}\n"
+"\n"
+"layout(index = 21) subroutine(MaterialColor) vec4 default_material_color(void){\n"
+"\treturn diffuse_color();\n"
+"}\n"
+"\n"
+"// OutputColor\n"
+"\n"
+"layout(index = 22) subroutine(OutputColor) vec4 final_diffuse_color(void){\n"
+"\treturn material_color() * Diffuse;\n"
+"}\n"
+"\n"
+"layout(index = 23) subroutine(OutputColor) vec4 final_diffuse_color_alpha_test(void){\n"
+"\tvec4 col = material_color() * Diffuse;\n"
+"\n"
+"\tif(col.w <= AlphaRef)\n"
+"\t	discard;\n"
+"\n"
+"\treturn col;\n"
+"}\n"
+"\n"
+"// Main\n"
+"\n"
+"void main(void){\n"
+"\tFragColor = final_color();\n"
+"}\n", true);
+
+FString UOpenGLRenderDevice::FramebufferVertexShaderText(
+	"void main(void){\n"
+		"\tTexCoord0 = InTexCoord0;\n"
+		"\tgl_Position = vec4(InPosition.xy, 0.5, 1.0);\n"
+	"}\n", true);
+
+FString UOpenGLRenderDevice::FramebufferFragmentShaderText(
+	"void main(void){\n"
+		"\tFragColor = texture2D(Texture0, TexCoord0.xy);\n"
+	"}\n", true);

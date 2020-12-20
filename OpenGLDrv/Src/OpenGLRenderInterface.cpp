@@ -189,6 +189,12 @@ void FOpenGLRenderInterface::SetCullMode(ECullMode CullMode){
 	}
 }
 
+void FOpenGLRenderInterface::SetAmbientLight(FColor Color){
+	NeedUniformUpdate = 1;
+	++CurrentState->UniformRevision;
+	CurrentState->Uniforms.AmbientLight = GLSL_vec4(Color);
+}
+
 void FOpenGLRenderInterface::SetTransform(ETransformType Type, const FMatrix& Matrix){
 	checkSlow(Type < 3);
 
@@ -223,37 +229,95 @@ FMatrix FOpenGLRenderInterface::GetTransform(ETransformType Type) const{
 }
 
 void FOpenGLRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorString, UMaterial** ErrorMaterial, INT* NumPasses){
+	guardFunc;
+
 	static INT Count = 0;
 
+	SetShader(&RenDev->FixedFunctionShader);
+
 	if(Count == 0){
-		ModifierInfo.ZWrite = true;
-		ModifierInfo.ZTest = true;
-		ModifierInfo.AlphaTest = true;
-		ModifierInfo.TwoSided = false;
-		ModifierInfo.Matrix = FMatrix::Identity;
-		ModifierInfo.Blending = FB_Overwrite;
+		ZWrite = true;
+		ZTest = true;
+		AlphaTest = false;
+		TwoSided = false;
+		AlphaRef = 0.0f;
+		TexMatrix = FMatrix::Identity;
+		FramebufferBlending = FB_Overwrite;
+		ModifyFramebufferBlending = false;
 	}
 
 	if(!Material)
 		Material = static_cast<UMaterial*>(UMaterial::StaticClass()->GetDefaultObject());
 
-	if(CheckMaterial<UShader>(Material, &ModifierInfo)){
+	if(CheckMaterial<UShader>(Material)){
 		++Count;
 		SetMaterial(static_cast<UShader*>(Material)->Diffuse);
 		--Count;
-	}else if(CheckMaterial<UCombiner>(Material, &ModifierInfo)){
+	}else if(CheckMaterial<UCombiner>(Material)){
+		INT T = 0;
+		SetCombinerMaterial(static_cast<UCombiner*>(Material), T, FSU_MaterialColor);
+	}else if(CheckMaterial<UBitmapMaterial>(Material) ||
+	         CheckMaterial<UVertexColor>(Material) ||
+	         CheckMaterial<UConstantMaterial>(Material)){
+		INT T = 0;
+		SetSimpleMaterial(Material, T, FSU_DiffuseColor);
+	}else if(CheckMaterial<UTerrainMaterial>(Material)){
 		++Count;
-		SetMaterial(static_cast<UCombiner*>(Material)->Material1);
+		SetMaterial(static_cast<UTerrainMaterial*>(Material)->Layers[0].Texture);
 		--Count;
-	}else if(CheckMaterial<UConstantMaterial>(Material, &ModifierInfo)){
+	}else if(CheckMaterial<UParticleMaterial>(Material)){
+		ModifyFramebufferBlending = true;
+		AlphaTest = true;
+		FramebufferBlending = FB_AlphaBlend;
 		++Count;
-		SetMaterial(static_cast<UMaterial*>(UMaterial::StaticClass()->GetDefaultObject()));
+		SetMaterial(static_cast<UParticleMaterial*>(Material)->BitmapMaterial);
 		--Count;
-	}else if(CheckMaterial<UBitmapMaterial>(Material, &ModifierInfo)){
+	}else if(CheckMaterial<UProjectorMultiMaterial>(Material)){
+		++Count;
+		SetMaterial(static_cast<UProjectorMultiMaterial*>(Material)->BaseMaterial);
+		--Count;
+	}else if(CheckMaterial<UProjectorMaterial>(Material)){
+		++Count;
+		SetMaterial(static_cast<UProjectorMaterial*>(Material)->Projected);
+		--Count;
+	}else if(CheckMaterial<UHardwareShaderWrapper>(Material)){
+		++Count;
+		static_cast<UHardwareShaderWrapper*>(Material)->SetupShaderWrapper(this);
+		SetMaterial(static_cast<UHardwareShaderWrapper*>(Material)->ShaderImplementation);
+		--Count;
+	}else if(CheckMaterial<UHardwareShader>(Material)){
+		AlphaTest = static_cast<UHardwareShader*>(Material)->AlphaTest != 0;
+		AlphaRef = static_cast<UHardwareShader*>(Material)->AlphaRef;
+
+		if(static_cast<UHardwareShader*>(Material)->AlphaBlending)
+			FramebufferBlending = FB_AlphaBlend;
+
+		ModifyFramebufferBlending = true;
+
+		++Count;
+		SetMaterial(static_cast<UHardwareShader*>(Material)->Textures[0]);
+		--Count;
+	}
+
+	unguard;
+}
+
+void FOpenGLRenderInterface::SetSimpleMaterial(UMaterial* Material, INT& TextureUnit, EFixedFunctionFragmentShaderSubroutineUniform ShaderSubroutine){
+	if(Material->IsA<UVertexColor>()){
+		CurrentState->Shader->FragmentShaderSubroutines[ShaderSubroutine] = FSI_VertexColor;
+		NeedShaderSubroutineUpdate = 1;
+	}else if(Material->IsA<UConstantMaterial>()){
+		FPlane Color = static_cast<UConstantMaterial*>(Material)->GetColor(GEngineTime);
+
+		CurrentState->Shader->SetUniformVec4(1, Color);
+		CurrentState->Shader->FragmentShaderSubroutines[ShaderSubroutine] = FSI_ConstantColor;
+		NeedShaderSubroutineUpdate = 1;
+	}else if(Material->IsA<UBitmapMaterial>()){
+		check(TextureUnit < MAX_TEXTURES);
+
 		UBitmapMaterial* Bitmap = static_cast<UBitmapMaterial*>(Material);
 		FBaseTexture* BaseTex = Bitmap->GetRenderInterface();
 		FTexture* Tex = BaseTex ? BaseTex->GetTextureInterface() : NULL;
-
 		FRenderTarget* RenderTarget = BaseTex ? BaseTex->GetRenderTargetInterface() : NULL;
 
 		if(RenderTarget){
@@ -261,65 +325,82 @@ void FOpenGLRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorStri
 
 			checkSlow(GLRenderTarget);
 
-			glBindTextureUnit(0, GLRenderTarget->ColorAttachment);
+			glBindTextureUnit(TextureUnit, GLRenderTarget->ColorAttachment);
+		}else{
+			if(!Tex){
+				static FSolidColorTexture DefaultTexture(FColor(255, 0, 255));
 
-			return;
+				Tex = &DefaultTexture;
+			}
+
+			UTexture* Texture = Cast<UTexture>(Bitmap);
+
+			if(Texture && !ModifyFramebufferBlending){
+				if(Texture->bMasked){
+					ModifyFramebufferBlending = true;
+					FramebufferBlending = FB_Overwrite;
+					ZTest = true;
+					ZWrite = true;
+					AlphaTest = true;
+					AlphaRef = 0.5f;
+				}else if(Texture->bAlphaTexture){
+					ModifyFramebufferBlending = true;
+					FramebufferBlending = FB_AlphaBlend;
+					ZTest = true;
+					ZWrite = true;
+					AlphaTest = true;
+					AlphaRef = 0.0f;
+				}
+
+				TwoSided = Texture->bTwoSided != 0;
+			}
+
+			QWORD CacheId = Tex->GetCacheId();
+			FOpenGLTexture* GLTexture = static_cast<FOpenGLTexture*>(RenDev->GetCachedResource(CacheId));
+
+			if(!GLTexture)
+				GLTexture = new FOpenGLTexture(RenDev, CacheId);
+
+			if(GLTexture->Revision != Tex->GetRevision())
+				GLTexture->Cache(Tex);
+
+			GLTexture->Bind(TextureUnit);
 		}
 
-		if(!Tex){
-			++Count;
-			SetMaterial(static_cast<UMaterial*>(UMaterial::StaticClass()->GetDefaultObject()));
-			--Count;
-
-			return;
-		}
-
-		UTexture* Texture = Cast<UTexture>(Bitmap);
-
-		if(Texture){
-			if(Texture->bAlphaTexture || Texture->bMasked)
-				ModifierInfo.Blending = FB_AlphaBlend;
-
-			if(Texture->bTwoSided)
-				ModifierInfo.TwoSided = true;
-		}
-
-		QWORD CacheId = Tex->GetCacheId();
-		FOpenGLTexture* GLTexture = static_cast<FOpenGLTexture*>(RenDev->GetCachedResource(CacheId));
-
-		if(!GLTexture)
-			GLTexture = new FOpenGLTexture(RenDev, CacheId);
-
-		if(GLTexture->Revision != Tex->GetRevision())
-			GLTexture->Cache(Tex);
-
-		GLTexture->Bind(0);
-	}else if(CheckMaterial<UTerrainMaterial>(Material, &ModifierInfo)){
-		++Count;
-		SetMaterial(static_cast<UTerrainMaterial*>(Material)->Layers[0].Texture);
-		--Count;
-	}else if(CheckMaterial<UParticleMaterial>(Material, &ModifierInfo)){
-		ModifierInfo.Blending = FB_AlphaBlend;
-		++Count;
-		SetMaterial(static_cast<UParticleMaterial*>(Material)->BitmapMaterial);
-		--Count;
-	}else if(CheckMaterial<UProjectorMultiMaterial>(Material, &ModifierInfo)){
-		++Count;
-		SetMaterial(static_cast<UProjectorMultiMaterial*>(Material)->BaseMaterial);
-		--Count;
-	}else if(CheckMaterial<UProjectorMaterial>(Material, &ModifierInfo)){
-		++Count;
-		SetMaterial(static_cast<UProjectorMaterial*>(Material)->Projected);
-		--Count;
-	}else if(CheckMaterial<UHardwareShaderWrapper>(Material, &ModifierInfo)){
-		++Count;
-		SetMaterial(static_cast<UHardwareShaderWrapper*>(Material)->ShaderImplementation);
-		--Count;
-	}else if(CheckMaterial<UHardwareShader>(Material, &ModifierInfo)){
-		++Count;
-		SetMaterial(static_cast<UHardwareShader*>(Material)->Textures[0]);
-		--Count;
+		CurrentState->Shader->FragmentShaderSubroutines[ShaderSubroutine] = FSI_Texture0Color + TextureUnit;
+		NeedShaderSubroutineUpdate = 1;
+		++TextureUnit;
+	}else{
+		appErrorf("Unexpected material type: '%s'", *Material->GetClass()->FriendlyName);
 	}
+}
+
+void FOpenGLRenderInterface::SetCombinerMaterial(UCombiner* Combiner, INT& TextureUnit, EFixedFunctionFragmentShaderSubroutineUniform ShaderSubroutine){
+	UMaterial* Material1 = Combiner->Material1;
+	UMaterial* Material2 = Combiner->Material2;
+	UMaterial* Mask = Combiner->Mask;
+
+	if(!Material1)
+		appErrorf("Material1 not set for combiner '%s'", Combiner->GetFullName());
+
+	if(!Material2)
+		Material2 = GetDefault<UMaterial>()->DefaultMaterial;
+
+	if(!Mask)
+		Mask = GetDefault<UMaterial>()->DefaultMaterial;
+
+	// Applying Modifiers
+	verify(CheckMaterial<URenderedMaterial>(Material1));
+	verify(CheckMaterial<URenderedMaterial>(Material2));
+	verify(CheckMaterial<URenderedMaterial>(Mask));
+
+	SetSimpleMaterial(Material1, TextureUnit, FSU_CombinerMaterial1);
+	SetSimpleMaterial(Material2, TextureUnit, FSU_CombinerMaterial2);
+	SetSimpleMaterial(Mask, TextureUnit, FSU_CombinerMaskColor);
+
+	CurrentState->Shader->FragmentShaderSubroutines[FSU_CombinerMask] = Combiner->InvertMask ? FSI_CombinerMaskInverted : FSI_CombinerMaskDefault;
+	CurrentState->Shader->FragmentShaderSubroutines[ShaderSubroutine] = FSI_CombinerMain;
+	NeedShaderSubroutineUpdate = 1;
 }
 
 static GLenum GetStencilFunc(ECompareFunction Test){
@@ -501,7 +582,10 @@ void FOpenGLRenderInterface::DrawPrimitive(EPrimitiveType PrimitiveType, INT Fir
 	if(NeedUniformUpdate)
 		UpdateShaderUniforms();
 
-	SetMaterialBlending(&ModifierInfo);
+	SetMaterialBlending();
+
+	if(NeedShaderSubroutineUpdate)
+		CurrentState->Shader->UpdateSubroutines();
 
 	GLenum Mode = 0;
 	INT    Count = NumPrimitives;
@@ -567,6 +651,28 @@ void FOpenGLRenderInterface::SetShader(FShaderGLSL* NewShader){
 
 	CurrentState->Shader = Shader;
 	Shader->Bind();
+
+	if(NewShader == &RenDev->FixedFunctionShader){
+		// Init default shader subroutines
+		CurrentState->Shader->FragmentShaderSubroutines[FSU_Texture0Coord]     = FSI_TexCoord0;
+		CurrentState->Shader->FragmentShaderSubroutines[FSU_Texture1Coord]     = FSI_TexCoord0;
+		CurrentState->Shader->FragmentShaderSubroutines[FSU_Texture2Coord]     = FSI_TexCoord0;
+		CurrentState->Shader->FragmentShaderSubroutines[FSU_Texture3Coord]     = FSI_TexCoord0;
+		CurrentState->Shader->FragmentShaderSubroutines[FSU_Texture4Coord]     = FSI_TexCoord0;
+		CurrentState->Shader->FragmentShaderSubroutines[FSU_Texture5Coord]     = FSI_TexCoord0;
+		CurrentState->Shader->FragmentShaderSubroutines[FSU_Texture6Coord]     = FSI_TexCoord0;
+		CurrentState->Shader->FragmentShaderSubroutines[FSU_Texture7Coord]     = FSI_TexCoord0;
+		CurrentState->Shader->FragmentShaderSubroutines[FSU_DiffuseColor]      = FSI_ConstantColor;
+		CurrentState->Shader->FragmentShaderSubroutines[FSU_CombinerMaterial1] = FSI_ConstantColor;
+		CurrentState->Shader->FragmentShaderSubroutines[FSU_CombinerMaterial2] = FSI_ConstantColor;
+		CurrentState->Shader->FragmentShaderSubroutines[FSU_CombinerMaskColor] = FSI_ConstantColor;
+		CurrentState->Shader->FragmentShaderSubroutines[FSU_CombinerMask]      = FSI_CombinerMaskDefault;
+		CurrentState->Shader->FragmentShaderSubroutines[FSU_MaterialColor]     = FSI_DefaultMaterialColor;
+		CurrentState->Shader->FragmentShaderSubroutines[FSU_FinalColor]        = FSI_FinalDiffuseColor;
+		UsingFixedFunctionShader = 1;
+	}else{
+		UsingFixedFunctionShader = 0;
+	}
 }
 
 void FOpenGLRenderInterface::SetFramebufferBlending(EFrameBufferBlending Blending){
@@ -587,4 +693,26 @@ void FOpenGLRenderInterface::SetupPerFrameShaderConstants(){
 	CurrentState->Uniforms.SinTime = appSin(Time);
 	CurrentState->Uniforms.CosTime = appCos(Time);
 	CurrentState->Uniforms.TanTime = appTan(Time);
+}
+
+void FOpenGLRenderInterface::SetMaterialBlending(){
+	if(TwoSided)
+		SetCullMode(CM_None);
+
+	EnableZWrite(ZWrite);
+	EnableZTest(ZTest);
+	SetFramebufferBlending(FramebufferBlending);
+
+	if(UsingFixedFunctionShader){
+		if(AlphaTest){
+			CurrentState->Shader->SetUniformFloat(0, AlphaRef);
+			CurrentState->Shader->FragmentShaderSubroutines[FSU_FinalColor] = FSI_FinalDiffuseColorAlphaTest;
+		}else{
+			CurrentState->Shader->FragmentShaderSubroutines[FSU_FinalColor] = FSI_FinalDiffuseColor;
+		}
+
+		NeedShaderSubroutineUpdate = 1;
+	}else{
+		NeedShaderSubroutineUpdate = 0;
+	}
 }

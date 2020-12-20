@@ -16,67 +16,10 @@ FOpenGLResource::~FOpenGLResource(){
 
 // FOpenGLShader
 
-static const GLchar* GlobalUniforms = "layout(std140, binding = 0) uniform Globals{\n"
-#define UNIFORM_BLOCK_MEMBER(type, name)  "\t" #type " " #name ";\n"
-                                           UNIFORM_BLOCK_CONTENTS
-#undef UNIFORM_BLOCK_MEMBER
-                                      "};\n"
-                                      "layout(binding = 0) uniform sampler2D Texture0;\n"
-                                      "layout(binding = 1) uniform sampler2D Texture1;\n"
-                                      "layout(binding = 2) uniform sampler2D Texture2;\n"
-                                      "layout(binding = 3) uniform sampler2D Texture3;\n"
-                                      "layout(binding = 4) uniform sampler2D Texture4;\n"
-                                      "layout(binding = 5) uniform sampler2D Texture5;\n"
-                                      "layout(binding = 6) uniform sampler2D Texture6;\n"
-                                      "layout(binding = 7) uniform sampler2D Texture7;\n";
-
-static const GLchar* VertexShaderVariables = "layout(location = 0)  in vec3 InPosition;\n"
-                                             "layout(location = 1)  in vec3 InNormal;\n"
-                                             "layout(location = 2)  in vec4 InDiffuse;\n"
-                                             "layout(location = 3)  in vec4 InSpecular;\n"
-                                             "layout(location = 4)  in vec4 InTexCoord0;\n"
-                                             "layout(location = 5)  in vec4 InTexCoord1;\n"
-                                             "layout(location = 6)  in vec4 InTexCoord2;\n"
-                                             "layout(location = 7)  in vec4 InTexCoord3;\n"
-                                             "layout(location = 8)  in vec4 InTexCoord4;\n"
-                                             "layout(location = 9)  in vec4 InTexCoord5;\n"
-                                             "layout(location = 10) in vec4 InTexCoord6;\n"
-                                             "layout(location = 11) in vec4 InTexCoord7;\n"
-                                             "layout(location = 12) in vec3 InTangent;\n"
-                                             "layout(location = 13) in vec3 InBinormal;\n"
-                                             "out vec3 Position;\n"
-                                             "out vec3 Normal;\n"
-                                             "out vec4 Diffuse;\n"
-                                             "out vec4 Specular;\n"
-                                             "out vec4 TexCoord0;\n"
-                                             "out vec4 TexCoord1;\n"
-                                             "out vec4 TexCoord2;\n"
-                                             "out vec4 TexCoord3;\n"
-                                             "out vec4 TexCoord4;\n"
-                                             "out vec4 TexCoord5;\n"
-                                             "out vec4 TexCoord6;\n"
-                                             "out vec4 TexCoord7;\n"
-                                             "out vec3 Tangent;\n"
-                                             "out vec3 Binormal;\n\n";
-
-static const GLchar* FragmentShaderVariables = "in vec3 Position;\n"
-                                               "in vec3 Normal;\n"
-                                               "in vec4 Diffuse;\n"
-                                               "in vec4 Specular;\n"
-                                               "in vec4 TexCoord0;\n"
-                                               "in vec4 TexCoord1;\n"
-                                               "in vec4 TexCoord2;\n"
-                                               "in vec4 TexCoord3;\n"
-                                               "in vec4 TexCoord4;\n"
-                                               "in vec4 TexCoord5;\n"
-                                               "in vec4 TexCoord6;\n"
-                                               "in vec4 TexCoord7;\n"
-                                               "in vec3 Tangent;\n"
-                                               "in vec3 Binormal;\n"
-                                               "out vec4 FragColor;\n\n";
-
 FOpenGLShader::FOpenGLShader(UOpenGLRenderDevice* InRenDev, QWORD InCacheId) : FOpenGLResource(InRenDev, InCacheId),
-                                                                                               Program(GL_NONE){}
+                                                                                               Program(GL_NONE),
+                                                                                               NumVertexShaderSubroutines(0),
+                                                                                               NumFragmentShaderSubroutines(0){}
 
 FOpenGLShader::~FOpenGLShader(){
 	if(Program)
@@ -87,7 +30,7 @@ void FOpenGLShader::Cache(FShaderGLSL* Shader){
 	GLuint VertexShader = CompileShader(Shader, GL_VERTEX_SHADER);
 	GLuint FragmentShader = CompileShader(Shader, GL_FRAGMENT_SHADER);
 
-	// Set revision even if compilation if unsuccessful to avoid recompiling the invalid shader each time it is set
+	// Set revision even if compilation is unsuccessful to avoid recompiling the invalid shader each time it is set
 	Revision = Shader->GetRevision();
 
 	if(!VertexShader || !FragmentShader){
@@ -125,6 +68,12 @@ void FOpenGLShader::Cache(FShaderGLSL* Shader){
 			glDeleteProgram(Program);
 
 		Program = NewProgram;
+
+		glGetProgramStageiv(Program, GL_VERTEX_SHADER, GL_ACTIVE_SUBROUTINE_UNIFORM_LOCATIONS, &NumVertexShaderSubroutines);
+		glGetProgramStageiv(Program, GL_FRAGMENT_SHADER, GL_ACTIVE_SUBROUTINE_UNIFORM_LOCATIONS, &NumFragmentShaderSubroutines);
+
+		check(NumVertexShaderSubroutines < MAX_SHADER_SUBROUTINES);
+		check(NumFragmentShaderSubroutines < MAX_SHADER_SUBROUTINES);
 	}
 }
 
@@ -133,41 +82,50 @@ void FOpenGLShader::Bind() const{
 	glUseProgram(Program);
 }
 
+void FOpenGLShader::UpdateSubroutines() const{
+	if(NumVertexShaderSubroutines > 0)
+		glUniformSubroutinesuiv(GL_VERTEX_SHADER, NumVertexShaderSubroutines, VertexShaderSubroutines);
+
+	if(NumFragmentShaderSubroutines > 0)
+		glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, NumFragmentShaderSubroutines, FragmentShaderSubroutines);
+}
+
+void FOpenGLShader::SetUniformInt(GLuint Index, GLint Value) const{
+	glProgramUniform1i(Program, Index, Value);
+}
+
+void FOpenGLShader::SetUniformFloat(GLuint Index, GLfloat Value) const{
+	glProgramUniform1f(Program, Index, Value);
+}
+
+void FOpenGLShader::SetUniformVec2(GLuint Index, const GLSL_vec2& Value) const{
+	glProgramUniform2f(Program, Index, Value.X, Value.Y);
+}
+
+void FOpenGLShader::SetUniformVec3(GLuint Index, const GLSL_vec3& Value) const{
+	glProgramUniform3f(Program, Index, Value.X, Value.Y, Value.Z);
+}
+
+void FOpenGLShader::SetUniformVec4(GLuint Index, const GLSL_vec4& Value) const{
+	glProgramUniform4f(Program, Index, Value.X, Value.Y, Value.Z, Value.W);
+}
+
 GLuint FOpenGLShader::CompileShader(FShaderGLSL* Shader, GLenum Type){
 	GLuint Handle = glCreateShader(Type);
-	const TCHAR* Variables = NULL;
-	FString EntryPoint;
-	FString Main;
-	const TCHAR* Text = NULL;
-	const TCHAR* Ext = NULL;
+	const TCHAR* ShaderText = NULL;
+	const TCHAR* FileExt = NULL;
 
 	if(Type == GL_VERTEX_SHADER){
-		Variables = VertexShaderVariables;
-		EntryPoint = Shader->GetVertexShaderEntryPointName();
-		Main = Shader->GetVertexShaderMain();
-		Text = Shader->GetVertexShaderText();
-		Ext = VERTEX_SHADER_EXTENSION;
+		ShaderText = Shader->GetVertexShaderText();
+		FileExt = VERTEX_SHADER_FILE_EXTENSION;
 	}else if(Type == GL_FRAGMENT_SHADER){
-		Variables = FragmentShaderVariables;
-		EntryPoint = Shader->GetFragmentShaderEntryPointName();
-		Main = Shader->GetFragmentShaderMain();
-		Text = Shader->GetFragmentShaderText();
-		Ext = FRAGMENT_SHADER_EXTENSION;
+		ShaderText = Shader->GetFragmentShaderText();
+		FileExt = FRAGMENT_SHADER_FILE_EXTENSION;
 	}else{
 		appErrorf("Unsupported shader type (%i)", Type);
 	}
 
-	const GLchar* CombinedSource[] = {
-		"#version 450\n\n",
-		GlobalUniforms,
-		Variables,
-		*(FStringTemp("vec4 ", true) + EntryPoint + "();\n\n"), // Forward declaration so that default main can call the shader specific main
-		*Main,
-		"#line 1\n",
-		Text
-	};
-
-	glShaderSource(Handle, ARRAY_COUNT(CombinedSource), CombinedSource, NULL);
+	glShaderSource(Handle, 1, &ShaderText, NULL);
 	glCompileShader(Handle);
 
 	GLint Status;
@@ -178,7 +136,7 @@ GLuint FOpenGLShader::CompileShader(FShaderGLSL* Shader, GLenum Type){
 		GLchar Buffer[512];
 
 		glGetShaderInfoLog(Handle, ARRAY_COUNT(Buffer), NULL, Buffer);
-		debugf("Shader compilation failed for %s%s: %s", Shader->GetName(), Ext, Buffer);
+		debugf("Shader compilation failed for %s%s: %s", Shader->GetName(), FileExt, Buffer);
 		glDeleteShader(Handle);
 		Handle = GL_NONE;
 	}
@@ -189,6 +147,8 @@ GLuint FOpenGLShader::CompileShader(FShaderGLSL* Shader, GLenum Type){
 // FOpenGLRenderTarget
 
 FOpenGLRenderTarget::FOpenGLRenderTarget(UOpenGLRenderDevice* InRenDev, QWORD InCacheId) : FOpenGLResource(InRenDev, InCacheId),
+                                                                                           Width(0),
+                                                                                           Height(0),
                                                                                            FBO(GL_NONE),
                                                                                            ColorAttachment(GL_NONE){}
 
@@ -199,14 +159,22 @@ FOpenGLRenderTarget::~FOpenGLRenderTarget(){
 void FOpenGLRenderTarget::Cache(FRenderTarget* RenderTarget){
 	Free();
 
+	Width = RenderTarget->GetWidth();
+	Height = RenderTarget->GetHeight();
+
+	if(Width == 0 || Height == 0)
+		return;
+
 	glCreateFramebuffers(1, &FBO);
 	glCreateTextures(GL_TEXTURE_2D, 1, &ColorAttachment);
-	glTextureStorage2D(ColorAttachment, 1, RenDev->Use16bit ? GL_RGB565 : GL_RGB8, RenderTarget->GetWidth(), RenderTarget->GetHeight());
+	glTextureStorage2D(ColorAttachment, 1, RenDev->Use16bit ? GL_RGB565 : GL_RGB8, Width, Height);
 	glTextureParameteri(ColorAttachment, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTextureParameteri(ColorAttachment, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTextureParameteri(ColorAttachment, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+	glTextureParameteri(ColorAttachment, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
 	glNamedFramebufferTexture(FBO, GL_COLOR_ATTACHMENT0, ColorAttachment, 0);
 	glCreateRenderbuffers(1, &DepthStencilAttachment);
-	glNamedRenderbufferStorage(DepthStencilAttachment, GL_DEPTH24_STENCIL8, RenderTarget->GetWidth(), RenderTarget->GetHeight());
+	glNamedRenderbufferStorage(DepthStencilAttachment, GL_DEPTH24_STENCIL8, Width, Height);
 	glNamedFramebufferRenderbuffer(FBO, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, DepthStencilAttachment);
 
 	checkSlow(glCheckNamedFramebufferStatus(FBO, GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE);

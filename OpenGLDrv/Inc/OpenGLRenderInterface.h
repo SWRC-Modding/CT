@@ -9,51 +9,15 @@ class FOpenGLIndexBuffer;
 class FOpenGLVertexStream;
 class FOpenGLShader;
 
-// GLSL equivalent types with proper alignment
-
-typedef ALIGN(4) __int32 GLSL_bool;
-typedef ALIGN(4) __int32 GLSL_int;
-typedef ALIGN(4) float GLSL_float;
-typedef ALIGN(8) struct{ GLSL_float X; GLSL_float Y; } GLSL_vec2;
-typedef ALIGN(16) FVector GLSL_vec3;
-typedef ALIGN(16) FPlane GLSL_vec4;
-typedef ALIGN(16) FMatrix GLSL_mat4;
-
-// Macro to synchronize the GLSL uniform block with the C++ struct
-#define UNIFORM_BLOCK_CONTENTS \
-	UNIFORM_BLOCK_MEMBER(mat4, LocalToWorld) \
-	UNIFORM_BLOCK_MEMBER(mat4, WorldToCamera) \
-	UNIFORM_BLOCK_MEMBER(mat4, CameraToScreen) \
-	UNIFORM_BLOCK_MEMBER(mat4, Transform) \
-	UNIFORM_BLOCK_MEMBER(float, Time) \
-	UNIFORM_BLOCK_MEMBER(float, CosTime) \
-	UNIFORM_BLOCK_MEMBER(float, SinTime) \
-	UNIFORM_BLOCK_MEMBER(float, TanTime)
-
-// Global uniforms available in every shader
-struct FOpenGLGlobalUniforms{
-#define UNIFORM_BLOCK_MEMBER(type, name) GLSL_ ## type name;
-	UNIFORM_BLOCK_CONTENTS
-#undef UNIFORM_BLOCK_MEMBER
-};
-
 #define MAX_STATESTACKDEPTH 16
 #define MAX_VERTEX_STREAMS MAX_VERTEX_COMPONENTS
+#define MAX_TEXTURES 8
 
 struct FStreamDeclaration{
 	FVertexComponent Components[MAX_VERTEX_COMPONENTS];
 	INT              NumComponents;
 
 	void Init(FVertexStream* VertexStream){ NumComponents = VertexStream->GetComponents(Components); }
-};
-
-struct FModifierInfo{
-	bool ZWrite;
-	bool ZTest;
-	bool AlphaTest;
-	bool TwoSided;
-	FMatrix Matrix;
-	EFrameBufferBlending Blending;
 };
 
 /*
@@ -93,26 +57,27 @@ public:
 		EFrameBufferBlending  FramebufferBlending;
 	};
 
-	void SetMaterialBlending(FModifierInfo* ModifierInfo){
-		EnableZWrite(ModifierInfo->ZWrite);
-		EnableZTest(ModifierInfo->ZTest);
+	UOpenGLRenderDevice*      RenDev;
 
-		if(ModifierInfo->TwoSided)
-			SetCullMode(CM_None);
+	FOpenGLSavedState         SavedStates[MAX_STATESTACKDEPTH];
+	FOpenGLSavedState*        CurrentState;
+	FOpenGLSavedState*        PoppedState;
 
-		SetFramebufferBlending(ModifierInfo->Blending);
-	}
+	UBOOL                     UsingFixedFunctionShader;
+	UBOOL                     NeedShaderSubroutineUpdate;
+	UBOOL                     NeedUniformUpdate;
+	unsigned int              GlobalUBO;
 
-	FModifierInfo        ModifierInfo;
+	// Blending
+	bool                      ZWrite;
+	bool                      ZTest;
+	bool                      AlphaTest;
+	bool                      TwoSided;
+	FLOAT                     AlphaRef;
+	EFrameBufferBlending      FramebufferBlending;
+	bool                      ModifyFramebufferBlending;
 
-	UOpenGLRenderDevice* RenDev;
-
-	FOpenGLSavedState    SavedStates[MAX_STATESTACKDEPTH];
-	FOpenGLSavedState*   CurrentState;
-	FOpenGLSavedState*   PoppedState;
-
-	UBOOL                NeedUniformUpdate;
-	unsigned int         GlobalUBO;
+	FMatrix                   TexMatrix;
 
 	FStreamDeclaration   VertexStreamDeclarations[MAX_VERTEX_STREAMS];
 
@@ -130,7 +95,7 @@ public:
 	virtual void PushHit(const BYTE* Data, INT Count){}
 	virtual void PopHit(INT Count, UBOOL Force){}
 	virtual void SetCullMode(ECullMode CullMode);
-	virtual void SetAmbientLight(FColor Color){}
+	virtual void SetAmbientLight(FColor Color);
 	virtual void EnableLighting(UBOOL UseDynamic, UBOOL UseStatic = 1, UBOOL Modulate2X = 0, FBaseTexture* UseLightmap = NULL, UBOOL LightingOnly = 0, const FSphere& LitSphere = FSphere(FVector(0, 0, 0), 0), int = 0){}
 	virtual void SetLight(INT LightIndex, FDynamicLight* Light, FLOAT Scale = 1.0f){}
 	virtual void SetNPatchTesselation(FLOAT Tesselation){}
@@ -160,10 +125,17 @@ public:
 private:
 	INT SetIndexBuffer(FIndexBuffer* IndexBuffer, INT BaseIndex, bool IsDynamic);
 	INT SetVertexStreams(EVertexShader Shader, FVertexStream** Streams, INT NumStreams, bool IsDynamic);
+
+	void SetMaterialBlending();
+	void SetSimpleMaterial(UMaterial* Material, INT& TextureUnit, EFixedFunctionFragmentShaderSubroutineUniform ShaderSubroutine);
+	void SetCombinerMaterial(UCombiner* Combiner, INT& TextureUnit, EFixedFunctionFragmentShaderSubroutineUniform ShaderSubroutine);
+
+	template<typename T>
+	bool CheckMaterial(UMaterial*& Material);
 };
 
 template<typename T>
-bool CheckMaterial(UMaterial*& Material, FModifierInfo* ModifierInfo){
+bool FOpenGLRenderInterface::CheckMaterial(UMaterial*& Material){
 	if(Material->IsA<T>())
 		return true;
 
@@ -174,15 +146,21 @@ bool CheckMaterial(UMaterial*& Material, FModifierInfo* ModifierInfo){
 			FMatrix* Matrix = static_cast<UTexModifier*>(Modifier)->GetMatrix(GEngineTime);
 
 			if(Matrix)
-				ModifierInfo->Matrix *= *Matrix;
+				TexMatrix *= *Matrix;
 		}else if(Modifier->IsA<UFinalBlend>()){
 			UFinalBlend* FinalBlend = static_cast<UFinalBlend*>(Modifier);
 
-			ModifierInfo->ZWrite    |= FinalBlend->ZWrite != 0;
-			ModifierInfo->ZTest     |= FinalBlend->ZTest != 0;
-			ModifierInfo->AlphaTest |= FinalBlend->AlphaTest != 0;
-			ModifierInfo->TwoSided  |= FinalBlend->TwoSided != 0;
-			ModifierInfo->Blending   = static_cast<EFrameBufferBlending>(FinalBlend->FrameBufferBlending);
+			ModifyFramebufferBlending = true;
+			ZWrite |= FinalBlend->ZWrite != 0;
+			ZTest |= FinalBlend->ZTest != 0;
+
+			if(FinalBlend->AlphaTest){
+				AlphaTest = true;
+				AlphaRef = FinalBlend->AlphaRef;
+			}
+
+			TwoSided |= FinalBlend->TwoSided != 0;
+			FramebufferBlending = static_cast<EFrameBufferBlending>(FinalBlend->FrameBufferBlending);
 		}else if(Modifier->IsA<UColorModifier>()){
 
 		}else if(Modifier->IsA<UOpacityModifier>()){

@@ -5433,6 +5433,19 @@ public:
 };
 
 /*
+ * TexCoordSource
+ */
+
+class ENGINE_API UTexCoordSource : public UTexModifier{
+public:
+	INT SourceChannel;
+
+	DECLARE_CLASS(UTexCoordSource,UTexModifier,0,Engine)
+
+	virtual void PostEditChange();
+};
+
+/*
  * TexOscillator
  */
 

@@ -8,16 +8,9 @@ class FOpenGLResource;
 class FOpenGLShader;
 class FOpenGLRenderTarget;
 
-#define DEFAULT_SHADERS \
-	SHADER(Default) \
-	SHADER(Framebuffer)
-
-enum EShader{
-	#define SHADER(x) SHADER_ ## x,
-	DEFAULT_SHADERS
-	#undef SHADER
-	SHADER_MAX
-};
+#define FRAGMENT_SHADER_FILE_EXTENSION ".fsh"
+#define VERTEX_SHADER_FILE_EXTENSION ".vsh"
+#define MAX_SHADER_SUBROUTINES 32
 
 class OPENGLDRV_API UOpenGLRenderDevice : public URenderDevice{
 	DECLARE_CLASS(UOpenGLRenderDevice,URenderDevice,CLASS_Config,OpenGLDrv)
@@ -29,6 +22,11 @@ public:
 	HGLRC                  OpenGLContext;
 	FOpenGLRenderInterface RenderInterface;
 	FRenderCaps            RenderCaps;
+
+	// Resources
+	FAuxRenderTarget       ScreenRenderTarget;
+	FShaderGLSL            FixedFunctionShader;
+	FShaderGLSL            FramebufferShader;
 
 	UOpenGLRenderDevice();
 	void StaticConstructor();
@@ -63,7 +61,7 @@ public:
 	virtual int GetStateCaching(){ return 0; }
 	virtual int SetStateCaching(int){ return 0; }
 	virtual int RefreshStates(){ return 0; }
-	virtual UBOOL DoesSupportFSAA(int){ return 0; }
+	virtual INT DoesSupportFSAA(INT Level){ return 0; }
 	virtual void TakeScreenshot(const char*, class UViewport*, int, int){}
 	virtual UBOOL SupportsTextureFormat(ETextureFormat){ return 0; }
 
@@ -74,11 +72,9 @@ public:
 		return Scratch.GetData();
 	}
 
-	FShaderGLSL* GetShader(EShader Shader){ return &DefaultShaders[Shader]; }
 	void LoadShaders();
 
 private:
-	FAuxRenderTarget          ScreenRenderTarget;
 	UBOOL                     bFirstRun;
 	UBOOL                     bIsFullscreen;
 	INT                       SavedViewportWidth;
@@ -94,7 +90,16 @@ private:
 
 	FStringNoInit             ShaderDir;
 
-	FShaderGLSL               DefaultShaders[SHADER_MAX];
+	TMap<FString, FString>    VertexShaderTextByName;
+	TMap<FString, FString>    FragmentShaderTextByName;
+
+	static FString            CommonShaderHeaderText;
+	static FString            VertexShaderVarsText;
+	static FString            FragmentShaderVarsText;
+	static FString            FixedFunctionVertexShaderText;
+	static FString            FixedFunctionFragmentShaderText;
+	static FString            FramebufferVertexShaderText;
+	static FString            FramebufferFragmentShaderText;
 
 	friend class FOpenGLResource;
 	friend class FOpenGLRenderInterface;
@@ -106,5 +111,5 @@ private:
 	FOpenGLIndexBuffer* GetDynamicIndexBuffer(INT IndexSize);
 	FOpenGLVertexStream* GetDynamicVertexStream();
 
-	void LoadShader(FShaderGLSL* Shader, const TCHAR* Name);
+	void LoadShader(FShaderGLSL* Shader);
 };

@@ -17,6 +17,7 @@ class OPENGLDRV_API UOpenGLRenderDevice : public URenderDevice{
 public:
 	UBOOL                  bUseDesktopResolution;
 	UBOOL                  bKeepAspectRatio;
+	UBOOL                  bDebugOpenGL;
 
 	HDC                    DeviceContext;
 	HGLRC                  OpenGLContext;

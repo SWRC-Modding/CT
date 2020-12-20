@@ -1,6 +1,7 @@
 #include "../Inc/OpenGLRenderDevice.h"
 
 #include "GL/glew.h"
+#include "GL/wglew.h"
 #include "OpenGLResource.h"
 
 #define MIN_OPENGL_MAJOR_VERSION 4
@@ -21,6 +22,7 @@ void UOpenGLRenderDevice::StaticConstructor(){
 
 	new(GetClass(), "UseDesktopResolution", RF_Public) UBoolProperty(CPP_PROPERTY(bUseDesktopResolution), "Options", CPF_Config);
 	new(GetClass(), "KeepAspectRatio", RF_Public) UBoolProperty(CPP_PROPERTY(bKeepAspectRatio), "Options", CPF_Config);
+	new(GetClass(), "DebugOpenGL", RF_Public) UBoolProperty(CPP_PROPERTY(bDebugOpenGL), "", CPF_Config);
 	new(GetClass(), "FirstRun", RF_Public) UBoolProperty(CPP_PROPERTY(bFirstRun), "", CPF_Config);
 	new(GetClass(), "ShaderDir", RF_Public) UStrProperty(CPP_PROPERTY(ShaderDir), "", CPF_Config);
 }
@@ -182,15 +184,17 @@ UBOOL UOpenGLRenderDevice::Exec(const TCHAR* Cmd, FOutputDevice& Ar){
 	return 0;
 }
 
-void GLAPIENTRY MessageCallback(GLenum source,
+void GLAPIENTRY OpenGLMessageCallback(GLenum source,
                                 GLenum type,
                                 GLuint id,
                                 GLenum severity,
                                 GLsizei length,
                                 const GLchar* message,
                                 const void* userParam){
-	if(type == GL_DEBUG_TYPE_ERROR)
-		appMsgf(3, "GL CALLBACK: %s type = 0x%x, severity = 0x%x, message = %s", "** GL ERROR **", type, severity, message);
+	debugf("GL CALLBACK: type = 0x%x, severity = 0x%x, message = %s", type, severity, message);
+
+	if(type == GL_DEBUG_TYPE_ERROR && appIsDebuggerPresent())
+		appDebugBreak();
 }
 
 UBOOL UOpenGLRenderDevice::SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL Fullscreen, INT ColorBytes, UBOOL bSaveSize){
@@ -243,30 +247,71 @@ UBOOL UOpenGLRenderDevice::SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL
 		};
 
 		INT PixelFormat = ChoosePixelFormat(DeviceContext, &Pfd);
-		Parse(appCmdLine(), "PIXELFORMAT=", PixelFormat);
-		check(PixelFormat);
 
 		debugf(NAME_Init, "Using pixel format %i", PixelFormat);
+		debugf(NAME_Init, "%i-bit color buffer", ColorBytes * 8);
 
-		verify(SetPixelFormat(DeviceContext, PixelFormat, &Pfd));
+		SetPixelFormat(DeviceContext, PixelFormat, &Pfd);
 
-		OpenGLContext = wglCreateContext(DeviceContext);
+		HGLRC TempContext = wglCreateContext(DeviceContext);
 
-		MakeCurrent();
+		if(!TempContext)
+			appErrorf("Failed to create OpenGL context");
+
+		wglMakeCurrent(DeviceContext, TempContext);
 
 		glewExperimental = GL_TRUE;
+
 		GLenum GlewStatus = glewInit();
 
 		if(GlewStatus != GLEW_OK)
 			appErrorf("GLEW failed to initialize: %s", glewGetErrorString(GlewStatus));
 
-		glEnable(GL_DEBUG_OUTPUT);
-		glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
-		glDebugMessageCallback(MessageCallback, NULL);
+		if(WGLEW_ARB_create_context){
+			TArray<int> Attributes;
+
+			Attributes.Add(WGL_CONTEXT_MAJOR_VERSION_ARB);
+			Attributes.Add(MIN_OPENGL_MAJOR_VERSION);
+			Attributes.Add(WGL_CONTEXT_MINOR_VERSION_ARB);
+			Attributes.Add(MIN_OPENGL_MINOR_VERSION);
+			Attributes.Add(WGL_CONTEXT_FLAGS_ARB);
+			Attributes.Add(WGL_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB);
+
+			if(bDebugOpenGL){
+				debugf("OpenGL debugging enabled");
+				Attributes.Last() |= WGL_CONTEXT_DEBUG_BIT_ARB;
+			}
+
+			Attributes.Add(WGL_CONTEXT_PROFILE_MASK_ARB);
+			Attributes.Add(WGL_CONTEXT_CORE_PROFILE_BIT_ARB);
+			Attributes.Add(0);
+
+			OpenGLContext = wglCreateContextAttribsARB(DeviceContext, NULL, Attributes.GetData());
+
+			if(OpenGLContext){
+				wglMakeCurrent(DeviceContext, OpenGLContext);
+
+				GlewStatus = glewInit();
+
+				if(GlewStatus != GLEW_OK)
+					appErrorf("GLEW failed to initialize: %s", glewGetErrorString(GlewStatus));
+
+				wglDeleteContext(TempContext);
+			}else{
+				debugf(NAME_Warning, "wglCreateContextAttribsARB failed");
+				// Use the temp context as a fallback. It might still work if it supports the required OpenGL version.
+				OpenGLContext = TempContext;
+			}
+		}else{
+			debugf("WGL_ARB_create_context not supported");
+			OpenGLContext = TempContext;
+		}
 
 		debugf(NAME_Init, "GL_VENDOR      : %s", glGetString(GL_VENDOR));
 		debugf(NAME_Init, "GL_RENDERER    : %s", glGetString(GL_RENDERER));
 		debugf(NAME_Init, "GL_VERSION     : %s", glGetString(GL_VERSION));
+
+		// Check for minimum required OpenGL version
 
 		GLint MajorVersion;
 		GLint MinorVersion;
@@ -277,7 +322,11 @@ UBOOL UOpenGLRenderDevice::SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL
 		if(MajorVersion < MIN_OPENGL_MAJOR_VERSION || (MajorVersion == MIN_OPENGL_MAJOR_VERSION && MinorVersion < MIN_OPENGL_MINOR_VERSION))
 			appErrorf("OpenGL %i.%i is required but got %i.%i", MIN_OPENGL_MAJOR_VERSION, MIN_OPENGL_MINOR_VERSION, MajorVersion, MinorVersion);
 
-		debugf(NAME_Init, "%i-bit color buffer", ColorBytes * 8);
+		if(bDebugOpenGL){
+			glEnable(GL_DEBUG_OUTPUT);
+			glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+			glDebugMessageCallback(OpenGLMessageCallback, NULL);
+		}
 
 		// Check for required extensions
 

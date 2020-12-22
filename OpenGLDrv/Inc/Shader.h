@@ -31,58 +31,6 @@ struct FOpenGLGlobalUniforms{
 #undef UNIFORM_BLOCK_MEMBER
 };
 
-// Fixed function shader subroutine indices
-
-enum EFixedFunctionFragmentShaderSubroutineUniform{
-	FSU_Texture0Coord,
-	FSU_Texture1Coord,
-	FSU_Texture2Coord,
-	FSU_Texture3Coord,
-	FSU_Texture4Coord,
-	FSU_Texture5Coord,
-	FSU_Texture6Coord,
-	FSU_Texture7Coord,
-	FSU_DiffuseColor,
-	FSU_CombinerMaterial1,
-	FSU_CombinerMaterial2,
-	FSU_CombinerMaskColor,
-	FSU_CombinerMask,
-	FSU_MaterialColor,
-	FSU_FinalColor,
-};
-
-enum EFixedFunctionFragmentShaderSubroutineIndex{
-	// TexCoordSource
-	FSI_TexCoord0,
-	FSI_TexCoord1,
-	FSI_TexCoord2,
-	FSI_TexCoord3,
-	FSI_TexCoord4,
-	FSI_TexCoord5,
-	FSI_TexCoord6,
-	FSI_TexCoord7,
-	// DiffuseColor
-	FSI_ConstantColor,
-	FSI_VertexColor,
-	FSI_Texture0Color,
-	FSI_Texture1Color,
-	FSI_Texture2Color,
-	FSI_Texture3Color,
-	FSI_Texture4Color,
-	FSI_Texture5Color,
-	FSI_Texture6Color,
-	FSI_Texture7Color,
-	// CombinerMask
-	FSI_CombinerMaskDefault,
-	FSI_CombinerMaskInverted,
-	// MaterialColor
-	FSI_CombinerMain,
-	FSI_DefaultMaterialColor,
-	// OutputColor
-	FSI_FinalDiffuseColor,
-	FSI_FinalDiffuseColorAlphaTest
-};
-
 // GLSL shader resource
 
 class FShaderGLSL : public FRenderResource{

@@ -12,6 +12,7 @@ class FOpenGLShader;
 #define MAX_STATESTACKDEPTH 16
 #define MAX_VERTEX_STREAMS MAX_VERTEX_COMPONENTS
 #define MAX_TEXTURES 8
+#define MAX_SHADER_STAGES 8
 
 struct FStreamDeclaration{
 	FVertexComponent Components[MAX_VERTEX_COMPONENTS];
@@ -53,8 +54,6 @@ public:
 		unsigned int          VAO;
 		INT                   NumVertexStreams;
 		FOpenGLVertexStream*  VertexStreams[MAX_VERTEX_STREAMS];
-
-		EFrameBufferBlending  FramebufferBlending;
 	};
 
 	UOpenGLRenderDevice*      RenDev;
@@ -63,23 +62,10 @@ public:
 	FOpenGLSavedState*        CurrentState;
 	FOpenGLSavedState*        PoppedState;
 
-	UBOOL                     UsingFixedFunctionShader;
-	UBOOL                     NeedShaderSubroutineUpdate;
 	UBOOL                     NeedUniformUpdate;
 	unsigned int              GlobalUBO;
 
-	// Blending
-	bool                      ZWrite;
-	bool                      ZTest;
-	bool                      AlphaTest;
-	bool                      TwoSided;
-	FLOAT                     AlphaRef;
-	EFrameBufferBlending      FramebufferBlending;
-	bool                      ModifyFramebufferBlending;
-
-	FMatrix                   TexMatrix;
-
-	FStreamDeclaration   VertexStreamDeclarations[MAX_VERTEX_STREAMS];
+	FStreamDeclaration        VertexStreamDeclarations[MAX_VERTEX_STREAMS];
 
 	FOpenGLRenderInterface(UOpenGLRenderDevice* InRenDev);
 
@@ -118,58 +104,9 @@ public:
 
 	void EnableZTest(UBOOL Enable);
 	void SetShader(FShaderGLSL* NewShader);
-	void SetFramebufferBlending(EFrameBufferBlending Blending);
-
 	void SetupPerFrameShaderConstants();
 
 private:
 	INT SetIndexBuffer(FIndexBuffer* IndexBuffer, INT BaseIndex, bool IsDynamic);
 	INT SetVertexStreams(EVertexShader Shader, FVertexStream** Streams, INT NumStreams, bool IsDynamic);
-
-	void SetMaterialBlending();
-	void SetSimpleMaterial(UMaterial* Material, INT& TextureUnit, EFixedFunctionFragmentShaderSubroutineUniform ShaderSubroutine);
-	void SetCombinerMaterial(UCombiner* Combiner, INT& TextureUnit, EFixedFunctionFragmentShaderSubroutineUniform ShaderSubroutine);
-
-	template<typename T>
-	bool CheckMaterial(UMaterial*& Material);
 };
-
-template<typename T>
-bool FOpenGLRenderInterface::CheckMaterial(UMaterial*& Material){
-	if(Material->IsA<T>())
-		return true;
-
-	UModifier* Modifier = Cast<UModifier>(Material);
-
-	while(Modifier){
-		if(Modifier->IsA<UTexModifier>()){
-			FMatrix* Matrix = static_cast<UTexModifier*>(Modifier)->GetMatrix(GEngineTime);
-
-			if(Matrix)
-				TexMatrix *= *Matrix;
-		}else if(Modifier->IsA<UFinalBlend>()){
-			UFinalBlend* FinalBlend = static_cast<UFinalBlend*>(Modifier);
-
-			ModifyFramebufferBlending = true;
-			ZWrite |= FinalBlend->ZWrite != 0;
-			ZTest |= FinalBlend->ZTest != 0;
-
-			if(FinalBlend->AlphaTest){
-				AlphaTest = true;
-				AlphaRef = FinalBlend->AlphaRef;
-			}
-
-			TwoSided |= FinalBlend->TwoSided != 0;
-			FramebufferBlending = static_cast<EFrameBufferBlending>(FinalBlend->FrameBufferBlending);
-		}else if(Modifier->IsA<UColorModifier>()){
-
-		}else if(Modifier->IsA<UOpacityModifier>()){
-
-		}
-
-		Material = Modifier->Material;
-		Modifier = Cast<UModifier>(Material);
-	}
-
-	return Cast<T>(Material) != NULL;
-}

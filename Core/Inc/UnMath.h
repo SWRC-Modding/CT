@@ -2459,7 +2459,7 @@ inline FQuat SlerpQuat(const FQuat &quat1,const FQuat &quat2, float slerp){
 class FMatrix{
 public:
 
-	static FMatrix	Identity;
+	CORE_API static FMatrix Identity;
 
 	// Variables.
 	FLOAT M[4][4];

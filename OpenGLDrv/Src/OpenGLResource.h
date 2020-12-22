@@ -32,19 +32,10 @@ public:
 
 	void Cache(FShaderGLSL* Shader);
 	void Bind() const;
-	void UpdateSubroutines() const;
-	void SetUniformInt(GLuint Index, GLint Value) const;
-	void SetUniformFloat(GLuint Index, GLfloat Value) const;
-	void SetUniformVec2(GLuint Index, const GLSL_vec2& Value) const;
-	void SetUniformVec3(GLuint Index, const GLSL_vec3& Value) const;
-	void SetUniformVec4(GLuint Index, const GLSL_vec4& Value) const;
-
 
 	GLuint Program;
 	GLint  NumVertexShaderSubroutines;
-	GLuint VertexShaderSubroutines[MAX_SHADER_SUBROUTINES];
 	GLint  NumFragmentShaderSubroutines;
-	GLuint FragmentShaderSubroutines[MAX_SHADER_SUBROUTINES];
 
 private:
 	GLuint CompileShader(FShaderGLSL* Shader, GLenum Type);

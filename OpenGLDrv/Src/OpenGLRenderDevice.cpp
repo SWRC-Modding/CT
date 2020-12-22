@@ -352,11 +352,20 @@ UBOOL UOpenGLRenderDevice::SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL
 		RenderInterface.SetShader(&FixedFunctionShader);
 		RenderInterface.SetCullMode(CM_CW);
 		RenderInterface.SetFillMode(FM_Solid);
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
 		// Set default values for unspecified vertex attributes
 
 		glVertexAttrib4f(FVF_Diffuse, 1.0f, 1.0f, 1.0f, 1.0f);
 		glVertexAttrib4f(FVF_Specular, 1.0f, 1.0f, 1.0f, 1.0f);
+		glVertexAttrib4f(FVF_TexCoord0, 0.0f, 0.0f, 0.0f, 1.0f);
+		glVertexAttrib4f(FVF_TexCoord1, 0.0f, 0.0f, 0.0f, 1.0f);
+		glVertexAttrib4f(FVF_TexCoord2, 0.0f, 0.0f, 0.0f, 1.0f);
+		glVertexAttrib4f(FVF_TexCoord3, 0.0f, 0.0f, 0.0f, 1.0f);
+		glVertexAttrib4f(FVF_TexCoord4, 0.0f, 0.0f, 0.0f, 1.0f);
+		glVertexAttrib4f(FVF_TexCoord5, 0.0f, 0.0f, 0.0f, 1.0f);
+		glVertexAttrib4f(FVF_TexCoord6, 0.0f, 0.0f, 0.0f, 1.0f);
+		glVertexAttrib4f(FVF_TexCoord7, 0.0f, 0.0f, 0.0f, 1.0f);
 	}else{
 		MakeCurrent();
 	}
@@ -576,6 +585,7 @@ void UOpenGLRenderDevice::Present(UViewport* Viewport){
 
 		FFullscreenQuadVertexStream FullscreenQuad(XScale, YScale);
 
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 		glBindTextureUnit(0, Framebuffer->ColorAttachment);
 		RenderInterface.SetFillMode(FM_Solid);
 		RenderInterface.EnableZTest(0);
@@ -584,6 +594,7 @@ void UOpenGLRenderDevice::Present(UViewport* Viewport){
 		RenderInterface.DrawPrimitive(PT_TriangleStrip, 0, 2);
 		Framebuffer->Bind();
 		RenderInterface.PopState();
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	}
 
 	SwapBuffers(DeviceContext);
@@ -720,110 +731,9 @@ FString UOpenGLRenderDevice::FixedFunctionVertexShaderText(
 	"}\n", true);
 
 FString UOpenGLRenderDevice::FixedFunctionFragmentShaderText(
-"// Shader specific uniforms\n"
-"\n"
-"layout(location = 0) uniform float AlphaRef;\n"
-"layout(location = 1) uniform vec4 ConstantColor;\n"
-"\n"
-"// Subroutine types\n"
-"\n"
-"subroutine vec4 TexCoordSource(void);\n"
-"subroutine vec4 DiffuseColor(void);\n"
-"subroutine vec4 CombinerMask(void);\n"
-"subroutine vec4 MaterialColor(void);\n"
-"subroutine vec4 OutputColor(void);\n"
-"\n"
-"// Subroutine uniforms\n"
-"layout(location = 0) subroutine uniform TexCoordSource texture0_coord;\n"
-"layout(location = 1) subroutine uniform TexCoordSource texture1_coord;\n"
-"layout(location = 2) subroutine uniform TexCoordSource texture2_coord;\n"
-"layout(location = 3) subroutine uniform TexCoordSource texture3_coord;\n"
-"layout(location = 4) subroutine uniform TexCoordSource texture4_coord;\n"
-"layout(location = 5) subroutine uniform TexCoordSource texture5_coord;\n"
-"layout(location = 6) subroutine uniform TexCoordSource texture6_coord;\n"
-"layout(location = 7) subroutine uniform TexCoordSource texture7_coord;\n"
-"layout(location = 8) subroutine uniform DiffuseColor diffuse_color;\n"
-"layout(location = 9) subroutine uniform DiffuseColor combiner_material1;\n"
-"layout(location = 10) subroutine uniform DiffuseColor combiner_material2;\n"
-"layout(location = 11) subroutine uniform DiffuseColor combiner_mask_color;\n"
-"layout(location = 12) subroutine uniform CombinerMask combiner_mask;\n"
-"layout(location = 13) subroutine uniform MaterialColor material_color;\n"
-"layout(location = 14) subroutine uniform OutputColor final_color;\n"
-"\n"
-"// TexCoordSource\n"
-"\n"
-"layout(index = 0) subroutine(TexCoordSource) vec4 tex_coord0(void){ return TexCoord0; }\n"
-"layout(index = 1) subroutine(TexCoordSource) vec4 tex_coord1(void){ return TexCoord1; }\n"
-"layout(index = 2) subroutine(TexCoordSource) vec4 tex_coord2(void){ return TexCoord2; }\n"
-"layout(index = 3) subroutine(TexCoordSource) vec4 tex_coord3(void){ return TexCoord3; }\n"
-"layout(index = 4) subroutine(TexCoordSource) vec4 tex_coord4(void){ return TexCoord4; }\n"
-"layout(index = 5) subroutine(TexCoordSource) vec4 tex_coord5(void){ return TexCoord5; }\n"
-"layout(index = 6) subroutine(TexCoordSource) vec4 tex_coord6(void){ return TexCoord6; }\n"
-"layout(index = 7) subroutine(TexCoordSource) vec4 tex_coord7(void){ return TexCoord7; }\n"
-"\n"
-"// DiffuseColor\n"
-"\n"
-"layout(index = 8) subroutine(DiffuseColor) vec4 constant_color(void){\n"
-"\treturn ConstantColor;\n"
-"}\n"
-"\n"
-"layout(index = 9) subroutine(DiffuseColor) vec4 vertex_color(void){\n"
-"\treturn Diffuse;\n"
-"}\n"
-"\n"
-"layout(index = 10) subroutine(DiffuseColor) vec4 texture0_color(void){ return texture2D(Texture0, texture0_coord().xy); }\n"
-"layout(index = 11) subroutine(DiffuseColor) vec4 texture1_color(void){ return texture2D(Texture1, texture1_coord().xy); }\n"
-"layout(index = 12) subroutine(DiffuseColor) vec4 texture2_color(void){ return texture2D(Texture2, texture2_coord().xy); }\n"
-"layout(index = 13) subroutine(DiffuseColor) vec4 texture3_color(void){ return texture2D(Texture3, texture3_coord().xy); }\n"
-"layout(index = 14) subroutine(DiffuseColor) vec4 texture4_color(void){ return texture2D(Texture4, texture4_coord().xy); }\n"
-"layout(index = 15) subroutine(DiffuseColor) vec4 texture5_color(void){ return texture2D(Texture5, texture5_coord().xy); }\n"
-"layout(index = 16) subroutine(DiffuseColor) vec4 texture6_color(void){ return texture2D(Texture6, texture6_coord().xy); }\n"
-"layout(index = 17) subroutine(DiffuseColor) vec4 texture7_color(void){ return texture2D(Texture7, texture7_coord().xy); }\n"
-"\n"
-"// CombinerMask\n"
-"\n"
-"layout(index = 18) subroutine(CombinerMask) vec4 combiner_mask_default(void){\n"
-"\treturn combiner_mask_color();\n"
-"}\n"
-"\n"
-"layout(index = 19) subroutine(CombinerMask) vec4 combiner_mask_inverted(void){\n"
-"\treturn 1.0 - combiner_mask_color();\n"
-"}\n"
-"\n"
-"// MaterialColor\n"
-"\n"
-"layout(index = 20) subroutine(MaterialColor) vec4 combiner_main(void){\n"
-"\tvec4 col1 = combiner_material1();\n"
-"\tvec4 col2 = combiner_material2();\n"
-"\tvec4 mask = combiner_mask();\n"
-"\n"
-"\treturn mix(col1, col2, mask.w);\n"
-"}\n"
-"\n"
-"layout(index = 21) subroutine(MaterialColor) vec4 default_material_color(void){\n"
-"\treturn diffuse_color();\n"
-"}\n"
-"\n"
-"// OutputColor\n"
-"\n"
-"layout(index = 22) subroutine(OutputColor) vec4 final_diffuse_color(void){\n"
-"\treturn material_color() * Diffuse;\n"
-"}\n"
-"\n"
-"layout(index = 23) subroutine(OutputColor) vec4 final_diffuse_color_alpha_test(void){\n"
-"\tvec4 col = material_color() * Diffuse;\n"
-"\n"
-"\tif(col.w <= AlphaRef)\n"
-"\t	discard;\n"
-"\n"
-"\treturn col;\n"
-"}\n"
-"\n"
-"// Main\n"
-"\n"
-"void main(void){\n"
-"\tFragColor = final_color();\n"
-"}\n", true);
+	"void main(void){\n"
+	"\tFragColor = Diffuse;\n"
+	"}\n", true);
 
 FString UOpenGLRenderDevice::FramebufferVertexShaderText(
 	"void main(void){\n"

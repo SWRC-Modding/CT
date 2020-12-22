@@ -82,34 +82,6 @@ void FOpenGLShader::Bind() const{
 	glUseProgram(Program);
 }
 
-void FOpenGLShader::UpdateSubroutines() const{
-	if(NumVertexShaderSubroutines > 0)
-		glUniformSubroutinesuiv(GL_VERTEX_SHADER, NumVertexShaderSubroutines, VertexShaderSubroutines);
-
-	if(NumFragmentShaderSubroutines > 0)
-		glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, NumFragmentShaderSubroutines, FragmentShaderSubroutines);
-}
-
-void FOpenGLShader::SetUniformInt(GLuint Index, GLint Value) const{
-	glProgramUniform1i(Program, Index, Value);
-}
-
-void FOpenGLShader::SetUniformFloat(GLuint Index, GLfloat Value) const{
-	glProgramUniform1f(Program, Index, Value);
-}
-
-void FOpenGLShader::SetUniformVec2(GLuint Index, const GLSL_vec2& Value) const{
-	glProgramUniform2f(Program, Index, Value.X, Value.Y);
-}
-
-void FOpenGLShader::SetUniformVec3(GLuint Index, const GLSL_vec3& Value) const{
-	glProgramUniform3f(Program, Index, Value.X, Value.Y, Value.Z);
-}
-
-void FOpenGLShader::SetUniformVec4(GLuint Index, const GLSL_vec4& Value) const{
-	glProgramUniform4f(Program, Index, Value.X, Value.Y, Value.Z, Value.W);
-}
-
 GLuint FOpenGLShader::CompileShader(FShaderGLSL* Shader, GLenum Type){
 	GLuint Handle = glCreateShader(Type);
 	const TCHAR* ShaderText = NULL;

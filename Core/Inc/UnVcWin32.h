@@ -627,7 +627,7 @@ inline void appMemset4(void* Dest, DWORD Value, INT Count){
 	}
 }
 
-#define appDebugBreak() __asm int 3
+#define appDebugBreak() __asm{ int 3 }
 
 extern "C" void* __cdecl _alloca(size_t);
 #define appAlloca(size) ((size == 0) ? NULL : _alloca((size + 7) & ~7))

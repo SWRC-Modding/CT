@@ -63,6 +63,7 @@ void UOpenGLRenderDevice::UnSetRes(){
 void UOpenGLRenderDevice::AddResource(FOpenGLResource* Resource){
 	checkSlow(Resource->HashIndex == INDEX_NONE);
 	checkSlow(Resource->HashNext == NULL);
+	checkSlow(GetCachedResource(Resource->CacheId) == NULL);
 
 	Resource->HashIndex = GetResourceHashIndex(Resource->CacheId);
 	Resource->HashNext = ResourceHash[Resource->HashIndex];
@@ -482,6 +483,8 @@ FRenderInterface* UOpenGLRenderDevice::Lock(UViewport* Viewport, BYTE* HitData, 
 
 	MakeCurrent();
 
+	RenderInterface.LockedViewport = Viewport;
+
 	// Render target and default shader might be deleted when Flush is called so check for that and set them again
 
 	if(!RenderInterface.CurrentState->RenderTarget)
@@ -503,6 +506,7 @@ FRenderInterface* UOpenGLRenderDevice::Lock(UViewport* Viewport, BYTE* HitData, 
 
 void UOpenGLRenderDevice::Unlock(FRenderInterface* RI){
 	RI->PopState();
+	RenderInterface.LockedViewport = NULL;
 }
 
 class FFullscreenQuadVertexStream : public FVertexStream{
@@ -551,7 +555,7 @@ public:
 void UOpenGLRenderDevice::Present(UViewport* Viewport){
 	checkSlow(IsCurrent());
 
-	FOpenGLRenderTarget* Framebuffer = RenderInterface.CurrentState->RenderTarget;
+	FOpenGLTexture* Framebuffer = RenderInterface.CurrentState->RenderTarget;
 
 	if(Framebuffer){
 		RenderInterface.PushState();
@@ -595,16 +599,14 @@ void UOpenGLRenderDevice::Present(UViewport* Viewport){
 
 		FFullscreenQuadVertexStream FullscreenQuad(XScale, YScale);
 
-		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-		glBindTextureUnit(0, Framebuffer->ColorAttachment);
+		Framebuffer->BindTexture(0);
 		RenderInterface.SetFillMode(FM_Solid);
 		RenderInterface.EnableZTest(0);
 		RenderInterface.SetDynamicStream(VS_FixedFunction, &FullscreenQuad);
 		RenderInterface.SetShader(&FramebufferShader);
 		RenderInterface.DrawPrimitive(PT_TriangleStrip, 0, 2);
-		Framebuffer->Bind();
+		Framebuffer->BindRenderTarget();
 		RenderInterface.PopState();
-		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	}
 
 	SwapBuffers(DeviceContext);
@@ -724,6 +726,7 @@ FString UOpenGLRenderDevice::FragmentShaderVarsText(
 	"out vec4 FragColor;\n\n", true);
 
 FString UOpenGLRenderDevice::FixedFunctionVertexShaderText(
+	"out vec4 StageTexCoords[8];\n\n"
 	"void main(void){\n"
 		"\tPosition = (LocalToWorld * vec4(InPosition, 1.0)).xyz;\n"
 		"\tNormal = (LocalToWorld * vec4(InNormal, 0.0)).xyz;\n"
@@ -736,13 +739,135 @@ FString UOpenGLRenderDevice::FixedFunctionVertexShaderText(
 		"\tTexCoord4 = InTexCoord4;\n"
 		"\tTexCoord5 = InTexCoord5;\n"
 		"\tTexCoord6 = InTexCoord6;\n"
-		"\tTexCoord7 = InTexCoord7;\n\n"
+		"\tTexCoord7 = InTexCoord7;\n"
+		"\n"
+		"\tStageTexCoords = vec4[](TexCoord0, TexCoord0, TexCoord0, TexCoord0, TexCoord0, TexCoord0, TexCoord0, TexCoord0);\n"
+		"\n"
 		"\tgl_Position = Transform * vec4(InPosition, 1.0);\n"
 	"}\n", true);
 
 FString UOpenGLRenderDevice::FixedFunctionFragmentShaderText(
+	"layout(location = 0)  uniform int NumStages;\n"
+	"layout(location = 1)  uniform int StageColorArgs[16];\n"
+	"layout(location = 17) uniform int StageColorOps[8];\n"
+	"layout(location = 25) uniform int StageAlphaArgs[16];\n"
+	"layout(location = 41) uniform int StageAlphaOps[8];\n"
+	"layout(location = 49) uniform vec4 ConstantColor;\n"
+	"\n"
+	"in vec4 StageTexCoords[8];\n"
+	"\n"
+	"#define CA_Previous 0\n"
+	"#define CA_Diffuse  1\n"
+	"#define CA_Constant 2\n"
+	"#define CA_Texture0 3\n"
+	"#define CA_Texture1 4\n"
+	"#define CA_Texture2 5\n"
+	"#define CA_Texture3 6\n"
+	"#define CA_Texture4 7\n"
+	"#define CA_Texture5 8\n"
+	"#define CA_Texture6 9\n"
+	"#define CA_Texture7 10\n"
+	"\n"
+	"vec4 color_arg(int StageIndex, int Arg){\n"
+		"\tswitch(StageColorArgs[StageIndex * 2 + Arg]){\n"
+		"\tcase CA_Previous:\n"
+		"\t	return FragColor;\n"
+		"\tcase CA_Diffuse:\n"
+		"\t	return Diffuse;\n"
+		"\tcase CA_Constant:\n"
+		"\t	return ConstantColor;\n"
+		"\tcase CA_Texture0:\n"
+		"\t	return texture2D(Texture0, StageTexCoords[StageIndex].xy);\n"
+		"\tcase CA_Texture1:\n"
+		"\t	return texture2D(Texture1, StageTexCoords[StageIndex].xy);\n"
+		"\tcase CA_Texture2:\n"
+		"\t	return texture2D(Texture2, StageTexCoords[StageIndex].xy);\n"
+		"\tcase CA_Texture3:\n"
+		"\t	return texture2D(Texture3, StageTexCoords[StageIndex].xy);\n"
+		"\tcase CA_Texture4:\n"
+		"\t	return texture2D(Texture4, StageTexCoords[StageIndex].xy);\n"
+		"\tcase CA_Texture5:\n"
+		"\t	return texture2D(Texture5, StageTexCoords[StageIndex].xy);\n"
+		"\tcase CA_Texture6:\n"
+		"\t	return texture2D(Texture6, StageTexCoords[StageIndex].xy);\n"
+		"\tcase CA_Texture7:\n"
+		"\t	return texture2D(Texture7, StageTexCoords[StageIndex].xy);\n"
+		"\t}\n"
+		"\n"
+		"\treturn vec4(1.0, 1.0, 1.0, 1.0);\n"
+	"}\n"
+	"\n"
+	"#define COP_Arg1             0\n"
+	"#define COP_Arg2             1\n"
+	"#define COP_Modulate         2\n"
+	"#define COP_Add              3\n"
+	"#define COP_Subtract         4\n"
+	"#define COP_AlphaBlend       5\n"
+	"#define COP_AddAlphaModulate 6\n"
+	"\n"
+	"vec4 color_op(int StageIndex, vec4 Arg1, vec4 Arg2){\n"
+		"\tswitch(StageColorOps[StageIndex]){\n"
+		"\t	case COP_Arg1:\n"
+			"\t\treturn Arg1;\n"
+		"\t	case COP_Arg2:\n"
+			"\t\treturn Arg2;\n"
+		"\t	case COP_Modulate:\n"
+			"\t\treturn Arg1 * Arg2;\n"
+		"\t	case COP_Add:\n"
+			"\t\treturn Arg1 + Arg2;\n"
+		"\t	case COP_Subtract:\n"
+			"\t\treturn Arg1 - Arg2;\n"
+		"\t	case COP_AlphaBlend:\n"
+			"\t\treturn mix(Arg1, Arg2, Arg1.a);\n"
+		"\t	case COP_AddAlphaModulate:\n"
+			"\t\treturn Arg1 + Arg2 * Arg1.a;\n"
+		"\t}\n"
+		"\n"
+		"\treturn vec4(1.0, 1.0, 1.0, 1.0);\n"
+	"}\n"
+	"\n"
+	"#define AOP_Arg1     0\n"
+	"#define AOP_Arg2     1\n"
+	"#define AOP_Modulate 2\n"
+	"#define AOP_Add      3\n"
+	"#define AOP_Blend    4\n"
+	"\n"
+	"float alpha_op(int StageIndex, float Arg1, float Arg2){\n"
+		"\tswitch(StageAlphaOps[StageIndex]){\n"
+		"\tcase AOP_Arg1:\n"
+		"\t	return Arg1;\n"
+		"\tcase AOP_Arg2:\n"
+		"\t	return Arg2;\n"
+		"\tcase AOP_Modulate:\n"
+		"\t	return Arg1 * Arg2;\n"
+		"\tcase AOP_Add:\n"
+		"\t	return Arg1 + Arg2;\n"
+		"\tcase AOP_Blend:\n"
+		"\t	return mix(Arg1, Arg2, Arg1);\n"
+		"\t}\n"
+		"\n"
+		"\treturn 1.0;\n"
+	"}\n"
+	"\n"
+	"void shader_stage(int StageIndex){\n"
+		"\tvec4 ColorArg1 = color_arg(StageIndex, 0);\n"
+		"\tvec4 ColorArg2 = color_arg(StageIndex, 1);\n"
+		"\n"
+		"\tFragColor.rgb = color_op(StageIndex, ColorArg1, ColorArg2).rgb;\n"
+		"\n"
+		"\tfloat AlphaArg1 = color_arg(StageIndex, 0).a;\n"
+		"\tfloat AlphaArg2 = color_arg(StageIndex, 1).a;\n"
+		"\n"
+		"\tFragColor.a = alpha_op(StageIndex, AlphaArg1, AlphaArg2);\n"
+	"}\n"
+	"\n"
+	"// Main\n"
+	"\n"
 	"void main(void){\n"
-	"\tFragColor = Diffuse;\n"
+		"\tFragColor = vec4(1.0, 1.0, 1.0, 1.0);\n"
+		"\n"
+		"\tfor(int i = 0; i < NumStages; ++i)\n"
+		"\t	shader_stage(i);\n"
 	"}\n", true);
 
 FString UOpenGLRenderDevice::FramebufferVertexShaderText(

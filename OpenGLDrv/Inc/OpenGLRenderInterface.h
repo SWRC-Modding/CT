@@ -4,7 +4,7 @@
 #include "Shader.h"
 
 class UOpenGLRenderDevice;
-class FOpenGLRenderTarget;
+class FOpenGLTexture;
 class FOpenGLIndexBuffer;
 class FOpenGLVertexStream;
 class FOpenGLShader;
@@ -21,6 +21,47 @@ struct FStreamDeclaration{
 	void Init(FVertexStream* VertexStream){ NumComponents = VertexStream->GetComponents(Components); }
 };
 
+enum EColorArg{
+	CA_Previous,
+	CA_Diffuse,
+	CA_Constant,
+	CA_Texture0,
+	CA_Texture1,
+	CA_Texture2,
+	CA_Texture3,
+	CA_Texture4,
+	CA_Texture5,
+	CA_Texture6,
+	CA_Texture7
+};
+
+enum EColorOp{
+	COP_Arg1,
+	COP_Arg2,
+	COP_Modulate,
+	COP_Add,
+	COP_Subtract,
+	COP_AlphaBlend,
+	COP_AddAlphaModulate
+};
+
+enum EAlphaOp{
+	AOP_Arg1,
+	AOP_Arg2,
+	AOP_Modulate,
+	AOP_Add,
+	AOP_Blend
+};
+
+enum EShaderUniforms{
+	SU_NumStages      = 0,  // int
+	SU_StageColorArgs = 1,  // int[16]
+	SU_StageColorOps  = 17, // int[8]
+	SU_StageAlphaArgs = 25, // int[16]
+	SU_StageAlphaOps  = 41, // int[8]
+	SU_ConstantColor  = 49  // vec4
+};
+
 /*
  * OpenGL RenderInterface
  */
@@ -30,7 +71,7 @@ public:
 		INT                   UniformRevision;
 		FOpenGLGlobalUniforms Uniforms;
 
-		FOpenGLRenderTarget*  RenderTarget;
+		FOpenGLTexture*       RenderTarget;
 
 		INT                   ViewportX;
 		INT                   ViewportY;
@@ -40,9 +81,9 @@ public:
 		ECullMode             CullMode;
 		EFillMode             FillMode;
 
-		UBOOL                 bStencilTest;
-		UBOOL                 bZWrite;
-		UBOOL                 bZTest;
+		bool                  bStencilTest;
+		bool                  bZWrite;
+		bool                  bZTest;
 
 		INT                   ZBias;
 
@@ -54,15 +95,28 @@ public:
 		unsigned int          VAO;
 		INT                   NumVertexStreams;
 		FOpenGLVertexStream*  VertexStreams[MAX_VERTEX_STREAMS];
+
+		// Fixed function emulation
+
+		bool                  UsingFixedFunctionShader;
+		bool                  NeedFixedFunctionShaderUniformUpdate;
+		bool                  UsingConstantColor;
+		INT                   NumStages;
+		INT                   StageColorArgs[MAX_SHADER_STAGES * 2]; // EColorArg for Arg1 and Arg2
+		INT                   StageColorOps[MAX_SHADER_STAGES];      // EColorOp
+		INT                   StageAlphaArgs[MAX_SHADER_STAGES * 2]; // EColorArg for Arg1 and Arg2
+		INT                   StageAlphaOps[MAX_SHADER_STAGES];      // EAlphaOp
+		FPlane                ConstantColor;
 	};
 
 	UOpenGLRenderDevice*      RenDev;
+	UViewport*                LockedViewport;
 
 	FOpenGLSavedState         SavedStates[MAX_STATESTACKDEPTH];
 	FOpenGLSavedState*        CurrentState;
 	FOpenGLSavedState*        PoppedState;
 
-	UBOOL                     NeedUniformUpdate;
+	bool                      NeedUniformUpdate;
 	unsigned int              GlobalUBO;
 
 	FStreamDeclaration        VertexStreamDeclarations[MAX_VERTEX_STREAMS];
@@ -93,7 +147,7 @@ public:
 	virtual void SetStencilOp(ECompareFunction Test, DWORD Ref, DWORD Mask, EStencilOp FailOp, EStencilOp ZFailOp, EStencilOp PassOp, DWORD WriteMask);
 	virtual void EnableStencilTest(UBOOL Enable);
 	virtual void EnableZWrite(UBOOL Enable);
-	virtual void SetPrecacheMode(EPrecacheMode PrecacheMode){}
+	virtual void SetPrecacheMode(EPrecacheMode InPrecacheMode){ PrecacheMode = InPrecacheMode; }
 	virtual void SetZBias(INT ZBias);
 	virtual INT SetVertexStreams(EVertexShader Shader, FVertexStream** Streams, INT NumStreams);
 	virtual INT SetDynamicStream(EVertexShader Shader, FVertexStream* Stream);
@@ -107,6 +161,37 @@ public:
 	void SetupPerFrameShaderConstants();
 
 private:
+	EPrecacheMode PrecacheMode;
+
 	INT SetIndexBuffer(FIndexBuffer* IndexBuffer, INT BaseIndex, bool IsDynamic);
 	INT SetVertexStreams(EVertexShader Shader, FVertexStream** Streams, INT NumStreams, bool IsDynamic);
+	bool SetSimpleMaterial(UMaterial* Material, FString* ErrorString = NULL, UMaterial** ErrorMaterial = NULL);
+	bool HandleCombinedMaterial(UMaterial* InMaterial, INT& PassesUsed, INT& TexturesUsed, FString* ErrorString = NULL, UMaterial** ErrorMaterial = NULL);
+
+	template<typename T>
+	bool CheckMaterial(UMaterial*& Material){
+		UMaterial* RootMaterial = Material;
+
+		if(Material->IsA<T>())
+			return true;
+
+		Material = NULL;
+
+		// Check for modifier chain pointing to a material of type T
+
+		UModifier* Modifier = Cast<UModifier>(Material);
+
+		while(Modifier){
+			Material = Cast<T>(Modifier->Material);
+			Modifier = Cast<UModifier>(Modifier->Material);
+		}
+
+		if(Material){
+			return true;
+		}else{
+			Material = RootMaterial; // Reset to initial
+
+			return false;
+		}
+	}
 };

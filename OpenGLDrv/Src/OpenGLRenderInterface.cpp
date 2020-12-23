@@ -55,7 +55,7 @@ void FOpenGLRenderInterface::PushState(INT Flags){
 	// Restore OpenGL state only if needed rather than doing these checks each time PopState is called
 	if(PoppedState){
 		if(CurrentState->RenderTarget != PoppedState->RenderTarget)
-			CurrentState->RenderTarget->Bind();
+			CurrentState->RenderTarget->BindRenderTarget();
 
 		if(CurrentState->ViewportX != PoppedState->ViewportX ||
 		   CurrentState->ViewportY != PoppedState->ViewportY ||
@@ -112,23 +112,21 @@ void FOpenGLRenderInterface::PopState(INT Flags){
 
 	check(CurrentState >= &SavedStates[0]);
 
+	CurrentState->NeedFixedFunctionShaderUniformUpdate = CurrentState->UsingFixedFunctionShader;
+
 	unguard;
 }
 
 UBOOL FOpenGLRenderInterface::SetRenderTarget(FRenderTarget* RenderTarget, bool bFSAA){
 	guardFunc;
 
-	// TODO: Remove
-	if(RenderTarget != &RenDev->ScreenRenderTarget)
-		return 1;
-
 	bool Updated = false;
 	QWORD CacheId = RenderTarget->GetCacheId();
 	INT Revision = RenderTarget->GetRevision();
-	FOpenGLRenderTarget* NewRenderTarget = static_cast<FOpenGLRenderTarget*>(RenDev->GetCachedResource(CacheId));
+	FOpenGLTexture* NewRenderTarget = static_cast<FOpenGLTexture*>(RenDev->GetCachedResource(CacheId));
 
 	if(!NewRenderTarget)
-		NewRenderTarget = new FOpenGLRenderTarget(RenDev, CacheId);
+		NewRenderTarget = new FOpenGLTexture(RenDev, CacheId);
 
 	if(NewRenderTarget->Revision != Revision){
 		Updated = true;
@@ -136,7 +134,7 @@ UBOOL FOpenGLRenderInterface::SetRenderTarget(FRenderTarget* RenderTarget, bool 
 	}
 
 	if(CurrentState->RenderTarget != NewRenderTarget || Updated)
-		NewRenderTarget->Bind();
+		NewRenderTarget->BindRenderTarget();
 
 	CurrentState->RenderTarget = NewRenderTarget;
 
@@ -233,7 +231,173 @@ FMatrix FOpenGLRenderInterface::GetTransform(ETransformType Type) const{
 }
 
 void FOpenGLRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorString, UMaterial** ErrorMaterial, INT* NumPasses){
+	guardFunc;
 
+	CurrentState->NeedFixedFunctionShaderUniformUpdate = true;
+	CurrentState->UsingConstantColor = false;
+	CurrentState->NumStages = 1;
+	CurrentState->StageColorArgs[0] = CA_Diffuse;
+	CurrentState->StageColorArgs[1] = CA_Diffuse;
+	CurrentState->StageColorOps[0] = COP_Arg1;
+	CurrentState->StageAlphaArgs[0] = COP_Arg1;
+	CurrentState->StageAlphaArgs[1] = COP_Arg1;
+	CurrentState->StageAlphaOps[0] = AOP_Arg1;
+	CurrentState->ConstantColor = FPlane(1.0f, 1.0f, 1.0f, 1.0f);
+
+	if(!Material || PrecacheMode == PRECACHE_VertexBuffers)
+		Material = GetDefault<UMaterial>()->DefaultMaterial;
+
+	if(GIsEditor){
+		TArray<UMaterial*> History;
+
+		if(!Material->CheckCircularReferences(History)){
+			if(History.Num() >= 0){
+				if(ErrorString)
+					*ErrorString = FString::Printf("Circular material reference in '%s'", History.Last()->GetName());
+
+				if(ErrorMaterial)
+					*ErrorMaterial = History.Last();
+			}
+
+			return;
+		}
+	}
+
+	Material->PreSetMaterial(GEngineTime);
+
+	if(CheckMaterial<UShader>(Material)){
+		SetSimpleMaterial(static_cast<UShader*>(Material)->Diffuse, ErrorString, ErrorMaterial);
+	}else if(CheckMaterial<UCombiner>(Material)){
+		SetSimpleMaterial(Material, ErrorString, ErrorMaterial);
+	}else if(CheckMaterial<UConstantMaterial>(Material)){
+		SetSimpleMaterial(Material, ErrorString, ErrorMaterial);
+	}else if(CheckMaterial<UBitmapMaterial>(Material)){
+		SetSimpleMaterial(Material, ErrorString, ErrorMaterial);
+	}else if(CheckMaterial<UTerrainMaterial>(Material)){
+
+	}else if(CheckMaterial<UParticleMaterial>(Material)){
+
+	}else if(CheckMaterial<UProjectorMultiMaterial>(Material)){
+
+	}else if(CheckMaterial<UProjectorMaterial>(Material)){
+
+	}else if(CheckMaterial<UHardwareShaderWrapper>(Material)){
+		UHardwareShaderWrapper* HardwareShaderWrapper = static_cast<UHardwareShaderWrapper*>(Material);
+
+		HardwareShaderWrapper->SetupShaderWrapper(this);
+		SetSimpleMaterial(HardwareShaderWrapper->ShaderImplementation->Textures[0], ErrorString, ErrorMaterial);
+	}else if(CheckMaterial<UHardwareShader>(Material)){
+		SetSimpleMaterial(static_cast<UHardwareShader*>(Material)->Textures[0], ErrorString, ErrorMaterial);
+	}
+
+	unguard;
+}
+
+bool FOpenGLRenderInterface::SetSimpleMaterial(UMaterial* Material, FString* ErrorString, UMaterial** ErrorMaterial){
+	INT StagesUsed = 0;
+	INT TexturesUsed = 0;
+
+	if(!HandleCombinedMaterial(Material, StagesUsed, TexturesUsed, ErrorString, ErrorMaterial))
+		return false;
+
+	return true;
+}
+
+bool FOpenGLRenderInterface::HandleCombinedMaterial(UMaterial* Material, INT& StagesUsed, INT& TexturesUsed, FString* ErrorString, UMaterial** ErrorMaterial){
+	if(!Material)
+		return true;
+
+	if(CheckMaterial<UVertexColor>(Material)){
+		if(StagesUsed >= MAX_SHADER_STAGES){
+			if(ErrorString)
+				*ErrorString = "No stages left for vertex color";
+
+			if(ErrorMaterial)
+				*ErrorMaterial = Material;
+
+			return false;
+		}
+
+		CurrentState->StageColorArgs[StagesUsed * 2] = CA_Diffuse;
+		CurrentState->StageColorOps[StagesUsed] = COP_Arg1;
+		CurrentState->StageAlphaArgs[StagesUsed * 2 + 1] = CA_Previous;
+		CurrentState->StageAlphaOps[StagesUsed] = AOP_Arg2;
+
+		++StagesUsed;
+
+		return true;
+	}else if(CheckMaterial<UConstantMaterial>(Material)){
+		if(CurrentState->UsingConstantColor){
+			if(ErrorString)
+				*ErrorString = "Only one ConstantMaterial may be used per material";
+
+			if(ErrorMaterial)
+				*ErrorMaterial = Material;
+
+			return false;
+		}
+
+		if(StagesUsed >= MAX_SHADER_STAGES){
+			if(ErrorString)
+				*ErrorString = "No stages left for constant color";
+
+			if(ErrorMaterial)
+				*ErrorMaterial = Material;
+
+			return false;
+		}
+
+		CurrentState->ConstantColor = static_cast<UConstantMaterial*>(Material)->GetColor(GEngineTime);
+		CurrentState->StageColorArgs[StagesUsed * 2] = CA_Constant;
+		CurrentState->StageColorOps[StagesUsed] = COP_Arg1;
+		CurrentState->StageAlphaArgs[StagesUsed * 2] = CA_Constant;
+		CurrentState->StageAlphaOps[StagesUsed] = AOP_Arg1;
+
+		++StagesUsed;
+
+		return true;
+	}else if(CheckMaterial<UBitmapMaterial>(Material)){
+		if(StagesUsed >= MAX_SHADER_STAGES || TexturesUsed >= MAX_TEXTURES){
+			if(ErrorString)
+				*ErrorString = "No stages left for bitmap material";
+
+			if(ErrorMaterial)
+				*ErrorMaterial = Material;
+
+			return false;
+		}
+
+		UBitmapMaterial* Bitmap = static_cast<UBitmapMaterial*>(Material);
+		FBaseTexture* Texture = Bitmap->Get(LockedViewport->CurrentTime, LockedViewport)->GetRenderInterface();
+
+		if(!Texture)
+			return true;
+
+		QWORD CacheId = Texture->GetCacheId();
+		FOpenGLTexture* GLTexture = static_cast<FOpenGLTexture*>(RenDev->GetCachedResource(CacheId));
+
+		if(!GLTexture)
+			GLTexture = new FOpenGLTexture(RenDev, CacheId);
+
+		if(GLTexture->Revision != Texture->GetRevision())
+			GLTexture->Cache(Texture);
+
+		GLTexture->BindTexture(TexturesUsed);
+
+		CurrentState->StageColorArgs[StagesUsed * 2] = CA_Texture0 + TexturesUsed;
+		CurrentState->StageColorOps[StagesUsed] = COP_Arg1;
+		CurrentState->StageAlphaArgs[StagesUsed * 2] = CA_Texture0 + TexturesUsed;
+		CurrentState->StageAlphaOps[StagesUsed] = AOP_Arg1;
+
+		++StagesUsed;
+		++TexturesUsed;
+
+		return true;
+	}else if(CheckMaterial<UCombiner>(Material)){
+		return HandleCombinedMaterial(static_cast<UCombiner*>(Material)->Material1, StagesUsed, TexturesUsed, ErrorString, ErrorMaterial);
+	}
+
+	return true;
 }
 
 static GLenum GetStencilFunc(ECompareFunction Test){
@@ -288,12 +452,12 @@ void FOpenGLRenderInterface::SetStencilOp(ECompareFunction Test, DWORD Ref, DWOR
 }
 
 void FOpenGLRenderInterface::EnableStencilTest(UBOOL Enable){
-	CurrentState->bStencilTest = Enable;
+	CurrentState->bStencilTest = Enable != 0;
 	glStencilMask(Enable ? 0xFF : 0x00);
 }
 
 void FOpenGLRenderInterface::EnableZWrite(UBOOL Enable){
-	CurrentState->bZWrite = Enable;
+	CurrentState->bZWrite = Enable != 0;
 	glDepthMask(Enable ? GL_TRUE : GL_FALSE);
 }
 
@@ -415,7 +579,19 @@ void FOpenGLRenderInterface::DrawPrimitive(EPrimitiveType PrimitiveType, INT Fir
 	if(NeedUniformUpdate)
 		UpdateShaderUniforms();
 
-	GLenum Mode = 0;
+	EnableZTest(1);
+
+	if(CurrentState->UsingFixedFunctionShader && CurrentState->NeedFixedFunctionShaderUniformUpdate){
+		glUniform1i(SU_NumStages, CurrentState->NumStages);
+		glUniform1iv(SU_StageColorArgs, ARRAY_COUNT(CurrentState->StageColorArgs), CurrentState->StageColorArgs);
+		glUniform1iv(SU_StageColorOps, ARRAY_COUNT(CurrentState->StageColorOps), CurrentState->StageColorOps);
+		glUniform1iv(SU_StageAlphaArgs, ARRAY_COUNT(CurrentState->StageAlphaArgs), CurrentState->StageAlphaArgs);
+		glUniform1iv(SU_StageAlphaOps, ARRAY_COUNT(CurrentState->StageAlphaOps), CurrentState->StageAlphaOps);
+		glUniform4fv(SU_ConstantColor, 1, (GLfloat*)&CurrentState->ConstantColor);
+		CurrentState->NeedFixedFunctionShaderUniformUpdate = false;
+	}
+
+	GLenum Mode  = 0;
 	INT    Count = NumPrimitives;
 
 	switch(PrimitiveType){
@@ -463,7 +639,7 @@ void FOpenGLRenderInterface::SetFillMode(EFillMode FillMode){
 }
 
 void FOpenGLRenderInterface::EnableZTest(UBOOL Enable){
-	CurrentState->bZTest = Enable;
+	CurrentState->bZTest = Enable != 0;
 	glDepthFunc(Enable ? GL_LEQUAL : GL_ALWAYS);
 }
 
@@ -479,6 +655,8 @@ void FOpenGLRenderInterface::SetShader(FShaderGLSL* NewShader){
 
 	CurrentState->Shader = Shader;
 	Shader->Bind();
+	CurrentState->UsingFixedFunctionShader = NewShader == &RenDev->FixedFunctionShader;
+	CurrentState->NeedFixedFunctionShaderUniformUpdate = true;
 }
 
 void FOpenGLRenderInterface::SetupPerFrameShaderConstants(){

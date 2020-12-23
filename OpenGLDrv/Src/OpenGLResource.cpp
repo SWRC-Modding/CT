@@ -17,9 +17,7 @@ FOpenGLResource::~FOpenGLResource(){
 // FOpenGLShader
 
 FOpenGLShader::FOpenGLShader(UOpenGLRenderDevice* InRenDev, QWORD InCacheId) : FOpenGLResource(InRenDev, InCacheId),
-                                                                                               Program(GL_NONE),
-                                                                                               NumVertexShaderSubroutines(0),
-                                                                                               NumFragmentShaderSubroutines(0){}
+                                                                                               Program(GL_NONE){}
 
 FOpenGLShader::~FOpenGLShader(){
 	if(Program)
@@ -68,12 +66,6 @@ void FOpenGLShader::Cache(FShaderGLSL* Shader){
 			glDeleteProgram(Program);
 
 		Program = NewProgram;
-
-		glGetProgramStageiv(Program, GL_VERTEX_SHADER, GL_ACTIVE_SUBROUTINE_UNIFORM_LOCATIONS, &NumVertexShaderSubroutines);
-		glGetProgramStageiv(Program, GL_FRAGMENT_SHADER, GL_ACTIVE_SUBROUTINE_UNIFORM_LOCATIONS, &NumFragmentShaderSubroutines);
-
-		check(NumVertexShaderSubroutines < MAX_SHADER_SUBROUTINES);
-		check(NumFragmentShaderSubroutines < MAX_SHADER_SUBROUTINES);
 	}
 }
 
@@ -114,66 +106,6 @@ GLuint FOpenGLShader::CompileShader(FShaderGLSL* Shader, GLenum Type){
 	}
 
 	return Handle;
-}
-
-// FOpenGLRenderTarget
-
-FOpenGLRenderTarget::FOpenGLRenderTarget(UOpenGLRenderDevice* InRenDev, QWORD InCacheId) : FOpenGLResource(InRenDev, InCacheId),
-                                                                                           Width(0),
-                                                                                           Height(0),
-                                                                                           FBO(GL_NONE),
-                                                                                           ColorAttachment(GL_NONE){}
-
-FOpenGLRenderTarget::~FOpenGLRenderTarget(){
-	Free();
-}
-
-void FOpenGLRenderTarget::Cache(FRenderTarget* RenderTarget){
-	Free();
-
-	Width = RenderTarget->GetWidth();
-	Height = RenderTarget->GetHeight();
-
-	if(Width == 0 || Height == 0)
-		return;
-
-	glCreateFramebuffers(1, &FBO);
-	glCreateTextures(GL_TEXTURE_2D, 1, &ColorAttachment);
-	glTextureStorage2D(ColorAttachment, 1, RenDev->Use16bit ? GL_RGB565 : GL_RGB8, Width, Height);
-	glTextureParameteri(ColorAttachment, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTextureParameteri(ColorAttachment, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTextureParameteri(ColorAttachment, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-	glTextureParameteri(ColorAttachment, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-	glNamedFramebufferTexture(FBO, GL_COLOR_ATTACHMENT0, ColorAttachment, 0);
-	glCreateRenderbuffers(1, &DepthStencilAttachment);
-	glNamedRenderbufferStorage(DepthStencilAttachment, GL_DEPTH24_STENCIL8, Width, Height);
-	glNamedFramebufferRenderbuffer(FBO, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, DepthStencilAttachment);
-
-	checkSlow(glCheckNamedFramebufferStatus(FBO, GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE);
-
-	Revision = RenderTarget->GetRevision();
-}
-
-void FOpenGLRenderTarget::Free(){
-	if(FBO){
-		glDeleteFramebuffers(1, &FBO);
-		FBO = GL_NONE;
-	}
-
-	if(ColorAttachment){
-		glDeleteTextures(1, &ColorAttachment);
-		ColorAttachment = GL_NONE;
-	}
-
-	if(DepthStencilAttachment){
-		glDeleteRenderbuffers(1, &DepthStencilAttachment);
-		DepthStencilAttachment = GL_NONE;
-	}
-}
-
-void FOpenGLRenderTarget::Bind() const{
-	checkSlow(FBO);
-	glBindFramebuffer(GL_FRAMEBUFFER, FBO);
 }
 
 // FOpenGLIndexBuffer
@@ -285,70 +217,118 @@ void FOpenGLVertexStream::Bind(GLuint BindingIndex) const{
 // FOpenGLTexture
 
 FOpenGLTexture::FOpenGLTexture(UOpenGLRenderDevice* InRenDev, QWORD InCacheId) : FOpenGLResource(InRenDev, InCacheId),
-                                                                                 Handle(GL_NONE){}
+                                                                                 Width(0),
+                                                                                 Height(0),
+                                                                                 TextureHandle(GL_NONE),
+                                                                                 FBO(GL_NONE),
+                                                                                 DepthStencilAttachment(GL_NONE){}
 
 FOpenGLTexture::~FOpenGLTexture(){
-	if(Handle)
-		glDeleteTextures(1, &Handle);
+	Free();
 }
 
-void FOpenGLTexture::Cache(FTexture* Texture){
-	if(Handle)
-		glDeleteTextures(1, &Handle);
+void FOpenGLTexture::Cache(FBaseTexture* BaseTexture){
+	Free();
 
-	INT Width = Texture->GetWidth();
-	INT Height = Texture->GetHeight();
+	FTexture* Texture = BaseTexture->GetTextureInterface();
+	FRenderTarget* RenderTarget = BaseTexture->GetRenderTargetInterface();
 
-	if(Width == 0 || Height == 0){
-		static FSolidColorTexture ErrorTexture(FColor(255, 0, 255));
+	Width = BaseTexture->GetWidth();
+	Height = BaseTexture->GetHeight();
 
-		Texture = &ErrorTexture;
-		Width = Texture->GetWidth();
-		Height = Texture->GetHeight();
-	}
+	if(Texture){
+		if(Width == 0 || Height == 0){
+			static FSolidColorTexture ErrorTexture(FColor(255, 0, 255));
 
-	glCreateTextures(GL_TEXTURE_2D, 1, &Handle);
-
-	ETextureFormat SrcFormat = Texture->GetFormat();
-	INT Size = GetBytesPerPixel(SrcFormat, Width * Height);
-
-	if(IsDXTC(SrcFormat)){
-		GLenum GLFormat;
-
-		if(SrcFormat == TEXF_DXT1)
-			GLFormat = GL_COMPRESSED_RGBA_S3TC_DXT1_EXT;
-		else if(SrcFormat == TEXF_DXT3)
-			GLFormat = GL_COMPRESSED_RGBA_S3TC_DXT3_EXT;
-		else
-			GLFormat = GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
-
-		void* Data = Texture->GetRawTextureData(0);
-
-		checkSlow(Data);
-
-		glCompressedTextureImage2DEXT(Handle, GL_TEXTURE_2D, 0, GLFormat, Width, Height, 0, Size, Data);
-		Texture->UnloadRawTextureData(0);
-	}else{
-		void* Data = Texture->GetRawTextureData(0);
-
-		if(!Data){
-			Data = RenDev->GetScratchBuffer(Size);
-			Texture->GetTextureData(0, Data, 0, SrcFormat);
+			Texture = &ErrorTexture;
+			Width = Texture->GetWidth();
+			Height = Texture->GetHeight();
 		}
 
-		glTextureStorage2D(Handle, 1, GL_RGBA8, Width, Height);
-		glTextureSubImage2D(Handle, 0, 0, 0, Width, Height, GL_BGRA, GL_UNSIGNED_BYTE, Data);
-		Texture->UnloadRawTextureData(0);
+		glCreateTextures(GL_TEXTURE_2D, 1, &TextureHandle);
+
+		ETextureFormat SrcFormat = Texture->GetFormat();
+		INT Size = GetBytesPerPixel(SrcFormat, Width * Height);
+
+		if(IsDXTC(SrcFormat)){
+			GLenum GLFormat;
+
+			if(SrcFormat == TEXF_DXT1)
+				GLFormat = GL_COMPRESSED_RGBA_S3TC_DXT1_EXT;
+			else if(SrcFormat == TEXF_DXT3)
+				GLFormat = GL_COMPRESSED_RGBA_S3TC_DXT3_EXT;
+			else
+				GLFormat = GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
+
+			void* Data = Texture->GetRawTextureData(0);
+
+			checkSlow(Data);
+
+			glCompressedTextureImage2DEXT(TextureHandle, GL_TEXTURE_2D, 0, GLFormat, Width, Height, 0, Size, Data);
+			Texture->UnloadRawTextureData(0);
+		}else{
+			void* Data = Texture->GetRawTextureData(0);
+
+			if(!Data){
+				Data = RenDev->GetScratchBuffer(Size);
+				Texture->GetTextureData(0, Data, 0, SrcFormat);
+			}
+
+			glTextureStorage2D(TextureHandle, 1, GL_RGBA8, Width, Height);
+			glTextureSubImage2D(TextureHandle, 0, 0, 0, Width, Height, GL_BGRA, GL_UNSIGNED_BYTE, Data);
+			Texture->UnloadRawTextureData(0);
+		}
+
+		glGenerateTextureMipmap(TextureHandle);
+		glTextureParameteri(TextureHandle, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+		glTextureParameteri(TextureHandle, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	}else if(RenderTarget){
+		if(Width == 0 || Height == 0)
+			return;
+
+		glCreateFramebuffers(1, &FBO);
+		glCreateTextures(GL_TEXTURE_2D, 1, &TextureHandle);
+		glTextureStorage2D(TextureHandle, 1, RenDev->Use16bit ? GL_RGB565 : GL_RGB8, Width, Height);
+		glTextureParameteri(TextureHandle, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTextureParameteri(TextureHandle, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTextureParameteri(TextureHandle, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+		glTextureParameteri(TextureHandle, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+		glNamedFramebufferTexture(FBO, GL_COLOR_ATTACHMENT0, TextureHandle, 0);
+		glCreateRenderbuffers(1, &DepthStencilAttachment);
+		glNamedRenderbufferStorage(DepthStencilAttachment, GL_DEPTH24_STENCIL8, Width, Height);
+		glNamedFramebufferRenderbuffer(FBO, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, DepthStencilAttachment);
+
+		checkSlow(glCheckNamedFramebufferStatus(FBO, GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE);
 	}
 
-	glGenerateTextureMipmap(Handle);
-	glTextureParameteri(Handle, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-	glTextureParameteri(Handle, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-	Revision = Texture->GetRevision();
+	Revision = BaseTexture->GetRevision();
 }
 
-void FOpenGLTexture::Bind(GLuint TextureUnit){
-	checkSlow(Handle);
-	glBindTextureUnit(TextureUnit, Handle);
+void FOpenGLTexture::Free(){
+	Width = 0;
+	Height = 0;
+
+	if(TextureHandle){
+		glDeleteTextures(1, &TextureHandle);
+		TextureHandle = GL_NONE;
+	}
+
+	if(FBO){
+		glDeleteFramebuffers(1, &FBO);
+		FBO = GL_NONE;
+	}
+
+	if(DepthStencilAttachment){
+		glDeleteRenderbuffers(1, &DepthStencilAttachment);
+		DepthStencilAttachment = GL_NONE;
+	}
+}
+
+void FOpenGLTexture::BindTexture(GLuint TextureUnit){
+	glBindTextureUnit(TextureUnit, TextureHandle);
+}
+
+void FOpenGLTexture::BindRenderTarget(){
+	checkSlow(FBO);
+	glBindFramebuffer(GL_FRAMEBUFFER, FBO);
 }

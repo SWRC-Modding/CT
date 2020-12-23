@@ -5,19 +5,15 @@
 #include "Shader.h"
 
 class FOpenGLResource;
-class FOpenGLShader;
-class FOpenGLRenderTarget;
 
-#define FRAGMENT_SHADER_FILE_EXTENSION ".fsh"
-#define VERTEX_SHADER_FILE_EXTENSION ".vsh"
-#define MAX_SHADER_SUBROUTINES 32
+#define FRAGMENT_SHADER_FILE_EXTENSION ".fs"
+#define VERTEX_SHADER_FILE_EXTENSION ".vs"
 
 class OPENGLDRV_API UOpenGLRenderDevice : public URenderDevice{
 	DECLARE_CLASS(UOpenGLRenderDevice,URenderDevice,CLASS_Config,OpenGLDrv)
 public:
 	UBOOL                  bUseDesktopResolution;
 	UBOOL                  bKeepAspectRatio;
-	UBOOL                  bDebugOpenGL;
 
 	HDC                    DeviceContext;
 	HGLRC                  OpenGLContext;

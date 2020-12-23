@@ -34,29 +34,9 @@ public:
 	void Bind() const;
 
 	GLuint Program;
-	GLint  NumVertexShaderSubroutines;
-	GLint  NumFragmentShaderSubroutines;
 
 private:
 	GLuint CompileShader(FShaderGLSL* Shader, GLenum Type);
-};
-
-// FOpenGLRenderTarget
-
-class FOpenGLRenderTarget : public FOpenGLResource{
-public:
-	FOpenGLRenderTarget(UOpenGLRenderDevice* InRenDev, QWORD InCacheId);
-	virtual ~FOpenGLRenderTarget();
-
-	void Cache(FRenderTarget* RenderTarget);
-	void Free();
-	void Bind() const;
-
-	INT    Width;
-	INT    Height;
-	GLuint FBO;
-	GLuint ColorAttachment;
-	GLuint DepthStencilAttachment;
 };
 
 // FOpenGLIndexBuffer
@@ -100,8 +80,14 @@ public:
 	FOpenGLTexture(UOpenGLRenderDevice* InRenDev, QWORD InCacheId);
 	virtual ~FOpenGLTexture();
 
-	void Cache(FTexture* Texture);
-	void Bind(GLuint TextureUnit);
+	void Cache(FBaseTexture* BaseTexture);
+	void Free();
+	void BindTexture(GLuint TextureUnit);
+	void BindRenderTarget();
 
-	GLuint Handle;
+	INT    Width;
+	INT    Height;
+	GLuint TextureHandle;
+	GLuint FBO;
+	GLuint DepthStencilAttachment;
 };

@@ -54,12 +54,14 @@ enum EAlphaOp{
 };
 
 enum EShaderUniforms{
-	SU_NumStages      = 0,  // int
-	SU_StageColorArgs = 1,  // int[16]
-	SU_StageColorOps  = 17, // int[8]
-	SU_StageAlphaArgs = 25, // int[16]
-	SU_StageAlphaOps  = 41, // int[8]
-	SU_ConstantColor  = 49  // vec4
+	SU_NumStages            = 0,  // int
+	SU_StageTexCoordIndices = 1,  // int[8]
+	SU_StageTexMatrices     = 9,  // mat4[8]
+	SU_StageColorArgs       = 17, // int[16]
+	SU_StageColorOps        = 33, // int[8]
+	SU_StageAlphaArgs       = 41, // int[16]
+	SU_StageAlphaOps        = 57, // int[8]
+	SU_ConstantColor        = 65  // vec4
 };
 
 /*
@@ -102,6 +104,8 @@ public:
 		bool                  NeedFixedFunctionShaderUniformUpdate;
 		bool                  UsingConstantColor;
 		INT                   NumStages;
+		INT                   StageTexCoordIndices[MAX_SHADER_STAGES]; // TODO: Support generated texture coordinates
+		FMatrix               StageTexMatrices[MAX_SHADER_STAGES];
 		INT                   StageColorArgs[MAX_SHADER_STAGES * 2]; // EColorArg for Arg1 and Arg2
 		INT                   StageColorOps[MAX_SHADER_STAGES];      // EColorOp
 		INT                   StageAlphaArgs[MAX_SHADER_STAGES * 2]; // EColorArg for Arg1 and Arg2
@@ -169,27 +173,54 @@ private:
 	bool HandleCombinedMaterial(UMaterial* InMaterial, INT& PassesUsed, INT& TexturesUsed, FString* ErrorString = NULL, UMaterial** ErrorMaterial = NULL);
 
 	template<typename T>
-	bool CheckMaterial(UMaterial*& Material){
-		UMaterial* RootMaterial = Material;
+	bool CheckMaterial(UMaterial** Material, INT StageIndex = 0){
+		UMaterial* RootMaterial = *Material;
 
-		if(Material->IsA<T>())
+		if(RootMaterial->IsA<T>())
 			return true;
-
-		Material = NULL;
 
 		// Check for modifier chain pointing to a material of type T
 
-		UModifier* Modifier = Cast<UModifier>(Material);
+		UModifier* Modifier = Cast<UModifier>(RootMaterial);
+
+		*Material = NULL;
 
 		while(Modifier){
-			Material = Cast<T>(Modifier->Material);
+			*Material = Cast<T>(Modifier->Material);
 			Modifier = Cast<UModifier>(Modifier->Material);
 		}
 
-		if(Material){
+		if(*Material){
+			INT*     StageTexCoordIndex = &CurrentState->StageTexCoordIndices[StageIndex];
+			FMatrix* StageTexMatrix = &CurrentState->StageTexMatrices[StageIndex];
+
+			*StageTexCoordIndex = 0;
+			*StageTexMatrix = FMatrix::Identity;
+			Modifier = static_cast<UModifier*>(RootMaterial);
+
+			// Apply modifiers
+			while(Modifier != *Material){
+				if(Modifier->IsA<UTexModifier>()){
+					UTexModifier* TexModifier = static_cast<UTexModifier*>(Modifier);
+
+					*StageTexCoordIndex = TexModifier->TexCoordSource;
+
+					// TODO: Support generated texture coordinates
+					if(*StageTexCoordIndex >= MAX_TEXTURES)
+						*StageTexCoordIndex = 0;
+
+					FMatrix* Matrix = TexModifier->GetMatrix(GEngineTime);
+
+					if(Matrix)
+						*StageTexMatrix *= *Matrix;
+				}
+
+				Modifier = static_cast<UModifier*>(Modifier->Material);
+			}
+
 			return true;
 		}else{
-			Material = RootMaterial; // Reset to initial
+			*Material = RootMaterial; // Reset to initial
 
 			return false;
 		}

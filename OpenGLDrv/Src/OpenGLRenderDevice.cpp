@@ -22,8 +22,9 @@ void UOpenGLRenderDevice::StaticConstructor(){
 
 	new(GetClass(), "UseDesktopResolution", RF_Public) UBoolProperty(CPP_PROPERTY(bUseDesktopResolution), "Options", CPF_Config);
 	new(GetClass(), "KeepAspectRatio", RF_Public) UBoolProperty(CPP_PROPERTY(bKeepAspectRatio), "Options", CPF_Config);
-	new(GetClass(), "DebugOpenGL", RF_Public) UBoolProperty(CPP_PROPERTY(bDebugOpenGL), "", CPF_Config);
 	new(GetClass(), "FirstRun", RF_Public) UBoolProperty(CPP_PROPERTY(bFirstRun), "", CPF_Config);
+	new(GetClass(), "VSync", RF_Public) UBoolProperty(CPP_PROPERTY(bVSync), "", CPF_Config);
+	new(GetClass(), "DebugOpenGL", RF_Public) UBoolProperty(CPP_PROPERTY(bDebugOpenGL), "", CPF_Config);
 	new(GetClass(), "ShaderDir", RF_Public) UStrProperty(CPP_PROPERTY(ShaderDir), "", CPF_Config);
 }
 
@@ -185,12 +186,12 @@ UBOOL UOpenGLRenderDevice::Exec(const TCHAR* Cmd, FOutputDevice& Ar){
 }
 
 void GLAPIENTRY OpenGLMessageCallback(GLenum source,
-                                GLenum type,
-                                GLuint id,
-                                GLenum severity,
-                                GLsizei length,
-                                const GLchar* message,
-                                const void* userParam){
+                                      GLenum type,
+                                      GLuint id,
+                                      GLenum severity,
+                                      GLsizei length,
+                                      const GLchar* message,
+                                      const void* userParam){
 	debugf("GL CALLBACK: type = 0x%x, severity = 0x%x, message = %s", type, severity, message);
 
 	if(type == GL_DEBUG_TYPE_ERROR && appIsDebuggerPresent())
@@ -352,7 +353,7 @@ UBOOL UOpenGLRenderDevice::SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL
 		RenderInterface.SetShader(&FixedFunctionShader);
 		RenderInterface.SetCullMode(CM_CW);
 		RenderInterface.SetFillMode(FM_Solid);
-		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		EnableVSync(bVSync != 0);
 
 		// Set default values for unspecified vertex attributes
 
@@ -465,6 +466,15 @@ void UOpenGLRenderDevice::FlushResource(QWORD CacheId){
 
 UBOOL UOpenGLRenderDevice::ResourceCached(QWORD CacheId){
 	return GetCachedResource(CacheId) != NULL;
+}
+
+void UOpenGLRenderDevice::EnableVSync(bool bEnable){
+	if(WGL_EXT_swap_control){
+		bVSync = bEnable;
+		wglSwapIntervalEXT(bEnable ? 1 : 0);
+	}else{
+		bVSync = 0;
+	}
 }
 
 FRenderInterface* UOpenGLRenderDevice::Lock(UViewport* Viewport, BYTE* HitData, INT* HitSize){

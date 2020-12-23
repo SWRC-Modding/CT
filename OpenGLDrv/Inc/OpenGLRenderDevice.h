@@ -49,8 +49,8 @@ public:
 	virtual FMemCount ResourceMemTotal(){ return FMemCount(); }
 	virtual void UpdateGamma(UViewport* Viewport){}
 	virtual void RestoreGamma(){}
-	virtual UBOOL VSyncEnabled(){ return 0; }
-	virtual void EnableVSync(bool bEnable){}
+	virtual UBOOL VSyncEnabled(){ return bVSync; }
+	virtual void EnableVSync(bool bEnable);
 	virtual FRenderInterface* Lock(UViewport* Viewport, BYTE* HitData, INT* HitSize);
 	virtual void Unlock(FRenderInterface* RI);
 	virtual void Present(UViewport* Viewport);
@@ -77,6 +77,8 @@ public:
 
 private:
 	UBOOL                     bFirstRun;
+	UBOOL                     bVSync;
+	UBOOL                     bDebugOpenGL;
 	UBOOL                     bIsFullscreen;
 	INT                       SavedViewportWidth;
 	INT                       SavedViewportHeight;

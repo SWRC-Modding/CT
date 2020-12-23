@@ -233,9 +233,13 @@ FMatrix FOpenGLRenderInterface::GetTransform(ETransformType Type) const{
 void FOpenGLRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorString, UMaterial** ErrorMaterial, INT* NumPasses){
 	guardFunc;
 
+	// Init default material state
+
 	CurrentState->NeedFixedFunctionShaderUniformUpdate = true;
 	CurrentState->UsingConstantColor = false;
 	CurrentState->NumStages = 1;
+	CurrentState->StageTexCoordIndices[0] = 0;
+	CurrentState->StageTexMatrices[0] = FMatrix::Identity;
 	CurrentState->StageColorArgs[0] = CA_Diffuse;
 	CurrentState->StageColorArgs[1] = CA_Diffuse;
 	CurrentState->StageColorOps[0] = COP_Arg1;
@@ -265,28 +269,28 @@ void FOpenGLRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorStri
 
 	Material->PreSetMaterial(GEngineTime);
 
-	if(CheckMaterial<UShader>(Material)){
+	if(CheckMaterial<UShader>(&Material)){
 		SetSimpleMaterial(static_cast<UShader*>(Material)->Diffuse, ErrorString, ErrorMaterial);
-	}else if(CheckMaterial<UCombiner>(Material)){
+	}else if(CheckMaterial<UCombiner>(&Material)){
 		SetSimpleMaterial(Material, ErrorString, ErrorMaterial);
-	}else if(CheckMaterial<UConstantMaterial>(Material)){
+	}else if(CheckMaterial<UConstantMaterial>(&Material)){
 		SetSimpleMaterial(Material, ErrorString, ErrorMaterial);
-	}else if(CheckMaterial<UBitmapMaterial>(Material)){
+	}else if(CheckMaterial<UBitmapMaterial>(&Material)){
 		SetSimpleMaterial(Material, ErrorString, ErrorMaterial);
-	}else if(CheckMaterial<UTerrainMaterial>(Material)){
+	}else if(CheckMaterial<UTerrainMaterial>(&Material)){
 
-	}else if(CheckMaterial<UParticleMaterial>(Material)){
+	}else if(CheckMaterial<UParticleMaterial>(&Material)){
 
-	}else if(CheckMaterial<UProjectorMultiMaterial>(Material)){
+	}else if(CheckMaterial<UProjectorMultiMaterial>(&Material)){
 
-	}else if(CheckMaterial<UProjectorMaterial>(Material)){
+	}else if(CheckMaterial<UProjectorMaterial>(&Material)){
 
-	}else if(CheckMaterial<UHardwareShaderWrapper>(Material)){
+	}else if(CheckMaterial<UHardwareShaderWrapper>(&Material)){
 		UHardwareShaderWrapper* HardwareShaderWrapper = static_cast<UHardwareShaderWrapper*>(Material);
 
 		HardwareShaderWrapper->SetupShaderWrapper(this);
 		SetSimpleMaterial(HardwareShaderWrapper->ShaderImplementation->Textures[0], ErrorString, ErrorMaterial);
-	}else if(CheckMaterial<UHardwareShader>(Material)){
+	}else if(CheckMaterial<UHardwareShader>(&Material)){
 		SetSimpleMaterial(static_cast<UHardwareShader*>(Material)->Textures[0], ErrorString, ErrorMaterial);
 	}
 
@@ -300,6 +304,8 @@ bool FOpenGLRenderInterface::SetSimpleMaterial(UMaterial* Material, FString* Err
 	if(!HandleCombinedMaterial(Material, StagesUsed, TexturesUsed, ErrorString, ErrorMaterial))
 		return false;
 
+	CurrentState->NumStages = StagesUsed;
+
 	return true;
 }
 
@@ -307,7 +313,7 @@ bool FOpenGLRenderInterface::HandleCombinedMaterial(UMaterial* Material, INT& St
 	if(!Material)
 		return true;
 
-	if(CheckMaterial<UVertexColor>(Material)){
+	if(CheckMaterial<UVertexColor>(&Material, StagesUsed)){
 		if(StagesUsed >= MAX_SHADER_STAGES){
 			if(ErrorString)
 				*ErrorString = "No stages left for vertex color";
@@ -326,7 +332,7 @@ bool FOpenGLRenderInterface::HandleCombinedMaterial(UMaterial* Material, INT& St
 		++StagesUsed;
 
 		return true;
-	}else if(CheckMaterial<UConstantMaterial>(Material)){
+	}else if(CheckMaterial<UConstantMaterial>(&Material, StagesUsed)){
 		if(CurrentState->UsingConstantColor){
 			if(ErrorString)
 				*ErrorString = "Only one ConstantMaterial may be used per material";
@@ -356,7 +362,7 @@ bool FOpenGLRenderInterface::HandleCombinedMaterial(UMaterial* Material, INT& St
 		++StagesUsed;
 
 		return true;
-	}else if(CheckMaterial<UBitmapMaterial>(Material)){
+	}else if(CheckMaterial<UBitmapMaterial>(&Material, StagesUsed)){
 		if(StagesUsed >= MAX_SHADER_STAGES || TexturesUsed >= MAX_TEXTURES){
 			if(ErrorString)
 				*ErrorString = "No stages left for bitmap material";
@@ -393,7 +399,7 @@ bool FOpenGLRenderInterface::HandleCombinedMaterial(UMaterial* Material, INT& St
 		++TexturesUsed;
 
 		return true;
-	}else if(CheckMaterial<UCombiner>(Material)){
+	}else if(CheckMaterial<UCombiner>(&Material, StagesUsed)){
 		return HandleCombinedMaterial(static_cast<UCombiner*>(Material)->Material1, StagesUsed, TexturesUsed, ErrorString, ErrorMaterial);
 	}
 
@@ -582,7 +588,15 @@ void FOpenGLRenderInterface::DrawPrimitive(EPrimitiveType PrimitiveType, INT Fir
 	EnableZTest(1);
 
 	if(CurrentState->UsingFixedFunctionShader && CurrentState->NeedFixedFunctionShaderUniformUpdate){
+		// Why is this needed???
+		for(INT i = 0; i < CurrentState->NumStages; ++i){
+			CurrentState->StageTexMatrices[i].M[3][0] = CurrentState->StageTexMatrices[i].M[2][0];
+			CurrentState->StageTexMatrices[i].M[3][1] = CurrentState->StageTexMatrices[i].M[2][1];
+		}
+
 		glUniform1i(SU_NumStages, CurrentState->NumStages);
+		glUniform1iv(SU_StageTexCoordIndices, ARRAY_COUNT(CurrentState->StageTexCoordIndices), CurrentState->StageTexCoordIndices);
+		glUniformMatrix4fv(SU_StageTexMatrices, ARRAY_COUNT(CurrentState->StageTexMatrices), GL_FALSE, (GLfloat*)CurrentState->StageTexMatrices);
 		glUniform1iv(SU_StageColorArgs, ARRAY_COUNT(CurrentState->StageColorArgs), CurrentState->StageColorArgs);
 		glUniform1iv(SU_StageColorOps, ARRAY_COUNT(CurrentState->StageColorOps), CurrentState->StageColorOps);
 		glUniform1iv(SU_StageAlphaArgs, ARRAY_COUNT(CurrentState->StageAlphaArgs), CurrentState->StageAlphaArgs);

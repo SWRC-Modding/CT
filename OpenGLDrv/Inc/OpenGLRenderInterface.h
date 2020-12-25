@@ -57,7 +57,7 @@ enum EAlphaOp{
 enum EShaderUniforms{
 	SU_NumStages            = 0,  // int
 	SU_TexCoordCount        = 1,  // int
-	SU_StageTexCoordIndices = 2,  // int[8]
+	SU_StageTexCoordSources = 2,  // int[8]
 	SU_StageTexMatrices     = 10, // mat4[8]
 	SU_StageColorArgs       = 18, // int[16]
 	SU_StageColorOps        = 34, // int[8]
@@ -106,7 +106,7 @@ public:
 		bool                  UsingConstantColor;
 		INT                   NumStages;
 		INT                   TexCoordCount;
-		INT                   StageTexCoordIndices[MAX_SHADER_STAGES]; // TODO: Support generated texture coordinates
+		INT                   StageTexCoordSources[MAX_SHADER_STAGES]; // TODO: Support generated texture coordinates
 		FMatrix               StageTexMatrices[MAX_SHADER_STAGES];
 		INT                   StageColorArgs[MAX_SHADER_STAGES * 2]; // EColorArg for Arg1 and Arg2
 		INT                   StageColorOps[MAX_SHADER_STAGES];      // EColorOp
@@ -207,10 +207,10 @@ private:
 
 			return true;
 		}else{ // Collect modifiers
-			INT*     StageTexCoordIndex = &CurrentState->StageTexCoordIndices[StageIndex];
+			INT*     StageTexCoordSrc = &CurrentState->StageTexCoordSources[StageIndex];
 			FMatrix* StageTexMatrix = &CurrentState->StageTexMatrices[StageIndex];
 
-			*StageTexCoordIndex = 0;
+			*StageTexCoordSrc = 0;
 			*StageTexMatrix = FMatrix::Identity;
 			Modifier = static_cast<UModifier*>(RootMaterial);
 
@@ -220,11 +220,11 @@ private:
 					UTexModifier* TexModifier = static_cast<UTexModifier*>(Modifier);
 
 					if(TexModifier->TexCoordSource != TCS_NoChange){
-						*StageTexCoordIndex = TexModifier->TexCoordSource;
+						*StageTexCoordSrc = TexModifier->TexCoordSource;
 
 						// TODO: Support generated texture coordinates
-						if(*StageTexCoordIndex >= MAX_TEXTURES)
-							*StageTexCoordIndex = 0;
+						if(*StageTexCoordSrc >= MAX_TEXTURES)
+							*StageTexCoordSrc = 0;
 
 						CurrentState->TexCoordCount = TexModifier->TexCoordCount + 2;
 					}

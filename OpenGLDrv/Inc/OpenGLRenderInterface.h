@@ -32,7 +32,8 @@ enum EColorArg{
 	CA_Texture4,
 	CA_Texture5,
 	CA_Texture6,
-	CA_Texture7
+	CA_Texture7,
+	CA_MAX // Can be used for the default value
 };
 
 enum EColorOp{
@@ -55,13 +56,15 @@ enum EAlphaOp{
 
 enum EShaderUniforms{
 	SU_NumStages            = 0,  // int
-	SU_StageTexCoordIndices = 1,  // int[8]
-	SU_StageTexMatrices     = 9,  // mat4[8]
-	SU_StageColorArgs       = 17, // int[16]
-	SU_StageColorOps        = 33, // int[8]
-	SU_StageAlphaArgs       = 41, // int[16]
-	SU_StageAlphaOps        = 57, // int[8]
-	SU_ConstantColor        = 65  // vec4
+	SU_TexCoordCount        = 1,  // int
+	SU_StageTexCoordIndices = 2,  // int[8]
+	SU_StageTexMatrices     = 10, // mat4[8]
+	SU_StageColorArgs       = 18, // int[16]
+	SU_StageColorOps        = 34, // int[8]
+	SU_StageAlphaArgs       = 42, // int[16]
+	SU_StageAlphaOps        = 58, // int[8]
+	SU_ConstantColor        = 66, // vec4
+	SU_AlphaRef             = 67  // float
 };
 
 /*
@@ -100,10 +103,9 @@ public:
 
 		// Fixed function emulation
 
-		bool                  UsingFixedFunctionShader;
-		bool                  NeedFixedFunctionShaderUniformUpdate;
 		bool                  UsingConstantColor;
 		INT                   NumStages;
+		INT                   TexCoordCount;
 		INT                   StageTexCoordIndices[MAX_SHADER_STAGES]; // TODO: Support generated texture coordinates
 		FMatrix               StageTexMatrices[MAX_SHADER_STAGES];
 		INT                   StageColorArgs[MAX_SHADER_STAGES * 2]; // EColorArg for Arg1 and Arg2
@@ -111,6 +113,10 @@ public:
 		INT                   StageAlphaArgs[MAX_SHADER_STAGES * 2]; // EColorArg for Arg1 and Arg2
 		INT                   StageAlphaOps[MAX_SHADER_STAGES];      // EAlphaOp
 		FPlane                ConstantColor;
+
+		// Blending
+
+		FLOAT                 AlphaRef;
 	};
 
 	UOpenGLRenderDevice*      RenDev;
@@ -169,11 +175,13 @@ private:
 
 	INT SetIndexBuffer(FIndexBuffer* IndexBuffer, INT BaseIndex, bool IsDynamic);
 	INT SetVertexStreams(EVertexShader Shader, FVertexStream** Streams, INT NumStreams, bool IsDynamic);
+	void InitDefaultMaterialStageState(INT StageIndex);
+	void SetBitmapTexture(UBitmapMaterial* Bitmap, INT TextureUnit);
 	bool SetSimpleMaterial(UMaterial* Material, FString* ErrorString = NULL, UMaterial** ErrorMaterial = NULL);
 	bool HandleCombinedMaterial(UMaterial* InMaterial, INT& PassesUsed, INT& TexturesUsed, FString* ErrorString = NULL, UMaterial** ErrorMaterial = NULL);
 
 	template<typename T>
-	bool CheckMaterial(UMaterial** Material, INT StageIndex = 0){
+	bool CheckMaterial(UMaterial** Material, INT StageIndex){
 		UMaterial* RootMaterial = *Material;
 
 		if(RootMaterial->IsA<T>())
@@ -190,7 +198,15 @@ private:
 			Modifier = Cast<UModifier>(Modifier->Material);
 		}
 
-		if(*Material){
+		if(!*Material){
+			*Material = RootMaterial; // Reset to initial
+
+			return false;
+		}else if(StageIndex < 0){ // StageIndex < 0 means we only want to check the material's type but not apply the modifiers
+			*Material = RootMaterial; // Reset to initial
+
+			return true;
+		}else{ // Collect modifiers
 			INT*     StageTexCoordIndex = &CurrentState->StageTexCoordIndices[StageIndex];
 			FMatrix* StageTexMatrix = &CurrentState->StageTexMatrices[StageIndex];
 
@@ -203,11 +219,15 @@ private:
 				if(Modifier->IsA<UTexModifier>()){
 					UTexModifier* TexModifier = static_cast<UTexModifier*>(Modifier);
 
-					*StageTexCoordIndex = TexModifier->TexCoordSource;
+					if(TexModifier->TexCoordSource != TCS_NoChange){
+						*StageTexCoordIndex = TexModifier->TexCoordSource;
 
-					// TODO: Support generated texture coordinates
-					if(*StageTexCoordIndex >= MAX_TEXTURES)
-						*StageTexCoordIndex = 0;
+						// TODO: Support generated texture coordinates
+						if(*StageTexCoordIndex >= MAX_TEXTURES)
+							*StageTexCoordIndex = 0;
+
+						CurrentState->TexCoordCount = TexModifier->TexCoordCount + 2;
+					}
 
 					FMatrix* Matrix = TexModifier->GetMatrix(GEngineTime);
 
@@ -219,10 +239,6 @@ private:
 			}
 
 			return true;
-		}else{
-			*Material = RootMaterial; // Reset to initial
-
-			return false;
 		}
 	}
 };

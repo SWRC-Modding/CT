@@ -14,6 +14,15 @@ FOpenGLRenderInterface::FOpenGLRenderInterface(UOpenGLRenderDevice* InRenDev) : 
 	CurrentState->Uniforms.LocalToWorld = FMatrix::Identity;
 	CurrentState->Uniforms.WorldToCamera = FMatrix::Identity;
 	CurrentState->Uniforms.CameraToScreen = FMatrix::Identity;
+
+	for(INT i = 0; i < MAX_SHADER_STAGES; ++i)
+		InitDefaultMaterialStageState(i);
+
+	CurrentState->UsingConstantColor = false;
+	CurrentState->NumStages = 0;
+	CurrentState->TexCoordCount = 2;
+	CurrentState->ConstantColor = FPlane(1.0f, 1.0f, 1.0f, 1.0f);
+	CurrentState->AlphaRef = -1.0f;
 }
 
 void FOpenGLRenderInterface::FlushResources(){
@@ -111,8 +120,6 @@ void FOpenGLRenderInterface::PopState(INT Flags){
 	--CurrentState;
 
 	check(CurrentState >= &SavedStates[0]);
-
-	CurrentState->NeedFixedFunctionShaderUniformUpdate = CurrentState->UsingFixedFunctionShader;
 
 	unguard;
 }
@@ -230,26 +237,38 @@ FMatrix FOpenGLRenderInterface::GetTransform(ETransformType Type) const{
 	return FMatrix::Identity;
 }
 
+void FOpenGLRenderInterface::InitDefaultMaterialStageState(INT StageIndex){
+	// Init default material state
+	CurrentState->StageTexCoordIndices[StageIndex] = 0;
+	CurrentState->StageTexMatrices[StageIndex] = FMatrix::Identity;
+	CurrentState->StageColorArgs[StageIndex * 2] = CA_Diffuse;
+	CurrentState->StageColorArgs[StageIndex * 2 + 1] = CA_Diffuse;
+	CurrentState->StageColorOps[StageIndex] = COP_Arg1;
+	CurrentState->StageAlphaArgs[StageIndex * 2] = CA_Diffuse;
+	CurrentState->StageAlphaArgs[StageIndex * 2 + 1] = CA_Diffuse;
+	CurrentState->StageAlphaOps[StageIndex] = AOP_Arg1;
+}
+
 void FOpenGLRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorString, UMaterial** ErrorMaterial, INT* NumPasses){
 	guardFunc;
 
-	// Init default material state
+	// Restore default material state
 
-	CurrentState->NeedFixedFunctionShaderUniformUpdate = true;
+	for(INT i = 0; i < CurrentState->NumStages; ++i)
+		InitDefaultMaterialStageState(i);
+
 	CurrentState->UsingConstantColor = false;
-	CurrentState->NumStages = 1;
-	CurrentState->StageTexCoordIndices[0] = 0;
-	CurrentState->StageTexMatrices[0] = FMatrix::Identity;
-	CurrentState->StageColorArgs[0] = CA_Diffuse;
-	CurrentState->StageColorArgs[1] = CA_Diffuse;
-	CurrentState->StageColorOps[0] = COP_Arg1;
-	CurrentState->StageAlphaArgs[0] = COP_Arg1;
-	CurrentState->StageAlphaArgs[1] = COP_Arg1;
-	CurrentState->StageAlphaOps[0] = AOP_Arg1;
+	CurrentState->NumStages = 0;
+	CurrentState->TexCoordCount = 2;
 	CurrentState->ConstantColor = FPlane(1.0f, 1.0f, 1.0f, 1.0f);
+	CurrentState->AlphaRef = -1.0f;
+
+	// Use default material if precaching geometry
 
 	if(!Material || PrecacheMode == PRECACHE_VertexBuffers)
 		Material = GetDefault<UMaterial>()->DefaultMaterial;
+
+	// Check for circular references
 
 	if(GIsEditor){
 		TArray<UMaterial*> History;
@@ -269,32 +288,68 @@ void FOpenGLRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorStri
 
 	Material->PreSetMaterial(GEngineTime);
 
-	if(CheckMaterial<UShader>(&Material)){
-		SetSimpleMaterial(static_cast<UShader*>(Material)->Diffuse, ErrorString, ErrorMaterial);
-	}else if(CheckMaterial<UCombiner>(&Material)){
-		SetSimpleMaterial(Material, ErrorString, ErrorMaterial);
-	}else if(CheckMaterial<UConstantMaterial>(&Material)){
-		SetSimpleMaterial(Material, ErrorString, ErrorMaterial);
-	}else if(CheckMaterial<UBitmapMaterial>(&Material)){
-		SetSimpleMaterial(Material, ErrorString, ErrorMaterial);
-	}else if(CheckMaterial<UTerrainMaterial>(&Material)){
+	bool Result = false;
 
-	}else if(CheckMaterial<UParticleMaterial>(&Material)){
+	if(CheckMaterial<UShader>(&Material, 0)){
+		Result = SetSimpleMaterial(static_cast<UShader*>(Material)->Diffuse, ErrorString, ErrorMaterial);
+	}else if(CheckMaterial<UCombiner>(&Material, -1)){
+		Result = SetSimpleMaterial(Material, ErrorString, ErrorMaterial);
+	}else if(CheckMaterial<UConstantMaterial>(&Material, -1)){
+		Result = SetSimpleMaterial(Material, ErrorString, ErrorMaterial);
+	}else if(CheckMaterial<UBitmapMaterial>(&Material, -1)){
+		Result = SetSimpleMaterial(Material, ErrorString, ErrorMaterial);
+	}else if(CheckMaterial<UTerrainMaterial>(&Material, -1)){
 
-	}else if(CheckMaterial<UProjectorMultiMaterial>(&Material)){
+	}else if(CheckMaterial<UParticleMaterial>(&Material, -1)){
 
-	}else if(CheckMaterial<UProjectorMaterial>(&Material)){
+	}else if(CheckMaterial<UProjectorMultiMaterial>(&Material, -1)){
 
-	}else if(CheckMaterial<UHardwareShaderWrapper>(&Material)){
+	}else if(CheckMaterial<UProjectorMaterial>(&Material, -1)){
+
+	}else if(CheckMaterial<UHardwareShaderWrapper>(&Material, -1)){
 		UHardwareShaderWrapper* HardwareShaderWrapper = static_cast<UHardwareShaderWrapper*>(Material);
 
 		HardwareShaderWrapper->SetupShaderWrapper(this);
-		SetSimpleMaterial(HardwareShaderWrapper->ShaderImplementation->Textures[0], ErrorString, ErrorMaterial);
-	}else if(CheckMaterial<UHardwareShader>(&Material)){
-		SetSimpleMaterial(static_cast<UHardwareShader*>(Material)->Textures[0], ErrorString, ErrorMaterial);
+		Result = SetSimpleMaterial(HardwareShaderWrapper->ShaderImplementation->Textures[0], ErrorString, ErrorMaterial);
+	}else if(CheckMaterial<UHardwareShader>(&Material, -1)){
+		Result = SetSimpleMaterial(static_cast<UHardwareShader*>(Material)->Textures[0], ErrorString, ErrorMaterial);
 	}
 
+	if(!Result){ // Reset to default state in error case
+		InitDefaultMaterialStageState(0);
+		CurrentState->NumStages = 1;
+	}
+
+	glUniform1i(SU_NumStages, CurrentState->NumStages);
+	glUniform1i(SU_TexCoordCount, CurrentState->TexCoordCount);
+	glUniform1iv(SU_StageTexCoordIndices, ARRAY_COUNT(CurrentState->StageTexCoordIndices), CurrentState->StageTexCoordIndices);
+	glUniformMatrix4fv(SU_StageTexMatrices, ARRAY_COUNT(CurrentState->StageTexMatrices), GL_FALSE, (GLfloat*)CurrentState->StageTexMatrices);
+	glUniform1iv(SU_StageColorArgs, ARRAY_COUNT(CurrentState->StageColorArgs), CurrentState->StageColorArgs);
+	glUniform1iv(SU_StageColorOps, ARRAY_COUNT(CurrentState->StageColorOps), CurrentState->StageColorOps);
+	glUniform1iv(SU_StageAlphaArgs, ARRAY_COUNT(CurrentState->StageAlphaArgs), CurrentState->StageAlphaArgs);
+	glUniform1iv(SU_StageAlphaOps, ARRAY_COUNT(CurrentState->StageAlphaOps), CurrentState->StageAlphaOps);
+	glUniform4fv(SU_ConstantColor, 1, (GLfloat*)&CurrentState->ConstantColor);
+	glUniform1f(SU_AlphaRef, CurrentState->AlphaRef);
+
 	unguard;
+}
+
+void FOpenGLRenderInterface::SetBitmapTexture(UBitmapMaterial* Bitmap, INT TextureUnit){
+	FBaseTexture* Texture = Bitmap->Get(LockedViewport->CurrentTime, LockedViewport)->GetRenderInterface();
+
+	if(!Texture)
+		return;
+
+	QWORD CacheId = Texture->GetCacheId();
+	FOpenGLTexture* GLTexture = static_cast<FOpenGLTexture*>(RenDev->GetCachedResource(CacheId));
+
+	if(!GLTexture)
+		GLTexture = new FOpenGLTexture(RenDev, CacheId);
+
+	if(GLTexture->Revision != Texture->GetRevision())
+		GLTexture->Cache(Texture);
+
+	GLTexture->BindTexture(TextureUnit);
 }
 
 bool FOpenGLRenderInterface::SetSimpleMaterial(UMaterial* Material, FString* ErrorString, UMaterial** ErrorMaterial){
@@ -373,22 +428,7 @@ bool FOpenGLRenderInterface::HandleCombinedMaterial(UMaterial* Material, INT& St
 			return false;
 		}
 
-		UBitmapMaterial* Bitmap = static_cast<UBitmapMaterial*>(Material);
-		FBaseTexture* Texture = Bitmap->Get(LockedViewport->CurrentTime, LockedViewport)->GetRenderInterface();
-
-		if(!Texture)
-			return true;
-
-		QWORD CacheId = Texture->GetCacheId();
-		FOpenGLTexture* GLTexture = static_cast<FOpenGLTexture*>(RenDev->GetCachedResource(CacheId));
-
-		if(!GLTexture)
-			GLTexture = new FOpenGLTexture(RenDev, CacheId);
-
-		if(GLTexture->Revision != Texture->GetRevision())
-			GLTexture->Cache(Texture);
-
-		GLTexture->BindTexture(TexturesUsed);
+		SetBitmapTexture(static_cast<UBitmapMaterial*>(Material), TexturesUsed);
 
 		CurrentState->StageColorArgs[StagesUsed * 2] = CA_Texture0 + TexturesUsed;
 		CurrentState->StageColorOps[StagesUsed] = COP_Arg1;
@@ -400,7 +440,233 @@ bool FOpenGLRenderInterface::HandleCombinedMaterial(UMaterial* Material, INT& St
 
 		return true;
 	}else if(CheckMaterial<UCombiner>(&Material, StagesUsed)){
-		return HandleCombinedMaterial(static_cast<UCombiner*>(Material)->Material1, StagesUsed, TexturesUsed, ErrorString, ErrorMaterial);
+		UCombiner* Combiner = static_cast<UCombiner*>(Material);
+		UMaterial* Material1 = Combiner->Material1;
+		UMaterial* Material2 = Combiner->Material2;
+		bool BitmapMaterial1 = CheckMaterial<UBitmapMaterial>(&Material1, -1);
+		bool BitmapMaterial2 = CheckMaterial<UBitmapMaterial>(&Material2, -1);
+
+		if(!Material1){
+			if(ErrorString)
+				*ErrorString = "Combiner must specify Material1";
+
+			if(ErrorMaterial)
+				*ErrorMaterial = Material;
+
+			return false;
+		}else if(!BitmapMaterial1 && !BitmapMaterial2){
+			if(ErrorString)
+				*ErrorString = "Either Material1 or Material2 must be a simple bitmap material";
+
+			if(ErrorMaterial)
+				*ErrorMaterial = Material;
+
+			return false;
+		}
+
+		// Swap materials if it makes things easier
+
+		bool Swapped;
+
+		if(!BitmapMaterial2 || (BitmapMaterial1 && Combiner->Mask == Combiner->Material2)){
+			Material1 = Combiner->Material2;
+			Material2 = Combiner->Material1;
+			Swapped = true;
+		}else{
+			Swapped = false;
+		}
+
+		// Set Material1
+
+		if(!HandleCombinedMaterial(Material1, StagesUsed, TexturesUsed, ErrorString, ErrorMaterial))
+			return false;
+
+		// Set Mask
+
+		UMaterial* Mask = Combiner->Mask;
+		if(Mask){
+			if(Mask != Material1 && Mask != Material2 && !Mask->IsA<UBitmapMaterial>() && !Mask->IsA<UVertexColor>() && !Mask->IsA<UConstantMaterial>()){
+				if(ErrorString)
+					*ErrorString = "Combiner Mask must be a bitmap material, vertex color, constant color, Material1 or Material2";
+
+				if(ErrorMaterial)
+					*ErrorMaterial = Material;
+
+				return false;
+			}
+
+			if(Mask == Material2){
+
+			}else if(Mask != Material1){
+				// If the mask is a simple bitmap material we don't need to waste an entire stage for it, just the texture unit.
+				bool SimpleBitmapMask = Mask->IsA<UBitmapMaterial>() != 0;
+
+				if(SimpleBitmapMask || CheckMaterial<UBitmapMaterial>(&Mask, StagesUsed)){
+					if(TexturesUsed >= MAX_TEXTURES){
+						if(ErrorString)
+							*ErrorString = "No texture units left for combiner Mask";
+
+						if(ErrorMaterial)
+							*ErrorMaterial = Material;
+
+						return false;
+					}
+
+					if(SimpleBitmapMask){
+						SetBitmapTexture(static_cast<UBitmapMaterial*>(Mask), TexturesUsed);
+
+						CurrentState->StageAlphaArgs[StagesUsed * 2] = CA_Texture0 + TexturesUsed;
+						CurrentState->StageAlphaArgs[StagesUsed] = AOP_Arg1;
+						++TexturesUsed;
+					}else{
+						if(!HandleCombinedMaterial(Mask, StagesUsed, TexturesUsed, ErrorString, ErrorMaterial))
+							return false;
+
+						CurrentState->StageColorArgs[StagesUsed * 2 - 2] = CA_Previous;
+						CurrentState->StageColorOps[StagesUsed - 1] = COP_Arg1;
+						CurrentState->StageAlphaArgs[StagesUsed * 2 - 2] = CA_Texture0 + TexturesUsed - 1;
+						CurrentState->StageAlphaArgs[StagesUsed - 1] = AOP_Arg1;
+					}
+				}else if(CheckMaterial<UVertexColor>(&Mask, StagesUsed)){
+					CurrentState->StageAlphaArgs[StagesUsed * 2 - 2] = CA_Diffuse;
+					CurrentState->StageAlphaOps[StagesUsed - 1] = AOP_Arg1;
+				}else if(CheckMaterial<UConstantMaterial>(&Mask, StagesUsed)){
+					if(CurrentState->UsingConstantColor){
+						if(ErrorString)
+							*ErrorString = "Only one ConstantMaterial may be used per material";
+
+						if(ErrorMaterial)
+							*ErrorMaterial = Material;
+
+						return false;
+					}
+
+					CurrentState->ConstantColor = static_cast<UConstantMaterial*>(Mask)->GetColor(GEngineTime);
+					CurrentState->StageAlphaArgs[StagesUsed * 2 - 2] = CA_Constant;
+					CurrentState->StageAlphaOps[StagesUsed - 1] = AOP_Arg1;
+				}else{
+					if(ErrorString)
+						*ErrorString = "Combiner Mask must be a bitmap material, vertex color, constant color, Material1 or Material2";
+
+					if(ErrorMaterial)
+						*ErrorMaterial = Material;
+
+					return false;
+				}
+			}
+		}
+
+		// Set Material2
+
+		if(Material2){
+			if(!HandleCombinedMaterial(Material2, StagesUsed, TexturesUsed, ErrorString, ErrorMaterial))
+				return false;
+
+			if(Swapped){
+				CurrentState->StageColorArgs[StagesUsed * 2 - 2] = CA_Texture0 + TexturesUsed - 1;
+				CurrentState->StageColorArgs[StagesUsed * 2 - 1] = CA_Previous;
+				CurrentState->StageAlphaArgs[StagesUsed * 2 - 2] = CA_Texture0 + TexturesUsed - 1;
+				CurrentState->StageAlphaArgs[StagesUsed * 2 - 1] = CA_Previous;
+			}else{
+				CurrentState->StageColorArgs[StagesUsed * 2 - 2] = CA_Previous;
+				CurrentState->StageColorArgs[StagesUsed * 2 - 1] = CA_Texture0 + TexturesUsed - 1;
+				CurrentState->StageAlphaArgs[StagesUsed * 2 - 2] = CA_Previous;
+				CurrentState->StageAlphaArgs[StagesUsed * 2 - 1] = CA_Texture0 + TexturesUsed - 1;
+			}
+		}
+
+		// Apply color operations
+
+		INT StageIndex = StagesUsed - 1;
+
+		switch(Combiner->CombineOperation){
+		case CO_Use_Color_From_Material1:
+			CurrentState->StageColorOps[StageIndex] = COP_Arg1;
+			break;
+		case CO_Use_Color_From_Material2:
+			CurrentState->StageColorOps[StageIndex] = COP_Arg2;
+			break;
+		case CO_Multiply:
+			CurrentState->StageColorOps[StageIndex] = COP_Modulate;
+			break;
+		case CO_Add:
+			CurrentState->StageColorOps[StageIndex] = COP_Add;
+			break;
+		case CO_Subtract:
+			CurrentState->StageColorOps[StageIndex] = COP_Subtract;
+			break;
+		case CO_AlphaBlend_With_Mask:
+			CurrentState->StageColorOps[StageIndex] = COP_AlphaBlend;
+			break;
+		case CO_Add_With_Mask_Modulation:
+			CurrentState->StageColorOps[StageIndex] = COP_AddAlphaModulate;
+			break;
+		case CO_Use_Color_From_Mask:
+			CurrentState->StageColorOps[StageIndex] = COP_Arg1; // TODO: This is probably not correct
+		}
+
+		// Apply alpha operations
+
+		switch(Combiner->AlphaOperation){
+		case AO_Use_Mask:
+			break;
+		case AO_Multiply:
+			if(Mask && Mask != Material1 && Mask != Material2){
+				if(ErrorString)
+					*ErrorString = "Combiner Mask must be Material1, Material2 or None for AO_Multiply";
+
+				if(ErrorMaterial)
+					*ErrorMaterial = Material;
+
+				return false;
+			}
+
+			CurrentState->StageAlphaOps[StageIndex] = AOP_Modulate;
+			break;
+		case AO_Add:
+			if(Mask && Mask != Material1 && Mask != Material2){
+				if(ErrorString)
+					*ErrorString = "Combiner Mask must be Material1, Material2 or None for AO_Add";
+
+				if(ErrorMaterial)
+					*ErrorMaterial = Material;
+
+				return false;
+			}
+
+			CurrentState->StageAlphaOps[StageIndex] = AOP_Add;
+			break;
+		case AO_Use_Alpha_From_Material1:
+			if(Mask && Mask != Material1 && Mask != Material2){
+				if(ErrorString)
+					*ErrorString = "Combiner Mask must be Material1, Material2 or None for AO_Use_Alpha_From_Material1";
+
+				if(ErrorMaterial)
+					*ErrorMaterial = Material;
+
+				return false;
+			}
+
+			CurrentState->StageAlphaOps[StageIndex] = AOP_Arg1;
+			break;
+		case AO_Use_Alpha_From_Material2:
+			if(Mask && Mask != Material1 && Mask != Material2){
+				if(ErrorString)
+					*ErrorString = "Combiner Mask must be Material1, Material2 or None for AO_Use_Alpha_From_Material2";
+
+				if(ErrorMaterial)
+					*ErrorMaterial = Material;
+
+				return false;
+			}
+
+			CurrentState->StageAlphaOps[StageIndex] = AOP_Arg2;
+			break;
+		case AO_AlphaBlend_With_Mask:
+			CurrentState->StageAlphaOps[StageIndex] = AOP_Blend;
+		}
+
+		return true;
 	}
 
 	return true;
@@ -587,24 +853,6 @@ void FOpenGLRenderInterface::DrawPrimitive(EPrimitiveType PrimitiveType, INT Fir
 
 	EnableZTest(1);
 
-	if(CurrentState->UsingFixedFunctionShader && CurrentState->NeedFixedFunctionShaderUniformUpdate){
-		// Why is this needed???
-		for(INT i = 0; i < CurrentState->NumStages; ++i){
-			CurrentState->StageTexMatrices[i].M[3][0] = CurrentState->StageTexMatrices[i].M[2][0];
-			CurrentState->StageTexMatrices[i].M[3][1] = CurrentState->StageTexMatrices[i].M[2][1];
-		}
-
-		glUniform1i(SU_NumStages, CurrentState->NumStages);
-		glUniform1iv(SU_StageTexCoordIndices, ARRAY_COUNT(CurrentState->StageTexCoordIndices), CurrentState->StageTexCoordIndices);
-		glUniformMatrix4fv(SU_StageTexMatrices, ARRAY_COUNT(CurrentState->StageTexMatrices), GL_FALSE, (GLfloat*)CurrentState->StageTexMatrices);
-		glUniform1iv(SU_StageColorArgs, ARRAY_COUNT(CurrentState->StageColorArgs), CurrentState->StageColorArgs);
-		glUniform1iv(SU_StageColorOps, ARRAY_COUNT(CurrentState->StageColorOps), CurrentState->StageColorOps);
-		glUniform1iv(SU_StageAlphaArgs, ARRAY_COUNT(CurrentState->StageAlphaArgs), CurrentState->StageAlphaArgs);
-		glUniform1iv(SU_StageAlphaOps, ARRAY_COUNT(CurrentState->StageAlphaOps), CurrentState->StageAlphaOps);
-		glUniform4fv(SU_ConstantColor, 1, (GLfloat*)&CurrentState->ConstantColor);
-		CurrentState->NeedFixedFunctionShaderUniformUpdate = false;
-	}
-
 	GLenum Mode  = 0;
 	INT    Count = NumPrimitives;
 
@@ -669,8 +917,6 @@ void FOpenGLRenderInterface::SetShader(FShaderGLSL* NewShader){
 
 	CurrentState->Shader = Shader;
 	Shader->Bind();
-	CurrentState->UsingFixedFunctionShader = NewShader == &RenDev->FixedFunctionShader;
-	CurrentState->NeedFixedFunctionShaderUniformUpdate = true;
 }
 
 void FOpenGLRenderInterface::SetupPerFrameShaderConstants(){

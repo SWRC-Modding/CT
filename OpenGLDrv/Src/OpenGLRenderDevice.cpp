@@ -360,14 +360,14 @@ UBOOL UOpenGLRenderDevice::SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL
 
 		glVertexAttrib4f(FVF_Diffuse, 1.0f, 1.0f, 1.0f, 1.0f);
 		glVertexAttrib4f(FVF_Specular, 1.0f, 1.0f, 1.0f, 1.0f);
-		glVertexAttrib4f(FVF_TexCoord0, 0.0f, 0.0f, 0.0f, 1.0f);
-		glVertexAttrib4f(FVF_TexCoord1, 0.0f, 0.0f, 0.0f, 1.0f);
-		glVertexAttrib4f(FVF_TexCoord2, 0.0f, 0.0f, 0.0f, 1.0f);
-		glVertexAttrib4f(FVF_TexCoord3, 0.0f, 0.0f, 0.0f, 1.0f);
-		glVertexAttrib4f(FVF_TexCoord4, 0.0f, 0.0f, 0.0f, 1.0f);
-		glVertexAttrib4f(FVF_TexCoord5, 0.0f, 0.0f, 0.0f, 1.0f);
-		glVertexAttrib4f(FVF_TexCoord6, 0.0f, 0.0f, 0.0f, 1.0f);
-		glVertexAttrib4f(FVF_TexCoord7, 0.0f, 0.0f, 0.0f, 1.0f);
+		glVertexAttrib4f(FVF_TexCoord0, 0.0f, 0.0f, 1.0f, 1.0f);
+		glVertexAttrib4f(FVF_TexCoord1, 0.0f, 0.0f, 1.0f, 1.0f);
+		glVertexAttrib4f(FVF_TexCoord2, 0.0f, 0.0f, 1.0f, 1.0f);
+		glVertexAttrib4f(FVF_TexCoord3, 0.0f, 0.0f, 1.0f, 1.0f);
+		glVertexAttrib4f(FVF_TexCoord4, 0.0f, 0.0f, 1.0f, 1.0f);
+		glVertexAttrib4f(FVF_TexCoord5, 0.0f, 0.0f, 1.0f, 1.0f);
+		glVertexAttrib4f(FVF_TexCoord6, 0.0f, 0.0f, 1.0f, 1.0f);
+		glVertexAttrib4f(FVF_TexCoord7, 0.0f, 0.0f, 1.0f, 1.0f);
 	}else{
 		MakeCurrent();
 	}

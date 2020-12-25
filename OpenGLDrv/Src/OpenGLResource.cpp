@@ -265,7 +265,6 @@ void FOpenGLTexture::Cache(FBaseTexture* BaseTexture){
 			checkSlow(Data);
 
 			glCompressedTextureImage2DEXT(TextureHandle, GL_TEXTURE_2D, 0, GLFormat, Width, Height, 0, Size, Data);
-			Texture->UnloadRawTextureData(0);
 		}else{
 			void* Data = Texture->GetRawTextureData(0);
 
@@ -276,8 +275,10 @@ void FOpenGLTexture::Cache(FBaseTexture* BaseTexture){
 
 			glTextureStorage2D(TextureHandle, 1, GL_RGBA8, Width, Height);
 			glTextureSubImage2D(TextureHandle, 0, 0, 0, Width, Height, GL_BGRA, GL_UNSIGNED_BYTE, Data);
-			Texture->UnloadRawTextureData(0);
 		}
+
+		for(INT i = 0; i < Texture->GetNumMips(); ++i)
+			Texture->UnloadRawTextureData(i);
 
 		glGenerateTextureMipmap(TextureHandle);
 		glTextureParameteri(TextureHandle, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);

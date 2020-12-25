@@ -239,7 +239,7 @@ FMatrix FOpenGLRenderInterface::GetTransform(ETransformType Type) const{
 
 void FOpenGLRenderInterface::InitDefaultMaterialStageState(INT StageIndex){
 	// Init default material state
-	CurrentState->StageTexCoordIndices[StageIndex] = 0;
+	CurrentState->StageTexCoordSources[StageIndex] = 0;
 	CurrentState->StageTexMatrices[StageIndex] = FMatrix::Identity;
 	CurrentState->StageColorArgs[StageIndex * 2] = CA_Diffuse;
 	CurrentState->StageColorArgs[StageIndex * 2 + 1] = CA_Diffuse;
@@ -322,7 +322,7 @@ void FOpenGLRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorStri
 
 	glUniform1i(SU_NumStages, CurrentState->NumStages);
 	glUniform1i(SU_TexCoordCount, CurrentState->TexCoordCount);
-	glUniform1iv(SU_StageTexCoordIndices, ARRAY_COUNT(CurrentState->StageTexCoordIndices), CurrentState->StageTexCoordIndices);
+	glUniform1iv(SU_StageTexCoordSources, ARRAY_COUNT(CurrentState->StageTexCoordSources), CurrentState->StageTexCoordSources);
 	glUniformMatrix4fv(SU_StageTexMatrices, ARRAY_COUNT(CurrentState->StageTexMatrices), GL_FALSE, (GLfloat*)CurrentState->StageTexMatrices);
 	glUniform1iv(SU_StageColorArgs, ARRAY_COUNT(CurrentState->StageColorArgs), CurrentState->StageColorArgs);
 	glUniform1iv(SU_StageColorOps, ARRAY_COUNT(CurrentState->StageColorOps), CurrentState->StageColorOps);
@@ -495,9 +495,7 @@ bool FOpenGLRenderInterface::HandleCombinedMaterial(UMaterial* Material, INT& St
 				return false;
 			}
 
-			if(Mask == Material2){
-
-			}else if(Mask != Material1){
+			if(Mask != Material1 && Mask != Material2){
 				// If the mask is a simple bitmap material we don't need to waste an entire stage for it, just the texture unit.
 				bool SimpleBitmapMask = Mask->IsA<UBitmapMaterial>() != 0;
 
@@ -565,11 +563,15 @@ bool FOpenGLRenderInterface::HandleCombinedMaterial(UMaterial* Material, INT& St
 			if(Swapped){
 				CurrentState->StageColorArgs[StagesUsed * 2 - 2] = CA_Texture0 + TexturesUsed - 1;
 				CurrentState->StageColorArgs[StagesUsed * 2 - 1] = CA_Previous;
-				CurrentState->StageAlphaArgs[StagesUsed * 2 - 2] = CA_Texture0 + TexturesUsed - 1;
-				CurrentState->StageAlphaArgs[StagesUsed * 2 - 1] = CA_Previous;
 			}else{
 				CurrentState->StageColorArgs[StagesUsed * 2 - 2] = CA_Previous;
 				CurrentState->StageColorArgs[StagesUsed * 2 - 1] = CA_Texture0 + TexturesUsed - 1;
+			}
+
+			if(Mask == Material2){
+				CurrentState->StageAlphaArgs[StagesUsed * 2 - 2] = CA_Texture0 + TexturesUsed - 1;
+				CurrentState->StageAlphaArgs[StagesUsed * 2 - 1] = CA_Previous;
+			}else{
 				CurrentState->StageAlphaArgs[StagesUsed * 2 - 2] = CA_Previous;
 				CurrentState->StageAlphaArgs[StagesUsed * 2 - 1] = CA_Texture0 + TexturesUsed - 1;
 			}

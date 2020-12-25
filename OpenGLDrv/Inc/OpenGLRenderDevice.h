@@ -74,6 +74,7 @@ public:
 private:
 	UBOOL                     bFirstRun;
 	UBOOL                     bVSync;
+	UBOOL                     bAdaptiveVSync;
 	UBOOL                     bDebugOpenGL;
 	UBOOL                     bIsFullscreen;
 	INT                       SavedViewportWidth;

@@ -22,8 +22,9 @@ void UOpenGLRenderDevice::StaticConstructor(){
 
 	new(GetClass(), "UseDesktopResolution", RF_Public) UBoolProperty(CPP_PROPERTY(bUseDesktopResolution), "Options", CPF_Config);
 	new(GetClass(), "KeepAspectRatio", RF_Public) UBoolProperty(CPP_PROPERTY(bKeepAspectRatio), "Options", CPF_Config);
+	new(GetClass(), "VSync", RF_Public) UBoolProperty(CPP_PROPERTY(bVSync), "Options", CPF_Config);
+	new(GetClass(), "AdaptiveVSync", RF_Public) UBoolProperty(CPP_PROPERTY(bAdaptiveVSync), "Options", CPF_Config);
 	new(GetClass(), "FirstRun", RF_Public) UBoolProperty(CPP_PROPERTY(bFirstRun), "", CPF_Config);
-	new(GetClass(), "VSync", RF_Public) UBoolProperty(CPP_PROPERTY(bVSync), "", CPF_Config);
 	new(GetClass(), "DebugOpenGL", RF_Public) UBoolProperty(CPP_PROPERTY(bDebugOpenGL), "", CPF_Config);
 	new(GetClass(), "ShaderDir", RF_Public) UStrProperty(CPP_PROPERTY(ShaderDir), "", CPF_Config);
 }
@@ -472,7 +473,19 @@ UBOOL UOpenGLRenderDevice::ResourceCached(QWORD CacheId){
 void UOpenGLRenderDevice::EnableVSync(bool bEnable){
 	if(WGL_EXT_swap_control){
 		bVSync = bEnable;
-		wglSwapIntervalEXT(bEnable ? 1 : 0);
+
+		INT Interval;
+
+		if(bEnable){
+			if(WGL_EXT_swap_control_tear && bAdaptiveVSync)
+				Interval = -1;
+			else
+				Interval = 1;
+		}else{
+			Interval = 0;
+		}
+
+		wglSwapIntervalEXT(Interval);
 	}else{
 		bVSync = 0;
 	}

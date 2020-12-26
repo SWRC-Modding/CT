@@ -10,7 +10,8 @@
 
 FOpenGLRenderInterface::FOpenGLRenderInterface(UOpenGLRenderDevice* InRenDev) : RenDev(InRenDev),
                                                                                 CurrentState(&SavedStates[0]),
-                                                                                GlobalUBO(GL_NONE){}
+                                                                                GlobalUBO(GL_NONE),
+                                                                                PrecacheMode(PRECACHE_All){}
 
 void FOpenGLRenderInterface::Init(){
 	CurrentState->Uniforms.LocalToWorld = FMatrix::Identity;

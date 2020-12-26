@@ -248,7 +248,6 @@ void FOpenGLTexture::Cache(FBaseTexture* BaseTexture){
 		glCreateTextures(GL_TEXTURE_2D, 1, &TextureHandle);
 
 		ETextureFormat SrcFormat = Texture->GetFormat();
-		INT Size = GetBytesPerPixel(SrcFormat, Width * Height);
 
 		if(IsDXTC(SrcFormat)){
 			GLenum GLFormat;
@@ -264,13 +263,13 @@ void FOpenGLTexture::Cache(FBaseTexture* BaseTexture){
 
 			checkSlow(Data);
 
-			glCompressedTextureImage2DEXT(TextureHandle, GL_TEXTURE_2D, 0, GLFormat, Width, Height, 0, Size, Data);
-		}else{
+			glCompressedTextureImage2DEXT(TextureHandle, GL_TEXTURE_2D, 0, GLFormat, Width, Height, 0, GetBytesPerPixel(SrcFormat, Width * Height), Data);
+		}else{ // TODO: Fix texture loading and format conversion
 			void* Data = Texture->GetRawTextureData(0);
 
 			if(!Data){
-				Data = RenDev->GetScratchBuffer(Size);
-				Texture->GetTextureData(0, Data, 0, SrcFormat);
+				Data = RenDev->GetScratchBuffer(GetBytesPerPixel(TEXF_RGBA8, Width * Height));
+				Texture->GetTextureData(0, Data, 0, TEXF_RGBA8);
 			}
 
 			glTextureStorage2D(TextureHandle, 1, GL_RGBA8, Width, Height);

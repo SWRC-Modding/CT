@@ -280,8 +280,6 @@ void FOpenGLTexture::Cache(FBaseTexture* BaseTexture){
 			Texture->UnloadRawTextureData(i);
 
 		glGenerateTextureMipmap(TextureHandle);
-		glTextureParameteri(TextureHandle, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-		glTextureParameteri(TextureHandle, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	}else if(RenderTarget){
 		if(Width == 0 || Height == 0)
 			return;

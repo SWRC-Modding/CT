@@ -105,7 +105,9 @@ public:
 
 		bool                  UsingConstantColor;
 		INT                   NumStages;
+		INT                   NumTextures;
 		INT                   TexCoordCount;
+		INT                   StageTexWrapModes[MAX_TEXTURES * 2];  // ETexClampMode for U and V
 		INT                   StageTexCoordSources[MAX_SHADER_STAGES]; // TODO: Support generated texture coordinates
 		FMatrix               StageTexMatrices[MAX_SHADER_STAGES];
 		INT                   StageColorArgs[MAX_SHADER_STAGES * 2]; // EColorArg for Arg1 and Arg2
@@ -132,11 +134,14 @@ public:
 	bool                      NeedUniformUpdate;
 	unsigned int              GlobalUBO;
 
+	unsigned int              Samplers[MAX_TEXTURES];
+
 	FStreamDeclaration        VertexStreamDeclarations[MAX_VERTEX_STREAMS];
 
 	FOpenGLRenderInterface(UOpenGLRenderDevice* InRenDev);
 
-	void FlushResources();
+	void Init();
+	void Exit();
 	void UpdateShaderUniforms();
 
 	// Overrides
@@ -183,7 +188,7 @@ private:
 	bool HandleCombinedMaterial(UMaterial* InMaterial, INT& PassesUsed, INT& TexturesUsed, FString* ErrorString = NULL, UMaterial** ErrorMaterial = NULL);
 
 	template<typename T>
-	bool CheckMaterial(UMaterial** Material, INT StageIndex){
+	bool CheckMaterial(UMaterial** Material, INT StageIndex, INT TextureIndex = -1){
 		UMaterial* RootMaterial = *Material;
 
 		if(RootMaterial->IsA<T>())
@@ -233,6 +238,14 @@ private:
 							*StageTexCoordSrc = 0;
 
 						CurrentState->TexCoordCount = TexModifier->TexCoordCount + 2;
+					}
+
+					if(TextureIndex > 0){
+						if(TexModifier->UClampMode != TCO_UseTextureMode)
+							CurrentState->StageTexWrapModes[TextureIndex * 2] = TexModifier->UClampMode - 1;
+
+						if(TexModifier->VClampMode != TCO_UseTextureMode)
+							CurrentState->StageTexWrapModes[TextureIndex * 2 + 1] = TexModifier->UClampMode - 1;
 					}
 				}else if(Modifier->IsA<UFinalBlend>()){
 					UFinalBlend* FinalBlend = static_cast<UFinalBlend*>(Modifier);

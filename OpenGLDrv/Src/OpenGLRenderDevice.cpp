@@ -30,15 +30,11 @@ void UOpenGLRenderDevice::StaticConstructor(){
 }
 
 void UOpenGLRenderDevice::MakeCurrent(){
-	guardFunc;
-
 	if(!IsCurrent()){
 		wglMakeCurrent(DeviceContext, OpenGLContext);
 		// NOTE: This must be set to 0 in order to avoid inconsistencies with RGBA and BGRA colors.
 		GIsOpenGL = 0;
 	}
-
-	unguard;
 }
 
 bool UOpenGLRenderDevice::IsCurrent(){
@@ -49,11 +45,8 @@ void UOpenGLRenderDevice::UnSetRes(){
 	guardFunc;
 
 	if(OpenGLContext){
-		if(IsCurrent()){
-			wglMakeCurrent(NULL, NULL);
-			GIsOpenGL = 0;
-		}
-
+		MakeCurrent();
+		RenderInterface.Exit();
 		wglDeleteContext(OpenGLContext);
 		OpenGLContext = NULL;
 	}
@@ -351,6 +344,7 @@ UBOOL UOpenGLRenderDevice::SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL
 		glEnable(GL_STENCIL_TEST);
 		glEnable(GL_POLYGON_OFFSET_FILL);
 
+		RenderInterface.Init();
 		RenderInterface.EnableZTest(1);
 		RenderInterface.EnableZWrite(1);
 		RenderInterface.SetShader(&FixedFunctionShader);
@@ -435,8 +429,6 @@ void UOpenGLRenderDevice::Flush(UViewport* Viewport){
 	if(Viewport && Viewport->Actor)
 		Viewport->Actor->FrameFX->FreeRenderTargets();
 
-	RenderInterface.FlushResources();
-
 	for(INT i = 0; i < ARRAY_COUNT(ResourceHash); ++i){
 		FOpenGLResource* Resource = ResourceHash[i];
 
@@ -499,19 +491,8 @@ FRenderInterface* UOpenGLRenderDevice::Lock(UViewport* Viewport, BYTE* HitData, 
 
 	RenderInterface.LockedViewport = Viewport;
 
-	// Render target and default shader might be deleted when Flush is called so check for that and set them again
-
-	if(!RenderInterface.CurrentState->RenderTarget)
-		RenderInterface.SetRenderTarget(&ScreenRenderTarget, false);
-
-	FShaderGLSL* DefaultShader = &FixedFunctionShader;
-	FOpenGLShader* CurrentShader = RenderInterface.CurrentState->Shader;
-
-	checkSlow(!CurrentShader || CurrentShader->CacheId == DefaultShader->GetCacheId());
-
-	if(!CurrentShader || (CurrentShader->Revision != DefaultShader->GetRevision())) // Update default shader in case it was reloaded
-		RenderInterface.SetShader(DefaultShader);
-
+	RenderInterface.SetRenderTarget(&ScreenRenderTarget, false);
+	RenderInterface.SetShader(&FixedFunctionShader); // TODO: Move to FOpenGLRenderInterface::SetMaterial
 	RenderInterface.SetupPerFrameShaderConstants();
 	RenderInterface.PushState();
 

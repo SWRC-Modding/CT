@@ -35,7 +35,7 @@ public:
 
 	// Overrides
 	virtual UBOOL Exec(const TCHAR* Cmd, FOutputDevice& Ar);
-	virtual UBOOL Init(){ return 1; }
+	virtual UBOOL Init();
 	virtual UBOOL SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL Fullscreen, INT ColorBytes = 0, UBOOL bSaveSize = 1);
 	virtual void Exit(UViewport* Viewport);
 	virtual void Flush(UViewport* Viewport);
@@ -73,6 +73,7 @@ public:
 
 private:
 	UBOOL                     bFirstRun;
+	UBOOL                     bFixCanvasScaling;
 	UBOOL                     bVSync;
 	UBOOL                     bAdaptiveVSync;
 	UBOOL                     bDebugOpenGL;

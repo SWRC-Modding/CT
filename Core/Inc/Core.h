@@ -648,7 +648,8 @@ inline void* PatchDllClassVTable(const TCHAR* DllName, const TCHAR* ClassName, c
 		return NULL;
 	}
 
-	void** VTable = static_cast<void**>(appGetDllExport(Handle, *(FStringTemp("??_7") + ClassName + "@@6B" + VTableName + "@@@")));
+	FString DllExportName = (FStringTemp("??_7") + ClassName + "@@6B" + (VTableName ? FString(VTableName, true) + "@@@" : "@"));
+	void** VTable = static_cast<void**>(appGetDllExport(Handle, *DllExportName));
 
 	if(!VTable){
 		debugf(NAME_Error, "Unable to patch vtable for class '%s': Dll export for vtable '%s' not found", ClassName, VTableName);

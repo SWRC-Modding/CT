@@ -18,6 +18,7 @@ void UOpenGLRenderDevice::StaticConstructor(){
 	SupportsZBIAS = 1;
 	UseStencil = 1;
 	bFirstRun = 1;
+	bFixCanvasScaling = 1;
 	ShaderDir = "OpenGLShaders";
 
 	new(GetClass(), "UseDesktopResolution", RF_Public) UBoolProperty(CPP_PROPERTY(bUseDesktopResolution), "Options", CPF_Config);
@@ -25,16 +26,14 @@ void UOpenGLRenderDevice::StaticConstructor(){
 	new(GetClass(), "VSync", RF_Public) UBoolProperty(CPP_PROPERTY(bVSync), "Options", CPF_Config);
 	new(GetClass(), "AdaptiveVSync", RF_Public) UBoolProperty(CPP_PROPERTY(bAdaptiveVSync), "Options", CPF_Config);
 	new(GetClass(), "FirstRun", RF_Public) UBoolProperty(CPP_PROPERTY(bFirstRun), "", CPF_Config);
+	new(GetClass(), "FixCanvasScaling", RF_Public) UBoolProperty(CPP_PROPERTY(bFixCanvasScaling), "", CPF_Config);
 	new(GetClass(), "DebugOpenGL", RF_Public) UBoolProperty(CPP_PROPERTY(bDebugOpenGL), "", CPF_Config);
 	new(GetClass(), "ShaderDir", RF_Public) UStrProperty(CPP_PROPERTY(ShaderDir), "", CPF_Config);
 }
 
 void UOpenGLRenderDevice::MakeCurrent(){
-	if(!IsCurrent()){
+	if(!IsCurrent())
 		wglMakeCurrent(DeviceContext, OpenGLContext);
-		// NOTE: This must be set to 0 in order to avoid inconsistencies with RGBA and BGRA colors.
-		GIsOpenGL = 0;
-	}
 }
 
 bool UOpenGLRenderDevice::IsCurrent(){
@@ -191,6 +190,31 @@ void GLAPIENTRY OpenGLMessageCallback(GLenum source,
 
 	if(type == GL_DEBUG_TYPE_ERROR && appIsDebuggerPresent())
 		appDebugBreak();
+}
+
+typedef void(__fastcall*UCanvasUpdateFunc)(UCanvas*, DWORD);
+
+UCanvasUpdateFunc UCanvasUpdateOriginal = NULL;
+
+void __fastcall UCanvasUpdateOverride(UCanvas* Self, DWORD Edx){
+	GIsOpenGL = 1;
+	checkSlow(UCanvasUpdateOriginal);
+	UCanvasUpdateOriginal(Self, Edx);
+	GIsOpenGL = 0;
+}
+
+UBOOL UOpenGLRenderDevice::Init(){
+	// NOTE: This must be set to 0 in order to avoid inconsistencies with RGBA and BGRA colors.
+	GIsOpenGL = 0;
+
+	/*
+	 * Setting GIsOpenGL to 0 causes an issue with UCanvas where it doesn't properly fit the screen and fonts are rendered in lower resolution.
+	 * This is fixed by patching the vtable with an override function that sets GIsOpenGL to 1 for the duration of the call to UCanvas::Update.
+	 */
+	if(bFixCanvasScaling && !UCanvasUpdateOriginal)
+		UCanvasUpdateOriginal = static_cast<UCanvasUpdateFunc>(PatchDllClassVTable("Engine.dll", "UCanvas", NULL, 31, UCanvasUpdateOverride));
+
+	return 1;
 }
 
 UBOOL UOpenGLRenderDevice::SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL Fullscreen, INT ColorBytes, UBOOL bSaveSize){

@@ -352,6 +352,7 @@ UBOOL UOpenGLRenderDevice::SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL
 		glEnable(GL_POLYGON_OFFSET_FILL);
 
 		RenderInterface.EnableZTest(1);
+		RenderInterface.EnableZWrite(1);
 		RenderInterface.SetShader(&FixedFunctionShader);
 		RenderInterface.SetCullMode(CM_CW);
 		RenderInterface.SetFillMode(FM_Solid);

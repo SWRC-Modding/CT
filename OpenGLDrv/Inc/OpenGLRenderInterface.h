@@ -116,11 +116,14 @@ public:
 
 		// Blending
 
+		BYTE                  FramebufferBlending; // EFrameBufferBlending
 		FLOAT                 AlphaRef;
 	};
 
 	UOpenGLRenderDevice*      RenDev;
 	UViewport*                LockedViewport;
+
+	EPrecacheMode             PrecacheMode;
 
 	FOpenGLSavedState         SavedStates[MAX_STATESTACKDEPTH];
 	FOpenGLSavedState*        CurrentState;
@@ -171,8 +174,7 @@ public:
 	void SetupPerFrameShaderConstants();
 
 private:
-	EPrecacheMode PrecacheMode;
-
+	void RestoreLastState();
 	INT SetIndexBuffer(FIndexBuffer* IndexBuffer, INT BaseIndex, bool IsDynamic);
 	INT SetVertexStreams(EVertexShader Shader, FVertexStream** Streams, INT NumStreams, bool IsDynamic);
 	void InitDefaultMaterialStageState(INT StageIndex);
@@ -218,6 +220,10 @@ private:
 			while(Modifier != *Material){
 				if(Modifier->IsA<UTexModifier>()){
 					UTexModifier* TexModifier = static_cast<UTexModifier*>(Modifier);
+					FMatrix* Matrix = TexModifier->GetMatrix(GEngineTime);
+
+					if(Matrix)
+						*StageTexMatrix *= *Matrix;
 
 					if(TexModifier->TexCoordSource != TCS_NoChange){
 						*StageTexCoordSrc = TexModifier->TexCoordSource;
@@ -228,11 +234,18 @@ private:
 
 						CurrentState->TexCoordCount = TexModifier->TexCoordCount + 2;
 					}
+				}else if(Modifier->IsA<UFinalBlend>()){
+					UFinalBlend* FinalBlend = static_cast<UFinalBlend*>(Modifier);
 
-					FMatrix* Matrix = TexModifier->GetMatrix(GEngineTime);
+					CurrentState->FramebufferBlending = FinalBlend->FrameBufferBlending;
+					CurrentState->bZTest = FinalBlend->ZTest != 0;
+					CurrentState->bZWrite = FinalBlend->ZWrite != 0;
 
-					if(Matrix)
-						*StageTexMatrix *= *Matrix;
+					if(FinalBlend->TwoSided)
+						CurrentState->CullMode = CM_None;
+
+					if(FinalBlend->AlphaTest)
+						CurrentState->AlphaRef = CurrentState->AlphaRef / 255.0f;
 				}
 
 				Modifier = static_cast<UModifier*>(Modifier->Material);

@@ -61,6 +61,18 @@ void FOpenGLRenderInterface::UpdateShaderUniforms(){
 void FOpenGLRenderInterface::PushState(INT Flags){
 	guardFunc;
 
+	RestoreLastState();
+
+	++CurrentState;
+
+	check(CurrentState <= &SavedStates[MAX_STATESTACKDEPTH]);
+
+	appMemcpy(CurrentState, CurrentState - 1, sizeof(FOpenGLSavedState));
+
+	unguard;
+}
+
+void FOpenGLRenderInterface::RestoreLastState(){
 	// Restore OpenGL state only if needed rather than doing these checks each time PopState is called
 	if(PoppedState){
 		if(CurrentState->RenderTarget != PoppedState->RenderTarget)
@@ -98,17 +110,15 @@ void FOpenGLRenderInterface::PushState(INT Flags){
 				glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, GL_NONE);
 		}
 
+		if(CurrentState->bZTest != PoppedState->bZTest)
+			EnableZTest(CurrentState->bZTest);
+
+		if(CurrentState->bZWrite != PoppedState->bZWrite)
+			EnableZWrite(CurrentState->bZWrite);
+
 		NeedUniformUpdate = CurrentState->UniformRevision != PoppedState->UniformRevision;
 		PoppedState = NULL;
 	}
-
-	++CurrentState;
-
-	check(CurrentState <= &SavedStates[MAX_STATESTACKDEPTH]);
-
-	appMemcpy(CurrentState, CurrentState - 1, sizeof(FOpenGLSavedState));
-
-	unguard;
 }
 
 void FOpenGLRenderInterface::PopState(INT Flags){
@@ -252,16 +262,7 @@ void FOpenGLRenderInterface::InitDefaultMaterialStageState(INT StageIndex){
 void FOpenGLRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorString, UMaterial** ErrorMaterial, INT* NumPasses){
 	guardFunc;
 
-	// Restore default material state
-
-	for(INT i = 0; i < CurrentState->NumStages; ++i)
-		InitDefaultMaterialStageState(i);
-
-	CurrentState->UsingConstantColor = false;
-	CurrentState->NumStages = 0;
-	CurrentState->TexCoordCount = 2;
-	CurrentState->ConstantColor = FPlane(1.0f, 1.0f, 1.0f, 1.0f);
-	CurrentState->AlphaRef = -1.0f;
+	RestoreLastState();
 
 	// Use default material if precaching geometry
 
@@ -286,11 +287,31 @@ void FOpenGLRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorStri
 		}
 	}
 
+	// Restore default material state
+
+	for(INT i = 0; i < CurrentState->NumStages; ++i)
+		InitDefaultMaterialStageState(i);
+
+	CurrentState->UsingConstantColor = false;
+	CurrentState->NumStages = 0;
+	CurrentState->TexCoordCount = 2;
+	CurrentState->ConstantColor = FPlane(1.0f, 1.0f, 1.0f, 1.0f);
+	CurrentState->FramebufferBlending = FB_Overwrite;
+	CurrentState->AlphaRef = -1.0f;
+
+	// We check later if these properties have changed after setting the material and udate the OpenGL state
+	bool ZTest = CurrentState->bZTest;
+	bool ZWrite = CurrentState->bZWrite;
+	ECullMode CullMode = CurrentState->CullMode;
+
 	Material->PreSetMaterial(GEngineTime);
 
 	bool Result = false;
 
 	if(CheckMaterial<UShader>(&Material, 0)){
+		if(static_cast<UShader*>(Material)->Opacity)
+			CurrentState->FramebufferBlending = FB_AlphaBlend;
+
 		Result = SetSimpleMaterial(static_cast<UShader*>(Material)->Diffuse, ErrorString, ErrorMaterial);
 	}else if(CheckMaterial<UCombiner>(&Material, -1)){
 		Result = SetSimpleMaterial(Material, ErrorString, ErrorMaterial);
@@ -298,14 +319,23 @@ void FOpenGLRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorStri
 		Result = SetSimpleMaterial(Material, ErrorString, ErrorMaterial);
 	}else if(CheckMaterial<UBitmapMaterial>(&Material, -1)){
 		Result = SetSimpleMaterial(Material, ErrorString, ErrorMaterial);
-	}else if(CheckMaterial<UTerrainMaterial>(&Material, -1)){
-
-	}else if(CheckMaterial<UParticleMaterial>(&Material, -1)){
-
+	}else if(CheckMaterial<UTerrainMaterial>(&Material, 0)){
+		Result = SetSimpleMaterial(static_cast<UTerrainMaterial*>(Material)->Layers[0].Texture, ErrorString, ErrorMaterial);
+	}else if(CheckMaterial<UParticleMaterial>(&Material, 0)){
+		CurrentState->AlphaRef = 0.0f;
+		CurrentState->FramebufferBlending = FB_AlphaBlend;
+		Result = SetSimpleMaterial(static_cast<UParticleMaterial*>(Material)->BitmapMaterial, ErrorString, ErrorMaterial);
+		CurrentState->bZWrite = false;
 	}else if(CheckMaterial<UProjectorMultiMaterial>(&Material, -1)){
-
+		CurrentState->AlphaRef = 0.5f;
+		CurrentState->FramebufferBlending = FB_Modulate;
+		Result = SetSimpleMaterial(static_cast<UProjectorMultiMaterial*>(Material)->BaseMaterial, ErrorString, ErrorMaterial);
+		CurrentState->bZWrite = false;
 	}else if(CheckMaterial<UProjectorMaterial>(&Material, -1)){
-
+		CurrentState->AlphaRef = 0.5f;
+		CurrentState->FramebufferBlending = FB_Modulate;
+		Result = SetSimpleMaterial(static_cast<UProjectorMaterial*>(Material)->Projected, ErrorString, ErrorMaterial);
+		CurrentState->bZWrite = false;
 	}else if(CheckMaterial<UHardwareShaderWrapper>(&Material, -1)){
 		UHardwareShaderWrapper* HardwareShaderWrapper = static_cast<UHardwareShaderWrapper*>(Material);
 
@@ -315,7 +345,7 @@ void FOpenGLRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorStri
 		Result = SetSimpleMaterial(static_cast<UHardwareShader*>(Material)->Textures[0], ErrorString, ErrorMaterial);
 	}
 
-	if(!Result){ // Reset to default state in error case
+	if(!Result || CurrentState->NumStages <= 0){ // Reset to default state in error case
 		InitDefaultMaterialStageState(0);
 		CurrentState->NumStages = 1;
 	}
@@ -330,6 +360,44 @@ void FOpenGLRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorStri
 	glUniform1iv(SU_StageAlphaOps, ARRAY_COUNT(CurrentState->StageAlphaOps), CurrentState->StageAlphaOps);
 	glUniform4fv(SU_ConstantColor, 1, (GLfloat*)&CurrentState->ConstantColor);
 	glUniform1f(SU_AlphaRef, CurrentState->AlphaRef);
+
+	if(ZTest != CurrentState->bZTest)
+		EnableZTest(CurrentState->bZTest);
+
+	if(ZWrite != CurrentState->bZWrite)
+		EnableZWrite(CurrentState->bZWrite);
+
+	if(CullMode != CurrentState->CullMode)
+		SetCullMode(CurrentState->CullMode);
+
+	switch(CurrentState->FramebufferBlending){
+	case FB_Overwrite:
+		glBlendFunc(GL_ONE, GL_ZERO);
+		break;
+	case FB_Modulate:
+		glBlendFunc(GL_DST_COLOR, GL_SRC_COLOR);
+		break;
+	case FB_AlphaBlend:
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		break;
+	case FB_AlphaModulate_MightNotFogCorrectly:
+		glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+		break;
+	case FB_Translucent:
+		glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_COLOR);
+		break;
+	case FB_Darken:
+		glBlendFunc(GL_ZERO, GL_ONE_MINUS_SRC_COLOR);
+		break;
+	case FB_Brighten:
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+		break;
+	case FB_Invisible:
+		glBlendFunc(GL_ZERO, GL_ONE);
+		break;
+	case FB_ShadowBlend:
+		glBlendFunc(GL_DST_COLOR, GL_SRC_COLOR);
+	}
 
 	unguard;
 }
@@ -353,8 +421,27 @@ void FOpenGLRenderInterface::SetBitmapTexture(UBitmapMaterial* Bitmap, INT Textu
 }
 
 bool FOpenGLRenderInterface::SetSimpleMaterial(UMaterial* Material, FString* ErrorString, UMaterial** ErrorMaterial){
+	if(!Material)
+		return true;
+
 	INT StagesUsed = 0;
 	INT TexturesUsed = 0;
+
+	// If the material is a simple texture, use it to get the blending options
+	if(Material->IsA<UTexture>()){
+		UTexture* Texture = static_cast<UTexture*>(Material);
+
+		if(Texture->bMasked){
+			CurrentState->AlphaRef = 0.5f;
+			CurrentState->FramebufferBlending = FB_AlphaBlend;
+		}else if(Texture->bAlphaTexture){
+			CurrentState->AlphaRef = 0.0f;
+			CurrentState->FramebufferBlending = FB_AlphaBlend;
+		}
+
+		if(Texture->bTwoSided)
+			CurrentState->CullMode = CM_None;
+	}
 
 	if(!HandleCombinedMaterial(Material, StagesUsed, TexturesUsed, ErrorString, ErrorMaterial))
 		return false;
@@ -484,6 +571,7 @@ bool FOpenGLRenderInterface::HandleCombinedMaterial(UMaterial* Material, INT& St
 		// Set Mask
 
 		UMaterial* Mask = Combiner->Mask;
+
 		if(Mask){
 			if(Mask != Material1 && Mask != Material2 && !Mask->IsA<UBitmapMaterial>() && !Mask->IsA<UVertexColor>() && !Mask->IsA<UConstantMaterial>()){
 				if(ErrorString)

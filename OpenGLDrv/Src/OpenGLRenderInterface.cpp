@@ -10,7 +10,9 @@
 
 FOpenGLRenderInterface::FOpenGLRenderInterface(UOpenGLRenderDevice* InRenDev) : RenDev(InRenDev),
                                                                                 CurrentState(&SavedStates[0]),
-                                                                                GlobalUBO(GL_NONE){
+                                                                                GlobalUBO(GL_NONE){}
+
+void FOpenGLRenderInterface::Init(){
 	CurrentState->Uniforms.LocalToWorld = FMatrix::Identity;
 	CurrentState->Uniforms.WorldToCamera = FMatrix::Identity;
 	CurrentState->Uniforms.CameraToScreen = FMatrix::Identity;
@@ -23,15 +25,30 @@ FOpenGLRenderInterface::FOpenGLRenderInterface(UOpenGLRenderDevice* InRenDev) : 
 	CurrentState->TexCoordCount = 2;
 	CurrentState->ConstantColor = FPlane(1.0f, 1.0f, 1.0f, 1.0f);
 	CurrentState->AlphaRef = -1.0f;
+
+	// Create uniform buffer
+
+	glCreateBuffers(1, &GlobalUBO);
+	glNamedBufferStorage(GlobalUBO, sizeof(FOpenGLGlobalUniforms), &CurrentState->Uniforms, GL_DYNAMIC_STORAGE_BIT);
+	glBindBufferBase(GL_UNIFORM_BUFFER, 0, GlobalUBO); // Binding index 0 is reserved for the global uniform block
+
+	// Create samplers
+
+	glCreateSamplers(MAX_TEXTURES, Samplers);
+	glBindSamplers(0, MAX_TEXTURES, Samplers);
+
+	for(int i = 0; i < MAX_TEXTURES; ++i){
+		glSamplerParameteri(Samplers[i], GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+		glSamplerParameteri(Samplers[i], GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	}
 }
 
-void FOpenGLRenderInterface::FlushResources(){
-	check(CurrentState == &SavedStates[0]);
+void FOpenGLRenderInterface::Exit(){
+	glDeleteBuffers(1, &GlobalUBO);
+	GlobalUBO = GL_NONE;
 
-	if(GlobalUBO){
-		glDeleteBuffers(1, &GlobalUBO);
-		GlobalUBO = GL_NONE;
-	}
+	glDeleteSamplers(MAX_TEXTURES, Samplers);
+	appMemzero(Samplers, sizeof(Samplers));
 
 	CurrentState->RenderTarget = NULL;
 	CurrentState->Shader = NULL;
@@ -47,13 +64,7 @@ void FOpenGLRenderInterface::UpdateShaderUniforms(){
 	                                   CurrentState->Uniforms.WorldToCamera *
 	                                   CurrentState->Uniforms.CameraToScreen;
 
-	if(!GlobalUBO){
-		glCreateBuffers(1, &GlobalUBO);
-		glNamedBufferStorage(GlobalUBO, sizeof(FOpenGLGlobalUniforms), &CurrentState->Uniforms, GL_DYNAMIC_STORAGE_BIT);
-		glBindBufferBase(GL_UNIFORM_BUFFER, 0, GlobalUBO); // Binding index 0 is reserved for the global uniform block
-	}else{
-		glNamedBufferSubData(GlobalUBO, 0, sizeof(FOpenGLGlobalUniforms), &CurrentState->Uniforms);
-	}
+	glNamedBufferSubData(GlobalUBO, 0, sizeof(FOpenGLGlobalUniforms), &CurrentState->Uniforms);
 
 	NeedUniformUpdate = 0;
 }
@@ -249,6 +260,8 @@ FMatrix FOpenGLRenderInterface::GetTransform(ETransformType Type) const{
 
 void FOpenGLRenderInterface::InitDefaultMaterialStageState(INT StageIndex){
 	// Init default material state
+	CurrentState->StageTexWrapModes[StageIndex * 2] = -1;
+	CurrentState->StageTexWrapModes[StageIndex * 2 + 1] = -1;
 	CurrentState->StageTexCoordSources[StageIndex] = 0;
 	CurrentState->StageTexMatrices[StageIndex] = FMatrix::Identity;
 	CurrentState->StageColorArgs[StageIndex * 2] = CA_Diffuse;
@@ -257,6 +270,13 @@ void FOpenGLRenderInterface::InitDefaultMaterialStageState(INT StageIndex){
 	CurrentState->StageAlphaArgs[StageIndex * 2] = CA_Diffuse;
 	CurrentState->StageAlphaArgs[StageIndex * 2 + 1] = CA_Diffuse;
 	CurrentState->StageAlphaOps[StageIndex] = AOP_Arg1;
+}
+
+static GLint GetTextureWrapMode(INT Mode){
+	if(Mode == TC_Clamp)
+		return GL_CLAMP_TO_EDGE;
+
+	return GL_REPEAT;
 }
 
 void FOpenGLRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorString, UMaterial** ErrorMaterial, INT* NumPasses){
@@ -294,6 +314,7 @@ void FOpenGLRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorStri
 
 	CurrentState->UsingConstantColor = false;
 	CurrentState->NumStages = 0;
+	CurrentState->NumTextures = 0;
 	CurrentState->TexCoordCount = 2;
 	CurrentState->ConstantColor = FPlane(1.0f, 1.0f, 1.0f, 1.0f);
 	CurrentState->FramebufferBlending = FB_Overwrite;
@@ -308,7 +329,7 @@ void FOpenGLRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorStri
 
 	bool Result = false;
 
-	if(CheckMaterial<UShader>(&Material, 0)){
+	if(CheckMaterial<UShader>(&Material, 0, 0)){
 		if(static_cast<UShader*>(Material)->Opacity)
 			CurrentState->FramebufferBlending = FB_AlphaBlend;
 
@@ -360,6 +381,11 @@ void FOpenGLRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorStri
 	glUniform1iv(SU_StageAlphaOps, ARRAY_COUNT(CurrentState->StageAlphaOps), CurrentState->StageAlphaOps);
 	glUniform4fv(SU_ConstantColor, 1, (GLfloat*)&CurrentState->ConstantColor);
 	glUniform1f(SU_AlphaRef, CurrentState->AlphaRef);
+
+	for(INT i = 0; i < CurrentState->NumTextures; ++i){
+		glSamplerParameteri(Samplers[i], GL_TEXTURE_WRAP_S, GetTextureWrapMode(CurrentState->StageTexWrapModes[i * 2]));
+		glSamplerParameteri(Samplers[i], GL_TEXTURE_WRAP_T, GetTextureWrapMode(CurrentState->StageTexWrapModes[i * 2 + 1]));
+	}
 
 	if(ZTest != CurrentState->bZTest)
 		EnableZTest(CurrentState->bZTest);
@@ -418,6 +444,12 @@ void FOpenGLRenderInterface::SetBitmapTexture(UBitmapMaterial* Bitmap, INT Textu
 		GLTexture->Cache(Texture);
 
 	GLTexture->BindTexture(TextureUnit);
+
+	if(CurrentState->StageTexWrapModes[TextureUnit * 2] < 0)
+		CurrentState->StageTexWrapModes[TextureUnit * 2] = Bitmap->UClampMode;
+
+	if(CurrentState->StageTexWrapModes[TextureUnit * 2 + 1] < 0)
+		CurrentState->StageTexWrapModes[TextureUnit * 2 + 1] = Bitmap->VClampMode;
 }
 
 bool FOpenGLRenderInterface::SetSimpleMaterial(UMaterial* Material, FString* ErrorString, UMaterial** ErrorMaterial){
@@ -447,6 +479,7 @@ bool FOpenGLRenderInterface::SetSimpleMaterial(UMaterial* Material, FString* Err
 		return false;
 
 	CurrentState->NumStages = StagesUsed;
+	CurrentState->NumTextures = TexturesUsed;
 
 	return true;
 }
@@ -504,7 +537,7 @@ bool FOpenGLRenderInterface::HandleCombinedMaterial(UMaterial* Material, INT& St
 		++StagesUsed;
 
 		return true;
-	}else if(CheckMaterial<UBitmapMaterial>(&Material, StagesUsed)){
+	}else if(CheckMaterial<UBitmapMaterial>(&Material, StagesUsed, TexturesUsed)){
 		if(StagesUsed >= MAX_SHADER_STAGES || TexturesUsed >= MAX_TEXTURES){
 			if(ErrorString)
 				*ErrorString = "No stages left for bitmap material";
@@ -587,7 +620,7 @@ bool FOpenGLRenderInterface::HandleCombinedMaterial(UMaterial* Material, INT& St
 				// If the mask is a simple bitmap material we don't need to waste an entire stage for it, just the texture unit.
 				bool SimpleBitmapMask = Mask->IsA<UBitmapMaterial>() != 0;
 
-				if(SimpleBitmapMask || CheckMaterial<UBitmapMaterial>(&Mask, StagesUsed)){
+				if(SimpleBitmapMask || CheckMaterial<UBitmapMaterial>(&Mask, StagesUsed, TexturesUsed)){
 					if(TexturesUsed >= MAX_TEXTURES){
 						if(ErrorString)
 							*ErrorString = "No texture units left for combiner Mask";

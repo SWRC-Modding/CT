@@ -331,10 +331,18 @@ void FOpenGLRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorStri
 	bool Result = false;
 
 	if(CheckMaterial<UShader>(&Material, 0, 0)){
-		if(static_cast<UShader*>(Material)->Opacity)
+		UShader* Shader = static_cast<UShader*>(Material);
+
+		Result = SetSimpleMaterial(Shader->Diffuse, ErrorString, ErrorMaterial);
+
+		if(Shader->Opacity)
 			CurrentState->FramebufferBlending = FB_AlphaBlend;
 
-		Result = SetSimpleMaterial(static_cast<UShader*>(Material)->Diffuse, ErrorString, ErrorMaterial);
+		if(Shader->OutputBlending == OB_Masked)
+			CurrentState->AlphaRef = 0.5f;
+
+		if(Shader->TwoSided)
+			CurrentState->CullMode = CM_None;
 	}else if(CheckMaterial<UCombiner>(&Material, -1)){
 		Result = SetSimpleMaterial(Material, ErrorString, ErrorMaterial);
 	}else if(CheckMaterial<UConstantMaterial>(&Material, -1)){
@@ -360,11 +368,26 @@ void FOpenGLRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorStri
 		CurrentState->bZWrite = false;
 	}else if(CheckMaterial<UHardwareShaderWrapper>(&Material, -1)){
 		UHardwareShaderWrapper* HardwareShaderWrapper = static_cast<UHardwareShaderWrapper*>(Material);
+		UHardwareShader* HardwareShader = HardwareShaderWrapper->ShaderImplementation;
 
 		HardwareShaderWrapper->SetupShaderWrapper(this);
-		Result = SetSimpleMaterial(HardwareShaderWrapper->ShaderImplementation->Textures[0], ErrorString, ErrorMaterial);
+		Result = SetSimpleMaterial(HardwareShader->Textures[0], ErrorString, ErrorMaterial);
+
+		if(HardwareShader->AlphaBlending)
+			CurrentState->FramebufferBlending = FB_AlphaBlend;
+
+		if(HardwareShader->AlphaTest)
+			CurrentState->AlphaRef = HardwareShader->AlphaRef / 255.0f;
 	}else if(CheckMaterial<UHardwareShader>(&Material, -1)){
-		Result = SetSimpleMaterial(static_cast<UHardwareShader*>(Material)->Textures[0], ErrorString, ErrorMaterial);
+		UHardwareShader* HardwareShader = static_cast<UHardwareShader*>(Material);
+
+		Result = SetSimpleMaterial(HardwareShader->Textures[0], ErrorString, ErrorMaterial);
+
+		if(HardwareShader->AlphaBlending)
+			CurrentState->FramebufferBlending = FB_AlphaBlend;
+
+		if(HardwareShader->AlphaTest)
+			CurrentState->AlphaRef = HardwareShader->AlphaRef / 255.0f;
 	}
 
 	if(!Result || CurrentState->NumStages <= 0){ // Reset to default state in error case

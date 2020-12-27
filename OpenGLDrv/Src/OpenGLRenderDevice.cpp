@@ -801,6 +801,8 @@ FString UOpenGLRenderDevice::FixedFunctionVertexShaderText(
 			"\t\treturn InTexCoord6;\n"
 		"\tcase TCS_Stream7:\n"
 			"\t\treturn InTexCoord7;\n"
+		"\tcase TCS_WorldCoords:\n"
+			"\t\treturn vec4(Position, 1.0);\n"
 		"\tdefault:\n"
 			"\t\treturn vec4(0.0, 0.0, 1.0, 1.0);\n"
 		"\t}\n"

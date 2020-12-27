@@ -5544,6 +5544,12 @@ public:
  * TerrainMaterial
  */
 
+enum ETerrainRenderMethod{
+	RM_WeightMap,
+	RM_CombinedWeightMap,
+	RM_AlphaMap
+};
+
 struct ENGINE_API FTerrainMaterialLayer{
 	class UMaterial* Texture;
 	class UBitmapMaterial* AlphaWeight;

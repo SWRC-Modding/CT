@@ -319,6 +319,8 @@ void FOpenGLRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorStri
 	CurrentState->TexCoordCount = 2;
 	CurrentState->ConstantColor = FPlane(1.0f, 1.0f, 1.0f, 1.0f);
 	CurrentState->FramebufferBlending = FB_Overwrite;
+	CurrentState->SrcBlend = GL_ONE;
+	CurrentState->DstBlend = GL_ZERO;
 	CurrentState->AlphaRef = -1.0f;
 
 	// We check later if these properties have changed after setting the material and udate the OpenGL state
@@ -350,7 +352,7 @@ void FOpenGLRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorStri
 	}else if(CheckMaterial<UBitmapMaterial>(&Material, -1)){
 		Result = SetSimpleMaterial(Material, ErrorString, ErrorMaterial);
 	}else if(CheckMaterial<UTerrainMaterial>(&Material, 0)){
-		Result = SetSimpleMaterial(static_cast<UTerrainMaterial*>(Material)->Layers[0].Texture, ErrorString, ErrorMaterial);
+		Result = SetTerrainMaterial(static_cast<UTerrainMaterial*>(Material), ErrorString, ErrorMaterial);
 	}else if(CheckMaterial<UParticleMaterial>(&Material, 0)){
 		CurrentState->AlphaRef = 0.0f;
 		CurrentState->FramebufferBlending = FB_AlphaBlend;
@@ -447,6 +449,9 @@ void FOpenGLRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorStri
 		break;
 	case FB_ShadowBlend:
 		glBlendFunc(GL_DST_COLOR, GL_SRC_COLOR);
+		break;
+	case FB_MAX:
+		glBlendFunc(CurrentState->SrcBlend, CurrentState->DstBlend);
 	}
 
 	unguard;
@@ -815,6 +820,109 @@ bool FOpenGLRenderInterface::HandleCombinedMaterial(UMaterial* Material, INT& St
 
 		return true;
 	}
+
+	return true;
+}
+
+bool FOpenGLRenderInterface::SetTerrainMaterial(UTerrainMaterial* Terrain, FString* ErrorString, UMaterial** ErrorMaterial){
+	checkSlow(Terrain->Layers.Num() == 1);
+
+	INT StagesUsed = 0;
+	INT TexturesUsed = 0;
+
+	UMaterial* Material = Terrain->Layers[0].Texture;
+
+	if(Material->IsA<UShader>())
+		Material = static_cast<UShader*>(Material)->Diffuse;
+
+	if(Terrain->RenderMethod == RM_AlphaMap){
+		CurrentState->StageTexMatrices[StagesUsed] = Terrain->Layers[0].TextureMatrix;
+		CurrentState->StageTexCoordSources[StagesUsed] = TCS_WorldCoords;
+		CurrentState->TexCoordCount = 3;
+
+		if(CheckMaterial<UBitmapMaterial>(&Material, StagesUsed, TexturesUsed)){
+			if(Terrain->FirstPass){
+				CurrentState->FramebufferBlending = FB_Overwrite;
+			}else{
+				CurrentState->FramebufferBlending = FB_AlphaBlend;
+				CurrentState->AlphaRef = 0.0f;
+			}
+
+			// Color texture
+
+			UBitmapMaterial* BitmapMaterial = static_cast<UBitmapMaterial*>(Material);
+
+			CurrentState->StageTexWrapModes[TexturesUsed * 2] = TC_Wrap;
+			CurrentState->StageTexWrapModes[TexturesUsed * 2 + 1] = TC_Wrap;
+
+			SetBitmapTexture(BitmapMaterial, TexturesUsed);
+
+			CurrentState->StageColorArgs[StagesUsed * 2] = CA_Texture0 + TexturesUsed;
+			CurrentState->StageColorArgs[StagesUsed * 2 + 1] = CA_Diffuse;
+			CurrentState->StageColorOps[StagesUsed] = COP_Arg1; //COP_Modulate; TODO: Lighting
+			CurrentState->StageAlphaArgs[StagesUsed * 2] = CA_Texture0 + TexturesUsed;
+			CurrentState->StageAlphaOps[StagesUsed] = AOP_Arg1;
+
+			++StagesUsed;
+			++TexturesUsed;
+
+			// Alpha map
+
+			SetBitmapTexture(Terrain->Layers[0].AlphaWeight, TexturesUsed);
+
+			CurrentState->StageColorArgs[StagesUsed * 2] = CA_Previous;
+			CurrentState->StageColorOps[StagesUsed] = COP_Arg1;
+			CurrentState->StageAlphaArgs[StagesUsed * 2] = CA_Texture0 + TexturesUsed;
+			CurrentState->StageAlphaArgs[StagesUsed * 2 + 1] = CA_Previous;
+			CurrentState->StageAlphaOps[StagesUsed] = BitmapMaterial->IsTransparent() ? AOP_Modulate : AOP_Arg1;
+			CurrentState->StageTexCoordSources[StagesUsed] = TCS_Stream0;
+
+			++StagesUsed;
+			++TexturesUsed;
+		}else{
+			return false;
+		}
+	}else{
+		if(Terrain->FirstPass){
+			CurrentState->FramebufferBlending = FB_Overwrite;
+		}else{
+			CurrentState->FramebufferBlending = FB_AlphaBlend;
+			CurrentState->bZWrite = false;
+		}
+
+		// Weight map
+
+		SetBitmapTexture(Terrain->Layers[0].AlphaWeight, TexturesUsed);
+
+		CurrentState->StageTexCoordSources[StagesUsed] = TCS_Stream0;
+		CurrentState->StageAlphaArgs[StagesUsed * 2] = CA_Texture0 + TexturesUsed;
+		CurrentState->StageAlphaOps[StagesUsed] = AOP_Arg1;
+
+		++StagesUsed;
+		++TexturesUsed;
+
+		// Color texture
+
+		CurrentState->StageTexMatrices[StagesUsed] = Terrain->Layers[0].TextureMatrix;
+		CurrentState->StageTexCoordSources[StagesUsed] = TCS_WorldCoords;
+
+		if(!CheckMaterial<UBitmapMaterial>(&Material, StagesUsed, TexturesUsed))
+			return false;
+
+		SetBitmapTexture(static_cast<UBitmapMaterial*>(Material), TexturesUsed);
+
+		CurrentState->StageColorArgs[StagesUsed * 2] = CA_Texture0 + TexturesUsed;
+		CurrentState->StageColorArgs[StagesUsed * 2 + 1] = CA_Diffuse;
+		CurrentState->StageColorOps[StagesUsed] = COP_Arg1; //COP_Modulate; TODO: Lighting
+		CurrentState->StageAlphaArgs[StagesUsed * 2] = CA_Previous;
+		CurrentState->StageAlphaOps[StagesUsed] = AOP_Arg1;
+
+		++StagesUsed;
+		++TexturesUsed;
+	}
+
+	CurrentState->NumStages = StagesUsed;
+	CurrentState->NumTextures = TexturesUsed;
 
 	return true;
 }

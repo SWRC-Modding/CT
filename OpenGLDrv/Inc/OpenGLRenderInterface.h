@@ -119,6 +119,8 @@ public:
 		// Blending
 
 		BYTE                  FramebufferBlending; // EFrameBufferBlending
+		unsigned int          SrcBlend; // Blending parameters used when Framebufferblending == FB_MAX
+		unsigned int          DstBlend;
 		FLOAT                 AlphaRef;
 	};
 
@@ -184,8 +186,9 @@ private:
 	INT SetVertexStreams(EVertexShader Shader, FVertexStream** Streams, INT NumStreams, bool IsDynamic);
 	void InitDefaultMaterialStageState(INT StageIndex);
 	void SetBitmapTexture(UBitmapMaterial* Bitmap, INT TextureUnit);
-	bool SetSimpleMaterial(UMaterial* Material, FString* ErrorString = NULL, UMaterial** ErrorMaterial = NULL);
-	bool HandleCombinedMaterial(UMaterial* InMaterial, INT& PassesUsed, INT& TexturesUsed, FString* ErrorString = NULL, UMaterial** ErrorMaterial = NULL);
+	bool SetSimpleMaterial(UMaterial* Material, FString* ErrorString, UMaterial** ErrorMaterial);
+	bool HandleCombinedMaterial(UMaterial* Material, INT& PassesUsed, INT& TexturesUsed, FString* ErrorString, UMaterial** ErrorMaterial);
+	bool SetTerrainMaterial(UTerrainMaterial* Terrain, FString* ErrorString, UMaterial** ErrorMaterial);
 
 	template<typename T>
 	bool CheckMaterial(UMaterial** Material, INT StageIndex, INT TextureIndex = -1){
@@ -217,8 +220,6 @@ private:
 			INT*     StageTexCoordSrc = &CurrentState->StageTexCoordSources[StageIndex];
 			FMatrix* StageTexMatrix = &CurrentState->StageTexMatrices[StageIndex];
 
-			*StageTexCoordSrc = 0;
-			*StageTexMatrix = FMatrix::Identity;
 			Modifier = static_cast<UModifier*>(RootMaterial);
 
 			// Apply modifiers

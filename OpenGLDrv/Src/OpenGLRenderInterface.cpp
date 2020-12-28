@@ -664,6 +664,7 @@ bool FOpenGLRenderInterface::HandleCombinedMaterial(UMaterial* Material, INT& St
 			if(Mask != Material1 && Mask != Material2){
 				// If the mask is a simple bitmap material we don't need to waste an entire stage for it, just the texture unit.
 				bool SimpleBitmapMask = Mask->IsA<UBitmapMaterial>() != 0;
+				INT MaskModifiers = Combiner->InvertMask ? CM_Invert : 0;
 
 				if(SimpleBitmapMask || CheckMaterial<UBitmapMaterial>(&Mask, StagesUsed, TexturesUsed)){
 					if(TexturesUsed >= MAX_TEXTURES){
@@ -679,8 +680,8 @@ bool FOpenGLRenderInterface::HandleCombinedMaterial(UMaterial* Material, INT& St
 					if(SimpleBitmapMask){
 						SetBitmapTexture(static_cast<UBitmapMaterial*>(Mask), TexturesUsed);
 
-						CurrentState->StageAlphaArgs[StagesUsed * 2] = CA_Texture0 + TexturesUsed;
-						CurrentState->StageAlphaArgs[StagesUsed] = AOP_Arg1;
+						CurrentState->StageAlphaArgs[StagesUsed * 2] = (CA_Texture0 + TexturesUsed) | MaskModifiers;
+						CurrentState->StageAlphaOps[StagesUsed] = AOP_Arg1;
 						++TexturesUsed;
 					}else{
 						if(!HandleCombinedMaterial(Mask, StagesUsed, TexturesUsed, ErrorString, ErrorMaterial))
@@ -688,11 +689,11 @@ bool FOpenGLRenderInterface::HandleCombinedMaterial(UMaterial* Material, INT& St
 
 						CurrentState->StageColorArgs[StagesUsed * 2 - 2] = CA_Previous;
 						CurrentState->StageColorOps[StagesUsed - 1] = COP_Arg1;
-						CurrentState->StageAlphaArgs[StagesUsed * 2 - 2] = CA_Texture0 + TexturesUsed - 1;
-						CurrentState->StageAlphaArgs[StagesUsed - 1] = AOP_Arg1;
+						CurrentState->StageAlphaArgs[StagesUsed * 2 - 2] = (CA_Texture0 + TexturesUsed - 1) | MaskModifiers;
+						CurrentState->StageAlphaOps[StagesUsed - 1] = AOP_Arg1;
 					}
 				}else if(CheckMaterial<UVertexColor>(&Mask, StagesUsed)){
-					CurrentState->StageAlphaArgs[StagesUsed * 2 - 2] = CA_Diffuse;
+					CurrentState->StageAlphaArgs[StagesUsed * 2 - 2] = CA_Diffuse | MaskModifiers;
 					CurrentState->StageAlphaOps[StagesUsed - 1] = AOP_Arg1;
 				}else if(CheckMaterial<UConstantMaterial>(&Mask, StagesUsed)){
 					if(CurrentState->UsingConstantColor){
@@ -755,7 +756,7 @@ bool FOpenGLRenderInterface::HandleCombinedMaterial(UMaterial* Material, INT& St
 			CurrentState->StageColorOps[StageIndex] = COP_Arg2;
 			break;
 		case CO_Multiply:
-			CurrentState->StageColorOps[StageIndex] = COP_Modulate;
+			CurrentState->StageColorOps[StageIndex] = Combiner->Modulate4X ? COP_Modulate4X : Combiner->Modulate2X ? COP_Modulate2X : COP_Modulate;
 			break;
 		case CO_Add:
 			CurrentState->StageColorOps[StageIndex] = COP_Add;

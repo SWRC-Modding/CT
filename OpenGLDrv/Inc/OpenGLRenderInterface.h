@@ -90,6 +90,14 @@ public:
 		bool                  bZWrite;
 		bool                  bZTest;
 
+		ECompareFunction      StencilCompare;
+		DWORD                 StencilRef;
+		DWORD                 StencilMask;
+		EStencilOp            StencilFailOp;
+		EStencilOp            StencilZFailOp;
+		EStencilOp            StencilPassOp;
+		DWORD                 StencilWriteMask;
+
 		INT                   ZBias;
 
 		FOpenGLShader*        Shader;
@@ -131,7 +139,6 @@ public:
 
 	FOpenGLSavedState         SavedStates[MAX_STATESTACKDEPTH];
 	FOpenGLSavedState*        CurrentState;
-	FOpenGLSavedState*        PoppedState;
 
 	bool                      NeedUniformUpdate;
 	unsigned int              GlobalUBO;
@@ -160,7 +167,7 @@ public:
 	virtual void SetLight(INT LightIndex, FDynamicLight* Light, FLOAT Scale = 1.0f){}
 	virtual void SetNPatchTesselation(FLOAT Tesselation){}
 	virtual void SetDistanceFog(UBOOL Enable, FLOAT FogStart, FLOAT FogEnd, FColor Color){}
-	virtual void SetGlobalColor(FColor Color){}
+	virtual void SetGlobalColor(FColor Color);
 	virtual void SetTransform(ETransformType Type, const FMatrix& Matrix);
 	virtual FMatrix GetTransform(ETransformType Type) const;
 	virtual void SetMaterial(UMaterial* Material, FString* ErrorString = NULL, UMaterial** ErrorMaterial = NULL, INT* NumPasses = NULL);
@@ -181,7 +188,6 @@ public:
 	void SetupPerFrameShaderConstants();
 
 private:
-	void RestoreLastState();
 	INT SetIndexBuffer(FIndexBuffer* IndexBuffer, INT BaseIndex, bool IsDynamic);
 	INT SetVertexStreams(EVertexShader Shader, FVertexStream** Streams, INT NumStreams, bool IsDynamic);
 	void InitDefaultMaterialStageState(INT StageIndex);

@@ -17,6 +17,7 @@ void FOpenGLRenderInterface::Init(){
 	CurrentState->Uniforms.LocalToWorld = FMatrix::Identity;
 	CurrentState->Uniforms.WorldToCamera = FMatrix::Identity;
 	CurrentState->Uniforms.CameraToScreen = FMatrix::Identity;
+	CurrentState->Uniforms.GlobalColor = FPlane(1.0, 1.0, 1.0, 1.0);
 
 	for(INT i = 0; i < MAX_SHADER_STAGES; ++i)
 		InitDefaultMaterialStageState(i);
@@ -73,8 +74,6 @@ void FOpenGLRenderInterface::UpdateShaderUniforms(){
 void FOpenGLRenderInterface::PushState(INT Flags){
 	guardFunc;
 
-	RestoreLastState();
-
 	++CurrentState;
 
 	check(CurrentState <= &SavedStates[MAX_STATESTACKDEPTH]);
@@ -84,64 +83,77 @@ void FOpenGLRenderInterface::PushState(INT Flags){
 	unguard;
 }
 
-void FOpenGLRenderInterface::RestoreLastState(){
-	// Restore OpenGL state only if needed rather than doing these checks each time PopState is called
-	if(PoppedState){
-		if(CurrentState->RenderTarget != PoppedState->RenderTarget)
-			CurrentState->RenderTarget->BindRenderTarget();
-
-		if(CurrentState->ViewportX != PoppedState->ViewportX ||
-		   CurrentState->ViewportY != PoppedState->ViewportY ||
-		   CurrentState->ViewportWidth != PoppedState->ViewportWidth ||
-		   CurrentState->ViewportHeight != PoppedState->ViewportHeight){
-			SetViewport(CurrentState->ViewportX, CurrentState->ViewportY, CurrentState->ViewportWidth, CurrentState->ViewportHeight);
-		}
-
-		if(CurrentState->bStencilTest != PoppedState->bStencilTest)
-			EnableStencilTest(CurrentState->bStencilTest);
-
-		if(CurrentState->ZBias != PoppedState->ZBias)
-			SetZBias(CurrentState->ZBias);
-
-		if(CurrentState->Shader != PoppedState->Shader)
-			CurrentState->Shader->Bind();
-
-		if(CurrentState->VAO != PoppedState->VAO)
-			glBindVertexArray(CurrentState->VAO);
-
-		for(INT i = 0; i < PoppedState->NumVertexStreams; ++i)
-			glBindVertexBuffer(i, GL_NONE, 0, 0);
-
-		for(INT i = 0; i < CurrentState->NumVertexStreams; ++i)
-			CurrentState->VertexStreams[i]->Bind(i);
-
-		if(CurrentState->IndexBuffer != PoppedState->IndexBuffer){
-			if(CurrentState->IndexBuffer)
-				CurrentState->IndexBuffer->Bind();
-			else
-				glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, GL_NONE);
-		}
-
-		if(CurrentState->bZTest != PoppedState->bZTest)
-			EnableZTest(CurrentState->bZTest);
-
-		if(CurrentState->bZWrite != PoppedState->bZWrite)
-			EnableZWrite(CurrentState->bZWrite);
-
-		NeedUniformUpdate = CurrentState->UniformRevision != PoppedState->UniformRevision;
-		PoppedState = NULL;
-	}
-}
-
 void FOpenGLRenderInterface::PopState(INT Flags){
 	guardFunc;
 
-	if(!PoppedState)
-		PoppedState = CurrentState;
+	FOpenGLSavedState* PoppedState = CurrentState;
 
 	--CurrentState;
 
 	check(CurrentState >= &SavedStates[0]);
+
+	if(CurrentState->RenderTarget != PoppedState->RenderTarget)
+		CurrentState->RenderTarget->BindRenderTarget();
+
+	if(CurrentState->ViewportX != PoppedState->ViewportX ||
+	   CurrentState->ViewportY != PoppedState->ViewportY ||
+	   CurrentState->ViewportWidth != PoppedState->ViewportWidth ||
+	   CurrentState->ViewportHeight != PoppedState->ViewportHeight){
+		SetViewport(CurrentState->ViewportX, CurrentState->ViewportY, CurrentState->ViewportWidth, CurrentState->ViewportHeight);
+	}
+
+	if(CurrentState->Shader != PoppedState->Shader)
+		CurrentState->Shader->Bind();
+
+	if(CurrentState->VAO != PoppedState->VAO)
+		glBindVertexArray(CurrentState->VAO);
+
+	for(INT i = 0; i < PoppedState->NumVertexStreams; ++i)
+		glBindVertexBuffer(i, GL_NONE, 0, 0);
+
+	for(INT i = 0; i < CurrentState->NumVertexStreams; ++i)
+		CurrentState->VertexStreams[i]->Bind(i);
+
+	if(CurrentState->IndexBuffer != PoppedState->IndexBuffer){
+		if(CurrentState->IndexBuffer)
+			CurrentState->IndexBuffer->Bind();
+		else
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, GL_NONE);
+	}
+
+	bool StencilTest = CurrentState->bStencilTest;
+
+	if(CurrentState->StencilCompare != PoppedState->StencilCompare ||
+	   CurrentState->StencilRef != PoppedState->StencilRef ||
+	   CurrentState->StencilMask != PoppedState->StencilMask ||
+	   CurrentState->StencilFailOp != PoppedState->StencilFailOp ||
+	   CurrentState->StencilZFailOp != PoppedState->StencilZFailOp ||
+	   CurrentState->StencilPassOp != PoppedState->StencilPassOp ||
+	   CurrentState->StencilWriteMask != PoppedState->StencilWriteMask){
+		SetStencilOp(CurrentState->StencilCompare,
+		             CurrentState->StencilRef,
+		             CurrentState->StencilMask,
+		             CurrentState->StencilFailOp,
+		             CurrentState->StencilZFailOp,
+		             CurrentState->StencilPassOp,
+		             CurrentState->StencilWriteMask);
+	}
+
+	CurrentState->bStencilTest = StencilTest;
+
+	if(CurrentState->bStencilTest != PoppedState->bStencilTest)
+		EnableStencilTest(CurrentState->bStencilTest);
+
+	if(CurrentState->bZTest != PoppedState->bZTest)
+		EnableZTest(CurrentState->bZTest);
+
+	if(CurrentState->bZWrite != PoppedState->bZWrite)
+		EnableZWrite(CurrentState->bZWrite);
+
+	if(CurrentState->ZBias != PoppedState->ZBias)
+		SetZBias(CurrentState->ZBias);
+
+	NeedUniformUpdate = CurrentState->UniformRevision != PoppedState->UniformRevision;
 
 	unguard;
 }
@@ -195,7 +207,7 @@ void FOpenGLRenderInterface::Clear(UBOOL UseColor, FColor Color, UBOOL UseDepth,
 	}
 
 	if(UseStencil){
-		glClearStencil(Stencil);
+		glClearStencil(Stencil & 0xFF);
 		Flags |= GL_STENCIL_BUFFER_BIT;
 	}
 
@@ -224,6 +236,12 @@ void FOpenGLRenderInterface::SetAmbientLight(FColor Color){
 	NeedUniformUpdate = 1;
 	++CurrentState->UniformRevision;
 	CurrentState->Uniforms.AmbientLight = GLSL_vec4(Color);
+}
+
+void FOpenGLRenderInterface::SetGlobalColor(FColor Color){
+	NeedUniformUpdate = 1;
+	++CurrentState->UniformRevision;
+	CurrentState->Uniforms.GlobalColor = Color;
 }
 
 void FOpenGLRenderInterface::SetTransform(ETransformType Type, const FMatrix& Matrix){
@@ -283,8 +301,6 @@ static GLint GetTextureWrapMode(INT Mode){
 void FOpenGLRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorString, UMaterial** ErrorMaterial, INT* NumPasses){
 	guardFunc;
 
-	RestoreLastState();
-
 	// Use default material if precaching geometry
 
 	if(!Material || PrecacheMode == PRECACHE_VertexBuffers)
@@ -323,7 +339,7 @@ void FOpenGLRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorStri
 	CurrentState->DstBlend = GL_ZERO;
 	CurrentState->AlphaRef = -1.0f;
 
-	// We check later if these properties have changed after setting the material and udate the OpenGL state
+	// We check later if these properties have changed after setting the material and update the OpenGL state
 	bool ZTest = CurrentState->bZTest;
 	bool ZWrite = CurrentState->bZWrite;
 	ECullMode CullMode = CurrentState->CullMode;
@@ -974,13 +990,26 @@ static GLenum GetStencilOp(EStencilOp StencilOp){
 }
 
 void FOpenGLRenderInterface::SetStencilOp(ECompareFunction Test, DWORD Ref, DWORD Mask, EStencilOp FailOp, EStencilOp ZFailOp, EStencilOp PassOp, DWORD WriteMask){
+	CurrentState->StencilCompare = Test;
+	CurrentState->StencilRef = Ref;
+	CurrentState->StencilMask = Mask;
+	CurrentState->StencilFailOp = FailOp;
+	CurrentState->StencilZFailOp = ZFailOp;
+	CurrentState->StencilPassOp = PassOp;
+	CurrentState->StencilWriteMask = WriteMask;
+
 	glStencilOp(GetStencilOp(FailOp), GetStencilOp(ZFailOp), GetStencilOp(PassOp));
-	glStencilFunc(GetStencilFunc(Test), Ref, WriteMask);
+	glStencilFunc(GetStencilFunc(Test), Ref & 0xFF, Mask & 0xFF);
+	glStencilMask(WriteMask & 0xFF);
 }
 
 void FOpenGLRenderInterface::EnableStencilTest(UBOOL Enable){
 	CurrentState->bStencilTest = Enable != 0;
-	glStencilMask(Enable ? 0xFF : 0x00);
+
+	if(Enable)
+		glEnable(GL_STENCIL_TEST);
+	else
+		glDisable(GL_STENCIL_TEST);
 }
 
 void FOpenGLRenderInterface::EnableZWrite(UBOOL Enable){

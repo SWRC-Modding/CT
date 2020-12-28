@@ -22,6 +22,7 @@ typedef ALIGN(16) FMatrix GLSL_mat4;
 	UNIFORM_BLOCK_MEMBER(float, CosTime) \
 	UNIFORM_BLOCK_MEMBER(float, SinTime) \
 	UNIFORM_BLOCK_MEMBER(float, TanTime) \
+	UNIFORM_BLOCK_MEMBER(vec4, GlobalColor) \
 	UNIFORM_BLOCK_MEMBER(vec4, AmbientLight)
 
 // Global uniforms available in every shader

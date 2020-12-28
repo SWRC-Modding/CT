@@ -371,6 +371,8 @@ UBOOL UOpenGLRenderDevice::SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL
 		RenderInterface.Init();
 		RenderInterface.EnableZTest(1);
 		RenderInterface.EnableZWrite(1);
+		RenderInterface.SetStencilOp(CF_Always, 0x0, 0xFF, SO_Keep, SO_Keep, SO_Keep, 0xFF);
+		RenderInterface.EnableStencilTest(UseStencil);
 		RenderInterface.SetShader(&FixedFunctionShader);
 		RenderInterface.SetCullMode(CM_CW);
 		RenderInterface.SetFillMode(FM_Solid);
@@ -621,6 +623,7 @@ void UOpenGLRenderDevice::Present(UViewport* Viewport){
 		Framebuffer->BindTexture(0);
 		RenderInterface.SetFillMode(FM_Solid);
 		RenderInterface.EnableZTest(0);
+		RenderInterface.EnableStencilTest(0);
 		RenderInterface.SetDynamicStream(VS_FixedFunction, &FullscreenQuad);
 		RenderInterface.SetShader(&FramebufferShader);
 		RenderInterface.DrawPrimitive(PT_TriangleStrip, 0, 2);

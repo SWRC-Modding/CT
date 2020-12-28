@@ -966,7 +966,7 @@ FString UOpenGLRenderDevice::FixedFunctionFragmentShaderText(
 		"\tcase AOP_Add:\n"
 			"\t\treturn Arg1 + Arg2;\n"
 		"\tcase AOP_Blend:\n"
-			"\t\treturn mix(Arg1, Arg2, Arg1);\n"
+			"\t\treturn mix(Arg1, Arg2, Arg2);\n"
 		"\tdefault:\n"
 			"\t\treturn 1.0;\n"
 		"\t}\n"

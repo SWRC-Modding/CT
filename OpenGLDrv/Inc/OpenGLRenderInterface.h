@@ -36,10 +36,16 @@ enum EColorArg{
 	CA_MAX // Can be used for the default value
 };
 
+enum EColorModifier{
+	CM_Invert = 1 << 31
+};
+
 enum EColorOp{
 	COP_Arg1,
 	COP_Arg2,
 	COP_Modulate,
+	COP_Modulate2X,
+	COP_Modulate4X,
 	COP_Add,
 	COP_Subtract,
 	COP_AlphaBlend,

@@ -16,9 +16,9 @@ UOpenGLRenderDevice::UOpenGLRenderDevice() : RenderInterface(this),
 
 void UOpenGLRenderDevice::StaticConstructor(){
 	SupportsZBIAS = 1;
-	UseStencil = 1;
 	bFirstRun = 1;
 	bFixCanvasScaling = 1;
+	bUseOffscreenFramebuffer = 1;
 	ShaderDir = "OpenGLShaders";
 
 	new(GetClass(), "UseDesktopResolution", RF_Public) UBoolProperty(CPP_PROPERTY(bUseDesktopResolution), "Options", CPF_Config);
@@ -27,6 +27,7 @@ void UOpenGLRenderDevice::StaticConstructor(){
 	new(GetClass(), "AdaptiveVSync", RF_Public) UBoolProperty(CPP_PROPERTY(bAdaptiveVSync), "Options", CPF_Config);
 	new(GetClass(), "FirstRun", RF_Public) UBoolProperty(CPP_PROPERTY(bFirstRun), "", CPF_Config);
 	new(GetClass(), "FixCanvasScaling", RF_Public) UBoolProperty(CPP_PROPERTY(bFixCanvasScaling), "", CPF_Config);
+	new(GetClass(), "UseOffscreenFramebuffer", RF_Public) UBoolProperty(CPP_PROPERTY(bUseOffscreenFramebuffer), "", CPF_Config);
 	new(GetClass(), "DebugOpenGL", RF_Public) UBoolProperty(CPP_PROPERTY(bDebugOpenGL), "", CPF_Config);
 	new(GetClass(), "ShaderDir", RF_Public) UStrProperty(CPP_PROPERTY(ShaderDir), "", CPF_Config);
 }
@@ -227,7 +228,7 @@ UBOOL UOpenGLRenderDevice::SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL
 		SaveConfig();
 	}
 
-	HWND hwnd = static_cast<HWND>(Viewport->GetWindow());
+	HWND Window = static_cast<HWND>(Viewport->GetWindow());
 	UBOOL Was16Bit = Use16bit;
 
 	if(ColorBytes == 2)
@@ -240,26 +241,42 @@ UBOOL UOpenGLRenderDevice::SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL
 		Flush(Viewport);
 		UnSetRes();
 
-		DeviceContext = GetDC(hwnd);
+		DeviceContext = GetDC(Window);
 		check(DeviceContext);
 
 		ColorBytes = Use16bit ? 2 : 4;
 
 		debugf("SetRes: %ix%i, %i-bit, Fullscreen: %i", NewX, NewY, ColorBytes * 8, Fullscreen);
 
+		INT PfdFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
+		INT DepthBits = 24;
+		INT StencilBits = UseStencil ? 8 : 0;
+
+		if(bUseOffscreenFramebuffer){
+			PfdFlags |= PFD_DEPTH_DONTCARE;
+			DepthBits = 0;
+			StencilBits = 0;
+			debugf("Using offscreen framebuffer");
+		}else{
+			debugf("Not using offscreen framebuffer");
+
+			if(bKeepAspectRatio)
+				debugf("KeepAspectRatio is set to true but has no effect");
+		}
+
 		PIXELFORMATDESCRIPTOR Pfd = {
 			sizeof(PIXELFORMATDESCRIPTOR), // size
 			1,                             // version
-			PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER | PFD_DEPTH_DONTCARE, // flags
+			PfdFlags,                      // flags
 			PFD_TYPE_RGBA,                 // color type
-			Use16bit ? 16 : 32,            // preferred color depth
+			ColorBytes * 8,                // preferred color depth
 			0, 0, 0, 0, 0, 0,              // color bits (ignored)
 			0,                             // alpha buffer
 			0,                             // alpha bits (ignored)
 			0,                             // accumulation buffer
 			0, 0, 0, 0,                    // accum bits (ignored)
-			0,                             // depth buffer
-			0,                             // stencil buffer
+			DepthBits,                     // depth buffer
+			StencilBits,                   // stencil buffer
 			0,                             // auxiliary buffers
 			PFD_MAIN_PLANE,                // main layer
 			0,                             // reserved
@@ -396,7 +413,7 @@ UBOOL UOpenGLRenderDevice::SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL
 
 	// Set window size
 	if(Fullscreen){
-		HMONITOR    Monitor = MonitorFromWindow(hwnd, MONITOR_DEFAULTTOPRIMARY);
+		HMONITOR    Monitor = MonitorFromWindow(Window, MONITOR_DEFAULTTOPRIMARY);
 		MONITORINFO Info    = {sizeof(MONITORINFO)};
 
 		verify(GetMonitorInfoA(Monitor, &Info));
@@ -404,7 +421,7 @@ UBOOL UOpenGLRenderDevice::SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL
 		INT Width  = Info.rcMonitor.right - Info.rcMonitor.left;
 		INT Height = Info.rcMonitor.bottom - Info.rcMonitor.top;
 
-		if(bUseDesktopResolution){
+		if(bUseDesktopResolution || !bUseOffscreenFramebuffer){
 			NewX = Width;
 			NewY = Height;
 		}
@@ -431,15 +448,22 @@ UBOOL UOpenGLRenderDevice::SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL
 		bIsFullscreen = 0;
 	}
 
-	// Resize screen render target if necessary
-	if(ScreenRenderTarget.Width != NewX || ScreenRenderTarget.Height != NewY){
-		ScreenRenderTarget.Width = NewX;
-		ScreenRenderTarget.Height = NewY;
-		++ScreenRenderTarget.Revision;
+	if(bUseOffscreenFramebuffer){
+		// Resize screen render target if necessary
+		if(ScreenRenderTarget.Width != NewX || ScreenRenderTarget.Height != NewY){
+			ScreenRenderTarget.Width = NewX;
+			ScreenRenderTarget.Height = NewY;
+			++ScreenRenderTarget.Revision;
+		}
+
+		RenderInterface.SetViewport(0, 0, NewX, NewY);
+	}else{
+		if(bIsFullscreen)
+			RenderInterface.SetViewport(0, 0, SavedViewportWidth, SavedViewportHeight);
+		else
+			RenderInterface.SetViewport(0, 0, NewX, NewY);
 	}
 
-	RenderInterface.SetRenderTarget(&ScreenRenderTarget, false);
-	RenderInterface.SetViewport(0, 0, NewX, NewY);
 
 	return 1;
 
@@ -452,6 +476,11 @@ void UOpenGLRenderDevice::Exit(UViewport* Viewport){
 }
 
 void UOpenGLRenderDevice::Flush(UViewport* Viewport){
+	RenderInterface.CurrentState->RenderTarget = NULL;
+	RenderInterface.CurrentState->Shader = NULL;
+	RenderInterface.CurrentState->IndexBuffer = NULL;
+	RenderInterface.CurrentState->NumVertexStreams = 0;
+
 	if(Viewport && Viewport->Actor)
 		Viewport->Actor->FrameFX->FreeRenderTargets();
 
@@ -517,7 +546,9 @@ FRenderInterface* UOpenGLRenderDevice::Lock(UViewport* Viewport, BYTE* HitData, 
 
 	RenderInterface.LockedViewport = Viewport;
 
-	RenderInterface.SetRenderTarget(&ScreenRenderTarget, false);
+	if(bUseOffscreenFramebuffer)
+		RenderInterface.SetRenderTarget(&ScreenRenderTarget, false);
+
 	RenderInterface.SetShader(&FixedFunctionShader); // TODO: Move to FOpenGLRenderInterface::SetMaterial
 	RenderInterface.SetupPerFrameShaderConstants();
 	RenderInterface.PushState();

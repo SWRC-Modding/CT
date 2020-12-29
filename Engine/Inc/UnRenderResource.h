@@ -246,7 +246,7 @@ public:
 	virtual UBOOL UseNPatches(){ return 0; }
 	virtual INT GetComponents(FVertexComponent* Components) = 0;
 	virtual void GetStreamData(void* Dest) = 0;
-	virtual void GetRawStreamData(void** Dest, INT FirstVertex){} // This function is unused and should not be implemented
+	virtual void GetRawStreamData(void** Dest, INT FirstVertex){ *Dest = NULL; }
 };
 
 //

@@ -95,6 +95,26 @@ FOpenGLResource* UOpenGLRenderDevice::GetCachedResource(QWORD CacheId){
 	return NULL;
 }
 
+FShaderGLSL* UOpenGLRenderDevice::GetShader(UHardwareShader* HardwareShader){
+	FShaderGLSL* Shader = GLShaderByHardwareShader.Find(HardwareShader);
+
+	if(!Shader){
+		Shader = &GLShaderByHardwareShader[HardwareShader];
+
+		if(HardwareShader->GetFName() != NAME_InGameTempName){
+			FString ShaderName = HardwareShader->GetPathName();
+
+			Shader->SetName(ShaderName.Substitute(".", "\\").Substitute(".", "\\"));
+		}
+
+		Shader->SetVertexShaderText(HardwareShader->VertexShaderText);
+		Shader->SetFragmentShaderText(HardwareShader->PixelShaderText);
+		LoadShader(Shader);
+	}
+
+	return Shader;
+}
+
 unsigned int UOpenGLRenderDevice::GetVAO(const FStreamDeclaration* Declarations, INT NumStreams){
 	// Check if there is an existing VAO for this format by hashing the shader declarations
 	GLuint& VAO = VAOsByDeclId[appMemCrc(Declarations, sizeof(FStreamDeclaration) * NumStreams)];
@@ -170,7 +190,7 @@ FOpenGLVertexStream* UOpenGLRenderDevice::GetDynamicVertexStream(){
 }
 
 UBOOL UOpenGLRenderDevice::Exec(const TCHAR* Cmd, FOutputDevice& Ar){
-	if(ParseCommand(&Cmd, "LOADSHADERS")){
+	if(ParseCommand(&Cmd, "RELOADSHADERS")){
 		Ar.Log("Reloading shaders from disk");
 		LoadShaders();
 
@@ -214,6 +234,13 @@ UBOOL UOpenGLRenderDevice::Init(){
 	 */
 	if(bFixCanvasScaling && !UCanvasUpdateOriginal)
 		UCanvasUpdateOriginal = static_cast<UCanvasUpdateFunc>(PatchDllClassVTable("Engine.dll", "UCanvas", NULL, 31, UCanvasUpdateOverride));
+
+	FixedFunctionShader.SetName("FixedFunction");
+	FixedFunctionShader.SetVertexShaderText(CommonShaderHeaderText + VertexShaderVarsText + FixedFunctionVertexShaderText);
+	FixedFunctionShader.SetFragmentShaderText(CommonShaderHeaderText + FragmentShaderVarsText + FixedFunctionFragmentShaderText);
+	FramebufferShader.SetName("Framebuffer");
+	FramebufferShader.SetVertexShaderText(FramebufferVertexShaderText);
+	FramebufferShader.SetFragmentShaderText(FramebufferFragmentShaderText);
 
 	return 1;
 }
@@ -631,24 +658,21 @@ FRenderCaps* UOpenGLRenderDevice::GetRenderCaps(){
 }
 
 void UOpenGLRenderDevice::LoadShaders(){
-	// Init default shaders with the default implementation
-
-	FixedFunctionShader.SetName("FixedFunction");
-	FixedFunctionShader.SetVertexShaderText(CommonShaderHeaderText + VertexShaderVarsText + FixedFunctionVertexShaderText);
-	FixedFunctionShader.SetFragmentShaderText(CommonShaderHeaderText + FragmentShaderVarsText + FixedFunctionFragmentShaderText);
 	LoadShader(&FixedFunctionShader);
-
-	FramebufferShader.SetName("Framebuffer");
-	FramebufferShader.SetVertexShaderText(FramebufferVertexShaderText);
-	FramebufferShader.SetFragmentShaderText(FramebufferFragmentShaderText);
 	LoadShader(&FramebufferShader);
+
+	for(TMap<UHardwareShader*, FShaderGLSL>::TIterator It(GLShaderByHardwareShader); It; ++It)
+		LoadShader(&It.Value());
 }
 
 void UOpenGLRenderDevice::LoadShader(FShaderGLSL* Shader){
-	FStringTemp ShaderText(0);
-	FString Filename = ShaderDir * Shader->GetName() + VERTEX_SHADER_FILE_EXTENSION;
+	if(Shader->GetName()[0] == '\0')
+		return;
 
-	GFileManager->MakeDirectory(*ShaderDir);
+	FStringTemp ShaderText(0);
+	FFilename Filename = ShaderDir * Shader->GetName() + VERTEX_SHADER_FILE_EXTENSION;
+
+	GFileManager->MakeDirectory(*Filename.GetPath(), 1);
 
 	if(GFileManager->FileSize(*Filename) > 0 && appLoadFileToString(ShaderText, *Filename))
 		Shader->SetVertexShaderText(ShaderText);
@@ -656,6 +680,8 @@ void UOpenGLRenderDevice::LoadShader(FShaderGLSL* Shader){
 		appSaveStringToFile(Shader->GetVertexShaderText(), *Filename);
 
 	Filename = ShaderDir * Shader->GetName() + FRAGMENT_SHADER_FILE_EXTENSION;
+
+	GFileManager->MakeDirectory(*Filename.GetPath(), 1);
 
 	if(GFileManager->FileSize(*Filename) > 0 && appLoadFileToString(ShaderText, *Filename))
 		Shader->SetFragmentShaderText(ShaderText);

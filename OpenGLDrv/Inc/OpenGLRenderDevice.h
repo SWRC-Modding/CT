@@ -32,6 +32,7 @@ public:
 	bool IsCurrent();
 	void UnSetRes();
 	FOpenGLResource* GetCachedResource(QWORD CacheId);
+	FShaderGLSL* GetShader(UHardwareShader* HardwareShader);
 
 	// Overrides
 	virtual UBOOL Exec(const TCHAR* Cmd, FOutputDevice& Ar);
@@ -92,8 +93,7 @@ private:
 
 	FStringNoInit             ShaderDir;
 
-	TMap<FString, FString>    VertexShaderTextByName;
-	TMap<FString, FString>    FragmentShaderTextByName;
+	TMap<UHardwareShader*, FShaderGLSL> GLShaderByHardwareShader;
 
 	static FString            CommonShaderHeaderText;
 	static FString            VertexShaderVarsText;

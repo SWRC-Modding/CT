@@ -397,6 +397,8 @@ void FOpenGLRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorStri
 		UHardwareShaderWrapper* HardwareShaderWrapper = static_cast<UHardwareShaderWrapper*>(Material);
 		UHardwareShader* HardwareShader = HardwareShaderWrapper->ShaderImplementation;
 
+		RenDev->GetShader(HardwareShader);
+
 		HardwareShaderWrapper->SetupShaderWrapper(this);
 		Result = SetSimpleMaterial(HardwareShader->Textures[0], ErrorString, ErrorMaterial);
 
@@ -407,6 +409,8 @@ void FOpenGLRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorStri
 			CurrentState->AlphaRef = HardwareShader->AlphaRef / 255.0f;
 	}else if(CheckMaterial<UHardwareShader>(&Material, -1)){
 		UHardwareShader* HardwareShader = static_cast<UHardwareShader*>(Material);
+
+		RenDev->GetShader(HardwareShader);
 
 		Result = SetSimpleMaterial(HardwareShader->Textures[0], ErrorString, ErrorMaterial);
 

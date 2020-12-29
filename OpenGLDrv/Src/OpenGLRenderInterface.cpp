@@ -172,7 +172,6 @@ UBOOL FOpenGLRenderInterface::SetRenderTarget(FRenderTarget* RenderTarget, bool 
 		return 1;
 	}
 
-	bool Updated = false;
 	QWORD CacheId = RenderTarget->GetCacheId();
 	INT Revision = RenderTarget->GetRevision();
 	FOpenGLTexture* NewRenderTarget = static_cast<FOpenGLTexture*>(RenDev->GetCachedResource(CacheId));
@@ -181,12 +180,11 @@ UBOOL FOpenGLRenderInterface::SetRenderTarget(FRenderTarget* RenderTarget, bool 
 		NewRenderTarget = new FOpenGLTexture(RenDev, CacheId);
 
 	if(NewRenderTarget->Revision != Revision){
-		Updated = true;
 		NewRenderTarget->Cache(RenderTarget);
-	}
-
-	if(CurrentState->RenderTarget != NewRenderTarget || Updated)
 		NewRenderTarget->BindRenderTarget();
+	}else if(CurrentState->RenderTarget != NewRenderTarget){
+		NewRenderTarget->BindRenderTarget();
+	}
 
 	CurrentState->RenderTarget = NewRenderTarget;
 

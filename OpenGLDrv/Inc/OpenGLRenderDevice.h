@@ -76,6 +76,7 @@ private:
 	UBOOL                     bFixCanvasScaling;
 	UBOOL                     bVSync;
 	UBOOL                     bAdaptiveVSync;
+	UBOOL                     bUseOffscreenFramebuffer;
 	UBOOL                     bDebugOpenGL;
 	UBOOL                     bIsFullscreen;
 	INT                       SavedViewportWidth;

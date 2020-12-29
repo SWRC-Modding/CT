@@ -539,21 +539,21 @@ public:
 		FLOAT V;
 	} Vertices[4];
 
-	FFullscreenQuadVertexStream(FLOAT XScale, FLOAT YScale){
-		Vertices[0].X = 1.0f * XScale;
-		Vertices[0].Y = 1.0f * YScale;
+	FFullscreenQuadVertexStream(){
+		Vertices[0].X = 1.0f;
+		Vertices[0].Y = 1.0f;
 		Vertices[0].U = 1.0f;
 		Vertices[0].V = 1.0f;
-		Vertices[1].X = -1.0f * XScale;
-		Vertices[1].Y = 1.0f * YScale;
+		Vertices[1].X = -1.0f;
+		Vertices[1].Y = 1.0f;
 		Vertices[1].U = 0.0f;
 		Vertices[1].V = 1.0f;
-		Vertices[2].X = 1.0f * XScale;
-		Vertices[2].Y = -1.0f * YScale;
+		Vertices[2].X = 1.0f;
+		Vertices[2].Y = -1.0f;
 		Vertices[2].U = 1.0f;
 		Vertices[2].V = 0.0f;
-		Vertices[3].X = -1.0f * XScale;
-		Vertices[3].Y = -1.0f * YScale;
+		Vertices[3].X = -1.0f;
+		Vertices[3].Y = -1.0f;
 		Vertices[3].U = 0.0f;
 		Vertices[3].V = 0.0f;
 	}
@@ -562,15 +562,16 @@ public:
 	virtual INT GetSize(){ return sizeof(Vertices); }
 
 	virtual INT GetComponents(FVertexComponent* Components){
-		Components[0].Function = FVF_Position;
 		Components[0].Type     = CT_Float2;
-		Components[1].Function = FVF_TexCoord0;
+		Components[0].Function = FVF_Position;
 		Components[1].Type     = CT_Float2;
+		Components[1].Function = FVF_TexCoord0;
 
 		return 2;
 	}
 
 	virtual void GetStreamData(void* Dest){ appMemcpy(Dest, Vertices, sizeof(Vertices)); }
+	virtual void GetRawStreamData(void** Dest, INT FirstVertex){ *Dest = Vertices; }
 };
 
 void UOpenGLRenderDevice::Present(UViewport* Viewport){
@@ -580,46 +581,48 @@ void UOpenGLRenderDevice::Present(UViewport* Viewport){
 
 	if(Framebuffer){
 		RenderInterface.PushState();
-		glBindFramebuffer(GL_FRAMEBUFFER, GL_NONE);
+		RenderInterface.SetRenderTarget(NULL, false);
 
 		INT FramebufferWidth = Framebuffer->Width;
 		INT FramebufferHeight = Framebuffer->Height;
-		INT ViewportWidth;
-		INT ViewportHeight;
+		INT ScreenWidth;
+		INT ScreenHeight;
 
 		if(bIsFullscreen){
-			ViewportWidth  = SavedViewportWidth;
-			ViewportHeight = SavedViewportHeight;
+			ScreenWidth  = SavedViewportWidth;
+			ScreenHeight = SavedViewportHeight;
 		}else{
-			ViewportWidth  = Viewport->SizeX;
-			ViewportHeight = Viewport->SizeY;
+			ScreenWidth  = Viewport->SizeX;
+			ScreenHeight = Viewport->SizeY;
 		}
-
-		RenderInterface.SetViewport(0, 0, ViewportWidth, ViewportHeight);
 
 		FLOAT XScale = 1.0f;
 		FLOAT YScale = 1.0f;
 
 		if(bKeepAspectRatio){
-			FLOAT ViewportAspectRatio = static_cast<FLOAT>(ViewportWidth) / ViewportHeight;
+			FLOAT ViewportAspectRatio = static_cast<FLOAT>(ScreenWidth) / ScreenHeight;
 			FLOAT FramebufferAspectRatio = static_cast<FLOAT>(FramebufferWidth) / FramebufferHeight;
 
 			if(FramebufferAspectRatio < ViewportAspectRatio){
-				FLOAT Scale = static_cast<FLOAT>(ViewportHeight) / FramebufferHeight;
+				FLOAT Scale = static_cast<FLOAT>(ScreenHeight) / FramebufferHeight;
 
-				XScale = FramebufferWidth * Scale / ViewportWidth;
+				XScale = FramebufferWidth * Scale / ScreenWidth;
 			}else{
-				FLOAT Scale = static_cast<FLOAT>(ViewportWidth) / FramebufferWidth;
+				FLOAT Scale = static_cast<FLOAT>(ScreenWidth) / FramebufferWidth;
 
-				YScale = FramebufferHeight * Scale / ViewportHeight;
+				YScale = FramebufferHeight * Scale / ScreenHeight;
 			}
 
 			// Clear black bars
-			RenderInterface.Clear(1, FColor(0, 0, 0));
+			RenderInterface.Clear(1, FColor(0, 0, 0), 0, 0.0f, 0, 0);
 		}
 
-		FFullscreenQuadVertexStream FullscreenQuad(XScale, YScale);
+		INT ViewportWidth = static_cast<INT>(ScreenWidth * XScale);
+		INT ViewportHeight = static_cast<INT>(ScreenHeight * YScale);
 
+		FFullscreenQuadVertexStream FullscreenQuad;
+
+		RenderInterface.SetViewport(ScreenWidth / 2 - ViewportWidth / 2, ScreenHeight / 2 - ViewportHeight / 2, ViewportWidth, ViewportHeight);
 		Framebuffer->BindTexture(0);
 		RenderInterface.SetFillMode(FM_Solid);
 		RenderInterface.EnableZTest(0);
@@ -627,7 +630,6 @@ void UOpenGLRenderDevice::Present(UViewport* Viewport){
 		RenderInterface.SetDynamicStream(VS_FixedFunction, &FullscreenQuad);
 		RenderInterface.SetShader(&FramebufferShader);
 		RenderInterface.DrawPrimitive(PT_TriangleStrip, 0, 2);
-		Framebuffer->BindRenderTarget();
 		RenderInterface.PopState();
 	}
 

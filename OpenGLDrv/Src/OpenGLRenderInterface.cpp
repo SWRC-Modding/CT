@@ -92,8 +92,12 @@ void FOpenGLRenderInterface::PopState(INT Flags){
 
 	check(CurrentState >= &SavedStates[0]);
 
-	if(CurrentState->RenderTarget != PoppedState->RenderTarget)
-		CurrentState->RenderTarget->BindRenderTarget();
+	if(CurrentState->RenderTarget != PoppedState->RenderTarget){
+		if(CurrentState->RenderTarget)
+			CurrentState->RenderTarget->BindRenderTarget();
+		else
+			SetRenderTarget(NULL, false);
+	}
 
 	if(CurrentState->ViewportX != PoppedState->ViewportX ||
 	   CurrentState->ViewportY != PoppedState->ViewportY ||
@@ -160,6 +164,13 @@ void FOpenGLRenderInterface::PopState(INT Flags){
 
 UBOOL FOpenGLRenderInterface::SetRenderTarget(FRenderTarget* RenderTarget, bool bFSAA){
 	guardFunc;
+
+	if(!RenderTarget){
+		glBindFramebuffer(GL_FRAMEBUFFER, GL_NONE);
+		CurrentState->RenderTarget = NULL;
+
+		return 1;
+	}
 
 	bool Updated = false;
 	QWORD CacheId = RenderTarget->GetCacheId();

@@ -182,9 +182,14 @@ void FOpenGLVertexStream::Cache(FVertexStream* VertexStream){
 		glCreateBuffers(1, &VBO);
 
 	INT NewBufferSize = VertexStream->GetSize();
-	void* Data = RenDev->GetScratchBuffer(NewBufferSize);
+	void* Data = NULL;
 
-	VertexStream->GetStreamData(Data);
+	VertexStream->GetRawStreamData(&Data, 0);
+
+	if(!Data){
+		Data = RenDev->GetScratchBuffer(NewBufferSize);
+		VertexStream->GetStreamData(Data);
+	}
 
 	if(IsDynamic){
 		if(BufferSize < NewBufferSize){

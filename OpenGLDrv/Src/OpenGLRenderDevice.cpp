@@ -530,50 +530,6 @@ void UOpenGLRenderDevice::Unlock(FRenderInterface* RI){
 	RenderInterface.LockedViewport = NULL;
 }
 
-class FFullscreenQuadVertexStream : public FVertexStream{
-public:
-	struct Vertex{
-		FLOAT X;
-		FLOAT Y;
-		FLOAT U;
-		FLOAT V;
-	} Vertices[4];
-
-	FFullscreenQuadVertexStream(){
-		Vertices[0].X = 1.0f;
-		Vertices[0].Y = 1.0f;
-		Vertices[0].U = 1.0f;
-		Vertices[0].V = 1.0f;
-		Vertices[1].X = -1.0f;
-		Vertices[1].Y = 1.0f;
-		Vertices[1].U = 0.0f;
-		Vertices[1].V = 1.0f;
-		Vertices[2].X = 1.0f;
-		Vertices[2].Y = -1.0f;
-		Vertices[2].U = 1.0f;
-		Vertices[2].V = 0.0f;
-		Vertices[3].X = -1.0f;
-		Vertices[3].Y = -1.0f;
-		Vertices[3].U = 0.0f;
-		Vertices[3].V = 0.0f;
-	}
-
-	virtual INT GetStride(){ return sizeof(Vertex); }
-	virtual INT GetSize(){ return sizeof(Vertices); }
-
-	virtual INT GetComponents(FVertexComponent* Components){
-		Components[0].Type     = CT_Float2;
-		Components[0].Function = FVF_Position;
-		Components[1].Type     = CT_Float2;
-		Components[1].Function = FVF_TexCoord0;
-
-		return 2;
-	}
-
-	virtual void GetStreamData(void* Dest){ appMemcpy(Dest, Vertices, sizeof(Vertices)); }
-	virtual void GetRawStreamData(void** Dest, INT FirstVertex){ *Dest = Vertices; }
-};
-
 void UOpenGLRenderDevice::Present(UViewport* Viewport){
 	checkSlow(IsCurrent());
 
@@ -620,14 +576,11 @@ void UOpenGLRenderDevice::Present(UViewport* Viewport){
 		INT ViewportWidth = static_cast<INT>(ScreenWidth * XScale);
 		INT ViewportHeight = static_cast<INT>(ScreenHeight * YScale);
 
-		FFullscreenQuadVertexStream FullscreenQuad;
-
 		RenderInterface.SetViewport(ScreenWidth / 2 - ViewportWidth / 2, ScreenHeight / 2 - ViewportHeight / 2, ViewportWidth, ViewportHeight);
 		Framebuffer->BindTexture(0);
 		RenderInterface.SetFillMode(FM_Solid);
 		RenderInterface.EnableZTest(0);
 		RenderInterface.EnableStencilTest(0);
-		RenderInterface.SetDynamicStream(VS_FixedFunction, &FullscreenQuad);
 		RenderInterface.SetShader(&FramebufferShader);
 		RenderInterface.DrawPrimitive(PT_TriangleStrip, 0, 2);
 		RenderInterface.PopState();
@@ -655,8 +608,8 @@ void UOpenGLRenderDevice::LoadShaders(){
 	LoadShader(&FixedFunctionShader);
 
 	FramebufferShader.SetName("Framebuffer");
-	FramebufferShader.SetVertexShaderText(CommonShaderHeaderText + VertexShaderVarsText + FramebufferVertexShaderText);
-	FramebufferShader.SetFragmentShaderText(CommonShaderHeaderText + FragmentShaderVarsText + FramebufferFragmentShaderText);
+	FramebufferShader.SetVertexShaderText(FramebufferVertexShaderText);
+	FramebufferShader.SetFragmentShaderText(FramebufferFragmentShaderText);
 	LoadShader(&FramebufferShader);
 }
 
@@ -681,14 +634,16 @@ void UOpenGLRenderDevice::LoadShader(FShaderGLSL* Shader){
 
 // Default shader code
 
-FString UOpenGLRenderDevice::CommonShaderHeaderText(
-	"#version 450 core\n\n"
-	"// Global shared uniforms\n\n"
-	"layout(std140, binding = 0) uniform Globals{\n"
-#define UNIFORM_BLOCK_MEMBER(type, name) 	"\t" #type " " #name ";\n"
-	UNIFORM_BLOCK_CONTENTS
-#undef UNIFORM_BLOCK_MEMBER
+#define UNIFORM_BLOCK_MEMBER(type, name) "\t" #type " " #name ";\n"
+#define SHADER_HEADER \
+	"#version 450 core\n\n" \
+	"// Global shared uniforms\n\n" \
+	"layout(std140, binding = 0) uniform Globals{\n" \
+		UNIFORM_BLOCK_CONTENTS \
 	"};\n\n"
+
+FString UOpenGLRenderDevice::CommonShaderHeaderText(
+	SHADER_HEADER
 	"// Textures\n\n"
 	"layout(binding = 0) uniform sampler2D Texture0;\n"
 	"layout(binding = 1) uniform sampler2D Texture1;\n"
@@ -998,12 +953,25 @@ FString UOpenGLRenderDevice::FixedFunctionFragmentShaderText(
 	"}\n", true);
 
 FString UOpenGLRenderDevice::FramebufferVertexShaderText(
+	SHADER_HEADER
+	"out vec2 TexCoord;\n\n"
 	"void main(void){\n"
-				"\tTexCoord0 = InTexCoord0;\n"
-				"\tgl_Position = vec4(InPosition.xy, 0.5, 1.0);\n"
+		"\tconst vec4[] Vertices = vec4[](vec4(1.0, 1.0, 1.0, 1.0),\n"
+		"\t                               vec4(-1.0, 1.0, 0.0, 1.0),\n"
+		"\t                               vec4(1.0, -1.0, 1.0, 0.0),\n"
+		"\t                               vec4(-1.0, -1.0, 0.0, 0.0));\n\n"
+		"\tgl_Position = vec4(Vertices[gl_VertexID].xy, 0.5, 1.0);\n"
+		"\tTexCoord = Vertices[gl_VertexID].zw;\n"
 	"}\n", true);
 
 FString UOpenGLRenderDevice::FramebufferFragmentShaderText(
+	SHADER_HEADER
+	"layout(binding = 0) uniform sampler2D Screen;\n\n"
+	"in vec2 TexCoord;\n\n"
+	"out vec4 FragColor;\n\n"
 	"void main(void){\n"
-				"\tFragColor = texture2D(Texture0, TexCoord0.xy);\n"
+		"\tFragColor = texture2D(Screen, TexCoord.xy);\n"
 	"}\n", true);
+
+#undef UNIFORM_BLOCK_MEMBER
+#undef SHADER_HEADER

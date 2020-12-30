@@ -286,10 +286,6 @@ void FOpenGLTexture::Cache(FBaseTexture* BaseTexture){
 		glCreateFramebuffers(1, &FBO);
 		glCreateTextures(GL_TEXTURE_2D, 1, &TextureHandle);
 		glTextureStorage2D(TextureHandle, 1, RenDev->Use16bit ? GL_RGB565 : GL_RGB8, Width, Height);
-		glTextureParameteri(TextureHandle, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTextureParameteri(TextureHandle, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTextureParameteri(TextureHandle, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-		glTextureParameteri(TextureHandle, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
 		glNamedFramebufferTexture(FBO, GL_COLOR_ATTACHMENT0, TextureHandle, 0);
 		glCreateRenderbuffers(1, &DepthStencilAttachment);
 		glNamedRenderbufferStorage(DepthStencilAttachment, GL_DEPTH24_STENCIL8, Width, Height);

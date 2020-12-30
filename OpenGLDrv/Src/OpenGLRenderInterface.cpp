@@ -790,6 +790,10 @@ bool FOpenGLRenderInterface::HandleCombinedMaterial(UMaterial* Material, INT& St
 			break;
 		case CO_Subtract:
 			CurrentState->StageColorOps[StageIndex] = COP_Subtract;
+
+			if(!Swapped)
+				Exchange(CurrentState->StageColorArgs[StageIndex * 2], CurrentState->StageColorArgs[StageIndex * 2 + 1]);
+
 			break;
 		case CO_AlphaBlend_With_Mask:
 			CurrentState->StageColorOps[StageIndex] = COP_AlphaBlend;

@@ -118,6 +118,7 @@ public:
 		// Fixed function emulation
 
 		bool                  UsingConstantColor;
+		bool                  UsingColorModifier;
 		INT                   NumStages;
 		INT                   NumTextures;
 		INT                   TexCoordCount;
@@ -273,6 +274,18 @@ private:
 
 					if(FinalBlend->AlphaTest)
 						CurrentState->AlphaRef = CurrentState->AlphaRef / 255.0f;
+				}else if(Modifier->IsA<UColorModifier>()){
+					UColorModifier* ColorModifier = static_cast<UColorModifier*>(Modifier);
+
+					CurrentState->UsingConstantColor = true;
+					CurrentState->UsingColorModifier = true;
+					CurrentState->ConstantColor = ColorModifier->Color;
+
+					if(ColorModifier->RenderTwoSided)
+						CurrentState->CullMode = CM_None;
+
+					if(ColorModifier->AlphaBlend && CurrentState->FramebufferBlending == FB_Overwrite)
+						CurrentState->FramebufferBlending = FB_AlphaBlend;
 				}
 
 				Modifier = static_cast<UModifier*>(Modifier->Material);

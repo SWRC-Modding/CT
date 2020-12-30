@@ -339,6 +339,7 @@ void FOpenGLRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorStri
 		InitDefaultMaterialStageState(i);
 
 	CurrentState->UsingConstantColor = false;
+	CurrentState->UsingColorModifier = false;
 	CurrentState->NumStages = 0;
 	CurrentState->NumTextures = 0;
 	CurrentState->TexCoordCount = 2;
@@ -484,6 +485,16 @@ void FOpenGLRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorStri
 		break;
 	case FB_MAX:
 		glBlendFunc(CurrentState->SrcBlend, CurrentState->DstBlend);
+	}
+
+	if(CurrentState->UsingColorModifier){
+		checkSlow(CurrentState->NumStages < MAX_SHADER_STAGES);
+		CurrentState->StageColorArgs[CurrentState->NumStages * 2] = CA_Previous;
+		CurrentState->StageColorArgs[CurrentState->NumStages * 2 + 1] = CA_Constant;
+		CurrentState->StageColorOps[CurrentState->NumStages] = COP_Modulate;
+		CurrentState->StageAlphaArgs[CurrentState->NumStages * 2] = CA_Previous;
+		CurrentState->StageAlphaArgs[CurrentState->NumStages * 2 + 1] = CA_Constant;
+		CurrentState->StageAlphaOps[CurrentState->NumStages] = AOP_Modulate;
 	}
 
 	unguard;

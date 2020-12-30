@@ -90,4 +90,7 @@ public:
 	GLuint TextureHandle;
 	GLuint FBO;
 	GLuint DepthStencilAttachment;
+
+private:
+	void* ConvertTextureData(FTexture* Texture, ETextureFormat DestFormat, INT Width, INT Height, INT MipIndex);
 };

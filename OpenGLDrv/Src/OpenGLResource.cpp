@@ -269,22 +269,16 @@ void FOpenGLTexture::Cache(FBaseTexture* BaseTexture){
 			checkSlow(Data);
 
 			glCompressedTextureImage2DEXT(TextureHandle, GL_TEXTURE_2D, 0, GLFormat, Width, Height, 0, GetBytesPerPixel(SrcFormat, Width * Height), Data);
-		}else{ // TODO: Fix texture loading and format conversion
-			void* Data = Texture->GetRawTextureData(0);
+		}else{
+			void* Data = ConvertTextureData(Texture, TEXF_RGBA8, Width, Height, 0);
 
-			if(!Data){
-				Data = RenDev->GetScratchBuffer(GetBytesPerPixel(TEXF_RGBA8, Width * Height));
-				Texture->GetTextureData(0, Data, 0, TEXF_RGBA8);
-			}
-
-			glTextureStorage2D(TextureHandle, 1, GL_RGBA8, Width, Height);
+			glTextureStorage2D(TextureHandle, Texture->GetNumMips(), GL_RGBA8, Width, Height);
 			glTextureSubImage2D(TextureHandle, 0, 0, 0, Width, Height, GL_BGRA, GL_UNSIGNED_BYTE, Data);
 		}
 
-		for(INT i = 0; i < Texture->GetNumMips(); ++i)
-			Texture->UnloadRawTextureData(i);
-
 		glGenerateTextureMipmap(TextureHandle);
+
+		Texture->UnloadRawTextureData(0);
 	}else if(RenderTarget){
 		if(Width == 0 || Height == 0)
 			return;
@@ -334,4 +328,68 @@ void FOpenGLTexture::BindTexture(GLuint TextureUnit){
 void FOpenGLTexture::BindRenderTarget(){
 	checkSlow(FBO);
 	glBindFramebuffer(GL_FRAMEBUFFER, FBO);
+}
+
+void* FOpenGLTexture::ConvertTextureData(FTexture* Texture, ETextureFormat DestFormat, INT Width, INT Height, INT MipIndex){
+	void* Result;
+	ETextureFormat SrcFormat = Texture->GetFormat();
+	INT NumPixels = Width * Height;
+	INT SrcBufferSize = GetBytesPerPixel(SrcFormat, NumPixels);
+	INT DestBufferSize = GetBytesPerPixel(DestFormat, NumPixels);
+	void* TextureData = Texture->GetRawTextureData(MipIndex);
+
+	if(DestFormat == SrcFormat && TextureData){
+		Result = TextureData;
+	}else{
+		if(TextureData){
+			Result = RenDev->GetScratchBuffer(DestBufferSize);
+		}else{
+			TextureData = RenDev->GetScratchBuffer(SrcBufferSize + DestBufferSize);
+			Result = static_cast<BYTE*>(TextureData) + SrcBufferSize;
+			Texture->GetTextureData(MipIndex, TextureData, 0, SrcFormat);
+		}
+
+		if(DestFormat == TEXF_RGBA8){
+			if(SrcFormat == TEXF_P8){
+				UTexture* Tex = Texture->GetUTexture();
+				check(Tex && Tex->Palette);
+				const TArray<FColor>& Palette = Tex->Palette->Colors;
+
+				for(INT i = 0; i < NumPixels; ++i)
+					static_cast<FColor*>(Result)[i] = Palette[static_cast<BYTE*>(TextureData)[i]];
+			}else if(SrcFormat == TEXF_RGB8){
+				for(INT i = 0; i < NumPixels; ++i){
+					BYTE* RGB = static_cast<BYTE*>(TextureData) + i;
+					static_cast<FColor*>(Result)[i] = FColor(RGB[0], RGB[1], RGB[2]);
+				}
+			}else if(SrcFormat == TEXF_RGBA8){
+				appMemcpy(Result, TextureData, SrcBufferSize);
+			}else if(SrcFormat == TEXF_L8){
+				for(INT i = 0; i < NumPixels; ++i){
+					BYTE Value = static_cast<BYTE*>(TextureData)[i];
+					static_cast<FColor*>(Result)[i] = FColor(Value, Value, Value);
+				}
+			}else if(SrcFormat == TEXF_G16){
+				for(INT i = 0; i < NumPixels; ++i){
+					BYTE Intensity = static_cast<_WORD*>(TextureData)[i] >> 8;
+					static_cast<FColor*>(Result)[i] = FColor(Intensity, Intensity, Intensity);
+				}
+			}else if(SrcFormat == TEXF_V8U8){
+				ConvertV8U8ToRGBA8(TextureData, Result, Width, Height);
+			}else if(SrcFormat == TEXF_L6V5U5){
+				ConvertL6V5U5ToRGBA8(TextureData, Result, Width, Height);
+			}else if(SrcFormat == TEXF_X8L8V8U8){
+				ConvertX8L8V8U8ToRGB8(TextureData, Result, Width, Height);
+			}else{
+				Result = NULL;
+			}
+		}else{
+			Result = NULL;
+		}
+	}
+
+	if(!Result)
+		appErrorf("Invalid texture format conversion (%i -> %i)", SrcFormat, DestFormat);
+
+	return Result;
 }

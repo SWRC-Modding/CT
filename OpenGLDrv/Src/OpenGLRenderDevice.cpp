@@ -242,6 +242,8 @@ UBOOL UOpenGLRenderDevice::Init(){
 	FramebufferShader.SetVertexShaderText(FramebufferVertexShaderText);
 	FramebufferShader.SetFragmentShaderText(FramebufferFragmentShaderText);
 
+	LoadShaders();
+
 	return 1;
 }
 

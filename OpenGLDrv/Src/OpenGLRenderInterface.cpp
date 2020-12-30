@@ -352,6 +352,7 @@ void FOpenGLRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorStri
 	bool ZTest = CurrentState->bZTest;
 	bool ZWrite = CurrentState->bZWrite;
 	ECullMode CullMode = CurrentState->CullMode;
+	EFillMode FillMode = CurrentState->FillMode;
 
 	Material->PreSetMaterial(GEngineTime);
 
@@ -379,10 +380,7 @@ void FOpenGLRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorStri
 	}else if(CheckMaterial<UTerrainMaterial>(&Material, 0)){
 		Result = SetTerrainMaterial(static_cast<UTerrainMaterial*>(Material), ErrorString, ErrorMaterial);
 	}else if(CheckMaterial<UParticleMaterial>(&Material, 0)){
-		CurrentState->AlphaRef = 0.0f;
-		CurrentState->FramebufferBlending = FB_AlphaBlend;
-		Result = SetSimpleMaterial(static_cast<UParticleMaterial*>(Material)->BitmapMaterial, ErrorString, ErrorMaterial);
-		CurrentState->bZWrite = false;
+		Result = SetParticleMaterial(static_cast<UParticleMaterial*>(Material), ErrorString, ErrorMaterial);
 	}else if(CheckMaterial<UProjectorMultiMaterial>(&Material, -1)){
 		CurrentState->AlphaRef = 0.5f;
 		CurrentState->FramebufferBlending = FB_Modulate;
@@ -451,6 +449,9 @@ void FOpenGLRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorStri
 	if(CullMode != CurrentState->CullMode)
 		SetCullMode(CurrentState->CullMode);
 
+	if(FillMode != CurrentState->FillMode)
+		SetFillMode(CurrentState->FillMode);
+
 	switch(CurrentState->FramebufferBlending){
 	case FB_Overwrite:
 		glBlendFunc(GL_ONE, GL_ZERO);
@@ -465,13 +466,15 @@ void FOpenGLRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorStri
 		glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 		break;
 	case FB_Translucent:
-		glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_COLOR);
+		// glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_COLOR);
+		glBlendFunc(GL_ONE, GL_ONE);
 		break;
 	case FB_Darken:
 		glBlendFunc(GL_ZERO, GL_ONE_MINUS_SRC_COLOR);
 		break;
 	case FB_Brighten:
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+		// glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+		glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_COLOR);
 		break;
 	case FB_Invisible:
 		glBlendFunc(GL_ZERO, GL_ONE);
@@ -911,6 +914,97 @@ bool FOpenGLRenderInterface::SetTerrainMaterial(UTerrainMaterial* Terrain, FStri
 	}else{
 		return false;
 	}
+
+	CurrentState->NumStages = StagesUsed;
+	CurrentState->NumTextures = TexturesUsed;
+
+	return true;
+}
+
+bool FOpenGLRenderInterface::SetParticleMaterial(UParticleMaterial* ParticleMaterial, FString* ErrorString, UMaterial** ErrorMaterial){
+	INT StagesUsed = 0;
+	INT TexturesUsed = 0;
+
+	switch(ParticleMaterial->ParticleBlending){
+	case PTDS_Regular:
+		CurrentState->FramebufferBlending = FB_Overwrite;
+		break;
+	case PTDS_AlphaBlend:
+		CurrentState->FramebufferBlending = FB_AlphaBlend;
+		break;
+	case PTDS_Modulated:
+		CurrentState->FramebufferBlending = FB_Modulate;
+		break;
+	case PTDS_Translucent:
+		CurrentState->FramebufferBlending = FB_Translucent;
+		break;
+	case PTDS_AlphaModulate_MightNotFogCorrectly:
+		CurrentState->FramebufferBlending = FB_AlphaModulate_MightNotFogCorrectly;
+		break;
+	case PTDS_Darken:
+		CurrentState->FramebufferBlending = FB_Darken;
+		break;
+	case PTDS_Brighten:
+		CurrentState->FramebufferBlending = FB_Brighten;
+	}
+
+	if(ParticleMaterial->BitmapMaterial)
+		SetBitmapTexture(ParticleMaterial->BitmapMaterial, TexturesUsed);
+
+	if(!ParticleMaterial->BlendBetweenSubdivisions){
+		CurrentState->StageColorArgs[StagesUsed * 2] = CA_Texture0 + TexturesUsed;
+		CurrentState->StageAlphaArgs[StagesUsed * 2] = CA_Texture0 + TexturesUsed;
+
+		if(ParticleMaterial->UseTFactor){
+			CurrentState->StageColorArgs[StagesUsed * 2 + 1] = CA_Constant;
+			CurrentState->StageAlphaArgs[StagesUsed * 2 + 1] = CA_Constant;
+		}else{
+			CurrentState->StageColorArgs[StagesUsed * 2 + 1] = CA_Diffuse;
+			CurrentState->StageAlphaArgs[StagesUsed * 2 + 1] = CA_Diffuse;
+		}
+
+		if(ParticleMaterial->ParticleBlending != PTDS_Modulated){
+			CurrentState->StageColorOps[StagesUsed] = COP_Modulate;
+			CurrentState->StageAlphaOps[StagesUsed] = AOP_Modulate;
+		}else{
+			CurrentState->StageColorOps[StagesUsed] = COP_AlphaBlend;
+			CurrentState->StageAlphaOps[StagesUsed] = AOP_Blend;
+		}
+
+		++TexturesUsed;
+		++StagesUsed;
+	}else{
+		CurrentState->StageColorArgs[StagesUsed * 2] = CA_Texture0 + TexturesUsed;
+		CurrentState->StageAlphaArgs[StagesUsed * 2] = CA_Texture0 + TexturesUsed;
+		CurrentState->StageColorOps[StagesUsed] = COP_Arg1;
+		CurrentState->StageAlphaOps[StagesUsed] = AOP_Arg1;
+		++StagesUsed;
+		CurrentState->StageColorArgs[StagesUsed * 2] = CA_Texture0 + TexturesUsed;
+		CurrentState->StageColorArgs[StagesUsed * 2 + 1] = CA_Previous;
+		CurrentState->StageAlphaArgs[StagesUsed * 2] = CA_Texture0 + TexturesUsed;
+		CurrentState->StageAlphaArgs[StagesUsed * 2 + 1] = CA_Previous;
+		CurrentState->StageColorOps[StagesUsed] = COP_AlphaBlend;
+		CurrentState->StageAlphaOps[StagesUsed] = AOP_Blend;
+		CurrentState->StageTexCoordSources[StagesUsed] = TCS_Stream1;
+		++StagesUsed;
+		CurrentState->StageColorArgs[StagesUsed * 2] = CA_Diffuse;
+		CurrentState->StageColorArgs[StagesUsed * 2 + 1] = CA_Previous;
+		CurrentState->StageAlphaArgs[StagesUsed * 2] = CA_Previous;
+		CurrentState->StageColorOps[StagesUsed] = COP_Modulate;
+		CurrentState->StageAlphaOps[StagesUsed] = AOP_Arg1;
+		++StagesUsed;
+		++TexturesUsed;
+	}
+
+	if(ParticleMaterial->RenderTwoSided)
+		CurrentState->CullMode = CM_None;
+
+	if(ParticleMaterial->AlphaTest)
+		CurrentState->AlphaRef = ParticleMaterial->AlphaRef / 255.0f;
+
+	CurrentState->bZTest = ParticleMaterial->ZTest != 0;
+	CurrentState->bZWrite = ParticleMaterial->ZWrite != 0;
+	CurrentState->FillMode = ParticleMaterial->Wireframe ? FM_Wireframe : FM_Solid;
 
 	CurrentState->NumStages = StagesUsed;
 	CurrentState->NumTextures = TexturesUsed;

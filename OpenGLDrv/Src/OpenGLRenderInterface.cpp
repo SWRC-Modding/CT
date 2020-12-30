@@ -288,15 +288,15 @@ FMatrix FOpenGLRenderInterface::GetTransform(ETransformType Type) const{
 
 void FOpenGLRenderInterface::InitDefaultMaterialStageState(INT StageIndex){
 	// Init default material state
-	CurrentState->StageTexWrapModes[StageIndex * 2] = -1;
-	CurrentState->StageTexWrapModes[StageIndex * 2 + 1] = -1;
+	CurrentState->StageTexWrapModes[StageIndex][0] = -1;
+	CurrentState->StageTexWrapModes[StageIndex][1] = -1;
 	CurrentState->StageTexCoordSources[StageIndex] = 0;
 	CurrentState->StageTexMatrices[StageIndex] = FMatrix::Identity;
-	CurrentState->StageColorArgs[StageIndex * 2] = CA_Diffuse;
-	CurrentState->StageColorArgs[StageIndex * 2 + 1] = CA_Diffuse;
+	CurrentState->StageColorArgs[StageIndex][0] = CA_Diffuse;
+	CurrentState->StageColorArgs[StageIndex][1] = CA_Diffuse;
 	CurrentState->StageColorOps[StageIndex] = COP_Arg1;
-	CurrentState->StageAlphaArgs[StageIndex * 2] = CA_Diffuse;
-	CurrentState->StageAlphaArgs[StageIndex * 2 + 1] = CA_Diffuse;
+	CurrentState->StageAlphaArgs[StageIndex][0] = CA_Diffuse;
+	CurrentState->StageAlphaArgs[StageIndex][1] = CA_Diffuse;
 	CurrentState->StageAlphaOps[StageIndex] = AOP_Arg1;
 }
 
@@ -429,16 +429,16 @@ void FOpenGLRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorStri
 	glUniform1i(SU_TexCoordCount, CurrentState->TexCoordCount);
 	glUniform1iv(SU_StageTexCoordSources, ARRAY_COUNT(CurrentState->StageTexCoordSources), CurrentState->StageTexCoordSources);
 	glUniformMatrix4fv(SU_StageTexMatrices, ARRAY_COUNT(CurrentState->StageTexMatrices), GL_FALSE, (GLfloat*)CurrentState->StageTexMatrices);
-	glUniform1iv(SU_StageColorArgs, ARRAY_COUNT(CurrentState->StageColorArgs), CurrentState->StageColorArgs);
+	glUniform1iv(SU_StageColorArgs, ARRAY_COUNT(CurrentState->StageColorArgs), &CurrentState->StageColorArgs[0][0]);
 	glUniform1iv(SU_StageColorOps, ARRAY_COUNT(CurrentState->StageColorOps), CurrentState->StageColorOps);
-	glUniform1iv(SU_StageAlphaArgs, ARRAY_COUNT(CurrentState->StageAlphaArgs), CurrentState->StageAlphaArgs);
+	glUniform1iv(SU_StageAlphaArgs, ARRAY_COUNT(CurrentState->StageAlphaArgs), &CurrentState->StageAlphaArgs[0][0]);
 	glUniform1iv(SU_StageAlphaOps, ARRAY_COUNT(CurrentState->StageAlphaOps), CurrentState->StageAlphaOps);
 	glUniform4fv(SU_ConstantColor, 1, (GLfloat*)&CurrentState->ConstantColor);
 	glUniform1f(SU_AlphaRef, CurrentState->AlphaRef);
 
 	for(INT i = 0; i < CurrentState->NumTextures; ++i){
-		glSamplerParameteri(Samplers[i], GL_TEXTURE_WRAP_S, GetTextureWrapMode(CurrentState->StageTexWrapModes[i * 2]));
-		glSamplerParameteri(Samplers[i], GL_TEXTURE_WRAP_T, GetTextureWrapMode(CurrentState->StageTexWrapModes[i * 2 + 1]));
+		glSamplerParameteri(Samplers[i], GL_TEXTURE_WRAP_S, GetTextureWrapMode(CurrentState->StageTexWrapModes[i][0]));
+		glSamplerParameteri(Samplers[i], GL_TEXTURE_WRAP_T, GetTextureWrapMode(CurrentState->StageTexWrapModes[i][1]));
 	}
 
 	if(ZTest != CurrentState->bZTest)
@@ -489,11 +489,11 @@ void FOpenGLRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorStri
 
 	if(CurrentState->UsingColorModifier){
 		checkSlow(CurrentState->NumStages < MAX_SHADER_STAGES);
-		CurrentState->StageColorArgs[CurrentState->NumStages * 2] = CA_Previous;
-		CurrentState->StageColorArgs[CurrentState->NumStages * 2 + 1] = CA_Constant;
+		CurrentState->StageColorArgs[CurrentState->NumStages][0] = CA_Previous;
+		CurrentState->StageColorArgs[CurrentState->NumStages][1] = CA_Constant;
 		CurrentState->StageColorOps[CurrentState->NumStages] = COP_Modulate;
-		CurrentState->StageAlphaArgs[CurrentState->NumStages * 2] = CA_Previous;
-		CurrentState->StageAlphaArgs[CurrentState->NumStages * 2 + 1] = CA_Constant;
+		CurrentState->StageAlphaArgs[CurrentState->NumStages][0] = CA_Previous;
+		CurrentState->StageAlphaArgs[CurrentState->NumStages][1] = CA_Constant;
 		CurrentState->StageAlphaOps[CurrentState->NumStages] = AOP_Modulate;
 	}
 
@@ -517,11 +517,11 @@ void FOpenGLRenderInterface::SetBitmapTexture(UBitmapMaterial* Bitmap, INT Textu
 
 	GLTexture->BindTexture(TextureUnit);
 
-	if(CurrentState->StageTexWrapModes[TextureUnit * 2] < 0)
-		CurrentState->StageTexWrapModes[TextureUnit * 2] = Bitmap->UClampMode;
+	if(CurrentState->StageTexWrapModes[TextureUnit][0] < 0)
+		CurrentState->StageTexWrapModes[TextureUnit][0] = Bitmap->UClampMode;
 
-	if(CurrentState->StageTexWrapModes[TextureUnit * 2 + 1] < 0)
-		CurrentState->StageTexWrapModes[TextureUnit * 2 + 1] = Bitmap->VClampMode;
+	if(CurrentState->StageTexWrapModes[TextureUnit][1] < 0)
+		CurrentState->StageTexWrapModes[TextureUnit][1] = Bitmap->VClampMode;
 }
 
 bool FOpenGLRenderInterface::SetSimpleMaterial(UMaterial* Material, FString* ErrorString, UMaterial** ErrorMaterial){
@@ -571,9 +571,9 @@ bool FOpenGLRenderInterface::HandleCombinedMaterial(UMaterial* Material, INT& St
 			return false;
 		}
 
-		CurrentState->StageColorArgs[StagesUsed * 2] = CA_Diffuse;
+		CurrentState->StageColorArgs[StagesUsed][0] = CA_Diffuse;
 		CurrentState->StageColorOps[StagesUsed] = COP_Arg1;
-		CurrentState->StageAlphaArgs[StagesUsed * 2 + 1] = CA_Previous;
+		CurrentState->StageAlphaArgs[StagesUsed][1] = CA_Previous;
 		CurrentState->StageAlphaOps[StagesUsed] = AOP_Arg2;
 
 		++StagesUsed;
@@ -601,9 +601,9 @@ bool FOpenGLRenderInterface::HandleCombinedMaterial(UMaterial* Material, INT& St
 		}
 
 		CurrentState->ConstantColor = static_cast<UConstantMaterial*>(Material)->GetColor(GEngineTime);
-		CurrentState->StageColorArgs[StagesUsed * 2] = CA_Constant;
+		CurrentState->StageColorArgs[StagesUsed][0] = CA_Constant;
 		CurrentState->StageColorOps[StagesUsed] = COP_Arg1;
-		CurrentState->StageAlphaArgs[StagesUsed * 2] = CA_Constant;
+		CurrentState->StageAlphaArgs[StagesUsed][0] = CA_Constant;
 		CurrentState->StageAlphaOps[StagesUsed] = AOP_Arg1;
 
 		++StagesUsed;
@@ -622,9 +622,9 @@ bool FOpenGLRenderInterface::HandleCombinedMaterial(UMaterial* Material, INT& St
 
 		SetBitmapTexture(static_cast<UBitmapMaterial*>(Material), TexturesUsed);
 
-		CurrentState->StageColorArgs[StagesUsed * 2] = CA_Texture0 + TexturesUsed;
+		CurrentState->StageColorArgs[StagesUsed][0] = CA_Texture0 + TexturesUsed;
 		CurrentState->StageColorOps[StagesUsed] = COP_Arg1;
-		CurrentState->StageAlphaArgs[StagesUsed * 2] = CA_Texture0 + TexturesUsed;
+		CurrentState->StageAlphaArgs[StagesUsed][0] = CA_Texture0 + TexturesUsed;
 		CurrentState->StageAlphaOps[StagesUsed] = AOP_Arg1;
 
 		++StagesUsed;
@@ -707,20 +707,20 @@ bool FOpenGLRenderInterface::HandleCombinedMaterial(UMaterial* Material, INT& St
 					if(SimpleBitmapMask){
 						SetBitmapTexture(static_cast<UBitmapMaterial*>(Mask), TexturesUsed);
 
-						CurrentState->StageAlphaArgs[StagesUsed * 2] = (CA_Texture0 + TexturesUsed) | MaskModifiers;
+						CurrentState->StageAlphaArgs[StagesUsed][0] = (CA_Texture0 + TexturesUsed) | MaskModifiers;
 						CurrentState->StageAlphaOps[StagesUsed] = AOP_Arg1;
 						++TexturesUsed;
 					}else{
 						if(!HandleCombinedMaterial(Mask, StagesUsed, TexturesUsed, ErrorString, ErrorMaterial))
 							return false;
 
-						CurrentState->StageColorArgs[StagesUsed * 2 - 2] = CA_Previous;
+						CurrentState->StageColorArgs[StagesUsed - 1][0] = CA_Previous;
 						CurrentState->StageColorOps[StagesUsed - 1] = COP_Arg1;
-						CurrentState->StageAlphaArgs[StagesUsed * 2 - 2] = (CA_Texture0 + TexturesUsed - 1) | MaskModifiers;
+						CurrentState->StageAlphaArgs[StagesUsed - 1][0] = (CA_Texture0 + TexturesUsed - 1) | MaskModifiers;
 						CurrentState->StageAlphaOps[StagesUsed - 1] = AOP_Arg1;
 					}
 				}else if(CheckMaterial<UVertexColor>(&Mask, StagesUsed)){
-					CurrentState->StageAlphaArgs[StagesUsed * 2 - 2] = CA_Diffuse | MaskModifiers;
+					CurrentState->StageAlphaArgs[StagesUsed - 1][0] = CA_Diffuse | MaskModifiers;
 					CurrentState->StageAlphaOps[StagesUsed - 1] = AOP_Arg1;
 				}else if(CheckMaterial<UConstantMaterial>(&Mask, StagesUsed)){
 					if(CurrentState->UsingConstantColor){
@@ -734,7 +734,7 @@ bool FOpenGLRenderInterface::HandleCombinedMaterial(UMaterial* Material, INT& St
 					}
 
 					CurrentState->ConstantColor = static_cast<UConstantMaterial*>(Mask)->GetColor(GEngineTime);
-					CurrentState->StageAlphaArgs[StagesUsed * 2 - 2] = CA_Constant;
+					CurrentState->StageAlphaArgs[StagesUsed - 1][0] = CA_Constant;
 					CurrentState->StageAlphaOps[StagesUsed - 1] = AOP_Arg1;
 				}else{
 					if(ErrorString)
@@ -755,19 +755,19 @@ bool FOpenGLRenderInterface::HandleCombinedMaterial(UMaterial* Material, INT& St
 				return false;
 
 			if(Swapped){
-				CurrentState->StageColorArgs[StagesUsed * 2 - 2] = CA_Texture0 + TexturesUsed - 1;
-				CurrentState->StageColorArgs[StagesUsed * 2 - 1] = CA_Previous;
+				CurrentState->StageColorArgs[StagesUsed - 1][0] = CA_Texture0 + TexturesUsed - 1;
+				CurrentState->StageColorArgs[StagesUsed - 1][1] = CA_Previous;
 			}else{
-				CurrentState->StageColorArgs[StagesUsed * 2 - 2] = CA_Previous;
-				CurrentState->StageColorArgs[StagesUsed * 2 - 1] = CA_Texture0 + TexturesUsed - 1;
+				CurrentState->StageColorArgs[StagesUsed - 1][0] = CA_Previous;
+				CurrentState->StageColorArgs[StagesUsed - 1][1] = CA_Texture0 + TexturesUsed - 1;
 			}
 
 			if(Mask == Material2){
-				CurrentState->StageAlphaArgs[StagesUsed * 2 - 2] = CA_Texture0 + TexturesUsed - 1;
-				CurrentState->StageAlphaArgs[StagesUsed * 2 - 1] = CA_Previous;
+				CurrentState->StageAlphaArgs[StagesUsed - 1][0] = CA_Texture0 + TexturesUsed - 1;
+				CurrentState->StageAlphaArgs[StagesUsed - 1][1] = CA_Previous;
 			}else{
-				CurrentState->StageAlphaArgs[StagesUsed * 2 - 2] = CA_Previous;
-				CurrentState->StageAlphaArgs[StagesUsed * 2 - 1] = CA_Texture0 + TexturesUsed - 1;
+				CurrentState->StageAlphaArgs[StagesUsed - 1][0] = CA_Previous;
+				CurrentState->StageAlphaArgs[StagesUsed - 1][1] = CA_Texture0 + TexturesUsed - 1;
 			}
 		}
 
@@ -792,7 +792,7 @@ bool FOpenGLRenderInterface::HandleCombinedMaterial(UMaterial* Material, INT& St
 			CurrentState->StageColorOps[StageIndex] = COP_Subtract;
 
 			if(!Swapped)
-				Exchange(CurrentState->StageColorArgs[StageIndex * 2], CurrentState->StageColorArgs[StageIndex * 2 + 1]);
+				Exchange(CurrentState->StageColorArgs[StageIndex][0], CurrentState->StageColorArgs[StageIndex][1]);
 
 			break;
 		case CO_AlphaBlend_With_Mask:
@@ -899,15 +899,15 @@ bool FOpenGLRenderInterface::SetTerrainMaterial(UTerrainMaterial* Terrain, FStri
 
 		UBitmapMaterial* BitmapMaterial = static_cast<UBitmapMaterial*>(Material);
 
-		CurrentState->StageTexWrapModes[TexturesUsed * 2] = TC_Wrap;
-		CurrentState->StageTexWrapModes[TexturesUsed * 2 + 1] = TC_Wrap;
+		CurrentState->StageTexWrapModes[TexturesUsed][0] = TC_Wrap;
+		CurrentState->StageTexWrapModes[TexturesUsed][1] = TC_Wrap;
 
 		SetBitmapTexture(BitmapMaterial, TexturesUsed);
 
-		CurrentState->StageColorArgs[StagesUsed * 2] = CA_Texture0 + TexturesUsed;
-		CurrentState->StageColorArgs[StagesUsed * 2 + 1] = CA_Diffuse;
+		CurrentState->StageColorArgs[StagesUsed][0] = CA_Texture0 + TexturesUsed;
+		CurrentState->StageColorArgs[StagesUsed][1] = CA_Diffuse;
 		CurrentState->StageColorOps[StagesUsed] = COP_Arg1; //COP_Modulate; TODO: Lighting
-		CurrentState->StageAlphaArgs[StagesUsed * 2] = CA_Texture0 + TexturesUsed;
+		CurrentState->StageAlphaArgs[StagesUsed][0] = CA_Texture0 + TexturesUsed;
 		CurrentState->StageAlphaOps[StagesUsed] = AOP_Arg1;
 
 		++StagesUsed;
@@ -917,10 +917,10 @@ bool FOpenGLRenderInterface::SetTerrainMaterial(UTerrainMaterial* Terrain, FStri
 
 		SetBitmapTexture(Terrain->Layers[0].AlphaWeight, TexturesUsed);
 
-		CurrentState->StageColorArgs[StagesUsed * 2] = CA_Previous;
+		CurrentState->StageColorArgs[StagesUsed][0] = CA_Previous;
 		CurrentState->StageColorOps[StagesUsed] = COP_Arg1;
-		CurrentState->StageAlphaArgs[StagesUsed * 2] = CA_Texture0 + TexturesUsed;
-		CurrentState->StageAlphaArgs[StagesUsed * 2 + 1] = CA_Previous;
+		CurrentState->StageAlphaArgs[StagesUsed][0] = CA_Texture0 + TexturesUsed;
+		CurrentState->StageAlphaArgs[StagesUsed][1] = CA_Previous;
 		CurrentState->StageAlphaOps[StagesUsed] = BitmapMaterial->IsTransparent() ? AOP_Modulate : AOP_Arg1;
 		CurrentState->StageTexCoordSources[StagesUsed] = TCS_Stream0;
 
@@ -967,15 +967,15 @@ bool FOpenGLRenderInterface::SetParticleMaterial(UParticleMaterial* ParticleMate
 		SetBitmapTexture(ParticleMaterial->BitmapMaterial, TexturesUsed);
 
 	if(!ParticleMaterial->BlendBetweenSubdivisions){
-		CurrentState->StageColorArgs[StagesUsed * 2] = CA_Texture0 + TexturesUsed;
-		CurrentState->StageAlphaArgs[StagesUsed * 2] = CA_Texture0 + TexturesUsed;
+		CurrentState->StageColorArgs[StagesUsed][0] = CA_Texture0 + TexturesUsed;
+		CurrentState->StageAlphaArgs[StagesUsed][0] = CA_Texture0 + TexturesUsed;
 
 		if(ParticleMaterial->UseTFactor){
-			CurrentState->StageColorArgs[StagesUsed * 2 + 1] = CA_Constant;
-			CurrentState->StageAlphaArgs[StagesUsed * 2 + 1] = CA_Constant;
+			CurrentState->StageColorArgs[StagesUsed][1] = CA_Constant;
+			CurrentState->StageAlphaArgs[StagesUsed][1] = CA_Constant;
 		}else{
-			CurrentState->StageColorArgs[StagesUsed * 2 + 1] = CA_Diffuse;
-			CurrentState->StageAlphaArgs[StagesUsed * 2 + 1] = CA_Diffuse;
+			CurrentState->StageColorArgs[StagesUsed][1] = CA_Diffuse;
+			CurrentState->StageAlphaArgs[StagesUsed][1] = CA_Diffuse;
 		}
 
 		if(ParticleMaterial->ParticleBlending != PTDS_Modulated){
@@ -989,22 +989,22 @@ bool FOpenGLRenderInterface::SetParticleMaterial(UParticleMaterial* ParticleMate
 		++TexturesUsed;
 		++StagesUsed;
 	}else{
-		CurrentState->StageColorArgs[StagesUsed * 2] = CA_Texture0 + TexturesUsed;
-		CurrentState->StageAlphaArgs[StagesUsed * 2] = CA_Texture0 + TexturesUsed;
+		CurrentState->StageColorArgs[StagesUsed][0] = CA_Texture0 + TexturesUsed;
+		CurrentState->StageAlphaArgs[StagesUsed][0] = CA_Texture0 + TexturesUsed;
 		CurrentState->StageColorOps[StagesUsed] = COP_Arg1;
 		CurrentState->StageAlphaOps[StagesUsed] = AOP_Arg1;
 		++StagesUsed;
-		CurrentState->StageColorArgs[StagesUsed * 2] = CA_Texture0 + TexturesUsed;
-		CurrentState->StageColorArgs[StagesUsed * 2 + 1] = CA_Previous;
-		CurrentState->StageAlphaArgs[StagesUsed * 2] = CA_Texture0 + TexturesUsed;
-		CurrentState->StageAlphaArgs[StagesUsed * 2 + 1] = CA_Previous;
+		CurrentState->StageColorArgs[StagesUsed][0] = CA_Texture0 + TexturesUsed;
+		CurrentState->StageColorArgs[StagesUsed][1] = CA_Previous;
+		CurrentState->StageAlphaArgs[StagesUsed][0] = CA_Texture0 + TexturesUsed;
+		CurrentState->StageAlphaArgs[StagesUsed][1] = CA_Previous;
 		CurrentState->StageColorOps[StagesUsed] = COP_AlphaBlend;
 		CurrentState->StageAlphaOps[StagesUsed] = AOP_Blend;
 		CurrentState->StageTexCoordSources[StagesUsed] = TCS_Stream1;
 		++StagesUsed;
-		CurrentState->StageColorArgs[StagesUsed * 2] = CA_Diffuse;
-		CurrentState->StageColorArgs[StagesUsed * 2 + 1] = CA_Previous;
-		CurrentState->StageAlphaArgs[StagesUsed * 2] = CA_Previous;
+		CurrentState->StageColorArgs[StagesUsed][0] = CA_Diffuse;
+		CurrentState->StageColorArgs[StagesUsed][1] = CA_Previous;
+		CurrentState->StageAlphaArgs[StagesUsed][0] = CA_Previous;
 		CurrentState->StageColorOps[StagesUsed] = COP_Modulate;
 		CurrentState->StageAlphaOps[StagesUsed] = AOP_Arg1;
 		++StagesUsed;

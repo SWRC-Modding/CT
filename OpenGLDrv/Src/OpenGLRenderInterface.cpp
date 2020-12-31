@@ -60,11 +60,14 @@ void FOpenGLRenderInterface::Exit(){
 	CurrentState->NumVertexStreams = 0;
 }
 
-void FOpenGLRenderInterface::UpdateShaderUniforms(){
-	// This is done here to avoid a possibly unnecessary matrix multiplication each time SetTransform is called
-	CurrentState->Uniforms.Transform = CurrentState->Uniforms.LocalToWorld *
-	                                   CurrentState->Uniforms.WorldToCamera *
-	                                   CurrentState->Uniforms.CameraToScreen;
+void FOpenGLRenderInterface::UpdateGlobalShaderUniforms(){
+	CurrentState->Uniforms.LocalToScreen = CurrentState->Uniforms.LocalToWorld *
+	                                       CurrentState->Uniforms.WorldToCamera *
+	                                       CurrentState->Uniforms.CameraToScreen;
+	CurrentState->Uniforms.WorldToLocal = CurrentState->Uniforms.LocalToWorld.Inverse();
+	CurrentState->Uniforms.WorldToScreen = CurrentState->Uniforms.WorldToCamera *
+	                                       CurrentState->Uniforms.CameraToScreen;
+	CurrentState->Uniforms.CameraToWorld = CurrentState->Uniforms.WorldToCamera.Inverse();
 
 	glNamedBufferSubData(GlobalUBO, 0, sizeof(FOpenGLGlobalUniforms), &CurrentState->Uniforms);
 
@@ -244,7 +247,7 @@ void FOpenGLRenderInterface::SetCullMode(ECullMode CullMode){
 void FOpenGLRenderInterface::SetAmbientLight(FColor Color){
 	NeedUniformUpdate = 1;
 	++CurrentState->UniformRevision;
-	CurrentState->Uniforms.AmbientLight = GLSL_vec4(Color);
+	//CurrentState->Uniforms.AmbientLightColor = GLSL_vec4(Color);
 }
 
 void FOpenGLRenderInterface::SetGlobalColor(FColor Color){
@@ -1221,7 +1224,7 @@ INT FOpenGLRenderInterface::SetDynamicIndexBuffer(FIndexBuffer* IndexBuffer, INT
 
 void FOpenGLRenderInterface::DrawPrimitive(EPrimitiveType PrimitiveType, INT FirstIndex, INT NumPrimitives, INT MinIndex, INT MaxIndex){
 	if(NeedUniformUpdate)
-		UpdateShaderUniforms();
+		UpdateGlobalShaderUniforms();
 
 	EnableZTest(1);
 

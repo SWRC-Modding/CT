@@ -334,54 +334,51 @@ void* FOpenGLTexture::ConvertTextureData(FTexture* Texture, ETextureFormat DestF
 	INT DestBufferSize = GetBytesPerPixel(DestFormat, NumPixels);
 	void* TextureData = Texture->GetRawTextureData(MipIndex);
 
-	if(DestFormat == SrcFormat && TextureData){
-		Result = TextureData;
+	if(TextureData){
+		Result = RenDev->GetScratchBuffer(DestBufferSize);
 	}else{
-		if(TextureData){
-			Result = RenDev->GetScratchBuffer(DestBufferSize);
-		}else{
-			TextureData = RenDev->GetScratchBuffer(SrcBufferSize + DestBufferSize);
-			Result = static_cast<BYTE*>(TextureData) + SrcBufferSize;
-			Texture->GetTextureData(MipIndex, TextureData, 0, SrcFormat);
-		}
+		TextureData = RenDev->GetScratchBuffer(SrcBufferSize + DestBufferSize);
+		Result = static_cast<BYTE*>(TextureData) + SrcBufferSize;
+		Texture->GetTextureData(MipIndex, TextureData, 0, SrcFormat);
+	}
 
-		if(DestFormat == TEXF_RGBA8){
-			if(SrcFormat == TEXF_P8){
-				UTexture* Tex = Texture->GetUTexture();
-				check(Tex && Tex->Palette);
-				const TArray<FColor>& Palette = Tex->Palette->Colors;
+	if(SrcFormat == DestFormat)
+		return TextureData;
 
-				for(INT i = 0; i < NumPixels; ++i)
-					static_cast<FColor*>(Result)[i] = Palette[static_cast<BYTE*>(TextureData)[i]];
-			}else if(SrcFormat == TEXF_RGB8){
-				for(INT i = 0; i < NumPixels; ++i){
-					BYTE* RGB = static_cast<BYTE*>(TextureData) + i;
-					static_cast<FColor*>(Result)[i] = FColor(RGB[0], RGB[1], RGB[2]);
-				}
-			}else if(SrcFormat == TEXF_RGBA8){
-				appMemcpy(Result, TextureData, SrcBufferSize);
-			}else if(SrcFormat == TEXF_L8){
-				for(INT i = 0; i < NumPixels; ++i){
-					BYTE Value = static_cast<BYTE*>(TextureData)[i];
-					static_cast<FColor*>(Result)[i] = FColor(Value, Value, Value);
-				}
-			}else if(SrcFormat == TEXF_G16){
-				for(INT i = 0; i < NumPixels; ++i){
-					BYTE Intensity = static_cast<_WORD*>(TextureData)[i] >> 8;
-					static_cast<FColor*>(Result)[i] = FColor(Intensity, Intensity, Intensity);
-				}
-			}else if(SrcFormat == TEXF_V8U8){
-				ConvertV8U8ToRGBA8(TextureData, Result, Width, Height);
-			}else if(SrcFormat == TEXF_L6V5U5){
-				ConvertL6V5U5ToRGBA8(TextureData, Result, Width, Height);
-			}else if(SrcFormat == TEXF_X8L8V8U8){
-				ConvertX8L8V8U8ToRGB8(TextureData, Result, Width, Height);
-			}else{
-				Result = NULL;
+	if(DestFormat == TEXF_RGBA8){
+		if(SrcFormat == TEXF_P8){
+			UTexture* Tex = Texture->GetUTexture();
+			check(Tex && Tex->Palette);
+			const TArray<FColor>& Palette = Tex->Palette->Colors;
+
+			for(INT i = 0; i < NumPixels; ++i)
+				static_cast<FColor*>(Result)[i] = Palette[static_cast<BYTE*>(TextureData)[i]];
+		}else if(SrcFormat == TEXF_RGB8){
+			for(INT i = 0; i < NumPixels; ++i){
+				BYTE* RGB = static_cast<BYTE*>(TextureData) + i * 3;
+				static_cast<FColor*>(Result)[i] = FColor(RGB[0], RGB[1], RGB[2]);
 			}
+		}else if(SrcFormat == TEXF_L8){
+			for(INT i = 0; i < NumPixels; ++i){
+				BYTE Value = static_cast<BYTE*>(TextureData)[i];
+				static_cast<FColor*>(Result)[i] = FColor(Value, Value, Value);
+			}
+		}else if(SrcFormat == TEXF_G16){
+			for(INT i = 0; i < NumPixels; ++i){
+				BYTE Intensity = static_cast<_WORD*>(TextureData)[i] >> 8;
+				static_cast<FColor*>(Result)[i] = FColor(Intensity, Intensity, Intensity);
+			}
+		}else if(SrcFormat == TEXF_V8U8){
+			ConvertV8U8ToRGBA8(TextureData, Result, Width, Height);
+		}else if(SrcFormat == TEXF_L6V5U5){
+			ConvertL6V5U5ToRGBA8(TextureData, Result, Width, Height);
+		}else if(SrcFormat == TEXF_X8L8V8U8){
+			ConvertX8L8V8U8ToRGB8(TextureData, Result, Width, Height);
 		}else{
 			Result = NULL;
 		}
+	}else{
+		Result = NULL;
 	}
 
 	if(!Result)

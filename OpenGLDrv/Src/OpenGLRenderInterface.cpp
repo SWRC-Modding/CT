@@ -339,7 +339,8 @@ void FOpenGLRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorStri
 		InitDefaultMaterialStageState(i);
 
 	CurrentState->UsingConstantColor = false;
-	CurrentState->UsingColorModifier = false;
+	CurrentState->ModifyColor = false;
+	CurrentState->ModifyFramebufferBlending = false;
 	CurrentState->NumStages = 0;
 	CurrentState->NumTextures = 0;
 	CurrentState->TexCoordCount = 2;
@@ -425,6 +426,17 @@ void FOpenGLRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorStri
 		CurrentState->NumStages = 1;
 	}
 
+	if(CurrentState->ModifyColor){
+		checkSlow(CurrentState->NumStages < MAX_SHADER_STAGES);
+		CurrentState->StageColorArgs[CurrentState->NumStages][0] = CA_Previous;
+		CurrentState->StageColorArgs[CurrentState->NumStages][1] = CA_Constant;
+		CurrentState->StageColorOps[CurrentState->NumStages] = COP_Modulate;
+		CurrentState->StageAlphaArgs[CurrentState->NumStages][0] = CA_Previous;
+		CurrentState->StageAlphaArgs[CurrentState->NumStages][1] = CA_Constant;
+		CurrentState->StageAlphaOps[CurrentState->NumStages] = AOP_Modulate;
+		++CurrentState->NumStages;
+	}
+
 	glUniform1i(SU_NumStages, CurrentState->NumStages);
 	glUniform1i(SU_TexCoordCount, CurrentState->TexCoordCount);
 	glUniform1iv(SU_StageTexCoordSources, ARRAY_COUNT(CurrentState->StageTexCoordSources), CurrentState->StageTexCoordSources);
@@ -467,34 +479,22 @@ void FOpenGLRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorStri
 		glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 		break;
 	case FB_Translucent:
-		// glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_COLOR);
 		glBlendFunc(GL_ONE, GL_ONE);
 		break;
 	case FB_Darken:
 		glBlendFunc(GL_ZERO, GL_ONE_MINUS_SRC_COLOR);
 		break;
 	case FB_Brighten:
-		// glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 		glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_COLOR);
 		break;
 	case FB_Invisible:
 		glBlendFunc(GL_ZERO, GL_ONE);
 		break;
 	case FB_ShadowBlend:
-		glBlendFunc(GL_DST_COLOR, GL_SRC_COLOR);
+		glBlendFunc(GL_ONE_MINUS_DST_COLOR, GL_ONE);
 		break;
 	case FB_MAX:
 		glBlendFunc(CurrentState->SrcBlend, CurrentState->DstBlend);
-	}
-
-	if(CurrentState->UsingColorModifier){
-		checkSlow(CurrentState->NumStages < MAX_SHADER_STAGES);
-		CurrentState->StageColorArgs[CurrentState->NumStages][0] = CA_Previous;
-		CurrentState->StageColorArgs[CurrentState->NumStages][1] = CA_Constant;
-		CurrentState->StageColorOps[CurrentState->NumStages] = COP_Modulate;
-		CurrentState->StageAlphaArgs[CurrentState->NumStages][0] = CA_Previous;
-		CurrentState->StageAlphaArgs[CurrentState->NumStages][1] = CA_Constant;
-		CurrentState->StageAlphaOps[CurrentState->NumStages] = AOP_Modulate;
 	}
 
 	unguard;
@@ -532,13 +532,15 @@ bool FOpenGLRenderInterface::SetSimpleMaterial(UMaterial* Material, FString* Err
 	INT TexturesUsed = 0;
 
 	// If the material is a simple texture, use it to get the blending options
-	if(Material->IsA<UTexture>()){
+	if(!CurrentState->ModifyFramebufferBlending && Material->IsA<UTexture>()){
 		UTexture* Texture = static_cast<UTexture*>(Material);
 
 		if(Texture->bMasked){
+			CurrentState->ModifyFramebufferBlending = true;
 			CurrentState->AlphaRef = 0.5f;
 			CurrentState->FramebufferBlending = FB_AlphaBlend;
 		}else if(Texture->bAlphaTexture){
+			CurrentState->ModifyFramebufferBlending = true;
 			CurrentState->AlphaRef = 0.0f;
 			CurrentState->FramebufferBlending = FB_AlphaBlend;
 		}
@@ -962,6 +964,8 @@ bool FOpenGLRenderInterface::SetParticleMaterial(UParticleMaterial* ParticleMate
 	case PTDS_Brighten:
 		CurrentState->FramebufferBlending = FB_Brighten;
 	}
+
+	CurrentState->ModifyFramebufferBlending = true;
 
 	if(ParticleMaterial->BitmapMaterial)
 		SetBitmapTexture(ParticleMaterial->BitmapMaterial, TexturesUsed);

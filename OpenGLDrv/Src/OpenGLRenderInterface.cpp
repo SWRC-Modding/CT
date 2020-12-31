@@ -386,17 +386,17 @@ void FOpenGLRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorStri
 		Result = SetTerrainMaterial(static_cast<UTerrainMaterial*>(Material), ErrorString, ErrorMaterial);
 	}else if(CheckMaterial<UParticleMaterial>(&Material, 0)){
 		Result = SetParticleMaterial(static_cast<UParticleMaterial*>(Material), ErrorString, ErrorMaterial);
-	}else if(CheckMaterial<UProjectorMultiMaterial>(&Material, -1)){
+	}else if(CheckMaterial<UProjectorMultiMaterial>(&Material, 0)){
 		CurrentState->AlphaRef = 0.5f;
 		CurrentState->FramebufferBlending = FB_Modulate;
 		Result = SetSimpleMaterial(static_cast<UProjectorMultiMaterial*>(Material)->BaseMaterial, ErrorString, ErrorMaterial);
 		CurrentState->bZWrite = false;
-	}else if(CheckMaterial<UProjectorMaterial>(&Material, -1)){
+	}else if(CheckMaterial<UProjectorMaterial>(&Material, 0)){
 		CurrentState->AlphaRef = 0.5f;
 		CurrentState->FramebufferBlending = FB_Modulate;
 		Result = SetSimpleMaterial(static_cast<UProjectorMaterial*>(Material)->Projected, ErrorString, ErrorMaterial);
 		CurrentState->bZWrite = false;
-	}else if(CheckMaterial<UHardwareShaderWrapper>(&Material, -1)){
+	}else if(CheckMaterial<UHardwareShaderWrapper>(&Material, 0)){
 		UHardwareShaderWrapper* HardwareShaderWrapper = static_cast<UHardwareShaderWrapper*>(Material);
 		UHardwareShader* HardwareShader = HardwareShaderWrapper->ShaderImplementation;
 
@@ -410,7 +410,7 @@ void FOpenGLRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorStri
 
 		if(HardwareShader->AlphaTest)
 			CurrentState->AlphaRef = HardwareShader->AlphaRef / 255.0f;
-	}else if(CheckMaterial<UHardwareShader>(&Material, -1)){
+	}else if(CheckMaterial<UHardwareShader>(&Material, 0)){
 		UHardwareShader* HardwareShader = static_cast<UHardwareShader*>(Material);
 
 		RenDev->GetShader(HardwareShader);

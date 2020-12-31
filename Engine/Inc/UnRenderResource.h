@@ -354,6 +354,7 @@ public:
 class FCubemap : public FBaseTexture{
 public:
 	virtual FCubemap* GetCubemapInterface(){ return this; }
+	virtual void vtpad(){}
 	virtual FTexture* GetFace(INT Face) = 0;
 };
 

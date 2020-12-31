@@ -92,5 +92,8 @@ public:
 	GLuint DepthStencilAttachment;
 
 private:
+	static FSolidColorTexture ErrorTexture;
+
+	void UploadTextureData(GLenum Target, ETextureFormat Format, void* Data, INT Width, INT Height, INT NumMips, INT CubemapFace = -1);
 	void* ConvertTextureData(FTexture* Texture, ETextureFormat DestFormat, INT Width, INT Height, INT MipIndex);
 };

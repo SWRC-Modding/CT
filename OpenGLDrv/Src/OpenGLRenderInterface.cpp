@@ -440,6 +440,25 @@ void FOpenGLRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorStri
 		++CurrentState->NumStages;
 	}
 
+	// Check for cube maps and set the modifier bit
+	for(INT i = 0; i < MAX_TEXTURES; ++i){
+		if(Cubemaps[i]){
+			for(INT j = 0; j < MAX_SHADER_STAGES; ++j){
+				if(CurrentState->StageColorArgs[j][0] == CA_Texture0 + i)
+					CurrentState->StageColorArgs[j][0] |= CM_CubeMap;
+
+				if(CurrentState->StageColorArgs[j][1] == CA_Texture0 + i)
+					CurrentState->StageColorArgs[j][1] |= CM_CubeMap;
+
+				if(CurrentState->StageAlphaArgs[j][0] == CA_Texture0 + i)
+					CurrentState->StageAlphaArgs[j][0] |= CM_CubeMap;
+
+				if(CurrentState->StageAlphaArgs[j][1] == CA_Texture0 + i)
+					CurrentState->StageAlphaArgs[j][1] |= CM_CubeMap;
+			}
+		}
+	}
+
 	glUniform1i(SU_NumStages, CurrentState->NumStages);
 	glUniform1i(SU_TexCoordCount, CurrentState->TexCoordCount);
 	glUniform1iv(SU_StageTexCoordSources, ARRAY_COUNT(CurrentState->StageTexCoordSources), CurrentState->StageTexCoordSources);
@@ -454,6 +473,7 @@ void FOpenGLRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorStri
 	for(INT i = 0; i < CurrentState->NumTextures; ++i){
 		glSamplerParameteri(Samplers[i], GL_TEXTURE_WRAP_S, GetTextureWrapMode(CurrentState->StageTexWrapModes[i][0]));
 		glSamplerParameteri(Samplers[i], GL_TEXTURE_WRAP_T, GetTextureWrapMode(CurrentState->StageTexWrapModes[i][1]));
+		glSamplerParameteri(Samplers[i], GL_TEXTURE_WRAP_R, GetTextureWrapMode(CurrentState->StageTexWrapModes[i][1]));
 	}
 
 	if(ZTest != CurrentState->bZTest)
@@ -518,7 +538,13 @@ void FOpenGLRenderInterface::SetBitmapTexture(UBitmapMaterial* Bitmap, INT Textu
 	if(GLTexture->Revision != Texture->GetRevision())
 		GLTexture->Cache(Texture);
 
-	GLTexture->BindTexture(TextureUnit);
+	if(Texture->GetCubemapInterface() == NULL){
+		GLTexture->BindTexture(TextureUnit);
+		Cubemaps[TextureUnit] = false;
+	}else{
+		GLTexture->BindTexture(MAX_TEXTURES + TextureUnit);
+		Cubemaps[TextureUnit] = true;
+	}
 
 	if(CurrentState->StageTexWrapModes[TextureUnit][0] < 0)
 		CurrentState->StageTexWrapModes[TextureUnit][0] = Bitmap->UClampMode;

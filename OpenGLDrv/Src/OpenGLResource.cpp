@@ -221,6 +221,8 @@ void FOpenGLVertexStream::Bind(GLuint BindingIndex) const{
 
 // FOpenGLTexture
 
+FSolidColorTexture FOpenGLTexture::ErrorTexture(FColor(255, 0, 255));
+
 FOpenGLTexture::FOpenGLTexture(UOpenGLRenderDevice* InRenDev, QWORD InCacheId) : FOpenGLResource(InRenDev, InCacheId),
                                                                                  Width(0),
                                                                                  Height(0),
@@ -236,45 +238,33 @@ void FOpenGLTexture::Cache(FBaseTexture* BaseTexture){
 	Free();
 
 	FTexture* Texture = BaseTexture->GetTextureInterface();
+	FCubemap* Cubemap = BaseTexture->GetCubemapInterface();
 	FRenderTarget* RenderTarget = BaseTexture->GetRenderTargetInterface();
+	ETextureFormat SrcFormat = BaseTexture->GetFormat();
+	ETextureFormat DestFormat = IsDXTC(SrcFormat) ? SrcFormat : TEXF_RGBA8;
 
 	Width = BaseTexture->GetWidth();
 	Height = BaseTexture->GetHeight();
 
-	if(Texture){
-		if(Width == 0 || Height == 0){
-			static FSolidColorTexture ErrorTexture(FColor(255, 0, 255));
+	if(Cubemap){
+		for(INT FaceIndex = 0; FaceIndex < 6; ++FaceIndex){
+			FTexture* Face = Cubemap->GetFace(FaceIndex);
 
-			Texture = &ErrorTexture;
-			Width = Texture->GetWidth();
-			Height = Texture->GetHeight();
+			if(!Face)
+				Face = &ErrorTexture;
+
+			void* Data = ConvertTextureData(Face, DestFormat, Width, Height, 0);
+
+			UploadTextureData(GL_TEXTURE_CUBE_MAP, DestFormat, Data, Width, Height, Face->GetNumMips(), FaceIndex);
+			Face->UnloadRawTextureData(0);
 		}
 
-		glCreateTextures(GL_TEXTURE_2D, 1, &TextureHandle);
+		if(TextureHandle)
+			glGenerateTextureMipmap(TextureHandle);
+	}else if(Texture){
+		void* Data = ConvertTextureData(Texture, DestFormat, Width, Height, 0);
 
-		ETextureFormat SrcFormat = Texture->GetFormat();
-
-		if(IsDXTC(SrcFormat)){
-			GLenum GLFormat;
-
-			if(SrcFormat == TEXF_DXT1)
-				GLFormat = GL_COMPRESSED_RGBA_S3TC_DXT1_EXT;
-			else if(SrcFormat == TEXF_DXT3)
-				GLFormat = GL_COMPRESSED_RGBA_S3TC_DXT3_EXT;
-			else
-				GLFormat = GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
-
-			void* Data = Texture->GetRawTextureData(0);
-
-			checkSlow(Data);
-
-			glCompressedTextureImage2DEXT(TextureHandle, GL_TEXTURE_2D, 0, GLFormat, Width, Height, 0, GetBytesPerPixel(SrcFormat, Width * Height), Data);
-		}else{
-			void* Data = ConvertTextureData(Texture, TEXF_RGBA8, Width, Height, 0);
-
-			glTextureStorage2D(TextureHandle, Texture->GetNumMips(), GL_RGBA8, Width, Height);
-			glTextureSubImage2D(TextureHandle, 0, 0, 0, Width, Height, GL_BGRA, GL_UNSIGNED_BYTE, Data);
-		}
+		UploadTextureData(GL_TEXTURE_2D, DestFormat, Data, Width, Height, Texture->GetNumMips());
 
 		glGenerateTextureMipmap(TextureHandle);
 
@@ -322,8 +312,72 @@ void FOpenGLTexture::BindTexture(GLuint TextureUnit){
 }
 
 void FOpenGLTexture::BindRenderTarget(){
-	checkSlow(FBO);
 	glBindFramebuffer(GL_FRAMEBUFFER, FBO);
+}
+
+void FOpenGLTexture::UploadTextureData(GLenum Target, ETextureFormat Format, void* Data, INT Width, INT Height, INT NumMips, INT CubemapFace){
+	if(!Data || Width == 0 || Height == 0){
+		Format = TEXF_RGBA8;
+		Data = ErrorTexture.GetRawTextureData(0);
+		Width = ErrorTexture.GetWidth();
+		Height = ErrorTexture.GetHeight();
+		NumMips = 1;
+	}
+
+	if(IsDXTC(Format)){
+		GLenum GLFormat;
+
+		if(Format == TEXF_DXT1)
+			GLFormat = GL_COMPRESSED_RGBA_S3TC_DXT1_EXT;
+		else if(Format == TEXF_DXT3)
+			GLFormat = GL_COMPRESSED_RGBA_S3TC_DXT3_EXT;
+		else
+			GLFormat = GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
+
+		if(Target == GL_TEXTURE_CUBE_MAP){
+			checkSlow(CubemapFace >= 0 && CubemapFace < 6);
+
+			if(!TextureHandle)
+				glCreateTextures(GL_TEXTURE_CUBE_MAP, 1, &TextureHandle);
+
+			Target = GL_TEXTURE_CUBE_MAP_POSITIVE_X + CubemapFace;
+		}else{
+			checkSlow(!TextureHandle);
+			glCreateTextures(GL_TEXTURE_2D, 1, &TextureHandle);
+		}
+
+		glCompressedTextureImage2DEXT(TextureHandle, Target, 0, GLFormat, Width, Height, 0, GetBytesPerPixel(Format, Width * Height), Data);
+	}else{
+		GLenum GLFormat = GL_NONE;
+		GLenum GLType = GL_NONE;
+
+		if(Format == TEXF_RGBA8){
+			GLFormat = GL_BGRA;
+			GLType = GL_UNSIGNED_BYTE;
+		}else{
+			appErrorf("Invalid texture format '%i'", Format);
+		}
+
+		if(Target == GL_TEXTURE_2D){
+			checkSlow(!TextureHandle);
+			glCreateTextures(GL_TEXTURE_2D, 1, &TextureHandle);
+
+			glTextureStorage2D(TextureHandle, NumMips, GL_RGBA8, Width, Height);
+
+			glTextureSubImage2D(TextureHandle, 0, 0, 0, Width, Height, GLFormat, GLType, Data);
+
+		}else if(Target == GL_TEXTURE_CUBE_MAP){
+			if(!TextureHandle){
+				glCreateTextures(GL_TEXTURE_CUBE_MAP, 1, &TextureHandle);
+				glTextureStorage2D(TextureHandle, NumMips, GL_RGBA8, Width, Height);
+			}
+
+			glTextureSubImage3D(TextureHandle, 0, 0, 0, CubemapFace, Width, Height, 1, GLFormat, GLType, Data);
+
+		}else{
+			appErrorf("Invalid texture target '%x'", Target);
+		}
+	}
 }
 
 void* FOpenGLTexture::ConvertTextureData(FTexture* Texture, ETextureFormat DestFormat, INT Width, INT Height, INT MipIndex){
@@ -380,9 +434,6 @@ void* FOpenGLTexture::ConvertTextureData(FTexture* Texture, ETextureFormat DestF
 	}else{
 		Result = NULL;
 	}
-
-	if(!Result)
-		appErrorf("Invalid texture format conversion (%i -> %i)", SrcFormat, DestFormat);
 
 	return Result;
 }

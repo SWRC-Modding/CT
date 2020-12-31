@@ -37,7 +37,8 @@ enum EColorArg{
 };
 
 enum EColorModifier{
-	CM_Invert = 1 << 31
+	CM_CubeMap = 1 << 30,
+	CM_Invert  = 1 << 31
 };
 
 enum EColorOp{
@@ -124,7 +125,7 @@ public:
 		INT                   NumTextures;
 		INT                   TexCoordCount;
 		INT                   StageTexWrapModes[MAX_TEXTURES][2];      // ETexClampMode for U and V
-		INT                   StageTexCoordSources[MAX_SHADER_STAGES]; // TODO: Support generated texture coordinates
+		INT                   StageTexCoordSources[MAX_SHADER_STAGES];
 		FMatrix               StageTexMatrices[MAX_SHADER_STAGES];
 		INT                   StageColorArgs[MAX_SHADER_STAGES][2];    // EColorArg for Arg1 and Arg2
 		INT                   StageColorOps[MAX_SHADER_STAGES];        // EColorOp
@@ -151,6 +152,7 @@ public:
 	bool                      NeedUniformUpdate;
 	unsigned int              GlobalUBO;
 
+	bool                      Cubemaps[MAX_TEXTURES]; // Whether the texture at a specific texture unit is a cubemap or not
 	unsigned int              Samplers[MAX_TEXTURES];
 
 	FStreamDeclaration        VertexStreamDeclarations[MAX_VERTEX_STREAMS];

@@ -159,7 +159,7 @@ public:
 
 	void Init();
 	void Exit();
-	void UpdateShaderUniforms();
+	void UpdateGlobalShaderUniforms();
 
 	// Overrides
 	virtual void PushState(INT Flags = 0);
@@ -243,18 +243,29 @@ private:
 					UTexModifier* TexModifier = static_cast<UTexModifier*>(Modifier);
 					FMatrix* Matrix = TexModifier->GetMatrix(GEngineTime);
 
-					if(Matrix)
-						*StageTexMatrix *= *Matrix;
-
 					if(TexModifier->TexCoordSource != TCS_NoChange){
 						*StageTexCoordSrc = TexModifier->TexCoordSource;
 
-						// TODO: Support generated texture coordinates
-						if(*StageTexCoordSrc >= MAX_TEXTURES)
-							*StageTexCoordSrc = 0;
+						switch(TexModifier->TexCoordSource){
+						case TCS_CameraCoords:
+							*StageTexMatrix *= CurrentState->Uniforms.WorldToCamera.Transpose();
+							break;
+						case TCS_CubeCameraSpaceReflection:
+							{
+								FMatrix Tmp = CurrentState->Uniforms.WorldToCamera;
+								Tmp.M[3][0] = 0.0f;
+								Tmp.M[3][1] = 0.0f;
+								Tmp.M[3][2] = 0.0f;
+								Tmp.M[3][3] = 1.0f;
+								*StageTexMatrix *= Tmp;
+							}
+						}
 
 						CurrentState->TexCoordCount = TexModifier->TexCoordCount + 2;
 					}
+
+					if(Matrix)
+						*StageTexMatrix *= *Matrix;
 
 					if(TextureIndex > 0){
 						if(TexModifier->UClampMode != TCO_UseTextureMode)

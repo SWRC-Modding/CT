@@ -133,6 +133,12 @@ public:
 		INT                   StageAlphaOps[MAX_SHADER_STAGES];        // EAlphaOp
 		FPlane                ConstantColor;
 
+		// Light
+
+		bool                  UseDynamicLighting;
+		bool                  UseStaticLighting;
+		FOpenGLTexture*       Lightmap;
+
 		// Blending
 
 		BYTE                  FramebufferBlending; // EFrameBufferBlending
@@ -173,8 +179,8 @@ public:
 	virtual void PopHit(INT Count, UBOOL Force){}
 	virtual void SetCullMode(ECullMode CullMode);
 	virtual void SetAmbientLight(FColor Color);
-	virtual void EnableLighting(UBOOL UseDynamic, UBOOL UseStatic = 1, UBOOL Modulate2X = 0, FBaseTexture* UseLightmap = NULL, UBOOL LightingOnly = 0, const FSphere& LitSphere = FSphere(FVector(0, 0, 0), 0), int = 0){}
-	virtual void SetLight(INT LightIndex, FDynamicLight* Light, FLOAT Scale = 1.0f){}
+	virtual void EnableLighting(UBOOL UseDynamic, UBOOL UseStatic = 1, UBOOL Modulate2X = 0, FBaseTexture* UseLightmap = NULL, UBOOL LightingOnly = 0, const FSphere& LitSphere = FSphere(FVector(0, 0, 0), 0), int = 0);
+	virtual void SetLight(INT LightIndex, FDynamicLight* Light, FLOAT Scale = 1.0f);
 	virtual void SetNPatchTesselation(FLOAT Tesselation){}
 	virtual void SetDistanceFog(UBOOL Enable, FLOAT FogStart, FLOAT FogEnd, FColor Color){}
 	virtual void SetGlobalColor(FColor Color);

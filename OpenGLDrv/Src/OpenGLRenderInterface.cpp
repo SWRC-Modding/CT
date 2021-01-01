@@ -247,7 +247,29 @@ void FOpenGLRenderInterface::SetCullMode(ECullMode CullMode){
 void FOpenGLRenderInterface::SetAmbientLight(FColor Color){
 	NeedUniformUpdate = 1;
 	++CurrentState->UniformRevision;
-	//CurrentState->Uniforms.AmbientLightColor = GLSL_vec4(Color);
+	CurrentState->Uniforms.AmbientLightColor = Color;
+}
+
+void FOpenGLRenderInterface::EnableLighting(UBOOL UseDynamic, UBOOL UseStatic, UBOOL Modulate2X, FBaseTexture* UseLightmap, UBOOL LightingOnly, const FSphere& LitSphere, int){
+	CurrentState->UseDynamicLighting = UseDynamic != 0;
+	CurrentState->UseStaticLighting = UseStatic != 0;
+
+	if(UseLightmap){
+		QWORD CacheId = UseLightmap->CacheId;
+		FOpenGLTexture* Lightmap = static_cast<FOpenGLTexture*>(RenDev->GetCachedResource(CacheId));
+
+		if(!Lightmap)
+			Lightmap = new FOpenGLTexture(RenDev, CacheId);
+
+		if(Lightmap->Revision != UseLightmap->GetRevision())
+			Lightmap->Cache(UseLightmap);
+
+		CurrentState->Lightmap = Lightmap;
+	}
+}
+
+void FOpenGLRenderInterface::SetLight(INT LightIndex, FDynamicLight* Light, FLOAT Scale){
+
 }
 
 void FOpenGLRenderInterface::SetGlobalColor(FColor Color){
@@ -436,6 +458,29 @@ void FOpenGLRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorStri
 		CurrentState->StageColorOps[CurrentState->NumStages] = COP_Modulate;
 		CurrentState->StageAlphaArgs[CurrentState->NumStages][0] = CA_Previous;
 		CurrentState->StageAlphaArgs[CurrentState->NumStages][1] = CA_Constant;
+		CurrentState->StageAlphaOps[CurrentState->NumStages] = AOP_Modulate;
+		++CurrentState->NumStages;
+	}
+
+	if(CurrentState->Lightmap){
+		checkSlow(CurrentState->NumStages < MAX_SHADER_STAGES);
+		checkSlow(CurrentState->NumTextures < MAX_TEXTURES);
+		CurrentState->StageColorArgs[CurrentState->NumStages][0] = CA_Previous;
+		CurrentState->StageColorArgs[CurrentState->NumStages][1] = CA_Texture0 + CurrentState->NumTextures;
+		CurrentState->StageColorOps[CurrentState->NumStages] = COP_Modulate;
+		CurrentState->StageAlphaArgs[CurrentState->NumStages][0] = CA_Previous;
+		CurrentState->StageAlphaOps[CurrentState->NumStages] = AOP_Arg1;
+		CurrentState->StageTexCoordSources[CurrentState->NumStages] = TCS_Stream1;
+		CurrentState->Lightmap->BindTexture(CurrentState->NumTextures);
+		++CurrentState->NumStages;
+		++CurrentState->NumTextures;
+	}else if(CurrentState->UseStaticLighting){
+		checkSlow(CurrentState->NumStages < MAX_SHADER_STAGES);
+		CurrentState->StageColorArgs[CurrentState->NumStages][0] = CA_Previous;
+		CurrentState->StageColorArgs[CurrentState->NumStages][1] = CA_Diffuse;
+		CurrentState->StageColorOps[CurrentState->NumStages] = COP_Modulate;
+		CurrentState->StageAlphaArgs[CurrentState->NumStages][0] = CA_Previous;
+		CurrentState->StageAlphaArgs[CurrentState->NumStages][1] = CA_Diffuse;
 		CurrentState->StageAlphaOps[CurrentState->NumStages] = AOP_Modulate;
 		++CurrentState->NumStages;
 	}

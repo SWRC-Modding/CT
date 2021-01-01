@@ -78,6 +78,41 @@ public:
 };
 
 //
+// FDynamicLight
+//
+
+class ENGINE_API FDynamicLight{
+public:
+	AActor* Actor;
+	INT     Revision;
+
+	FPlane  Color;
+	FVector Position;
+	FVector Direction;
+	FLOAT   Radius;
+
+	UBOOL   Dynamic;
+	UBOOL   Changed;
+	INT     SortKey;
+
+	INT     Padding[2]; // PADDING!!!
+
+	FLOAT   Alpha;
+
+	// Constructor
+	FDynamicLight(AActor* InActor = NULL);
+
+	// Update - Calculates render data for the light.
+	void Update();
+
+	// SampleIntensity
+	FLOAT SampleIntensity(const FVector& SamplePosition, const FVector& SampleNormal, bool);
+
+	// SampleLight
+	FColor SampleLight(const FVector& SamplePosition, const FVector& SampleNormal);
+};
+
+//
 // FLevelSceneNode
 //
 class ENGINE_API FLevelSceneNode : public FSceneNode{

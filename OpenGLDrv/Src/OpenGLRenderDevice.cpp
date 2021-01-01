@@ -10,9 +10,7 @@
 IMPLEMENT_CLASS(UOpenGLRenderDevice)
 
 UOpenGLRenderDevice::UOpenGLRenderDevice() : RenderInterface(this),
-                                             ScreenRenderTarget(0, 0, TEXF_RGBA8, false, true){
-	LoadShaders();
-}
+                                             ScreenRenderTarget(0, 0, TEXF_RGBA8, false, true){}
 
 void UOpenGLRenderDevice::StaticConstructor(){
 	SupportsCubemaps = 1;
@@ -675,7 +673,7 @@ void UOpenGLRenderDevice::LoadShader(FShaderGLSL* Shader){
 	FStringTemp ShaderText(0);
 	FFilename Filename = ShaderDir * Shader->GetName() + VERTEX_SHADER_FILE_EXTENSION;
 
-	GFileManager->MakeDirectory(*Filename.GetPath(), 1);
+	GFileManager->MakeDirectory(*(Filename.GetPath() + "\\"), 1);
 
 	if(GFileManager->FileSize(*Filename) > 0 && appLoadFileToString(ShaderText, *Filename))
 		Shader->SetVertexShaderText(ShaderText);
@@ -684,7 +682,7 @@ void UOpenGLRenderDevice::LoadShader(FShaderGLSL* Shader){
 
 	Filename = ShaderDir * Shader->GetName() + FRAGMENT_SHADER_FILE_EXTENSION;
 
-	GFileManager->MakeDirectory(*Filename.GetPath(), 1);
+	GFileManager->MakeDirectory(*(Filename.GetPath() + "\\"), 1);
 
 	if(GFileManager->FileSize(*Filename) > 0 && appLoadFileToString(ShaderText, *Filename))
 		Shader->SetFragmentShaderText(ShaderText);

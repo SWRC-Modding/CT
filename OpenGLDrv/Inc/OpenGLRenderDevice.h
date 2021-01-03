@@ -113,5 +113,11 @@ private:
 	FOpenGLIndexBuffer* GetDynamicIndexBuffer(INT IndexSize);
 	FOpenGLVertexStream* GetDynamicVertexStream();
 
-	void LoadShader(FShaderGLSL* Shader);
+	bool LoadVertexShader(FShaderGLSL* Shader);
+	bool LoadFragmentShader(FShaderGLSL* Shader);
+	void SaveVertexShader(FShaderGLSL* Shader);
+	void SaveFragmentShader(FShaderGLSL* Shader);
+
+	FStringTemp MakeShaderFilename(FShaderGLSL* Shader, const TCHAR* Extension);
+	void SaveShaderText(const FFilename& Filename, const FString& Text);
 };

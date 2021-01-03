@@ -94,7 +94,23 @@ void FOpenGLRenderInterface::PopState(INT Flags){
 	--CurrentState;
 
 	check(CurrentState >= &SavedStates[0]);
+#if 1
+	if((Flags & 1) == 0){
+		if((Flags & 2) == 0 && CurrentState->RenderTarget != PoppedState->RenderTarget){
+			if(CurrentState->RenderTarget)
+				CurrentState->RenderTarget->BindRenderTarget();
+			else
+				SetRenderTarget(NULL, false);
+		}
 
+		if(CurrentState->ViewportX != PoppedState->ViewportX ||
+		   CurrentState->ViewportY != PoppedState->ViewportY ||
+		   CurrentState->ViewportWidth != PoppedState->ViewportWidth ||
+		   CurrentState->ViewportHeight != PoppedState->ViewportHeight){
+			SetViewport(CurrentState->ViewportX, CurrentState->ViewportY, CurrentState->ViewportWidth, CurrentState->ViewportHeight);
+		}
+	}
+#else
 	if(CurrentState->RenderTarget != PoppedState->RenderTarget){
 		if(CurrentState->RenderTarget)
 			CurrentState->RenderTarget->BindRenderTarget();
@@ -108,6 +124,7 @@ void FOpenGLRenderInterface::PopState(INT Flags){
 	   CurrentState->ViewportHeight != PoppedState->ViewportHeight){
 		SetViewport(CurrentState->ViewportX, CurrentState->ViewportY, CurrentState->ViewportWidth, CurrentState->ViewportHeight);
 	}
+#endif
 
 	if(CurrentState->Shader != PoppedState->Shader)
 		CurrentState->Shader->Bind();
@@ -160,7 +177,7 @@ void FOpenGLRenderInterface::PopState(INT Flags){
 	if(CurrentState->ZBias != PoppedState->ZBias)
 		SetZBias(CurrentState->ZBias);
 
-	NeedUniformUpdate = CurrentState->UniformRevision != PoppedState->UniformRevision;
+	NeedUniformUpdate = true;// CurrentState->UniformRevision != PoppedState->UniformRevision;
 
 	unguard;
 }
@@ -245,36 +262,99 @@ void FOpenGLRenderInterface::SetCullMode(ECullMode CullMode){
 }
 
 void FOpenGLRenderInterface::SetAmbientLight(FColor Color){
-	NeedUniformUpdate = 1;
+	NeedUniformUpdate = true;
 	++CurrentState->UniformRevision;
 	CurrentState->Uniforms.AmbientLightColor = Color;
 }
 
-void FOpenGLRenderInterface::EnableLighting(UBOOL UseDynamic, UBOOL UseStatic, UBOOL Modulate2X, FBaseTexture* UseLightmap, UBOOL LightingOnly, const FSphere& LitSphere, int){
+void FOpenGLRenderInterface::EnableLighting(UBOOL UseDynamic, UBOOL UseStatic, UBOOL Modulate2X, FBaseTexture* Lightmap, UBOOL LightingOnly, const FSphere& LitSphere, int){
 	CurrentState->UseDynamicLighting = UseDynamic != 0;
 	CurrentState->UseStaticLighting = UseStatic != 0;
-
-	if(UseLightmap){
-		QWORD CacheId = UseLightmap->CacheId;
-		FOpenGLTexture* Lightmap = static_cast<FOpenGLTexture*>(RenDev->GetCachedResource(CacheId));
-
-		if(!Lightmap)
-			Lightmap = new FOpenGLTexture(RenDev, CacheId);
-
-		if(Lightmap->Revision != UseLightmap->GetRevision())
-			Lightmap->Cache(UseLightmap);
-
-		CurrentState->Lightmap = Lightmap;
-	}
+	CurrentState->LightingModulate2X = Modulate2X != 0;
+	CurrentState->LitSphere = LitSphere;
+	CurrentState->Lightmap = Lightmap;
 }
 
 void FOpenGLRenderInterface::SetLight(INT LightIndex, FDynamicLight* Light, FLOAT Scale){
+	checkSlow(LightIndex <= MAX_LIGHTS);
 
+	if(Light){
+		FOpenGLGlobalUniforms::Light* ShaderLight = &CurrentState->Uniforms.Lights[LightIndex];
+
+		if(Light->Actor && Light->Actor->LightEffect == LE_Sunlight){
+			ShaderLight->Type = 0; // Directional light
+			ShaderLight->Direction = -Light->Direction;
+			ShaderLight->Color.X = Light->Color.X * 1.75f * Light->Alpha * Scale;
+			ShaderLight->Color.Y = Light->Color.Y * 1.75f * Light->Alpha * Scale;
+			ShaderLight->Color.Z = Light->Color.Z * 1.75f * Light->Alpha * Scale;
+		}else if(Light->Actor && Light->Actor->LightEffect == LE_QuadraticNonIncidence || CurrentState->LitSphere.W == -1.0f){
+			ShaderLight->Type = 1; // Point light
+			ShaderLight->Position = Light->Position;
+			ShaderLight->Radius = Light->Radius;
+			ShaderLight->InvRadius = 1.0f / Light->Radius;
+			ShaderLight->Color.X = Light->Color.X * Light->Alpha * Scale;
+			ShaderLight->Color.Y = Light->Color.Y * Light->Alpha * Scale;
+			ShaderLight->Color.Z = Light->Color.Z * Light->Alpha * Scale;
+		}else{
+			ShaderLight->Position = Light->Position;
+			ShaderLight->Color.X = Light->Color.X * Light->Alpha * Scale;
+			ShaderLight->Color.Y = Light->Color.Y * Light->Alpha * Scale;
+			ShaderLight->Color.Z = Light->Color.Z * Light->Alpha * Scale;
+
+			if(Light->Actor && Light->Actor->LightCone != 0){
+				ShaderLight->Type = 1; // Spotlight
+				ShaderLight->Direction = -Light->Direction;
+			}else{
+				ShaderLight->Type = 1; // Point light
+				ShaderLight->Radius = Light->Radius;
+				ShaderLight->InvRadius = 1.0f / Light->Radius;
+			}
+		}
+
+		if(CurrentState->LightingModulate2X){
+			ShaderLight->Color.X *= 0.5f;
+			ShaderLight->Color.Y *= 0.5f;
+			ShaderLight->Color.Z *= 0.5f;
+		}
+
+		ShaderLight->Color.W = 1.0f;
+
+		if(LightIndex >= CurrentState->Uniforms.NumLights)
+			CurrentState->Uniforms.NumLights = LightIndex + 1;
+	}else{
+		if(LightIndex < CurrentState->Uniforms.NumLights)
+			CurrentState->Uniforms.NumLights = LightIndex;
+	}
+
+	++CurrentState->UniformRevision;
+	NeedUniformUpdate = true;
 }
 
-void FOpenGLRenderInterface::SetGlobalColor(FColor Color){
-	NeedUniformUpdate = 1;
+void FOpenGLRenderInterface::SetDistanceFog(UBOOL Enable, FLOAT FogStart, FLOAT FogEnd, FColor Color){
+	EnableFog(Enable);
+	CurrentState->Uniforms.FogStart = FogStart;
+	CurrentState->Uniforms.FogEnd = FogEnd;
+	CurrentState->Uniforms.FogColor = Color;
 	++CurrentState->UniformRevision;
+	NeedUniformUpdate = true;
+}
+
+UBOOL FOpenGLRenderInterface::EnableFog(UBOOL Enable){
+	CurrentState->Uniforms.FogEnabled = Enable != 0;
+	++CurrentState->UniformRevision;
+	NeedUniformUpdate = true;
+
+	return Enable;
+}
+
+UBOOL FOpenGLRenderInterface::IsFogEnabled(){
+	return CurrentState->Uniforms.FogEnabled;
+}
+
+
+void FOpenGLRenderInterface::SetGlobalColor(FColor Color){
+	++CurrentState->UniformRevision;
+	NeedUniformUpdate = true;
 	CurrentState->Uniforms.GlobalColor = Color;
 }
 
@@ -293,7 +373,7 @@ void FOpenGLRenderInterface::SetTransform(ETransformType Type, const FMatrix& Ma
 	}
 
 	++CurrentState->UniformRevision;
-	NeedUniformUpdate = 1;
+	NeedUniformUpdate = true;
 }
 
 FMatrix FOpenGLRenderInterface::GetTransform(ETransformType Type) const{
@@ -384,7 +464,8 @@ void FOpenGLRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorStri
 	Material->PreSetMaterial(GEngineTime);
 
 	bool Result = false;
-
+bool TerrainMaterial = false;
+bool ProjectorMaterial = false;
 	if(CheckMaterial<UShader>(&Material, 0, 0)){
 		UShader* Shader = static_cast<UShader*>(Material);
 
@@ -405,15 +486,18 @@ void FOpenGLRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorStri
 	}else if(CheckMaterial<UBitmapMaterial>(&Material, -1)){
 		Result = SetSimpleMaterial(Material, ErrorString, ErrorMaterial);
 	}else if(CheckMaterial<UTerrainMaterial>(&Material, 0)){
+		TerrainMaterial = true;
 		Result = SetTerrainMaterial(static_cast<UTerrainMaterial*>(Material), ErrorString, ErrorMaterial);
 	}else if(CheckMaterial<UParticleMaterial>(&Material, 0)){
 		Result = SetParticleMaterial(static_cast<UParticleMaterial*>(Material), ErrorString, ErrorMaterial);
 	}else if(CheckMaterial<UProjectorMultiMaterial>(&Material, 0)){
+		ProjectorMaterial = true;
 		CurrentState->AlphaRef = 0.5f;
 		CurrentState->FramebufferBlending = FB_Modulate;
 		Result = SetSimpleMaterial(static_cast<UProjectorMultiMaterial*>(Material)->BaseMaterial, ErrorString, ErrorMaterial);
 		CurrentState->bZWrite = false;
 	}else if(CheckMaterial<UProjectorMaterial>(&Material, 0)){
+		ProjectorMaterial = true;
 		CurrentState->AlphaRef = 0.5f;
 		CurrentState->FramebufferBlending = FB_Modulate;
 		Result = SetSimpleMaterial(static_cast<UProjectorMaterial*>(Material)->Projected, ErrorString, ErrorMaterial);
@@ -451,40 +535,6 @@ void FOpenGLRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorStri
 		CurrentState->NumStages = 1;
 	}
 
-	if(CurrentState->ModifyColor){
-		checkSlow(CurrentState->NumStages < MAX_SHADER_STAGES);
-		CurrentState->StageColorArgs[CurrentState->NumStages][0] = CA_Previous;
-		CurrentState->StageColorArgs[CurrentState->NumStages][1] = CA_Constant;
-		CurrentState->StageColorOps[CurrentState->NumStages] = COP_Modulate;
-		CurrentState->StageAlphaArgs[CurrentState->NumStages][0] = CA_Previous;
-		CurrentState->StageAlphaArgs[CurrentState->NumStages][1] = CA_Constant;
-		CurrentState->StageAlphaOps[CurrentState->NumStages] = AOP_Modulate;
-		++CurrentState->NumStages;
-	}
-
-	if(CurrentState->Lightmap){
-		checkSlow(CurrentState->NumStages < MAX_SHADER_STAGES);
-		checkSlow(CurrentState->NumTextures < MAX_TEXTURES);
-		CurrentState->StageColorArgs[CurrentState->NumStages][0] = CA_Previous;
-		CurrentState->StageColorArgs[CurrentState->NumStages][1] = CA_Texture0 + CurrentState->NumTextures;
-		CurrentState->StageColorOps[CurrentState->NumStages] = COP_Modulate;
-		CurrentState->StageAlphaArgs[CurrentState->NumStages][0] = CA_Previous;
-		CurrentState->StageAlphaOps[CurrentState->NumStages] = AOP_Arg1;
-		CurrentState->StageTexCoordSources[CurrentState->NumStages] = TCS_Stream1;
-		CurrentState->Lightmap->BindTexture(CurrentState->NumTextures);
-		++CurrentState->NumStages;
-		++CurrentState->NumTextures;
-	}else if(CurrentState->UseStaticLighting){
-		checkSlow(CurrentState->NumStages < MAX_SHADER_STAGES);
-		CurrentState->StageColorArgs[CurrentState->NumStages][0] = CA_Previous;
-		CurrentState->StageColorArgs[CurrentState->NumStages][1] = CA_Diffuse;
-		CurrentState->StageColorOps[CurrentState->NumStages] = COP_Modulate;
-		CurrentState->StageAlphaArgs[CurrentState->NumStages][0] = CA_Previous;
-		CurrentState->StageAlphaArgs[CurrentState->NumStages][1] = CA_Diffuse;
-		CurrentState->StageAlphaOps[CurrentState->NumStages] = AOP_Modulate;
-		++CurrentState->NumStages;
-	}
-
 	// Check for cube maps and set the modifier bit
 	for(INT i = 0; i < MAX_TEXTURES; ++i){
 		if(Cubemaps[i]){
@@ -514,6 +564,7 @@ void FOpenGLRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorStri
 	glUniform1iv(SU_StageAlphaOps, ARRAY_COUNT(CurrentState->StageAlphaOps), CurrentState->StageAlphaOps);
 	glUniform4fv(SU_ConstantColor, 1, (GLfloat*)&CurrentState->ConstantColor);
 	glUniform1f(SU_AlphaRef, CurrentState->AlphaRef);
+	glUniform1i(SU_LightingEnabled, CurrentState->UseDynamicLighting);
 
 	for(INT i = 0; i < CurrentState->NumTextures; ++i){
 		glSamplerParameteri(Samplers[i], GL_TEXTURE_WRAP_S, GetTextureWrapMode(CurrentState->StageTexWrapModes[i][0]));
@@ -568,12 +619,7 @@ void FOpenGLRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorStri
 	unguard;
 }
 
-void FOpenGLRenderInterface::SetBitmapTexture(UBitmapMaterial* Bitmap, INT TextureUnit){
-	FBaseTexture* Texture = Bitmap->Get(LockedViewport->CurrentTime, LockedViewport)->GetRenderInterface();
-
-	if(!Texture)
-		return;
-
+void FOpenGLRenderInterface::SetTexture(FBaseTexture* Texture, INT TextureUnit){
 	QWORD CacheId = Texture->GetCacheId();
 	FOpenGLTexture* GLTexture = static_cast<FOpenGLTexture*>(RenDev->GetCachedResource(CacheId));
 
@@ -590,6 +636,15 @@ void FOpenGLRenderInterface::SetBitmapTexture(UBitmapMaterial* Bitmap, INT Textu
 		GLTexture->BindTexture(MAX_TEXTURES + TextureUnit);
 		Cubemaps[TextureUnit] = true;
 	}
+}
+
+void FOpenGLRenderInterface::SetBitmapTexture(UBitmapMaterial* Bitmap, INT TextureUnit){
+	FBaseTexture* Texture = Bitmap->Get(LockedViewport->CurrentTime, LockedViewport)->GetRenderInterface();
+
+	if(!Texture)
+		return;
+
+	SetTexture(Texture, TextureUnit);
 
 	if(CurrentState->StageTexWrapModes[TextureUnit][0] < 0)
 		CurrentState->StageTexWrapModes[TextureUnit][0] = Bitmap->UClampMode;
@@ -597,6 +652,8 @@ void FOpenGLRenderInterface::SetBitmapTexture(UBitmapMaterial* Bitmap, INT Textu
 	if(CurrentState->StageTexWrapModes[TextureUnit][1] < 0)
 		CurrentState->StageTexWrapModes[TextureUnit][1] = Bitmap->VClampMode;
 }
+
+static bool HaveDiffuse = false; // Hack to support UCombiner::LightBothMaterials
 
 bool FOpenGLRenderInterface::SetSimpleMaterial(UMaterial* Material, FString* ErrorString, UMaterial** ErrorMaterial){
 	if(!Material)
@@ -623,8 +680,39 @@ bool FOpenGLRenderInterface::SetSimpleMaterial(UMaterial* Material, FString* Err
 			CurrentState->CullMode = CM_None;
 	}
 
+	HaveDiffuse = false;
+
 	if(!HandleCombinedMaterial(Material, StagesUsed, TexturesUsed, ErrorString, ErrorMaterial))
 		return false;
+
+	if(!HaveDiffuse && (CurrentState->UseStaticLighting || CurrentState->UseDynamicLighting))
+		UseDiffuse();
+
+	if(CurrentState->Lightmap){
+		UseLightmap(StagesUsed, TexturesUsed);
+		++StagesUsed;
+		++TexturesUsed;
+	}
+
+	if(CurrentState->ModifyColor){
+		if(StagesUsed < MAX_SHADER_STAGES){
+			CurrentState->StageColorArgs[StagesUsed][0] = CA_Previous;
+			CurrentState->StageColorArgs[StagesUsed][1] = CA_Constant;
+			CurrentState->StageColorOps[StagesUsed] = COP_Modulate;
+			CurrentState->StageAlphaArgs[StagesUsed][0] = CA_Previous;
+			CurrentState->StageAlphaArgs[StagesUsed][1] = CA_Constant;
+			CurrentState->StageAlphaOps[StagesUsed] = AOP_Modulate;
+			++CurrentState->NumStages;
+		}else{
+			if(ErrorString)
+				*ErrorString = "No stages left for color modifier";
+
+			if(ErrorMaterial)
+				*ErrorMaterial = Material;
+
+			return false;
+		}
+	}
 
 	CurrentState->NumStages = StagesUsed;
 	CurrentState->NumTextures = TexturesUsed;
@@ -942,6 +1030,18 @@ bool FOpenGLRenderInterface::HandleCombinedMaterial(UMaterial* Material, INT& St
 			CurrentState->StageAlphaOps[StageIndex] = AOP_Blend;
 		}
 
+		if(Combiner->LightBothMaterials){
+			checkSlow(StagesUsed < MAX_SHADER_STAGES);
+			CurrentState->StageColorArgs[StagesUsed][0] = CA_Previous;
+			CurrentState->StageColorArgs[StagesUsed][1] = CA_Diffuse;
+			CurrentState->StageColorOps[StagesUsed] = CurrentState->LightingModulate2X ? COP_Modulate2X : COP_Modulate;
+			CurrentState->StageAlphaArgs[StagesUsed][0] = CA_Previous;
+			CurrentState->StageAlphaArgs[StagesUsed][1] = CA_Diffuse;
+			CurrentState->StageAlphaOps[StagesUsed] = AOP_Modulate;
+			++StagesUsed;
+			HaveDiffuse = true;
+		}
+
 		return true;
 	}
 
@@ -982,7 +1082,7 @@ bool FOpenGLRenderInterface::SetTerrainMaterial(UTerrainMaterial* Terrain, FStri
 
 		CurrentState->StageColorArgs[StagesUsed][0] = CA_Texture0 + TexturesUsed;
 		CurrentState->StageColorArgs[StagesUsed][1] = CA_Diffuse;
-		CurrentState->StageColorOps[StagesUsed] = COP_Arg1; //COP_Modulate; TODO: Lighting
+		CurrentState->StageColorOps[StagesUsed] = (CurrentState->UseStaticLighting || CurrentState->UseDynamicLighting) ? COP_Modulate2X : COP_Arg1;
 		CurrentState->StageAlphaArgs[StagesUsed][0] = CA_Texture0 + TexturesUsed;
 		CurrentState->StageAlphaOps[StagesUsed] = AOP_Arg1;
 
@@ -1103,6 +1203,30 @@ bool FOpenGLRenderInterface::SetParticleMaterial(UParticleMaterial* ParticleMate
 	CurrentState->NumTextures = TexturesUsed;
 
 	return true;
+}
+
+void FOpenGLRenderInterface::UseDiffuse(){
+	CurrentState->StageColorArgs[0][1] = CA_Diffuse;
+	CurrentState->StageColorOps[0] = CurrentState->LightingModulate2X ? COP_Modulate2X : COP_Modulate;
+	CurrentState->StageAlphaArgs[0][1] = CA_Diffuse;
+	CurrentState->StageAlphaOps[0] = AOP_Modulate;
+}
+
+void FOpenGLRenderInterface::UseLightmap(INT StageIndex, INT TextureUnit){
+	checkSlow(CurrentState->Lightmap);
+	checkSlow(StageIndex < MAX_SHADER_STAGES);
+	checkSlow(TextureUnit < MAX_TEXTURES);
+
+	SetTexture(CurrentState->Lightmap, TextureUnit);
+	CurrentState->StageTexCoordSources[StageIndex] = TCS_Stream1;
+	CurrentState->StageTexWrapModes[StageIndex][0] = GL_CLAMP_TO_EDGE;
+	CurrentState->StageTexWrapModes[StageIndex][1] = GL_CLAMP_TO_EDGE;
+	CurrentState->StageColorArgs[StageIndex][0] = CA_Previous;
+	CurrentState->StageColorArgs[StageIndex][1] = CA_Texture0 + TextureUnit;
+	// CurrentState->StageColorOps[StageIndex] = (!CurrentState->UseStaticLighting && CurrentState->LightingModulate2X) ? COP_Modulate2X : COP_Modulate;
+	CurrentState->StageColorOps[StageIndex] = COP_Modulate;
+	CurrentState->StageAlphaArgs[StageIndex][0] = CA_Previous;
+	CurrentState->StageAlphaOps[StageIndex] = AOP_Arg1;
 }
 
 static GLenum GetStencilFunc(ECompareFunction Test){
@@ -1226,7 +1350,7 @@ INT FOpenGLRenderInterface::SetVertexStreams(EVertexShader Shader, FVertexStream
 		if(CurrentState->IndexBuffer)
 			CurrentState->IndexBuffer->Bind();
 
-		NeedUniformUpdate = 1;
+		NeedUniformUpdate = true;
 	}
 
 	for(INT i = 0; i < CurrentState->NumVertexStreams; ++i)
@@ -1296,8 +1420,6 @@ INT FOpenGLRenderInterface::SetDynamicIndexBuffer(FIndexBuffer* IndexBuffer, INT
 void FOpenGLRenderInterface::DrawPrimitive(EPrimitiveType PrimitiveType, INT FirstIndex, INT NumPrimitives, INT MinIndex, INT MaxIndex){
 	if(NeedUniformUpdate)
 		UpdateGlobalShaderUniforms();
-
-	EnableZTest(1);
 
 	GLenum Mode  = 0;
 	INT    Count = NumPrimitives;

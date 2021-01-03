@@ -92,7 +92,7 @@ public:
 	virtual void PopHit(INT Count, UBOOL Force) = 0;
 	virtual void SetCullMode(ECullMode CullMode) = 0;
 	virtual void SetAmbientLight(FColor Color) = 0;
-	virtual void EnableLighting(UBOOL UseDynamic, UBOOL UseStatic = 1, UBOOL Modulate2X = 0, FBaseTexture* UseLightmap = NULL, UBOOL LightingOnly = 0, const FSphere& LitSphere = FSphere(FVector(0, 0, 0), 0), int = 0) = 0;
+	virtual void EnableLighting(UBOOL UseDynamic, UBOOL UseStatic = 1, UBOOL Modulate2X = 0, FBaseTexture* Lightmap = NULL, UBOOL LightingOnly = 0, const FSphere& LitSphere = FSphere(FVector(0, 0, 0), 0), int = 0) = 0;
 	virtual void SetLight(INT LightIndex, FDynamicLight* Light, FLOAT Scale = 1.0f) = 0;
 	virtual void SetShaderLight(INT LightIndex, FDynamicLight* Light, FLOAT Scale = 1.0f){}
 	virtual void SetNPatchTesselation(FLOAT Tesselation) = 0;
@@ -105,7 +105,7 @@ public:
 	virtual void SetMaterial(UMaterial* Material, FString* ErrorString = NULL, UMaterial** ErrorMaterial = NULL, INT* NumPasses = NULL) = 0;
 	virtual UBOOL SetHardwareShaderMaterial(UHardwareShader* Material, FString* ErrorString = NULL, UMaterial** ErrorMaterial = NULL){ return 0; }
 	virtual UBOOL ShowAlpha(UMaterial*){ return 0; }
-	virtual UBOOL IsShadowInterface(){ return 0; }
+ 	virtual UBOOL IsShadowInterface(){ return 0; }
 	virtual void SetAntiAliasing(INT Level){}
 	virtual void CopyBackBufferToTarget(FAuxRenderTarget*){}
 	virtual void SetLODDiffuseFade(FLOAT Distance){}

@@ -416,7 +416,7 @@ UBOOL UOpenGLRenderDevice::SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL
 		RenderInterface.Init();
 		RenderInterface.EnableZTest(1);
 		RenderInterface.EnableZWrite(1);
-		RenderInterface.SetStencilOp(CF_Always, 0x0, 0xFF, SO_Keep, SO_Keep, SO_Keep, 0xFF);
+		RenderInterface.SetStencilOp(CF_Always, 0xF, 0xFF, SO_Keep, SO_Keep, SO_Keep, 0xFF);
 		RenderInterface.EnableStencilTest(UseStencil);
 		RenderInterface.SetShader(&FixedFunctionShader);
 		RenderInterface.SetCullMode(CM_CW);
@@ -692,7 +692,8 @@ void UOpenGLRenderDevice::LoadShader(FShaderGLSL* Shader){
 
 // Default shader code
 
-#define UNIFORM_BLOCK_MEMBER(type, name) "\t" #type " " #name ";\n"
+#define UNIFORM_BLOCK_MEMBER(type, name) "\t" STRINGIFY(type) " " STRINGIFY(name) ";\n"
+#define UNIFORM_STRUCT_MEMBER(type, name) type name;
 #define SHADER_HEADER \
 	"#version 450 core\n\n" \
 	"// Global shared uniforms\n\n" \
@@ -784,6 +785,7 @@ FString UOpenGLRenderDevice::FixedFunctionVertexShaderText(
 	"layout(location = 58) uniform int StageAlphaOps[8];\n"
 	"layout(location = 66) uniform vec4 ConstantColor;\n"
 	"layout(location = 67) uniform float AlphaRef;\n"
+	"layout(location = 68) uniform bool LightingEnabled;\n"
 	"\n"
 	"out vec4 StageTexCoords[8];\n"
 	"\n"
@@ -877,6 +879,7 @@ FString UOpenGLRenderDevice::FixedFunctionFragmentShaderText(
 	"layout(location = 58) uniform int StageAlphaOps[8];\n"
 	"layout(location = 66) uniform vec4 ConstantColor;\n"
 	"layout(location = 67) uniform float AlphaRef;\n"
+	"layout(location = 68) uniform bool LightingEnabled;\n"
 	"\n"
 	"in vec4 StageTexCoords[8];\n"
 	"\n"
@@ -1069,5 +1072,6 @@ FString UOpenGLRenderDevice::FramebufferFragmentShaderText(
 		"\tFragColor = texture2D(Screen, TexCoord.xy);\n"
 	"}\n", true);
 
+#undef UNIFORM_STRUCT_MEMBER
 #undef UNIFORM_BLOCK_MEMBER
 #undef SHADER_HEADER

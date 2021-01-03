@@ -559,14 +559,12 @@ typedef TBox<FLOAT> FFloatBox;
 	FSphere.
 -----------------------------------------------------------------------------*/
 
-class CORE_API FSphere : public FPlane{
+class FSphere : public FPlane{
 public:
 	// Constructors.
 	FSphere(){}
-	FSphere(INT)
-	:	FPlane(0,0,0,0){}
-	FSphere(FVector V, FLOAT W)
-	:	FPlane(V, W){}
+	FSphere(INT) : FPlane(0,0,0,0){}
+	FSphere(FVector V, FLOAT W) : FPlane(V, W){}
 	FSphere(const FVector* Pts, INT Count);
 
 	FSphere TransformBy(const FMatrix& M) const;

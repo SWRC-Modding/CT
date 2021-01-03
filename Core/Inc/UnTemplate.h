@@ -186,6 +186,9 @@ DWORD GetTypeHash(const T* P){
 #define STRUCT_OFFSET(struc, member) \
 	((INT)&((struc*)NULL)->member)
 
+#define STR(x) #x
+#define STRINGIFY(x) STR(x)
+
 /*-----------------------------------------------------------------------------
 	Allocators.
 -----------------------------------------------------------------------------*/

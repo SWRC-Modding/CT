@@ -104,11 +104,20 @@ FShaderGLSL* UOpenGLRenderDevice::GetShader(UHardwareShader* HardwareShader){
 			FString ShaderName = HardwareShader->GetPathName();
 
 			Shader->SetName(ShaderName.Substitute(".", "\\").Substitute(".", "\\"));
-		}
 
-		Shader->SetVertexShaderText(HardwareShader->VertexShaderText);
-		Shader->SetFragmentShaderText(HardwareShader->PixelShaderText);
-		LoadShader(Shader);
+			if(!LoadVertexShader(Shader)){
+				Shader->SetVertexShaderFromHardwareShader(HardwareShader);
+				SaveVertexShader(Shader);
+			}
+
+			if(!LoadFragmentShader(Shader)){
+				Shader->SetFragmentShaderFromHardwareShader(HardwareShader);
+				SaveFragmentShader(Shader);
+			}
+		}else{
+			Shader->SetVertexShaderFromHardwareShader(HardwareShader);
+			Shader->SetFragmentShaderFromHardwareShader(HardwareShader);
+		}
 	}
 
 	return Shader;
@@ -659,35 +668,70 @@ FRenderCaps* UOpenGLRenderDevice::GetRenderCaps(){
 }
 
 void UOpenGLRenderDevice::LoadShaders(){
-	LoadShader(&FixedFunctionShader);
-	LoadShader(&FramebufferShader);
+	if(!LoadVertexShader(&FixedFunctionShader))
+		SaveVertexShader(&FixedFunctionShader);
 
-	for(TMap<UHardwareShader*, FShaderGLSL>::TIterator It(GLShaderByHardwareShader); It; ++It)
-		LoadShader(&It.Value());
+	if(!LoadFragmentShader(&FixedFunctionShader))
+		SaveFragmentShader(&FixedFunctionShader);
+
+	if(!LoadVertexShader(&FramebufferShader))
+		SaveVertexShader(&FramebufferShader);
+
+	if(!LoadFragmentShader(&FramebufferShader))
+		SaveFragmentShader(&FramebufferShader);
+
+	for(TMap<UHardwareShader*, FShaderGLSL>::TIterator It(GLShaderByHardwareShader); It; ++It){
+		if(*It.Value().GetName()){
+			if(!LoadVertexShader(&It.Value()))
+				SaveVertexShader(&It.Value());
+
+			if(!LoadFragmentShader(&It.Value()))
+				SaveFragmentShader(&It.Value());
+		}
+	}
 }
 
-void UOpenGLRenderDevice::LoadShader(FShaderGLSL* Shader){
-	if(Shader->GetName()[0] == '\0')
-		return;
+FStringTemp UOpenGLRenderDevice::MakeShaderFilename(FShaderGLSL* Shader, const TCHAR* Extension){
+	return ShaderDir * Shader->GetName() + Extension;
+}
 
+bool UOpenGLRenderDevice::LoadVertexShader(FShaderGLSL* Shader){
 	FStringTemp ShaderText(0);
-	FFilename Filename = ShaderDir * Shader->GetName() + VERTEX_SHADER_FILE_EXTENSION;
+	FFilename Filename = MakeShaderFilename(Shader, VERTEX_SHADER_FILE_EXTENSION);
 
-	GFileManager->MakeDirectory(*(Filename.GetPath() + "\\"), 1);
-
-	if(GFileManager->FileSize(*Filename) > 0 && appLoadFileToString(ShaderText, *Filename))
+	if(GFileManager->FileSize(*Filename) > 0 && appLoadFileToString(ShaderText, *Filename)){
 		Shader->SetVertexShaderText(ShaderText);
-	else
-		appSaveStringToFile(Shader->GetVertexShaderText(), *Filename);
 
-	Filename = ShaderDir * Shader->GetName() + FRAGMENT_SHADER_FILE_EXTENSION;
+		return true;
+	}
 
-	GFileManager->MakeDirectory(*(Filename.GetPath() + "\\"), 1);
+	return false;
+}
 
-	if(GFileManager->FileSize(*Filename) > 0 && appLoadFileToString(ShaderText, *Filename))
+bool UOpenGLRenderDevice::LoadFragmentShader(FShaderGLSL* Shader){
+	FStringTemp ShaderText(0);
+	FFilename Filename = MakeShaderFilename(Shader, FRAGMENT_SHADER_FILE_EXTENSION);
+
+	if(GFileManager->FileSize(*Filename) > 0 && appLoadFileToString(ShaderText, *Filename)){
 		Shader->SetFragmentShaderText(ShaderText);
-	else
-		appSaveStringToFile(Shader->GetFragmentShaderText(), *Filename);
+
+		return true;
+	}
+
+	return false;
+}
+
+void UOpenGLRenderDevice::SaveShaderText(const FFilename& Filename, const FString& Text){
+	GFileManager->MakeDirectory(*(Filename.GetPath() + "\\"), 1);
+	appSaveStringToFile(Text, *Filename, GFileManager);
+}
+
+void UOpenGLRenderDevice::SaveVertexShader(FShaderGLSL* Shader){
+	SaveShaderText(MakeShaderFilename(Shader, VERTEX_SHADER_FILE_EXTENSION), FString(Shader->GetVertexShaderText(), true));
+}
+
+void UOpenGLRenderDevice::SaveFragmentShader(FShaderGLSL* Shader){
+	SaveShaderText(MakeShaderFilename(Shader, FRAGMENT_SHADER_FILE_EXTENSION), FString(Shader->GetFragmentShaderText(), true));
 }
 
 // Default shader code

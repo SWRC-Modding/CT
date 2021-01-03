@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../Engine/Inc/Engine.h"
+#include "OpenGLDrv.h"
 
 // GLSL equivalent types with proper alignment
 
@@ -16,7 +16,7 @@ typedef ALIGN(16) FMatrix GLSL_mat4;
 
 // GLSL shader resource
 
-class FShaderGLSL : public FRenderResource{
+class OPENGLDRV_API FShaderGLSL : public FRenderResource{
 public:
 	FShaderGLSL() : Name("__unnamed_internal__", true){
 		CacheId = MakeCacheID(CID_RenderShader);
@@ -25,6 +25,9 @@ public:
 	void SetName(const FString& InName){
 		Name = InName;
 	}
+
+	void SetVertexShaderFromHardwareShader(UHardwareShader* HardwareShader);
+	void SetFragmentShaderFromHardwareShader(UHardwareShader* HardwareShader);
 
 	void SetVertexShaderText(const FString& InVertexShaderText){
 		VertexShaderText = InVertexShaderText;
@@ -40,8 +43,17 @@ public:
 	const TCHAR* GetVertexShaderText() const{ return *VertexShaderText; }
 	const TCHAR* GetFragmentShaderText() const{ return *FragmentShaderText; }
 
+	static void SetHardwareShaderMacros(UHardwareShaderMacros* Macros);
+	static void ClearHardwareShaderMacros();
+	static void ExpandHardwareShaderMacros(FString* ShaderText);
+
 private:
 	FString Name;
 	FString VertexShaderText;
 	FString FragmentShaderText;
+
+	static UHardwareShaderMacros* HardwareShaderMacros;
+	static TMap<FString, FString> HardwareShaderMacroText;
+
+	void ExpandHardwareShaderMacros();
 };

@@ -13,6 +13,7 @@ class FOpenGLShader;
 #define MAX_VERTEX_STREAMS MAX_VERTEX_COMPONENTS
 #define MAX_TEXTURES 8
 #define MAX_SHADER_STAGES 8
+#define MAX_LIGHTS 8
 
 struct FStreamDeclaration{
 	FVertexComponent Components[MAX_VERTEX_COMPONENTS];
@@ -71,8 +72,55 @@ enum EShaderUniforms{
 	SU_StageAlphaArgs       = 42, // int[16]
 	SU_StageAlphaOps        = 58, // int[8]
 	SU_ConstantColor        = 66, // vec4
-	SU_AlphaRef             = 67  // float
+	SU_AlphaRef             = 67, // float
+	SU_LightingEnabled      = 68  // bool
 };
+
+#define GLSL_STRUCT(x) struct x // Workaround to get struct name to show up in C++ but not GLSL
+#define STRUCT(x) struct
+
+// Macro to synchronize the GLSL uniform block with the C++ struct
+#define UNIFORM_BLOCK_CONTENTS \
+	UNIFORM_BLOCK_MEMBER(mat4, LocalToWorld) \
+	UNIFORM_BLOCK_MEMBER(mat4, WorldToCamera) \
+	UNIFORM_BLOCK_MEMBER(mat4, CameraToScreen) \
+	UNIFORM_BLOCK_MEMBER(mat4, LocalToScreen) \
+	UNIFORM_BLOCK_MEMBER(mat4, WorldToLocal) \
+	UNIFORM_BLOCK_MEMBER(mat4, WorldToScreen) \
+	UNIFORM_BLOCK_MEMBER(mat4, CameraToWorld) \
+	UNIFORM_BLOCK_MEMBER(float, Time) \
+	UNIFORM_BLOCK_MEMBER(float, CosTime) \
+	UNIFORM_BLOCK_MEMBER(float, SinTime) \
+	UNIFORM_BLOCK_MEMBER(float, TanTime) \
+	UNIFORM_BLOCK_MEMBER(vec4, GlobalColor) \
+	UNIFORM_BLOCK_MEMBER(vec4, AmbientLightColor) \
+	UNIFORM_BLOCK_MEMBER(STRUCT(Light){ \
+		UNIFORM_STRUCT_MEMBER(vec4, Color) \
+		UNIFORM_STRUCT_MEMBER(vec3, Position) \
+		UNIFORM_STRUCT_MEMBER(vec3, Direction) \
+		UNIFORM_STRUCT_MEMBER(float, Radius) \
+		UNIFORM_STRUCT_MEMBER(float, InvRadius) \
+		UNIFORM_STRUCT_MEMBER(int, Type) \
+	}, Lights[MAX_LIGHTS]) \
+	UNIFORM_BLOCK_MEMBER(int, NumLights) \
+	UNIFORM_BLOCK_MEMBER(bool, FogEnabled) \
+	UNIFORM_BLOCK_MEMBER(float, FogStart) \
+	UNIFORM_BLOCK_MEMBER(float, FogEnd) \
+	UNIFORM_BLOCK_MEMBER(vec4, FogColor)
+
+#pragma warning(push)
+#pragma warning(disable : 4324) // structure was padded due to __declspec(align())
+
+// Global uniforms available in every shader
+struct FOpenGLGlobalUniforms{
+#define UNIFORM_BLOCK_MEMBER(type, name) GLSL_ ## type name;
+#define UNIFORM_STRUCT_MEMBER(type, name) GLSL_ ## type name;
+	UNIFORM_BLOCK_CONTENTS
+#undef UNIFORM_STRUCT_MEMBER
+#undef UNIFORM_BLOCK_MEMBER
+};
+
+#pragma warning(pop)
 
 /*
  * OpenGL RenderInterface
@@ -124,20 +172,22 @@ public:
 		INT                   NumStages;
 		INT                   NumTextures;
 		INT                   TexCoordCount;
-		INT                   StageTexWrapModes[MAX_TEXTURES][2];      // ETexClampMode for U and V
+		INT                   StageTexWrapModes[MAX_TEXTURES][2];
 		INT                   StageTexCoordSources[MAX_SHADER_STAGES];
 		FMatrix               StageTexMatrices[MAX_SHADER_STAGES];
-		INT                   StageColorArgs[MAX_SHADER_STAGES][2];    // EColorArg for Arg1 and Arg2
-		INT                   StageColorOps[MAX_SHADER_STAGES];        // EColorOp
-		INT                   StageAlphaArgs[MAX_SHADER_STAGES][2];    // EColorArg for Arg1 and Arg2
-		INT                   StageAlphaOps[MAX_SHADER_STAGES];        // EAlphaOp
+		INT                   StageColorArgs[MAX_SHADER_STAGES][2]; // EColorArg for Arg1 and Arg2
+		INT                   StageColorOps[MAX_SHADER_STAGES];     // EColorOp
+		INT                   StageAlphaArgs[MAX_SHADER_STAGES][2]; // EColorArg for Arg1 and Arg2
+		INT                   StageAlphaOps[MAX_SHADER_STAGES];     // EAlphaOp
 		FPlane                ConstantColor;
 
 		// Light
 
 		bool                  UseDynamicLighting;
 		bool                  UseStaticLighting;
-		FOpenGLTexture*       Lightmap;
+		bool                  LightingModulate2X;
+		FBaseTexture*         Lightmap;
+		FSphere               LitSphere;
 
 		// Blending
 
@@ -179,10 +229,12 @@ public:
 	virtual void PopHit(INT Count, UBOOL Force){}
 	virtual void SetCullMode(ECullMode CullMode);
 	virtual void SetAmbientLight(FColor Color);
-	virtual void EnableLighting(UBOOL UseDynamic, UBOOL UseStatic = 1, UBOOL Modulate2X = 0, FBaseTexture* UseLightmap = NULL, UBOOL LightingOnly = 0, const FSphere& LitSphere = FSphere(FVector(0, 0, 0), 0), int = 0);
+	virtual void EnableLighting(UBOOL UseDynamic, UBOOL UseStatic = 1, UBOOL Modulate2X = 0, FBaseTexture* Lightmap = NULL, UBOOL LightingOnly = 0, const FSphere& LitSphere = FSphere(FVector(0, 0, 0), 0), int = 0);
 	virtual void SetLight(INT LightIndex, FDynamicLight* Light, FLOAT Scale = 1.0f);
 	virtual void SetNPatchTesselation(FLOAT Tesselation){}
-	virtual void SetDistanceFog(UBOOL Enable, FLOAT FogStart, FLOAT FogEnd, FColor Color){}
+	virtual void SetDistanceFog(UBOOL Enable, FLOAT FogStart, FLOAT FogEnd, FColor Color);
+	virtual UBOOL EnableFog(UBOOL Enable);
+	virtual UBOOL IsFogEnabled();
 	virtual void SetGlobalColor(FColor Color);
 	virtual void SetTransform(ETransformType Type, const FMatrix& Matrix);
 	virtual FMatrix GetTransform(ETransformType Type) const;
@@ -207,11 +259,14 @@ private:
 	INT SetIndexBuffer(FIndexBuffer* IndexBuffer, INT BaseIndex, bool IsDynamic);
 	INT SetVertexStreams(EVertexShader Shader, FVertexStream** Streams, INT NumStreams, bool IsDynamic);
 	void InitDefaultMaterialStageState(INT StageIndex);
+	void SetTexture(FBaseTexture* Texture, INT TextureUnit);
 	void SetBitmapTexture(UBitmapMaterial* Bitmap, INT TextureUnit);
 	bool SetSimpleMaterial(UMaterial* Material, FString* ErrorString, UMaterial** ErrorMaterial);
 	bool HandleCombinedMaterial(UMaterial* Material, INT& PassesUsed, INT& TexturesUsed, FString* ErrorString, UMaterial** ErrorMaterial);
 	bool SetTerrainMaterial(UTerrainMaterial* Terrain, FString* ErrorString, UMaterial** ErrorMaterial);
 	bool SetParticleMaterial(UParticleMaterial* ParticleMaterial, FString* ErrorString, UMaterial** ErrorMaterial);
+	void UseDiffuse();
+	void UseLightmap(INT StageIndex, INT TextureUnit);
 
 	template<typename T>
 	bool CheckMaterial(UMaterial** Material, INT StageIndex, INT TextureIndex = -1){

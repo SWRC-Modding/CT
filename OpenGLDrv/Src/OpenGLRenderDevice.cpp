@@ -434,7 +434,7 @@ UBOOL UOpenGLRenderDevice::SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL
 
 		// Set default values for unspecified vertex attributes
 
-		glVertexAttrib4f(FVF_Diffuse, 1.0f, 1.0f, 1.0f, 1.0f);
+		glVertexAttrib4f(FVF_Diffuse, 0.0f, 0.0f, 0.0f, 1.0f);
 		glVertexAttrib4f(FVF_Specular, 1.0f, 1.0f, 1.0f, 1.0f);
 		glVertexAttrib4f(FVF_TexCoord0, 0.0f, 0.0f, 1.0f, 1.0f);
 		glVertexAttrib4f(FVF_TexCoord1, 0.0f, 0.0f, 1.0f, 1.0f);
@@ -501,7 +501,6 @@ UBOOL UOpenGLRenderDevice::SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL
 			RenderInterface.SetViewport(0, 0, NewX, NewY);
 	}
 
-
 	return 1;
 
 	unguard;
@@ -561,14 +560,10 @@ void UOpenGLRenderDevice::EnableVSync(bool bEnable){
 
 		INT Interval;
 
-		if(bEnable){
-			if(WGL_EXT_swap_control_tear && bAdaptiveVSync)
-				Interval = -1;
-			else
-				Interval = 1;
-		}else{
+		if(bEnable)
+			Interval = bAdaptiveVSync && WGL_EXT_swap_control_tear ? -1 : 1;
+		else
 			Interval = 0;
-		}
 
 		wglSwapIntervalEXT(Interval);
 	}else{
@@ -816,21 +811,23 @@ FString UOpenGLRenderDevice::FragmentShaderVarsText(
 	"in vec3 Binormal;\n"
 	"out vec4 FragColor;\n\n", true);
 
+#define FIXED_FUNCTION_UNIFORMS \
+	"// Shader specific uniforms\n\n" \
+	"layout(location = 0)  uniform int NumStages;\n" \
+	"layout(location = 1)  uniform int TexCoordCount;\n" \
+	"layout(location = 2)  uniform int StageTexCoordSources[8];\n" \
+	"layout(location = 10) uniform mat4 StageTexMatrices[8];\n" \
+	"layout(location = 18) uniform int StageColorArgs[16];\n" \
+	"layout(location = 34) uniform int StageColorOps[8];\n" \
+	"layout(location = 42) uniform int StageAlphaArgs[16];\n" \
+	"layout(location = 58) uniform int StageAlphaOps[8];\n" \
+	"layout(location = 66) uniform vec4 ConstantColor;\n" \
+	"layout(location = 67) uniform float AlphaRef;\n" \
+	"layout(location = 68) uniform bool LightingEnabled;\n" \
+	"layout(location = 69) uniform float LightFactor;\n\n"
+
 FString UOpenGLRenderDevice::FixedFunctionVertexShaderText(
-	"// Shader specific uniforms\n"
-	"\n"
-	"layout(location = 0)  uniform int NumStages;\n"
-	"layout(location = 1)  uniform int TexCoordCount;\n"
-	"layout(location = 2)  uniform int StageTexCoordSources[8];\n"
-	"layout(location = 10) uniform mat4 StageTexMatrices[8];\n"
-	"layout(location = 18) uniform int StageColorArgs[16];\n"
-	"layout(location = 34) uniform int StageColorOps[8];\n"
-	"layout(location = 42) uniform int StageAlphaArgs[16];\n"
-	"layout(location = 58) uniform int StageAlphaOps[8];\n"
-	"layout(location = 66) uniform vec4 ConstantColor;\n"
-	"layout(location = 67) uniform float AlphaRef;\n"
-	"layout(location = 68) uniform bool LightingEnabled;\n"
-	"\n"
+	FIXED_FUNCTION_UNIFORMS
 	"out vec4 StageTexCoords[8];\n"
 	"\n"
 	"#define TCS_Stream0                         0\n"
@@ -911,20 +908,7 @@ FString UOpenGLRenderDevice::FixedFunctionVertexShaderText(
 	"}\n", true);
 
 FString UOpenGLRenderDevice::FixedFunctionFragmentShaderText(
-	"// Shader specific uniforms\n"
-	"\n"
-	"layout(location = 0)  uniform int NumStages;\n"
-	"layout(location = 1)  uniform int TexCoordCount;\n"
-	"layout(location = 2)  uniform int StageTexCoordSources[8];\n"
-	"layout(location = 10) uniform mat4 StageTexMatrices[8];\n"
-	"layout(location = 18) uniform int StageColorArgs[16];\n"
-	"layout(location = 34) uniform int StageColorOps[8];\n"
-	"layout(location = 42) uniform int StageAlphaArgs[16];\n"
-	"layout(location = 58) uniform int StageAlphaOps[8];\n"
-	"layout(location = 66) uniform vec4 ConstantColor;\n"
-	"layout(location = 67) uniform float AlphaRef;\n"
-	"layout(location = 68) uniform bool LightingEnabled;\n"
-	"\n"
+	FIXED_FUNCTION_UNIFORMS
 	"in vec4 StageTexCoords[8];\n"
 	"\n"
 	"#define CA_Previous 0\n"
@@ -1083,16 +1067,40 @@ FString UOpenGLRenderDevice::FixedFunctionFragmentShaderText(
 		"\tFragColor.rgb = color_op(StageIndex, ColorArg1, ColorArg2).rgb;\n"
 	"}\n"
 	"\n"
+	"// Lighting\n"
+	"\n"
+	"vec4 light_color(){\n"
+		"\tvec4 LightColor = Diffuse + AmbientLightColor;\n"
+		"\tvec3 NormalizedNormal = normalize(Normal);\n"
+		"\n"
+		"\tfor(int i = 0; i < NumLights; ++i){\n"
+			"\t\tif(Lights[i].Type == 0){\n"
+				"\t\t\tLightColor += Lights[i].Color * max(dot(Lights[i].Direction, NormalizedNormal), 0.0);\n"
+			"\t\t}else{\n"
+				"\t\t\tvec3 Dir = Lights[i].Position - Position;\n"
+				"\t\t\tfloat Dist = length(Dir);\n"
+				"\n"
+				"\t\t\tif(Dist <= Lights[i].Radius)\n"
+				"\t\t\t	LightColor += Lights[i].Color * max(dot(normalize(Dir), NormalizedNormal), 0.0) * (1.0 - Dist * Lights[i].InvRadius);\n"
+			"\t\t}\n"
+		"\t}\n"
+	"\n"
+		"\treturn LightColor * LightFactor * Specular;\n"
+	"}\n"
+	"\n"
 	"// Main\n"
 	"\n"
 	"void main(void){\n"
 		"\tFragColor = vec4(1.0, 1.0, 1.0, 1.0);\n"
-		"\n"
+	"\n"
 		"\tfor(int i = 0; i < NumStages; ++i)\n"
 			"\t\tshader_stage(i);\n"
-		"\n"
+	"\n"
 		"\tif(FragColor.a <= AlphaRef)\n"
 			"\t\tdiscard;\n"
+	"\n"
+		"\tif(LightingEnabled)\n"
+			"\t\tFragColor.rgb *= light_color().rgb;\n"
 	"}\n", true);
 
 FString UOpenGLRenderDevice::FramebufferVertexShaderText(

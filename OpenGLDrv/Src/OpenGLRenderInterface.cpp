@@ -311,12 +311,6 @@ void FOpenGLRenderInterface::SetLight(INT LightIndex, FDynamicLight* Light, FLOA
 			}
 		}
 
-		if(CurrentState->LightingModulate2X){
-			ShaderLight->Color.X *= 0.5f;
-			ShaderLight->Color.Y *= 0.5f;
-			ShaderLight->Color.Z *= 0.5f;
-		}
-
 		ShaderLight->Color.W = 1.0f;
 
 		if(LightIndex >= CurrentState->Uniforms.NumLights)
@@ -331,24 +325,25 @@ void FOpenGLRenderInterface::SetLight(INT LightIndex, FDynamicLight* Light, FLOA
 }
 
 void FOpenGLRenderInterface::SetDistanceFog(UBOOL Enable, FLOAT FogStart, FLOAT FogEnd, FColor Color){
-	EnableFog(Enable);
-	CurrentState->Uniforms.FogStart = FogStart;
-	CurrentState->Uniforms.FogEnd = FogEnd;
-	CurrentState->Uniforms.FogColor = Color;
-	++CurrentState->UniformRevision;
-	NeedUniformUpdate = true;
+	// EnableFog(Enable);
+	// CurrentState->Uniforms.FogStart = FogStart;
+	// CurrentState->Uniforms.FogEnd = FogEnd;
+	// CurrentState->Uniforms.FogColor = Color;
+	// ++CurrentState->UniformRevision;
+	// NeedUniformUpdate = true;
 }
 
 UBOOL FOpenGLRenderInterface::EnableFog(UBOOL Enable){
-	CurrentState->Uniforms.FogEnabled = Enable != 0;
-	++CurrentState->UniformRevision;
-	NeedUniformUpdate = true;
+	// CurrentState->Uniforms.FogEnabled = Enable != 0;
+	// ++CurrentState->UniformRevision;
+	// NeedUniformUpdate = true;
 
-	return Enable;
+	// return Enable;
+	return 0;
 }
 
 UBOOL FOpenGLRenderInterface::IsFogEnabled(){
-	return CurrentState->Uniforms.FogEnabled;
+	return 0;//CurrentState->Uniforms.FogEnabled;
 }
 
 
@@ -464,8 +459,7 @@ void FOpenGLRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorStri
 	Material->PreSetMaterial(GEngineTime);
 
 	bool Result = false;
-bool TerrainMaterial = false;
-bool ProjectorMaterial = false;
+
 	if(CheckMaterial<UShader>(&Material, 0, 0)){
 		UShader* Shader = static_cast<UShader*>(Material);
 
@@ -486,18 +480,16 @@ bool ProjectorMaterial = false;
 	}else if(CheckMaterial<UBitmapMaterial>(&Material, -1)){
 		Result = SetSimpleMaterial(Material, ErrorString, ErrorMaterial);
 	}else if(CheckMaterial<UTerrainMaterial>(&Material, 0)){
-		TerrainMaterial = true;
 		Result = SetTerrainMaterial(static_cast<UTerrainMaterial*>(Material), ErrorString, ErrorMaterial);
 	}else if(CheckMaterial<UParticleMaterial>(&Material, 0)){
 		Result = SetParticleMaterial(static_cast<UParticleMaterial*>(Material), ErrorString, ErrorMaterial);
 	}else if(CheckMaterial<UProjectorMultiMaterial>(&Material, 0)){
-		ProjectorMaterial = true;
+		UProjectorMultiMaterial* ProjectorMultiMaterial = static_cast<UProjectorMultiMaterial*>(Material);
 		CurrentState->AlphaRef = 0.5f;
 		CurrentState->FramebufferBlending = FB_Modulate;
-		Result = SetSimpleMaterial(static_cast<UProjectorMultiMaterial*>(Material)->BaseMaterial, ErrorString, ErrorMaterial);
+		Result = SetSimpleMaterial(ProjectorMultiMaterial->BaseMaterial, ErrorString, ErrorMaterial);
 		CurrentState->bZWrite = false;
 	}else if(CheckMaterial<UProjectorMaterial>(&Material, 0)){
-		ProjectorMaterial = true;
 		CurrentState->AlphaRef = 0.5f;
 		CurrentState->FramebufferBlending = FB_Modulate;
 		Result = SetSimpleMaterial(static_cast<UProjectorMaterial*>(Material)->Projected, ErrorString, ErrorMaterial);
@@ -565,6 +557,7 @@ bool ProjectorMaterial = false;
 	glUniform4fv(SU_ConstantColor, 1, (GLfloat*)&CurrentState->ConstantColor);
 	glUniform1f(SU_AlphaRef, CurrentState->AlphaRef);
 	glUniform1i(SU_LightingEnabled, CurrentState->UseDynamicLighting);
+	glUniform1f(SU_LightFactor, CurrentState->LightingModulate2X ? 2.0f : 1.0f);
 
 	for(INT i = 0; i < CurrentState->NumTextures; ++i){
 		glSamplerParameteri(Samplers[i], GL_TEXTURE_WRAP_S, GetTextureWrapMode(CurrentState->StageTexWrapModes[i][0]));
@@ -685,7 +678,7 @@ bool FOpenGLRenderInterface::SetSimpleMaterial(UMaterial* Material, FString* Err
 	if(!HandleCombinedMaterial(Material, StagesUsed, TexturesUsed, ErrorString, ErrorMaterial))
 		return false;
 
-	if(!HaveDiffuse && (CurrentState->UseStaticLighting || CurrentState->UseDynamicLighting))
+	if(!HaveDiffuse && CurrentState->UseStaticLighting && !CurrentState->UseDynamicLighting)
 		UseDiffuse();
 
 	if(CurrentState->Lightmap){
@@ -1030,7 +1023,7 @@ bool FOpenGLRenderInterface::HandleCombinedMaterial(UMaterial* Material, INT& St
 			CurrentState->StageAlphaOps[StageIndex] = AOP_Blend;
 		}
 
-		if(Combiner->LightBothMaterials){
+		if(Combiner->LightBothMaterials && CurrentState->UseStaticLighting && !CurrentState->UseDynamicLighting){
 			checkSlow(StagesUsed < MAX_SHADER_STAGES);
 			CurrentState->StageColorArgs[StagesUsed][0] = CA_Previous;
 			CurrentState->StageColorArgs[StagesUsed][1] = CA_Diffuse;
@@ -1082,7 +1075,7 @@ bool FOpenGLRenderInterface::SetTerrainMaterial(UTerrainMaterial* Terrain, FStri
 
 		CurrentState->StageColorArgs[StagesUsed][0] = CA_Texture0 + TexturesUsed;
 		CurrentState->StageColorArgs[StagesUsed][1] = CA_Diffuse;
-		CurrentState->StageColorOps[StagesUsed] = (CurrentState->UseStaticLighting || CurrentState->UseDynamicLighting) ? COP_Modulate2X : COP_Arg1;
+		CurrentState->StageColorOps[StagesUsed] = (CurrentState->UseStaticLighting && !CurrentState->UseDynamicLighting) ? COP_Modulate2X : COP_Arg1;
 		CurrentState->StageAlphaArgs[StagesUsed][0] = CA_Texture0 + TexturesUsed;
 		CurrentState->StageAlphaOps[StagesUsed] = AOP_Arg1;
 
@@ -1223,8 +1216,7 @@ void FOpenGLRenderInterface::UseLightmap(INT StageIndex, INT TextureUnit){
 	CurrentState->StageTexWrapModes[StageIndex][1] = GL_CLAMP_TO_EDGE;
 	CurrentState->StageColorArgs[StageIndex][0] = CA_Previous;
 	CurrentState->StageColorArgs[StageIndex][1] = CA_Texture0 + TextureUnit;
-	// CurrentState->StageColorOps[StageIndex] = (!CurrentState->UseStaticLighting && CurrentState->LightingModulate2X) ? COP_Modulate2X : COP_Modulate;
-	CurrentState->StageColorOps[StageIndex] = COP_Modulate;
+	CurrentState->StageColorOps[StageIndex] = (!CurrentState->UseStaticLighting && CurrentState->LightingModulate2X) ? COP_Modulate2X : COP_Modulate;
 	CurrentState->StageAlphaArgs[StageIndex][0] = CA_Previous;
 	CurrentState->StageAlphaOps[StageIndex] = AOP_Arg1;
 }

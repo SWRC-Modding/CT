@@ -61,13 +61,33 @@ void FOpenGLRenderInterface::Exit(){
 }
 
 void FOpenGLRenderInterface::UpdateGlobalShaderUniforms(){
-	CurrentState->Uniforms.LocalToScreen = CurrentState->Uniforms.LocalToWorld *
-	                                       CurrentState->Uniforms.WorldToCamera *
+	// Matrices
+	CurrentState->Uniforms.LocalToCamera = CurrentState->Uniforms.LocalToWorld *
+	                                       CurrentState->Uniforms.WorldToCamera;
+	CurrentState->Uniforms.LocalToScreen = CurrentState->Uniforms.LocalToCamera *
 	                                       CurrentState->Uniforms.CameraToScreen;
 	CurrentState->Uniforms.WorldToLocal = CurrentState->Uniforms.LocalToWorld.Inverse();
 	CurrentState->Uniforms.WorldToScreen = CurrentState->Uniforms.WorldToCamera *
 	                                       CurrentState->Uniforms.CameraToScreen;
 	CurrentState->Uniforms.CameraToWorld = CurrentState->Uniforms.WorldToCamera.Inverse();
+	// EyePosition
+	CurrentState->Uniforms.EyePosition.X = CurrentState->Uniforms.CameraToWorld.M[3][0];
+	CurrentState->Uniforms.EyePosition.Y = CurrentState->Uniforms.CameraToWorld.M[3][1];
+	CurrentState->Uniforms.EyePosition.Z = CurrentState->Uniforms.CameraToWorld.M[3][2];
+	// EyePositionObjectSpace
+	CurrentState->Uniforms.EyePositionObjectSpace = CurrentState->Uniforms.WorldToLocal.TransformFVector(CurrentState->Uniforms.EyePosition);
+	// DrawScale3D
+	CurrentState->Uniforms.DrawScale3D.X = CurrentState->Uniforms.LocalToWorld.M[0][0];
+	CurrentState->Uniforms.DrawScale3D.Y = CurrentState->Uniforms.LocalToWorld.M[1][1];
+	CurrentState->Uniforms.DrawScale3D.Z = CurrentState->Uniforms.LocalToWorld.M[2][2];
+	// Flicker
+	// TODO...
+	// XYCircle
+	CurrentState->Uniforms.XYCircle.X = appCos(CurrentState->Uniforms.Time) * 500.0f;
+	CurrentState->Uniforms.XYCircle.Y = appSin(CurrentState->Uniforms.Time) * 500.0f;
+	// 2DRotator
+	CurrentState->Uniforms.Rotator2D.X = appCos(CurrentState->Uniforms.Time);
+	CurrentState->Uniforms.Rotator2D.Y = -appSin(CurrentState->Uniforms.Time);
 
 	glNamedBufferSubData(GlobalUBO, 0, sizeof(FOpenGLGlobalUniforms), &CurrentState->Uniforms);
 
@@ -155,6 +175,9 @@ void FOpenGLRenderInterface::PopState(INT Flags){
 
 	if(CurrentState->ZBias != PoppedState->ZBias)
 		SetZBias(CurrentState->ZBias);
+
+	if(CurrentState->CullMode != PoppedState->CullMode)
+		SetCullMode(CurrentState->CullMode);
 
 	NeedUniformUpdate = CurrentState->UniformRevision != PoppedState->UniformRevision;
 

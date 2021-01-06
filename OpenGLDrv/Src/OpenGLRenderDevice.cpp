@@ -579,7 +579,7 @@ FRenderInterface* UOpenGLRenderDevice::Lock(UViewport* Viewport, BYTE* HitData, 
 	RenderInterface.LockedViewport = Viewport;
 
 	if(bUseOffscreenFramebuffer)
-		RenderInterface.SetRenderTarget(&ScreenRenderTarget, false);
+		RenderInterface.SetRenderTarget(&ScreenRenderTarget, true);
 
 	RenderInterface.SetShader(&FixedFunctionShader); // TODO: Move to FOpenGLRenderInterface::SetMaterial
 	RenderInterface.SetupPerFrameShaderConstants();
@@ -596,11 +596,12 @@ void UOpenGLRenderDevice::Unlock(FRenderInterface* RI){
 void UOpenGLRenderDevice::Present(UViewport* Viewport){
 	checkSlow(IsCurrent());
 
-	FOpenGLTexture* Framebuffer = RenderInterface.CurrentState->RenderTarget;
+	FRenderTarget* RenderTarget = RenderInterface.CurrentState->RenderTarget;
+	FOpenGLTexture* Framebuffer = RenderTarget ? static_cast<FOpenGLTexture*>(GetCachedResource(RenderTarget->GetCacheId())) : NULL;
 
 	if(Framebuffer){
 		RenderInterface.PushState();
-		RenderInterface.SetRenderTarget(NULL, false);
+		RenderInterface.SetRenderTarget(NULL, true);
 
 		INT FramebufferWidth = Framebuffer->Width;
 		INT FramebufferHeight = Framebuffer->Height;

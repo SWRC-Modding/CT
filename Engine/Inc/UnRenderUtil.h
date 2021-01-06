@@ -369,7 +369,7 @@ public:
 
 	virtual void GetTextureData(INT MipIndex, void* Dest, INT DestStride, ETextureFormat DestFormat, UBOOL ColoredMips, UBOOL UnloadMip);
 	virtual void* GetRawTextureData(INT MipIndex);
-	virtual void UnloadRawTextureData( INT MipIndex ) {}
+	virtual void UnloadRawTextureData(INT MipIndex){}
 
 	virtual UTexture* GetUTexture();
 };

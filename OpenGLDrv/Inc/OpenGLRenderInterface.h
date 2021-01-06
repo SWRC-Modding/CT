@@ -128,7 +128,8 @@ public:
 		INT                   UniformRevision;
 		FOpenGLGlobalUniforms Uniforms;
 
-		FOpenGLTexture*       RenderTarget;
+		FRenderTarget*        RenderTarget;
+		bool                  RenderTargetMatchesBackbuffer;
 
 		INT                   ViewportX;
 		INT                   ViewportY;
@@ -180,6 +181,7 @@ public:
 
 		// Light
 
+		bool                  Unlit;
 		bool                  UseDynamicLighting;
 		bool                  UseStaticLighting;
 		bool                  LightingModulate2X;
@@ -219,7 +221,7 @@ public:
 	// Overrides
 	virtual void PushState(INT Flags = 0);
 	virtual void PopState(INT Flags = 0);
-	virtual UBOOL SetRenderTarget(FRenderTarget* RenderTarget, bool bFSAA);
+	virtual UBOOL SetRenderTarget(FRenderTarget* RenderTarget, bool MatchBackbuffer);
 	virtual void SetViewport(INT X, INT Y, INT Width, INT Height);
 	virtual void Clear(UBOOL UseColor = 1, FColor Color = FColor(0, 0, 0), UBOOL UseDepth = 1, FLOAT Depth = 1.0f, UBOOL UseStencil = 1, DWORD Stencil = 0);
 	virtual void PushHit(const BYTE* Data, INT Count){}
@@ -345,7 +347,7 @@ private:
 						CurrentState->CullMode = CM_None;
 
 					if(FinalBlend->AlphaTest)
-						CurrentState->AlphaRef = CurrentState->AlphaRef / 255.0f;
+						CurrentState->AlphaRef = FinalBlend->AlphaRef / 255.0f;
 				}else if(Modifier->IsA<UColorModifier>()){
 					UColorModifier* ColorModifier = static_cast<UColorModifier*>(Modifier);
 

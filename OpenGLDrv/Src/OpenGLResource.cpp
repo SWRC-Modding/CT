@@ -234,7 +234,7 @@ FOpenGLTexture::~FOpenGLTexture(){
 	Free();
 }
 
-void FOpenGLTexture::Cache(FBaseTexture* BaseTexture){
+void FOpenGLTexture::Cache(FBaseTexture* BaseTexture, bool RenderTargetMatchBackbuffer){
 	Free();
 
 	FTexture* Texture = BaseTexture->GetTextureInterface();
@@ -273,9 +273,16 @@ void FOpenGLTexture::Cache(FBaseTexture* BaseTexture){
 		if(Width == 0 || Height == 0)
 			return;
 
+		GLenum Format;
+
+		if(RenderTargetMatchBackbuffer)
+			Format = RenDev->Use16bit ? GL_RGB565 : GL_RGB8;
+		else
+			Format = GL_RGBA8;
+
 		glCreateFramebuffers(1, &FBO);
 		glCreateTextures(GL_TEXTURE_2D, 1, &TextureHandle);
-		glTextureStorage2D(TextureHandle, 1, RenDev->Use16bit ? GL_RGB565 : GL_RGB8, Width, Height);
+		glTextureStorage2D(TextureHandle, 1, Format, Width, Height);
 		glNamedFramebufferTexture(FBO, GL_COLOR_ATTACHMENT0, TextureHandle, 0);
 		glCreateRenderbuffers(1, &DepthStencilAttachment);
 		glNamedRenderbufferStorage(DepthStencilAttachment, GL_DEPTH24_STENCIL8, Width, Height);

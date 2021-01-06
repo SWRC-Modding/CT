@@ -80,7 +80,7 @@ public:
 	FOpenGLTexture(UOpenGLRenderDevice* InRenDev, QWORD InCacheId);
 	virtual ~FOpenGLTexture();
 
-	void Cache(FBaseTexture* BaseTexture);
+	void Cache(FBaseTexture* BaseTexture, bool RenderTargetMatchBackbuffer = false);
 	void Free();
 	void BindTexture(GLuint TextureUnit);
 	void BindRenderTarget();

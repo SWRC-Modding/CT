@@ -361,11 +361,8 @@ void FOpenGLTexture::UploadTextureData(GLenum Target, ETextureFormat Format, voi
 		if(Target == GL_TEXTURE_2D){
 			checkSlow(!TextureHandle);
 			glCreateTextures(GL_TEXTURE_2D, 1, &TextureHandle);
-
 			glTextureStorage2D(TextureHandle, NumMips, GL_RGBA8, Width, Height);
-
 			glTextureSubImage2D(TextureHandle, 0, 0, 0, Width, Height, GLFormat, GLType, Data);
-
 		}else if(Target == GL_TEXTURE_CUBE_MAP){
 			if(!TextureHandle){
 				glCreateTextures(GL_TEXTURE_CUBE_MAP, 1, &TextureHandle);
@@ -373,7 +370,6 @@ void FOpenGLTexture::UploadTextureData(GLenum Target, ETextureFormat Format, voi
 			}
 
 			glTextureSubImage3D(TextureHandle, 0, 0, 0, CubemapFace, Width, Height, 1, GLFormat, GLType, Data);
-
 		}else{
 			appErrorf("Invalid texture target '%x'", Target);
 		}

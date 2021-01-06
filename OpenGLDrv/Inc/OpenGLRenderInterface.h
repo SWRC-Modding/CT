@@ -73,7 +73,8 @@ enum EShaderUniforms{
 	SU_StageAlphaOps        = 58, // int[8]
 	SU_ConstantColor        = 66, // vec4
 	SU_AlphaRef             = 67, // float
-	SU_LightingEnabled      = 68  // bool
+	SU_LightingEnabled      = 68, // bool
+	SU_LightFactor          = 69  // float
 };
 
 #define GLSL_STRUCT(x) struct x // Workaround to get struct name to show up in C++ but not GLSL
@@ -102,11 +103,7 @@ enum EShaderUniforms{
 		UNIFORM_STRUCT_MEMBER(float, InvRadius) \
 		UNIFORM_STRUCT_MEMBER(int, Type) \
 	}, Lights[MAX_LIGHTS]) \
-	UNIFORM_BLOCK_MEMBER(int, NumLights) \
-	UNIFORM_BLOCK_MEMBER(bool, FogEnabled) \
-	UNIFORM_BLOCK_MEMBER(float, FogStart) \
-	UNIFORM_BLOCK_MEMBER(float, FogEnd) \
-	UNIFORM_BLOCK_MEMBER(vec4, FogColor)
+	UNIFORM_BLOCK_MEMBER(int, NumLights)
 
 #pragma warning(push)
 #pragma warning(disable : 4324) // structure was padded due to __declspec(align())

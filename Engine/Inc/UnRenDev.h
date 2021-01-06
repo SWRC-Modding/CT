@@ -84,7 +84,7 @@ class FRenderInterface{
 public:
 	virtual void PushState(INT Flags = 0) = 0;
 	virtual void PopState(INT Flags = 0) = 0;
-	virtual UBOOL SetRenderTarget(FRenderTarget* RenderTarget, bool bFSAA) = 0;
+	virtual UBOOL SetRenderTarget(FRenderTarget* RenderTarget, bool MatchBackbuffer) = 0;
 	virtual UBOOL SetCubeRenderTarget(class FDynamicCubemap*, int, int){ return 0; }
 	virtual void SetViewport(INT X, INT Y, INT Width, INT Height) = 0;
 	virtual void Clear(UBOOL UseColor = 1, FColor Color = FColor(0, 0, 0), UBOOL UseDepth = 1, FLOAT Depth = 1.0f, UBOOL UseStencil = 1, DWORD Stencil = 0) = 0;

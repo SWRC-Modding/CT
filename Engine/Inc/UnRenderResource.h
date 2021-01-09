@@ -478,7 +478,7 @@ inline void ConvertL6V5U5ToRGBA8(const void* In, void* Out, INT Width, INT Heigh
 			P2->R = Map8BitSignedTo8BitUnsigned(Map5BitSignedTo8BitSigned(P1->U));
 			P2->G = Map8BitSignedTo8BitUnsigned(Map5BitSignedTo8BitSigned(P1->V));
 			P2->B = Map6BitUnsignedTo8BitUnsigned(P1->L);
-			P2->A = P2->R;
+			P2->A = P2->B;
 		}
 	}
 }
@@ -492,10 +492,10 @@ inline void ConvertX8L8V8U8ToRGB8(const void* In, void* Out, INT Width, INT Heig
 			const FX8L8V8U8Pixel* P1 = static_cast<const FX8L8V8U8Pixel*>(In) + Index;
 			FRGBA8Pixel* P2 = static_cast<FRGBA8Pixel*>(Out) + Index;
 
-			P2->B = Map8BitSignedTo8BitUnsigned(P1->U);
+			P2->R = Map8BitSignedTo8BitUnsigned(P1->U);
 			P2->G = Map8BitSignedTo8BitUnsigned(P1->V);
-			P2->R = P1->L;
-			P2->A = P1->X;
+			P2->B = P1->X;
+			P2->A = P1->L;
 		}
 	}
 }

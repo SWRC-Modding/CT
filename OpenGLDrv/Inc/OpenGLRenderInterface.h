@@ -23,9 +23,11 @@ struct FStreamDeclaration{
 };
 
 enum EColorArg{
-	CA_Previous,
 	CA_Diffuse,
 	CA_Constant,
+	CA_Previous,
+	CA_Temp1,
+	CA_Temp2,
 	CA_Texture0,
 	CA_Texture1,
 	CA_Texture2,
@@ -33,13 +35,17 @@ enum EColorArg{
 	CA_Texture4,
 	CA_Texture5,
 	CA_Texture6,
-	CA_Texture7,
-	CA_MAX // Can be used for the default value
+	CA_Texture7
 };
 
-enum EColorModifier{
-	CM_CubeMap = 1 << 30,
-	CM_Invert  = 1 << 31
+enum EColorArgModifier{
+	CAM_CubeMap = 1 << 30,
+	CAM_Invert  = 1 << 31
+};
+
+enum EColorOpModifier{
+	COPM_SaveTemp1 = 1 << 30,
+	COPM_SaveTemp2 = 1 << 31
 };
 
 enum EColorOp{
@@ -60,6 +66,10 @@ enum EAlphaOp{
 	AOP_Modulate,
 	AOP_Add,
 	AOP_Blend
+};
+
+enum EAlphaOpModifier{
+	AOPM_LightInfluence = 1 << 31
 };
 
 enum EShaderUniforms{
@@ -262,6 +272,7 @@ private:
 	void SetBitmapTexture(UBitmapMaterial* Bitmap, INT TextureUnit);
 	bool SetSimpleMaterial(UMaterial* Material, FString* ErrorString, UMaterial** ErrorMaterial);
 	bool HandleCombinedMaterial(UMaterial* Material, INT& PassesUsed, INT& TexturesUsed, FString* ErrorString, UMaterial** ErrorMaterial);
+	bool SetShaderMaterial(UShader* Shader, FString* ErrorString, UMaterial** ErrorMaterial);
 	bool SetTerrainMaterial(UTerrainMaterial* Terrain, FString* ErrorString, UMaterial** ErrorMaterial);
 	bool SetParticleMaterial(UParticleMaterial* ParticleMaterial, FString* ErrorString, UMaterial** ErrorMaterial);
 	void UseDiffuse();
@@ -339,6 +350,7 @@ private:
 				}else if(Modifier->IsA<UFinalBlend>()){
 					UFinalBlend* FinalBlend = static_cast<UFinalBlend*>(Modifier);
 
+					CurrentState->ModifyFramebufferBlending = true;
 					CurrentState->FramebufferBlending = FinalBlend->FrameBufferBlending;
 					CurrentState->bZTest = FinalBlend->ZTest != 0;
 					CurrentState->bZWrite = FinalBlend->ZWrite != 0;

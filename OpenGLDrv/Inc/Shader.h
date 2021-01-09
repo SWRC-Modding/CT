@@ -54,6 +54,4 @@ private:
 
 	static UHardwareShaderMacros* HardwareShaderMacros;
 	static TMap<FString, FString> HardwareShaderMacroText;
-
-	void ExpandHardwareShaderMacros();
 };

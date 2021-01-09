@@ -465,34 +465,7 @@ void FOpenGLRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorStri
 	bool Result = false;
 
 	if(CheckMaterial<UShader>(&Material, 0, 0)){
-		UShader* Shader = static_cast<UShader*>(Material);
-
-		Result = SetSimpleMaterial(Shader->Diffuse, ErrorString, ErrorMaterial);
-
-		if(!CurrentState->ModifyFramebufferBlending){
-			switch(Shader->OutputBlending){
-			case OB_Modulate:
-				CurrentState->FramebufferBlending = FB_Modulate;
-				break;
-			case OB_Translucent:
-				CurrentState->FramebufferBlending = FB_Translucent;
-				break;
-			case OB_Invisible:
-				CurrentState->FramebufferBlending = FB_Invisible;
-				break;
-			case OB_Brighten:
-				CurrentState->FramebufferBlending = FB_Brighten;
-				break;
-			case OB_Darken:
-				CurrentState->FramebufferBlending = FB_Darken;
-			}
-
-			if(Shader->OutputBlending == OB_Masked)
-				CurrentState->AlphaRef = 0.5f;
-
-			if(Shader->TwoSided)
-				CurrentState->CullMode = CM_None;
-		}
+		Result = SetShaderMaterial(static_cast<UShader*>(Material), ErrorString, ErrorMaterial);
 	}else if(CheckMaterial<UCombiner>(&Material, -1)){
 		Result = SetSimpleMaterial(Material, ErrorString, ErrorMaterial);
 	}else if(CheckMaterial<UConstantMaterial>(&Material, -1)){
@@ -552,16 +525,16 @@ void FOpenGLRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorStri
 		if(Cubemaps[i]){
 			for(INT j = 0; j < CurrentState->NumStages; ++j){
 				if(CurrentState->StageColorArgs[j][0] == CA_Texture0 + i)
-					CurrentState->StageColorArgs[j][0] |= CM_CubeMap;
+					CurrentState->StageColorArgs[j][0] |= CAM_CubeMap;
 
 				if(CurrentState->StageColorArgs[j][1] == CA_Texture0 + i)
-					CurrentState->StageColorArgs[j][1] |= CM_CubeMap;
+					CurrentState->StageColorArgs[j][1] |= CAM_CubeMap;
 
 				if(CurrentState->StageAlphaArgs[j][0] == CA_Texture0 + i)
-					CurrentState->StageAlphaArgs[j][0] |= CM_CubeMap;
+					CurrentState->StageAlphaArgs[j][0] |= CAM_CubeMap;
 
 				if(CurrentState->StageAlphaArgs[j][1] == CA_Texture0 + i)
-					CurrentState->StageAlphaArgs[j][1] |= CM_CubeMap;
+					CurrentState->StageAlphaArgs[j][1] |= CAM_CubeMap;
 			}
 		}
 	}
@@ -864,7 +837,7 @@ bool FOpenGLRenderInterface::HandleCombinedMaterial(UMaterial* Material, INT& St
 			if(Mask != Material1 && Mask != Material2){
 				// If the mask is a simple bitmap material we don't need to waste an entire stage for it, just the texture unit.
 				bool SimpleBitmapMask = Mask->IsA<UBitmapMaterial>() != 0;
-				INT MaskModifiers = Combiner->InvertMask ? CM_Invert : 0;
+				INT MaskModifiers = Combiner->InvertMask ? CAM_Invert : 0;
 
 				if(SimpleBitmapMask || CheckMaterial<UBitmapMaterial>(&Mask, StagesUsed, TexturesUsed)){
 					if(TexturesUsed >= MAX_TEXTURES){
@@ -1058,6 +1031,117 @@ bool FOpenGLRenderInterface::HandleCombinedMaterial(UMaterial* Material, INT& St
 
 		return true;
 	}
+
+	return true;
+}
+
+bool FOpenGLRenderInterface::SetShaderMaterial(UShader* Shader, FString* ErrorString, UMaterial** ErrorMaterial){
+	INT StagesUsed = 0;
+	INT TexturesUsed = 0;
+	bool HaveDiffuse = false;
+
+	if(Shader->Diffuse){
+		if(!HandleCombinedMaterial(Shader->Diffuse, StagesUsed, TexturesUsed, ErrorString, ErrorMaterial))
+			return false;
+
+		CurrentState->StageColorOps[StagesUsed - 1] |= COPM_SaveTemp1;
+		HaveDiffuse = true;
+	}
+
+	if(Shader->SelfIllumination){
+		if(Shader->SelfIllumination != Shader->Diffuse){
+			if(!HandleCombinedMaterial(Shader->SelfIllumination, StagesUsed, TexturesUsed, ErrorString, ErrorMaterial))
+				return false;
+		}
+
+		CurrentState->StageColorOps[StagesUsed - 1] |= COPM_SaveTemp2;
+
+		if(Shader->SelfIlluminationMask){
+			if(Shader->SelfIlluminationMask == Shader->Diffuse){
+				CurrentState->StageColorArgs[StagesUsed][0] = CA_Temp1;
+				CurrentState->StageColorArgs[StagesUsed][1] = CA_Temp2;
+				CurrentState->StageAlphaArgs[StagesUsed][0] = CA_Temp1;
+				CurrentState->StageAlphaOps[StagesUsed] = AOP_Arg1 | AOPM_LightInfluence;
+				CurrentState->StageColorOps[StagesUsed] = COP_AlphaBlend;
+				++StagesUsed;
+			}else if(Shader->SelfIlluminationMask == Shader->SelfIllumination){
+				CurrentState->StageColorArgs[StagesUsed][0] = HaveDiffuse ? CA_Temp1 : CA_Diffuse;
+				CurrentState->StageColorArgs[StagesUsed][1] = CA_Temp2;
+				CurrentState->StageAlphaArgs[StagesUsed][0] = CA_Temp2;
+				CurrentState->StageAlphaOps[StagesUsed] = AOP_Arg1 | AOPM_LightInfluence;
+				CurrentState->StageColorOps[StagesUsed] = COP_AlphaBlend;
+				++StagesUsed;
+			}else{
+				if(!HandleCombinedMaterial(Shader->SelfIlluminationMask, StagesUsed, TexturesUsed, ErrorString, ErrorMaterial))
+					return false;
+
+				CurrentState->StageColorArgs[StagesUsed][0] = HaveDiffuse ? CA_Temp1 : CA_Diffuse;
+				CurrentState->StageColorArgs[StagesUsed][1] = CA_Temp2;
+				CurrentState->StageAlphaArgs[StagesUsed][0] = CA_Previous;
+				CurrentState->StageAlphaOps[StagesUsed] = AOP_Arg1 | AOPM_LightInfluence;
+				CurrentState->StageColorOps[StagesUsed] = COP_AlphaBlend;
+				++StagesUsed;
+			}
+		}else{
+			CurrentState->Unlit = true;
+		}
+	}
+
+	if(Shader->Opacity){
+		INT AlphaArg;
+
+		if(Shader->Opacity == Shader->Diffuse){
+			AlphaArg = CA_Temp1;
+		}else if(Shader->Opacity == Shader->SelfIllumination){
+			AlphaArg = CA_Temp2;
+		}else{
+			CurrentState->StageColorOps[StagesUsed - 1] |= COPM_SaveTemp1;
+
+			if(!HandleCombinedMaterial(Shader->Opacity, StagesUsed, TexturesUsed, ErrorString, ErrorMaterial))
+				return false;
+
+			AlphaArg = CA_Previous;
+		}
+
+		CurrentState->StageColorArgs[StagesUsed][0] = CA_Temp1;
+		CurrentState->StageAlphaArgs[StagesUsed][0] = AlphaArg;
+		CurrentState->StageAlphaOps[StagesUsed] = AOP_Arg1;
+		CurrentState->StageColorOps[StagesUsed] = COP_Arg1;
+		++StagesUsed;
+	}
+
+	if(!CurrentState->ModifyFramebufferBlending){
+		switch(Shader->OutputBlending){
+		case OB_Normal:
+			if(Shader->Opacity){
+				CurrentState->AlphaRef = 0.0f;
+				CurrentState->FramebufferBlending = FB_AlphaBlend;
+			}
+
+			break;
+		case OB_Masked:
+			CurrentState->AlphaRef = 0.5f;
+			CurrentState->FramebufferBlending = FB_AlphaBlend;
+			break;
+		case OB_Modulate:
+			CurrentState->FramebufferBlending = FB_Modulate;
+			break;
+		case OB_Translucent:
+			CurrentState->FramebufferBlending = FB_Translucent;
+			break;
+		case OB_Invisible:
+			CurrentState->FramebufferBlending = FB_Invisible;
+			break;
+		case OB_Brighten:
+			CurrentState->FramebufferBlending = FB_Brighten;
+			break;
+		case OB_Darken:
+			CurrentState->FramebufferBlending = FB_Darken;
+		}
+	}
+
+	CurrentState->NumStages = StagesUsed;
+	CurrentState->NumTextures = TexturesUsed;
 
 	return true;
 }

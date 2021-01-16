@@ -26,9 +26,6 @@ public:
 		Name = InName;
 	}
 
-	void SetVertexShaderFromHardwareShader(UHardwareShader* HardwareShader);
-	void SetFragmentShaderFromHardwareShader(UHardwareShader* HardwareShader);
-
 	void SetVertexShaderText(const FString& InVertexShaderText){
 		VertexShaderText = InVertexShaderText;
 		++Revision;
@@ -43,15 +40,8 @@ public:
 	const TCHAR* GetVertexShaderText() const{ return *VertexShaderText; }
 	const TCHAR* GetFragmentShaderText() const{ return *FragmentShaderText; }
 
-	static void SetHardwareShaderMacros(UHardwareShaderMacros* Macros);
-	static void ClearHardwareShaderMacros();
-	static void ExpandHardwareShaderMacros(FString* ShaderText);
-
 private:
 	FString Name;
 	FString VertexShaderText;
 	FString FragmentShaderText;
-
-	static UHardwareShaderMacros* HardwareShaderMacros;
-	static TMap<FString, FString> HardwareShaderMacroText;
 };

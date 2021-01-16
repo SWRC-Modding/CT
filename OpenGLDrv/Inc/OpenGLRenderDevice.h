@@ -25,6 +25,15 @@ public:
 	FShaderGLSL            FixedFunctionShader;
 	FShaderGLSL            FramebufferShader;
 
+	// Default shader code
+	static FString            CommonShaderHeaderText;
+	static FString            VertexShaderVarsText;
+	static FString            FragmentShaderVarsText;
+	static FString            FixedFunctionVertexShaderText;
+	static FString            FixedFunctionFragmentShaderText;
+	static FString            FramebufferVertexShaderText;
+	static FString            FramebufferFragmentShaderText;
+
 	UOpenGLRenderDevice();
 	void StaticConstructor();
 
@@ -95,14 +104,6 @@ private:
 
 	TMap<UHardwareShader*, FShaderGLSL> GLShaderByHardwareShader;
 
-	static FString            CommonShaderHeaderText;
-	static FString            VertexShaderVarsText;
-	static FString            FragmentShaderVarsText;
-	static FString            FixedFunctionVertexShaderText;
-	static FString            FixedFunctionFragmentShaderText;
-	static FString            FramebufferVertexShaderText;
-	static FString            FramebufferFragmentShaderText;
-
 	friend class FOpenGLResource;
 	friend class FOpenGLRenderInterface;
 
@@ -120,4 +121,16 @@ private:
 
 	FStringTemp MakeShaderFilename(FShaderGLSL* Shader, const TCHAR* Extension);
 	void SaveShaderText(const FFilename& Filename, const FString& Text);
+
+	// Shader conversion
+
+	static UHardwareShaderMacros* HardwareShaderMacros;
+	static TMap<FString, FString> HardwareShaderMacroText;
+
+	static void SetHardwareShaderMacros(UHardwareShaderMacros* Macros);
+	static void ClearHardwareShaderMacros();
+	static void ExpandHardwareShaderMacros(FString* ShaderText);
+	static FStringTemp GLSLVertexShaderFromD3DVertexShader(UHardwareShader* Shader);
+	static FStringTemp GLSLFragmentShaderFromD3DPixelShader(UHardwareShader* Shader);
+	static FStringTemp ConvertD3DAssemblyToGLSL();
 };

@@ -14,6 +14,8 @@ class FOpenGLShader;
 #define MAX_TEXTURES 8
 #define MAX_SHADER_STAGES 8
 #define MAX_LIGHTS 8
+#define MAX_VERTEX_SHADER_CONSTANTS 96
+#define MAX_PIXEL_SHADER_CONSTANTS 8
 
 struct FStreamDeclaration{
 	FVertexComponent Components[MAX_VERTEX_COMPONENTS];
@@ -87,6 +89,12 @@ enum EShaderUniforms{
 	SU_LightFactor          = 69  // float
 };
 
+enum EHardwareShaderUniforms{
+	HSU_VSConstants = 0,
+	HSU_PSConstants = MAX_VERTEX_SHADER_CONSTANTS,
+	HSU_AlphaRef    = MAX_VERTEX_SHADER_CONSTANTS + MAX_PIXEL_SHADER_CONSTANTS
+};
+
 #define GLSL_STRUCT(x) struct x // Workaround to get struct name to show up in C++ but not GLSL
 #define STRUCT(x) struct
 
@@ -95,6 +103,7 @@ enum EShaderUniforms{
 	UNIFORM_BLOCK_MEMBER(mat4, LocalToWorld) \
 	UNIFORM_BLOCK_MEMBER(mat4, WorldToCamera) \
 	UNIFORM_BLOCK_MEMBER(mat4, CameraToScreen) \
+	UNIFORM_BLOCK_MEMBER(mat4, LocalToCamera) \
 	UNIFORM_BLOCK_MEMBER(mat4, LocalToScreen) \
 	UNIFORM_BLOCK_MEMBER(mat4, WorldToLocal) \
 	UNIFORM_BLOCK_MEMBER(mat4, WorldToScreen) \
@@ -111,6 +120,7 @@ enum EShaderUniforms{
 		UNIFORM_STRUCT_MEMBER(vec3, Direction) \
 		UNIFORM_STRUCT_MEMBER(float, Radius) \
 		UNIFORM_STRUCT_MEMBER(float, InvRadius) \
+		UNIFORM_STRUCT_MEMBER(float, CosCone) \
 		UNIFORM_STRUCT_MEMBER(int, Type) \
 	}, Lights[MAX_LIGHTS]) \
 	UNIFORM_BLOCK_MEMBER(int, NumLights)
@@ -248,6 +258,7 @@ public:
 	virtual void SetTransform(ETransformType Type, const FMatrix& Matrix);
 	virtual FMatrix GetTransform(ETransformType Type) const;
 	virtual void SetMaterial(UMaterial* Material, FString* ErrorString = NULL, UMaterial** ErrorMaterial = NULL, INT* NumPasses = NULL);
+	virtual UBOOL SetHardwareShaderMaterial(UHardwareShader* Material, FString* ErrorString = NULL, UMaterial** ErrorMaterial = NULL, INT* NumPasses = NULL);
 	virtual void SetStencilOp(ECompareFunction Test, DWORD Ref, DWORD Mask, EStencilOp FailOp, EStencilOp ZFailOp, EStencilOp PassOp, DWORD WriteMask);
 	virtual void EnableStencilTest(UBOOL Enable);
 	virtual void EnableZWrite(UBOOL Enable);
@@ -270,6 +281,7 @@ private:
 	void InitDefaultMaterialStageState(INT StageIndex);
 	void SetTexture(FBaseTexture* Texture, INT TextureUnit);
 	void SetBitmapTexture(UBitmapMaterial* Bitmap, INT TextureUnit);
+	void GetShaderConstants(FSConstantsInfo* Info, FPlane* Constants, INT NumConstants);
 	bool SetSimpleMaterial(UMaterial* Material, FString* ErrorString, UMaterial** ErrorMaterial);
 	bool HandleCombinedMaterial(UMaterial* Material, INT& PassesUsed, INT& TexturesUsed, FString* ErrorString, UMaterial** ErrorMaterial);
 	bool SetShaderMaterial(UShader* Shader, FString* ErrorString, UMaterial** ErrorMaterial);

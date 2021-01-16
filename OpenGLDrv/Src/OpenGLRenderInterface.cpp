@@ -29,7 +29,6 @@ void FOpenGLRenderInterface::Init(){
 	CurrentState->AlphaRef = -1.0f;
 
 	// Create uniform buffer
-
 	glCreateBuffers(1, &GlobalUBO);
 	glNamedBufferStorage(GlobalUBO, sizeof(FOpenGLGlobalUniforms), &CurrentState->Uniforms, GL_DYNAMIC_STORAGE_BIT);
 	glBindBufferBase(GL_UNIFORM_BUFFER, 0, GlobalUBO); // Binding index 0 is reserved for the global uniform block
@@ -70,24 +69,6 @@ void FOpenGLRenderInterface::UpdateGlobalShaderUniforms(){
 	CurrentState->Uniforms.WorldToScreen = CurrentState->Uniforms.WorldToCamera *
 	                                       CurrentState->Uniforms.CameraToScreen;
 	CurrentState->Uniforms.CameraToWorld = CurrentState->Uniforms.WorldToCamera.Inverse();
-	// EyePosition
-	CurrentState->Uniforms.EyePosition.X = CurrentState->Uniforms.CameraToWorld.M[3][0];
-	CurrentState->Uniforms.EyePosition.Y = CurrentState->Uniforms.CameraToWorld.M[3][1];
-	CurrentState->Uniforms.EyePosition.Z = CurrentState->Uniforms.CameraToWorld.M[3][2];
-	// EyePositionObjectSpace
-	CurrentState->Uniforms.EyePositionObjectSpace = CurrentState->Uniforms.WorldToLocal.TransformFVector(CurrentState->Uniforms.EyePosition);
-	// DrawScale3D
-	CurrentState->Uniforms.DrawScale3D.X = CurrentState->Uniforms.LocalToWorld.M[0][0];
-	CurrentState->Uniforms.DrawScale3D.Y = CurrentState->Uniforms.LocalToWorld.M[1][1];
-	CurrentState->Uniforms.DrawScale3D.Z = CurrentState->Uniforms.LocalToWorld.M[2][2];
-	// Flicker
-	// TODO...
-	// XYCircle
-	CurrentState->Uniforms.XYCircle.X = appCos(CurrentState->Uniforms.Time) * 500.0f;
-	CurrentState->Uniforms.XYCircle.Y = appSin(CurrentState->Uniforms.Time) * 500.0f;
-	// 2DRotator
-	CurrentState->Uniforms.Rotator2D.X = appCos(CurrentState->Uniforms.Time);
-	CurrentState->Uniforms.Rotator2D.Y = -appSin(CurrentState->Uniforms.Time);
 
 	glNamedBufferSubData(GlobalUBO, 0, sizeof(FOpenGLGlobalUniforms), &CurrentState->Uniforms);
 
@@ -436,6 +417,9 @@ void FOpenGLRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorStri
 		}
 	}
 
+	if(NumPasses)
+		*NumPasses = 1;
+
 	// Restore default material state
 
 	for(INT i = 0; i < CurrentState->NumStages; ++i)
@@ -463,6 +447,7 @@ void FOpenGLRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorStri
 	Material->PreSetMaterial(GEngineTime);
 
 	bool Result = false;
+	bool UseFixedFunction = true;
 
 	if(CheckMaterial<UShader>(&Material, 0, 0)){
 		Result = SetShaderMaterial(static_cast<UShader*>(Material), ErrorString, ErrorMaterial);
@@ -489,30 +474,12 @@ void FOpenGLRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorStri
 		CurrentState->bZWrite = false;
 	}else if(CheckMaterial<UHardwareShaderWrapper>(&Material, 0)){
 		UHardwareShaderWrapper* HardwareShaderWrapper = static_cast<UHardwareShaderWrapper*>(Material);
-		UHardwareShader* HardwareShader = HardwareShaderWrapper->ShaderImplementation;
-
-		RenDev->GetShader(HardwareShader);
-
 		HardwareShaderWrapper->SetupShaderWrapper(this);
-		Result = SetSimpleMaterial(HardwareShader->Textures[0], ErrorString, ErrorMaterial);
-
-		if(HardwareShader->AlphaBlending)
-			CurrentState->FramebufferBlending = FB_AlphaBlend;
-
-		if(HardwareShader->AlphaTest)
-			CurrentState->AlphaRef = HardwareShader->AlphaRef / 255.0f;
+		Result = SetHardwareShaderMaterial(HardwareShaderWrapper->ShaderImplementation, ErrorString, ErrorMaterial, NumPasses) != 0;
+		UseFixedFunction = !Result;
 	}else if(CheckMaterial<UHardwareShader>(&Material, 0)){
-		UHardwareShader* HardwareShader = static_cast<UHardwareShader*>(Material);
-
-		RenDev->GetShader(HardwareShader);
-
-		Result = SetSimpleMaterial(HardwareShader->Textures[0], ErrorString, ErrorMaterial);
-
-		if(HardwareShader->AlphaBlending)
-			CurrentState->FramebufferBlending = FB_AlphaBlend;
-
-		if(HardwareShader->AlphaTest)
-			CurrentState->AlphaRef = HardwareShader->AlphaRef / 255.0f;
+		Result = SetHardwareShaderMaterial(static_cast<UHardwareShader*>(Material), ErrorString, ErrorMaterial, NumPasses) != 0;
+		UseFixedFunction = !Result;
 	}
 
 	if(!Result || CurrentState->NumStages <= 0){ // Reset to default state in error case
@@ -520,37 +487,41 @@ void FOpenGLRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorStri
 		CurrentState->NumStages = 1;
 	}
 
-	// Check for cube maps and set the modifier bit
-	for(INT i = 0; i < CurrentState->NumTextures; ++i){
-		if(Cubemaps[i]){
-			for(INT j = 0; j < CurrentState->NumStages; ++j){
-				if(CurrentState->StageColorArgs[j][0] == CA_Texture0 + i)
-					CurrentState->StageColorArgs[j][0] |= CAM_CubeMap;
+	if(UseFixedFunction){
+		SetShader(&RenDev->FixedFunctionShader);
 
-				if(CurrentState->StageColorArgs[j][1] == CA_Texture0 + i)
-					CurrentState->StageColorArgs[j][1] |= CAM_CubeMap;
+		// Check for cube maps and set the modifier bit
+		for(INT i = 0; i < CurrentState->NumTextures; ++i){
+			if(Cubemaps[i]){
+				for(INT j = 0; j < CurrentState->NumStages; ++j){
+					if(CurrentState->StageColorArgs[j][0] == CA_Texture0 + i)
+						CurrentState->StageColorArgs[j][0] |= CAM_CubeMap;
 
-				if(CurrentState->StageAlphaArgs[j][0] == CA_Texture0 + i)
-					CurrentState->StageAlphaArgs[j][0] |= CAM_CubeMap;
+					if(CurrentState->StageColorArgs[j][1] == CA_Texture0 + i)
+						CurrentState->StageColorArgs[j][1] |= CAM_CubeMap;
 
-				if(CurrentState->StageAlphaArgs[j][1] == CA_Texture0 + i)
-					CurrentState->StageAlphaArgs[j][1] |= CAM_CubeMap;
+					if(CurrentState->StageAlphaArgs[j][0] == CA_Texture0 + i)
+						CurrentState->StageAlphaArgs[j][0] |= CAM_CubeMap;
+
+					if(CurrentState->StageAlphaArgs[j][1] == CA_Texture0 + i)
+						CurrentState->StageAlphaArgs[j][1] |= CAM_CubeMap;
+				}
 			}
 		}
-	}
 
-	glUniform1i(SU_NumStages, CurrentState->NumStages);
-	glUniform1i(SU_TexCoordCount, CurrentState->TexCoordCount);
-	glUniform1iv(SU_StageTexCoordSources, ARRAY_COUNT(CurrentState->StageTexCoordSources), CurrentState->StageTexCoordSources);
-	glUniformMatrix4fv(SU_StageTexMatrices, ARRAY_COUNT(CurrentState->StageTexMatrices), GL_FALSE, (GLfloat*)CurrentState->StageTexMatrices);
-	glUniform1iv(SU_StageColorArgs, ARRAY_COUNT(CurrentState->StageColorArgs), &CurrentState->StageColorArgs[0][0]);
-	glUniform1iv(SU_StageColorOps, ARRAY_COUNT(CurrentState->StageColorOps), CurrentState->StageColorOps);
-	glUniform1iv(SU_StageAlphaArgs, ARRAY_COUNT(CurrentState->StageAlphaArgs), &CurrentState->StageAlphaArgs[0][0]);
-	glUniform1iv(SU_StageAlphaOps, ARRAY_COUNT(CurrentState->StageAlphaOps), CurrentState->StageAlphaOps);
-	glUniform4fv(SU_ConstantColor, 1, (GLfloat*)&CurrentState->ConstantColor);
-	glUniform1f(SU_AlphaRef, CurrentState->AlphaRef);
-	glUniform1i(SU_LightingEnabled, CurrentState->UseDynamicLighting && !CurrentState->Unlit);
-	glUniform1f(SU_LightFactor, CurrentState->LightingModulate2X ? 2.0f : 1.0f);
+		glUniform1i(SU_NumStages, CurrentState->NumStages);
+		glUniform1i(SU_TexCoordCount, CurrentState->TexCoordCount);
+		glUniform1iv(SU_StageTexCoordSources, ARRAY_COUNT(CurrentState->StageTexCoordSources), CurrentState->StageTexCoordSources);
+		glUniformMatrix4fv(SU_StageTexMatrices, ARRAY_COUNT(CurrentState->StageTexMatrices), GL_FALSE, (GLfloat*)CurrentState->StageTexMatrices);
+		glUniform1iv(SU_StageColorArgs, ARRAY_COUNT(CurrentState->StageColorArgs), &CurrentState->StageColorArgs[0][0]);
+		glUniform1iv(SU_StageColorOps, ARRAY_COUNT(CurrentState->StageColorOps), CurrentState->StageColorOps);
+		glUniform1iv(SU_StageAlphaArgs, ARRAY_COUNT(CurrentState->StageAlphaArgs), &CurrentState->StageAlphaArgs[0][0]);
+		glUniform1iv(SU_StageAlphaOps, ARRAY_COUNT(CurrentState->StageAlphaOps), CurrentState->StageAlphaOps);
+		glUniform4fv(SU_ConstantColor, 1, (GLfloat*)&CurrentState->ConstantColor);
+		glUniform1f(SU_AlphaRef, CurrentState->AlphaRef);
+		glUniform1i(SU_LightingEnabled, CurrentState->UseDynamicLighting && !CurrentState->Unlit);
+		glUniform1f(SU_LightFactor, CurrentState->LightingModulate2X ? 2.0f : 1.0f);
+	}
 
 	for(INT i = 0; i < CurrentState->NumTextures; ++i){
 		glSamplerParameteri(Samplers[i], GL_TEXTURE_WRAP_S, GetTextureWrapMode(CurrentState->StageTexWrapModes[i][0]));
@@ -603,6 +574,242 @@ void FOpenGLRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorStri
 	}
 
 	unguard;
+}
+
+static GLenum GetBlendFunc(ED3DBLEND D3DBlend){
+	switch(D3DBlend){
+	case NOBLEND:
+		return GL_ONE;
+	case ZERO:
+		return GL_ZERO;
+	case ONE:
+		return GL_ONE;
+	case SRCCOLOR:
+		return GL_SRC_COLOR;
+	case INVSRCCOLOR:
+		return GL_ONE_MINUS_SRC_COLOR;
+	case SRCALPHA:
+		return GL_SRC_ALPHA;
+	case INVSRCALPHA:
+		return GL_ONE_MINUS_SRC_ALPHA;
+	case DESTALPHA:
+		return GL_DST_ALPHA;
+	case INVDESTALPHA:
+		return GL_ONE_MINUS_DST_ALPHA;
+	case DESTCOLOR:
+		return GL_DST_COLOR;
+	case INVDESTCOLOR:
+		return GL_ONE_MINUS_DST_COLOR;
+	case SRCALPHASAT:
+		return GL_SRC_ALPHA_SATURATE;
+	case BOTHSRCALPHA:
+		return GL_BLEND_SRC_ALPHA;
+	case BOTHINVSRCALPHA:
+		return GL_ONE_MINUS_SRC_ALPHA;
+	}
+
+	return GL_ONE;
+}
+
+void FOpenGLRenderInterface::GetShaderConstants(FSConstantsInfo* Info, FPlane* Constants, INT NumConstants){
+	FMatrix Matrix;
+	for(INT i = 0; i < NumConstants; ++i){
+		switch(Info[i].Type){
+		case EVC_Unused:
+			continue;
+		case EVC_MaterialDefined:
+			Constants[i] = Info[i].Value;
+			continue;
+		case EVC_WorldToScreenMatrix:
+			Matrix = CurrentState->Uniforms.WorldToScreen.Transpose();
+			appMemcpy(&Constants[i], &Matrix, sizeof(FLOAT) * 16);
+			i += 3;
+			continue;
+		case EVC_ObjectToScreenMatrix:
+			Matrix = CurrentState->Uniforms.LocalToScreen.Transpose();
+			appMemcpy(&Constants[i], &Matrix, sizeof(FLOAT) * 16);
+			i += 3;
+			continue;
+		case EVC_ObjectToWorldMatrix:
+			Matrix = CurrentState->Uniforms.LocalToWorld.Transpose();
+			appMemcpy(&Constants[i], &Matrix, sizeof(FLOAT) * 16);
+			i += 3;
+			continue;
+		case EVC_CameraToWorldMatrix:
+			Matrix = CurrentState->Uniforms.CameraToWorld.Transpose();
+			appMemcpy(&Constants[i], &Matrix, sizeof(FLOAT) * 16);
+			i += 3;
+			continue;
+		case EVC_WorldToCameraMatrix:
+			Matrix = CurrentState->Uniforms.WorldToCamera.Transpose();
+			appMemcpy(&Constants[i], &Matrix, sizeof(FLOAT) * 16);
+			i += 3;
+			continue;
+		case EVC_WorldToObjectMatrix:
+			Matrix = CurrentState->Uniforms.WorldToLocal.Transpose();
+			appMemcpy(&Constants[i], &Matrix, sizeof(FLOAT) * 16);
+			i += 3;
+			continue;
+		case EVC_Time:
+			Constants[i].X = CurrentState->Uniforms.Time;
+			Constants[i].Y = CurrentState->Uniforms.Time;
+			Constants[i].Z = CurrentState->Uniforms.Time;
+			Constants[i].W = CurrentState->Uniforms.Time;
+			continue;
+		case EVC_CosTime:
+			Constants[i].X = CurrentState->Uniforms.CosTime;
+			Constants[i].Y = CurrentState->Uniforms.CosTime;
+			Constants[i].Z = CurrentState->Uniforms.CosTime;
+			Constants[i].W = CurrentState->Uniforms.CosTime;
+			continue;
+		case EVC_SinTime:
+			Constants[i].X = CurrentState->Uniforms.SinTime;
+			Constants[i].Y = CurrentState->Uniforms.SinTime;
+			Constants[i].Z = CurrentState->Uniforms.SinTime;
+			Constants[i].W = CurrentState->Uniforms.SinTime;
+			continue;
+		case EVC_TanTime:
+			Constants[i].X = CurrentState->Uniforms.TanTime;
+			Constants[i].Y = CurrentState->Uniforms.TanTime;
+			Constants[i].Z = CurrentState->Uniforms.TanTime;
+			Constants[i].W = CurrentState->Uniforms.TanTime;
+			continue;
+		case EVC_EyePosition:
+			Constants[i].X = CurrentState->Uniforms.CameraToWorld.M[3][0];
+			Constants[i].Y = CurrentState->Uniforms.CameraToWorld.M[3][1];
+			Constants[i].Z = CurrentState->Uniforms.CameraToWorld.M[3][2];
+			Constants[i].W = CurrentState->Uniforms.CameraToWorld.M[3][3];
+			continue;
+		case EVC_XYCircle:
+			Constants[i].X = appCos(CurrentState->Uniforms.Time) * 500.0f;
+			Constants[i].Y = appSin(CurrentState->Uniforms.Time) * 500.0f;
+			Constants[i].Z = 0.0f;
+			Constants[i].W = 1.0f;
+			continue;
+		case EVC_LightPos1:
+			Constants[i] = CurrentState->Uniforms.Lights[0].Position;
+			continue;
+		case EVC_LightColor1:
+			Constants[i] = CurrentState->Uniforms.Lights[0].Color;
+			continue;
+		case EVC_LightInvRadius1:
+			Constants[i].X = CurrentState->Uniforms.Lights[0].InvRadius;
+			Constants[i].Y = Constants[i].X;
+			Constants[i].Z = Constants[i].X;
+			Constants[i].W = Constants[i].X;
+			continue;
+		case EVC_LightPos2:
+			Constants[i] = CurrentState->Uniforms.Lights[1].Position;
+			continue;
+		case EVC_LightColor2:
+			Constants[i] = CurrentState->Uniforms.Lights[1].Color;
+			continue;
+		case EVC_LightInvRadius2:
+			Constants[i].X = CurrentState->Uniforms.Lights[1].InvRadius;
+			Constants[i].Y = Constants[i].X;
+			Constants[i].Z = Constants[i].X;
+			Constants[i].W = Constants[i].X;
+			continue;
+		case EVC_LightPos3:
+			Constants[i] = CurrentState->Uniforms.Lights[2].Position;
+			continue;
+		case EVC_LightColor3:
+			Constants[i] = CurrentState->Uniforms.Lights[2].Color;
+			continue;
+		case EVC_LightInvRadius3:
+			Constants[i].X = CurrentState->Uniforms.Lights[2].InvRadius;
+			Constants[i].Y = Constants[i].X;
+			Constants[i].Z = Constants[i].X;
+			Constants[i].W = Constants[i].X;
+			continue;
+		case EVC_LightPos4:
+			Constants[i] = CurrentState->Uniforms.Lights[3].Position;
+			continue;
+		case EVC_LightColor4:
+			Constants[i] = CurrentState->Uniforms.Lights[3].Color;
+			continue;
+		case EVC_LightInvRadius4:
+			Constants[i].X = CurrentState->Uniforms.Lights[3].InvRadius;
+			Constants[i].Y = Constants[i].X;
+			Constants[i].Z = Constants[i].X;
+			Constants[i].W = Constants[i].X;
+			continue;
+		case EVC_AmbientLightColor:
+			Constants[i] = CurrentState->Uniforms.AmbientLightColor;
+			continue;
+		case EVC_Flicker:
+			{
+				FLOAT X     = Info[i].Value.X;
+				FLOAT Y     = Info[i].Value.Y;
+				FLOAT YInv  = 1.0f - Y;
+				FLOAT Rand1 = appRand() * 0.000030518509f;
+				FLOAT Rand2 = appRand() * 0.000030518509f;
+				FLOAT Rand3 = appRand() * 0.000030518509f;
+
+				Constants[i].X = Rand1 <= X ? 1.0f : Y * Rand3 + YInv;
+				Constants[i].Y = Rand2 <= X ? 1.0f : Y * Rand1 + YInv;
+				Constants[i].Z = Rand3 <= X ? 1.0f : Y * Rand2 + YInv;
+				Constants[i].W = 1.0f;
+			}
+			continue;
+		case EVC_SpotlightDirection:
+			CurrentState->Uniforms.Lights[0].Direction; // TODO: Implement spotlights
+			continue;
+		case EVC_SpotlightCosCone:
+			CurrentState->Uniforms.Lights[0].CosCone; // TODO: Implement spotlights
+			continue;
+		case EVC_DrawScale3D:
+			Constants[i].X = CurrentState->Uniforms.LocalToWorld.M[0][0];
+			Constants[i].Y = CurrentState->Uniforms.LocalToWorld.M[1][1];
+			Constants[i].Z = CurrentState->Uniforms.LocalToWorld.M[2][2];
+			Constants[i].W = 1.0f;
+			continue;
+		case EVC_Fog:
+			continue; // TODO: Implement Fog
+		case EVC_ObjectToCameraMatrix:
+			Matrix = CurrentState->Uniforms.LocalToCamera.Transpose();
+			appMemcpy(&Constants[i], &Matrix, sizeof(FLOAT) * 16);
+			i += 3;
+			continue;
+		case EVC_EyePositionObjectSpace:
+			Constants[i] = CurrentState->Uniforms.WorldToLocal.TransformFPlane(FPlane(CurrentState->Uniforms.CameraToWorld.M[3][0],
+			                                                                          CurrentState->Uniforms.CameraToWorld.M[3][1],
+			                                                                          CurrentState->Uniforms.CameraToWorld.M[3][2],
+			                                                                          CurrentState->Uniforms.CameraToWorld.M[3][3]));
+			continue;
+		case EVC_2DRotator:
+			Constants[i].X = appCos(CurrentState->Uniforms.Time);
+			Constants[i].Y = -appSin(CurrentState->Uniforms.Time);
+			Constants[i].Z = 0.0f;
+			Constants[i].W = 1.0f;
+			continue;
+		}
+	}
+}
+
+UBOOL FOpenGLRenderInterface::SetHardwareShaderMaterial(UHardwareShader* Material, FString* ErrorString, UMaterial** ErrorMaterial, INT* NumPasses){
+	SetShader(RenDev->GetShader(Material));
+	UpdateGlobalShaderUniforms();
+
+	static FPlane Constants[MAX_VERTEX_SHADER_CONSTANTS];
+
+	GetShaderConstants(Material->VSConstants, Constants, Material->NumVSConstants);
+	glUniform4fv(HSU_PSConstants, Material->NumVSConstants, (GLfloat*)Constants);
+	GetShaderConstants(Material->PSConstants, Constants, Material->NumPSConstants);
+	glUniform4fv(HSU_PSConstants, Material->NumPSConstants, (GLfloat*)Constants);
+
+	for(INT i = 0; i < MAX_TEXTURES; ++i){
+		if(Material->Textures[i])
+			SetBitmapTexture(Material->Textures[i], i);
+	}
+
+	if(Material->AlphaBlending){
+		CurrentState->FramebufferBlending = FB_MAX;
+		CurrentState->SrcBlend = GetBlendFunc(static_cast<ED3DBLEND>(Material->SrcBlend));
+		CurrentState->DstBlend = GetBlendFunc(static_cast<ED3DBLEND>(Material->DestBlend));
+	}
+
+	return 1;
 }
 
 void FOpenGLRenderInterface::SetTexture(FBaseTexture* Texture, INT TextureUnit){

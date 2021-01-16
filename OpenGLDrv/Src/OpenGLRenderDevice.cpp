@@ -94,6 +94,16 @@ FOpenGLResource* UOpenGLRenderDevice::GetCachedResource(QWORD CacheId){
 	return NULL;
 }
 
+static bool IsMatrixShaderConstant(BYTE ConstantType){
+	return ConstantType == EVC_WorldToScreenMatrix ||
+	       ConstantType == EVC_ObjectToScreenMatrix ||
+	       ConstantType == EVC_ObjectToWorldMatrix ||
+	       ConstantType == EVC_CameraToWorldMatrix ||
+	       ConstantType == EVC_WorldToCameraMatrix ||
+	       ConstantType == EVC_WorldToObjectMatrix ||
+	       ConstantType == EVC_ObjectToCameraMatrix;
+}
+
 FShaderGLSL* UOpenGLRenderDevice::GetShader(UHardwareShader* HardwareShader){
 	FShaderGLSL* Shader = GLShaderByHardwareShader.Find(HardwareShader);
 
@@ -105,18 +115,43 @@ FShaderGLSL* UOpenGLRenderDevice::GetShader(UHardwareShader* HardwareShader){
 
 			Shader->SetName(ShaderName.Substitute(".", "\\").Substitute(".", "\\"));
 
+			// Cache number of vertex and pixel shader constants
+
+			for(INT i = MAX_VERTEX_SHADER_CONSTANTS - 1; i >= 0; --i){
+				if(HardwareShader->VSConstants[i].Type != EVC_Unused){
+					HardwareShader->NumVSConstants = i + 1;
+
+					if(IsMatrixShaderConstant(HardwareShader->VSConstants[i].Type))
+						HardwareShader->NumVSConstants += 3;
+
+					break;
+				}
+			}
+
+			for(INT i = MAX_PIXEL_SHADER_CONSTANTS - 1; i >= 0; --i){
+				if(HardwareShader->VSConstants[i].Type != EVC_Unused){
+					HardwareShader->NumPSConstants = i + 1;
+
+					if(IsMatrixShaderConstant(HardwareShader->PSConstants[i].Type))
+						HardwareShader->NumPSConstants += 3;
+
+					break;
+				}
+			}
+
+			// Convert d3d shader assembly to glsl or load existing shader from disk
+
 			if(!LoadVertexShader(Shader)){
-				Shader->SetVertexShaderFromHardwareShader(HardwareShader);
+				// TODO: Convert vertex shader
 				SaveVertexShader(Shader);
 			}
 
 			if(!LoadFragmentShader(Shader)){
-				Shader->SetFragmentShaderFromHardwareShader(HardwareShader);
+				// TODO: Convert fragment shader
 				SaveFragmentShader(Shader);
 			}
 		}else{
-			Shader->SetVertexShaderFromHardwareShader(HardwareShader);
-			Shader->SetFragmentShaderFromHardwareShader(HardwareShader);
+			// TODO: Convert vertex and fragment shader for transient hardware shader
 		}
 	}
 
@@ -251,6 +286,19 @@ UBOOL UOpenGLRenderDevice::Init(){
 	FramebufferShader.SetFragmentShaderText(FramebufferFragmentShaderText);
 
 	LoadShaders();
+
+	UObject* FOVChanger = FindObject<UObject>(NULL, "MainFOVChanger");
+
+	// Create FOVChanger object. This might not be the best place but idk where else to put it...
+	if(!FOVChanger){
+		UClass* FOVChangerClass = LoadClass<UObject>(NULL, "Mod.FOVChanger", NULL, 0, NULL);
+
+		if(FOVChangerClass){
+			FOVChanger = ConstructObject<UObject>(FOVChangerClass, reinterpret_cast<UObject*>(-1), FName("MainFOVChanger"));
+			FOVChanger->AddToRoot(); // This object should never be garbage collected
+			FOVChanger->ProcessEvent(NAME_Init, NULL);
+		}
+	}
 
 	return 1;
 }
@@ -581,8 +629,11 @@ FRenderInterface* UOpenGLRenderDevice::Lock(UViewport* Viewport, BYTE* HitData, 
 	if(bUseOffscreenFramebuffer)
 		RenderInterface.SetRenderTarget(&ScreenRenderTarget, true);
 
-	RenderInterface.SetShader(&FixedFunctionShader); // TODO: Move to FOpenGLRenderInterface::SetMaterial
 	RenderInterface.SetupPerFrameShaderConstants();
+
+	if(!RenderInterface.CurrentState->Shader)
+		RenderInterface.SetShader(&FixedFunctionShader);
+
 	RenderInterface.PushState();
 
 	return &RenderInterface;

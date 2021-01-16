@@ -17,7 +17,7 @@
 	Dependencies.
 -----------------------------------------------------------------------------*/
 
-#include "../../Core/inc/Core.h"
+#include "../../Core/Inc/Core.h"
 
 LINK_LIB(Engine)
 

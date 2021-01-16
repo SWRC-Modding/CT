@@ -292,7 +292,7 @@ public:
 ----------------------------------------------------------------------------*/
 
 //Special canonical package for FindObject, ParseObject.
-#define ANY_PACKAGE ((UPackage*)-1)
+#define ANY_PACKAGE ((UObject*)-1)
 
 //Define private default constructor.
 #define NO_DEFAULT_CONSTRUCTOR(cls) \

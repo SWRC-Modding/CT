@@ -43,6 +43,8 @@ public:
 	FOpenGLResource* GetCachedResource(QWORD CacheId);
 	FShaderGLSL* GetShader(UHardwareShader* HardwareShader);
 
+	static void SetHardwareShaderMacros(UHardwareShaderMacros* Macros);
+
 	// Overrides
 	virtual UBOOL Exec(const TCHAR* Cmd, FOutputDevice& Ar);
 	virtual UBOOL Init();
@@ -127,7 +129,6 @@ private:
 	static UHardwareShaderMacros* HardwareShaderMacros;
 	static TMap<FString, FString> HardwareShaderMacroText;
 
-	static void SetHardwareShaderMacros(UHardwareShaderMacros* Macros);
 	static void ClearHardwareShaderMacros();
 	static void ExpandHardwareShaderMacros(FString* ShaderText);
 	static FStringTemp GLSLVertexShaderFromD3DVertexShader(UHardwareShader* Shader);

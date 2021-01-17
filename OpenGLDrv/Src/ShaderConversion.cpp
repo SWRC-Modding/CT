@@ -67,8 +67,8 @@ void UOpenGLRenderDevice::ExpandHardwareShaderMacros(FString* ShaderText){
 					INT Index = static_cast<INT>(First - **ShaderText); // Save index since Pos is invalidated when the string is reallocated
 
 					*ShaderText = FStringTemp(Index, **ShaderText) +
-					              "// Macro: " + Name + "\n" +
-					              *MacroText + "// End macro\n" +
+					              "// ==================== Macro: " + Name + " ====================\n" +
+					              *MacroText + "// ==================== End macro ====================\n" +
 					              (Pos + 1);
 					Pos = &(*ShaderText)[Index];
 				}

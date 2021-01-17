@@ -131,24 +131,139 @@ void UOpenGLRenderDevice::ExpandHardwareShaderMacros(FString* ShaderText){
 	INSTRUCTION(texreg2gb) \
 	INSTRUCTION(texreg2rgb)
 
+enum EShaderInstruction{
+	INS_INVALID,
+#define INSTRUCTION(x) INS_ ## x,
+	SHADER_INSTRUCTIONS
+#undef INSTRUCTION
+	INS_MAX
+};
+
+struct FShaderInstructionString{
+	const TCHAR* Str;
+	INT NumMatchesWithPrev;
+};
+
+static INT GetShaderInstructionStringNumMatches(const TCHAR* Str, const TCHAR* Prev){
+	INT i = 0;
+
+	while(Str[i] == Prev[i] && Str[i] && Prev[i])
+		++i;
+
+	return i;
+}
+
+static FShaderInstructionString ShaderInstructionStrings[] = {
+	{"", 0},
+#define INSTRUCTION(x) {#x, GetShaderInstructionStringNumMatches(#x, ShaderInstructionStrings[INS_ ## x - 1].Str)},
+	SHADER_INSTRUCTIONS
+#undef INSTRUCTION
+};
+
+static EShaderInstruction ParseShaderInstruction(const TCHAR** Text){
+	INT NumMatches = 0;
+
+	for(INT i = 1; appIsAlnum(**Text) && i < INS_MAX; ++i){
+		if(NumMatches < ShaderInstructionStrings[i].NumMatchesWithPrev)
+			continue;
+		else if(NumMatches > ShaderInstructionStrings[i].NumMatchesWithPrev)
+			break;
+
+		while(*(*Text + NumMatches) == ShaderInstructionStrings[i].Str[NumMatches])
+			++NumMatches;
+
+		if(!appIsAlnum(*(*Text + NumMatches)) && ShaderInstructionStrings[i].Str[NumMatches] == '\0'){
+			*Text += NumMatches;
+
+			return static_cast<EShaderInstruction>(i);
+		}
+	}
+
+	return INS_INVALID;
+}
+
+static void SkipCommentsAndWhitespace(const TCHAR** Text){
+	while(appIsSpace(**Text) || **Text == ';' || **Text == '/'){
+		while(appIsSpace(**Text))
+			++*Text;
+
+		if(**Text == ';' || (**Text == '/' && *(*Text + 1) == '/')){
+			while(**Text && **Text != '\n')
+				++*Text;
+		}else if(**Text == '/' && *(*Text + 1) == '*'){
+			*Text += 2;
+
+			while(**Text){
+				if(**Text == '*' && *(*Text + 1) == '/'){
+					*Text += 2;
+
+					break;
+				}
+
+				++*Text;
+			}
+		}
+	}
+}
+
 FStringTemp UOpenGLRenderDevice::GLSLVertexShaderFromD3DVertexShader(UHardwareShader* Shader){
 	FString D3DShaderText = Shader->VertexShaderText;
-	FString GLSLShaderText;
 
 	ExpandHardwareShaderMacros(&D3DShaderText);
+
+	FString GLSLShaderText = CommonShaderHeaderText + VertexShaderVarsText +
+		FString::Printf("layout(location = %i) uniform vec4 VSConstants[%i];\n", HSU_VSConstants, MAX_VERTEX_SHADER_CONSTANTS) +
+		                "#define c VSConstants\n\n"
+		                "void main(void){\n"
+		                    "\tvec4 r0;\n"
+		                    "\tvec4 r1;\n"
+		                    "\tvec4 r2;\n"
+		                    "\tvec4 r3;\n"
+		                    "\tvec4 r4;\n"
+		                    "\tvec4 r5;\n"
+		                    "\tvec4 r6;\n"
+		                    "\tvec4 r7;\n"
+		                    "\tvec4 r8;\n"
+		                    "\tvec4 r9;\n"
+		                    "\tvec4 r10;\n"
+		                    "\tvec4 r11;\n"
+		                    "\tvec4 r12;\n" +
+		                    ConvertD3DAssemblyToGLSL(*D3DShaderText) +
+		                "}\n";
 
 	return GLSLShaderText;
 }
 
 FStringTemp UOpenGLRenderDevice::GLSLFragmentShaderFromD3DPixelShader(UHardwareShader* Shader){
 	FString D3DShaderText = Shader->PixelShaderText;
-	FString GLSLShaderText;
 
 	ExpandHardwareShaderMacros(&D3DShaderText);
+
+	FStringTemp GLSLShaderText = CommonShaderHeaderText + FragmentShaderVarsText +
+		FString::Printf("layout(location = %i) uniform vec4 PSConstants[%i];\n", HSU_PSConstants, MAX_PIXEL_SHADER_CONSTANTS) +
+		                "#define c PSConstants\n\n"
+		                "void main(void){\n"
+		                    "\tvec4 r0;\n"
+		                    "\tvec4 r1;\n"
+		                    "\tvec4 r2;\n"
+		                    "\tvec4 r3;\n"
+		                    "\tvec4 r4;\n"
+		                    "\tvec4 r5;\n" +
+		                    ConvertD3DAssemblyToGLSL(*D3DShaderText) +
+		                    "\n\tFragColor = r0;\n"
+		                "}\n";
 
 	return GLSLShaderText;
 }
 
-FStringTemp ConvertD3DAssemblyToGLSL(){
+FStringTemp UOpenGLRenderDevice::ConvertD3DAssemblyToGLSL(const TCHAR* Text){
+	SkipCommentsAndWhitespace(&Text);
+
+	// Skip shader type and version
+	if((*Text == 'v' || *Text == 'p') && Text[1] == 's'){
+		while(*Text && *Text != '\n')
+			++Text;
+	}
+
 	return "";
 }

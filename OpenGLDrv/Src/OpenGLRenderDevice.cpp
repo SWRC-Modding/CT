@@ -142,16 +142,17 @@ FShaderGLSL* UOpenGLRenderDevice::GetShader(UHardwareShader* HardwareShader){
 			// Convert d3d shader assembly to glsl or load existing shader from disk
 
 			if(!LoadVertexShader(Shader)){
-				// TODO: Convert vertex shader
+				Shader->SetVertexShaderText(GLSLVertexShaderFromD3DVertexShader(HardwareShader));
 				SaveVertexShader(Shader);
 			}
 
 			if(!LoadFragmentShader(Shader)){
-				// TODO: Convert fragment shader
+				Shader->SetFragmentShaderText(GLSLFragmentShaderFromD3DPixelShader(HardwareShader));
 				SaveFragmentShader(Shader);
 			}
 		}else{
-			// TODO: Convert vertex and fragment shader for transient hardware shader
+			Shader->SetVertexShaderText(GLSLVertexShaderFromD3DVertexShader(HardwareShader));
+			Shader->SetFragmentShaderText(GLSLFragmentShaderFromD3DPixelShader(HardwareShader));
 		}
 	}
 

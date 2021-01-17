@@ -229,7 +229,10 @@ FStringTemp UOpenGLRenderDevice::GLSLVertexShaderFromD3DVertexShader(UHardwareSh
 		                    "\tvec4 r11;\n"
 		                    "\tvec4 r12;\n" +
 		                    ConvertD3DAssemblyToGLSL(*D3DShaderText) +
-		                "}\n";
+		                "}\n\n"
+		                "#if 0\n\n" +
+		                D3DShaderText +
+						"\n#endif\n";
 
 	return GLSLShaderText;
 }
@@ -251,7 +254,10 @@ FStringTemp UOpenGLRenderDevice::GLSLFragmentShaderFromD3DPixelShader(UHardwareS
 		                    "\tvec4 r5;\n" +
 		                    ConvertD3DAssemblyToGLSL(*D3DShaderText) +
 		                    "\n\tFragColor = r0;\n"
-		                "}\n";
+		                "}\n\n"
+		                "#if 0\n\n" +
+		                D3DShaderText +
+		                "\n#endif\n";
 
 	return GLSLShaderText;
 }

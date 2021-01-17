@@ -9,9 +9,9 @@
  */
 
 FOpenGLRenderInterface::FOpenGLRenderInterface(UOpenGLRenderDevice* InRenDev) : RenDev(InRenDev),
-                                                                                CurrentState(&SavedStates[0]),
-                                                                                GlobalUBO(GL_NONE),
-                                                                                PrecacheMode(PRECACHE_All){}
+                                                                                PrecacheMode(PRECACHE_All),
+																				CurrentState(&SavedStates[0]),
+																				GlobalUBO(GL_NONE){}
 
 void FOpenGLRenderInterface::Init(){
 	CurrentState->Uniforms.LocalToWorld = FMatrix::Identity;
@@ -271,7 +271,7 @@ void FOpenGLRenderInterface::SetLight(INT LightIndex, FDynamicLight* Light, FLOA
 			ShaderLight->Color.X = Light->Color.X * 1.75f * Light->Alpha * Scale;
 			ShaderLight->Color.Y = Light->Color.Y * 1.75f * Light->Alpha * Scale;
 			ShaderLight->Color.Z = Light->Color.Z * 1.75f * Light->Alpha * Scale;
-		}else if(Light->Actor && Light->Actor->LightEffect == LE_QuadraticNonIncidence || CurrentState->LitSphere.W == -1.0f){
+		}else if((Light->Actor && Light->Actor->LightEffect == LE_QuadraticNonIncidence) || CurrentState->LitSphere.W == -1.0f){
 			ShaderLight->Type = 1; // Point light
 			ShaderLight->Position = Light->Position;
 			ShaderLight->Radius = Light->Radius;
@@ -753,10 +753,13 @@ void FOpenGLRenderInterface::GetShaderConstants(FSConstantsInfo* Info, FPlane* C
 			}
 			continue;
 		case EVC_SpotlightDirection:
-			CurrentState->Uniforms.Lights[0].Direction; // TODO: Implement spotlights
+			Constants[i] = CurrentState->Uniforms.Lights[0].Direction; // TODO: Implement spotlights
 			continue;
 		case EVC_SpotlightCosCone:
-			CurrentState->Uniforms.Lights[0].CosCone; // TODO: Implement spotlights
+			Constants[i].X = CurrentState->Uniforms.Lights[0].CosCone; // TODO: Implement spotlights
+			Constants[i].Y = CurrentState->Uniforms.Lights[0].CosCone; // TODO: Implement spotlights
+			Constants[i].Z = CurrentState->Uniforms.Lights[0].CosCone; // TODO: Implement spotlights
+			Constants[i].W = CurrentState->Uniforms.Lights[0].CosCone; // TODO: Implement spotlights
 			continue;
 		case EVC_DrawScale3D:
 			Constants[i].X = CurrentState->Uniforms.LocalToWorld.M[0][0];

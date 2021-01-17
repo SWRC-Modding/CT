@@ -129,8 +129,8 @@ CORE_API FString appClipboardPaste();
 // Meant to be enabled in release builds.
 //
 #if defined(_DEBUG) || !DO_GUARD
-	#define guard(func)   {static const TCHAR __FUNC_NAME__[]=#func;
-	#define guardFunc     {static const TCHAR __FUNC_NAME__[]=__FUNCTION__;
+	#define guard(func)   {
+	#define guardFunc     {
 	#define unguard       }
 	#define unguardf(msg) }
 #else

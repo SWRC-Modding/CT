@@ -1,4 +1,4 @@
--DDO_GUARD_SLOW=1
+-DDO_GUARD=0
 -DCORE_API=
 -DCTGAME_API=
 -DCTMARKERS_API=
@@ -19,3 +19,6 @@
 -IC:/Program Files (x86)/Microsoft Visual Studio .NET 2003/Vc7/PlatformSDK/Include
 -I.
 -xc++
+-Wall
+-Wno-microsoft-cast
+-Wno-string-plus-int

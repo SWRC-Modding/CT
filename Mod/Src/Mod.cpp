@@ -14,7 +14,7 @@ static void __fastcall ScriptFunctionHook(UObject* Self, int, FFrame& Stack, voi
 	UFunction* Function;
 	FName      FunctionName;
 
-	appMemcpy(&Function, Stack.Code - sizeof(UFunction*), sizeof(UFunction*));
+	appMemcpy(&Function, Stack.Code - sizeof(void*), sizeof(void*));
 
 	if(!FunctionOverrides.Find(Function)){
 		Function = NULL;

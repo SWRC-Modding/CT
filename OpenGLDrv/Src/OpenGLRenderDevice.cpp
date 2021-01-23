@@ -109,6 +109,7 @@ FShaderGLSL* UOpenGLRenderDevice::GetShader(UHardwareShader* HardwareShader){
 
 	if(!Shader){
 		Shader = &GLShaderByHardwareShader[HardwareShader];
+		*Shader = FShaderGLSL(); // Explicitly create object because TMap does not call the constructor!
 
 		if(HardwareShader->GetFName() != NAME_InGameTempName){
 			FString ShaderName = HardwareShader->GetPathName();
@@ -808,19 +809,19 @@ FString UOpenGLRenderDevice::CommonShaderHeaderText(
 	"layout(binding = 6) uniform sampler2D Texture6;\n"
 	"layout(binding = 7) uniform sampler2D Texture7;\n\n"
 	"// Cube maps\n\n"
-	"layout(binding = 8)  uniform samplerCube CubeMap0;\n"
-	"layout(binding = 9)  uniform samplerCube CubeMap1;\n"
-	"layout(binding = 10) uniform samplerCube CubeMap2;\n"
-	"layout(binding = 11) uniform samplerCube CubeMap3;\n"
-	"layout(binding = 12) uniform samplerCube CubeMap4;\n"
-	"layout(binding = 13) uniform samplerCube CubeMap5;\n"
-	"layout(binding = 14) uniform samplerCube CubeMap6;\n"
-	"layout(binding = 15) uniform samplerCube CubeMap7;\n\n", true);
+	"layout(binding = 8)  uniform samplerCube Cubemap0;\n"
+	"layout(binding = 9)  uniform samplerCube Cubemap1;\n"
+	"layout(binding = 10) uniform samplerCube Cubemap2;\n"
+	"layout(binding = 11) uniform samplerCube Cubemap3;\n"
+	"layout(binding = 12) uniform samplerCube Cubemap4;\n"
+	"layout(binding = 13) uniform samplerCube Cubemap5;\n"
+	"layout(binding = 14) uniform samplerCube Cubemap6;\n"
+	"layout(binding = 15) uniform samplerCube Cubemap7;\n\n", true);
 
 FString UOpenGLRenderDevice::VertexShaderVarsText(
 	"// Vertex attributes\n\n"
-	"layout(location = 0)  in vec3 InPosition;\n"
-	"layout(location = 1)  in vec3 InNormal;\n"
+	"layout(location = 0)  in vec4 InPosition;\n"
+	"layout(location = 1)  in vec4 InNormal;\n"
 	"layout(location = 2)  in vec4 InDiffuse;\n"
 	"layout(location = 3)  in vec4 InSpecular;\n"
 	"layout(location = 4)  in vec4 InTexCoord0;\n"
@@ -831,8 +832,8 @@ FString UOpenGLRenderDevice::VertexShaderVarsText(
 	"layout(location = 9)  in vec4 InTexCoord5;\n"
 	"layout(location = 10) in vec4 InTexCoord6;\n"
 	"layout(location = 11) in vec4 InTexCoord7;\n"
-	"layout(location = 12) in vec3 InTangent;\n"
-	"layout(location = 13) in vec3 InBinormal;\n\n"
+	"layout(location = 12) in vec4 InTangent;\n"
+	"layout(location = 13) in vec4 InBinormal;\n\n"
 	"// Variables\n\n"
 	"out vec3 Position;\n"
 	"out vec3 Normal;\n"
@@ -878,9 +879,8 @@ FString UOpenGLRenderDevice::FragmentShaderVarsText(
 	"layout(location = 42) uniform int StageAlphaArgs[16];\n" \
 	"layout(location = 58) uniform int StageAlphaOps[8];\n" \
 	"layout(location = 66) uniform vec4 ConstantColor;\n" \
-	"layout(location = 67) uniform float AlphaRef;\n" \
-	"layout(location = 68) uniform bool LightingEnabled;\n" \
-	"layout(location = 69) uniform float LightFactor;\n\n"
+	"layout(location = 67) uniform bool LightingEnabled;\n" \
+	"layout(location = 68) uniform float LightFactor;\n\n"
 
 FString UOpenGLRenderDevice::FixedFunctionVertexShaderText(
 	FIXED_FUNCTION_UNIFORMS
@@ -941,8 +941,8 @@ FString UOpenGLRenderDevice::FixedFunctionVertexShaderText(
 	"}\n"
 	"\n"
 	"void main(void){\n"
-		"\tPosition = (LocalToWorld * vec4(InPosition, 1.0)).xyz;\n"
-		"\tNormal = (LocalToWorld * vec4(InNormal, 0.0)).xyz;\n"
+		"\tPosition = (LocalToWorld * vec4(InPosition.xyz, 1.0)).xyz;\n"
+		"\tNormal = (LocalToWorld * vec4(InNormal.xyz, 0.0)).xyz;\n"
 		"\tDiffuse = InDiffuse;\n"
 		"\tSpecular = InSpecular;\n"
 		"\n"
@@ -960,7 +960,7 @@ FString UOpenGLRenderDevice::FixedFunctionVertexShaderText(
 				"\t\t\tStageTexCoords[i] = StageTexMatrices[i] * tex_coord_source(StageTexCoordSources[i]);\n"
 		"\t}\n"
 		"\n"
-		"\tgl_Position = LocalToScreen * vec4(InPosition, 1.0);\n"
+		"\tgl_Position = LocalToScreen * vec4(InPosition.xyz, 1.0);\n"
 	"}\n", true);
 
 FString UOpenGLRenderDevice::FixedFunctionFragmentShaderText(
@@ -1016,49 +1016,49 @@ FString UOpenGLRenderDevice::FixedFunctionFragmentShaderText(
 			"\t\tif((ColorArg & CAM_CubeMap) == 0)\n"
 				"\t\t\tResult = texture(Texture0, StageTexCoords[StageIndex].xy) * GlobalColor;\n"
 			"\t\telse\n"
-				"\t\t\tResult = texture(CubeMap0, StageTexCoords[StageIndex].xyz) * GlobalColor;\n"
+				"\t\t\tResult = texture(Cubemap0, StageTexCoords[StageIndex].xyz) * GlobalColor;\n"
 			"\t\tbreak;\n"
 		"\tcase CA_Texture1:\n"
 			"\t\tif((ColorArg & CAM_CubeMap) == 0)\n"
 				"\t\t\tResult = texture(Texture1, StageTexCoords[StageIndex].xy) * GlobalColor;\n"
 			"\t\telse\n"
-				"\t\t\tResult = texture(CubeMap1, StageTexCoords[StageIndex].xyz) * GlobalColor;\n"
+				"\t\t\tResult = texture(Cubemap1, StageTexCoords[StageIndex].xyz) * GlobalColor;\n"
 			"\t\tbreak;\n"
 		"\tcase CA_Texture2:\n"
 			"\t\tif((ColorArg & CAM_CubeMap) == 0)\n"
 				"\t\t\tResult = texture(Texture2, StageTexCoords[StageIndex].xy) * GlobalColor;\n"
 			"\t\telse\n"
-				"\t\t\tResult = texture(CubeMap2, StageTexCoords[StageIndex].xyz) * GlobalColor;\n"
+				"\t\t\tResult = texture(Cubemap2, StageTexCoords[StageIndex].xyz) * GlobalColor;\n"
 			"\t\tbreak;\n"
 		"\tcase CA_Texture3:\n"
 			"\t\tif((ColorArg & CAM_CubeMap) == 0)\n"
 				"\t\t\tResult = texture(Texture3, StageTexCoords[StageIndex].xy) * GlobalColor;\n"
 			"\t\telse\n"
-				"\t\t\tResult = texture(CubeMap3, StageTexCoords[StageIndex].xyz) * GlobalColor;\n"
+				"\t\t\tResult = texture(Cubemap3, StageTexCoords[StageIndex].xyz) * GlobalColor;\n"
 			"\t\tbreak;\n"
 		"\tcase CA_Texture4:\n"
 			"\t\tif((ColorArg & CAM_CubeMap) == 0)\n"
 				"\t\t\tResult = texture(Texture4, StageTexCoords[StageIndex].xy) * GlobalColor;\n"
 			"\t\telse\n"
-				"\t\t\tResult = texture(CubeMap4, StageTexCoords[StageIndex].xyz) * GlobalColor;\n"
+				"\t\t\tResult = texture(Cubemap4, StageTexCoords[StageIndex].xyz) * GlobalColor;\n"
 			"\t\tbreak;\n"
 		"\tcase CA_Texture5:\n"
 			"\t\tif((ColorArg & CAM_CubeMap) == 0)\n"
 				"\t\t\tResult = texture(Texture5, StageTexCoords[StageIndex].xy) * GlobalColor;\n"
 			"\t\telse\n"
-				"\t\t\tResult = texture(CubeMap5, StageTexCoords[StageIndex].xyz) * GlobalColor;\n"
+				"\t\t\tResult = texture(Cubemap5, StageTexCoords[StageIndex].xyz) * GlobalColor;\n"
 			"\t\tbreak;\n"
 		"\tcase CA_Texture6:\n"
 			"\t\tif((ColorArg & CAM_CubeMap) == 0)\n"
 				"\t\t\tResult = texture(Texture6, StageTexCoords[StageIndex].xy) * GlobalColor;\n"
 			"\t\telse\n"
-				"\t\t\tResult = texture(CubeMap6, StageTexCoords[StageIndex].xyz) * GlobalColor;\n"
+				"\t\t\tResult = texture(Cubemap6, StageTexCoords[StageIndex].xyz) * GlobalColor;\n"
 			"\t\tbreak;\n"
 		"\tcase CA_Texture7:\n"
 			"\t\tif((ColorArg & CAM_CubeMap) == 0)\n"
 				"\t\t\tResult = texture(Texture7, StageTexCoords[StageIndex].xy) * GlobalColor;\n"
 			"\t\telse\n"
-				"\t\t\tResult = texture(CubeMap7, StageTexCoords[StageIndex].xyz) * GlobalColor;\n"
+				"\t\t\tResult = texture(Cubemap7, StageTexCoords[StageIndex].xyz) * GlobalColor;\n"
 			"\t\tbreak;\n"
 		"\tdefault:\n"
 			"\t\tResult = vec4(1.0, 1.0, 1.0, 1.0);\n"

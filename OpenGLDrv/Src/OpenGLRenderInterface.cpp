@@ -26,7 +26,7 @@ void FOpenGLRenderInterface::Init(){
 	CurrentState->NumStages = 0;
 	CurrentState->TexCoordCount = 2;
 	CurrentState->ConstantColor = FPlane(1.0f, 1.0f, 1.0f, 1.0f);
-	CurrentState->AlphaRef = -1.0f;
+	CurrentState->Uniforms.AlphaRef = -1.0f;
 
 	// Create uniform buffer
 	glCreateBuffers(1, &GlobalUBO);
@@ -436,7 +436,7 @@ void FOpenGLRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorStri
 	CurrentState->FramebufferBlending = FB_Overwrite;
 	CurrentState->SrcBlend = GL_ONE;
 	CurrentState->DstBlend = GL_ZERO;
-	CurrentState->AlphaRef = -1.0f;
+	CurrentState->Uniforms.AlphaRef = -1.0f;
 
 	// We check later if these properties have changed after setting the material and update the OpenGL state
 	bool ZTest = CurrentState->bZTest;
@@ -463,12 +463,12 @@ void FOpenGLRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorStri
 		Result = SetParticleMaterial(static_cast<UParticleMaterial*>(Material), ErrorString, ErrorMaterial);
 	}else if(CheckMaterial<UProjectorMultiMaterial>(&Material, 0)){
 		UProjectorMultiMaterial* ProjectorMultiMaterial = static_cast<UProjectorMultiMaterial*>(Material);
-		CurrentState->AlphaRef = 0.5f;
+		CurrentState->Uniforms.AlphaRef = 0.5f;
 		CurrentState->FramebufferBlending = FB_Modulate;
 		Result = SetSimpleMaterial(ProjectorMultiMaterial->BaseMaterial, ErrorString, ErrorMaterial);
 		CurrentState->bZWrite = false;
 	}else if(CheckMaterial<UProjectorMaterial>(&Material, 0)){
-		CurrentState->AlphaRef = 0.5f;
+		CurrentState->Uniforms.AlphaRef = 0.5f;
 		CurrentState->FramebufferBlending = FB_Modulate;
 		Result = SetSimpleMaterial(static_cast<UProjectorMaterial*>(Material)->Projected, ErrorString, ErrorMaterial);
 		CurrentState->bZWrite = false;
@@ -518,7 +518,6 @@ void FOpenGLRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorStri
 		glUniform1iv(SU_StageAlphaArgs, ARRAY_COUNT(CurrentState->StageAlphaArgs), &CurrentState->StageAlphaArgs[0][0]);
 		glUniform1iv(SU_StageAlphaOps, ARRAY_COUNT(CurrentState->StageAlphaOps), CurrentState->StageAlphaOps);
 		glUniform4fv(SU_ConstantColor, 1, (GLfloat*)&CurrentState->ConstantColor);
-		glUniform1f(SU_AlphaRef, CurrentState->AlphaRef);
 		glUniform1i(SU_LightingEnabled, CurrentState->UseDynamicLighting && !CurrentState->Unlit);
 		glUniform1f(SU_LightFactor, CurrentState->LightingModulate2X ? 2.0f : 1.0f);
 	}
@@ -792,14 +791,19 @@ void FOpenGLRenderInterface::GetShaderConstants(FSConstantsInfo* Info, FPlane* C
 
 UBOOL FOpenGLRenderInterface::SetHardwareShaderMaterial(UHardwareShader* Material, FString* ErrorString, UMaterial** ErrorMaterial, INT* NumPasses){
 	SetShader(RenDev->GetShader(Material));
+
+	if(Material->AlphaTest)
+		CurrentState->Uniforms.AlphaRef = Material->AlphaRef / 255.0f;
+
 	UpdateGlobalShaderUniforms();
 
 	static FPlane Constants[MAX_VERTEX_SHADER_CONSTANTS];
 
 	GetShaderConstants(Material->VSConstants, Constants, Material->NumVSConstants);
-	glUniform4fv(HSU_PSConstants, Material->NumVSConstants, (GLfloat*)Constants);
+	glUniform4fv(HSU_VSConstants, Material->NumVSConstants, (GLfloat*)Constants);
 	GetShaderConstants(Material->PSConstants, Constants, Material->NumPSConstants);
 	glUniform4fv(HSU_PSConstants, Material->NumPSConstants, (GLfloat*)Constants);
+	glUniform1iv(HSU_Cubemaps, 6, Cubemaps);
 
 	for(INT i = 0; i < MAX_TEXTURES; ++i){
 		if(Material->Textures[i])
@@ -862,11 +866,11 @@ bool FOpenGLRenderInterface::SetSimpleMaterial(UMaterial* Material, FString* Err
 
 		if(Texture->bMasked){
 			CurrentState->ModifyFramebufferBlending = true;
-			CurrentState->AlphaRef = 0.5f;
+			CurrentState->Uniforms.AlphaRef = 0.5f;
 			CurrentState->FramebufferBlending = FB_AlphaBlend;
 		}else if(Texture->bAlphaTexture){
 			CurrentState->ModifyFramebufferBlending = true;
-			CurrentState->AlphaRef = 0.0f;
+			CurrentState->Uniforms.AlphaRef = 0.0f;
 			CurrentState->FramebufferBlending = FB_AlphaBlend;
 		}
 
@@ -1324,13 +1328,13 @@ bool FOpenGLRenderInterface::SetShaderMaterial(UShader* Shader, FString* ErrorSt
 		switch(Shader->OutputBlending){
 		case OB_Normal:
 			if(Shader->Opacity){
-				CurrentState->AlphaRef = 0.0f;
+				CurrentState->Uniforms.AlphaRef = 0.0f;
 				CurrentState->FramebufferBlending = FB_AlphaBlend;
 			}
 
 			break;
 		case OB_Masked:
-			CurrentState->AlphaRef = 0.5f;
+			CurrentState->Uniforms.AlphaRef = 0.5f;
 			CurrentState->FramebufferBlending = FB_AlphaBlend;
 			break;
 		case OB_Modulate:
@@ -1376,7 +1380,7 @@ bool FOpenGLRenderInterface::SetTerrainMaterial(UTerrainMaterial* Terrain, FStri
 			CurrentState->FramebufferBlending = FB_Overwrite;
 		}else{
 			CurrentState->FramebufferBlending = FB_AlphaBlend;
-			CurrentState->AlphaRef = 0.0f;
+			CurrentState->Uniforms.AlphaRef = 0.0f;
 		}
 
 		// Color texture
@@ -1501,7 +1505,7 @@ bool FOpenGLRenderInterface::SetParticleMaterial(UParticleMaterial* ParticleMate
 		CurrentState->CullMode = CM_None;
 
 	if(ParticleMaterial->AlphaTest)
-		CurrentState->AlphaRef = ParticleMaterial->AlphaRef / 255.0f;
+		CurrentState->Uniforms.AlphaRef = ParticleMaterial->AlphaRef / 255.0f;
 
 	CurrentState->bZTest = ParticleMaterial->ZTest != 0;
 	CurrentState->bZWrite = ParticleMaterial->ZWrite != 0;

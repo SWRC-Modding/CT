@@ -84,15 +84,14 @@ enum EShaderUniforms{
 	SU_StageAlphaArgs       = 42, // int[16]
 	SU_StageAlphaOps        = 58, // int[8]
 	SU_ConstantColor        = 66, // vec4
-	SU_AlphaRef             = 67, // float
-	SU_LightingEnabled      = 68, // bool
-	SU_LightFactor          = 69  // float
+	SU_LightingEnabled      = 67, // bool
+	SU_LightFactor          = 68  // float
 };
 
 enum EHardwareShaderUniforms{
 	HSU_VSConstants = 0,
 	HSU_PSConstants = MAX_VERTEX_SHADER_CONSTANTS,
-	HSU_AlphaRef    = MAX_VERTEX_SHADER_CONSTANTS + MAX_PIXEL_SHADER_CONSTANTS
+	HSU_Cubemaps    = MAX_VERTEX_SHADER_CONSTANTS + MAX_PIXEL_SHADER_CONSTANTS
 };
 
 #define GLSL_STRUCT(x) struct x // Workaround to get struct name to show up in C++ but not GLSL
@@ -108,6 +107,7 @@ enum EHardwareShaderUniforms{
 	UNIFORM_BLOCK_MEMBER(mat4, WorldToLocal) \
 	UNIFORM_BLOCK_MEMBER(mat4, WorldToScreen) \
 	UNIFORM_BLOCK_MEMBER(mat4, CameraToWorld) \
+	UNIFORM_BLOCK_MEMBER(float, AlphaRef) \
 	UNIFORM_BLOCK_MEMBER(float, Time) \
 	UNIFORM_BLOCK_MEMBER(float, CosTime) \
 	UNIFORM_BLOCK_MEMBER(float, SinTime) \
@@ -213,7 +213,6 @@ public:
 		BYTE                  FramebufferBlending; // EFrameBufferBlending
 		unsigned int          SrcBlend; // Blending parameters used when Framebufferblending == FB_MAX
 		unsigned int          DstBlend;
-		FLOAT                 AlphaRef;
 	};
 
 	UOpenGLRenderDevice*      RenDev;
@@ -227,7 +226,7 @@ public:
 	bool                      NeedUniformUpdate;
 	unsigned int              GlobalUBO;
 
-	bool                      Cubemaps[MAX_TEXTURES]; // Whether the texture at a specific texture unit is a cubemap or not
+	UBOOL                     Cubemaps[MAX_TEXTURES]; // Whether the texture at a specific texture unit is a cubemap or not
 	unsigned int              Samplers[MAX_TEXTURES];
 
 	FStreamDeclaration        VertexStreamDeclarations[MAX_VERTEX_STREAMS];
@@ -371,7 +370,7 @@ private:
 						CurrentState->CullMode = CM_None;
 
 					if(FinalBlend->AlphaTest)
-						CurrentState->AlphaRef = FinalBlend->AlphaRef / 255.0f;
+						CurrentState->Uniforms.AlphaRef = FinalBlend->AlphaRef / 255.0f;
 				}else if(Modifier->IsA<UColorModifier>()){
 					UColorModifier* ColorModifier = static_cast<UColorModifier*>(Modifier);
 

@@ -683,9 +683,9 @@ static void WriteShaderInstructionArg(const FShaderInstructionArg& Arg, EShaderE
 			if(TargetType == EXPR_Float)
 				Tmp += ".x";
 			else if(TargetType == EXPR_Float3)
-				Tmp = "vec3(" + Tmp + ", 0.0)";
+				Tmp += ".xyy";
 			else if(TargetType == EXPR_Float4)
-				Tmp = "vec4(" + Tmp + ", 0.0, 1.0)";
+				Tmp += ".xyyy";
 
 			break;
 		case EXPR_Float3:
@@ -694,7 +694,7 @@ static void WriteShaderInstructionArg(const FShaderInstructionArg& Arg, EShaderE
 			else if(TargetType == EXPR_Float2)
 				Tmp += ".xy";
 			else if(TargetType == EXPR_Float4)
-				Tmp = "vec4(" + Tmp + ", 1.0)";
+				Tmp += ".xyzz";
 
 			break;
 		case EXPR_Float4:
@@ -807,9 +807,9 @@ static bool WriteShaderInstructionRhs(FString* Out, FShaderInstruction& Instruct
 		REQUIRE_ARGS(3);
 		*ResultExpr = Min(Args[1].ExprType, Args[2].ExprType);
 		*Out += "mix(";
-		WriteShaderInstructionArg(Args[1], *ResultExpr, Out);
-		*Out += ", ";
 		WriteShaderInstructionArg(Args[2], *ResultExpr, Out);
+		*Out += ", ";
+		WriteShaderInstructionArg(Args[1], *ResultExpr, Out);
 		*Out += ", ";
 		WriteShaderInstructionArg(Args[0], Args[0].ExprType, Out);
 		*Out += ")";
@@ -902,24 +902,13 @@ static bool WriteShaderInstructionRhs(FString* Out, FShaderInstruction& Instruct
 	case INS_mad:
 		{
 			REQUIRE_ARGS(3);
-			EShaderExpr MulExpr = Min(Min(Args[0].ExprType, Args[1].ExprType), Instruction.ExprType);
-			*ResultExpr = Instruction.ExprType;
-
-			if(MulExpr == Instruction.ExprType){
-				*Out += FString::Printf("\t%s = ", Instruction.Destination);
-			}else{
-				if(MulExpr == EXPR_Float)
-					*Out += FString::Printf("\t%s.x = ", Instruction.Destination);
-				else if(MulExpr == EXPR_Float2)
-					*Out += FString::Printf("\t%s.xy = ", Instruction.Destination);
-				else if(MulExpr == EXPR_Float3)
-					*Out += FString::Printf("\t%s.xyz = ", Instruction.Destination);
-			}
+			EShaderExpr MulExpr = Max(Max(Args[0].ExprType, Args[1].ExprType), Instruction.ExprType);
+			*ResultExpr = MulExpr;
 
 			WriteShaderInstructionArg(Args[0], MulExpr, Out);
 			*Out += " * ";
 			WriteShaderInstructionArg(Args[1], MulExpr, Out);
-			*Out += FString::Printf(";\n\t%s += ", Instruction.Destination);
+			*Out += " + ";
 
 			for(INT i = 0; i < Instruction.NumModifiers; ++i){
 				if(Instruction.Modifiers[i].Saturate)
@@ -928,7 +917,7 @@ static bool WriteShaderInstructionRhs(FString* Out, FShaderInstruction& Instruct
 					*Out += "(";
 			}
 
-			WriteShaderInstructionArg(Args[2], Instruction.ExprType, Out);
+			WriteShaderInstructionArg(Args[2], MulExpr, Out);
 
 			for(INT i = 0; i < Instruction.NumModifiers; ++i){
 				if(Instruction.Modifiers[i].Saturate)
@@ -987,20 +976,20 @@ static bool WriteShaderInstructionRhs(FString* Out, FShaderInstruction& Instruct
 	case INS_sge:
 		REQUIRE_ARGS(2);
 		*ResultExpr = Args[0].ExprType;
-		*Out += "(sign(";
+		*Out += "saturate(sign(";
 		WriteShaderInstructionArg(Args[0], *ResultExpr, Out);
 		*Out += " - ";
 		WriteShaderInstructionArg(Args[1], *ResultExpr, Out);
-		*Out += ") * 0.5 * 2)";
+		*Out += ") + 1.0)";
 		break;
 	case INS_slt:
 		REQUIRE_ARGS(2);
 		*ResultExpr = Args[0].ExprType;
-		*Out += "(sign(";
+		*Out += "saturate(sign(";
 		WriteShaderInstructionArg(Args[1], *ResultExpr, Out);
 		*Out += " - ";
 		WriteShaderInstructionArg(Args[0], *ResultExpr, Out);
-		*Out += ") * 0.5 * 2)";
+		*Out += ") + 1.0)";
 		break;
 	case INS_sub:
 		REQUIRE_ARGS(2);
@@ -1072,7 +1061,7 @@ static bool WriteShaderInstruction(FShaderInstruction& Instruction, FString* Out
 	if(!WriteShaderInstructionRhs(&Rhs, Instruction, &ResultExpr))
 		return false;
 
-	if((Instruction.Type < INS_m3x2 || Instruction.Type > INS_m4x4) && Instruction.Type != INS_mad) // Matrix and mad instructions are special and write the assignment themselves
+	if(Instruction.Type < INS_m3x2 || Instruction.Type > INS_m4x4) // Matrix instructions are special and write the assignment themselves
 		*Out += FString::Printf("\t%s = ", Instruction.Destination);
 
 	// Move saturate modifier to the beginning of the list since it needs to be applied first.
@@ -1081,13 +1070,11 @@ static bool WriteShaderInstruction(FShaderInstruction& Instruction, FString* Out
 			Exchange(Instruction.Modifiers[i], Instruction.Modifiers[i + 1]);
 	}
 
-	if(Instruction.Type != INS_mad){ // mad is split into two instructions and has to handle modifiers itself
-		for(INT i = 0; i < Instruction.NumModifiers; ++i){
-			if(Instruction.Modifiers[i].Saturate)
-				*Out += "saturate(";
-			else
-				*Out += "(";
-		}
+	for(INT i = 0; i < Instruction.NumModifiers; ++i){
+		if(Instruction.Modifiers[i].Saturate)
+			*Out += "saturate(";
+		else
+			*Out += "(";
 	}
 
 	if(Instruction.ExprType != ResultExpr){
@@ -1123,13 +1110,11 @@ static bool WriteShaderInstruction(FShaderInstruction& Instruction, FString* Out
 		*Out += Rhs;
 	}
 
-	if(Instruction.Type != INS_mad){ // mad is split into two instructions and has to handle modifiers itself
-		for(INT i = 0; i < Instruction.NumModifiers; ++i){
-			if(Instruction.Modifiers[i].Saturate)
-				*Out += ")";
-			else
-				*Out += FString::Printf(" %c %i)", Instruction.Modifiers[i].Operator, Instruction.Modifiers[i].Operand);
-		}
+	for(INT i = 0; i < Instruction.NumModifiers; ++i){
+		if(Instruction.Modifiers[i].Saturate)
+			*Out += ")";
+		else
+			*Out += FString::Printf(" %c %i)", Instruction.Modifiers[i].Operator, Instruction.Modifiers[i].Operand);
 	}
 
 	*Out += ";\n";

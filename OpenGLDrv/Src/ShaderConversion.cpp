@@ -1078,33 +1078,39 @@ static bool WriteShaderInstruction(FShaderInstruction& Instruction, FString* Out
 	}
 
 	if(Instruction.ExprType != ResultExpr){
-		switch(Instruction.ExprType){
-		case EXPR_Float:
-			*Out += "(" + Rhs + ").x";
-			break;
-		case EXPR_Float2:
-			if(ResultExpr == EXPR_Float)
-				*Out += "vec2(" + Rhs + ")";
-			else
-				*Out += "(" + Rhs + ").xy";
+		const TCHAR* WriteMask = appStrstr(Instruction.Destination, ".");
 
-			break;
-		case EXPR_Float3:
-			if(ResultExpr == EXPR_Float)
-				*Out += "vec3(" + Rhs + ")";
-			else if(ResultExpr == EXPR_Float2)
-				*Out += "(" + Rhs + ").xyy";
-			else if(ResultExpr == EXPR_Float4)
-				*Out += "(" + Rhs + ").xyz";
+		if(WriteMask && Instruction.ExprType <= ResultExpr){
+			*Out += FString::Printf("(%s)%s", *Rhs, WriteMask);
+		}else{
+			switch(Instruction.ExprType){
+			case EXPR_Float:
+				*Out += "(" + Rhs + ").x";
+				break;
+			case EXPR_Float2:
+				if(ResultExpr == EXPR_Float)
+					*Out += "vec2(" + Rhs + ")";
+				else
+					*Out += "(" + Rhs + ").xy";
 
-			break;
-		case EXPR_Float4:
-			if(ResultExpr == EXPR_Float)
-				*Out += "vec4(" + Rhs + ")";
-			else if(ResultExpr == EXPR_Float2)
-				*Out += "(" + Rhs + ").xyyy";
-			else if(ResultExpr == EXPR_Float3)
-				*Out += "(" + Rhs + ").xyzz";
+				break;
+			case EXPR_Float3:
+				if(ResultExpr == EXPR_Float)
+					*Out += "vec3(" + Rhs + ")";
+				else if(ResultExpr == EXPR_Float2)
+					*Out += "(" + Rhs + ").xyy";
+				else if(ResultExpr == EXPR_Float4)
+					*Out += "(" + Rhs + ").xyz";
+
+				break;
+			case EXPR_Float4:
+				if(ResultExpr == EXPR_Float)
+					*Out += "vec4(" + Rhs + ")";
+				else if(ResultExpr == EXPR_Float2)
+					*Out += "(" + Rhs + ").xyyy";
+				else if(ResultExpr == EXPR_Float3)
+					*Out += "(" + Rhs + ").xyzz";
+			}
 		}
 	}else{
 		*Out += Rhs;

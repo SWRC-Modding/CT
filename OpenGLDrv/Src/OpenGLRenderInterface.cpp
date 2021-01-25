@@ -473,12 +473,10 @@ void FOpenGLRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorStri
 		Result = SetSimpleMaterial(static_cast<UProjectorMaterial*>(Material)->Projected, ErrorString, ErrorMaterial);
 		CurrentState->bZWrite = false;
 	}else if(CheckMaterial<UHardwareShaderWrapper>(&Material, 0)){
-		UHardwareShaderWrapper* HardwareShaderWrapper = static_cast<UHardwareShaderWrapper*>(Material);
-		HardwareShaderWrapper->SetupShaderWrapper(this);
-		Result = SetHardwareShaderMaterial(HardwareShaderWrapper->ShaderImplementation, ErrorString, ErrorMaterial, NumPasses) != 0;
+		Result = static_cast<UHardwareShaderWrapper*>(Material)->SetupShaderWrapper(this) != 0;
 		UseFixedFunction = !Result;
 	}else if(CheckMaterial<UHardwareShader>(&Material, 0)){
-		Result = SetHardwareShaderMaterial(static_cast<UHardwareShader*>(Material), ErrorString, ErrorMaterial, NumPasses) != 0;
+		Result = SetHardwareShaderMaterial(static_cast<UHardwareShader*>(Material), ErrorString, ErrorMaterial) != 0;
 		UseFixedFunction = !Result;
 	}
 
@@ -789,7 +787,7 @@ void FOpenGLRenderInterface::GetShaderConstants(FSConstantsInfo* Info, FPlane* C
 	}
 }
 
-UBOOL FOpenGLRenderInterface::SetHardwareShaderMaterial(UHardwareShader* Material, FString* ErrorString, UMaterial** ErrorMaterial, INT* NumPasses){
+UBOOL FOpenGLRenderInterface::SetHardwareShaderMaterial(UHardwareShader* Material, FString* ErrorString, UMaterial** ErrorMaterial){
 	SetShader(RenDev->GetShader(Material));
 
 	if(Material->AlphaTest)
@@ -1531,8 +1529,8 @@ void FOpenGLRenderInterface::UseLightmap(INT StageIndex, INT TextureUnit){
 
 	SetTexture(CurrentState->Lightmap, TextureUnit);
 	CurrentState->StageTexCoordSources[StageIndex] = TCS_Stream1;
-	CurrentState->StageTexWrapModes[StageIndex][0] = GL_CLAMP_TO_EDGE;
-	CurrentState->StageTexWrapModes[StageIndex][1] = GL_CLAMP_TO_EDGE;
+	CurrentState->StageTexWrapModes[StageIndex][0] = TC_Wrap;
+	CurrentState->StageTexWrapModes[StageIndex][1] = TC_Wrap;
 	CurrentState->StageColorArgs[StageIndex][0] = CA_Previous;
 	CurrentState->StageColorArgs[StageIndex][1] = CA_Texture0 + TextureUnit;
 	CurrentState->StageColorOps[StageIndex] = (!CurrentState->UseStaticLighting && CurrentState->LightingModulate2X) ? COP_Modulate2X : COP_Modulate;

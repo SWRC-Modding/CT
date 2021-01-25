@@ -790,8 +790,24 @@ void FOpenGLRenderInterface::GetShaderConstants(FSConstantsInfo* Info, FPlane* C
 UBOOL FOpenGLRenderInterface::SetHardwareShaderMaterial(UHardwareShader* Material, FString* ErrorString, UMaterial** ErrorMaterial){
 	SetShader(RenDev->GetShader(Material));
 
+	CurrentState->bZTest = Material->ZTest != 0;
+	CurrentState->bZWrite = Material->ZWrite != 0;
+
 	if(Material->AlphaTest)
 		CurrentState->Uniforms.AlphaRef = Material->AlphaRef / 255.0f;
+
+	if(Material->AlphaBlending){
+		CurrentState->FramebufferBlending = FB_MAX;
+		CurrentState->SrcBlend = GetBlendFunc(static_cast<ED3DBLEND>(Material->SrcBlend));
+		CurrentState->DstBlend = GetBlendFunc(static_cast<ED3DBLEND>(Material->DestBlend));
+	}
+
+	for(INT i = 0; i < MAX_TEXTURES; ++i){
+		if(Material->Textures[i]){
+			SetBitmapTexture(Material->Textures[i], i);
+			Cubemaps[i] = Material->Textures[i]->GetRenderInterface()->GetCubemapInterface() != NULL;
+		}
+	}
 
 	UpdateGlobalShaderUniforms();
 
@@ -802,17 +818,6 @@ UBOOL FOpenGLRenderInterface::SetHardwareShaderMaterial(UHardwareShader* Materia
 	GetShaderConstants(Material->PSConstants, Constants, Material->NumPSConstants);
 	glUniform4fv(HSU_PSConstants, Material->NumPSConstants, (GLfloat*)Constants);
 	glUniform1iv(HSU_Cubemaps, 6, Cubemaps);
-
-	for(INT i = 0; i < MAX_TEXTURES; ++i){
-		if(Material->Textures[i])
-			SetBitmapTexture(Material->Textures[i], i);
-	}
-
-	if(Material->AlphaBlending){
-		CurrentState->FramebufferBlending = FB_MAX;
-		CurrentState->SrcBlend = GetBlendFunc(static_cast<ED3DBLEND>(Material->SrcBlend));
-		CurrentState->DstBlend = GetBlendFunc(static_cast<ED3DBLEND>(Material->DestBlend));
-	}
 
 	return 1;
 }

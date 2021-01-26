@@ -247,15 +247,49 @@ static void SkipWhitespaceSingleLine(const TCHAR** Text){
 		++*Text;
 }
 
-static void SkipWhitespaceAndComments(const TCHAR** Text){
+static void SkipWhitespaceAndComments(const TCHAR** Text, FString* Out = NULL){
 	while(appIsSpace(**Text) || **Text == ';' || **Text == '/'){
-		while(appIsSpace(**Text))
-			++*Text;
+		while(appIsSpace(**Text)){
+			if(Out && **Text == '\n'){
+				if(*(*Text + 1) == '\r' && *(*Text + 1) == '\n')
+					*Text += 2;
+				else
+					++*Text;
+
+				*Out += "\n";
+			}else{
+				++*Text;
+			}
+		}
 
 		if(**Text == ';' || (**Text == '/' && *(*Text + 1) == '/')){
+			const TCHAR* Start = *Text;
+
 			while(**Text && **Text != '\n')
 				++*Text;
+
+			if(Out){
+				if(appIsSpace((*Out)[Out->Len() - 1]))
+					*Out += "\t";
+				else
+					*Out += " ";
+
+				if(*Start == ';'){
+					++Start;
+					SkipWhitespaceSingleLine(&Start);
+					*Out += "// ";
+				}
+
+				const TCHAR* End = *Text;
+
+				while(appIsSpace(End[-1])) // Remove trailing whitespace on comments
+					--End;
+
+				*Out += FStringTemp(static_cast<INT>(End - Start), Start);
+			}
 		}else if(**Text == '/' && *(*Text + 1) == '*'){
+			const TCHAR* Start = *Text;
+
 			*Text += 2;
 
 			while(**Text){
@@ -267,6 +301,9 @@ static void SkipWhitespaceAndComments(const TCHAR** Text){
 
 				++*Text;
 			}
+
+			if(Out)
+				*Out += FStringTemp(static_cast<INT>(*Text - Start), Start);
 		}
 	}
 }
@@ -387,10 +424,8 @@ static EShaderInstruction ParseShaderInstructionName(const TCHAR** Text){
 	for(INT i = StartIndex; appIsAlnum(**Text) && i < INS_MAX; ++i){
 		if(NumMatches < ShaderInstructionStrings[i].NumMatchesWithPrev)
 			continue;
-		else if(NumMatches > ShaderInstructionStrings[i].NumMatchesWithPrev){
-			appMsgf(3, "%s, %i", ShaderInstructionStrings[i].Str, NumMatches);
+		else if(NumMatches > ShaderInstructionStrings[i].NumMatchesWithPrev)
 			break; // Error: invalid instruction
-		}
 
 		while(*(*Text + NumMatches) == ShaderInstructionStrings[i].Str[NumMatches] || *(*Text + NumMatches) < ShaderInstructionStrings[i].Str[NumMatches])
 			++NumMatches;
@@ -743,13 +778,11 @@ static bool WriteShaderInstructionRhs(FString* Out, FShaderInstruction& Instruct
 	case INS_cnd:
 		REQUIRE_ARGS(3);
 		*ResultExpr = Args[1].ExprType;
-		*Out += "(";
 		WriteShaderInstructionArg(Args[0], EXPR_Float, Out);
 		*Out += " > 0.5 ? ";
 		WriteShaderInstructionArg(Args[1], *ResultExpr, Out);
 		*Out += " : ";
 		WriteShaderInstructionArg(Args[2], *ResultExpr, Out);
-		*Out += ")";
 		break;
 	case INS_dp3:
 		REQUIRE_ARGS(2);
@@ -904,28 +937,11 @@ static bool WriteShaderInstructionRhs(FString* Out, FShaderInstruction& Instruct
 			REQUIRE_ARGS(3);
 			EShaderExpr MulExpr = Max(Max(Args[0].ExprType, Args[1].ExprType), Instruction.ExprType);
 			*ResultExpr = MulExpr;
-
 			WriteShaderInstructionArg(Args[0], MulExpr, Out);
 			*Out += " * ";
 			WriteShaderInstructionArg(Args[1], MulExpr, Out);
 			*Out += " + ";
-
-			for(INT i = 0; i < Instruction.NumModifiers; ++i){
-				if(Instruction.Modifiers[i].Saturate)
-					*Out += "saturate(";
-				else
-					*Out += "(";
-			}
-
 			WriteShaderInstructionArg(Args[2], MulExpr, Out);
-
-			for(INT i = 0; i < Instruction.NumModifiers; ++i){
-				if(Instruction.Modifiers[i].Saturate)
-					*Out += ")";
-				else
-					*Out += FString::Printf(" %c %i)", Instruction.Modifiers[i].Operator, Instruction.Modifiers[i].Operand);
-			}
-
 			break;
 		}
 	case INS_max:
@@ -989,7 +1005,7 @@ static bool WriteShaderInstructionRhs(FString* Out, FShaderInstruction& Instruct
 		WriteShaderInstructionArg(Args[1], *ResultExpr, Out);
 		*Out += " - ";
 		WriteShaderInstructionArg(Args[0], *ResultExpr, Out);
-		*Out += ") + 1.0)";
+		*Out += "))";
 		break;
 	case INS_sub:
 		REQUIRE_ARGS(2);
@@ -1123,7 +1139,7 @@ static bool WriteShaderInstruction(FShaderInstruction& Instruction, FString* Out
 			*Out += FString::Printf(" %c %i)", Instruction.Modifiers[i].Operator, Instruction.Modifiers[i].Operand);
 	}
 
-	*Out += ";\n";
+	*Out += ";";
 
 	return true;
 }
@@ -1136,20 +1152,29 @@ bool UOpenGLRenderDevice::ConvertD3DAssemblyToGLSL(const TCHAR* Text, FString* O
 			++Text;
 	}
 
-	SkipWhitespaceAndComments(&Text);
+	while(*Text && appIsSpace(*Text)) // Skip initial whitespace until first comment or instruction
+		++Text;
+
+	SkipWhitespaceAndComments(&Text, Out);
 
 	FShaderInstruction Instruction;
 
 	while(*Text){
-		if(!ParseShaderInstruction(&Text, &Instruction)){
-			appMsgf(3, Text); return false;
-		}
+		if(!ParseShaderInstruction(&Text, &Instruction))
+			return false;
 
 		if(!WriteShaderInstruction(Instruction, Out))
 			return false;
 
-		SkipWhitespaceAndComments(&Text);
+		while(*Text && appIsSpace(*Text))
+			++Text;
+
+		if(*Text)
+			SkipWhitespaceAndComments(&Text, Out);
 	}
+
+	if((*Out)[Out->Len() - 1] != '\n')
+		*Out += "\n";
 
 	return true;
 }

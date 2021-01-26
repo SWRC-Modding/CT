@@ -1166,9 +1166,6 @@ bool UOpenGLRenderDevice::ConvertD3DAssemblyToGLSL(const TCHAR* Text, FString* O
 		if(!WriteShaderInstruction(Instruction, Out))
 			return false;
 
-		while(*Text && appIsSpace(*Text))
-			++Text;
-
 		if(*Text)
 			SkipWhitespaceAndComments(&Text, Out);
 	}

@@ -807,6 +807,8 @@ UBOOL FOpenGLRenderInterface::SetHardwareShaderMaterial(UHardwareShader* Materia
 			SetBitmapTexture(Material->Textures[i], i);
 			Cubemaps[i] = Material->Textures[i]->GetRenderInterface()->GetCubemapInterface() != NULL;
 		}
+
+		++CurrentState->NumTextures;
 	}
 
 	UpdateGlobalShaderUniforms();

@@ -90,6 +90,7 @@ public:
 	GLuint TextureHandle;
 	GLuint FBO;
 	GLuint DepthStencilAttachment;
+	bool   IsCubemap;
 
 private:
 	static FSolidColorTexture ErrorTexture;

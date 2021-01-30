@@ -26,7 +26,6 @@ public:
 	FShaderGLSL            FramebufferShader;
 
 	// Default shader code
-	static FString            CommonShaderHeaderText;
 	static FString            VertexShaderVarsText;
 	static FString            FragmentShaderVarsText;
 	static FString            FixedFunctionVertexShaderText;

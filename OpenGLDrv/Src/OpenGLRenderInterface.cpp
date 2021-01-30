@@ -487,26 +487,6 @@ void FOpenGLRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorStri
 
 	if(UseFixedFunction){
 		SetShader(&RenDev->FixedFunctionShader);
-
-		// Check for cube maps and set the modifier bit
-		for(INT i = 0; i < CurrentState->NumTextures; ++i){
-			if(Cubemaps[i]){
-				for(INT j = 0; j < CurrentState->NumStages; ++j){
-					if(CurrentState->StageColorArgs[j][0] == CA_Texture0 + i)
-						CurrentState->StageColorArgs[j][0] |= CAM_CubeMap;
-
-					if(CurrentState->StageColorArgs[j][1] == CA_Texture0 + i)
-						CurrentState->StageColorArgs[j][1] |= CAM_CubeMap;
-
-					if(CurrentState->StageAlphaArgs[j][0] == CA_Texture0 + i)
-						CurrentState->StageAlphaArgs[j][0] |= CAM_CubeMap;
-
-					if(CurrentState->StageAlphaArgs[j][1] == CA_Texture0 + i)
-						CurrentState->StageAlphaArgs[j][1] |= CAM_CubeMap;
-				}
-			}
-		}
-
 		glUniform1i(SU_NumStages, CurrentState->NumStages);
 		glUniform1i(SU_TexCoordCount, CurrentState->TexCoordCount);
 		glUniform1iv(SU_StageTexCoordSources, ARRAY_COUNT(CurrentState->StageTexCoordSources), CurrentState->StageTexCoordSources);
@@ -803,10 +783,8 @@ UBOOL FOpenGLRenderInterface::SetHardwareShaderMaterial(UHardwareShader* Materia
 	}
 
 	for(INT i = 0; i < MAX_TEXTURES; ++i){
-		if(Material->Textures[i]){
+		if(Material->Textures[i])
 			SetBitmapTexture(Material->Textures[i], i);
-			Cubemaps[i] = Material->Textures[i]->GetRenderInterface()->GetCubemapInterface() != NULL;
-		}
 
 		++CurrentState->NumTextures;
 	}
@@ -819,7 +797,6 @@ UBOOL FOpenGLRenderInterface::SetHardwareShaderMaterial(UHardwareShader* Materia
 	glUniform4fv(HSU_VSConstants, Material->NumVSConstants, (GLfloat*)Constants);
 	GetShaderConstants(Material->PSConstants, Constants, Material->NumPSConstants);
 	glUniform4fv(HSU_PSConstants, Material->NumPSConstants, (GLfloat*)Constants);
-	glUniform1iv(HSU_Cubemaps, 6, Cubemaps);
 
 	return 1;
 }
@@ -834,13 +811,15 @@ void FOpenGLRenderInterface::SetTexture(FBaseTexture* Texture, INT TextureUnit){
 	if(GLTexture->Revision != Texture->GetRevision())
 		GLTexture->Cache(Texture);
 
-	if(Texture->GetCubemapInterface() == NULL){
+	if(!GLTexture->IsCubemap){
 		GLTexture->BindTexture(TextureUnit);
-		Cubemaps[TextureUnit] = false;
+		CurrentState->Uniforms.TextureInfo[TextureUnit].IsCubemap = 0;
 	}else{
 		GLTexture->BindTexture(MAX_TEXTURES + TextureUnit);
-		Cubemaps[TextureUnit] = true;
+		CurrentState->Uniforms.TextureInfo[TextureUnit].IsCubemap = 1;
 	}
+
+	CurrentState->Uniforms.TextureInfo[TextureUnit].IsBumpmap = IsBumpmap(Texture->GetFormat());
 }
 
 void FOpenGLRenderInterface::SetBitmapTexture(UBitmapMaterial* Bitmap, INT TextureUnit){

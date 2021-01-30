@@ -228,7 +228,8 @@ FOpenGLTexture::FOpenGLTexture(UOpenGLRenderDevice* InRenDev, QWORD InCacheId) :
                                                                                  Height(0),
                                                                                  TextureHandle(GL_NONE),
                                                                                  FBO(GL_NONE),
-                                                                                 DepthStencilAttachment(GL_NONE){}
+                                                                                 DepthStencilAttachment(GL_NONE),
+                                                                                 IsCubemap(false){}
 
 FOpenGLTexture::~FOpenGLTexture(){
 	Free();
@@ -245,8 +246,11 @@ void FOpenGLTexture::Cache(FBaseTexture* BaseTexture, bool RenderTargetMatchBack
 
 	Width = BaseTexture->GetWidth();
 	Height = BaseTexture->GetHeight();
+	IsCubemap = false;
 
 	if(Cubemap){
+		IsCubemap = true;
+
 		for(INT FaceIndex = 0; FaceIndex < 6; ++FaceIndex){
 			FTexture* Face = Cubemap->GetFace(FaceIndex);
 

@@ -519,6 +519,8 @@ UBOOL UModRenderDevice::Init(){
 							   *(FString("XInterfaceCTMenus.") + UObject::GetLanguage()));
 		}
 
+		FOVChanger = FindObject<UObject>(ANY_PACKAGE, "MainFOVChanger");
+
 		// Create FOVChanger object. This might not be the best place but idk where else to put it...
 		if(!FOVChanger){
 			FOVChanger = ConstructObject<UObject>(LoadClass<UObject>(NULL, "Mod.FOVChanger", NULL, LOAD_NoFail | LOAD_Throw, NULL),

@@ -78,6 +78,40 @@ static struct FExecHook : public FExec{
 			}
 
 			return 1;
+		}else if(ParseCommand(&Cmd, "USERENDEV")){
+			FString RenderDeviceClass = Cmd;
+
+			if(RenderDeviceClass == "D3D")
+				RenderDeviceClass = "D3DDrv.D3DRenderDevice";
+			else if(RenderDeviceClass == "OpenGL")
+				RenderDeviceClass = "OpenGLDrv.OpenGLRenderDevice";
+			else if(RenderDeviceClass == "Mod")
+				RenderDeviceClass = "Mod.ModRenderDevice";
+
+			UClass* Class = LoadClass<URenderDevice>(NULL, *RenderDeviceClass, NULL, LOAD_NoWarn | LOAD_Quiet, NULL);
+
+			if(Class){
+				if(GEngine->GRenDev && GEngine->GRenDev->GetClass() != Class){
+					// UViewport::TryRenderDevice only works if GEngine->GRenDev is not the same as the current render device
+					GEngine->GRenDev = ConstructObject<URenderDevice>(Class);
+					GEngine->GRenDev->Init();
+
+					// We need to reset all FCanvasUtils since they still reference the old render interface
+					for(TObjectIterator<UCanvas> It; It; ++It){
+						if(It->pCanvasUtil){
+							delete It->pCanvasUtil;
+							It->pCanvasUtil = NULL;
+						}
+					}
+
+					UViewport* Viewport = GEngine->Client->Viewports[0];
+					Viewport->TryRenderDevice(*RenderDeviceClass, Viewport->SizeX, Viewport->SizeY, Viewport->IsFullscreen());
+				}
+			}else{
+				Ar.Logf("Unable to find render device class '%s'", *RenderDeviceClass);
+			}
+
+			return 1;
 		}
 
 		return 0;

@@ -562,6 +562,7 @@ UBOOL UOpenGLRenderDevice::SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL
 void UOpenGLRenderDevice::Exit(UViewport* Viewport){
 	Flush(Viewport);
 	UnSetRes();
+	GIsOpenGL = 0;
 }
 
 void UOpenGLRenderDevice::Flush(UViewport* Viewport){

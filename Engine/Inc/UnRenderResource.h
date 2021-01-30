@@ -238,10 +238,17 @@ enum ETexClampMode{
 };
 
 //
-//  IsDXTC
+// IsDXTC
 //
-inline UBOOL IsDXTC( ETextureFormat Format ){
+inline bool IsDXTC(ETextureFormat Format){
 	return Format == TEXF_DXT1 || Format == TEXF_DXT3 || Format == TEXF_DXT5;
+}
+
+//
+// IsBumpmap
+//
+inline bool IsBumpmap(ETextureFormat Format){
+	return Format == TEXF_V8U8 || Format == TEXF_L6V5U5 || Format == TEXF_X8L8V8U8;
 }
 
 //

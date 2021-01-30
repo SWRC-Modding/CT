@@ -143,7 +143,7 @@ FStringTemp UOpenGLRenderDevice::GLSLVertexShaderFromD3DVertexShader(UHardwareSh
 	else
 		VertexAttributes += "\n";
 
-	FString GLSLShaderText = CommonShaderHeaderText + VertexShaderVarsText +
+	FString GLSLShaderText = VertexShaderVarsText +
 		FString::Printf("layout(location = %i) uniform vec4 VSConstants[%i];\n", HSU_VSConstants, MAX_VERTEX_SHADER_CONSTANTS) +
 		                "#define c VSConstants\n\n" +
 		                VertexAttributes +
@@ -197,19 +197,12 @@ FStringTemp UOpenGLRenderDevice::GLSLFragmentShaderFromD3DPixelShader(UHardwareS
 
 	ExpandHardwareShaderMacros(&D3DShaderText);
 
-	FStringTemp GLSLShaderText = CommonShaderHeaderText + FragmentShaderVarsText +
-		FString::Printf("layout(location = %i) uniform vec4 PSConstants[%i];\n"
-		                "layout(location = %i) uniform bool Cubemaps[6];\n\n", HSU_PSConstants, MAX_PIXEL_SHADER_CONSTANTS, HSU_Cubemaps) +
+	FStringTemp GLSLShaderText = FragmentShaderVarsText +
+		FString::Printf("layout(location = %i) uniform vec4 PSConstants[%i];\n", HSU_PSConstants, MAX_PIXEL_SHADER_CONSTANTS) +
 		                "#define c PSConstants\n\n"
 		                "#define v0 Diffuse\n"
 		                "#define v1 Specular\n\n"
-		                "in float Fog;\n\n"
-		                "vec4 sample_texture0(){ return !Cubemaps[0] ? texture(Texture0, TexCoord0.xy) : texture(Cubemap0, TexCoord0.xyz); }\n"
-		                "vec4 sample_texture1(){ return !Cubemaps[1] ? texture(Texture1, TexCoord1.xy) : texture(Cubemap1, TexCoord1.xyz); }\n"
-		                "vec4 sample_texture2(){ return !Cubemaps[2] ? texture(Texture2, TexCoord2.xy) : texture(Cubemap2, TexCoord2.xyz); }\n"
-		                "vec4 sample_texture3(){ return !Cubemaps[3] ? texture(Texture3, TexCoord3.xy) : texture(Cubemap3, TexCoord3.xyz); }\n"
-		                "vec4 sample_texture4(){ return !Cubemaps[4] ? texture(Texture4, TexCoord4.xy) : texture(Cubemap4, TexCoord4.xyz); }\n"
-		                "vec4 sample_texture5(){ return !Cubemaps[5] ? texture(Texture5, TexCoord5.xy) : texture(Cubemap5, TexCoord5.xyz); }\n\n" +
+		                "in float Fog;\n\n" +
 		                SaturateFuncs +
 		                "void main(void){\n"
 		                    "\t// Texture registers\n"
@@ -1018,10 +1011,10 @@ static bool WriteShaderInstructionRhs(FString* Out, FShaderInstruction& Instruct
 		REQUIRE_ARGS(0);
 		*ResultExpr = EXPR_Float4;
 
-		if(Instruction.Destination[0] != 't')
+		if(Instruction.Destination[0] != 't' || !appIsDigit(Instruction.Destination[1]))
 			return false;
 
-		*Out += FString::Printf("sample_texture%c()", Instruction.Destination[1]);
+		*Out += FString::Printf("sample_texture%c(TexCoord%c)", Instruction.Destination[1], Instruction.Destination[1]);
 		break;
 	case INS_texbem:
 		return false; // TODO: Implement

@@ -90,11 +90,10 @@ enum EShaderUniforms{
 
 enum EHardwareShaderUniforms{
 	HSU_VSConstants = 0,
-	HSU_PSConstants = MAX_VERTEX_SHADER_CONSTANTS,
-	HSU_Cubemaps    = MAX_VERTEX_SHADER_CONSTANTS + MAX_PIXEL_SHADER_CONSTANTS
+	HSU_PSConstants = MAX_VERTEX_SHADER_CONSTANTS
 };
 
-#define GLSL_STRUCT(x) struct x // Workaround to get struct name to show up in C++ but not GLSL
+#define GLSL_STRUCT(x) GLSL_struct x // Workaround to get struct name to show up in C++ but not GLSL
 #define STRUCT(x) struct
 
 // Macro to synchronize the GLSL uniform block with the C++ struct
@@ -114,6 +113,10 @@ enum EHardwareShaderUniforms{
 	UNIFORM_BLOCK_MEMBER(float, TanTime) \
 	UNIFORM_BLOCK_MEMBER(vec4, GlobalColor) \
 	UNIFORM_BLOCK_MEMBER(vec4, AmbientLightColor) \
+	UNIFORM_BLOCK_MEMBER(STRUCT(TextureInfo){ \
+		UNIFORM_STRUCT_MEMBER(bool, IsCubemap) \
+		UNIFORM_STRUCT_MEMBER(bool, IsBumpmap) \
+	}, TextureInfo[MAX_TEXTURES]) \
 	UNIFORM_BLOCK_MEMBER(STRUCT(Light){ \
 		UNIFORM_STRUCT_MEMBER(vec4, Color) \
 		UNIFORM_STRUCT_MEMBER(vec3, Position) \
@@ -226,7 +229,6 @@ public:
 	bool                      NeedUniformUpdate;
 	unsigned int              GlobalUBO;
 
-	UBOOL                     Cubemaps[MAX_TEXTURES]; // Whether the texture at a specific texture unit is a cubemap or not
 	unsigned int              Samplers[MAX_TEXTURES];
 
 	FStreamDeclaration        VertexStreamDeclarations[MAX_VERTEX_STREAMS];

@@ -12,7 +12,7 @@ typedef ALIGN(16) FVector GLSL_vec3;
 typedef ALIGN(16) FPlane GLSL_vec4;
 typedef ALIGN(16) FMatrix GLSL_mat4;
 
-#define GLSL_struct struct
+#define GLSL_struct struct ALIGN(16)
 
 // GLSL shader resource
 

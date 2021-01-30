@@ -1259,6 +1259,11 @@ bool FOpenGLRenderInterface::SetShaderMaterial(UShader* Shader, FString* ErrorSt
 	INT TexturesUsed = 0;
 	bool HaveDiffuse = false;
 
+	if(!CurrentState->ModifyFramebufferBlending){
+		CurrentState->bZTest = true;
+		CurrentState->bZWrite = true;
+	}
+
 	if(Shader->Diffuse){
 		if(!HandleCombinedMaterial(Shader->Diffuse, StagesUsed, TexturesUsed, ErrorString, ErrorMaterial))
 			return false;

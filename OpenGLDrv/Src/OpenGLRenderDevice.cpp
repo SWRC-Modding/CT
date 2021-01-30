@@ -292,7 +292,7 @@ UBOOL UOpenGLRenderDevice::Init(){
 
 	LoadShaders();
 
-	UObject* FOVChanger = FindObject<UObject>(NULL, "MainFOVChanger");
+	UObject* FOVChanger = FindObject<UObject>(ANY_PACKAGE, "MainFOVChanger");
 
 	// Create FOVChanger object. This might not be the best place but idk where else to put it...
 	if(!FOVChanger){

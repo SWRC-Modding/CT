@@ -175,20 +175,17 @@ public:
 //	Utilities for rendering stuff in "canvas" space.
 //	Canvas space is in pixel coordinates, 0 through to viewport width/height.
 //
-class ENGINE_API FCanvasUtil : public FVertexStream
-{
+class ENGINE_API FCanvasUtil : public FVertexStream{
 public:
+	EPrimitiveType        PrimitiveType;
+	UMaterial*            Material;
+	INT                   NumPrimitives;
 
-	EPrimitiveType			PrimitiveType;
-	UMaterial*				Material;
-	INT						NumPrimitives;
+	FRenderInterface*     RI;
+	FMatrix               ScreenToCanvas;
+	FMatrix               CanvasToScreen;
 
-	FRenderInterface*		RI;
-	FMatrix					ScreenToCanvas,
-							CanvasToScreen;
-
-	TArray<FCanvasVertex>	Vertices;
-	QWORD					CacheId;
+	TArray<FCanvasVertex> Vertices;
 
 	// Constructor/destructor.
 	FCanvasUtil(FRenderTarget* RenderTarget,FRenderInterface* InRI);

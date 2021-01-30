@@ -345,7 +345,7 @@ public:
 	virtual void* GetServer();
 	virtual void SetMouseCapture(UBOOL Capture, UBOOL Clip, UBOOL FocusOnly = 0) = 0;
 	virtual void Repaint(UBOOL Blit) = 0;
-	virtual void TryRenderDevice(const TCHAR* ClassName, INT NewX, INT NewY, INT NewColorBytes, UBOOL Fullscreen){}
+	virtual void TryRenderDevice(const TCHAR* ClassName, INT NewX, INT NewY, UBOOL Fullscreen){}
 	virtual char* GetLocalizedKeyName(EInputKey Key) = 0;
 	virtual void DisableWinKey();
 	virtual void EndFullscreen();

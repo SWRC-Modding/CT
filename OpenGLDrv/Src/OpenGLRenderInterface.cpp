@@ -1244,11 +1244,6 @@ bool FOpenGLRenderInterface::SetShaderMaterial(UShader* Shader, FString* ErrorSt
 	INT TexturesUsed = 0;
 	bool HaveDiffuse = false;
 
-	if(!CurrentState->ModifyFramebufferBlending){
-		CurrentState->bZTest = true;
-		CurrentState->bZWrite = true;
-	}
-
 	if(Shader->Diffuse){
 		if(!HandleCombinedMaterial(Shader->Diffuse, StagesUsed, TexturesUsed, ErrorString, ErrorMaterial))
 			return false;
@@ -1320,17 +1315,29 @@ bool FOpenGLRenderInterface::SetShaderMaterial(UShader* Shader, FString* ErrorSt
 	}
 
 	if(!CurrentState->ModifyFramebufferBlending){
+		CurrentState->bZTest = true;
+		CurrentState->bZWrite = true;
+
+		if(Shader->TwoSided)
+			CurrentState->CullMode = CM_None;
+
+		if(Shader->Wireframe)
+			CurrentState->FillMode = FM_Wireframe;
+
 		switch(Shader->OutputBlending){
 		case OB_Normal:
 			if(Shader->Opacity){
 				CurrentState->Uniforms.AlphaRef = 0.0f;
 				CurrentState->FramebufferBlending = FB_AlphaBlend;
+				CurrentState->bZWrite = false;
+				NeedUniformUpdate = true;
 			}
 
 			break;
 		case OB_Masked:
 			CurrentState->Uniforms.AlphaRef = 0.5f;
-			CurrentState->FramebufferBlending = FB_AlphaBlend;
+			CurrentState->FramebufferBlending = FB_Overwrite;
+			NeedUniformUpdate = true;
 			break;
 		case OB_Modulate:
 			CurrentState->FramebufferBlending = FB_Modulate;

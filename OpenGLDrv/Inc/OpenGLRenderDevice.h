@@ -85,6 +85,7 @@ public:
 private:
 	UBOOL                     bFirstRun;
 	UBOOL                     bFixCanvasScaling;
+	INT                       TextureAnisotropy;
 	UBOOL                     bVSync;
 	UBOOL                     bAdaptiveVSync;
 	UBOOL                     bUseOffscreenFramebuffer;

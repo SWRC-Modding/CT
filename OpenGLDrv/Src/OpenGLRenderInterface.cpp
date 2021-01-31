@@ -36,7 +36,8 @@ void FOpenGLRenderInterface::Init(){
 	// Create samplers
 
 	glCreateSamplers(MAX_TEXTURES, Samplers);
-	glBindSamplers(0, MAX_TEXTURES, Samplers);
+	glBindSamplers(0, MAX_TEXTURES, Samplers);            // 2D texture samplers
+	glBindSamplers(MAX_TEXTURES, MAX_TEXTURES, Samplers); // Cubemap samplers
 
 	for(int i = 0; i < MAX_TEXTURES; ++i){
 		glSamplerParameteri(Samplers[i], GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
@@ -817,12 +818,17 @@ void FOpenGLRenderInterface::SetTexture(FBaseTexture* Texture, INT TextureUnit){
 	}else{
 		GLTexture->BindTexture(MAX_TEXTURES + TextureUnit);
 		CurrentState->Uniforms.TextureInfo[TextureUnit].IsCubemap = 1;
+		CurrentState->StageTexWrapModes[TextureUnit][0] = TC_Clamp;
+		CurrentState->StageTexWrapModes[TextureUnit][1] = TC_Clamp;
 	}
 
 	CurrentState->Uniforms.TextureInfo[TextureUnit].IsBumpmap = IsBumpmap(Texture->GetFormat());
 }
 
 void FOpenGLRenderInterface::SetBitmapTexture(UBitmapMaterial* Bitmap, INT TextureUnit){
+	if(!Bitmap)
+		return;
+
 	FBaseTexture* Texture = Bitmap->Get(LockedViewport->CurrentTime, LockedViewport)->GetRenderInterface();
 
 	if(!Texture)

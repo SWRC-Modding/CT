@@ -17,7 +17,7 @@
 	Dependencies.
 -----------------------------------------------------------------------------*/
 
-#include "../../Core/inc/Core.h"
+#include "../../Core/Inc/Core.h"
 
 LINK_LIB(Engine)
 
@@ -64,7 +64,6 @@ ENGINE_API extern FLOAT           GEngineTime;
 #include "UnActor.h"          // Actor inlines.
 #include "UnAudio.h"          // Audio code.
 #include "UnDynBsp.h"         // Dynamic Bsp objects.
-#include "UnScrTex.h"         // Scripted textures.
 #include "UnMovie.h"
 #include "UnRenDev.h"         // Rendering interface definition.
 #include "UnRenderUtil.h"     // Rendering utilities.

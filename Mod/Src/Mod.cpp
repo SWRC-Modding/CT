@@ -1,48 +1,6 @@
 #include "../Inc/Mod.h"
 
 /*
- * PatchVTable
- */
-void* PatchVTable(void* Object, INT Index, void* NewFunc){
-	DWORD OldProtect;
-	void** VTable = *reinterpret_cast<void***>(Object);
-
-	if(!VirtualProtect(VTable + Index, sizeof(void*), PAGE_EXECUTE_READWRITE, &OldProtect)){
-		GLog->Logf(NAME_Error, "Unable to patch vtable: VirtualProtect failed with error code %i", GetLastError());
-
-		return NULL;
-	}
-
-	void* OldFunc = VTable[Index];
-
-	VTable[Index] = NewFunc;
-
-	return OldFunc;
-}
-
-void* PatchDllClassVTable(const TCHAR* DllName, const TCHAR* ClassName, const TCHAR* VTableName, INT Index, void* NewFunc){
-	void* Handle = appGetDllHandle(DllName);
-
-	if(!Handle){
-		GLog->Logf(NAME_Error, "Unable to patch vtable for class '%s': Failed to load library '%s'", ClassName, DllName);
-
-		return NULL;
-	}
-
-	void** VTable = static_cast<void**>(appGetDllExport(Handle, *(FStringTemp("??_7") + ClassName + "@@6B" + VTableName + "@@@")));
-
-	if(!VTable){
-		GLog->Logf(NAME_Error, "Unable to patch vtable for class '%s': Dll export for vtable '%s' not found", ClassName, VTableName);
-
-		return NULL;
-	}
-
-	appFreeDllHandle(Handle); // Decrementing reference count just in case. This might cause a crash later if the dll wasn't already loaded which is required.
-
-	return PatchVTable(&VTable, Index, NewFunc);
-}
-
-/*
  * FunctionOverride
  */
 
@@ -56,14 +14,14 @@ static void __fastcall ScriptFunctionHook(UObject* Self, int, FFrame& Stack, voi
 	UFunction* Function;
 	FName      FunctionName;
 
-	appMemcpy(&Function, Stack.Code - sizeof(UFunction*), sizeof(UFunction*));
+	appMemcpy(&Function, Stack.Code - sizeof(void*), sizeof(void*));
 
 	if(!FunctionOverrides.Find(Function)){
 		Function = NULL;
 
 		appMemcpy(&FunctionName, Stack.Code - sizeof(FName), sizeof(FName));
 
-		if((reinterpret_cast<DWORD>(FunctionName.GetEntry()) & 0xFFFF0000) != 0 || // Seems to be enough to check for a valid name
+		if((reinterpret_cast<DWORD>(FunctionName.GetEntry()) & 0xFFFF0000) != 0 && // Seems to be enough to check for a valid name
 		   !IsBadReadPtr(FunctionName.GetEntry(), sizeof(FNameEntry) - NAME_SIZE)){ // Using IsBadReadPtr as a backup check just in case
 			Function = Self->FindFunction(FunctionName);
 		}

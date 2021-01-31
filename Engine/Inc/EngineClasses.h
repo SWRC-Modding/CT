@@ -4153,6 +4153,36 @@ public:
  * FrameFX
  */
 
+class FFrameGrid{ // This seems to be almost the same as AFluidSurfaceInfo
+public:
+	BYTE          FluidGridType;
+	char          Padding1[31]; // PADDING!!!
+	FRange        NoiseStrength;
+	char          Padding2[40]; // PADDING!!!
+	TArray<FLOAT> Verts0;
+	TArray<FLOAT> Verts1;
+	TArray<BYTE>  VertsAlpha;
+	char          Padding3[44]; // PADDING!!!
+
+	FFrameGrid();
+
+	virtual ~FFrameGrid();
+	virtual INT Tick(FLOAT DeltaTime, ELevelTick TickType);
+
+	void FillIndexBuffer(void*);
+	void FillVertexBuffer(void*);
+	void GetNearestIndex(const FVector&, int&, int&);
+	FVector GetVertexPosLocal(int, int);
+	FVector GetVertexPosWorld(int, int);
+	void Init();
+	void Render(class UMaterial*, class FBaseTexture*, class FRenderInterface*);
+	void SimpleFillIndexBuffer(void*);
+	void SimpleFillVertexBuffer(void*);
+	void SonicPulse(const FVector&, float, float);
+	void SonicPulseVertex(int, int, float);
+	void UpdateSimulation(float);
+};
+
 class ENGINE_API UFrameFX : public UObject{
 public:
 	BYTE Blur;
@@ -4180,13 +4210,13 @@ public:
 	// --------- Member Variables ---------
 	// Static working targets (shared even in splitscreen)
 	static const int MaxMips = 6;
-	static class FAuxRenderTarget * MipTargets[MaxMips];
-	static class FAuxRenderTarget * WorkingTarget;
-	static class FAuxRenderTarget * AccumulatorTarget;
-	static class FAuxRenderTarget * AntiAliasTarget;
+	static class FAuxRenderTarget* MipTargets[MaxMips];
+	static class FAuxRenderTarget* WorkingTarget;
+	static class FAuxRenderTarget* AccumulatorTarget;
+	static class FAuxRenderTarget* AntiAliasTarget;
 
 	// Static Frame Grid variables
-	static class FFrameGrid * FrameGrid;
+	static class FFrameGrid* FrameGrid;
 
 	// --------- UObject interface ---------
 	void Destroy();
@@ -5167,6 +5197,19 @@ public:
 };
 
 /*
+ * ColorModifier
+ */
+
+class ENGINE_API UOpacityModifier : public UModifier{
+public:
+	class UMaterial* Opacity;
+	BITFIELD bOverrideTexModifier:1;
+
+	DECLARE_CLASS(UOpacityModifier,UModifier,0,Engine)
+	NO_DEFAULT_CONSTRUCTOR(UOpacityModifier)
+};
+
+/*
  * HardwareShader
  */
 
@@ -5256,8 +5299,8 @@ public:
 	BYTE AlphaRef;
 	BYTE SrcBlend;
 	BYTE DestBlend;
-	INT VertexShader;
-	INT PixelShader;
+	FVertexShader* VertexShader;
+	FPixelShader* PixelShader;
 	INT NumVSConstants;
 	INT NumPSConstants;
 
@@ -5390,6 +5433,19 @@ public:
 };
 
 /*
+ * TexCoordSource
+ */
+
+class ENGINE_API UTexCoordSource : public UTexModifier{
+public:
+	INT SourceChannel;
+
+	DECLARE_CLASS(UTexCoordSource,UTexModifier,0,Engine)
+
+	virtual void PostEditChange();
+};
+
+/*
  * TexOscillator
  */
 
@@ -5468,7 +5524,7 @@ public:
 
 class ENGINE_API UScriptedTexture : public UBitmapMaterial{
 public:
-	INT RenderTarget;
+	FRenderTarget* RenderTarget;
 	class UViewport* RenderViewport;
 	class AActor* Client;
 	INT Revision;
@@ -5484,9 +5540,106 @@ public:
 	virtual void PostEditChange();
 };
 
-// Tex Scaler
-class ENGINE_API UTexScaler : public UTexModifier
-{
+/*
+ * TerrainMaterial
+ */
+
+enum ETerrainRenderMethod{
+	RM_WeightMap,
+	RM_CombinedWeightMap,
+	RM_AlphaMap
+};
+
+struct ENGINE_API FTerrainMaterialLayer{
+	class UMaterial* Texture;
+	class UBitmapMaterial* AlphaWeight;
+	FMatrix TextureMatrix;
+};
+
+class ENGINE_API UTerrainMaterial : public URenderedMaterial{
+public:
+	TArrayNoInit<FTerrainMaterialLayer> Layers;
+	BYTE RenderMethod;
+	BITFIELD FirstPass:1;
+
+	DECLARE_CLASS(UTerrainMaterial,URenderedMaterial,0,Engine)
+
+	virtual UMaterial* CheckFallback();
+	virtual UBOOL HasFallback();
+};
+
+/*
+ * ProjectorMaterial
+ */
+
+class ENGINE_API UProjectorMaterial : public URenderedMaterial{
+public:
+	class UBitmapMaterial* Gradient;
+	class UMaterial* Projected;
+	class UMaterial* BaseMaterial;
+	BYTE BaseMaterialBlending;
+	BYTE FrameBufferBlending;
+	FMatrix Matrix;
+	FMatrix GradientMatrix;
+	BITFIELD bProjected:1;
+	BITFIELD bProjectOnUnlit:1;
+	BITFIELD bGradient:1;
+	BITFIELD bProjectOnAlpha:1;
+	BITFIELD bProjectOnBackfaces:1;
+	BITFIELD bStaticProjector:1;
+	BITFIELD bTwoSided:1;
+
+	DECLARE_CLASS(UProjectorMaterial,URenderedMaterial,0,Engine)
+	NO_DEFAULT_CONSTRUCTOR(UProjectorMaterial)
+};
+
+/*
+ * ProjectorMultiMaterial
+ */
+
+struct FProjectorRenderEntry{
+	class UMaterial* ProjectedTexture;
+	FMatrix Matrix;
+	FVector Direction;
+	FVector Origin;
+	FLOAT InvMaxTraceDist;
+	BITFIELD bProjectOnBackFaces:1;
+};
+
+class ENGINE_API UProjectorMultiMaterial : public URenderedMaterial{
+public:
+	TArrayNoInit<FProjectorRenderEntry> RenderEntries;
+	INT RemainingEntries;
+	class UMaterial* BaseMaterial;
+	BYTE FrameBufferBlending;
+	class UTexture* DefaultOpacity;
+	class UHardwareShader* AddShaders[4];
+	class UHardwareShader* BlendShaders[4];
+	class UHardwareShader* ModShaders[4];
+
+	DECLARE_CLASS(UProjectorMultiMaterial,URenderedMaterial,0,Engine)
+	NO_DEFAULT_CONSTRUCTOR(UProjectorMultiMaterial)
+
+	inline UHardwareShader* GetHardwareShader(int NumProjectors){
+		switch(FrameBufferBlending){
+		case PB_Add:
+			return AddShaders[NumProjectors - 1];
+		case PB_AlphaBlend:
+			return BlendShaders[NumProjectors - 1];
+		case PB_Modulate:
+		case PB_Modulate2X:
+			return ModShaders[NumProjectors - 1];
+		}
+
+		return NULL;
+	}
+};
+
+/*
+ * TexScaler
+ */
+
+class ENGINE_API UTexScaler : public UTexModifier{
 public:
 	FMatrix M;
 	FLOAT UScale;
@@ -5494,7 +5647,6 @@ public:
 	FLOAT UOffset;
 	FLOAT VOffset;
 
-	// Declare the class
 	DECLARE_CLASS(UTexScaler,UTexModifier,0,Engine)
 
 	// UTexModifier interface
@@ -5556,6 +5708,16 @@ public:
 
 	// Virtual functions
 	virtual void InitMovie();
+};
+
+/*
+ * VertexColor
+ */
+
+class ENGINE_API UVertexColor : public URenderedMaterial{
+public:
+	DECLARE_CLASS(UVertexColor,URenderedMaterial,0,Engine)
+	NO_DEFAULT_CONSTRUCTOR(UVertexColor)
 };
 
 /*

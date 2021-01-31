@@ -46,85 +46,15 @@ static UINT               CurrentMipLevelWidth;
 static UINT               CurrentMipLevelHeight;
 static void*              CurrentMipLevelPixels;
 
-/*
- * Bumpmap pixel formats
- */
-
-struct FV8U8Pixel{
-	INT8 U;
-	INT8 V;
-};
-
-struct FL6V5U5Pixel{
-	INT16  U:5;
-	INT16  V:5;
-	UINT16 L:6;
-};
-
-struct FX8L8V8U8Pixel{
-	INT8  U;
-	INT8  V;
-	UINT8 L;
-	UINT8 X;
-};
-
-struct FA8R8G8B8Pixel{
-	UINT8 B;
-	UINT8 G;
-	UINT8 R;
-	UINT8 A;
-};
-
-/*
- * Integer range mapping
- */
-
-static UINT8 Map6BitUnsignedTo8BitUnsigned(UINT8 U6){
-	return (UINT8)(U6 * 255 / 63);
-}
-
-static INT8 Map5BitSignedTo8BitSigned(INT8 S5){
-	const int Min5 = -16;
-	const int Max5 = 15;
-	const int Range5 = Max5 - Min5;
-
-	const int Min8 = -128;
-	const int Max8 = 127;
-	const int Range8 = Max8 - Min8;
-
-	return (INT8)((S5 - Min5) * Range8 / Range5 + Min8);
-}
-
-static UINT8 Map8BitSignedTo8BitUnsigned(INT8 S8){
-	return S8 + 128;
-}
-
-/*
- * V8U8 format conversion
- */
-
-static void ConvertV8U8ToA8R8G8B8(const void* In, void* Out, UINT Width, UINT Height){
-	for(UINT Y = 0; Y < Height; ++Y){
-		for(UINT X = 0; X < Width; ++X){
-			INT Index = Y * Width + X;
-			const FV8U8Pixel* P1 = static_cast<const FV8U8Pixel*>(In) + Index;
-			FA8R8G8B8Pixel* P2 = static_cast<FA8R8G8B8Pixel*>(Out) + Index;
-
-			P2->B = Map8BitSignedTo8BitUnsigned(P1->V);
-			P2->G = Map8BitSignedTo8BitUnsigned(P1->U);
-			P2->R = 0xFF;
-			P2->A = 0xFF;
-		}
-	}
-}
+// Conversion from one bumpmap format to another
 
 /*
  * L6V5U5 format conversion
  */
 
-static void ConvertL6V5U5ToX8L8V8U8(const void* In, void* Out, UINT Width, UINT Height){
-	for(UINT Y = 0; Y < Height; ++Y){
-		for(UINT X = 0; X < Width; ++X){
+static void ConvertL6V5U5ToX8L8V8U8(const void* In, void* Out, INT Width, INT Height){
+	for(INT Y = 0; Y < Height; ++Y){
+		for(INT X = 0; X < Width; ++X){
 			INT Index = Y * Width + X;
 			const FL6V5U5Pixel* P1 = static_cast<const FL6V5U5Pixel*>(In) + Index;
 			FX8L8V8U8Pixel* P2 = static_cast<FX8L8V8U8Pixel*>(Out) + Index;
@@ -137,9 +67,9 @@ static void ConvertL6V5U5ToX8L8V8U8(const void* In, void* Out, UINT Width, UINT 
 	}
 }
 
-static void ConvertL6V5U5ToV8U8(const void* In, void* Out, UINT Width, UINT Height){
-	for(UINT Y = 0; Y < Height; ++Y){
-		for(UINT X = 0; X < Width; ++X){
+static void ConvertL6V5U5ToV8U8(const void* In, void* Out, INT Width, INT Height){
+	for(INT Y = 0; Y < Height; ++Y){
+		for(INT X = 0; X < Width; ++X){
 			INT Index = Y * Width + X;
 			const FL6V5U5Pixel* P1 = static_cast<const FL6V5U5Pixel*>(In) + Index;
 			FV8U8Pixel* P2 = static_cast<FV8U8Pixel*>(Out) + Index;
@@ -147,21 +77,6 @@ static void ConvertL6V5U5ToV8U8(const void* In, void* Out, UINT Width, UINT Heig
 			P2->V = Map5BitSignedTo8BitSigned(P1->V);
 			P2->U = Map5BitSignedTo8BitSigned(P1->U);
 			// No luminance
-		}
-	}
-}
-
-static void ConvertL6V5U5ToA8R8G8B8(const void* In, void* Out, UINT Width, UINT Height){
-	for(UINT Y = 0; Y < Height; ++Y){
-		for(UINT X = 0; X < Width; ++X){
-			INT Index = Y * Width + X;
-			const FL6V5U5Pixel* P1 = static_cast<const FL6V5U5Pixel*>(In) + Index;
-			FA8R8G8B8Pixel* P2 = static_cast<FA8R8G8B8Pixel*>(Out) + Index;
-
-			P2->B = Map8BitSignedTo8BitUnsigned(Map5BitSignedTo8BitSigned(P1->V));
-			P2->G = Map8BitSignedTo8BitUnsigned(Map5BitSignedTo8BitSigned(P1->U));
-			P2->R = Map6BitUnsignedTo8BitUnsigned(P1->L);
-			P2->A = P2->R;
 		}
 	}
 }
@@ -170,9 +85,9 @@ static void ConvertL6V5U5ToA8R8G8B8(const void* In, void* Out, UINT Width, UINT 
  * X8L8V8U8 format conversion
  */
 
-static void ConvertX8L8V8U8ToV8U8(const void* In, void* Out, UINT Width, UINT Height){
-	for(UINT Y = 0; Y < Height; ++Y){
-		for(UINT X = 0; X < Width; ++X){
+static void ConvertX8L8V8U8ToV8U8(const void* In, void* Out, INT Width, INT Height){
+	for(INT Y = 0; Y < Height; ++Y){
+		for(INT X = 0; X < Width; ++X){
 			INT Index = Y * Width + X;
 			const FX8L8V8U8Pixel* P1 = static_cast<const FX8L8V8U8Pixel*>(In) + Index;
 			FV8U8Pixel* P2 = static_cast<FV8U8Pixel*>(Out) + Index;
@@ -180,21 +95,6 @@ static void ConvertX8L8V8U8ToV8U8(const void* In, void* Out, UINT Width, UINT He
 			P2->V = Map5BitSignedTo8BitSigned(P1->V);
 			P2->U = Map5BitSignedTo8BitSigned(P1->U);
 			// No luminance
-		}
-	}
-}
-
-static void ConvertX8L8V8U8ToA8R8G8B8(const void* In, void* Out, UINT Width, UINT Height){
-	for(UINT Y = 0; Y < Height; ++Y){
-		for(UINT X = 0; X < Width; ++X){
-			INT Index = Y * Width + X;
-			const FX8L8V8U8Pixel* P1 = static_cast<const FX8L8V8U8Pixel*>(In) + Index;
-			FA8R8G8B8Pixel* P2 = static_cast<FA8R8G8B8Pixel*>(Out) + Index;
-
-			P2->B = Map8BitSignedTo8BitUnsigned(P1->V);
-			P2->G = Map8BitSignedTo8BitUnsigned(P1->U);
-			P2->R = P1->L;
-			P2->A = P1->X;
 		}
 	}
 }
@@ -225,7 +125,7 @@ static HRESULT __stdcall D3DTextureLockRectOverride(IDirect3DTexture8* D3DTextur
 
 	switch(CurrentTextureSourceFormat){
 	case D3DFMT_A8R8G8B8:
-		BytesPerPixel = sizeof(FA8R8G8B8Pixel);
+		BytesPerPixel = sizeof(FRGBA8Pixel);
 		break;
 	case D3DFMT_V8U8:
 		BytesPerPixel = sizeof(FV8U8Pixel);
@@ -263,19 +163,19 @@ static HRESULT __stdcall D3DTextureUnlockRectOverride(IDirect3DTexture8* D3DText
 
 	if(SUCCEEDED(Result)){
 		if(CurrentTextureSourceFormat == D3DFMT_V8U8){
-			ConvertV8U8ToA8R8G8B8(CurrentMipLevelPixels, LockedRect.pBits, CurrentMipLevelWidth, CurrentMipLevelHeight);
+			ConvertV8U8ToRGBA8(CurrentMipLevelPixels, LockedRect.pBits, CurrentMipLevelWidth, CurrentMipLevelHeight);
 		}else if(CurrentTextureSourceFormat == D3DFMT_L6V5U5){
 			if(CurrentTextureTargetFormat == D3DFMT_V8U8)
 				ConvertL6V5U5ToV8U8(CurrentMipLevelPixels, LockedRect.pBits, CurrentMipLevelWidth, CurrentMipLevelHeight);
 			else if(CurrentTextureTargetFormat == D3DFMT_X8L8V8U8)
 				ConvertL6V5U5ToX8L8V8U8(CurrentMipLevelPixels, LockedRect.pBits, CurrentMipLevelWidth, CurrentMipLevelHeight);
 			else if(CurrentTextureTargetFormat == D3DFMT_A8R8G8B8)
-				ConvertL6V5U5ToA8R8G8B8(CurrentMipLevelPixels, LockedRect.pBits, CurrentMipLevelWidth, CurrentMipLevelHeight);
+				ConvertL6V5U5ToRGBA8(CurrentMipLevelPixels, LockedRect.pBits, CurrentMipLevelWidth, CurrentMipLevelHeight);
 		}else if(CurrentTextureSourceFormat == D3DFMT_X8L8V8U8){
 			if(CurrentTextureTargetFormat == D3DFMT_V8U8)
 				ConvertX8L8V8U8ToV8U8(CurrentMipLevelPixels, LockedRect.pBits, CurrentMipLevelWidth, CurrentMipLevelHeight);
 			else if(CurrentTextureTargetFormat == D3DFMT_A8R8G8B8)
-				ConvertX8L8V8U8ToA8R8G8B8(CurrentMipLevelPixels, LockedRect.pBits, CurrentMipLevelWidth, CurrentMipLevelHeight);
+				ConvertX8L8V8U8ToRGB8(CurrentMipLevelPixels, LockedRect.pBits, CurrentMipLevelWidth, CurrentMipLevelHeight);
 		}
 
 		Result = D3DTextureUnlockRect(D3DTexture, Level);
@@ -619,6 +519,8 @@ UBOOL UModRenderDevice::Init(){
 							   *(FString("XInterfaceCTMenus.") + UObject::GetLanguage()));
 		}
 
+		FOVChanger = FindObject<UObject>(ANY_PACKAGE, "MainFOVChanger");
+
 		// Create FOVChanger object. This might not be the best place but idk where else to put it...
 		if(!FOVChanger){
 			FOVChanger = ConstructObject<UObject>(LoadClass<UObject>(NULL, "Mod.FOVChanger", NULL, LOAD_NoFail | LOAD_Throw, NULL),
@@ -738,9 +640,8 @@ FRenderInterface* UModRenderDevice::Lock(UViewport* Viewport, BYTE* HitData, INT
 }
 
 void UModRenderDevice::Unlock(FRenderInterface* RI){
-	checkSlow(LockedViewport);
-
 	if(RI == &RenderInterface){
+		checkSlow(LockedViewport);
 		checkSlow(RenderInterface.HitData);
 		checkSlow(RenderInterface.HitSize);
 

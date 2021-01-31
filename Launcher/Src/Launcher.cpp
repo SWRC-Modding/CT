@@ -78,6 +78,40 @@ static struct FExecHook : public FExec{
 			}
 
 			return 1;
+		}else if(ParseCommand(&Cmd, "USERENDEV")){
+			FString RenderDeviceClass = Cmd;
+
+			if(RenderDeviceClass == "D3D")
+				RenderDeviceClass = "D3DDrv.D3DRenderDevice";
+			else if(RenderDeviceClass == "OpenGL")
+				RenderDeviceClass = "OpenGLDrv.OpenGLRenderDevice";
+			else if(RenderDeviceClass == "Mod")
+				RenderDeviceClass = "Mod.ModRenderDevice";
+
+			UClass* Class = LoadClass<URenderDevice>(NULL, *RenderDeviceClass, NULL, LOAD_NoWarn | LOAD_Quiet, NULL);
+
+			if(Class){
+				if(GEngine->GRenDev && GEngine->GRenDev->GetClass() != Class){
+					// UViewport::TryRenderDevice only works if GEngine->GRenDev is not the same as the current render device
+					GEngine->GRenDev = ConstructObject<URenderDevice>(Class);
+					GEngine->GRenDev->Init();
+
+					// We need to reset all FCanvasUtils since they still reference the old render interface
+					for(TObjectIterator<UCanvas> It; It; ++It){
+						if(It->pCanvasUtil){
+							delete It->pCanvasUtil;
+							It->pCanvasUtil = NULL;
+						}
+					}
+
+					UViewport* Viewport = GEngine->Client->Viewports[0];
+					Viewport->TryRenderDevice(*RenderDeviceClass, Viewport->SizeX, Viewport->SizeY, Viewport->IsFullscreen());
+				}
+			}else{
+				Ar.Logf("Unable to find render device class '%s'", *RenderDeviceClass);
+			}
+
+			return 1;
 		}
 
 		return 0;
@@ -85,6 +119,36 @@ static struct FExecHook : public FExec{
 		unguard;
 	}
 } LauncherExecHook;
+
+static void DetectRenderDevice(){
+	FString RenderDeviceClass;
+
+	// Check for a specific render device on the command line.
+	if(Parse(appCmdLine(), "RenDev=", RenderDeviceClass)){
+		// Allow short form of known render devices.
+		if(RenderDeviceClass == "D3D")
+			RenderDeviceClass = "D3DDrv.D3DRenderDevice";
+		else if(RenderDeviceClass == "OpenGL")
+			RenderDeviceClass = "OpenGLDrv.OpenGLRenderDevice";
+		else if(RenderDeviceClass == "Mod")
+			RenderDeviceClass = "Mod.ModRenderDevice";
+
+		debugf("RenderDevice set on command line: %s", *RenderDeviceClass);
+		GConfig->SetString("Engine.Engine", "RenderDevice", *RenderDeviceClass);
+	}else{
+		// If default render device is set to D3DRenderDevice, try locating ModRenderDevice and use it if it exists.
+		GConfig->GetFString("Engine.Engine", "RenderDevice", RenderDeviceClass);
+
+		if(RenderDeviceClass == "D3DDrv.D3DRenderDevice"){
+			UClass* ModRenderDeviceClass = LoadClass<URenderDevice>(NULL, "Mod.ModRenderDevice", NULL, LOAD_NoWarn | LOAD_Quiet, NULL);
+
+			if(ModRenderDeviceClass){
+				debugf("Using Mod.ModRenderDevice");
+				GConfig->SetString("Engine.Engine", "RenderDevice", "Mod.ModRenderDevice");
+			}
+		}
+	}
+}
 
 static void InitEngine(){
 	guard(InitEngine);
@@ -106,21 +170,7 @@ static void InitEngine(){
 
 	GConfig->SetInt("FirstRun", "FirstRun", FirstRun);
 
-	// Locate Mod.ModRenderDevice and use it if it exists.
-	{
-		FString RenderDeviceClass;
-
-		GConfig->GetFString("Engine.Engine", "RenderDevice", RenderDeviceClass, "System.ini");
-
-		if(RenderDeviceClass == "D3DDrv.D3DRenderDevice"){ // Only use custom render device if there isn't another one specified
-			UClass* ModRenderDeviceClass = LoadClass<URenderDevice>(NULL, "Mod.ModRenderDevice", NULL, LOAD_NoWarn | LOAD_Quiet, NULL);
-
-			if(ModRenderDeviceClass){
-				GLog->Log("Using Mod.ModRenderDevice");
-				GConfig->SetString("Engine.Engine", "RenderDevice", "Mod.ModRenderDevice", "System.ini");
-			}
-		}
-	}
+	DetectRenderDevice();
 
 	// Create game engine.
 	UClass* EngineClass = LoadClass<UEngine>(NULL, "ini:Engine.Engine.GameEngine", NULL, LOAD_NoFail, NULL);
@@ -255,4 +305,10 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	GIsStarted = 0;
 
 	return ExitCode;
+}
+
+// Force use of dedicated GPU
+extern "C"{
+	__declspec(dllexport) DWORD NvOptimusEnablement = 1;
+	__declspec(dllexport) DWORD AmdPowerXpressRequestHighPerformance = 1;
 }

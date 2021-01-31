@@ -60,6 +60,31 @@ void FOpenGLRenderInterface::Exit(){
 	CurrentState->NumVertexStreams = 0;
 }
 
+void FOpenGLRenderInterface::Locked(UViewport* Viewport){
+	checkSlow(CurrentState == &SavedStates[0]);
+	checkSlow(!LockedViewport);
+
+	LockedViewport = Viewport;
+
+	if(!CurrentState->Shader)
+		SetShader(&RenDev->FixedFunctionShader);
+
+	if(GLEW_EXT_texture_filter_anisotropic && TextureAnisotropy != RenDev->TextureAnisotropy){
+		TextureAnisotropy = RenDev->TextureAnisotropy;
+
+		for(INT i = 0; i < MAX_TEXTURES; ++i)
+			glSamplerParameterf(Samplers[i], GL_TEXTURE_MAX_ANISOTROPY, Clamp<FLOAT>(TextureAnisotropy, 1, 16));
+	}
+
+	SetupPerFrameShaderConstants();
+	PushState();
+}
+
+void FOpenGLRenderInterface::Unlocked(){
+	LockedViewport = NULL;
+	PopState();
+}
+
 void FOpenGLRenderInterface::UpdateGlobalShaderUniforms(){
 	// Matrices
 	CurrentState->Uniforms.LocalToCamera = CurrentState->Uniforms.LocalToWorld *

@@ -229,6 +229,7 @@ public:
 	bool                      NeedUniformUpdate;
 	unsigned int              GlobalUBO;
 
+	INT                       TextureAnisotropy;
 	unsigned int              Samplers[MAX_TEXTURES];
 
 	FStreamDeclaration        VertexStreamDeclarations[MAX_VERTEX_STREAMS];
@@ -237,6 +238,8 @@ public:
 
 	void Init();
 	void Exit();
+	void Locked(UViewport* Viewport);
+	void Unlocked();
 	void UpdateGlobalShaderUniforms();
 
 	// Overrides

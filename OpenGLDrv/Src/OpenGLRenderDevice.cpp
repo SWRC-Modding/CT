@@ -15,6 +15,7 @@ UOpenGLRenderDevice::UOpenGLRenderDevice() : RenderInterface(this),
 void UOpenGLRenderDevice::StaticConstructor(){
 	SupportsCubemaps = 1;
 	SupportsZBIAS = 1;
+	TextureAnisotropy = 8;
 	bFirstRun = 1;
 	bFixCanvasScaling = 1;
 	bUseOffscreenFramebuffer = 1;
@@ -22,6 +23,7 @@ void UOpenGLRenderDevice::StaticConstructor(){
 
 	new(GetClass(), "UseDesktopResolution", RF_Public) UBoolProperty(CPP_PROPERTY(bUseDesktopResolution), "Options", CPF_Config);
 	new(GetClass(), "KeepAspectRatio", RF_Public) UBoolProperty(CPP_PROPERTY(bKeepAspectRatio), "Options", CPF_Config);
+	new(GetClass(), "TextureAnisotropy", RF_Public) UIntProperty(CPP_PROPERTY(TextureAnisotropy), "Options", CPF_Config);
 	new(GetClass(), "VSync", RF_Public) UBoolProperty(CPP_PROPERTY(bVSync), "Options", CPF_Config);
 	new(GetClass(), "AdaptiveVSync", RF_Public) UBoolProperty(CPP_PROPERTY(bAdaptiveVSync), "Options", CPF_Config);
 	new(GetClass(), "FirstRun", RF_Public) UBoolProperty(CPP_PROPERTY(bFirstRun), "", CPF_Config);
@@ -626,28 +628,19 @@ void UOpenGLRenderDevice::EnableVSync(bool bEnable){
 }
 
 FRenderInterface* UOpenGLRenderDevice::Lock(UViewport* Viewport, BYTE* HitData, INT* HitSize){
-	check(RenderInterface.CurrentState == &RenderInterface.SavedStates[0]);
-
 	MakeCurrent();
-
-	RenderInterface.LockedViewport = Viewport;
 
 	if(bUseOffscreenFramebuffer)
 		RenderInterface.SetRenderTarget(&ScreenRenderTarget, true);
 
-	RenderInterface.SetupPerFrameShaderConstants();
-
-	if(!RenderInterface.CurrentState->Shader)
-		RenderInterface.SetShader(&FixedFunctionShader);
-
-	RenderInterface.PushState();
+	RenderInterface.Locked(Viewport);
 
 	return &RenderInterface;
 }
 
 void UOpenGLRenderDevice::Unlock(FRenderInterface* RI){
-	RI->PopState();
-	RenderInterface.LockedViewport = NULL;
+	checkSlow(RI == &RenderInterface);
+	RenderInterface.Unlocked();
 }
 
 void UOpenGLRenderDevice::Present(UViewport* Viewport){

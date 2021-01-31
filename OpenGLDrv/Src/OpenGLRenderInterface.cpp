@@ -195,7 +195,7 @@ UBOOL FOpenGLRenderInterface::SetRenderTarget(FRenderTarget* RenderTarget, bool 
 	guardFunc;
 
 	// Flip framebuffer unless we're rendering to the screen.
-	if(MatchBackbuffer)
+	if(MatchBackbuffer || RenderTarget == NULL)
 		glClipControl(GL_LOWER_LEFT, GL_NEGATIVE_ONE_TO_ONE);
 	else
 		glClipControl(GL_UPPER_LEFT, GL_ZERO_TO_ONE);

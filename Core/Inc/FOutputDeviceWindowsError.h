@@ -10,16 +10,13 @@
 //Handle a critical error.
 //
 class FOutputDeviceWindowsError : public FOutputDeviceError{
-	INT ErrorPos;
-	EName ErrorType;
 public:
-	FOutputDeviceWindowsError()
-	: ErrorPos(0)
-	, ErrorType(NAME_None)
-	{}
+	FOutputDeviceWindowsError() : ErrorPos(0),
+	                              ErrorType(NAME_None){}
 
 	void Serialize(const TCHAR* Msg, enum EName Event){
 		INT Error = GetLastError();
+
 		if(!GIsCriticalError){
 			//First appError.
 			GIsCriticalError = 1;
@@ -68,9 +65,13 @@ public:
 			GLog->Flush();
 
 			if(GIsClient || GIsEditor)
-				MessageBox(NULL, GErrorHist, "Critical Error", MB_OK | MB_ICONERROR | MB_TASKMODAL);
+				MessageBoxA(NULL, GErrorHist, "Critical Error", MB_OK | MB_ICONERROR | MB_APPLMODAL);
 		}catch(...){}
 	}
+
+private:
+	INT   ErrorPos;
+	EName ErrorType;
 };
 
 /*-----------------------------------------------------------------------------

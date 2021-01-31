@@ -200,7 +200,7 @@ class ENGINE_API ULevel : public ULevelBase
 	virtual UBOOL Listen(FString& Error);
 	virtual UBOOL IsServer();
 	virtual UBOOL IsDedicatedServer();
-	virtual UBOOL MoveActor(AActor* Actor, const FVector& Delta, const FRotator& NewRotation, FCheckResult& Hit = FCheckResult(), UBOOL Test = 0, UBOOL IgnorePawns = 0, UBOOL bIgnoreBases = 0, UBOOL bNoFail = 0, unsigned long IDONTKNOWWHATTHISIS = 0);
+	virtual UBOOL MoveActor(AActor* Actor, const FVector& Delta, const FRotator& NewRotation, FCheckResult& Hit, UBOOL Test = 0, UBOOL IgnorePawns = 0, UBOOL bIgnoreBases = 0, UBOOL bNoFail = 0, unsigned long IDONTKNOWWHATTHISIS = 0);
 	virtual UBOOL FarMoveActor(AActor* Actor, const FVector& DestLocation, UBOOL Test = 0, UBOOL bNoCheck = 0, UBOOL bAttachedMove = 0);
 	virtual UBOOL DestroyActor(AActor* Actor, UBOOL bNetForce = 0);
 	virtual void CleanupDestroyed(UBOOL bForce);

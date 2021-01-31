@@ -163,8 +163,8 @@ public:
 	virtual ETexClampMode GetVClamp();
 
 	virtual void* GetRawTextureData(INT MipIndex);
-	virtual void UnloadRawTextureData( INT MipIndex );
-	virtual void GetTextureData(INT MipIndex,void* Dest,INT DestStride,ETextureFormat DestFormat,UBOOL ColoredMips=0);
+	virtual void UnloadRawTextureData(INT MipIndex);
+	virtual void GetTextureData(INT MipIndex, void* Dest, INT DestStride, ETextureFormat DestFormat, UBOOL ColoredMips = 0, UBOOL UnloadMip = 0);
 	virtual UTexture* GetUTexture();
 };
 
@@ -313,7 +313,6 @@ class ENGINE_API UTexture : public UBitmapMaterial{
 		return bAlphaTexture || bMasked;
 	}
 };
-
 
 //
 // Information about a locked texture. Used for ease of rendering.

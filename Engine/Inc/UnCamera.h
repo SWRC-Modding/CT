@@ -335,7 +335,7 @@ public:
 	virtual void Present();
 	virtual UBOOL SetDrag(UBOOL NewDrag);
 	virtual UBOOL IsFullscreen() = 0;
-	virtual UBOOL ResizeViewport(DWORD BlitType, INT X = INDEX_NONE, INT Y = INDEX_NONE, INT ColorBytes = INDEX_NONE) = 0;
+	virtual UBOOL ResizeViewport(DWORD BlitType, INT X = INDEX_NONE, INT Y = INDEX_NONE, UBOOL bSaveSize = 1) = 0;
 	virtual void SetModeCursor() = 0;
 	virtual void UpdateWindowFrame() = 0;
 	virtual void OpenWindow(DWORD ParentWindow, UBOOL Temporary, INT NewX, INT NewY, INT OpenX, INT OpenY) = 0;
@@ -345,7 +345,7 @@ public:
 	virtual void* GetServer();
 	virtual void SetMouseCapture(UBOOL Capture, UBOOL Clip, UBOOL FocusOnly = 0) = 0;
 	virtual void Repaint(UBOOL Blit) = 0;
-	virtual void TryRenderDevice(const TCHAR* ClassName, INT NewX, INT NewY, INT NewColorBytes, UBOOL Fullscreen){}
+	virtual void TryRenderDevice(const TCHAR* ClassName, INT NewX, INT NewY, UBOOL Fullscreen){}
 	virtual char* GetLocalizedKeyName(EInputKey Key) = 0;
 	virtual void DisableWinKey();
 	virtual void EndFullscreen();
@@ -419,32 +419,52 @@ class ENGINE_API UClient : public UObject{
 	DECLARE_ABSTRACT_CLASS(UClient,UObject,CLASS_Config,Engine)
 public:
 	// Variables.
-	UEngine*			Engine;
-	TArray<UViewport*>	Viewports;
-	char                Padding[192]; // PADDING!!!
-/*
-	INT					DrawCycles;
+	UEngine*           Engine;
+	TArray<UViewport*> Viewports;
 
 	// Configurable.
-	BITFIELD	CaptureMouse;
-	BITFIELD	CurvedSurfaces;
-	BITFIELD	ScreenFlashes;
-	BITFIELD	NoLighting;
-	BITFIELD	Decals;
-	BITFIELD	NoDynamicLights;
-	BITFIELD    NoFractalAnim;
-	INT			WindowedViewportX;
-	INT			WindowedViewportY;
-	INT			WindowedColorBits;
-	INT			FullscreenViewportX;
-	INT			FullscreenViewportY;
-	INT			FullscreenColorBits;
-	FLOAT		Brightness;
-	FLOAT		MipFactor;
-	INT			TextureLODSet[LODSET_MAX];
-	FLOAT		MinDesiredFrameRate;
-	INT			ParticleDensity;
-*/
+	BITFIELD           CaptureMouse;
+	BITFIELD           ScreenFlashes;
+	BITFIELD           NoLighting;
+	BITFIELD           Decals;
+	BITFIELD           NoDynamicLights;
+	BITFIELD           NoFractalAnim;
+	BITFIELD           Coronas;
+	BITFIELD           DecoLayers;
+	BITFIELD           Projectors;
+	BITFIELD           ReportDynamicUploads;
+	BITFIELD           Shadows;
+	BITFIELD           FrameFXDisabled;
+	BITFIELD           NoHud;
+	BITFIELD           NoDistort;
+	BITFIELD           BlurEnabled;
+	BYTE               BloomQuality;
+	BYTE               BumpmappingQuality;
+	INT                Bloom;
+	INT                BloomFilter;
+	INT                FilmGrain;
+	INT                LightOpt;
+	INT                LightEnvFlag;
+	INT                HWCull;
+	INT                ShadowsPerFrame;
+	INT                ShadowLength;
+	INT                X;
+	INT                Y;
+	INT                Z;
+	INT                WindowedViewportX;
+	INT                WindowedViewportY;
+	INT                FullscreenViewportX;
+	INT                FullscreenViewportY;
+	INT                FullscreenColorBits;
+	FLOAT              Gamma;
+	char               Padding1[4]; // PADDING!!!
+	BYTE               TextureLODSet[LODSET_MAX];
+	char               Padding2[20]; // PADDING!!!
+	FLOAT              MinDesiredFramerate;
+	UViewport*         LastCurrent;
+	INT                DropLODBy;
+	INT                FSAA;
+	char               Padding3[12]; // PADDING!!!
 
 	// Constructors.
 	UClient();
@@ -497,6 +517,17 @@ public:
 protected:
 	static void MovieFinishedCallback();
 };
+
+// FAuxRenderTarget inlines
+
+inline FAuxRenderTarget::~FAuxRenderTarget(){
+	// Need to do this via UTexture::__Client since GEngine is not set to NULL and might be an invalid pointer
+	if(UTexture::__Client &&
+		UTexture::__Client->Engine &&
+		UTexture::__Client->Engine->GRenDev){
+		UTexture::__Client->Engine->GRenDev->FlushResource(GetCacheId());
+	}
+}
 
 /*-----------------------------------------------------------------------------
 	The End.

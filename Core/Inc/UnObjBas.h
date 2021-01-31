@@ -292,7 +292,7 @@ public:
 ----------------------------------------------------------------------------*/
 
 //Special canonical package for FindObject, ParseObject.
-#define ANY_PACKAGE ((UPackage*)-1)
+#define ANY_PACKAGE ((UObject*)-1)
 
 //Define private default constructor.
 #define NO_DEFAULT_CONSTRUCTOR(cls) \
@@ -581,7 +581,6 @@ public:
 	UBOOL IsA(FName SomeBaseClassName) const;
 	UBOOL IsIn(UObject* SomeOuter) const;
 	UBOOL IsProbing(FName ProbeName);
-	void Rename(const TCHAR* NewName = NULL);
 	UField* FindObjectField(FName InName, UBOOL Global = 0);
 	UFunction* FindFunction(FName InName, UBOOL Global = 0);
 	UFunction* FindFunctionChecked(FName InName, UBOOL Global = 0);
@@ -692,7 +691,7 @@ UClass* LoadClass(UObject* Outer, const TCHAR* Name, const TCHAR* Filename, DWOR
 // Get default object of a class.
 template<typename T>
 T* GetDefault(){
-	return static_cast<T*>(&T::StaticClass()->Defaults[0]);
+	return static_cast<T*>(T::StaticClass()->GetDefaultObject());
 }
 
 /*----------------------------------------------------------------------------

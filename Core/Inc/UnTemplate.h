@@ -186,6 +186,9 @@ DWORD GetTypeHash(const T* P){
 #define STRUCT_OFFSET(struc, member) \
 	((INT)&((struc*)NULL)->member)
 
+#define STR(x) #x
+#define STRINGIFY(x) STR(x)
+
 /*-----------------------------------------------------------------------------
 	Allocators.
 -----------------------------------------------------------------------------*/
@@ -996,6 +999,10 @@ public:
 
 	FStringTemp& operator=(const FStringTemp&);
 };
+
+inline FStringTemp operator+(const TCHAR* CStr, const FString& Str){
+	return FString(CStr, true) + Str;
+}
 
 struct CORE_API FStringNoInit : public FString{
 public:

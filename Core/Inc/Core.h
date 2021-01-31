@@ -12,11 +12,6 @@
 	Low level includes.
 ----------------------------------------------------------------------------*/
 
-// API definition.
-#ifndef CORE_API
-#define CORE_API DLL_IMPORT
-#endif
-
 //===========================================================================================
 #ifdef DISABLE_LINK_LIB
 #define LINK_LIB(name)
@@ -26,37 +21,14 @@
 #endif
 //===========================================================================================
 
+// API definition.
+#ifndef CORE_API
+#define CORE_API DLL_IMPORT
 LINK_LIB(Core)
+#endif
 
 // Build options.
 #include "UnBuild.h"
-
-// Time.
-#define FIXTIME 4294967296.0f
-class FTime{
-	typedef __int64 TIMETYP;
-public:
-			FTime      ()              { v = 0; }
-			FTime      (float f)       { v = (TIMETYP)(f * FIXTIME); }
-			FTime      (double d)      { v = (TIMETYP)(d * FIXTIME); }
-	float   GetFloat   ()              { return v / FIXTIME; }
-	FTime   operator+  (float f) const { return FTime(v + (TIMETYP)(f * FIXTIME)); }
-	float   operator-  (FTime t) const { return (v - t.v) / FIXTIME; }
-	FTime   operator*  (float f) const { return FTime(v * f); }
-	FTime   operator/  (float f) const { return FTime(v / f); }
-	FTime&  operator+= (float f)       { v = v + (TIMETYP)(f * FIXTIME); return *this; }
-	FTime&  operator*= (float f)       { v = (TIMETYP)(v * f); return *this; }
-	FTime&  operator/= (float f)       { v = (TIMETYP)(v / f); return *this; }
-	int     operator== (FTime t)       { return v == t.v; }
-	int     operator!= (FTime t)       { return v != t.v; }
-	int     operator>  (FTime t)       { return v > t.v; }
-	FTime&  operator=  (const FTime& t){ v=t.v; return *this; }
-
-private:
-	TIMETYP v;
-
-	FTime(TIMETYP i) : v(i){}
-};
 
 // Compiler specific include.
 #ifdef _MSC_VER
@@ -89,9 +61,6 @@ enum ERunningOS{
 // Multi byte character set mappings. No wchar_t in Republic Commando...
 typedef ANSICHAR  TCHAR;
 typedef ANSICHARU TCHARU;
-
-#undef TEXT
-#define TEXT(s) s
 
 inline TCHAR    FromUnicode(UNICHAR In){ return (_WORD)In < 0x100 ? In : MAXSBYTE; }
 inline ANSICHAR	ToAnsi(TCHAR In){ return (_WORD)In < 0x100 ? In : MAXSBYTE; }
@@ -129,8 +98,8 @@ class		ULinkerSave;
 class	UPackage;
 class	USubsystem;
 class		USystem;
+class		URenderDevice;
 class	UTextBuffer;
-class	 URenderDevice;
 class	UPackageMap;
 class	UDebugger; //DEBUGGER
 
@@ -519,7 +488,7 @@ CORE_API extern UBOOL                   GEdShowFogInViewports;      // Show dist
 CORE_API extern UBOOL                   GBuildingScripts;
 CORE_API extern UBOOL                   GIsUTracing;
 CORE_API extern class FGlobalMath       GMath;                      // Math code
-CORE_API extern class FArchive*         GDummySave;                 // No-op save archive
+CORE_API extern FArchive*               GDummySave;                 // No-op save archive
 CORE_API extern FFileStream*            GFileStream;                // File streaming
 CORE_API extern FLOAT                   GAudioMaxRadiusMultiplier;  // Max distance = Radius * GAudioMaxRadiusMultiplier
 CORE_API extern FLOAT                   GAudioDefaultRadius;        // Default radius for PlayOwnedSound
@@ -639,6 +608,59 @@ public:
 	virtual void DebugInfo(UObject* Debugee, FFrame* Stack, FString InfoType, int LineNumber, int InputPos) = 0;
 	virtual void NotifyAccessedNone() = 0;
 };
+
+/*-----------------------------------------------------------------------------
+	Code injection helpers.
+-----------------------------------------------------------------------------*/
+
+/*
+ * Patches the given vtable with a custom function and returns the old function.
+ * NOTE: This changes the vtable for all objects of the same class.
+ * Returns the function pointer that was at Index previously. NULL if there was an error.
+ */
+inline void* PatchVTable(void* Object, INT Index, void* NewFunc){
+	DWORD OldProtect;
+	void** VTable = *reinterpret_cast<void***>(Object);
+
+	if(!VirtualProtect(VTable + Index, sizeof(void*), PAGE_EXECUTE_READWRITE, &OldProtect)){
+		debugf(NAME_Error, "Unable to patch vtable: VirtualProtect failed with error code %i", GetLastError());
+
+		return NULL;
+	}
+
+	void* OldFunc = VTable[Index];
+
+	VTable[Index] = NewFunc;
+
+	return OldFunc;
+}
+
+/*
+ * Patches the vtable for a class that is exported from a dll.
+ * VTableName is the name of the particular vtable to patch in case of multiple virtual inheritance.
+ */
+inline void* PatchDllClassVTable(const TCHAR* DllName, const TCHAR* ClassName, const TCHAR* VTableName, INT Index, void* NewFunc){
+	void* Handle = appGetDllHandle(DllName);
+
+	if(!Handle){
+		debugf(NAME_Error, "Unable to patch vtable for class '%s': Failed to load library '%s'", ClassName, DllName);
+
+		return NULL;
+	}
+
+	FString DllExportName = (FStringTemp("??_7") + ClassName + "@@6B" + (VTableName ? FString(VTableName, true) + "@@@" : "@"));
+	void** VTable = static_cast<void**>(appGetDllExport(Handle, *DllExportName));
+
+	if(!VTable){
+		debugf(NAME_Error, "Unable to patch vtable for class '%s': Dll export for vtable '%s' not found", ClassName, VTableName);
+
+		return NULL;
+	}
+
+	appFreeDllHandle(Handle); // Decrementing reference count just in case. This might cause a crash later if the dll wasn't already loaded which is required.
+
+	return PatchVTable(&VTable, Index, NewFunc);
+}
 
 /*-----------------------------------------------------------------------------
 	The End.

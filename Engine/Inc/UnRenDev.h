@@ -82,9 +82,9 @@ enum EPrecacheMode{
 
 class FRenderInterface{
 public:
-	virtual void PushState(int) = 0;
-	virtual void PopState(int) = 0;
-	virtual UBOOL SetRenderTarget(FRenderTarget* RenderTarget, bool) = 0;
+	virtual void PushState(INT Flags = 0) = 0;
+	virtual void PopState(INT Flags = 0) = 0;
+	virtual UBOOL SetRenderTarget(FRenderTarget* RenderTarget, bool MatchBackbuffer) = 0;
 	virtual UBOOL SetCubeRenderTarget(class FDynamicCubemap*, int, int){ return 0; }
 	virtual void SetViewport(INT X, INT Y, INT Width, INT Height) = 0;
 	virtual void Clear(UBOOL UseColor = 1, FColor Color = FColor(0, 0, 0), UBOOL UseDepth = 1, FLOAT Depth = 1.0f, UBOOL UseStencil = 1, DWORD Stencil = 0) = 0;
@@ -92,7 +92,7 @@ public:
 	virtual void PopHit(INT Count, UBOOL Force) = 0;
 	virtual void SetCullMode(ECullMode CullMode) = 0;
 	virtual void SetAmbientLight(FColor Color) = 0;
-	virtual void EnableLighting(UBOOL UseDynamic, UBOOL UseStatic = 1, UBOOL Modulate2X = 0, FBaseTexture* UseLightmap = NULL, UBOOL LightingOnly = 0, const FSphere& LitSphere = FSphere(FVector(0, 0, 0), 0), int = 0) = 0;
+	virtual void EnableLighting(UBOOL UseDynamic, UBOOL UseStatic = 1, UBOOL Modulate2X = 0, FBaseTexture* Lightmap = NULL, UBOOL LightingOnly = 0, const FSphere& LitSphere = FSphere(FVector(0, 0, 0), 0), int = 0) = 0;
 	virtual void SetLight(INT LightIndex, FDynamicLight* Light, FLOAT Scale = 1.0f) = 0;
 	virtual void SetShaderLight(INT LightIndex, FDynamicLight* Light, FLOAT Scale = 1.0f){}
 	virtual void SetNPatchTesselation(FLOAT Tesselation) = 0;
@@ -105,14 +105,14 @@ public:
 	virtual void SetMaterial(UMaterial* Material, FString* ErrorString = NULL, UMaterial** ErrorMaterial = NULL, INT* NumPasses = NULL) = 0;
 	virtual UBOOL SetHardwareShaderMaterial(UHardwareShader* Material, FString* ErrorString = NULL, UMaterial** ErrorMaterial = NULL){ return 0; }
 	virtual UBOOL ShowAlpha(UMaterial*){ return 0; }
-	virtual UBOOL IsShadowInterface(){ return 0; }
-	virtual void SetAntiAliasing(int){}
+ 	virtual UBOOL IsShadowInterface(){ return 0; }
+	virtual void SetAntiAliasing(INT Level){}
 	virtual void CopyBackBufferToTarget(FAuxRenderTarget*){}
-	virtual void SetLODDiffuseFade(float){}
-	virtual void SetLODSpecularFade(float){}
-	virtual void SetStencilOp(ECompareFunction Test, DWORD Ref, DWORD Mask, EStencilOp FailOp, EStencilOp ZFailOp, EStencilOp PassOp, DWORD WriteMask){}
-	virtual void vtpad1(int) = 0; // Possibly stencil op related (modifies same memory);
-	virtual void vtpad2(int) = 0; // Possibly stencil op related (modifies same memory);
+	virtual void SetLODDiffuseFade(FLOAT Distance){}
+	virtual void SetLODSpecularFade(FLOAT Distance){}
+	virtual void SetStencilOp(ECompareFunction Test, DWORD Ref, DWORD Mask, EStencilOp FailOp, EStencilOp ZFailOp, EStencilOp PassOp, DWORD WriteMask) = 0;
+	virtual void EnableStencilTest(UBOOL Enable) = 0;
+	virtual void EnableZWrite(UBOOL Enable) = 0;
 	virtual void SetPrecacheMode(EPrecacheMode PrecacheMode) = 0;
 	virtual void SetZBias(INT ZBias) = 0;
 	virtual INT SetVertexStreams(EVertexShader Shader, FVertexStream** Streams, INT NumStreams) = 0;
@@ -126,14 +126,9 @@ public:
 	virtual UBOOL PixoIsVisible(FBox&){ return 1; }
 	virtual bool IsVertexBufferBusy(FVertexStream*){ return false; }
 	virtual void SetFillMode(EFillMode FillMode){}
-	virtual int vtpad3(){ return 1; };
-	virtual int vtpad4(){ return 1; };
-	virtual int vtpad5(){ return 1; };
-
-	// The following virtual functions belong to FD3DRenderInterface and should be removed again
-	virtual int d3d1(int, int) = 0;
-	virtual int d3d2(int) = 0;
-	virtual int d3d3(int) = 0;
+	virtual int vtpad3(){ return 1; }
+	virtual int vtpad4(){ return 1; }
+	virtual int vtpad5(){ return 1; }
 };
 
 /*------------------------------------------------------------------------------------
@@ -158,7 +153,7 @@ struct FRenderCaps{
 //
 class ENGINE_API URenderDevice : public USubsystem{
 	DECLARE_ABSTRACT_CLASS(URenderDevice,USubsystem,CLASS_Config,Engine)
-
+public:
 	// Variables.
 	BYTE     DecompFormat;
 	INT      RecommendedLOD;
@@ -189,9 +184,9 @@ class ENGINE_API URenderDevice : public USubsystem{
 	virtual void Exit(UViewport* Viewport) = 0;
 	virtual void Flush(UViewport* Viewport) = 0;
 	virtual void FlushResource(QWORD CacheId) = 0;
-	virtual UBOOL ResourceCached(QWORD CacheId){}
-	virtual struct FMemCount ResourceMem(FRenderResource*, UObject*){}
-	virtual struct FMemCount ResourceMemTotal(){}
+	virtual UBOOL ResourceCached(QWORD CacheId){ return 0; }
+	virtual FMemCount ResourceMem(FRenderResource*, UObject*){ return FMemCount(); }
+	virtual FMemCount ResourceMemTotal(){ return FMemCount(); }
 	virtual void UpdateGamma(UViewport* Viewport) = 0;
 	virtual void RestoreGamma() = 0;
 	virtual UBOOL VSyncEnabled() = 0;
@@ -203,11 +198,11 @@ class ENGINE_API URenderDevice : public USubsystem{
 	virtual void SetEmulationMode(EHardwareEmulationMode Mode) = 0;
 	virtual FRenderCaps* GetRenderCaps() = 0;
 	virtual void RenderMovie(UViewport* Viewport){}
-	virtual FMovie* GetNewMovie(ECodecType Codec, FString Filename, UBOOL UseSound, INT FrameRate, int){}
-	virtual int GetStateCaching(){}
-	virtual int SetStateCaching(int){}
+	virtual FMovie* GetNewMovie(ECodecType Codec, FString Filename, UBOOL UseSound, INT FrameRate, int){ return NULL; }
+	virtual int GetStateCaching(){ return 0; }
+	virtual int SetStateCaching(int){ return 0; }
 	virtual int RefreshStates(){}
-	virtual UBOOL DoesSupportFSAA(int){}
+	virtual INT DoesSupportFSAA(INT Level){ return 0; }
 	virtual void TakeScreenshot(const char*, class UViewport*, int, int){}
 	virtual UBOOL SupportsTextureFormat(ETextureFormat) = 0;
 };

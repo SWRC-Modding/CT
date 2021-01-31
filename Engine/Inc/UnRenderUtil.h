@@ -175,20 +175,17 @@ public:
 //	Utilities for rendering stuff in "canvas" space.
 //	Canvas space is in pixel coordinates, 0 through to viewport width/height.
 //
-class ENGINE_API FCanvasUtil : public FVertexStream
-{
+class ENGINE_API FCanvasUtil : public FVertexStream{
 public:
+	EPrimitiveType        PrimitiveType;
+	UMaterial*            Material;
+	INT                   NumPrimitives;
 
-	EPrimitiveType			PrimitiveType;
-	UMaterial*				Material;
-	INT						NumPrimitives;
+	FRenderInterface*     RI;
+	FMatrix               ScreenToCanvas;
+	FMatrix               CanvasToScreen;
 
-	FRenderInterface*		RI;
-	FMatrix					ScreenToCanvas,
-							CanvasToScreen;
-
-	TArray<FCanvasVertex>	Vertices;
-	QWORD					CacheId;
+	TArray<FCanvasVertex> Vertices;
 
 	// Constructor/destructor.
 	FCanvasUtil(FRenderTarget* RenderTarget,FRenderInterface* InRI);
@@ -367,9 +364,9 @@ public:
 
 	// FTexture interface.
 
-	virtual void GetTextureData(INT MipIndex,void* Dest,INT DestStride,ETextureFormat DestFormat,UBOOL ColoredMips);
+	virtual void GetTextureData(INT MipIndex, void* Dest, INT DestStride, ETextureFormat DestFormat, UBOOL ColoredMips, UBOOL UnloadMip);
 	virtual void* GetRawTextureData(INT MipIndex);
-	virtual void UnloadRawTextureData( INT MipIndex ) {}
+	virtual void UnloadRawTextureData(INT MipIndex){}
 
 	virtual UTexture* GetUTexture();
 };
@@ -378,32 +375,37 @@ public:
 //	FAuxRenderTarget
 //
 
-class FAuxRenderTarget : public FRenderTarget
-{
+class FAuxRenderTarget : public FRenderTarget{
 public:
-
-	QWORD			CacheId;
-	INT				Revision,
-					Width,
-					Height;
-	ETextureFormat	Format;
+	bool           bFSAA;
+	bool           bMatchBackBuffer;
+	INT            Width;
+	INT            Height;
+	ETextureFormat Format;
 
 	// Constructor.
 
-	FAuxRenderTarget(INT InWidth,INT InHeight,ETextureFormat InFormat);
+	FAuxRenderTarget(INT InWidth,
+	                 INT InHeight,
+	                 ETextureFormat InFormat,
+	                 bool InFSAA = false,
+	                 bool InMatchBackBuffer = false) : Width(InWidth),
+	                                                   Height(InHeight),
+	                                                   Format(InFormat),
+	                                                   bFSAA(InFSAA),
+	                                                   bMatchBackBuffer(InMatchBackBuffer){
+		CacheId = MakeCacheID(CID_RenderTexture);
+	}
 
-	// FRenderResource interface.
-
-	virtual INT GetRevision();
-	virtual QWORD GetCacheId();
+	virtual ~FAuxRenderTarget(); // Implemented in UnCamera.h since it needs UClient
 
 	// FBaseTexture interface.
 
-	virtual INT GetWidth();
-	virtual INT GetHeight();
-	virtual ETexClampMode GetUClamp();
-	virtual ETexClampMode GetVClamp();
-	virtual ETextureFormat GetFormat();
-	virtual INT GetNumMips();
-	virtual INT GetFirstMip();
+	virtual INT GetWidth(){ return Width; }
+	virtual INT GetHeight(){ return Height; }
+	virtual ETexClampMode GetUClamp(){ return TC_Wrap; }
+	virtual ETexClampMode GetVClamp(){ return TC_Wrap; }
+	virtual ETextureFormat GetFormat(){ return Format; }
+	virtual INT GetNumMips(){ return 1; }
+	virtual INT GetFirstMip(){ return 0; }
 };

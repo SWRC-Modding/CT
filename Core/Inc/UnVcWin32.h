@@ -58,6 +58,7 @@ enum {CACHE_LINE_SIZE   = 32}; // Cache line size.
 #define CDECL   __cdecl                  // Standard C function
 #define STDCALL __stdcall                // Standard calling convention
 #define FORCEINLINE __forceinline        // Force code to be inline
+#define ALIGN(x) __declspec(align(x))    // Specify type alignment
 
 // Variable arguments.
 #define GET_VARARGS(msg,len,fmt) appGetVarArgs(msg,len,fmt)
@@ -95,6 +96,9 @@ typedef unsigned long       SIZE_T; // Corresponds to C SIZE_T.
 
 // Bitfield type.
 typedef unsigned long       BITFIELD; // For bitfields.
+
+// Time.
+typedef DOUBLE              FTime;
 
 // Unwanted VC++ level 4 warnings to disable.
 #pragma warning(disable : 4244) /* conversion to float, possible loss of data							*/
@@ -623,9 +627,7 @@ inline void appMemset4(void* Dest, DWORD Value, INT Count){
 	}
 }
 
-FORCEINLINE void appDebugBreak(){
-	__asm int 3
-}
+#define appDebugBreak() __asm{ int 3 }
 
 extern "C" void* __cdecl _alloca(size_t);
 #define appAlloca(size) ((size == 0) ? NULL : _alloca((size + 7) & ~7))

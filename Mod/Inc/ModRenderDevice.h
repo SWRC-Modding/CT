@@ -48,8 +48,9 @@ public:
 	virtual FMatrix GetTransform(ETransformType Type) const{ return Impl->GetTransform(Type); }
 	virtual void SetMaterial(UMaterial* Material, FString* ErrorString, UMaterial** ErrorMaterial, INT* NumPasses);
 	virtual UBOOL SetHardwareShaderMaterial(UHardwareShader* Material, FString* ErrorString, UMaterial** ErrorMaterial);
-	virtual void vtpad1(int a){}
-	virtual void vtpad2(int a){}
+	virtual void SetStencilOp(ECompareFunction Test, DWORD Ref, DWORD Mask, EStencilOp FailOp, EStencilOp ZFailOp, EStencilOp PassOp, DWORD WriteMask){}
+	virtual void EnableStencilTest(UBOOL Enable){}
+	virtual void EnableZWrite(UBOOL Enable){ Impl->EnableZWrite(Enable); }
 	virtual void SetPrecacheMode(EPrecacheMode PrecacheMode){ Impl->SetPrecacheMode(PrecacheMode); }
 	virtual void SetZBias(INT ZBias){ Impl->SetZBias(ZBias); }
 	virtual INT SetVertexStreams(EVertexShader Shader, FVertexStream** Streams, INT NumStreams){ return Impl->SetVertexStreams(Shader, Streams, NumStreams); }
@@ -60,9 +61,9 @@ public:
 	virtual void SetFillMode(EFillMode FillMode){ Impl->SetFillMode(FillMode); }
 
 	// Additional virtual functions from FD3DRenderInterface must be implemented to avoid crashes.
-	virtual int d3d1(int a, int b){ return Impl->d3d1(a, b); }
-	virtual int d3d2(int a){ return Impl->d3d2(a); }
-	virtual int d3d3(int a){ return Impl->d3d3(a); }
+	virtual int d3d1(int a, int b){ return 0; }
+	virtual int d3d2(int a){ return 0; }
+	virtual int d3d3(int a){ return 0; }
 };
 
 /*

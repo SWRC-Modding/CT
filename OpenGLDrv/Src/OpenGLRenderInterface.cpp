@@ -815,6 +815,8 @@ void FOpenGLRenderInterface::SetTexture(FBaseTexture* Texture, INT TextureUnit){
 	if(!GLTexture->IsCubemap){
 		GLTexture->BindTexture(TextureUnit);
 		CurrentState->Uniforms.TextureInfo[TextureUnit].IsCubemap = 0;
+		CurrentState->StageTexWrapModes[TextureUnit][0] = Texture->GetUClamp();
+		CurrentState->StageTexWrapModes[TextureUnit][1] = Texture->GetVClamp();
 	}else{
 		GLTexture->BindTexture(MAX_TEXTURES + TextureUnit);
 		CurrentState->Uniforms.TextureInfo[TextureUnit].IsCubemap = 1;
@@ -835,12 +837,6 @@ void FOpenGLRenderInterface::SetBitmapTexture(UBitmapMaterial* Bitmap, INT Textu
 		return;
 
 	SetTexture(Texture, TextureUnit);
-
-	if(CurrentState->StageTexWrapModes[TextureUnit][0] < 0)
-		CurrentState->StageTexWrapModes[TextureUnit][0] = Bitmap->UClampMode;
-
-	if(CurrentState->StageTexWrapModes[TextureUnit][1] < 0)
-		CurrentState->StageTexWrapModes[TextureUnit][1] = Bitmap->VClampMode;
 }
 
 bool FOpenGLRenderInterface::SetSimpleMaterial(UMaterial* Material, FString* ErrorString, UMaterial** ErrorMaterial){

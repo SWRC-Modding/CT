@@ -939,7 +939,7 @@ bool FOpenGLRenderInterface::SetSimpleMaterial(UMaterial* Material, FString* Err
 			CurrentState->StageAlphaArgs[StagesUsed][0] = CA_Previous;
 			CurrentState->StageAlphaArgs[StagesUsed][1] = CA_Constant;
 			CurrentState->StageAlphaOps[StagesUsed] = AOP_Modulate;
-			++CurrentState->NumStages;
+			++StagesUsed;
 		}else{
 			if(ErrorString)
 				*ErrorString = "No stages left for color modifier";

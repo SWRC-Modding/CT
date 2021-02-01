@@ -696,7 +696,7 @@ void UOpenGLRenderDevice::Present(UViewport* Viewport){
 		RenderInterface.EnableZTest(0);
 		RenderInterface.EnableStencilTest(0);
 		RenderInterface.SetShader(&FramebufferShader);
-		RenderInterface.DrawPrimitive(PT_TriangleStrip, 0, 2);
+		RenderInterface.DrawPrimitive(PT_TriangleList, 0, 1);
 		RenderInterface.PopState();
 	}
 
@@ -1212,10 +1212,9 @@ FString UOpenGLRenderDevice::FramebufferVertexShaderText(
 	SHADER_HEADER
 	"out vec2 TexCoord;\n\n"
 	"void main(void){\n"
-		"\tconst vec4[] Vertices = vec4[](vec4(1.0, 1.0, 1.0, 1.0),\n"
-		"\t                               vec4(-1.0, 1.0, 0.0, 1.0),\n"
-		"\t                               vec4(1.0, -1.0, 1.0, 0.0),\n"
-		"\t                               vec4(-1.0, -1.0, 0.0, 0.0));\n\n"
+		"\tconst vec4[] Vertices = vec4[](vec4(-1.0, 3.0, 0.0, 2.0),\n"
+		"\t                               vec4(-1.0, -1.0, 0.0, 0.0),\n"
+		"\t                               vec4(3.0, -1.0, 2.0, 0.0));\n\n"
 		"\tgl_Position = vec4(Vertices[gl_VertexID].xy, 0.5, 1.0);\n"
 		"\tTexCoord = Vertices[gl_VertexID].zw;\n"
 	"}\n", true);

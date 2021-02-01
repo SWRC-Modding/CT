@@ -1212,55 +1212,15 @@ bool FOpenGLRenderInterface::HandleCombinedMaterial(UMaterial* Material, INT& St
 		case AO_Use_Mask:
 			break;
 		case AO_Multiply:
-			if(Mask && Mask != Material1 && Mask != Material2){
-				if(ErrorString)
-					*ErrorString = "Combiner Mask must be Material1, Material2 or None for AO_Multiply";
-
-				if(ErrorMaterial)
-					*ErrorMaterial = Material;
-
-				return false;
-			}
-
 			CurrentState->StageAlphaOps[StageIndex] = AOP_Modulate;
 			break;
 		case AO_Add:
-			if(Mask && Mask != Material1 && Mask != Material2){
-				if(ErrorString)
-					*ErrorString = "Combiner Mask must be Material1, Material2 or None for AO_Add";
-
-				if(ErrorMaterial)
-					*ErrorMaterial = Material;
-
-				return false;
-			}
-
 			CurrentState->StageAlphaOps[StageIndex] = AOP_Add;
 			break;
 		case AO_Use_Alpha_From_Material1:
-			if(Mask && Mask != Material1 && Mask != Material2){
-				if(ErrorString)
-					*ErrorString = "Combiner Mask must be Material1, Material2 or None for AO_Use_Alpha_From_Material1";
-
-				if(ErrorMaterial)
-					*ErrorMaterial = Material;
-
-				return false;
-			}
-
 			CurrentState->StageAlphaOps[StageIndex] = AOP_Arg1;
 			break;
 		case AO_Use_Alpha_From_Material2:
-			if(Mask && Mask != Material1 && Mask != Material2){
-				if(ErrorString)
-					*ErrorString = "Combiner Mask must be Material1, Material2 or None for AO_Use_Alpha_From_Material2";
-
-				if(ErrorMaterial)
-					*ErrorMaterial = Material;
-
-				return false;
-			}
-
 			CurrentState->StageAlphaOps[StageIndex] = AOP_Arg2;
 			break;
 		case AO_AlphaBlend_With_Mask:

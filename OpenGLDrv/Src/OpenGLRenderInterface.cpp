@@ -425,6 +425,28 @@ void FOpenGLRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorStri
 	if(!Material || PrecacheMode == PRECACHE_VertexBuffers)
 		Material = GetDefault<UMaterial>()->DefaultMaterial;
 
+	/*
+	 * HACK:
+	 * When the final FrameFX render target is drawn to the screen it appears slightly offset. This is fixed by setting a different transformation matrix.
+	 * The only straightforward way to detect whether we are currently drawing the FrameFX target is to check if the newly set material
+	 * is one of the FrameFX shaders.
+	 */
+	if(LockedViewport->Actor->FrameFX && (Material == LockedViewport->Actor->FrameFX->ShaderDraw || Material == LockedViewport->Actor->FrameFX->ShaderGlow || Material == LockedViewport->Actor->FrameFX->ShaderBlur)){
+		FLOAT SizeX;
+		FLOAT SizeY;
+
+		if(CurrentState->RenderTarget){
+			SizeX = CurrentState->RenderTarget->GetWidth();
+ 			SizeY = CurrentState->RenderTarget->GetHeight();
+		}else{
+			SizeX = LockedViewport->SizeX;
+ 			SizeY = LockedViewport->SizeY;
+		}
+
+		SetTransform(TT_CameraToScreen,
+		             FTranslationMatrix(FVector(-SizeX / 2.0f + 0.5f, -SizeY / 2.0f, 0.0f)) * FScaleMatrix(FVector(2.0f / SizeX, -2.0f / SizeY, 1.0f)));
+	}
+
 	// Check for circular references
 
 	if(GIsEditor){
@@ -837,16 +859,22 @@ void FOpenGLRenderInterface::SetTexture(FBaseTexture* Texture, INT TextureUnit){
 	if(GLTexture->Revision != Texture->GetRevision())
 		GLTexture->Cache(Texture);
 
-	if(!GLTexture->IsCubemap){
-		GLTexture->BindTexture(TextureUnit);
-		CurrentState->Uniforms.TextureInfo[TextureUnit].IsCubemap = 0;
-		CurrentState->StageTexWrapModes[TextureUnit][0] = Texture->GetUClamp();
-		CurrentState->StageTexWrapModes[TextureUnit][1] = Texture->GetVClamp();
-	}else{
+	if(GLTexture->IsCubemap){
 		GLTexture->BindTexture(MAX_TEXTURES + TextureUnit);
 		CurrentState->Uniforms.TextureInfo[TextureUnit].IsCubemap = 1;
 		CurrentState->StageTexWrapModes[TextureUnit][0] = TC_Clamp;
 		CurrentState->StageTexWrapModes[TextureUnit][1] = TC_Clamp;
+	}else{
+		GLTexture->BindTexture(TextureUnit);
+		CurrentState->Uniforms.TextureInfo[TextureUnit].IsCubemap = 0;
+
+		if(GLTexture->FBO){ // Render targets should use TC_Clamp
+			CurrentState->StageTexWrapModes[TextureUnit][0] = TC_Clamp;
+			CurrentState->StageTexWrapModes[TextureUnit][1] = TC_Clamp;
+		}else{
+			CurrentState->StageTexWrapModes[TextureUnit][0] = Texture->GetUClamp();
+			CurrentState->StageTexWrapModes[TextureUnit][1] = Texture->GetVClamp();
+		}
 	}
 
 	CurrentState->Uniforms.TextureInfo[TextureUnit].IsBumpmap = IsBumpmap(Texture->GetFormat());

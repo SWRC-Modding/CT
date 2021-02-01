@@ -4238,7 +4238,7 @@ public:
 	void ExtractGlow(UViewport* Viewport,class FRenderInterface* RI, FAuxRenderTarget* SourceRenderTarget, FAuxRenderTarget* DestRenderTarget);
 	void AccumulateWorkingTarget(UViewport* Viewport, class FRenderInterface* RI);
 	void DrawAccumulator(UViewport* Viewport, class FRenderInterface* RI);
-	void SetPannerInfo(UViewport* Viewport, class UTexMatrix * GlassTexture);
+	void SetPannerInfo(UViewport* Viewport, class UTexMatrix* GlassTexture);
 	void CopyBackBufferToAntiAliasTarget(class FRenderInterface* RI);
 	void SetupActorShaderFX(AActor* Actor, UViewport* Viewport);
 	UHardwareShader* GetTacticalSkelMeshShader(UViewport* Viewport, AActor* Actor, float Fade = 1.0f);

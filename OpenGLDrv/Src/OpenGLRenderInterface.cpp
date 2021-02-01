@@ -878,11 +878,13 @@ bool FOpenGLRenderInterface::SetSimpleMaterial(UMaterial* Material, FString* Err
 		if(Texture->bMasked){
 			CurrentState->ModifyFramebufferBlending = true;
 			CurrentState->Uniforms.AlphaRef = 0.5f;
-			CurrentState->FramebufferBlending = FB_AlphaBlend;
+			CurrentState->FramebufferBlending = FB_Overwrite;
+			NeedUniformUpdate = true;
 		}else if(Texture->bAlphaTexture){
 			CurrentState->ModifyFramebufferBlending = true;
 			CurrentState->Uniforms.AlphaRef = 0.0f;
 			CurrentState->FramebufferBlending = FB_AlphaBlend;
+			NeedUniformUpdate = true;
 		}
 
 		if(Texture->bTwoSided)

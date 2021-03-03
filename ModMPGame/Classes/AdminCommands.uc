@@ -10,7 +10,7 @@ function bool ExecCmd(String Cmd, optional PlayerController PC){
 	local Controller C;
 
 	if(ParseCommand(Cmd, "CMD")){
-		if(PC == None || bAllowConsoleCommands || IsLocalPlayer(PC)){ // The host can always execute console commands
+		if(bAllowConsoleCommands || IsLocalPlayer(PC)){ // The host can always execute console commands
 			StringParam = Cmd;
 
 			if(IsLocalPlayer(PC)){
@@ -24,11 +24,9 @@ function bool ExecCmd(String Cmd, optional PlayerController PC){
 				CommandResult = "Remote players are only allowed to use the get and set commands"; // Might still mess things up but at least some access should be provided
 			}
 
-			if(CommandResult != ""){
-				if(PC != None)
-					CommandFeedback(PC, CommandResult);
-			}
-		}else if(PC != None){
+			if(CommandResult != "")
+				CommandFeedback(PC, CommandResult);
+		}else{
 			CommandFeedback(PC, "Console commands are not allowed!");
 		}
 

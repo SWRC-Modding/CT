@@ -277,9 +277,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		GLogWindow->OpenWindow(ParseParam(appCmdLine(), "LOG"), 0);
 		GLogWindow->Log(NAME_Title, LocalizeGeneral("Start", "SWRepublicCommando"));
 
-		InitEngine();
-
 		GExec = &LauncherExecHook;
+
+		InitEngine();
 
 		if(GEngine && !GIsRequestingExit)
 			MainLoop();

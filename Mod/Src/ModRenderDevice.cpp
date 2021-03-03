@@ -194,7 +194,7 @@ static HRESULT __stdcall D3DTextureUnlockRectOverride(IDirect3DTexture8* D3DText
  * CreateTexture
  */
 
-typedef HRESULT(__stdcall*D3DDeviceCreateTextureFunc)(IDirect3DDevice8*, UINT, UINT, UINT, DWORD, D3DFORMAT, enum ED3DPool, IDirect3DTexture8**);
+typedef HRESULT(__stdcall*D3DDeviceCreateTextureFunc)(IDirect3DDevice8*, UINT, UINT, UINT, DWORD, D3DFORMAT, D3DPOOL, IDirect3DTexture8**);
 
 D3DDeviceCreateTextureFunc D3DDeviceCreateTexture = NULL;
 
@@ -204,7 +204,7 @@ static HRESULT __stdcall D3DDeviceCreateTextureOverride(IDirect3DDevice8* D3DDev
 														UINT Levels,
 														DWORD Usage,
 														D3DFORMAT Format,
-														enum ED3DPool Pool,
+														D3DPOOL Pool,
 														IDirect3DTexture8** ppTexture){
 	// X8L8V8U8 is used as the first fallback format because no information is lost in the conversion
 	D3DFORMAT FallbackFormat = Format == D3DFMT_L6V5U5 ? D3DFMT_X8L8V8U8 : Format;
@@ -494,7 +494,7 @@ UBOOL UModRenderDevice::Init(){
 	if(Result && !GIsEditor){
 		// Get a list of all supported resolutions and apply them to the config
 
-		DEVMODE dm = {0};
+		DEVMODE dm = {{0}};
 
 		dm.dmSize = sizeof(dm);
 

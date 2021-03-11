@@ -1,10 +1,13 @@
-class FOVChanger extends Object; // TODO: Rename to something more general since it does more than just changing the FOV
+class SWRCFix extends Object config native transient;
 
 #exec OBJ LOAD FILE="Properties.u"
 
+var() config float   FpsLimit;
 var() config float   FOV;
 var() config float   HudArmsFOVFactor;
-var() config bool    bLimitHudArmsFOV;
+var() config bool    LimitHudArmsFOV;
+var() config bool    EnableCustomMenu;
+var() config bool    EnableEditorSelectionFix; // Only here for convenience. The actual fix is in ModRenderDevice
 
 var FunctionOverride CTPlayerEndZoomOverride;
 var FunctionOverride CTPlayerResetFOVOverride;
@@ -15,22 +18,24 @@ var FunctionOverride MenuBaseCallMenuClassOverride;
 var FunctionOverride MenuBaseOverlayMenuClassOverride;
 var FunctionOverride MenuBaseGotoMenuClassOverride;
 
-function Init(){
-	// CTPlayer
-	CTPlayerEndZoomOverride = new class'FunctionOverride';
-	CTPlayerEndZoomOverride.Init(class'CTPlayer', 'EndZoom', self, 'CTPlayerEndZoom');
-	CTPlayerResetFOVOverride = new class'FunctionOverride';
-	CTPlayerResetFOVOverride.Init(class'CTPlayer', 'ResetFOV', self, 'CTPlayerResetFOV');
-	// Weapon
-	WeaponSetWeapFOVOverride = new class'FunctionOverride';
-	WeaponSetWeapFOVOverride.Init(class'Weapon', 'SetWeapFOV', self, 'WeaponSetWeapFOV');
-	// MenuBase
-	MenuBaseCallMenuClassOverride = new class'FunctionOverride';
-	MenuBaseCallMenuClassOverride.Init(class'MenuBase', 'CallMenuClass', self, 'MenuBaseCallMenuClass');
-	MenuBaseOverlayMenuClassOverride = new class'FunctionOverride';
-	MenuBaseOverlayMenuClassOverride.Init(class'MenuBase', 'OverlayMenuClass', self, 'MenuBaseOverlayMenuClass');
-	MenuBaseGotoMenuClassOverride = new class'FunctionOverride';
-	MenuBaseGotoMenuClassOverride.Init(class'MenuBase', 'GotoMenuClass', self, 'MenuBaseGotoMenuClass');
+event InitScript(){
+	if(EnableCustomMenu){
+		// CTPlayer
+		CTPlayerEndZoomOverride = new class'FunctionOverride';
+		CTPlayerEndZoomOverride.Init(class'CTPlayer', 'EndZoom', self, 'CTPlayerEndZoom');
+		CTPlayerResetFOVOverride = new class'FunctionOverride';
+		CTPlayerResetFOVOverride.Init(class'CTPlayer', 'ResetFOV', self, 'CTPlayerResetFOV');
+		// Weapon
+		WeaponSetWeapFOVOverride = new class'FunctionOverride';
+		WeaponSetWeapFOVOverride.Init(class'Weapon', 'SetWeapFOV', self, 'WeaponSetWeapFOV');
+		// MenuBase
+		MenuBaseCallMenuClassOverride = new class'FunctionOverride';
+		MenuBaseCallMenuClassOverride.Init(class'MenuBase', 'CallMenuClass', self, 'MenuBaseCallMenuClass');
+		MenuBaseOverlayMenuClassOverride = new class'FunctionOverride';
+		MenuBaseOverlayMenuClassOverride.Init(class'MenuBase', 'OverlayMenuClass', self, 'MenuBaseOverlayMenuClass');
+		MenuBaseGotoMenuClassOverride = new class'FunctionOverride';
+		MenuBaseGotoMenuClassOverride.Init(class'MenuBase', 'GotoMenuClass', self, 'MenuBaseGotoMenuClass');
+	}
 
 	// Fixing battle droids using clone weapons in the first mission
 	class'Properties.BattleDroidBlasterTM'.default.AttachmentClass = class'Properties.BattleDroidBlasterAttachmentTM';
@@ -68,7 +73,7 @@ function WeaponSetWeapFOV(float NewFOV){
 
 	UpdateWeaponZoomFOVs(Weapon);
 
-	if(bLimitHudArmsFOV && !Weapon.bWeaponZoom){
+	if(LimitHudArmsFOV && !Weapon.bWeaponZoom){
 		if(Weapon.IsA('Boy'))
 			HudArmsFOV = FMin(HudArmsFOV, 90);
 		else if(Weapon.IsA('HeavyTurret'))
@@ -124,7 +129,7 @@ function SetViewFOV(PlayerController Player){
 	Player.FOVAngle = CurrentFOV;
 }
 
-function SetFOV(PlayerController Player, float NewFOV){
+event SetFOV(PlayerController Player, float NewFOV){
 	FOV = NewFOV;
 
 	SaveConfig();
@@ -166,9 +171,18 @@ simulated function MenuBaseGotoMenuClass(String MenuClassName, optional String A
 	Menu.GotoMenu(Menu.Spawn(class<Menu>(DynamicLoadObject(MenuClassName, class'Class')), Menu.Owner), Args);
 }
 
+cpptext
+{
+	void Init();
+
+	static USWRCFix* Instance;
+}
+
 defaultproperties
 {
 	FOV=85.0
 	HUDArmsFOVFactor=1.0
-	bLimitHudArmsFOV=true
+	LimitHudArmsFOV=true
+	EnableCustomMenu=true
+	EnableEditorSelectionFix=true
 }

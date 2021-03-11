@@ -23,6 +23,7 @@ public:
     class UClass* RelevantGameInfoClass;
     BITFIELD bRequiresAdminPermissions:1 GCC_PACK(4);
     class AAdminControl* AdminControl GCC_PACK(4);
+    class AAdminService* nextAdminService;
     void execParseCommand(FFrame& Stack, void* Result);
     void execParseToken(FFrame& Stack, void* Result);
     void execParseIntParam(FFrame& Stack, void* Result);
@@ -109,13 +110,13 @@ class MODMPGAME_API AAdminControl : public AGameStats
 {
 public:
     TArrayNoInit<FString> ServiceClasses;
-    TArrayNoInit<class AAdminService*> Services;
     FStringNoInit EventLogFile;
     BITFIELD AppendEventLog:1 GCC_PACK(4);
     BITFIELD EventLogTimestamp:1;
     BITFIELD DoStatLogging:1;
     BITFIELD bPrintCommands:1;
     TArrayNoInit<FString> CurrentCommands GCC_PACK(4);
+    class AAdminService* Services;
     void execEventLog(FFrame& Stack, void* Result);
     void execSaveStats(FFrame& Stack, void* Result);
     void execRestoreStats(FFrame& Stack, void* Result);

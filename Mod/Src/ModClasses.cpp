@@ -17,3 +17,5 @@ FNativeEntry<UFunctionOverride> UFunctionOverride::StaticNativeMap[] = {
 	{NULL,NULL}
 };
 LINK_NATIVES(UFunctionOverride);
+
+IMPLEMENT_CLASS(USWRCFix);

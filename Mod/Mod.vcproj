@@ -119,7 +119,7 @@
 				RelativePath=".\Src\ModRenderDevice.cpp">
 			</File>
 			<File
-				RelativePath=".\Src\EditorFixes.cpp">
+				RelativePath=".\Src\SWRCFix.cpp">
 			</File>
 		</Filter>
 	</Files>

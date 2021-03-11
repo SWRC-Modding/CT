@@ -272,6 +272,16 @@ void __fastcall UCanvasUpdateOverride(UCanvas* Self, DWORD Edx){
 }
 
 UBOOL UOpenGLRenderDevice::Init(){
+	// Init SWRCFix if it exists. Hacky but RenderDevice is always loaded at startup...
+	void* ModDLL = appGetDllHandle("Mod.dll");
+
+	if(ModDLL){
+		void(CDECL*InitSWRCFix)(void) = static_cast<void(CDECL*)(void)>(appGetDllExport(ModDLL, "InitSWRCFix"));
+
+		if(InitSWRCFix)
+			InitSWRCFix();
+	}
+
 	// NOTE: This must be set to 0 in order to avoid inconsistencies with RGBA and BGRA colors.
 	GIsOpenGL = 0;
 
@@ -293,19 +303,6 @@ UBOOL UOpenGLRenderDevice::Init(){
 	FramebufferShader.SetFragmentShaderText(FramebufferFragmentShaderText);
 
 	LoadShaders();
-
-	UObject* FOVChanger = FindObject<UObject>(ANY_PACKAGE, "MainFOVChanger");
-
-	// Create FOVChanger object. This might not be the best place but idk where else to put it...
-	if(!FOVChanger){
-		UClass* FOVChangerClass = LoadClass<UObject>(NULL, "Mod.FOVChanger", NULL, 0, NULL);
-
-		if(FOVChangerClass){
-			FOVChanger = ConstructObject<UObject>(FOVChangerClass, reinterpret_cast<UObject*>(-1), FName("MainFOVChanger"));
-			FOVChanger->AddToRoot(); // This object should never be garbage collected
-			FOVChanger->ProcessEvent(NAME_Init, NULL);
-		}
-	}
 
 	return 1;
 }

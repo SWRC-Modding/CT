@@ -8,3 +8,6 @@ LINK_LIB(Mod)
 #endif
 
 #include "ModClasses.h"
+
+// Global init function exported with C-Linkage so that other modules can easily check for it without requiring a hard link
+extern "C" MOD_API void CDECL InitSWRCFix(void);

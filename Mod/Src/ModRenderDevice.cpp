@@ -473,63 +473,16 @@ void FModRenderInterface::DrawPrimitive(EPrimitiveType PrimitiveType, INT FirstI
  * ModRenderDevice
  */
 
-FLOAT(__fastcall*UEngineGetMaxTickRate)(UEngine*, DWORD) = NULL;
-
-static FLOAT __fastcall EngineGetMaxTickRateOverride(UEngine* Self, DWORD Edx){
-	FLOAT MaxTickRate = UEngineGetMaxTickRate(Self, Edx);
-
-	return MaxTickRate <= 0.0f ? UModRenderDevice::FpsLimit : MaxTickRate; // If the engine doesn't set it's own tick rate (i.e. GetMaxTickRate returns 0), we use FpsLimit instead
-}
-
 UBOOL UModRenderDevice::Init(){
-	// Setting override function for maximum tick rate since the original always returns 0
-	MaybePatchVTable(&UEngineGetMaxTickRate, GEngine, 49, EngineGetMaxTickRateOverride);
-	GConfig->GetFloat("Engine.GameEngine", "FpsLimit", FpsLimit);
+	// Initialize fixes. This might not be the best place but idk where else to put it...
+	InitSWRCFix();
+	bEnableSelectionFix = USWRCFix::Instance->EnableEditorSelectionFix;
 
 	UBOOL Result = Super::Init();
 
-	if(Result)
+	if(Result){
 		MaybePatchVTable(&D3D8CreateDevice, Direct3D8, D3DVTableIndex_D3D8CreateDevice, D3D8CreateDeviceOverride);
 
-	if(Result && !GIsEditor){
-		// Get a list of all supported resolutions and apply them to the config
-
-		DEVMODE dm = {{0}};
-
-		dm.dmSize = sizeof(dm);
-
-		TArray<DWORD> AvailableResolutions;
-
-		for(int i = 0; EnumDisplaySettings(NULL, i, &dm) != 0; ++i)
-			AvailableResolutions.AddUniqueItem(MAKELONG(dm.dmPelsWidth, dm.dmPelsHeight));
-
-		if(AvailableResolutions.Num() > 0){
-			Sort(AvailableResolutions.GetData(), AvailableResolutions.Num());
-
-			FString ResolutionList = "(";
-
-			for(int i = 0; i < AvailableResolutions.Num() - 1; ++i)
-				ResolutionList += FString::Printf("\"%ix%i\",", LOWORD(AvailableResolutions[i]), HIWORD(AvailableResolutions[i]));
-
-			ResolutionList += FString::Printf("\"%ix%i\")", LOWORD(AvailableResolutions.Last()), HIWORD(AvailableResolutions.Last()));
-
-			GConfig->SetString("CTGraphicsOptionsPCMenu",
-							   "Options[2].Items",
-							   *ResolutionList,
-							   *(FString("XInterfaceCTMenus.") + UObject::GetLanguage()));
-		}
-
-		FOVChanger = FindObject<UObject>(ANY_PACKAGE, "MainFOVChanger");
-
-		// Create FOVChanger object. This might not be the best place but idk where else to put it...
-		if(!FOVChanger){
-			FOVChanger = ConstructObject<UObject>(LoadClass<UObject>(NULL, "Mod.FOVChanger", NULL, LOAD_NoFail | LOAD_Throw, NULL),
-												  reinterpret_cast<UObject*>(-1),
-												  FName("MainFOVChanger"));
-			FOVChanger->AddToRoot(); // This object should never be garbage collected
-			FOVChanger->ProcessEvent(NAME_Init, NULL);
-		}
-	}else{
 		if(!SolidSelectionShader){
 			// Initialize shader used for selection in the editor
 			SolidSelectionShader = new UHardwareShader();
@@ -585,33 +538,27 @@ UBOOL UModRenderDevice::Exec(const TCHAR* Cmd, FOutputDevice& Ar){
 
 			return 1;
 		}
-	}else{
+	}else if(USWRCFix::Instance){
 		if(ParseCommand(&Cmd, "SETFOV")){
-			struct{
-				APlayerController* Player;
-				FLOAT FOV;
-			} Params;
-
 			TObjectIterator<UViewport> It;
 
 			checkSlow(It);
 
-			Params.Player = It->Actor;
-			Params.FOV = appAtof(Cmd);
+			FLOAT FOV = appAtof(Cmd);
 
-			Ar.Logf("Setting field of view to %f", Params.FOV);
-			FOVChanger->ProcessEvent(FName("SetFOV"), &Params);
+			Ar.Logf("Setting field of view to %f", FOV);
+			USWRCFix::Instance->SetFOV(It->Actor, FOV);
 
 			return 1;
 		}else if(ParseCommand(&Cmd, "SETFPSLIMIT")){
 			if(appStrlen(Cmd) > 0){
-				FpsLimit = Max(0.0f, appAtof(Cmd));
-				GConfig->SetFloat("Engine.GameEngine", "FpsLimit", FpsLimit);
+				USWRCFix::Instance->FpsLimit = Max(0.0f, appAtof(Cmd));
+				USWRCFix::Instance->SaveConfig();
 			}
 
 			return 1;
 		}else if(ParseCommand(&Cmd, "GETFPSLIMIT")){
-			Ar.Logf("%f", FpsLimit);
+			Ar.Logf("%f", USWRCFix::Instance->FpsLimit);
 
 			return 1;
 		}
@@ -722,8 +669,6 @@ void UModRenderDevice::Unlock(FRenderInterface* RI){
 	LockedViewport = NULL;
 }
 
-UObject*         UModRenderDevice::FOVChanger = NULL;
-FLOAT            UModRenderDevice::FpsLimit   = 0.0f;
 UHardwareShader* UModRenderDevice::SolidSelectionShader = NULL;
 UHardwareShader* UModRenderDevice::AlphaSelectionShader = NULL;
 

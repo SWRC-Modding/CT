@@ -39,6 +39,44 @@ public:
 };
 
 
+class MOD_API USWRCFix : public UObject
+{
+public:
+    FLOAT FpsLimit;
+    FLOAT FOV;
+    FLOAT HudArmsFOVFactor;
+    BITFIELD LimitHudArmsFOV:1 GCC_PACK(4);
+    BITFIELD EnableCustomMenu:1;
+    BITFIELD EnableEditorSelectionFix:1;
+    class UFunctionOverride* CTPlayerEndZoomOverride GCC_PACK(4);
+    class UFunctionOverride* CTPlayerResetFOVOverride;
+    class UFunctionOverride* WeaponSetWeapFOVOverride;
+    class UFunctionOverride* MenuBaseCallMenuClassOverride;
+    class UFunctionOverride* MenuBaseOverlayMenuClassOverride;
+    class UFunctionOverride* MenuBaseGotoMenuClassOverride;
+    void InitScript()
+    {
+        DECLARE_NAME(InitScript);
+        ProcessEvent(NInitScript, NULL);
+    }
+    void SetFOV(class APlayerController* Player, FLOAT NewFOV)
+    {
+        DECLARE_NAME(SetFOV);
+        struct {
+            class APlayerController* Player;
+            FLOAT NewFOV;
+        } Parms;
+        Parms.Player=Player;
+        Parms.NewFOV=NewFOV;
+        ProcessEvent(NSetFOV, &Parms);
+    }
+    DECLARE_CLASS(USWRCFix,UObject,0|CLASS_Transient|CLASS_Config,Mod)
+	void Init();
+
+	static USWRCFix* Instance;
+};
+
+
 
 #if SUPPORTS_PRAGMA_PACK
 #pragma pack (pop)
@@ -49,6 +87,7 @@ public:
 #define AUTO_INITIALIZE_REGISTRANTS_MOD \
 	UFunctionOverride::StaticClass(); \
 	UModRenderDevice::StaticClass(); \
+	USWRCFix::StaticClass(); \
 
 #endif // __STATIC_LINK
 

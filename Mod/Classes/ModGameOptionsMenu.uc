@@ -32,7 +32,7 @@ var() MenuButtonText	Done;
 
 var() bool				bInMultiplayer;
 
-var FOVChanger          FOVChanger;
+var SWRCFix             SWRCFix;
 
 simulated function Init( string Args )
 {
@@ -46,10 +46,10 @@ simulated function Init( string Args )
 
 	bInMultiplayer = Level.NetMode != NM_StandAlone;
 
-	FOVChanger = FOVChanger(FindObject("Transient.MainFOVChanger", class'FOVChanger'));
+	SWRCFix = SWRCFix(FindObject("Transient.SWRCFixInstance", class'SWRCFix'));
 
-	if(FOVChanger == None)
-		Warn("FOVCHANGER OBJECT NOT FOUND!!!!!");
+	if(SWRCFix == None)
+		Warn("SWRCFix OBJECT NOT FOUND!!!!!");
 
 	Refresh();
 }
@@ -140,7 +140,7 @@ simulated function Refresh()
 	// Look for current fps limit in list and get the index. If it is a custom one set via ini or console insert it into the options array.
 	// There will never be more than one custom value in the list at a time as this is only done to display the correct one even if it is not one of the default options.
 
-	fpsLimit = float(GetPlayerOwner().ConsoleCommand("GetFpsLimit"));
+	fpsLimit = SWRCFix.FpsLimit;
 
 	for(i = 0; i < Options[9].Items.Length;  ++i){
 		diff = float(Options[9].Items[i]) - fpsLimit;
@@ -165,14 +165,14 @@ simulated function Refresh()
 
 	// Same procedure for FOV
 	for(i = 0; i < Options[10].Items.Length;  ++i){
-		diff = float(Options[10].Items[i]) - class'FOVChanger'.default.FOV;
+		diff = float(Options[10].Items[i]) - class'SWRCFix'.default.FOV;
 
 		if(Abs(diff) <= 0.1) // Tolerance to deal with floating point precision
 			break;
 
 		if(diff > 0.0 && prevDiff <= 0.0){
 			Options[10].Items.Insert(i, 1);
-			Options[10].Items[i] = string(class'FOVChanger'.default.FOV);
+			Options[10].Items[i] = string(class'SWRCFix'.default.FOV);
 
 			break;
 		}
@@ -181,10 +181,10 @@ simulated function Refresh()
 	}
 
 	if(i == Options[10].Items.Length)
-		Options[10].Items[Options[10].Items.Length] = string(class'FOVChanger'.default.FOV);
+		Options[10].Items[Options[10].Items.Length] = string(class'SWRCFix'.default.FOV);
 
 	Options[10].Current = i;
-	Options[11].Current = FOVChanger.HudArmsFOVFactor * 10;
+	Options[11].Current = SWRCFix.HudArmsFOVFactor * 10;
 
 	if ( !bInMultiplayer )
 	{
@@ -343,18 +343,18 @@ simulated function ChangeOption( int i, int Delta )
 			break;
 
 		case 9:
-			GetPlayerOwner().ConsoleCommand("SetFpsLimit" @ Options[9].Items[Options[9].Current]);
+			SWRCFix.FpsLimit = float(Options[9].Items[Options[9].Current]);
 
 			break;
 
 		case 10:
-			FOVChanger.SetFov(GetPlayerOwner(), float(Options[10].Items[Options[10].Current]));
+			SWRCFix.SetFov(GetPlayerOwner(), float(Options[10].Items[Options[10].Current]));
 
 			break;
 
 		case 11:
-			FOVChanger.HudArmsFOVFactor = float(Options[11].Items[Options[11].Current]);
-			FOVChanger.SetFOV(GetPlayerOwner(), FOVChanger.FOV);
+			SWRCFix.HudArmsFOVFactor = float(Options[11].Items[Options[11].Current]);
+			SWRCFix.SetFOV(GetPlayerOwner(), SWRCFix.FOV);
 	}
 
 	GetPlayerOwner().PropagateSettings();

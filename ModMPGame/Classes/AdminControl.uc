@@ -1,4 +1,4 @@
-class AdminControl extends Actor native config(ModMPGame);
+class AdminControl extends GameStats native config(ModMPGame);
 
 var() config array<String> ServiceClasses;
 var array<AdminService>    Services;
@@ -6,51 +6,49 @@ var array<AdminService>    Services;
 var() config string EventLogFile;
 var() config bool   AppendEventLog;
 var() config bool   EventLogTimestamp;
+var() config bool   DoStatLogging;
 
 var bool          bPrintCommands;  // Commands are not executed but instead displayed (e.g. when the 'help' command is used)
 var array<string> CurrentCommands; // Only used as temporary storage when bPrintCommands == true
 
-var FunctionOverride GameInfoPostLoginOverride;
-var FunctionOverride GameInfoLogoutOverride;
-
-native final function EventLog(coerce string Msg, name Event);
+native final function EventLog(coerce string Msg, name Tag);
 native final function SaveStats(PlayerController PC);
 native final function RestoreStats(PlayerController PC);
 
-function GameInfoPostLogin(PlayerController NewPlayer){
-	Level.Game.PostLogin(NewPlayer);
-
-	EventLog(NewPlayer.PlayerReplicationInfo.PlayerName $ " entered the game", 'Join');
-	RestoreStats(NewPlayer);
+function Init(){
+	if(DoStatLogging)
+		Super.Init();
 }
 
-function GameInfoLogout(Controller Exiting){
-	local PlayerController PC;
+function ConnectEvent(PlayerReplicationInfo Who){
+	EventLog(Who.PlayerName $ " entered the game", 'Join');
+	RestoreStats(PlayerController(Who.Owner));
+	Super.ConnectEvent(Who);
+}
 
-	PC = PlayerController(Exiting);
-
-	if(PC != None){
-		SaveStats(PC);
-
-		if(!Level.Game.bGameEnded) // No need to log this at the end of the game when all players leave automatically
-			EventLog(PC.PlayerReplicationInfo.PlayerName $ " left the game", 'Leave');
-	}
-
-	Level.Game.Logout(Exiting);
+function DisconnectEvent(PlayerReplicationInfo Who){
+	EventLog(Who.PlayerName $ " left the game", 'Leave');
+	SaveStats(PlayerController(Who.Owner));
+	Super.DisconnectEvent(Who);
 }
 
 function PostBeginPlay(){
 	local int i;
-	local Class<AdminService> ServiceClass;
+	local class<AdminService> ServiceClass;
 	local AdminService Service;
 
-	GameInfoPostLoginOverride = new class'FunctionOverride';
-	GameInfoPostLoginOverride.Init(Level.Game, 'PostLogin', self, 'GameInfoPostLogin');
-	GameInfoLogoutOverride = new class'FunctionOverride';
-	GameInfoLogoutOverride.Init(Level.Game, 'Logout', self, 'GameInfoLogout');
+	if(Level.Game.GameStats != None && Level.Game.GameStats != self){
+		Warn("GameStats will be replaced by AdminControl!");
+	}else if(Level.Game.GameStats.IsA('AdminControl')){
+		Destroy();
 
-	SaveConfig();
+		return;
+	}
 
+	EventLog(GetMapFileName(), 'Map');
+	SaveConfig(); // Create config if it doesn't exist
+
+	Level.Game.GameStats = self;
 	Level.Game.bAdminCanPause = false;
 	Level.Game.BroadcastHandlerClass = "ModMPGame.AdminControlBroadcastHandler";
 	Level.Game.AccessControlClass = "ModMPGame.AdminAccessControl";
@@ -182,7 +180,7 @@ cpptext
 defaultproperties
 {
 	bHidden=true
-	EventLogFile="../Save/ServerEvents.log"
+	EventLogFile="ServerEvents.log"
 	AppendEventLog=true
 	EventLogTimestamp=true
 	ServiceClasses(0)="ModMPGame.AdminAuthentication"

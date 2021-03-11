@@ -1,7 +1,6 @@
 class AdminControl extends GameStats native config(ModMPGame);
 
 var() config array<String> ServiceClasses;
-var array<AdminService>    Services;
 
 var() config string EventLogFile;
 var() config bool   AppendEventLog;
@@ -10,6 +9,7 @@ var() config bool   DoStatLogging;
 
 var bool          bPrintCommands;  // Commands are not executed but instead displayed (e.g. when the 'help' command is used)
 var array<string> CurrentCommands; // Only used as temporary storage when bPrintCommands == true
+var AdminService  Services;        // Linked list of all currently active services
 
 native final function EventLog(coerce string Msg, name Tag);
 native final function SaveStats(PlayerController PC);
@@ -87,32 +87,33 @@ function PostBeginPlay(){
 		}
 
 		Service.AdminControl = self;
-		Services[Services.Length] = Service;
+		Service.nextAdminService = Services;
+		Services = Service;
 	}
 }
 
 function bool DispatchCmd(PlayerController PC, string Cmd){
 	local int i;
-	local int j;
+	local AdminService Service;
 	local int NumLines;
 	local bool RecognizedCmd;
 	local bool bAdmin;
 
 	bAdmin = PC == None || PC.PlayerReplicationInfo.bAdmin;
 
-	for(i = 0; i < Services.Length; ++i){
-		if(Services[i].bRequiresAdminPermissions && !bAdmin)
+	for(Service = Services; Service != None; Service = Service.nextAdminService){
+		if(Service.bRequiresAdminPermissions && !bAdmin)
 			continue;
 
-		if(Services[i].ExecCmd(Cmd, PC))
+		if(Service.ExecCmd(Cmd, PC))
 			RecognizedCmd = true;
 
 		if(CurrentCommands.Length > 0){ // 'help' command was used, so display the list of commands
-			Services[i].CommandFeedback(PC, string(Services[i].Class.Name) $ ":", PC != None);
+			Service.CommandFeedback(PC, string(Service.Class.Name) $ ":", PC != None);
 			++NumLines;
 
-			for(j = 0; j < CurrentCommands.Length; ++j){
-				Services[i].CommandFeedback(PC, "  - " $ CurrentCommands[j], PC != None);
+			for(i = 0; i < CurrentCommands.Length; ++i){
+				Service.CommandFeedback(PC, "  - " $ CurrentCommands[i], PC != None);
 				++NumLines;
 			}
 
@@ -127,7 +128,7 @@ function bool DispatchCmd(PlayerController PC, string Cmd){
 }
 
 event bool ExecCmd(string Cmd, optional PlayerController PC){
-	local int i;
+	local AdminService Service;
 	local bool RecognizedCmd;
 	local string CommandSource;
 
@@ -146,8 +147,8 @@ event bool ExecCmd(string Cmd, optional PlayerController PC){
 	EventLog("(" $ CommandSource $ "): " $ Cmd, 'Command');
 
 	if((PC == None || PC.PlayerReplicationInfo.bAdmin) && Cmd ~= "SAVECONFIG"){
-		for(i = 0; i < Services.Length; ++i)
-			Services[i].SaveConfig();
+		for(Service = Services; Service != None; Service = Service.nextAdminService)
+			Service.SaveConfig();
 
 		SaveConfig();
 

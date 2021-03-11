@@ -259,7 +259,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 		appInit(appPackage(), lpCmdLine, &Log, &Error, &Warn, FConfigCacheIni::Factory, 1);
 
-		GIsClient = 1;
+		GIsClient = ParseParam(appCmdLine(), "SERVER") == 0;
 		GIsServer = 1;
 		GIsEditor = 0;
 		GIsScriptable = 1;

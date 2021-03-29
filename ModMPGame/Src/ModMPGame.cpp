@@ -76,14 +76,14 @@ void AAdminControl::Spawned(){
 				Filename += ".log";
 
 			AdminControlEventLog.SetFilename(*FString::Printf("%s_%i-%i-%i_%i-%i-%i.%s",
-															  *Filename.GetBaseFilePath(),
-															  Level->Month,
-															  Level->Day,
-															  Level->Year,
-															  Level->Hour,
-															  Level->Minute,
-															  Level->Second,
-															  *Filename.GetExtension()));
+			                                                  *Filename.GetBaseFilePath(),
+			                                                  Level->Month,
+			                                                  Level->Day,
+			                                                  Level->Year,
+			                                                  Level->Hour,
+			                                                  Level->Minute,
+			                                                  Level->Second,
+			                                                  *Filename.GetExtension()));
 		}
 	}
 
@@ -505,7 +505,7 @@ void ABotSupport::Spawned(){
 		// Spawning inventory spots for each pickup in the level
 		for(TActorIterator<APickup> It(XLevel, IT_DynamicActors); It; ++It){
 			SpawnNavigationPoint(AInventorySpot::StaticClass(),
-								 It->Location + FVector(0, 0, AScout::StaticClass()->GetDefaultActor()->CollisionHeight));
+			                     It->Location + FVector(0, 0, AScout::StaticClass()->GetDefaultActor()->CollisionHeight));
 		}
 
 		if(bAutoImportPaths){
@@ -669,95 +669,96 @@ bool ABotSupport::ExecCmd(const char* Cmd, class APlayerController* PC){
 
 	// Commands only available for players and not from the server console
 
-	if(!PC)
+	if(!PC) // Command was entered into server console, so we look if a local player exists and use their controller
 		PC = GetLocalPlayerController();
 
-	if(PC){
-		// Commands for removing navigation points
+	if(!PC)
+		return false;
 
-		if(CheckCommand(&Cmd, "REMOVENAVIGATIONPOINT")){
-			UBOOL IsEditor = GIsEditor;
+	// Commands for removing navigation points
 
-			GIsEditor = 1;
+	if(CheckCommand(&Cmd, "REMOVENAVIGATIONPOINT")){
+		UBOOL IsEditor = GIsEditor;
 
-			for(TActorIterator<ANavigationPoint> It(XLevel, IT_StaticActors); It; ++It){
-				if(!It->IsA(APlayerStart::StaticClass()) &&
-				   ((PC->Pawn ? PC->Pawn->Location : PC->Location) - It->Location).SizeSquared() <= 40 * 40){
-					XLevel->DestroyActor(*It);
-					BuildPaths();
-					bPathsHaveChanged = 1;
+		GIsEditor = 1;
 
-					break;
-				}
-			}
-
-			GIsEditor = IsEditor;
-
-
-			return true;
-		}else if(CheckCommand(&Cmd, "REMOVEALLNAVIGATIONPOINTS")){
-			UBOOL IsEditor = GIsEditor;
-
-			GIsEditor = 1;
-
-			for(TActorIterator<ANavigationPoint> It(XLevel, IT_StaticActors); It; ++It){
-				if(It->IsA(ANavigationPoint::StaticClass()) && !It->IsA(APlayerStart::StaticClass()))
-					XLevel->DestroyActor(*It);
-
+		for(TActorIterator<ANavigationPoint> It(XLevel, IT_StaticActors); It; ++It){
+			if(!It->IsA(APlayerStart::StaticClass()) &&
+			   ((PC->Pawn ? PC->Pawn->Location : PC->Location) - It->Location).SizeSquared() <= 40 * 40){
+				XLevel->DestroyActor(*It);
+				BuildPaths();
 				bPathsHaveChanged = 1;
+
+				break;
 			}
+		}
 
-			GIsEditor = IsEditor;
-			bPathsImported = 0;
+		GIsEditor = IsEditor;
 
+
+		return true;
+	}else if(CheckCommand(&Cmd, "REMOVEALLNAVIGATIONPOINTS")){
+		UBOOL IsEditor = GIsEditor;
+
+		GIsEditor = 1;
+
+		for(TActorIterator<ANavigationPoint> It(XLevel, IT_StaticActors); It; ++It){
+			if(It->IsA(ANavigationPoint::StaticClass()) && !It->IsA(APlayerStart::StaticClass()))
+				XLevel->DestroyActor(*It);
+
+			bPathsHaveChanged = 1;
+		}
+
+		GIsEditor = IsEditor;
+		bPathsImported = 0;
+
+		BuildPaths();
+
+		return true;
+	}
+
+	// Commands for spawning navigation points
+
+	UClass* PutNavPtClass = NULL;
+
+	if(CheckCommand(&Cmd, "PUTPATHNODE"))
+		PutNavPtClass = APathNode::StaticClass();
+	else if(CheckCommand(&Cmd, "PUTCOVERPOINT"))
+		PutNavPtClass = ACoverPoint::StaticClass();
+	else if(CheckCommand(&Cmd, "PUTPATROLPOINT"))
+		PutNavPtClass = APatrolPoint::StaticClass();
+
+	if(PutNavPtClass){
+		FVector Loc;
+		FRotator Rot(0, 0, 0);
+
+		if(PC->Pawn){
+			Loc = PC->Pawn->Location;
+			Rot.Yaw = PC->Pawn->Rotation.Yaw;
+		}else{
+			Loc = PC->Location;
+			Rot.Yaw = PC->Rotation.Yaw;
+		}
+
+		SpawnNavigationPoint(PutNavPtClass, Loc, Rot);
+
+		if(bAutoBuildPaths)
 			BuildPaths();
 
-			return true;
-		}
+		return true;
+	}
 
-		// Commands for spawning navigation points
+	// Commands only available for the host of a non-dedicated server
 
-		UClass* PutNavPtClass = NULL;
-
-		if(CheckCommand(&Cmd, "PUTPATHNODE"))
-			PutNavPtClass = APathNode::StaticClass();
-		else if(CheckCommand(&Cmd, "PUTCOVERPOINT"))
-			PutNavPtClass = ACoverPoint::StaticClass();
-		else if(CheckCommand(&Cmd, "PUTPATROLPOINT"))
-			PutNavPtClass = APatrolPoint::StaticClass();
-
-		if(PutNavPtClass){
-			FVector Loc;
-			FRotator Rot(0, 0, 0);
-
-			if(PC->Pawn){
-				Loc = PC->Pawn->Location;
-				Rot.Yaw = PC->Pawn->Rotation.Yaw;
-			}else{
-				Loc = PC->Location;
-				Rot.Yaw = PC->Rotation.Yaw;
-			}
-
-			SpawnNavigationPoint(PutNavPtClass, Loc, Rot);
-
-			if(bAutoBuildPaths)
-				BuildPaths();
+	if(GIsClient){
+		if(CheckCommand(&Cmd, "SHOWPATHS")){
+			bShowPaths = 1;
 
 			return true;
-		}
+		}else if(CheckCommand(&Cmd, "HIDEPATHS")){
+			bShowPaths = 0;
 
-		// Commands only available for the host of a non-dedicated server
-
-		if(GIsClient){
-			if(CheckCommand(&Cmd, "SHOWPATHS")){
-				bShowPaths = 1;
-
-				return true;
-			}else if(CheckCommand(&Cmd, "HIDEPATHS")){
-				bShowPaths = 0;
-
-				return true;
-			}
+			return true;
 		}
 	}
 

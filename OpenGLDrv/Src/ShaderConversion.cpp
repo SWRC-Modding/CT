@@ -3,6 +3,86 @@
 UHardwareShaderMacros* UOpenGLRenderDevice::HardwareShaderMacros = NULL;
 TMap<FString, FString> UOpenGLRenderDevice::HardwareShaderMacroText;
 
+static void SkipWhitespaceSingleLine(const TCHAR** Text){
+	while(**Text && appIsSpace(**Text) && **Text != '\n')
+		++*Text;
+}
+
+// If Out is specified, comments and newlines will be written to it
+static void SkipWhitespaceAndComments(const TCHAR** Text, FString* Out = NULL){
+	while(appIsSpace(**Text) || **Text == ';' || **Text == '/'){
+		while(appIsSpace(**Text)){
+			if(Out && **Text == '\n'){
+				if(*(*Text + 1) == '\r' && *(*Text + 1) == '\n')
+					*Text += 2;
+				else
+					++*Text;
+
+				*Out += "\n";
+			}else{
+				++*Text;
+			}
+
+			// Remove trailing whitespace at end of text
+			if(Out && **Text == '\0'){
+				TArray<TCHAR>& CharArray = Out->GetCharArray();
+
+				for(INT i = CharArray.Num() - 2; i >= 0; --i){
+					if(!appIsSpace(CharArray[i])){
+						CharArray[i + 1] = '\0';
+						CharArray.Set(i + 2);
+						break;
+					}
+				}
+			}
+		}
+
+		if(**Text == ';' || (**Text == '/' && *(*Text + 1) == '/')){
+			const TCHAR* Start = *Text;
+
+			while(**Text && **Text != '\n')
+				++*Text;
+
+			if(Out){
+				if(appIsSpace((*Out)[Out->Len() - 1]))
+					*Out += "\t";
+				else
+					*Out += " ";
+
+				if(*Start == ';'){
+					++Start;
+					SkipWhitespaceSingleLine(&Start);
+					*Out += "// ";
+				}
+
+				const TCHAR* End = *Text;
+
+				while(appIsSpace(End[-1])) // Remove trailing whitespace on comments
+					--End;
+
+				*Out += FStringTemp(static_cast<INT>(End - Start), Start);
+			}
+		}else if(**Text == '/' && *(*Text + 1) == '*'){
+			const TCHAR* Start = *Text;
+
+			*Text += 2;
+
+			while(**Text){
+				if(**Text == '*' && *(*Text + 1) == '/'){
+					*Text += 2;
+
+					break;
+				}
+
+				++*Text;
+			}
+
+			if(Out)
+				*Out += FStringTemp(static_cast<INT>(*Text - Start), Start);
+		}
+	}
+}
+
 void UOpenGLRenderDevice::ClearHardwareShaderMacros(){
 	HardwareShaderMacros = NULL;
 	HardwareShaderMacroText.Empty();
@@ -13,13 +93,9 @@ void UOpenGLRenderDevice::SetHardwareShaderMacros(UHardwareShaderMacros* Macros)
 
 	const TCHAR* Pos = *Macros->Macros;
 
-	if(!Pos)
-		return;
-
 	while(*Pos){
 		if(*Pos == ';' || *Pos == '/'){
-			while(*Pos && *Pos != '\n')
-				++Pos;
+			SkipWhitespaceAndComments(&Pos);
 		}else if(*Pos == '{'){
 			const TCHAR* First = Pos;
 
@@ -46,13 +122,9 @@ void UOpenGLRenderDevice::SetHardwareShaderMacros(UHardwareShaderMacros* Macros)
 void UOpenGLRenderDevice::ExpandHardwareShaderMacros(FString* ShaderText){
 	const TCHAR* Pos = **ShaderText;
 
-	if(!Pos)
-		return;
-
 	while(*Pos){
 		if(*Pos == ';' || *Pos == '/'){
-			while(*Pos && *Pos != '\n')
-				++Pos;
+			SkipWhitespaceAndComments(&Pos);
 		}else if(*Pos == '{'){
 			const TCHAR* First = Pos;
 
@@ -184,10 +256,7 @@ FStringTemp UOpenGLRenderDevice::GLSLVertexShaderFromD3DVertexShader(UHardwareSh
 		appErrorf("Shader conversion failed"); // TODO: Fall back to default implementation
 	}
 
-	GLSLShaderText +=   "}\n\n"
-		                "#if 0\n\n" +
-		                D3DShaderText +
-						"\n#endif\n";
+	GLSLShaderText +=   "}\n";
 
 	return GLSLShaderText;
 }
@@ -227,78 +296,9 @@ FStringTemp UOpenGLRenderDevice::GLSLFragmentShaderFromD3DPixelShader(UHardwareS
 	GLSLShaderText +=       "\n\tFragColor = r0;\n\n"
 		                    "\tif(FragColor.a <= AlphaRef)\n"
 	                            "\t\tdiscard;\n"
-		                "}\n\n"
-		                "#if 0\n\n" +
-		                D3DShaderText +
-		                "\n#endif\n";
+		                "}\n";
 
 	return GLSLShaderText;
-}
-
-static void SkipWhitespaceSingleLine(const TCHAR** Text){
-	while(**Text && appIsSpace(**Text) && **Text != '\n')
-		++*Text;
-}
-
-static void SkipWhitespaceAndComments(const TCHAR** Text, FString* Out = NULL){
-	while(appIsSpace(**Text) || **Text == ';' || **Text == '/'){
-		while(appIsSpace(**Text)){
-			if(Out && **Text == '\n'){
-				if(*(*Text + 1) == '\r' && *(*Text + 1) == '\n')
-					*Text += 2;
-				else
-					++*Text;
-
-				*Out += "\n";
-			}else{
-				++*Text;
-			}
-		}
-
-		if(**Text == ';' || (**Text == '/' && *(*Text + 1) == '/')){
-			const TCHAR* Start = *Text;
-
-			while(**Text && **Text != '\n')
-				++*Text;
-
-			if(Out){
-				if(appIsSpace((*Out)[Out->Len() - 1]))
-					*Out += "\t";
-				else
-					*Out += " ";
-
-				if(*Start == ';'){
-					++Start;
-					SkipWhitespaceSingleLine(&Start);
-					*Out += "// ";
-				}
-
-				const TCHAR* End = *Text;
-
-				while(appIsSpace(End[-1])) // Remove trailing whitespace on comments
-					--End;
-
-				*Out += FStringTemp(static_cast<INT>(End - Start), Start);
-			}
-		}else if(**Text == '/' && *(*Text + 1) == '*'){
-			const TCHAR* Start = *Text;
-
-			*Text += 2;
-
-			while(**Text){
-				if(**Text == '*' && *(*Text + 1) == '/'){
-					*Text += 2;
-
-					break;
-				}
-
-				++*Text;
-			}
-
-			if(Out)
-				*Out += FStringTemp(static_cast<INT>(*Text - Start), Start);
-		}
-	}
 }
 
 #define SHADER_INSTRUCTIONS \
@@ -417,7 +417,8 @@ static EShaderInstruction ParseShaderInstructionName(const TCHAR** Text){
 	for(INT i = StartIndex; appIsAlnum(**Text) && i < INS_MAX; ++i){
 		if(NumMatches < ShaderInstructionStrings[i].NumMatchesWithPrev)
 			continue;
-		else if(NumMatches > ShaderInstructionStrings[i].NumMatchesWithPrev)
+
+		if(NumMatches > ShaderInstructionStrings[i].NumMatchesWithPrev)
 			break; // Error: invalid instruction
 
 		while(*(*Text + NumMatches) == ShaderInstructionStrings[i].Str[NumMatches] || *(*Text + NumMatches) < ShaderInstructionStrings[i].Str[NumMatches])
@@ -636,7 +637,7 @@ static bool ParseShaderInstruction(const TCHAR** Text, FShaderInstruction* Instr
 	const TCHAR* Start = *Text;
 
 	while(appIsAlnum(**Text))
-			++*Text;
+		++*Text;
 
 	INT Len = static_cast<INT>(*Text - Start);
 
@@ -1136,6 +1137,7 @@ static bool WriteShaderInstruction(FShaderInstruction& Instruction, FString* Out
 
 	return true;
 }
+
 bool UOpenGLRenderDevice::ConvertD3DAssemblyToGLSL(const TCHAR* Text, FString* Out){
 	SkipWhitespaceAndComments(&Text);
 

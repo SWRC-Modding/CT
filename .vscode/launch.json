@@ -11,7 +11,7 @@
 			"request": "launch",
 			"program": "${workspaceFolder}/../GameData/System/CT.exe",
 			"args": [
-				"dm_canyon?game=MPGame.DMGame?goalscore=5?respawndelay=0?Listen",
+				"testmap?game=MPGame.DMGame?goalscore=5?respawndelay=0?maxplayers=32?Listen",
 				"-windowed",
 				"-log",
 				"-nosaveconfig",

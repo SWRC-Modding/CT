@@ -45,7 +45,6 @@ enum{ MAXSBYTE      = 0x7f        };
 enum{ MAXSWORD      = 0x7fff      };
 enum{ MAXINT        = 0x7fffffff  };
 enum{ INDEX_NONE    = -1          };
-enum{ UNICODE_BOM   = 0xfeff      };
 enum ENoInit{ E_NoInit = 0 };
 
 enum ERunningOS{
@@ -57,13 +56,6 @@ enum ERunningOS{
 	OS_WINNT,
 	OS_UNKNOWN = 255
 };
-
-// Multi byte character set mappings. No wchar_t in Republic Commando...
-typedef ANSICHAR  TCHAR;
-typedef ANSICHARU TCHARU;
-
-inline TCHAR    FromUnicode(UNICHAR In){ return (_WORD)In < 0x100 ? In : MAXSBYTE; }
-inline ANSICHAR	ToAnsi(TCHAR In){ return (_WORD)In < 0x100 ? In : MAXSBYTE; }
 
 /*----------------------------------------------------------------------------
 	Forward declarations.
@@ -531,15 +523,6 @@ extern "C" DLL_EXPORT TCHAR GPackage[];
 // Worker class for tracking loading errors in the editor
 class CORE_API FEdLoadError{
 public:
-	FEdLoadError(){}
-
-	FEdLoadError(INT InType, TCHAR* InDesc){
-		Type = InType;
-		Desc = InDesc;
-	}
-
-	~FEdLoadError(){}
-
 	// The types of things that could be missing.
 	enum{
 		TYPE_FILE,		// A totally missing file
@@ -549,16 +532,12 @@ public:
 	INT Type;		// TYPE_
 	FString Desc;	// Description of the error
 
-	UBOOL operator==( const FEdLoadError& LE ) const{
-		return Type==LE.Type && Desc==LE.Desc;
-	}
+	FEdLoadError(){}
+	FEdLoadError(INT InType, TCHAR* InDesc);
+	~FEdLoadError(){}
 
-	FEdLoadError& operator=(const FEdLoadError Other){
-		Type = Other.Type;
-		Desc = Other.Desc;
-
-		return *this;
-	}
+	UBOOL operator==(const FEdLoadError& LE) const;
+	FEdLoadError& operator=(const FEdLoadError Other);
 };
 
 CORE_API extern TArray<FEdLoadError> GEdLoadErrors; /*  For keeping track of load errors in the editor */

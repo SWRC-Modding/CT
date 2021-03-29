@@ -30,94 +30,47 @@ struct TTypeInfo<T*> : public TTypeInfoBase<T*>{
 	static UBOOL NeedsDestructor(){ return 0; }
 };
 
-template<>
-struct TTypeInfo<BYTE> : public TTypeInfoBase<BYTE>{
-	static UBOOL NeedsDestructor(){ return 0; }
-};
+#define PRIMITIVE_TYPEINFO(type) \
+	template<> \
+	struct TTypeInfo<type> : public TTypeInfoBase<type>{ \
+		static UBOOL NeedsDestructor(){ return 0; } \
+	};
 
-template<>
-struct TTypeInfo<SBYTE> : public TTypeInfoBase<SBYTE>{
-	static UBOOL NeedsDestructor(){ return 0; }
-};
-
-template<>
-struct TTypeInfo<ANSICHAR> : public TTypeInfoBase<ANSICHAR>{
-	static UBOOL NeedsDestructor(){ return 0; }
-};
-
-template<>
-struct TTypeInfo<INT> : public TTypeInfoBase<INT>{
-	static UBOOL NeedsDestructor(){ return 0; }
-};
-
-template<>
-struct TTypeInfo<DWORD> : public TTypeInfoBase<DWORD>{
-	static UBOOL NeedsDestructor(){ return 0; }
-};
-
-template<>
-struct TTypeInfo<_WORD> : public TTypeInfoBase<_WORD>{
-	static UBOOL NeedsDestructor(){ return 0; }
-};
-
-template<>
-struct TTypeInfo<SWORD> : public TTypeInfoBase<SWORD>{
-	static UBOOL NeedsDestructor(){ return 0; }
-};
-
-template<>
-struct TTypeInfo<QWORD> : public TTypeInfoBase<QWORD>{
-	static UBOOL NeedsDestructor(){ return 0; }
-};
-
-template<>
-struct TTypeInfo<SQWORD> : public TTypeInfoBase<SQWORD>{
-	static UBOOL NeedsDestructor(){ return 0; }
-};
-
-template<>
-struct TTypeInfo<FName> : public TTypeInfoBase<FName>{
-	static UBOOL NeedsDestructor(){ return 0; }
-};
+PRIMITIVE_TYPEINFO(BYTE)
+PRIMITIVE_TYPEINFO(SBYTE)
+PRIMITIVE_TYPEINFO(TCHAR)
+PRIMITIVE_TYPEINFO(INT)
+PRIMITIVE_TYPEINFO(DWORD)
+PRIMITIVE_TYPEINFO(_WORD)
+PRIMITIVE_TYPEINFO(SWORD)
+PRIMITIVE_TYPEINFO(QWORD)
+PRIMITIVE_TYPEINFO(SQWORD)
+PRIMITIVE_TYPEINFO(FName)
 
 /*-----------------------------------------------------------------------------
 	Standard templates.
 -----------------------------------------------------------------------------*/
 
 template<typename T>
-inline T Abs(const T A){
-	return (A >= static_cast<T>(0)) ? A : -A;
-}
+inline T Abs(const T A){ return (A >= static_cast<T>(0)) ? A : -A; }
 
 template<typename T>
-inline T Sgn(const T A){
-	return (A > 0) ? 1 : ((A < 0) ? -1 : 0);
-}
+inline T Sgn(const T A){ return (A > 0) ? 1 : ((A < 0) ? -1 : 0); }
 
 template<typename T>
-inline T Max(const T A, const T B){
-	return (A >= B) ? A : B;
-}
+inline T Max(const T A, const T B){ return (A >= B) ? A : B; }
 
 template<typename T>
-inline T Min(const T A, const T B){
-	return (A <= B) ? A : B;
-}
+inline T Min(const T A, const T B){ return (A <= B) ? A : B; }
 
 template<typename T>
-inline T Square(const T A){
-	return A * A;
-}
+inline T Square(const T A){ return A * A; }
 
 template<typename T>
-inline T Clamp(const T X, const T Min, const T Max){
-	return X < Min ? Min : X < Max ? X : Max;
-}
+inline T Clamp(const T X, const T Min, const T Max){ return X < Min ? Min : X < Max ? X : Max; }
 
 template<typename T>
-inline T Align(const T Ptr, INT Alignment){
-	return (T)(((DWORD)Ptr + Alignment - 1) & ~(Alignment - 1));
-}
+inline T Align(const T Ptr, INT Alignment){ return (T)(((DWORD)Ptr + Alignment - 1) & ~(Alignment - 1)); }
 
 template<typename T>
 inline void Exchange(T& A, T& B){
@@ -127,50 +80,20 @@ inline void Exchange(T& A, T& B){
 }
 
 template<typename T>
-T Lerp(T& A, T& B, FLOAT Alpha){
-	return A + Alpha * (B - A);
-}
+T Lerp(T& A, T& B, FLOAT Alpha){ return A + Alpha * (B - A); }
 
-inline DWORD GetTypeHash(const BYTE A){
-	return A;
-}
-
-inline DWORD GetTypeHash(const SBYTE A){
-	return A;
-}
-
-inline DWORD GetTypeHash(const _WORD A){
-	return A;
-}
-
-inline DWORD GetTypeHash(const SWORD A){
-	return A;
-}
-
-inline DWORD GetTypeHash(const INT A){
-	return A;
-}
-
-inline DWORD GetTypeHash(const DWORD A){
-	return A;
-}
-
-inline DWORD GetTypeHash(const QWORD A){
-	return (DWORD)A + ((DWORD)(A >> 32) * 23);
-}
-
-inline DWORD GetTypeHash(const SQWORD A){
-	return (DWORD)A + ((DWORD)(A >> 32) * 23);
-}
-
-inline DWORD GetTypeHash(const TCHAR* S){
-	return appStrihash(S);
-}
+inline DWORD GetTypeHash(const BYTE A){ return A; }
+inline DWORD GetTypeHash(const SBYTE A){ return A; }
+inline DWORD GetTypeHash(const _WORD A){ return A; }
+inline DWORD GetTypeHash(const SWORD A){ return A; }
+inline DWORD GetTypeHash(const INT A){ return A; }
+inline DWORD GetTypeHash(const DWORD A){ return A; }
+inline DWORD GetTypeHash(const QWORD A){ return (DWORD)A + ((DWORD)(A >> 32) * 23); }
+inline DWORD GetTypeHash(const SQWORD A){ return (DWORD)A + ((DWORD)(A >> 32) * 23); }
+inline DWORD GetTypeHash(const TCHAR* S){ return appStrihash(S); }
 
 template<typename T>
-DWORD GetTypeHash(const T* P){
-	return (DWORD)P;
-}
+DWORD GetTypeHash(const T* P){ return (DWORD)P; }
 
 #define ExchangeB(A,B) do{UBOOL T=A; A=B; B=T;}while(false);
 
@@ -188,13 +111,6 @@ DWORD GetTypeHash(const T* P){
 
 #define STR(x) #x
 #define STRINGIFY(x) STR(x)
-
-/*-----------------------------------------------------------------------------
-	Allocators.
------------------------------------------------------------------------------*/
-
-template<typename T>
-class TAllocator{};
 
 /*-----------------------------------------------------------------------------
 	Dynamic array template.
@@ -341,41 +257,15 @@ public:
 		}
 	}
 
-	void Set(INT NewSize){
-		Set(NewSize, NewSize);
-	}
-
-	T* GetData(){
-		return static_cast<T*>(Data);
-	}
-
-	const T* GetData() const{
-		return static_cast<T*>(Data);
-	}
-
-	bool IsValidIndex(INT Index) const{
-		return Index >= 0 && Index < Num();
-	}
-
-	INT Num() const{
-		return ArrayNum;
-	}
-
-	INT Size() const{
-		return Num();
-	}
-
-	bool IsAllocated() const{
-		return Data != NULL && !bIsReference;
-	}
-
-	T& Last(INT c = 0){
-		return (*this)[Num() - c - 1];
-	}
-
-	const T& Last(INT c = 0) const{
-		return (*this)[Num() - c - 1];
-	}
+	void Set(INT NewSize){ 	Set(NewSize, NewSize); 	}
+	T* GetData(){ 	return static_cast<T*>(Data); 	}
+	const T* GetData() const{ 	return static_cast<T*>(Data); 	}
+	bool IsValidIndex(INT Index) const{ 	return Index >= 0 && Index < Num(); 	}
+	INT Num() const{ 	return ArrayNum; 	}
+	INT Size() const{ 	return Num(); 	}
+	bool IsAllocated() const{ 	return Data != NULL && !bIsReference; 	}
+	T& Last(INT c = 0){ 	return (*this)[Num() - c - 1]; 	}
+	const T& Last(INT c = 0) const{ 	return (*this)[Num() - c - 1]; 	}
 
 	bool FindItem(const T& Item, INT& Index) const{
 		for(Index = 0; Index < Num(); ++Index){
@@ -395,17 +285,9 @@ public:
 		return INDEX_NONE;
 	}
 
-	void SetNoShrink(bool NoShrink){
-		bNoShrink = NoShrink;
-	}
-
-	void CountBytes(FArchive& Ar){
-		Ar.CountBytes(Data, Num() * sizeof(T));
-	}
-
-	INT GetMaxSize() const{
-		return Capacity();
-	}
+	void SetNoShrink(bool NoShrink){ 	bNoShrink = NoShrink; 	}
+	void CountBytes(FArchive& Ar){ 	Ar.CountBytes(Data, Num() * sizeof(T)); 	}
+	INT GetMaxSize() const{ 	return Capacity(); 	}
 
 	void Serialize(FArchive& Ar){
 		guard(MyTArray::Serialize);
@@ -1147,9 +1029,7 @@ public:
 	}
 
 private:
-	INT GetLastPathSeparator() const{
-		return Max(InStr("\\", true), InStr("/", true));
-	}
+	INT GetLastPathSeparator() const{ return Max(InStr("\\", true), InStr("/", true)); }
 };
 
 /*----------------------------------------------------------------------------
@@ -1166,96 +1046,6 @@ public:
 	void Serialize(const TCHAR* Data, EName Event){
 		*this += Data;
 	}
-};
-
-/*
- * Buffer writer.
- */
-class FBufferWriter : public FArchive{
-public:
-	FBufferWriter(TArray<BYTE>& InBytes) : Bytes(InBytes),
-										   Pos(0){
-		ArIsSaving = 1;
-	}
-
-	void Serialize(void* InData, INT Length){
-		if(Pos+Length>Bytes.Num())
-			Bytes.Add(Pos+Length-Bytes.Num());
-
-		if(Length == 1)
-			Bytes[Pos] = ((BYTE*)InData)[0];
-		else
-			appMemcpy(&Bytes[Pos], InData, Length);
-
-		Pos += Length;
-	}
-
-	INT Tell(){
-		return Pos;
-	}
-
-	void Seek(INT InPos){
-		Pos = InPos;
-	}
-
-	INT TotalSize(){
-		return Bytes.Num();
-	}
-
-private:
-	TArray<BYTE>& Bytes;
-	INT Pos;
-};
-
-/*
- * Buffer archiver.
- */
-class FBufferArchive : public FBufferWriter, public TArray<BYTE>{
-public:
-	FBufferArchive() : FBufferWriter((TArray<BYTE>&)*this){}
-};
-
-/*
- * Buffer reader.
- */
-class CORE_API FBufferReader : public FArchive{
-public:
-	FBufferReader(const TArray<BYTE>& InBytes) : Bytes(InBytes),
-												 Pos(0){
-		ArIsLoading = ArIsTrans = 1;
-	}
-
-	void Serialize(void* Data, INT Num){
-		check(Pos >= 0);
-		check(Pos+Num<=Bytes.Num());
-		if(Num == 1)
-			((BYTE*)Data)[0] = Bytes[Pos];
-		else
-			appMemcpy(Data, &Bytes[Pos], Num);
-		Pos += Num;
-	}
-
-	INT Tell(){
-		return Pos;
-	}
-
-	INT TotalSize(){
-		return Bytes.Num();
-	}
-
-	void Seek(INT InPos){
-		check(InPos >= 0);
-		check(InPos<=Bytes.Num());
-		Pos = InPos;
-	}
-
-	UBOOL AtEnd(){
-		return Pos>=Bytes.Num();
-	}
-
-private:
-	const TArray<BYTE>& Bytes;
-	INT Pos;
 };
 
 /*----------------------------------------------------------------------------
@@ -1634,36 +1424,6 @@ void Sort(T* First, INT Num){
 	}
 	unguard;
 }
-
-/*----------------------------------------------------------------------------
-	TDoubleLinkedList.
-----------------------------------------------------------------------------*/
-
-//
-// Simple double-linked list template.
-//
-template<typename T>
-class TDoubleLinkedList : public T{
-public:
-	TDoubleLinkedList*  Next;
-	TDoubleLinkedList** PrevLink;
-
-	void Unlink(){
-		if( ext)
-			Next->PrevLink = PrevLink;
-
-		*PrevLink = Next;
-	}
-
-	void Link(TDoubleLinkedList*& Before){
-		if(Before)
-			Before->PrevLink = &Next;
-
-		Next     = Before;
-		PrevLink = &Before;
-		Before   = this;
-	}
-};
 
 /*----------------------------------------------------------------------------
 	TList.

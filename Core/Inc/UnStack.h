@@ -60,11 +60,6 @@ enum EFunctionFlags{
 	FUNC_Private        = 0x00040000, // Function is accessible only in the class it is defined in (cannot be overriden, but function name may be reused in subclasses.  IOW: if overridden, parameters don't need to match, and Super.Func() cannot be accessed since it's private.)
 	FUNC_Protected      = 0x00080000, // Function is accessible only in the class it is defined in and subclasses (if overridden, parameters much remain unchanged).
 	FUNC_Delegate       = 0x00100000, // Function is actually a delegate.
-
-	// Combinations of flags.
-	FUNC_FuncInherit        = FUNC_Exec | FUNC_Event,
-	FUNC_FuncOverrideMatch	= FUNC_Exec | FUNC_Final | FUNC_Latent | FUNC_PreOperator | FUNC_Iterator | FUNC_Static | FUNC_Public | FUNC_Protected,
-	FUNC_NetFuncFlags       = FUNC_Net | FUNC_NetReliable,
 };
 
 enum ERuntimeUCFlags{

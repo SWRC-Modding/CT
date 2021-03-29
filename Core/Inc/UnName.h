@@ -13,9 +13,6 @@
 // Maximum size of name
 enum{ NAME_SIZE = 64 };
 
-// Name index
-typedef INT NAME_INDEX;
-
 /*
  * Enumeration for finding name
  */
@@ -34,7 +31,7 @@ enum EFindName{
  */
 struct FNameEntry{
 	// Variables.
-	NAME_INDEX  Index;    // Index of name in hash.
+	INT         Index;    // Index of name in hash.
 	DWORD       Flags;    // RF_TagImp, RF_TagExp, RF_Native.
 	FNameEntry* HashNext; // Pointer to the next entry in this hash bin's linked list.
 
@@ -46,16 +43,9 @@ struct FNameEntry{
 	CORE_API friend FNameEntry* AllocateNameEntry(const TCHAR* Name, DWORD Index, DWORD Flags, FNameEntry* HashNext);
 };
 
-template<>
-struct TTypeInfo<FNameEntry*> : public TTypeInfoBase<FNameEntry*>{
-	static UBOOL NeedsDestructor(){ return 0; }
-};
-
 /*----------------------------------------------------------------------------
 	FName.
 ----------------------------------------------------------------------------*/
-
-#define checkName checkSlow
 
 /*
  * Public name, available to the world.
@@ -68,7 +58,7 @@ class FName{
 public:
 	// Accessors
 	const TCHAR* operator*() const{ return Entry ? Entry->Name : Names[NAME_None]->Name; }
-	NAME_INDEX GetIndex() const{ return Entry ? Entry->Index : 0; }
+	INT GetIndex() const{ return Entry ? Entry->Index : 0; }
 	DWORD GetFlags() const{ return Entry ? Entry->Flags : 0; }
 	void SetFlags(DWORD Set) const{ if(Entry)Entry->Flags |= Set; }
 	void ClearFlags(DWORD Clear) const{ if(Entry)Entry->Flags &= ~Clear; }

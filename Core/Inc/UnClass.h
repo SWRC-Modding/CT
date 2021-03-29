@@ -7,13 +7,6 @@
 =============================================================================*/
 
 /*-----------------------------------------------------------------------------
-	Constants
------------------------------------------------------------------------------*/
-
-//Boundary to align class properties on.
-enum { PROPERTY_ALIGNMENT = 4 };
-
-/*-----------------------------------------------------------------------------
 	FRepRecord
 -----------------------------------------------------------------------------*/
 
@@ -47,39 +40,6 @@ public:
 	FDependency(UClass* InClass, UBOOL InDeep);
 	UBOOL IsUpToDate();
 	CORE_API friend FArchive& operator<<(FArchive& Ar, FDependency& Dep);
-};
-
-/*-----------------------------------------------------------------------------
-	FRepLink
------------------------------------------------------------------------------*/
-
-/*
- * A tagged linked list of replicatable variables.
- */
-class FRepLink{
-public:
-	UProperty* Property; // Replicated property.
-	FRepLink*  Next;     // Next replicated link per class.
-
-	FRepLink(UProperty* InProperty, FRepLink* InNext) : Property(InProperty),
-														Next(InNext){}
-};
-
-/*-----------------------------------------------------------------------------
-	FLabelEntry
------------------------------------------------------------------------------*/
-
-/*
- * Entry in a state's label table.
- */
-struct CORE_API FLabelEntry{
-	// Variables.
-	FName Name;
-	INT   iCode;
-
-	// Functions.
-	FLabelEntry(FName InName, INT iInCode);
-	CORE_API friend FArchive& operator<<(FArchive& Ar, FLabelEntry &Label);
 };
 
 /*-----------------------------------------------------------------------------
@@ -214,7 +174,6 @@ enum EStructFlags{
 	STRUCT_Native  = 0x00000001,
 	STRUCT_Export  = 0x00000002,
 	STRUCT_Long    = 0x00000004, // will get shown as "..." in editactor until expanded.
-	STRUCT_Inherit = STRUCT_Long,
 };
 
 /*

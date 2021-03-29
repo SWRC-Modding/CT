@@ -193,54 +193,22 @@ public:
 	TCHAR* String() const;
 };
 
-inline INT CompareGuids(FGuid* A, FGuid* B){
-	INT Diff;
-
-	Diff = A->A - B->A;
-
-	if(Diff)
-		return Diff;
-
-	Diff = A->B - B->B;
-
-	if(Diff)
-		return Diff;
-
-	Diff = A->C - B->C;
-
-	if(Diff)
-		return Diff;
-
-	Diff = A->D - B->D;
-
-	if(Diff)
-		return Diff;
-
-	return 0;
-}
-
 /*
  * Information about a driver class.
  */
-class CORE_API FRegistryObjectInfo{
+class FRegistryObjectInfo{
 public:
 	FString Object;
 	FString Class;
 	FString MetaClass;
 	FString Description;
 	FString Autodetect;
-
-	FRegistryObjectInfo() : Object(),
-	                        Class(),
-	                        MetaClass(),
-	                        Description(),
-	                        Autodetect(){}
 };
 
 /*
  * Information about a preferences menu item.
  */
-class CORE_API FPreferencesInfo{
+class FPreferencesInfo{
 public:
 	FString Caption;
 	FString ParentCaption;
@@ -350,7 +318,7 @@ public: \
 /*-----------------------------------------------------------------------------
 	FScriptDelegate.
 -----------------------------------------------------------------------------*/
-struct CORE_API FScriptDelegate{
+struct FScriptDelegate{
 	UObject* Object;
 	FName FunctionName;
 
@@ -395,13 +363,6 @@ class CORE_API UObject{
 
 	// Friends.
 	friend class FObjectIterator;
-	friend class ULinkerLoad;
-	friend class ULinkerSave;
-	friend class UPackageMap;
-	friend class FArchiveTagUsed;
-	friend struct FObjectImport;
-	friend struct FObjectExport;
-
 private:
 	// Internal per-object variables.
 	INT          Index;        // Index of object into table.

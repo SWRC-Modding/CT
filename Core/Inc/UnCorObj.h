@@ -77,8 +77,9 @@ class CORE_API UCommandlet : public UObject{
 
 	INT Main(const FString& InParms);
 };
+
 /*
- * Calling UCommandlet::Main gives a 'Function Main not found' error for some commandlets which makes no sense at all
+ * Calling UCommandlet::Main gives a 'Function Main not found' error for some commandlets which makes no sense at all.
  * This function provides a workaround by checking whether main exists without throwing an error.
  */
 inline INT CommandletMain(UCommandlet* Commandlet, const FString& InParms){
@@ -92,20 +93,6 @@ inline INT CommandletMain(UCommandlet* Commandlet, const FString& InParms){
 
 	return Parms.ReturnValue;
 }
-
-/*-----------------------------------------------------------------------------
-	ULanguage.
------------------------------------------------------------------------------*/
-
-/*
- * A language (special case placeholder class).
- */
-class CORE_API ULanguage : public UObject{
-	DECLARE_ABSTRACT_CLASS(ULanguage,UObject,CLASS_Transient,Core)
-	NO_DEFAULT_CONSTRUCTOR(ULanguage)
-
-	ULanguage* SuperLanguage;
-};
 
 /*-----------------------------------------------------------------------------
 	UTextBuffer.

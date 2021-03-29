@@ -103,16 +103,6 @@ struct FNativeInitializer{
 	FFrame implementation.
 -----------------------------------------------------------------------------*/
 
-inline FFrame::FFrame(UObject* InObject) : Node(InObject ? InObject->GetClass() : NULL),
-										   Object(InObject),
-										   Code(NULL),
-										   Locals(NULL){}
-
-inline FFrame::FFrame(UObject* InObject, UStruct* InNode, INT CodeOffset, void* InLocals) : Node(InNode),
-																							Object(InObject),
-																							Code(&InNode->Script[CodeOffset]),
-																							Locals((BYTE*)InLocals){}
-
 FORCEINLINE void FFrame::Step(UObject* Context, RESULT_DECL){
 	INT B = *Code++;
 
@@ -160,19 +150,6 @@ FORCEINLINE FName FFrame::ReadName(){
 }
 
 CORE_API void GInitRunaway();
-
-/*-----------------------------------------------------------------------------
-	FStateFrame implementation.
------------------------------------------------------------------------------*/
-
-inline FStateFrame::FStateFrame(UObject* InObject) : FFrame(InObject),
-													 CurrentFrame(NULL),
-													 StateNode(InObject->GetClass()),
-													 ProbeMask(~(QWORD)0){}
-
-FORCEINLINE const TCHAR* FStateFrame::Describe(){
-	return Node ? Node->GetFullName() : "None";
-}
 
 /*-----------------------------------------------------------------------------
 	The End.

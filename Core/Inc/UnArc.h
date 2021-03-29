@@ -18,7 +18,7 @@
  */
 class CORE_API FArchive{
 	// Friend archivers.
-	friend FArchive& operator<<(FArchive& Ar, ANSICHAR& C);
+	friend FArchive& operator<<(FArchive& Ar, TCHAR& C);
 	friend FArchive& operator<<(FArchive& Ar, BYTE& B);
 	friend FArchive& operator<<(FArchive& Ar, SBYTE& B);
 	friend FArchive& operator<<(FArchive& Ar, _WORD& W);
@@ -114,7 +114,7 @@ protected:
 	bool ArContainsCode;
 };
 
-inline FArchive& operator<<(FArchive& Ar, ANSICHAR& C){
+inline FArchive& operator<<(FArchive& Ar, TCHAR& C){
 	Ar.Serialize(&C, 1);
 
 	return Ar;

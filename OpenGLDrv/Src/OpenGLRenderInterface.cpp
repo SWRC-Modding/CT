@@ -1309,6 +1309,8 @@ bool FOpenGLRenderInterface::SetShaderMaterial(UShader* Shader, FString* ErrorSt
 			AlphaArg = CA_Temp1;
 		}else if(Shader->Opacity == Shader->SelfIllumination){
 			AlphaArg = CA_Temp2;
+		}else if(Shader->Opacity->IsA<UVertexColor>()){
+			AlphaArg = CA_Diffuse;
 		}else{
 			CurrentState->StageColorOps[StagesUsed - 1] |= COPM_SaveTemp1;
 

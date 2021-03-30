@@ -398,8 +398,8 @@ FMatrix FOpenGLRenderInterface::GetTransform(ETransformType Type) const{
 
 void FOpenGLRenderInterface::InitDefaultMaterialStageState(INT StageIndex){
 	// Init default material state
-	CurrentState->StageTexWrapModes[StageIndex][0] = -1;
-	CurrentState->StageTexWrapModes[StageIndex][1] = -1;
+	CurrentState->StageTexWrapModes[StageIndex][0] = TC_Clamp;
+	CurrentState->StageTexWrapModes[StageIndex][1] = TC_Clamp;
 	CurrentState->StageTexCoordSources[StageIndex] = 0;
 	CurrentState->StageTexMatrices[StageIndex] = FMatrix::Identity;
 	CurrentState->StageColorArgs[StageIndex][0] = CA_Diffuse;
@@ -444,7 +444,7 @@ void FOpenGLRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorStri
 		}
 
 		SetTransform(TT_CameraToScreen,
-		             FTranslationMatrix(FVector(-SizeX / 2.0f + 0.5f, -SizeY / 2.0f, 0.0f)) * FScaleMatrix(FVector(2.0f / SizeX, -2.0f / SizeY, 1.0f)));
+		             FTranslationMatrix(FVector(-SizeX / 2.0f, -SizeY / 2.0f, 0.0f)) * FScaleMatrix(FVector(2.0f / SizeX, -2.0f / SizeY, 1.0f)));
 	}
 
 	// Check for circular references

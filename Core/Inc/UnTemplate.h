@@ -102,8 +102,11 @@ DWORD GetTypeHash(const T* P){ return (DWORD)P; }
 ----------------------------------------------------------------------------*/
 
 // Number of elements in an array.
+template <typename T, INT N>
+char(&ArrayCountHelper(T (&array)[N]))[N];
+
 #define ARRAY_COUNT(array) \
-	(sizeof(array) / sizeof((array)[0]))
+	(sizeof(ArrayCountHelper(array)))
 
 // Offset of a struct member.
 #define STRUCT_OFFSET(struc, member) \

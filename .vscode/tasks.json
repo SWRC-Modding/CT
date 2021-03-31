@@ -7,7 +7,7 @@
             "label": "build",
             "type": "shell",
             "command": "${workspaceFolder}/build.bat",
-            //"args": ["debug"], // Uncomment for debug build
+            "args": ["debug"], // Uncomment for debug build
             "problemMatcher": "$msCompile",
             "group": {
                 "kind": "build",

@@ -269,9 +269,7 @@ void FOpenGLTexture::Cache(FBaseTexture* BaseTexture, bool RenderTargetMatchBack
 		void* Data = ConvertTextureData(Texture, DestFormat, Width, Height, 0);
 
 		UploadTextureData(GL_TEXTURE_2D, DestFormat, Data, Width, Height, Texture->GetNumMips());
-
 		glGenerateTextureMipmap(TextureHandle);
-
 		Texture->UnloadRawTextureData(0);
 	}else if(RenderTarget){
 		if(Width == 0 || Height == 0)

@@ -565,11 +565,6 @@ void UOpenGLRenderDevice::Exit(UViewport* Viewport){
 }
 
 void UOpenGLRenderDevice::Flush(UViewport* Viewport){
-	RenderInterface.CurrentState->RenderTarget = NULL;
-	RenderInterface.CurrentState->Shader = NULL;
-	RenderInterface.CurrentState->IndexBuffer = NULL;
-	RenderInterface.CurrentState->NumVertexStreams = 0;
-
 	if(Viewport && Viewport->Actor)
 		Viewport->Actor->FrameFX->FreeRenderTargets();
 
@@ -1187,7 +1182,7 @@ FString UOpenGLRenderDevice::FixedFunctionFragmentShaderText(
 			"\t\t}\n"
 		"\t}\n"
 		"\n"
-		"\treturn LightColor * LightFactor * Specular;\n"
+		"\treturn LightColor * LightFactor;\n"
 	"}\n"
 	"\n"
 	"// Main\n"

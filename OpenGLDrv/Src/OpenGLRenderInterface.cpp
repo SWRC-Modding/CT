@@ -42,22 +42,29 @@ void FOpenGLRenderInterface::Init(){
 	for(int i = 0; i < MAX_TEXTURES; ++i){
 		glSamplerParameteri(Samplers[i], GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 		glSamplerParameteri(Samplers[i], GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glSamplerParameteri(Samplers[i], GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glSamplerParameteri(Samplers[i], GL_TEXTURE_WRAP_T, GL_REPEAT);
+		glSamplerParameteri(Samplers[i], GL_TEXTURE_WRAP_R, GL_REPEAT);
+		CurrentTexClampModeUV[i][0] = TC_Wrap;
+		CurrentTexClampModeUV[i][1] = TC_Wrap;
+		DesiredTexClampModeUV[i][0] = TC_Wrap;
+		DesiredTexClampModeUV[i][1] = TC_Wrap;
 	}
 }
 
 void FOpenGLRenderInterface::Exit(){
+	Flush();
 	glDeleteBuffers(1, &GlobalUBO);
 	GlobalUBO = GL_NONE;
-
 	glDeleteSamplers(MAX_TEXTURES, Samplers);
 	appMemzero(Samplers, sizeof(Samplers));
+}
 
+void FOpenGLRenderInterface::Flush(){
+	CurrentVAO = GL_NONE;
+	IndexBufferBaseIndex = 0;
+	CurrentIndexBuffer = NULL;
 	CurrentState->RenderTarget = NULL;
-	CurrentState->Shader = NULL;
-	CurrentState->IndexBuffer = NULL;
-	CurrentState->IndexBufferBaseIndex = 0;
-	CurrentState->VAO = GL_NONE;
-	CurrentState->NumVertexStreams = 0;
 }
 
 void FOpenGLRenderInterface::Locked(UViewport* Viewport){
@@ -65,9 +72,6 @@ void FOpenGLRenderInterface::Locked(UViewport* Viewport){
 	checkSlow(!LockedViewport);
 
 	LockedViewport = Viewport;
-
-	if(!CurrentState->Shader)
-		SetShader(&RenDev->FixedFunctionShader);
 
 	if(GLEW_EXT_texture_filter_anisotropic && TextureAnisotropy != RenDev->TextureAnisotropy){
 		TextureAnisotropy = RenDev->TextureAnisotropy;
@@ -130,25 +134,6 @@ void FOpenGLRenderInterface::PopState(INT Flags){
 	   CurrentState->ViewportWidth != PoppedState->ViewportWidth ||
 	   CurrentState->ViewportHeight != PoppedState->ViewportHeight){
 		SetViewport(CurrentState->ViewportX, CurrentState->ViewportY, CurrentState->ViewportWidth, CurrentState->ViewportHeight);
-	}
-
-	if(CurrentState->Shader != PoppedState->Shader)
-		CurrentState->Shader->Bind();
-
-	if(CurrentState->VAO != PoppedState->VAO)
-		glBindVertexArray(CurrentState->VAO);
-
-	for(INT i = 0; i < PoppedState->NumVertexStreams; ++i)
-		glBindVertexBuffer(i, GL_NONE, 0, 0);
-
-	for(INT i = 0; i < CurrentState->NumVertexStreams; ++i)
-		CurrentState->VertexStreams[i]->Bind(i);
-
-	if(CurrentState->IndexBuffer != PoppedState->IndexBuffer){
-		if(CurrentState->IndexBuffer)
-			CurrentState->IndexBuffer->Bind();
-		else
-			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, GL_NONE);
 	}
 
 	bool StencilTest = CurrentState->bStencilTest;
@@ -398,8 +383,6 @@ FMatrix FOpenGLRenderInterface::GetTransform(ETransformType Type) const{
 
 void FOpenGLRenderInterface::InitDefaultMaterialStageState(INT StageIndex){
 	// Init default material state
-	CurrentState->StageTexWrapModes[StageIndex][0] = TC_Clamp;
-	CurrentState->StageTexWrapModes[StageIndex][1] = TC_Clamp;
 	CurrentState->StageTexCoordSources[StageIndex] = 0;
 	CurrentState->StageTexMatrices[StageIndex] = FMatrix::Identity;
 	CurrentState->StageColorArgs[StageIndex][0] = CA_Diffuse;
@@ -410,7 +393,7 @@ void FOpenGLRenderInterface::InitDefaultMaterialStageState(INT StageIndex){
 	CurrentState->StageAlphaOps[StageIndex] = AOP_Arg1;
 }
 
-static GLint GetTextureWrapMode(INT Mode){
+static GLint GetTextureWrapMode(BYTE Mode){
 	if(Mode == TC_Clamp)
 		return GL_CLAMP_TO_EDGE;
 
@@ -497,7 +480,7 @@ void FOpenGLRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorStri
 	bool Result = false;
 	bool UseFixedFunction = true;
 
-	if(CheckMaterial<UShader>(&Material, 0, 0)){
+	if(CheckMaterial<UShader>(&Material, 0)){
 		Result = SetShaderMaterial(static_cast<UShader*>(Material), ErrorString, ErrorMaterial);
 	}else if(CheckMaterial<UCombiner>(&Material, -1)){
 		Result = SetSimpleMaterial(Material, ErrorString, ErrorMaterial);
@@ -546,12 +529,6 @@ void FOpenGLRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorStri
 		glUniform4fv(SU_ConstantColor, 1, (GLfloat*)&CurrentState->ConstantColor);
 		glUniform1i(SU_LightingEnabled, CurrentState->UseDynamicLighting && !CurrentState->Unlit);
 		glUniform1f(SU_LightFactor, CurrentState->LightingModulate2X ? 2.0f : 1.0f);
-	}
-
-	for(INT i = 0; i < CurrentState->NumTextures; ++i){
-		glSamplerParameteri(Samplers[i], GL_TEXTURE_WRAP_S, GetTextureWrapMode(CurrentState->StageTexWrapModes[i][0]));
-		glSamplerParameteri(Samplers[i], GL_TEXTURE_WRAP_T, GetTextureWrapMode(CurrentState->StageTexWrapModes[i][1]));
-		glSamplerParameteri(Samplers[i], GL_TEXTURE_WRAP_R, GetTextureWrapMode(CurrentState->StageTexWrapModes[i][1]));
 	}
 
 	if(ZTest != CurrentState->bZTest)
@@ -859,36 +836,55 @@ void FOpenGLRenderInterface::SetTexture(FBaseTexture* Texture, INT TextureUnit){
 	if(GLTexture->Revision != Texture->GetRevision())
 		GLTexture->Cache(Texture);
 
+	BYTE CurrentUClamp = CurrentTexClampModeUV[TextureUnit][0];
+	BYTE CurrentVClamp = CurrentTexClampModeUV[TextureUnit][1];
+	BYTE DesiredUClamp = DesiredTexClampModeUV[TextureUnit][0];
+	BYTE DesiredVClamp = DesiredTexClampModeUV[TextureUnit][1];
+
 	if(GLTexture->IsCubemap){
 		GLTexture->BindTexture(MAX_TEXTURES + TextureUnit);
 		CurrentState->Uniforms.TextureInfo[TextureUnit].IsCubemap = 1;
-		CurrentState->StageTexWrapModes[TextureUnit][0] = TC_Clamp;
-		CurrentState->StageTexWrapModes[TextureUnit][1] = TC_Clamp;
+		DesiredUClamp = TC_Clamp;
+		DesiredVClamp = TC_Clamp;
 	}else{
 		GLTexture->BindTexture(TextureUnit);
 		CurrentState->Uniforms.TextureInfo[TextureUnit].IsCubemap = 0;
 
-		if(GLTexture->FBO){ // Render targets should use TC_Clamp
-			CurrentState->StageTexWrapModes[TextureUnit][0] = TC_Clamp;
-			CurrentState->StageTexWrapModes[TextureUnit][1] = TC_Clamp;
+		if(GLTexture->FBO == GL_NONE){
+			if(CurrentUClamp == DesiredUClamp)
+				DesiredUClamp = Texture->GetUClamp();
+
+			if(CurrentVClamp == DesiredVClamp)
+				DesiredVClamp = Texture->GetVClamp();
 		}else{
-			CurrentState->StageTexWrapModes[TextureUnit][0] = Texture->GetUClamp();
-			CurrentState->StageTexWrapModes[TextureUnit][1] = Texture->GetVClamp();
+			 // Render targets should use TC_Clamp, unless specified otherwise by a modifier
+			if(CurrentUClamp == DesiredUClamp)
+				DesiredUClamp = TC_Clamp;
+
+			if(CurrentVClamp == DesiredVClamp)
+				DesiredVClamp = TC_Clamp;
 		}
+	}
+
+	if(CurrentUClamp != DesiredUClamp){
+		glSamplerParameteri(Samplers[TextureUnit], GL_TEXTURE_WRAP_S, GetTextureWrapMode(DesiredUClamp));
+		CurrentTexClampModeUV[TextureUnit][0] = DesiredUClamp;
+		DesiredTexClampModeUV[TextureUnit][0] = DesiredUClamp;
+	}
+
+	if(CurrentVClamp != DesiredVClamp){
+		glSamplerParameteri(Samplers[TextureUnit], GL_TEXTURE_WRAP_T, GetTextureWrapMode(DesiredVClamp));
+		CurrentTexClampModeUV[TextureUnit][1] = DesiredVClamp;
+		DesiredTexClampModeUV[TextureUnit][1] = DesiredVClamp;
 	}
 
 	CurrentState->Uniforms.TextureInfo[TextureUnit].IsBumpmap = IsBumpmap(Texture->GetFormat());
 }
 
 void FOpenGLRenderInterface::SetBitmapTexture(UBitmapMaterial* Bitmap, INT TextureUnit){
-	if(!Bitmap)
-		return;
-
+	checkSlow(Bitmap);
 	FBaseTexture* Texture = Bitmap->Get(LockedViewport->CurrentTime, LockedViewport)->GetRenderInterface();
-
-	if(!Texture)
-		return;
-
+	checkSlow(Texture);
 	SetTexture(Texture, TextureUnit);
 }
 
@@ -1239,9 +1235,7 @@ bool FOpenGLRenderInterface::HandleCombinedMaterial(UMaterial* Material, INT& St
 				++StagesUsed;
 			}
 		}else{
-			// If !UCombiner::LightBothMaterials we only light the material if it is not statically lit.
-			// That doesn't necessarily make sense but mirrors the original behavior.
-			CurrentState->Unlit = CurrentState->UseStaticLighting;
+			CurrentState->StageAlphaOps[StageIndex] |= AOPM_LightInfluence;
 		}
 
 		return true;
@@ -1402,8 +1396,8 @@ bool FOpenGLRenderInterface::SetTerrainMaterial(UTerrainMaterial* Terrain, FStri
 
 		UBitmapMaterial* BitmapMaterial = static_cast<UBitmapMaterial*>(Material);
 
-		CurrentState->StageTexWrapModes[TexturesUsed][0] = TC_Wrap;
-		CurrentState->StageTexWrapModes[TexturesUsed][1] = TC_Wrap;
+		DesiredTexClampModeUV[TexturesUsed][0] = TC_Wrap;
+		DesiredTexClampModeUV[TexturesUsed][1] = TC_Wrap;
 
 		SetBitmapTexture(BitmapMaterial, TexturesUsed);
 
@@ -1546,8 +1540,6 @@ void FOpenGLRenderInterface::UseLightmap(INT StageIndex, INT TextureUnit){
 
 	SetTexture(CurrentState->Lightmap, TextureUnit);
 	CurrentState->StageTexCoordSources[StageIndex] = TCS_Stream1;
-	CurrentState->StageTexWrapModes[StageIndex][0] = TC_Wrap;
-	CurrentState->StageTexWrapModes[StageIndex][1] = TC_Wrap;
 	CurrentState->StageColorArgs[StageIndex][0] = CA_Previous;
 	CurrentState->StageColorArgs[StageIndex][1] = CA_Texture0 + TextureUnit;
 	CurrentState->StageColorOps[StageIndex] = (!CurrentState->UseStaticLighting && CurrentState->LightingModulate2X) ? COP_Modulate2X : COP_Modulate;
@@ -1637,6 +1629,8 @@ void FOpenGLRenderInterface::SetZBias(INT ZBias){
 INT FOpenGLRenderInterface::SetVertexStreams(EVertexShader Shader, FVertexStream** Streams, INT NumStreams, bool IsDynamic){
 	checkSlow(!IsDynamic || NumStreams == 1);
 
+	FOpenGLVertexStream* VertexStreams[MAX_VERTEX_STREAMS];
+
 	// NOTE: Stream declarations must be completely zeroed to get consistent hash values when looking up the VAO later
 	appMemzero(VertexStreamDeclarations, sizeof(VertexStreamDeclarations));
 
@@ -1660,27 +1654,25 @@ INT FOpenGLRenderInterface::SetVertexStreams(EVertexShader Shader, FVertexStream
 			Size += Stream->BufferSize;
 		}
 
-		CurrentState->VertexStreams[i] = Stream;
+		VertexStreams[i] = Stream;
 		VertexStreamDeclarations[i].Init(Streams[i]);
 	}
 
-	CurrentState->NumVertexStreams = NumStreams;
-
 	// Look up VAO by format
-	GLuint VAO = RenDev->GetVAO(VertexStreamDeclarations, CurrentState->NumVertexStreams);
+	GLuint VAO = RenDev->GetVAO(VertexStreamDeclarations, NumStreams);
 
-	if(VAO != CurrentState->VAO){
+	if(VAO != CurrentVAO){
 		glBindVertexArray(VAO);
-		CurrentState->VAO = VAO;
+		CurrentVAO = VAO;
 
-		if(CurrentState->IndexBuffer)
-			CurrentState->IndexBuffer->Bind();
+		if(CurrentIndexBuffer)
+			CurrentIndexBuffer->Bind();
 
 		NeedUniformUpdate = true;
 	}
 
-	for(INT i = 0; i < CurrentState->NumVertexStreams; ++i)
-		CurrentState->VertexStreams[i]->Bind(i);
+	for(INT i = 0; i < NumStreams; ++i)
+		VertexStreams[i]->Bind(i);
 
 	return 0;
 }
@@ -1720,14 +1712,14 @@ INT FOpenGLRenderInterface::SetIndexBuffer(FIndexBuffer* IndexBuffer, INT BaseIn
 			Buffer->Cache(IndexBuffer);
 		}
 
-		CurrentState->IndexBufferBaseIndex = BaseIndex;
-		CurrentState->IndexBuffer = Buffer;
+		IndexBufferBaseIndex = BaseIndex;
+		CurrentIndexBuffer = Buffer;
 
 		Buffer->Bind();
 	}else{
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, GL_NONE);
-		CurrentState->IndexBuffer = NULL;
-		CurrentState->IndexBufferBaseIndex = 0;
+		CurrentIndexBuffer = NULL;
+		IndexBufferBaseIndex = 0;
 	}
 
 	return RequiresCaching ? IndexBuffer->GetSize() : 0;
@@ -1774,15 +1766,15 @@ void FOpenGLRenderInterface::DrawPrimitive(EPrimitiveType PrimitiveType, INT Fir
 		appErrorf("Unexpected EPrimitiveType (%i)", PrimitiveType);
 	};
 
-	if(CurrentState->IndexBuffer){
-		INT IndexSize = CurrentState->IndexBuffer->IndexSize;
+	if(CurrentIndexBuffer){
+		INT IndexSize = CurrentIndexBuffer->IndexSize;
 
 		glDrawRangeElements(Mode,
 		                    MinIndex,
 		                    MaxIndex,
 		                    Count,
 		                    IndexSize == sizeof(DWORD) ? GL_UNSIGNED_INT : GL_UNSIGNED_SHORT,
-		                    reinterpret_cast<void*>((FirstIndex + CurrentState->IndexBufferBaseIndex) * IndexSize));
+		                    reinterpret_cast<void*>((FirstIndex + IndexBufferBaseIndex) * IndexSize));
 	}else{
 		glDrawArrays(Mode, 0, Count);
 	}
@@ -1809,7 +1801,6 @@ void FOpenGLRenderInterface::SetShader(FShaderGLSL* NewShader){
 	if(Shader->Revision != NewShader->GetRevision())
 		Shader->Cache(NewShader);
 
-	CurrentState->Shader = Shader;
 	Shader->Bind();
 }
 

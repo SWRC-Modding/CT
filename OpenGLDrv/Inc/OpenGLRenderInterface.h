@@ -176,15 +176,6 @@ public:
 
 		INT                   ZBias;
 
-		FOpenGLShader*        Shader;
-
-		INT                   IndexBufferBaseIndex;
-		FOpenGLIndexBuffer*   IndexBuffer;
-
-		unsigned int          VAO;
-		INT                   NumVertexStreams;
-		FOpenGLVertexStream*  VertexStreams[MAX_VERTEX_STREAMS];
-
 		// Fixed function emulation
 
 		bool                  UsingConstantColor;
@@ -193,7 +184,6 @@ public:
 		INT                   NumStages;
 		INT                   NumTextures;
 		INT                   TexCoordCount;
-		INT                   StageTexWrapModes[MAX_TEXTURES][2];
 		INT                   StageTexCoordSources[MAX_SHADER_STAGES];
 		FMatrix               StageTexMatrices[MAX_SHADER_STAGES];
 		INT                   StageColorArgs[MAX_SHADER_STAGES][2]; // EColorArg for Arg1 and Arg2
@@ -229,8 +219,14 @@ public:
 	bool                      NeedUniformUpdate;
 	unsigned int              GlobalUBO;
 
+	unsigned int              CurrentVAO;
+	INT                       IndexBufferBaseIndex;
+	FOpenGLIndexBuffer*       CurrentIndexBuffer;
+
 	INT                       TextureAnisotropy;
 	unsigned int              Samplers[MAX_TEXTURES];
+	BYTE                      CurrentTexClampModeUV[MAX_TEXTURES][2];
+	BYTE                      DesiredTexClampModeUV[MAX_TEXTURES][2];
 
 	FStreamDeclaration        VertexStreamDeclarations[MAX_VERTEX_STREAMS];
 
@@ -238,6 +234,7 @@ public:
 
 	void Init();
 	void Exit();
+	void Flush();
 	void Locked(UViewport* Viewport);
 	void Unlocked();
 	void UpdateGlobalShaderUniforms();
@@ -356,12 +353,12 @@ private:
 					if(Matrix)
 						*StageTexMatrix *= *Matrix;
 
-					if(TextureIndex > 0){
+					if(TextureIndex >= 0){
 						if(TexModifier->UClampMode != TCO_UseTextureMode)
-							CurrentState->StageTexWrapModes[TextureIndex][0] = TexModifier->UClampMode - 1;
+							DesiredTexClampModeUV[TextureIndex][0] = TexModifier->UClampMode - 1;
 
 						if(TexModifier->VClampMode != TCO_UseTextureMode)
-							CurrentState->StageTexWrapModes[TextureIndex][1] = TexModifier->UClampMode - 1;
+							DesiredTexClampModeUV[TextureIndex][1] = TexModifier->UClampMode - 1;
 					}
 				}else if(Modifier->IsA<UFinalBlend>()){
 					UFinalBlend* FinalBlend = static_cast<UFinalBlend*>(Modifier);
@@ -386,7 +383,7 @@ private:
 					if(ColorModifier->RenderTwoSided)
 						CurrentState->CullMode = CM_None;
 
-					if(ColorModifier->AlphaBlend)
+					if(!CurrentState->ModifyFramebufferBlending && ColorModifier->AlphaBlend)
 						CurrentState->FramebufferBlending = FB_AlphaBlend;
 				}
 

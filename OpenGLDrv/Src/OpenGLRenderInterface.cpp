@@ -456,6 +456,7 @@ void FOpenGLRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorStri
 	for(INT i = 0; i < CurrentState->NumStages; ++i)
 		InitDefaultMaterialStageState(i);
 
+	NeedUniformUpdate = true;
 	CurrentState->UsingConstantColor = false;
 	CurrentState->ModifyColor = false;
 	CurrentState->ModifyFramebufferBlending = false;

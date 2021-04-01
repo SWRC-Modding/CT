@@ -203,7 +203,7 @@ public:
 	virtual int SetStateCaching(int){ return 0; }
 	virtual int RefreshStates(){}
 	virtual INT DoesSupportFSAA(INT Level){ return 0; }
-	virtual void TakeScreenshot(const char*, class UViewport*, int, int){}
+	virtual void TakeScreenshot(const TCHAR* Name, UViewport* Viewport, INT Width, INT Height);
 	virtual UBOOL SupportsTextureFormat(ETextureFormat) = 0;
 };
 

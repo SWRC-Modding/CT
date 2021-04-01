@@ -61,7 +61,7 @@ public:
 	virtual FRenderInterface* Lock(UViewport* Viewport, BYTE* HitData, INT* HitSize);
 	virtual void Unlock(FRenderInterface* RI);
 	virtual void Present(UViewport* Viewport);
-	virtual void ReadPixels(UViewport* Viewport, FColor* Pixels){}
+	virtual void ReadPixels(UViewport* Viewport, FColor* Pixels);
 	virtual void SetEmulationMode(EHardwareEmulationMode Mode){}
 	virtual FRenderCaps* GetRenderCaps();
 	virtual void RenderMovie(UViewport* Viewport){}
@@ -70,7 +70,7 @@ public:
 	virtual int SetStateCaching(int){ return 0; }
 	virtual int RefreshStates(){ return 0; }
 	virtual INT DoesSupportFSAA(INT Level){ return 0; }
-	virtual void TakeScreenshot(const char*, class UViewport*, int, int){}
+	virtual void TakeScreenshot(const char*, class UViewport*, int, int);
 	virtual UBOOL SupportsTextureFormat(ETextureFormat){ return 0; }
 
 	void* GetScratchBuffer(INT Size){

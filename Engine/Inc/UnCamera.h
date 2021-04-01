@@ -523,8 +523,8 @@ protected:
 inline FAuxRenderTarget::~FAuxRenderTarget(){
 	// Need to do this via UTexture::__Client since GEngine is not set to NULL and might be an invalid pointer
 	if(UTexture::__Client &&
-		UTexture::__Client->Engine &&
-		UTexture::__Client->Engine->GRenDev){
+	   UTexture::__Client->Engine &&
+	   UTexture::__Client->Engine->GRenDev){
 		UTexture::__Client->Engine->GRenDev->FlushResource(GetCacheId());
 	}
 }

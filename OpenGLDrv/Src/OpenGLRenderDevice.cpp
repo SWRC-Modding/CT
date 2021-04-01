@@ -698,12 +698,36 @@ void UOpenGLRenderDevice::Present(UViewport* Viewport){
 	check(glGetError() == GL_NO_ERROR);
 }
 
+void UOpenGLRenderDevice::ReadPixels(UViewport* Viewport, FColor* Pixels){
+	if(Viewport && Pixels){
+		glReadPixels(0, 0, Viewport->SizeX, Viewport->SizeY, GL_BGRA, GL_UNSIGNED_BYTE, Pixels);
+
+		INT   Width = Viewport->SizeX;
+		INT   Height = Viewport->SizeY;
+		DWORD RowSize = Width * sizeof(FColor);
+		void* Buffer = appMalloc(RowSize);
+
+		// The image is flipped so we have to reverse it
+		for(INT i = 0; i < Height / 2; ++i){
+			appMemcpy(Buffer, Pixels + i * Width, RowSize);
+			appMemcpy(Pixels + i * Width, (Pixels + (Height - 1) * Width) - i * Width, RowSize);
+			appMemcpy((Pixels + (Height - 1) * Width) - i * Width, Buffer, RowSize);
+		}
+
+		appFree(Buffer);
+	}
+}
+
 FRenderCaps* UOpenGLRenderDevice::GetRenderCaps(){
 	RenderCaps.MaxSimultaneousTerrainLayers = 1;
 	RenderCaps.PixelShaderVersion = 0;
 	RenderCaps.HardwareTL = 1;
 
 	return &RenderCaps;
+}
+
+void UOpenGLRenderDevice::TakeScreenshot(const TCHAR* Name, UViewport* Viewport, INT Width, INT Height){
+	URenderDevice::TakeScreenshot(Name, Viewport, Width, Height);
 }
 
 void UOpenGLRenderDevice::LoadShaders(){

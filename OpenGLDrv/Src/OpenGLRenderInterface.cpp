@@ -414,7 +414,11 @@ void FOpenGLRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorStri
 	 * The only straightforward way to detect whether we are currently drawing the FrameFX target is to check if the newly set material
 	 * is one of the FrameFX shaders.
 	 */
-	if(LockedViewport->Actor->FrameFX && (Material == LockedViewport->Actor->FrameFX->ShaderDraw || Material == LockedViewport->Actor->FrameFX->ShaderGlow || Material == LockedViewport->Actor->FrameFX->ShaderBlur)){
+	UFrameFX* FrameFX = LockedViewport->Actor->FrameFX;
+	if((FrameFX && (Material == FrameFX->ShaderDraw ||
+	                Material == FrameFX->ShaderGlow ||
+	                Material == FrameFX->ShaderBlur ||
+	                (FrameFX->VisionMode && Material == FrameFX->VisionMode->VisionShader)))){
 		FLOAT SizeX;
 		FLOAT SizeY;
 
@@ -427,7 +431,8 @@ void FOpenGLRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorStri
 		}
 
 		SetTransform(TT_CameraToScreen,
-		             FTranslationMatrix(FVector(-SizeX / 2.0f, -SizeY / 2.0f, 0.0f)) * FScaleMatrix(FVector(2.0f / SizeX, -2.0f / SizeY, 1.0f)));
+		             FTranslationMatrix(FVector(-SizeX / 2.0f, -SizeY / 2.0f, 0.0f)) *
+		             FScaleMatrix(FVector(2.0f / SizeX, -2.0f / SizeY, 1.0f)));
 	}
 
 	// Check for circular references

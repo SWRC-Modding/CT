@@ -113,7 +113,7 @@ FShaderGLSL* UOpenGLRenderDevice::GetShader(UHardwareShader* HardwareShader){
 		Shader = &GLShaderByHardwareShader[HardwareShader];
 		*Shader = FShaderGLSL(); // Explicitly create object because TMap does not call the constructor!
 
-		if(HardwareShader->GetFName() != NAME_InGameTempName){
+		if(!HardwareShader->IsIn(UObject::GetTransientPackage())){
 			FString ShaderName = HardwareShader->GetPathName();
 
 			Shader->SetName(ShaderName.Substitute(".", "\\").Substitute(".", "\\"));
@@ -201,9 +201,6 @@ unsigned int UOpenGLRenderDevice::GetVAO(const FStreamDeclaration* Declarations,
 				case CT_Color:
 					glVertexArrayAttribFormat(VAO, Function, GL_BGRA, GL_UNSIGNED_BYTE, GL_TRUE, Offset);
 					Offset += sizeof(FColor);
-					break;
-				default:
-					appErrorf("Unexpected EComponentType (%i)", Type);
 				}
 
 				glEnableVertexArrayAttrib(VAO, Function);
@@ -256,8 +253,12 @@ void GLAPIENTRY OpenGLMessageCallback(GLenum source,
                                       const void* userParam){
 	debugf("GL CALLBACK: type = 0x%x, severity = 0x%x, message = %s", type, severity, message);
 
-	if(type == GL_DEBUG_TYPE_ERROR && appIsDebuggerPresent())
-		appDebugBreak();
+	if(type == GL_DEBUG_TYPE_ERROR){
+		GLog->Flush();
+
+		if(appIsDebuggerPresent())
+			appDebugBreak();
+	}
 }
 
 typedef void(__fastcall*UCanvasUpdateFunc)(UCanvas*, DWORD);

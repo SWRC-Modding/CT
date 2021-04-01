@@ -410,29 +410,18 @@ void FOpenGLRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorStri
 
 	/*
 	 * HACK:
-	 * When the final FrameFX render target is drawn to the screen it appears slightly offset. This is fixed by setting a different transformation matrix.
-	 * The only straightforward way to detect whether we are currently drawing the FrameFX target is to check if the newly set material
-	 * is one of the FrameFX shaders.
+	 * FrameFX render targets are offset by -0.5 pixels which is needed for Direct3D but causes a blurry image with OpenGL.
+	 * This is fixed by checking whether the current material is one of the FrameFX shaders and removing the offset from the CameraToScreen matrix.
 	 */
 	UFrameFX* FrameFX = LockedViewport->Actor->FrameFX;
 	if((FrameFX && (Material == FrameFX->ShaderDraw ||
 	                Material == FrameFX->ShaderGlow ||
 	                Material == FrameFX->ShaderBlur ||
 	                (FrameFX->VisionMode && Material == FrameFX->VisionMode->VisionShader)))){
-		FLOAT SizeX;
-		FLOAT SizeY;
-
-		if(CurrentState->RenderTarget){
-			SizeX = CurrentState->RenderTarget->GetWidth();
- 			SizeY = CurrentState->RenderTarget->GetHeight();
-		}else{
-			SizeX = LockedViewport->SizeX;
- 			SizeY = LockedViewport->SizeY;
-		}
-
-		SetTransform(TT_CameraToScreen,
-		             FTranslationMatrix(FVector(-SizeX / 2.0f, -SizeY / 2.0f, 0.0f)) *
-		             FScaleMatrix(FVector(2.0f / SizeX, -2.0f / SizeY, 1.0f)));
+		// Remove offset by truncating float to int.
+		// This works because the x/y values will only ever be -1 or 1 (plus fractional offset) for fullscreen quads or 0 for FFrameGrid
+		CurrentState->Uniforms.CameraToScreen.M[3][0] = (INT)CurrentState->Uniforms.CameraToScreen.M[3][0];
+		CurrentState->Uniforms.CameraToScreen.M[3][1] = (INT)CurrentState->Uniforms.CameraToScreen.M[3][1];
 	}
 
 	// Check for circular references

@@ -148,8 +148,16 @@ struct FOpenGLGlobalUniforms{
 class FOpenGLRenderInterface : public FRenderInterface{
 public:
 	struct FOpenGLSavedState{
+		// Buffers
+
 		INT                   UniformRevision;
 		FOpenGLGlobalUniforms Uniforms;
+
+		unsigned int          VAO;
+		INT                   IndexBufferBaseIndex;
+		FOpenGLIndexBuffer*   IndexBuffer;
+
+		// RenderTarget
 
 		FRenderTarget*        RenderTarget;
 		bool                  RenderTargetMatchesBackbuffer;
@@ -158,6 +166,8 @@ public:
 		INT                   ViewportY;
 		INT                   ViewportWidth;
 		INT                   ViewportHeight;
+
+		// Render modes
 
 		ECullMode             CullMode;
 		EFillMode             FillMode;
@@ -176,36 +186,13 @@ public:
 
 		INT                   ZBias;
 
-		// Fixed function emulation
-
-		bool                  UsingConstantColor;
-		bool                  ModifyColor;
-		bool                  ModifyFramebufferBlending;
-		INT                   NumStages;
-		INT                   NumTextures;
-		INT                   TexCoordCount;
-		INT                   StageTexCoordSources[MAX_SHADER_STAGES];
-		FMatrix               StageTexMatrices[MAX_SHADER_STAGES];
-		INT                   StageColorArgs[MAX_SHADER_STAGES][2]; // EColorArg for Arg1 and Arg2
-		INT                   StageColorOps[MAX_SHADER_STAGES];     // EColorOp
-		INT                   StageAlphaArgs[MAX_SHADER_STAGES][2]; // EColorArg for Arg1 and Arg2
-		INT                   StageAlphaOps[MAX_SHADER_STAGES];     // EAlphaOp
-		FPlane                ConstantColor;
-
 		// Light
 
-		bool                  Unlit;
 		bool                  UseDynamicLighting;
 		bool                  UseStaticLighting;
 		bool                  LightingModulate2X;
 		FBaseTexture*         Lightmap;
 		FSphere               LitSphere;
-
-		// Blending
-
-		BYTE                  FramebufferBlending; // EFrameBufferBlending
-		unsigned int          SrcBlend; // Blending parameters used when Framebufferblending == FB_MAX
-		unsigned int          DstBlend;
 	};
 
 	UOpenGLRenderDevice*      RenDev;
@@ -219,22 +206,38 @@ public:
 	bool                      NeedUniformUpdate;
 	unsigned int              GlobalUBO;
 
-	unsigned int              CurrentVAO;
-	INT                       IndexBufferBaseIndex;
-	FOpenGLIndexBuffer*       CurrentIndexBuffer;
-
 	INT                       TextureAnisotropy;
 	unsigned int              Samplers[MAX_TEXTURES];
 	BYTE                      CurrentTexClampModeUV[MAX_TEXTURES][2];
 	BYTE                      DesiredTexClampModeUV[MAX_TEXTURES][2];
 
-	FStreamDeclaration        VertexStreamDeclarations[MAX_VERTEX_STREAMS];
+	// Fixed function emulation
+
+	bool                      Unlit;
+	bool                      UsingConstantColor;
+	bool                      ModifyColor;
+	bool                      ModifyFramebufferBlending;
+	INT                       NumStages;
+	INT                       NumTextures;
+	INT                       TexCoordCount;
+	INT                       StageTexCoordSources[MAX_SHADER_STAGES];
+	FMatrix                   StageTexMatrices[MAX_SHADER_STAGES];
+	INT                       StageColorArgs[MAX_SHADER_STAGES][2]; // EColorArg for Arg1 and Arg2
+	INT                       StageColorOps[MAX_SHADER_STAGES];     // EColorOp
+	INT                       StageAlphaArgs[MAX_SHADER_STAGES][2]; // EColorArg for Arg1 and Arg2
+	INT                       StageAlphaOps[MAX_SHADER_STAGES];     // EAlphaOp
+	FPlane                    ConstantColor;
+
+	// Blending
+
+	BYTE                      FramebufferBlending; // EFrameBufferBlending
+	unsigned int              SrcBlend; // Blending parameters used when Framebufferblending == FB_MAX
+	unsigned int              DstBlend;
 
 	FOpenGLRenderInterface(UOpenGLRenderDevice* InRenDev);
 
 	void Init();
 	void Exit();
-	void Flush();
 	void Locked(UViewport* Viewport);
 	void Unlocked();
 	void UpdateGlobalShaderUniforms();
@@ -318,8 +321,8 @@ private:
 
 			return true;
 		}else{ // Collect modifiers
-			INT*     StageTexCoordSrc = &CurrentState->StageTexCoordSources[StageIndex];
-			FMatrix* StageTexMatrix = &CurrentState->StageTexMatrices[StageIndex];
+			INT*     StageTexCoordSrc = &StageTexCoordSources[StageIndex];
+			FMatrix* StageTexMatrix = &StageTexMatrices[StageIndex];
 
 			Modifier = static_cast<UModifier*>(RootMaterial);
 
@@ -347,7 +350,7 @@ private:
 							}
 						}
 
-						CurrentState->TexCoordCount = TexModifier->TexCoordCount + 2;
+						TexCoordCount = TexModifier->TexCoordCount + 2;
 					}
 
 					if(Matrix)
@@ -363,8 +366,8 @@ private:
 				}else if(Modifier->IsA<UFinalBlend>()){
 					UFinalBlend* FinalBlend = static_cast<UFinalBlend*>(Modifier);
 
-					CurrentState->ModifyFramebufferBlending = true;
-					CurrentState->FramebufferBlending = FinalBlend->FrameBufferBlending;
+					ModifyFramebufferBlending = true;
+					FramebufferBlending = FinalBlend->FrameBufferBlending;
 					CurrentState->bZTest = FinalBlend->ZTest != 0;
 					CurrentState->bZWrite = FinalBlend->ZWrite != 0;
 
@@ -376,15 +379,15 @@ private:
 				}else if(Modifier->IsA<UColorModifier>()){
 					UColorModifier* ColorModifier = static_cast<UColorModifier*>(Modifier);
 
-					CurrentState->UsingConstantColor = true;
-					CurrentState->ModifyColor = true;
-					CurrentState->ConstantColor = ColorModifier->Color;
+					UsingConstantColor = true;
+					ModifyColor = true;
+					ConstantColor = ColorModifier->Color;
 
 					if(ColorModifier->RenderTwoSided)
 						CurrentState->CullMode = CM_None;
 
-					if(!CurrentState->ModifyFramebufferBlending && ColorModifier->AlphaBlend)
-						CurrentState->FramebufferBlending = FB_AlphaBlend;
+					if(!ModifyFramebufferBlending && ColorModifier->AlphaBlend)
+						FramebufferBlending = FB_AlphaBlend;
 				}
 
 				Modifier = static_cast<UModifier*>(Modifier->Material);

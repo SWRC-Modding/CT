@@ -22,10 +22,10 @@ void FOpenGLRenderInterface::Init(){
 	for(INT i = 0; i < MAX_SHADER_STAGES; ++i)
 		InitDefaultMaterialStageState(i);
 
-	CurrentState->UsingConstantColor = false;
-	CurrentState->NumStages = 0;
-	CurrentState->TexCoordCount = 2;
-	CurrentState->ConstantColor = FPlane(1.0f, 1.0f, 1.0f, 1.0f);
+	UsingConstantColor = false;
+	NumStages = 0;
+	TexCoordCount = 2;
+	ConstantColor = FPlane(1.0f, 1.0f, 1.0f, 1.0f);
 	CurrentState->Uniforms.AlphaRef = -1.0f;
 
 	// Create uniform buffer
@@ -53,18 +53,10 @@ void FOpenGLRenderInterface::Init(){
 }
 
 void FOpenGLRenderInterface::Exit(){
-	Flush();
 	glDeleteBuffers(1, &GlobalUBO);
 	GlobalUBO = GL_NONE;
 	glDeleteSamplers(MAX_TEXTURES, Samplers);
 	appMemzero(Samplers, sizeof(Samplers));
-}
-
-void FOpenGLRenderInterface::Flush(){
-	CurrentVAO = GL_NONE;
-	IndexBufferBaseIndex = 0;
-	CurrentIndexBuffer = NULL;
-	CurrentState->RenderTarget = NULL;
 }
 
 void FOpenGLRenderInterface::Locked(UViewport* Viewport){
@@ -128,6 +120,9 @@ void FOpenGLRenderInterface::PopState(INT Flags){
 
 	if(CurrentState->RenderTarget != PoppedState->RenderTarget)
 		SetRenderTarget(CurrentState->RenderTarget, CurrentState->RenderTargetMatchesBackbuffer);
+
+	if(CurrentState->VAO != PoppedState->VAO)
+		glBindVertexArray(CurrentState->VAO);
 
 	if(CurrentState->ViewportX != PoppedState->ViewportX ||
 	   CurrentState->ViewportY != PoppedState->ViewportY ||
@@ -383,14 +378,14 @@ FMatrix FOpenGLRenderInterface::GetTransform(ETransformType Type) const{
 
 void FOpenGLRenderInterface::InitDefaultMaterialStageState(INT StageIndex){
 	// Init default material state
-	CurrentState->StageTexCoordSources[StageIndex] = 0;
-	CurrentState->StageTexMatrices[StageIndex] = FMatrix::Identity;
-	CurrentState->StageColorArgs[StageIndex][0] = CA_Diffuse;
-	CurrentState->StageColorArgs[StageIndex][1] = CA_Diffuse;
-	CurrentState->StageColorOps[StageIndex] = COP_Arg1;
-	CurrentState->StageAlphaArgs[StageIndex][0] = CA_Diffuse;
-	CurrentState->StageAlphaArgs[StageIndex][1] = CA_Diffuse;
-	CurrentState->StageAlphaOps[StageIndex] = AOP_Arg1;
+	StageTexCoordSources[StageIndex] = 0;
+	StageTexMatrices[StageIndex] = FMatrix::Identity;
+	StageColorArgs[StageIndex][0] = CA_Diffuse;
+	StageColorArgs[StageIndex][1] = CA_Diffuse;
+	StageColorOps[StageIndex] = COP_Arg1;
+	StageAlphaArgs[StageIndex][0] = CA_Diffuse;
+	StageAlphaArgs[StageIndex][1] = CA_Diffuse;
+	StageAlphaOps[StageIndex] = AOP_Arg1;
 }
 
 static GLint GetTextureWrapMode(BYTE Mode){
@@ -447,21 +442,21 @@ void FOpenGLRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorStri
 
 	// Restore default material state
 
-	for(INT i = 0; i < CurrentState->NumStages; ++i)
+	for(INT i = 0; i < NumStages; ++i)
 		InitDefaultMaterialStageState(i);
 
 	NeedUniformUpdate = true;
-	CurrentState->UsingConstantColor = false;
-	CurrentState->ModifyColor = false;
-	CurrentState->ModifyFramebufferBlending = false;
-	CurrentState->NumStages = 0;
-	CurrentState->NumTextures = 0;
-	CurrentState->TexCoordCount = 2;
-	CurrentState->ConstantColor = FPlane(1.0f, 1.0f, 1.0f, 1.0f);
-	CurrentState->Unlit = false;
-	CurrentState->FramebufferBlending = FB_Overwrite;
-	CurrentState->SrcBlend = GL_ONE;
-	CurrentState->DstBlend = GL_ZERO;
+	UsingConstantColor = false;
+	ModifyColor = false;
+	ModifyFramebufferBlending = false;
+	NumStages = 0;
+	NumTextures = 0;
+	TexCoordCount = 2;
+	ConstantColor = FPlane(1.0f, 1.0f, 1.0f, 1.0f);
+	Unlit = false;
+	FramebufferBlending = FB_Overwrite;
+	SrcBlend = GL_ONE;
+	DstBlend = GL_ZERO;
 	CurrentState->Uniforms.AlphaRef = -1.0f;
 
 	// We check later if these properties have changed after setting the material and update the OpenGL state
@@ -490,12 +485,12 @@ void FOpenGLRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorStri
 	}else if(CheckMaterial<UProjectorMultiMaterial>(&Material, 0)){
 		UProjectorMultiMaterial* ProjectorMultiMaterial = static_cast<UProjectorMultiMaterial*>(Material);
 		CurrentState->Uniforms.AlphaRef = 0.5f;
-		CurrentState->FramebufferBlending = FB_Modulate;
+		FramebufferBlending = FB_Modulate;
 		Result = SetSimpleMaterial(ProjectorMultiMaterial->BaseMaterial, ErrorString, ErrorMaterial);
 		CurrentState->bZWrite = false;
 	}else if(CheckMaterial<UProjectorMaterial>(&Material, 0)){
 		CurrentState->Uniforms.AlphaRef = 0.5f;
-		CurrentState->FramebufferBlending = FB_Modulate;
+		FramebufferBlending = FB_Modulate;
 		Result = SetSimpleMaterial(static_cast<UProjectorMaterial*>(Material)->Projected, ErrorString, ErrorMaterial);
 		CurrentState->bZWrite = false;
 	}else if(CheckMaterial<UHardwareShaderWrapper>(&Material, 0)){
@@ -506,23 +501,23 @@ void FOpenGLRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorStri
 		UseFixedFunction = !Result;
 	}
 
-	if(!Result || CurrentState->NumStages <= 0){ // Reset to default state in error case
+	if(!Result || NumStages <= 0){ // Reset to default state in error case
 		InitDefaultMaterialStageState(0);
-		CurrentState->NumStages = 1;
+		NumStages = 1;
 	}
 
 	if(UseFixedFunction){
 		SetShader(&RenDev->FixedFunctionShader);
-		glUniform1i(SU_NumStages, CurrentState->NumStages);
-		glUniform1i(SU_TexCoordCount, CurrentState->TexCoordCount);
-		glUniform1iv(SU_StageTexCoordSources, ARRAY_COUNT(CurrentState->StageTexCoordSources), CurrentState->StageTexCoordSources);
-		glUniformMatrix4fv(SU_StageTexMatrices, ARRAY_COUNT(CurrentState->StageTexMatrices), GL_FALSE, (GLfloat*)CurrentState->StageTexMatrices);
-		glUniform1iv(SU_StageColorArgs, ARRAY_COUNT(CurrentState->StageColorArgs), &CurrentState->StageColorArgs[0][0]);
-		glUniform1iv(SU_StageColorOps, ARRAY_COUNT(CurrentState->StageColorOps), CurrentState->StageColorOps);
-		glUniform1iv(SU_StageAlphaArgs, ARRAY_COUNT(CurrentState->StageAlphaArgs), &CurrentState->StageAlphaArgs[0][0]);
-		glUniform1iv(SU_StageAlphaOps, ARRAY_COUNT(CurrentState->StageAlphaOps), CurrentState->StageAlphaOps);
-		glUniform4fv(SU_ConstantColor, 1, (GLfloat*)&CurrentState->ConstantColor);
-		glUniform1i(SU_LightingEnabled, CurrentState->UseDynamicLighting && !CurrentState->Unlit);
+		glUniform1i(SU_NumStages, NumStages);
+		glUniform1i(SU_TexCoordCount, TexCoordCount);
+		glUniform1iv(SU_StageTexCoordSources, ARRAY_COUNT(StageTexCoordSources), StageTexCoordSources);
+		glUniformMatrix4fv(SU_StageTexMatrices, ARRAY_COUNT(StageTexMatrices), GL_FALSE, (GLfloat*)StageTexMatrices);
+		glUniform1iv(SU_StageColorArgs, ARRAY_COUNT(StageColorArgs), &StageColorArgs[0][0]);
+		glUniform1iv(SU_StageColorOps, ARRAY_COUNT(StageColorOps), StageColorOps);
+		glUniform1iv(SU_StageAlphaArgs, ARRAY_COUNT(StageAlphaArgs), &StageAlphaArgs[0][0]);
+		glUniform1iv(SU_StageAlphaOps, ARRAY_COUNT(StageAlphaOps), StageAlphaOps);
+		glUniform4fv(SU_ConstantColor, 1, (GLfloat*)&ConstantColor);
+		glUniform1i(SU_LightingEnabled, CurrentState->UseDynamicLighting && !Unlit);
 		glUniform1f(SU_LightFactor, CurrentState->LightingModulate2X ? 2.0f : 1.0f);
 	}
 
@@ -538,7 +533,7 @@ void FOpenGLRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorStri
 	if(FillMode != CurrentState->FillMode)
 		SetFillMode(CurrentState->FillMode);
 
-	switch(CurrentState->FramebufferBlending){
+	switch(FramebufferBlending){
 	case FB_Overwrite:
 		glBlendFunc(GL_ONE, GL_ZERO);
 		break;
@@ -567,7 +562,7 @@ void FOpenGLRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorStri
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 		break;
 	case FB_MAX:
-		glBlendFunc(CurrentState->SrcBlend, CurrentState->DstBlend);
+		glBlendFunc(SrcBlend, DstBlend);
 	}
 
 	unguard;
@@ -797,16 +792,16 @@ UBOOL FOpenGLRenderInterface::SetHardwareShaderMaterial(UHardwareShader* Materia
 		CurrentState->Uniforms.AlphaRef = Material->AlphaRef / 255.0f;
 
 	if(Material->AlphaBlending){
-		CurrentState->FramebufferBlending = FB_MAX;
-		CurrentState->SrcBlend = GetBlendFunc(static_cast<ED3DBLEND>(Material->SrcBlend));
-		CurrentState->DstBlend = GetBlendFunc(static_cast<ED3DBLEND>(Material->DestBlend));
+		FramebufferBlending = FB_MAX;
+		SrcBlend = GetBlendFunc(static_cast<ED3DBLEND>(Material->SrcBlend));
+		DstBlend = GetBlendFunc(static_cast<ED3DBLEND>(Material->DestBlend));
 	}
 
 	for(INT i = 0; i < MAX_TEXTURES; ++i){
 		if(Material->Textures[i])
 			SetBitmapTexture(Material->Textures[i], i);
 
-		++CurrentState->NumTextures;
+		++NumTextures;
 	}
 
 	UpdateGlobalShaderUniforms();
@@ -891,18 +886,18 @@ bool FOpenGLRenderInterface::SetSimpleMaterial(UMaterial* Material, FString* Err
 	INT TexturesUsed = 0;
 
 	// If the material is a simple texture, use it to get the blending options
-	if(!CurrentState->ModifyFramebufferBlending && Material->IsA<UTexture>()){
+	if(!ModifyFramebufferBlending && Material->IsA<UTexture>()){
 		UTexture* Texture = static_cast<UTexture*>(Material);
 
 		if(Texture->bMasked){
-			CurrentState->ModifyFramebufferBlending = true;
+			ModifyFramebufferBlending = true;
 			CurrentState->Uniforms.AlphaRef = 0.5f;
-			CurrentState->FramebufferBlending = FB_Overwrite;
+			FramebufferBlending = FB_Overwrite;
 			NeedUniformUpdate = true;
 		}else if(Texture->bAlphaTexture){
-			CurrentState->ModifyFramebufferBlending = true;
+			ModifyFramebufferBlending = true;
 			CurrentState->Uniforms.AlphaRef = 0.0f;
-			CurrentState->FramebufferBlending = FB_AlphaBlend;
+			FramebufferBlending = FB_AlphaBlend;
 			NeedUniformUpdate = true;
 		}
 
@@ -922,14 +917,14 @@ bool FOpenGLRenderInterface::SetSimpleMaterial(UMaterial* Material, FString* Err
 		++TexturesUsed;
 	}
 
-	if(CurrentState->ModifyColor){
+	if(ModifyColor){
 		if(StagesUsed < MAX_SHADER_STAGES){
-			CurrentState->StageColorArgs[StagesUsed][0] = CA_Previous;
-			CurrentState->StageColorArgs[StagesUsed][1] = CA_Constant;
-			CurrentState->StageColorOps[StagesUsed] = COP_Modulate;
-			CurrentState->StageAlphaArgs[StagesUsed][0] = CA_Previous;
-			CurrentState->StageAlphaArgs[StagesUsed][1] = CA_Constant;
-			CurrentState->StageAlphaOps[StagesUsed] = AOP_Modulate;
+			StageColorArgs[StagesUsed][0] = CA_Previous;
+			StageColorArgs[StagesUsed][1] = CA_Constant;
+			StageColorOps[StagesUsed] = COP_Modulate;
+			StageAlphaArgs[StagesUsed][0] = CA_Previous;
+			StageAlphaArgs[StagesUsed][1] = CA_Constant;
+			StageAlphaOps[StagesUsed] = AOP_Modulate;
 			++StagesUsed;
 		}else{
 			if(ErrorString)
@@ -942,8 +937,8 @@ bool FOpenGLRenderInterface::SetSimpleMaterial(UMaterial* Material, FString* Err
 		}
 	}
 
-	CurrentState->NumStages = StagesUsed;
-	CurrentState->NumTextures = TexturesUsed;
+	NumStages = StagesUsed;
+	NumTextures = TexturesUsed;
 
 	return true;
 }
@@ -963,16 +958,16 @@ bool FOpenGLRenderInterface::HandleCombinedMaterial(UMaterial* Material, INT& St
 			return false;
 		}
 
-		CurrentState->StageColorArgs[StagesUsed][0] = CA_Diffuse;
-		CurrentState->StageColorOps[StagesUsed] = COP_Arg1;
-		CurrentState->StageAlphaArgs[StagesUsed][1] = CA_Previous;
-		CurrentState->StageAlphaOps[StagesUsed] = AOP_Arg2;
+		StageColorArgs[StagesUsed][0] = CA_Diffuse;
+		StageColorOps[StagesUsed] = COP_Arg1;
+		StageAlphaArgs[StagesUsed][1] = CA_Previous;
+		StageAlphaOps[StagesUsed] = AOP_Arg2;
 
 		++StagesUsed;
 
 		return true;
 	}else if(CheckMaterial<UConstantMaterial>(&Material, StagesUsed)){
-		if(CurrentState->UsingConstantColor){
+		if(UsingConstantColor){
 			if(ErrorString)
 				*ErrorString = "Only one ConstantMaterial may be used per material";
 
@@ -992,11 +987,11 @@ bool FOpenGLRenderInterface::HandleCombinedMaterial(UMaterial* Material, INT& St
 			return false;
 		}
 
-		CurrentState->ConstantColor = static_cast<UConstantMaterial*>(Material)->GetColor(GEngineTime);
-		CurrentState->StageColorArgs[StagesUsed][0] = CA_Constant;
-		CurrentState->StageColorOps[StagesUsed] = COP_Arg1;
-		CurrentState->StageAlphaArgs[StagesUsed][0] = CA_Constant;
-		CurrentState->StageAlphaOps[StagesUsed] = AOP_Arg1;
+		ConstantColor = static_cast<UConstantMaterial*>(Material)->GetColor(GEngineTime);
+		StageColorArgs[StagesUsed][0] = CA_Constant;
+		StageColorOps[StagesUsed] = COP_Arg1;
+		StageAlphaArgs[StagesUsed][0] = CA_Constant;
+		StageAlphaOps[StagesUsed] = AOP_Arg1;
 
 		++StagesUsed;
 
@@ -1014,10 +1009,10 @@ bool FOpenGLRenderInterface::HandleCombinedMaterial(UMaterial* Material, INT& St
 
 		SetBitmapTexture(static_cast<UBitmapMaterial*>(Material), TexturesUsed);
 
-		CurrentState->StageColorArgs[StagesUsed][0] = CA_Texture0 + TexturesUsed;
-		CurrentState->StageColorOps[StagesUsed] = COP_Arg1;
-		CurrentState->StageAlphaArgs[StagesUsed][0] = CA_Texture0 + TexturesUsed;
-		CurrentState->StageAlphaOps[StagesUsed] = AOP_Arg1;
+		StageColorArgs[StagesUsed][0] = CA_Texture0 + TexturesUsed;
+		StageColorOps[StagesUsed] = COP_Arg1;
+		StageAlphaArgs[StagesUsed][0] = CA_Texture0 + TexturesUsed;
+		StageAlphaOps[StagesUsed] = AOP_Arg1;
 
 		++StagesUsed;
 		++TexturesUsed;
@@ -1099,23 +1094,23 @@ bool FOpenGLRenderInterface::HandleCombinedMaterial(UMaterial* Material, INT& St
 					if(SimpleBitmapMask){
 						SetBitmapTexture(static_cast<UBitmapMaterial*>(Mask), TexturesUsed);
 
-						CurrentState->StageAlphaArgs[StagesUsed][0] = (CA_Texture0 + TexturesUsed) | MaskModifiers;
-						CurrentState->StageAlphaOps[StagesUsed] = AOP_Arg1;
+						StageAlphaArgs[StagesUsed][0] = (CA_Texture0 + TexturesUsed) | MaskModifiers;
+						StageAlphaOps[StagesUsed] = AOP_Arg1;
 						++TexturesUsed;
 					}else{
 						if(!HandleCombinedMaterial(Mask, StagesUsed, TexturesUsed, ErrorString, ErrorMaterial))
 							return false;
 
-						CurrentState->StageColorArgs[StagesUsed - 1][0] = CA_Previous;
-						CurrentState->StageColorOps[StagesUsed - 1] = COP_Arg1;
-						CurrentState->StageAlphaArgs[StagesUsed - 1][0] = (CA_Texture0 + TexturesUsed - 1) | MaskModifiers;
-						CurrentState->StageAlphaOps[StagesUsed - 1] = AOP_Arg1;
+						StageColorArgs[StagesUsed - 1][0] = CA_Previous;
+						StageColorOps[StagesUsed - 1] = COP_Arg1;
+						StageAlphaArgs[StagesUsed - 1][0] = (CA_Texture0 + TexturesUsed - 1) | MaskModifiers;
+						StageAlphaOps[StagesUsed - 1] = AOP_Arg1;
 					}
 				}else if(CheckMaterial<UVertexColor>(&Mask, StagesUsed)){
-					CurrentState->StageAlphaArgs[StagesUsed - 1][0] = CA_Diffuse | MaskModifiers;
-					CurrentState->StageAlphaOps[StagesUsed - 1] = AOP_Arg1;
+					StageAlphaArgs[StagesUsed - 1][0] = CA_Diffuse | MaskModifiers;
+					StageAlphaOps[StagesUsed - 1] = AOP_Arg1;
 				}else if(CheckMaterial<UConstantMaterial>(&Mask, StagesUsed)){
-					if(CurrentState->UsingConstantColor){
+					if(UsingConstantColor){
 						if(ErrorString)
 							*ErrorString = "Only one ConstantMaterial may be used per material";
 
@@ -1125,9 +1120,9 @@ bool FOpenGLRenderInterface::HandleCombinedMaterial(UMaterial* Material, INT& St
 						return false;
 					}
 
-					CurrentState->ConstantColor = static_cast<UConstantMaterial*>(Mask)->GetColor(GEngineTime);
-					CurrentState->StageAlphaArgs[StagesUsed - 1][0] = CA_Constant;
-					CurrentState->StageAlphaOps[StagesUsed - 1] = AOP_Arg1;
+					ConstantColor = static_cast<UConstantMaterial*>(Mask)->GetColor(GEngineTime);
+					StageAlphaArgs[StagesUsed - 1][0] = CA_Constant;
+					StageAlphaOps[StagesUsed - 1] = AOP_Arg1;
 				}else{
 					if(ErrorString)
 						*ErrorString = "Combiner Mask must be a bitmap material, vertex color, constant color, Material1 or Material2";
@@ -1147,19 +1142,19 @@ bool FOpenGLRenderInterface::HandleCombinedMaterial(UMaterial* Material, INT& St
 				return false;
 
 			if(Swapped){
-				CurrentState->StageColorArgs[StagesUsed - 1][0] = CA_Texture0 + TexturesUsed - 1;
-				CurrentState->StageColorArgs[StagesUsed - 1][1] = CA_Previous;
+				StageColorArgs[StagesUsed - 1][0] = CA_Texture0 + TexturesUsed - 1;
+				StageColorArgs[StagesUsed - 1][1] = CA_Previous;
 			}else{
-				CurrentState->StageColorArgs[StagesUsed - 1][0] = CA_Previous;
-				CurrentState->StageColorArgs[StagesUsed - 1][1] = CA_Texture0 + TexturesUsed - 1;
+				StageColorArgs[StagesUsed - 1][0] = CA_Previous;
+				StageColorArgs[StagesUsed - 1][1] = CA_Texture0 + TexturesUsed - 1;
 			}
 
 			if(Mask == Material2){
-				CurrentState->StageAlphaArgs[StagesUsed - 1][0] = CA_Texture0 + TexturesUsed - 1;
-				CurrentState->StageAlphaArgs[StagesUsed - 1][1] = CA_Previous;
+				StageAlphaArgs[StagesUsed - 1][0] = CA_Texture0 + TexturesUsed - 1;
+				StageAlphaArgs[StagesUsed - 1][1] = CA_Previous;
 			}else{
-				CurrentState->StageAlphaArgs[StagesUsed - 1][0] = CA_Previous;
-				CurrentState->StageAlphaArgs[StagesUsed - 1][1] = CA_Texture0 + TexturesUsed - 1;
+				StageAlphaArgs[StagesUsed - 1][0] = CA_Previous;
+				StageAlphaArgs[StagesUsed - 1][1] = CA_Texture0 + TexturesUsed - 1;
 			}
 		}
 
@@ -1169,32 +1164,32 @@ bool FOpenGLRenderInterface::HandleCombinedMaterial(UMaterial* Material, INT& St
 
 		switch(Combiner->CombineOperation){
 		case CO_Use_Color_From_Material1:
-			CurrentState->StageColorOps[StageIndex] = COP_Arg1;
+			StageColorOps[StageIndex] = COP_Arg1;
 			break;
 		case CO_Use_Color_From_Material2:
-			CurrentState->StageColorOps[StageIndex] = COP_Arg2;
+			StageColorOps[StageIndex] = COP_Arg2;
 			break;
 		case CO_Multiply:
-			CurrentState->StageColorOps[StageIndex] = Combiner->Modulate4X ? COP_Modulate4X : Combiner->Modulate2X ? COP_Modulate2X : COP_Modulate;
+			StageColorOps[StageIndex] = Combiner->Modulate4X ? COP_Modulate4X : Combiner->Modulate2X ? COP_Modulate2X : COP_Modulate;
 			break;
 		case CO_Add:
-			CurrentState->StageColorOps[StageIndex] = COP_Add;
+			StageColorOps[StageIndex] = COP_Add;
 			break;
 		case CO_Subtract:
-			CurrentState->StageColorOps[StageIndex] = COP_Subtract;
+			StageColorOps[StageIndex] = COP_Subtract;
 
 			if(!Swapped)
-				Exchange(CurrentState->StageColorArgs[StageIndex][0], CurrentState->StageColorArgs[StageIndex][1]);
+				Exchange(StageColorArgs[StageIndex][0], StageColorArgs[StageIndex][1]);
 
 			break;
 		case CO_AlphaBlend_With_Mask:
-			CurrentState->StageColorOps[StageIndex] = COP_AlphaBlend;
+			StageColorOps[StageIndex] = COP_AlphaBlend;
 			break;
 		case CO_Add_With_Mask_Modulation:
-			CurrentState->StageColorOps[StageIndex] = COP_AddAlphaModulate;
+			StageColorOps[StageIndex] = COP_AddAlphaModulate;
 			break;
 		case CO_Use_Color_From_Mask:
-			CurrentState->StageColorOps[StageIndex] = COP_Arg1; // TODO: This is probably not correct
+			StageColorOps[StageIndex] = COP_Arg1; // TODO: This is probably not correct
 		}
 
 		// Apply alpha operations
@@ -1203,34 +1198,34 @@ bool FOpenGLRenderInterface::HandleCombinedMaterial(UMaterial* Material, INT& St
 		case AO_Use_Mask:
 			break;
 		case AO_Multiply:
-			CurrentState->StageAlphaOps[StageIndex] = AOP_Modulate;
+			StageAlphaOps[StageIndex] = AOP_Modulate;
 			break;
 		case AO_Add:
-			CurrentState->StageAlphaOps[StageIndex] = AOP_Add;
+			StageAlphaOps[StageIndex] = AOP_Add;
 			break;
 		case AO_Use_Alpha_From_Material1:
-			CurrentState->StageAlphaOps[StageIndex] = AOP_Arg1;
+			StageAlphaOps[StageIndex] = AOP_Arg1;
 			break;
 		case AO_Use_Alpha_From_Material2:
-			CurrentState->StageAlphaOps[StageIndex] = AOP_Arg2;
+			StageAlphaOps[StageIndex] = AOP_Arg2;
 			break;
 		case AO_AlphaBlend_With_Mask:
-			CurrentState->StageAlphaOps[StageIndex] = AOP_Blend;
+			StageAlphaOps[StageIndex] = AOP_Blend;
 		}
 
 		if(Combiner->LightBothMaterials){
 			if(CurrentState->UseStaticLighting && !CurrentState->UseDynamicLighting){
 				checkSlow(StagesUsed < MAX_SHADER_STAGES);
-				CurrentState->StageColorArgs[StagesUsed][0] = CA_Previous;
-				CurrentState->StageColorArgs[StagesUsed][1] = CA_Diffuse;
-				CurrentState->StageColorOps[StagesUsed] = CurrentState->LightingModulate2X ? COP_Modulate2X : COP_Modulate;
-				CurrentState->StageAlphaArgs[StagesUsed][0] = CA_Previous;
-				CurrentState->StageAlphaArgs[StagesUsed][1] = CA_Diffuse;
-				CurrentState->StageAlphaOps[StagesUsed] = AOP_Modulate;
+				StageColorArgs[StagesUsed][0] = CA_Previous;
+				StageColorArgs[StagesUsed][1] = CA_Diffuse;
+				StageColorOps[StagesUsed] = CurrentState->LightingModulate2X ? COP_Modulate2X : COP_Modulate;
+				StageAlphaArgs[StagesUsed][0] = CA_Previous;
+				StageAlphaArgs[StagesUsed][1] = CA_Diffuse;
+				StageAlphaOps[StagesUsed] = AOP_Modulate;
 				++StagesUsed;
 			}
 		}else{
-			CurrentState->StageAlphaOps[StageIndex] |= AOPM_LightInfluence;
+			StageAlphaOps[StageIndex] |= AOPM_LightInfluence;
 		}
 
 		return true;
@@ -1248,7 +1243,7 @@ bool FOpenGLRenderInterface::SetShaderMaterial(UShader* Shader, FString* ErrorSt
 		if(!HandleCombinedMaterial(Shader->Diffuse, StagesUsed, TexturesUsed, ErrorString, ErrorMaterial))
 			return false;
 
-		CurrentState->StageColorOps[StagesUsed - 1] |= COPM_SaveTemp1;
+		StageColorOps[StagesUsed - 1] |= COPM_SaveTemp1;
 		HaveDiffuse = true;
 	}
 
@@ -1258,36 +1253,36 @@ bool FOpenGLRenderInterface::SetShaderMaterial(UShader* Shader, FString* ErrorSt
 				return false;
 		}
 
-		CurrentState->StageColorOps[StagesUsed - 1] |= COPM_SaveTemp2;
+		StageColorOps[StagesUsed - 1] |= COPM_SaveTemp2;
 
 		if(Shader->SelfIlluminationMask){
 			if(Shader->SelfIlluminationMask == Shader->Diffuse){
-				CurrentState->StageColorArgs[StagesUsed][0] = CA_Temp1;
-				CurrentState->StageColorArgs[StagesUsed][1] = CA_Temp2;
-				CurrentState->StageAlphaArgs[StagesUsed][0] = CA_Temp1;
-				CurrentState->StageAlphaOps[StagesUsed] = AOP_Arg1 | AOPM_LightInfluence;
-				CurrentState->StageColorOps[StagesUsed] = COP_AlphaBlend;
+				StageColorArgs[StagesUsed][0] = CA_Temp1;
+				StageColorArgs[StagesUsed][1] = CA_Temp2;
+				StageAlphaArgs[StagesUsed][0] = CA_Temp1;
+				StageAlphaOps[StagesUsed] = AOP_Arg1 | AOPM_LightInfluence;
+				StageColorOps[StagesUsed] = COP_AlphaBlend;
 				++StagesUsed;
 			}else if(Shader->SelfIlluminationMask == Shader->SelfIllumination){
-				CurrentState->StageColorArgs[StagesUsed][0] = HaveDiffuse ? CA_Temp1 : CA_Diffuse;
-				CurrentState->StageColorArgs[StagesUsed][1] = CA_Temp2;
-				CurrentState->StageAlphaArgs[StagesUsed][0] = CA_Temp2;
-				CurrentState->StageAlphaOps[StagesUsed] = AOP_Arg1 | AOPM_LightInfluence;
-				CurrentState->StageColorOps[StagesUsed] = COP_AlphaBlend;
+				StageColorArgs[StagesUsed][0] = HaveDiffuse ? CA_Temp1 : CA_Diffuse;
+				StageColorArgs[StagesUsed][1] = CA_Temp2;
+				StageAlphaArgs[StagesUsed][0] = CA_Temp2;
+				StageAlphaOps[StagesUsed] = AOP_Arg1 | AOPM_LightInfluence;
+				StageColorOps[StagesUsed] = COP_AlphaBlend;
 				++StagesUsed;
 			}else{
 				if(!HandleCombinedMaterial(Shader->SelfIlluminationMask, StagesUsed, TexturesUsed, ErrorString, ErrorMaterial))
 					return false;
 
-				CurrentState->StageColorArgs[StagesUsed][0] = HaveDiffuse ? CA_Temp1 : CA_Diffuse;
-				CurrentState->StageColorArgs[StagesUsed][1] = CA_Temp2;
-				CurrentState->StageAlphaArgs[StagesUsed][0] = CA_Previous;
-				CurrentState->StageAlphaOps[StagesUsed] = AOP_Arg1 | AOPM_LightInfluence;
-				CurrentState->StageColorOps[StagesUsed] = COP_AlphaBlend;
+				StageColorArgs[StagesUsed][0] = HaveDiffuse ? CA_Temp1 : CA_Diffuse;
+				StageColorArgs[StagesUsed][1] = CA_Temp2;
+				StageAlphaArgs[StagesUsed][0] = CA_Previous;
+				StageAlphaOps[StagesUsed] = AOP_Arg1 | AOPM_LightInfluence;
+				StageColorOps[StagesUsed] = COP_AlphaBlend;
 				++StagesUsed;
 			}
 		}else{
-			CurrentState->Unlit = true;
+			Unlit = true;
 		}
 	}
 
@@ -1301,7 +1296,7 @@ bool FOpenGLRenderInterface::SetShaderMaterial(UShader* Shader, FString* ErrorSt
 		}else if(Shader->Opacity->IsA<UVertexColor>()){
 			AlphaArg = CA_Diffuse;
 		}else{
-			CurrentState->StageColorOps[StagesUsed - 1] |= COPM_SaveTemp1;
+			StageColorOps[StagesUsed - 1] |= COPM_SaveTemp1;
 
 			if(!HandleCombinedMaterial(Shader->Opacity, StagesUsed, TexturesUsed, ErrorString, ErrorMaterial))
 				return false;
@@ -1309,14 +1304,14 @@ bool FOpenGLRenderInterface::SetShaderMaterial(UShader* Shader, FString* ErrorSt
 			AlphaArg = CA_Previous;
 		}
 
-		CurrentState->StageColorArgs[StagesUsed][0] = CA_Temp1;
-		CurrentState->StageAlphaArgs[StagesUsed][0] = AlphaArg;
-		CurrentState->StageAlphaOps[StagesUsed] = AOP_Arg1;
-		CurrentState->StageColorOps[StagesUsed] = COP_Arg1;
+		StageColorArgs[StagesUsed][0] = CA_Temp1;
+		StageAlphaArgs[StagesUsed][0] = AlphaArg;
+		StageAlphaOps[StagesUsed] = AOP_Arg1;
+		StageColorOps[StagesUsed] = COP_Arg1;
 		++StagesUsed;
 	}
 
-	if(!CurrentState->ModifyFramebufferBlending){
+	if(!ModifyFramebufferBlending){
 		CurrentState->bZTest = true;
 		CurrentState->bZWrite = true;
 
@@ -1330,7 +1325,7 @@ bool FOpenGLRenderInterface::SetShaderMaterial(UShader* Shader, FString* ErrorSt
 		case OB_Normal:
 			if(Shader->Opacity){
 				CurrentState->Uniforms.AlphaRef = 0.0f;
-				CurrentState->FramebufferBlending = FB_AlphaBlend;
+				FramebufferBlending = FB_AlphaBlend;
 				CurrentState->bZWrite = false;
 				NeedUniformUpdate = true;
 			}
@@ -1338,28 +1333,28 @@ bool FOpenGLRenderInterface::SetShaderMaterial(UShader* Shader, FString* ErrorSt
 			break;
 		case OB_Masked:
 			CurrentState->Uniforms.AlphaRef = 0.5f;
-			CurrentState->FramebufferBlending = FB_Overwrite;
+			FramebufferBlending = FB_Overwrite;
 			NeedUniformUpdate = true;
 			break;
 		case OB_Modulate:
-			CurrentState->FramebufferBlending = FB_Modulate;
+			FramebufferBlending = FB_Modulate;
 			break;
 		case OB_Translucent:
-			CurrentState->FramebufferBlending = FB_Translucent;
+			FramebufferBlending = FB_Translucent;
 			break;
 		case OB_Invisible:
-			CurrentState->FramebufferBlending = FB_Invisible;
+			FramebufferBlending = FB_Invisible;
 			break;
 		case OB_Brighten:
-			CurrentState->FramebufferBlending = FB_Brighten;
+			FramebufferBlending = FB_Brighten;
 			break;
 		case OB_Darken:
-			CurrentState->FramebufferBlending = FB_Darken;
+			FramebufferBlending = FB_Darken;
 		}
 	}
 
-	CurrentState->NumStages = StagesUsed;
-	CurrentState->NumTextures = TexturesUsed;
+	NumStages = StagesUsed;
+	NumTextures = TexturesUsed;
 
 	return true;
 }
@@ -1375,15 +1370,15 @@ bool FOpenGLRenderInterface::SetTerrainMaterial(UTerrainMaterial* Terrain, FStri
 	if(Material->IsA<UShader>())
 		Material = static_cast<UShader*>(Material)->Diffuse;
 
-	CurrentState->StageTexMatrices[StagesUsed] = Terrain->Layers[0].TextureMatrix;
-	CurrentState->StageTexCoordSources[StagesUsed] = TCS_WorldCoords;
-	CurrentState->TexCoordCount = 3;
+	StageTexMatrices[StagesUsed] = Terrain->Layers[0].TextureMatrix;
+	StageTexCoordSources[StagesUsed] = TCS_WorldCoords;
+	TexCoordCount = 3;
 
 	if(CheckMaterial<UBitmapMaterial>(&Material, StagesUsed, TexturesUsed)){
 		if(Terrain->FirstPass){
-			CurrentState->FramebufferBlending = FB_Overwrite;
+			FramebufferBlending = FB_Overwrite;
 		}else{
-			CurrentState->FramebufferBlending = FB_AlphaBlend;
+			FramebufferBlending = FB_AlphaBlend;
 			CurrentState->Uniforms.AlphaRef = 0.0f;
 		}
 
@@ -1396,11 +1391,11 @@ bool FOpenGLRenderInterface::SetTerrainMaterial(UTerrainMaterial* Terrain, FStri
 
 		SetBitmapTexture(BitmapMaterial, TexturesUsed);
 
-		CurrentState->StageColorArgs[StagesUsed][0] = CA_Texture0 + TexturesUsed;
-		CurrentState->StageColorArgs[StagesUsed][1] = CA_Diffuse;
-		CurrentState->StageColorOps[StagesUsed] = (CurrentState->UseStaticLighting && !CurrentState->UseDynamicLighting) ? COP_Modulate2X : COP_Arg1;
-		CurrentState->StageAlphaArgs[StagesUsed][0] = CA_Texture0 + TexturesUsed;
-		CurrentState->StageAlphaOps[StagesUsed] = AOP_Arg1;
+		StageColorArgs[StagesUsed][0] = CA_Texture0 + TexturesUsed;
+		StageColorArgs[StagesUsed][1] = CA_Diffuse;
+		StageColorOps[StagesUsed] = (CurrentState->UseStaticLighting && !CurrentState->UseDynamicLighting) ? COP_Modulate2X : COP_Arg1;
+		StageAlphaArgs[StagesUsed][0] = CA_Texture0 + TexturesUsed;
+		StageAlphaOps[StagesUsed] = AOP_Arg1;
 
 		++StagesUsed;
 		++TexturesUsed;
@@ -1409,12 +1404,12 @@ bool FOpenGLRenderInterface::SetTerrainMaterial(UTerrainMaterial* Terrain, FStri
 
 		SetBitmapTexture(Terrain->Layers[0].AlphaWeight, TexturesUsed);
 
-		CurrentState->StageColorArgs[StagesUsed][0] = CA_Previous;
-		CurrentState->StageColorOps[StagesUsed] = COP_Arg1;
-		CurrentState->StageAlphaArgs[StagesUsed][0] = CA_Texture0 + TexturesUsed;
-		CurrentState->StageAlphaArgs[StagesUsed][1] = CA_Previous;
-		CurrentState->StageAlphaOps[StagesUsed] = BitmapMaterial->IsTransparent() ? AOP_Modulate : AOP_Arg1;
-		CurrentState->StageTexCoordSources[StagesUsed] = TCS_Stream0;
+		StageColorArgs[StagesUsed][0] = CA_Previous;
+		StageColorOps[StagesUsed] = COP_Arg1;
+		StageAlphaArgs[StagesUsed][0] = CA_Texture0 + TexturesUsed;
+		StageAlphaArgs[StagesUsed][1] = CA_Previous;
+		StageAlphaOps[StagesUsed] = BitmapMaterial->IsTransparent() ? AOP_Modulate : AOP_Arg1;
+		StageTexCoordSources[StagesUsed] = TCS_Stream0;
 
 		++StagesUsed;
 		++TexturesUsed;
@@ -1422,8 +1417,8 @@ bool FOpenGLRenderInterface::SetTerrainMaterial(UTerrainMaterial* Terrain, FStri
 		return false;
 	}
 
-	CurrentState->NumStages = StagesUsed;
-	CurrentState->NumTextures = TexturesUsed;
+	NumStages = StagesUsed;
+	NumTextures = TexturesUsed;
 
 	return true;
 }
@@ -1434,73 +1429,73 @@ bool FOpenGLRenderInterface::SetParticleMaterial(UParticleMaterial* ParticleMate
 
 	switch(ParticleMaterial->ParticleBlending){
 	case PTDS_Regular:
-		CurrentState->FramebufferBlending = FB_Overwrite;
+		FramebufferBlending = FB_Overwrite;
 		break;
 	case PTDS_AlphaBlend:
-		CurrentState->FramebufferBlending = FB_AlphaBlend;
+		FramebufferBlending = FB_AlphaBlend;
 		break;
 	case PTDS_Modulated:
-		CurrentState->FramebufferBlending = FB_Modulate;
+		FramebufferBlending = FB_Modulate;
 		break;
 	case PTDS_Translucent:
-		CurrentState->FramebufferBlending = FB_Translucent;
+		FramebufferBlending = FB_Translucent;
 		break;
 	case PTDS_AlphaModulate_MightNotFogCorrectly:
-		CurrentState->FramebufferBlending = FB_AlphaModulate_MightNotFogCorrectly;
+		FramebufferBlending = FB_AlphaModulate_MightNotFogCorrectly;
 		break;
 	case PTDS_Darken:
-		CurrentState->FramebufferBlending = FB_Darken;
+		FramebufferBlending = FB_Darken;
 		break;
 	case PTDS_Brighten:
-		CurrentState->FramebufferBlending = FB_Brighten;
+		FramebufferBlending = FB_Brighten;
 	}
 
-	CurrentState->ModifyFramebufferBlending = true;
+	ModifyFramebufferBlending = true;
 
 	if(ParticleMaterial->BitmapMaterial)
 		SetBitmapTexture(ParticleMaterial->BitmapMaterial, TexturesUsed);
 
 	if(!ParticleMaterial->BlendBetweenSubdivisions){
-		CurrentState->StageColorArgs[StagesUsed][0] = CA_Texture0 + TexturesUsed;
-		CurrentState->StageAlphaArgs[StagesUsed][0] = CA_Texture0 + TexturesUsed;
+		StageColorArgs[StagesUsed][0] = CA_Texture0 + TexturesUsed;
+		StageAlphaArgs[StagesUsed][0] = CA_Texture0 + TexturesUsed;
 
 		if(ParticleMaterial->UseTFactor){
-			CurrentState->StageColorArgs[StagesUsed][1] = CA_Constant;
-			CurrentState->StageAlphaArgs[StagesUsed][1] = CA_Constant;
+			StageColorArgs[StagesUsed][1] = CA_Constant;
+			StageAlphaArgs[StagesUsed][1] = CA_Constant;
 		}else{
-			CurrentState->StageColorArgs[StagesUsed][1] = CA_Diffuse;
-			CurrentState->StageAlphaArgs[StagesUsed][1] = CA_Diffuse;
+			StageColorArgs[StagesUsed][1] = CA_Diffuse;
+			StageAlphaArgs[StagesUsed][1] = CA_Diffuse;
 		}
 
 		if(ParticleMaterial->ParticleBlending != PTDS_Modulated){
-			CurrentState->StageColorOps[StagesUsed] = COP_Modulate;
-			CurrentState->StageAlphaOps[StagesUsed] = AOP_Modulate;
+			StageColorOps[StagesUsed] = COP_Modulate;
+			StageAlphaOps[StagesUsed] = AOP_Modulate;
 		}else{
-			CurrentState->StageColorOps[StagesUsed] = COP_AlphaBlend;
-			CurrentState->StageAlphaOps[StagesUsed] = AOP_Blend;
+			StageColorOps[StagesUsed] = COP_AlphaBlend;
+			StageAlphaOps[StagesUsed] = AOP_Blend;
 		}
 
 		++TexturesUsed;
 		++StagesUsed;
 	}else{
-		CurrentState->StageColorArgs[StagesUsed][0] = CA_Texture0 + TexturesUsed;
-		CurrentState->StageAlphaArgs[StagesUsed][0] = CA_Texture0 + TexturesUsed;
-		CurrentState->StageColorOps[StagesUsed] = COP_Arg1;
-		CurrentState->StageAlphaOps[StagesUsed] = AOP_Arg1;
+		StageColorArgs[StagesUsed][0] = CA_Texture0 + TexturesUsed;
+		StageAlphaArgs[StagesUsed][0] = CA_Texture0 + TexturesUsed;
+		StageColorOps[StagesUsed] = COP_Arg1;
+		StageAlphaOps[StagesUsed] = AOP_Arg1;
 		++StagesUsed;
-		CurrentState->StageColorArgs[StagesUsed][0] = CA_Texture0 + TexturesUsed;
-		CurrentState->StageColorArgs[StagesUsed][1] = CA_Previous;
-		CurrentState->StageAlphaArgs[StagesUsed][0] = CA_Texture0 + TexturesUsed;
-		CurrentState->StageAlphaArgs[StagesUsed][1] = CA_Previous;
-		CurrentState->StageColorOps[StagesUsed] = COP_AlphaBlend;
-		CurrentState->StageAlphaOps[StagesUsed] = AOP_Blend;
-		CurrentState->StageTexCoordSources[StagesUsed] = TCS_Stream1;
+		StageColorArgs[StagesUsed][0] = CA_Texture0 + TexturesUsed;
+		StageColorArgs[StagesUsed][1] = CA_Previous;
+		StageAlphaArgs[StagesUsed][0] = CA_Texture0 + TexturesUsed;
+		StageAlphaArgs[StagesUsed][1] = CA_Previous;
+		StageColorOps[StagesUsed] = COP_AlphaBlend;
+		StageAlphaOps[StagesUsed] = AOP_Blend;
+		StageTexCoordSources[StagesUsed] = TCS_Stream1;
 		++StagesUsed;
-		CurrentState->StageColorArgs[StagesUsed][0] = CA_Diffuse;
-		CurrentState->StageColorArgs[StagesUsed][1] = CA_Previous;
-		CurrentState->StageAlphaArgs[StagesUsed][0] = CA_Previous;
-		CurrentState->StageColorOps[StagesUsed] = COP_Modulate;
-		CurrentState->StageAlphaOps[StagesUsed] = AOP_Arg1;
+		StageColorArgs[StagesUsed][0] = CA_Diffuse;
+		StageColorArgs[StagesUsed][1] = CA_Previous;
+		StageAlphaArgs[StagesUsed][0] = CA_Previous;
+		StageColorOps[StagesUsed] = COP_Modulate;
+		StageAlphaOps[StagesUsed] = AOP_Arg1;
 		++StagesUsed;
 		++TexturesUsed;
 	}
@@ -1515,17 +1510,17 @@ bool FOpenGLRenderInterface::SetParticleMaterial(UParticleMaterial* ParticleMate
 	CurrentState->bZWrite = ParticleMaterial->ZWrite != 0;
 	CurrentState->FillMode = ParticleMaterial->Wireframe ? FM_Wireframe : FM_Solid;
 
-	CurrentState->NumStages = StagesUsed;
-	CurrentState->NumTextures = TexturesUsed;
+	NumStages = StagesUsed;
+	NumTextures = TexturesUsed;
 
 	return true;
 }
 
 void FOpenGLRenderInterface::UseDiffuse(){
-	CurrentState->StageColorArgs[0][1] = CA_Diffuse;
-	CurrentState->StageColorOps[0] = CurrentState->LightingModulate2X ? COP_Modulate2X : COP_Modulate;
-	CurrentState->StageAlphaArgs[0][1] = CA_Diffuse;
-	CurrentState->StageAlphaOps[0] = AOP_Modulate;
+	StageColorArgs[0][1] = CA_Diffuse;
+	StageColorOps[0] = CurrentState->LightingModulate2X ? COP_Modulate2X : COP_Modulate;
+	StageAlphaArgs[0][1] = CA_Diffuse;
+	StageAlphaOps[0] = AOP_Modulate;
 }
 
 void FOpenGLRenderInterface::UseLightmap(INT StageIndex, INT TextureUnit){
@@ -1534,12 +1529,12 @@ void FOpenGLRenderInterface::UseLightmap(INT StageIndex, INT TextureUnit){
 	checkSlow(TextureUnit < MAX_TEXTURES);
 
 	SetTexture(CurrentState->Lightmap, TextureUnit);
-	CurrentState->StageTexCoordSources[StageIndex] = TCS_Stream1;
-	CurrentState->StageColorArgs[StageIndex][0] = CA_Previous;
-	CurrentState->StageColorArgs[StageIndex][1] = CA_Texture0 + TextureUnit;
-	CurrentState->StageColorOps[StageIndex] = (!CurrentState->UseStaticLighting && CurrentState->LightingModulate2X) ? COP_Modulate2X : COP_Modulate;
-	CurrentState->StageAlphaArgs[StageIndex][0] = CA_Previous;
-	CurrentState->StageAlphaOps[StageIndex] = AOP_Arg1;
+	StageTexCoordSources[StageIndex] = TCS_Stream1;
+	StageColorArgs[StageIndex][0] = CA_Previous;
+	StageColorArgs[StageIndex][1] = CA_Texture0 + TextureUnit;
+	StageColorOps[StageIndex] = (!CurrentState->UseStaticLighting && CurrentState->LightingModulate2X) ? COP_Modulate2X : COP_Modulate;
+	StageAlphaArgs[StageIndex][0] = CA_Previous;
+	StageAlphaOps[StageIndex] = AOP_Arg1;
 }
 
 static GLenum GetStencilFunc(ECompareFunction Test){
@@ -1625,6 +1620,7 @@ INT FOpenGLRenderInterface::SetVertexStreams(EVertexShader Shader, FVertexStream
 	checkSlow(!IsDynamic || NumStreams == 1);
 
 	FOpenGLVertexStream* VertexStreams[MAX_VERTEX_STREAMS];
+	FStreamDeclaration   VertexStreamDeclarations[MAX_VERTEX_STREAMS];
 
 	// NOTE: Stream declarations must be completely zeroed to get consistent hash values when looking up the VAO later
 	appMemzero(VertexStreamDeclarations, sizeof(VertexStreamDeclarations));
@@ -1656,12 +1652,12 @@ INT FOpenGLRenderInterface::SetVertexStreams(EVertexShader Shader, FVertexStream
 	// Look up VAO by format
 	GLuint VAO = RenDev->GetVAO(VertexStreamDeclarations, NumStreams);
 
-	if(VAO != CurrentVAO){
+	if(VAO != CurrentState->VAO){
 		glBindVertexArray(VAO);
-		CurrentVAO = VAO;
+		CurrentState->VAO = VAO;
 
-		if(CurrentIndexBuffer)
-			CurrentIndexBuffer->Bind();
+		if(CurrentState->IndexBuffer)
+			CurrentState->IndexBuffer->Bind();
 
 		NeedUniformUpdate = true;
 	}
@@ -1707,14 +1703,14 @@ INT FOpenGLRenderInterface::SetIndexBuffer(FIndexBuffer* IndexBuffer, INT BaseIn
 			Buffer->Cache(IndexBuffer);
 		}
 
-		IndexBufferBaseIndex = BaseIndex;
-		CurrentIndexBuffer = Buffer;
+		CurrentState->IndexBufferBaseIndex = BaseIndex;
+		CurrentState->IndexBuffer = Buffer;
 
 		Buffer->Bind();
 	}else{
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, GL_NONE);
-		CurrentIndexBuffer = NULL;
-		IndexBufferBaseIndex = 0;
+		CurrentState->IndexBuffer = NULL;
+		CurrentState->IndexBufferBaseIndex = 0;
 	}
 
 	return RequiresCaching ? IndexBuffer->GetSize() : 0;
@@ -1761,15 +1757,15 @@ void FOpenGLRenderInterface::DrawPrimitive(EPrimitiveType PrimitiveType, INT Fir
 		appErrorf("Unexpected EPrimitiveType (%i)", PrimitiveType);
 	};
 
-	if(CurrentIndexBuffer){
-		INT IndexSize = CurrentIndexBuffer->IndexSize;
+	if(CurrentState->IndexBuffer){
+		INT IndexSize = CurrentState->IndexBuffer->IndexSize;
 
 		glDrawRangeElements(Mode,
 		                    MinIndex,
 		                    MaxIndex,
 		                    Count,
 		                    IndexSize == sizeof(DWORD) ? GL_UNSIGNED_INT : GL_UNSIGNED_SHORT,
-		                    reinterpret_cast<void*>((FirstIndex + IndexBufferBaseIndex) * IndexSize));
+		                    reinterpret_cast<void*>((FirstIndex + CurrentState->IndexBufferBaseIndex) * IndexSize));
 	}else{
 		glDrawArrays(Mode, 0, Count);
 	}

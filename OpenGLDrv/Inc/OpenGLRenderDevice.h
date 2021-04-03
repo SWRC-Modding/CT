@@ -11,27 +11,19 @@ class FOpenGLResource;
 
 class OPENGLDRV_API UOpenGLRenderDevice : public URenderDevice{
 	DECLARE_CLASS(UOpenGLRenderDevice,URenderDevice,CLASS_Config,OpenGLDrv)
+	friend class FOpenGLResource;
+	friend class FOpenGLTexture;
+	friend class FOpenGLRenderInterface;
 public:
 	UBOOL                  bUseDesktopResolution;
 	UBOOL                  bKeepAspectRatio;
-
-	HDC                    DeviceContext;
-	HGLRC                  OpenGLContext;
-	FOpenGLRenderInterface RenderInterface;
-	FRenderCaps            RenderCaps;
-
-	// Resources
-	FAuxRenderTarget       ScreenRenderTarget;
-	FShaderGLSL            FixedFunctionShader;
-	FShaderGLSL            FramebufferShader;
+	UBOOL                  bBilinearFramebuffer;
 
 	// Default shader code
 	static FString            VertexShaderVarsText;
 	static FString            FragmentShaderVarsText;
 	static FString            FixedFunctionVertexShaderText;
 	static FString            FixedFunctionFragmentShaderText;
-	static FString            FramebufferVertexShaderText;
-	static FString            FramebufferFragmentShaderText;
 
 	UOpenGLRenderDevice();
 	void StaticConstructor();
@@ -83,16 +75,30 @@ public:
 	void LoadShaders();
 
 private:
+	HDC                       DeviceContext;
+	HGLRC                     OpenGLContext;
+	FOpenGLRenderInterface    RenderInterface;
+	FRenderCaps               RenderCaps;
+
+	FShaderGLSL               FixedFunctionShader;
+
+	UBOOL                     bFrameFX;
+	FAuxRenderTarget          Backbuffer;
+	unsigned int              BackbufferDepthStencil; // Shared with UFrameFX::WorkingTarget
+
 	UBOOL                     bFirstRun;
 	UBOOL                     bFixCanvasScaling;
 	INT                       TextureAnisotropy;
 	UBOOL                     bVSync;
 	UBOOL                     bAdaptiveVSync;
-	UBOOL                     bUseOffscreenFramebuffer;
 	UBOOL                     bDebugOpenGL;
 	UBOOL                     bIsFullscreen;
 	INT                       SavedViewportWidth;
 	INT                       SavedViewportHeight;
+	INT                       ViewportX;
+	INT                       ViewportY;
+	INT                       ViewportWidth;
+	INT                       ViewportHeight;
 
 	FOpenGLIndexBuffer*       DynamicIndexBuffer16;
 	FOpenGLIndexBuffer*       DynamicIndexBuffer32;
@@ -105,9 +111,6 @@ private:
 	FStringNoInit             ShaderDir;
 
 	TMap<UHardwareShader*, FShaderGLSL> GLShaderByHardwareShader;
-
-	friend class FOpenGLResource;
-	friend class FOpenGLRenderInterface;
 
 	void AddResource(FOpenGLResource* Resource);
 	void RemoveResource(FOpenGLResource* Resource);

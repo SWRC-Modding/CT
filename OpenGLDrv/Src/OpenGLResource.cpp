@@ -286,8 +286,18 @@ void FOpenGLTexture::Cache(FBaseTexture* BaseTexture, bool RenderTargetMatchBack
 		glCreateTextures(GL_TEXTURE_2D, 1, &TextureHandle);
 		glTextureStorage2D(TextureHandle, 1, Format, Width, Height);
 		glNamedFramebufferTexture(FBO, GL_COLOR_ATTACHMENT0, TextureHandle, 0);
-		glCreateRenderbuffers(1, &DepthStencilAttachment);
-		glNamedRenderbufferStorage(DepthStencilAttachment, GL_DEPTH24_STENCIL8, Width, Height);
+
+		// NOTE: This is a special case: The backbuffer and FrameFX working target need to share their depth and stencil buffers
+		HasSharedDepthStencil = RenderTarget == &RenDev->Backbuffer || RenderTarget == UFrameFX::WorkingTarget;
+
+		if(HasSharedDepthStencil){
+			checkSlow(RenDev->BackbufferDepthStencil != GL_NONE);
+			DepthStencilAttachment = RenDev->BackbufferDepthStencil;
+		}else{
+			glCreateRenderbuffers(1, &DepthStencilAttachment);
+			glNamedRenderbufferStorage(DepthStencilAttachment, GL_DEPTH24_STENCIL8, Width, Height);
+		}
+
 		glNamedFramebufferRenderbuffer(FBO, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, DepthStencilAttachment);
 
 		checkSlow(glCheckNamedFramebufferStatus(FBO, GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE);
@@ -310,7 +320,7 @@ void FOpenGLTexture::Free(){
 		FBO = GL_NONE;
 	}
 
-	if(DepthStencilAttachment){
+	if(DepthStencilAttachment && !HasSharedDepthStencil){
 		glDeleteRenderbuffers(1, &DepthStencilAttachment);
 		DepthStencilAttachment = GL_NONE;
 	}

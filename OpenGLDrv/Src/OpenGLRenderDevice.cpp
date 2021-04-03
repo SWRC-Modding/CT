@@ -10,25 +10,25 @@
 IMPLEMENT_CLASS(UOpenGLRenderDevice)
 
 UOpenGLRenderDevice::UOpenGLRenderDevice() : RenderInterface(this),
-                                             ScreenRenderTarget(0, 0, TEXF_RGBA8, false, true){}
+                                             Backbuffer(0, 0, TEXF_RGBA8, false, true){}
 
 void UOpenGLRenderDevice::StaticConstructor(){
 	SupportsCubemaps = 1;
 	SupportsZBIAS = 1;
+	bBilinearFramebuffer = 1;
 	TextureAnisotropy = 8;
 	bFirstRun = 1;
 	bFixCanvasScaling = 1;
-	bUseOffscreenFramebuffer = 1;
 	ShaderDir = "OpenGLShaders";
 
 	new(GetClass(), "UseDesktopResolution", RF_Public) UBoolProperty(CPP_PROPERTY(bUseDesktopResolution), "Options", CPF_Config);
 	new(GetClass(), "KeepAspectRatio", RF_Public) UBoolProperty(CPP_PROPERTY(bKeepAspectRatio), "Options", CPF_Config);
+	new(GetClass(), "BilinearFramebuffer", RF_Public) UBoolProperty(CPP_PROPERTY(bBilinearFramebuffer), "Options", CPF_Config);
 	new(GetClass(), "TextureAnisotropy", RF_Public) UIntProperty(CPP_PROPERTY(TextureAnisotropy), "Options", CPF_Config);
 	new(GetClass(), "VSync", RF_Public) UBoolProperty(CPP_PROPERTY(bVSync), "Options", CPF_Config);
 	new(GetClass(), "AdaptiveVSync", RF_Public) UBoolProperty(CPP_PROPERTY(bAdaptiveVSync), "Options", CPF_Config);
 	new(GetClass(), "FirstRun", RF_Public) UBoolProperty(CPP_PROPERTY(bFirstRun), "", CPF_Config);
 	new(GetClass(), "FixCanvasScaling", RF_Public) UBoolProperty(CPP_PROPERTY(bFixCanvasScaling), "", CPF_Config);
-	new(GetClass(), "UseOffscreenFramebuffer", RF_Public) UBoolProperty(CPP_PROPERTY(bUseOffscreenFramebuffer), "", CPF_Config);
 	new(GetClass(), "DebugOpenGL", RF_Public) UBoolProperty(CPP_PROPERTY(bDebugOpenGL), "", CPF_Config);
 	new(GetClass(), "ShaderDir", RF_Public) UStrProperty(CPP_PROPERTY(ShaderDir), "", CPF_Config);
 }
@@ -299,9 +299,6 @@ UBOOL UOpenGLRenderDevice::Init(){
 	FixedFunctionShader.SetName("FixedFunction");
 	FixedFunctionShader.SetVertexShaderText(VertexShaderVarsText + FixedFunctionVertexShaderText);
 	FixedFunctionShader.SetFragmentShaderText(FragmentShaderVarsText + FixedFunctionFragmentShaderText);
-	FramebufferShader.SetName("Framebuffer");
-	FramebufferShader.SetVertexShaderText(FramebufferVertexShaderText);
-	FramebufferShader.SetFragmentShaderText(FramebufferFragmentShaderText);
 
 	LoadShaders();
 
@@ -338,21 +335,9 @@ UBOOL UOpenGLRenderDevice::SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL
 
 		debugf("SetRes: %ix%i, %i-bit, Fullscreen: %i", NewX, NewY, ColorBytes * 8, Fullscreen);
 
-		INT PfdFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
-		INT DepthBits = 24;
-		INT StencilBits = UseStencil ? 8 : 0;
-
-		if(bUseOffscreenFramebuffer){
-			PfdFlags |= PFD_DEPTH_DONTCARE;
-			DepthBits = 0;
-			StencilBits = 0;
-			debugf("Using offscreen framebuffer");
-		}else{
-			debugf("Not using offscreen framebuffer");
-
-			if(bKeepAspectRatio)
-				debugf("KeepAspectRatio is set to true but has no effect");
-		}
+		INT PfdFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER | PFD_DEPTH_DONTCARE;
+		INT DepthBits = 0;
+		INT StencilBits = 0;
 
 		PIXELFORMATDESCRIPTOR Pfd = {
 			sizeof(PIXELFORMATDESCRIPTOR), // size
@@ -499,6 +484,8 @@ UBOOL UOpenGLRenderDevice::SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL
 		glVertexAttrib4f(FVF_TexCoord7, 0.0f, 0.0f, 1.0f, 1.0f);
 	}else{
 		MakeCurrent();
+		glDeleteRenderbuffers(1, &BackbufferDepthStencil);
+		BackbufferDepthStencil = GL_NONE;
 	}
 
 	// Set window size
@@ -511,7 +498,7 @@ UBOOL UOpenGLRenderDevice::SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL
 		INT Width  = Info.rcMonitor.right - Info.rcMonitor.left;
 		INT Height = Info.rcMonitor.bottom - Info.rcMonitor.top;
 
-		if(bUseDesktopResolution || !bUseOffscreenFramebuffer){
+		if(bUseDesktopResolution){
 			NewX = Width;
 			NewY = Height;
 		}
@@ -538,21 +525,57 @@ UBOOL UOpenGLRenderDevice::SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL
 		bIsFullscreen = 0;
 	}
 
-	if(bUseOffscreenFramebuffer){
-		// Resize screen render target if necessary
-		if(ScreenRenderTarget.Width != NewX || ScreenRenderTarget.Height != NewY){
-			ScreenRenderTarget.Width = NewX;
-			ScreenRenderTarget.Height = NewY;
-			++ScreenRenderTarget.Revision;
-		}
+	// Create shared depth/stencil buffer
+	glCreateRenderbuffers(1, &BackbufferDepthStencil);
+	glNamedRenderbufferStorage(BackbufferDepthStencil, GL_DEPTH24_STENCIL8, NewX, NewY);
 
-		RenderInterface.SetViewport(0, 0, NewX, NewY);
-	}else{
-		if(bIsFullscreen)
-			RenderInterface.SetViewport(0, 0, SavedViewportWidth, SavedViewportHeight);
-		else
-			RenderInterface.SetViewport(0, 0, NewX, NewY);
+	// Resize screen render target if necessary
+	if(Backbuffer.Width != NewX || Backbuffer.Height != NewY){
+		Backbuffer.Width = NewX;
+		Backbuffer.Height = NewY;
+		++Backbuffer.Revision;
 	}
+
+	// Figure out viewport size for aspect ratio correction
+
+	INT FramebufferWidth = NewX;
+	INT FramebufferHeight = NewY;
+	INT ScreenWidth;
+	INT ScreenHeight;
+
+	if(bIsFullscreen){
+		ScreenWidth  = SavedViewportWidth;
+		ScreenHeight = SavedViewportHeight;
+	}else{
+		ScreenWidth  = NewX;
+		ScreenHeight = NewY;
+	}
+
+	FLOAT XScale = 1.0f;
+	FLOAT YScale = 1.0f;
+
+	if(bKeepAspectRatio || bIsFullscreen){
+		FLOAT ViewportAspectRatio = static_cast<FLOAT>(ScreenWidth) / ScreenHeight;
+		FLOAT FramebufferAspectRatio = static_cast<FLOAT>(FramebufferWidth) / FramebufferHeight;
+
+		if(FramebufferAspectRatio < ViewportAspectRatio){
+			FLOAT Scale = static_cast<FLOAT>(ScreenHeight) / FramebufferHeight;
+
+			XScale = FramebufferWidth * Scale / ScreenWidth;
+		}else{
+			FLOAT Scale = static_cast<FLOAT>(ScreenWidth) / FramebufferWidth;
+
+			YScale = FramebufferHeight * Scale / ScreenHeight;
+		}
+	}
+
+	ViewportWidth = static_cast<INT>(ScreenWidth * XScale);
+	ViewportHeight = static_cast<INT>(ScreenHeight * YScale);
+	ViewportX = ScreenWidth / 2 - ViewportWidth / 2;
+	ViewportY = ScreenHeight / 2 - ViewportHeight / 2;
+
+	// Set default render target
+	RenderInterface.SetRenderTarget(&Backbuffer, false);
 
 	return 1;
 
@@ -566,7 +589,7 @@ void UOpenGLRenderDevice::Exit(UViewport* Viewport){
 }
 
 void UOpenGLRenderDevice::Flush(UViewport* Viewport){
-	if(Viewport && Viewport->Actor)
+	if(Viewport && Viewport->Actor && Viewport->Actor->FrameFX)
 		Viewport->Actor->FrameFX->FreeRenderTargets();
 
 	for(INT i = 0; i < ARRAY_COUNT(ResourceHash); ++i){
@@ -622,11 +645,9 @@ void UOpenGLRenderDevice::EnableVSync(bool bEnable){
 
 FRenderInterface* UOpenGLRenderDevice::Lock(UViewport* Viewport, BYTE* HitData, INT* HitSize){
 	MakeCurrent();
-
-	if(bUseOffscreenFramebuffer)
-		RenderInterface.SetRenderTarget(&ScreenRenderTarget, true);
-
+	bFrameFX = !Viewport->GetOuterUClient()->FrameFXDisabled;
 	RenderInterface.Locked(Viewport);
+	RenderInterface.SetRenderTarget(&Backbuffer, false);
 
 	return &RenderInterface;
 }
@@ -639,82 +660,35 @@ void UOpenGLRenderDevice::Unlock(FRenderInterface* RI){
 void UOpenGLRenderDevice::Present(UViewport* Viewport){
 	checkSlow(IsCurrent());
 
-	FRenderTarget* RenderTarget = RenderInterface.CurrentState->RenderTarget;
-	FOpenGLTexture* Framebuffer = RenderTarget ? static_cast<FOpenGLTexture*>(GetCachedResource(RenderTarget->GetCacheId())) : NULL;
-
-	if(Framebuffer){
-		RenderInterface.PushState();
-		RenderInterface.SetRenderTarget(NULL, true);
-
-		INT FramebufferWidth = Framebuffer->Width;
-		INT FramebufferHeight = Framebuffer->Height;
-		INT ScreenWidth;
-		INT ScreenHeight;
-
-		if(bIsFullscreen){
-			ScreenWidth  = SavedViewportWidth;
-			ScreenHeight = SavedViewportHeight;
-		}else{
-			ScreenWidth  = Viewport->SizeX;
-			ScreenHeight = Viewport->SizeY;
-		}
-
-		FLOAT XScale = 1.0f;
-		FLOAT YScale = 1.0f;
-
-		if(bKeepAspectRatio){
-			FLOAT ViewportAspectRatio = static_cast<FLOAT>(ScreenWidth) / ScreenHeight;
-			FLOAT FramebufferAspectRatio = static_cast<FLOAT>(FramebufferWidth) / FramebufferHeight;
-
-			if(FramebufferAspectRatio < ViewportAspectRatio){
-				FLOAT Scale = static_cast<FLOAT>(ScreenHeight) / FramebufferHeight;
-
-				XScale = FramebufferWidth * Scale / ScreenWidth;
-			}else{
-				FLOAT Scale = static_cast<FLOAT>(ScreenWidth) / FramebufferWidth;
-
-				YScale = FramebufferHeight * Scale / ScreenHeight;
-			}
-
-			// Clear black bars
-			RenderInterface.Clear(1, FColor(0, 0, 0), 0, 0.0f, 0, 0);
-		}
-
-		INT ViewportWidth = static_cast<INT>(ScreenWidth * XScale);
-		INT ViewportHeight = static_cast<INT>(ScreenHeight * YScale);
-
-		RenderInterface.SetViewport(ScreenWidth / 2 - ViewportWidth / 2, ScreenHeight / 2 - ViewportHeight / 2, ViewportWidth, ViewportHeight);
-		Framebuffer->BindTexture(0);
-		RenderInterface.SetFillMode(FM_Solid);
-		RenderInterface.EnableZTest(0);
-		RenderInterface.EnableStencilTest(0);
-		RenderInterface.SetShader(&FramebufferShader);
-		RenderInterface.DrawPrimitive(PT_TriangleList, 0, 1);
-		RenderInterface.PopState();
+	if(bIsFullscreen && bKeepAspectRatio){
+		// Clear black bars.
+		// This shouldn't have to happen every frame but for some reason the old pixels are still visible outside of the draw region
+		// after a resolution change, even if the buffer was cleared in SetRes.
+		FPlane Black(0.0f, 0.0f, 0.0f, 1.0f);
+		glClearNamedFramebufferfv(GL_NONE, GL_COLOR, GL_NONE, reinterpret_cast<GLfloat*>(&Black));
 	}
 
-	SwapBuffers(DeviceContext);
+	FOpenGLTexture* Framebuffer = static_cast<FOpenGLTexture*>(GetCachedResource(Backbuffer.GetCacheId()));
+
+	if(Framebuffer){
+		glBlitNamedFramebuffer(Framebuffer->FBO, GL_NONE,
+		                       0, 0, Framebuffer->Width, Framebuffer->Height,
+		                       ViewportX, ViewportHeight, ViewportX + ViewportWidth, ViewportY,
+		                       GL_COLOR_BUFFER_BIT,
+		                       bBilinearFramebuffer ? GL_LINEAR : GL_NEAREST);
+
+		SwapBuffers(DeviceContext);
+	}
 
 	check(glGetError() == GL_NO_ERROR);
 }
 
 void UOpenGLRenderDevice::ReadPixels(UViewport* Viewport, FColor* Pixels){
 	if(Viewport && Pixels){
+		RenderInterface.PushState();
+		RenderInterface.SetRenderTarget(&Backbuffer, true);
 		glReadPixels(0, 0, Viewport->SizeX, Viewport->SizeY, GL_BGRA, GL_UNSIGNED_BYTE, Pixels);
-
-		INT   Width = Viewport->SizeX;
-		INT   Height = Viewport->SizeY;
-		DWORD RowSize = Width * sizeof(FColor);
-		void* Buffer = appMalloc(RowSize);
-
-		// The image is flipped so we have to reverse it
-		for(INT i = 0; i < Height / 2; ++i){
-			appMemcpy(Buffer, Pixels + i * Width, RowSize);
-			appMemcpy(Pixels + i * Width, (Pixels + (Height - 1) * Width) - i * Width, RowSize);
-			appMemcpy((Pixels + (Height - 1) * Width) - i * Width, Buffer, RowSize);
-		}
-
-		appFree(Buffer);
+		RenderInterface.PopState();
 	}
 }
 
@@ -727,6 +701,8 @@ FRenderCaps* UOpenGLRenderDevice::GetRenderCaps(){
 }
 
 void UOpenGLRenderDevice::TakeScreenshot(const TCHAR* Name, UViewport* Viewport, INT Width, INT Height){
+	check(Width == Viewport->SizeX);
+	check(Height == Viewport->SizeY);
 	URenderDevice::TakeScreenshot(Name, Viewport, Width, Height);
 }
 
@@ -736,12 +712,6 @@ void UOpenGLRenderDevice::LoadShaders(){
 
 	if(!LoadFragmentShader(&FixedFunctionShader))
 		SaveFragmentShader(&FixedFunctionShader);
-
-	if(!LoadVertexShader(&FramebufferShader))
-		SaveVertexShader(&FramebufferShader);
-
-	if(!LoadFragmentShader(&FramebufferShader))
-		SaveFragmentShader(&FramebufferShader);
 
 	for(TMap<UHardwareShader*, FShaderGLSL>::TIterator It(GLShaderByHardwareShader); It; ++It){
 		if(*It.Value().GetName()){
@@ -1223,26 +1193,6 @@ FString UOpenGLRenderDevice::FixedFunctionFragmentShaderText(
 		"\n"
 		"\tif(LightingEnabled)\n"
 			"\t\tFragColor.rgb = mix(FragColor.rgb, FragColor.rgb * light_color().rgb, LightInfluence);\n"
-	"}\n", true);
-
-FString UOpenGLRenderDevice::FramebufferVertexShaderText(
-	SHADER_HEADER
-	"out vec2 TexCoord;\n\n"
-	"void main(void){\n"
-		"\tconst vec4[] Vertices = vec4[](vec4(-1.0, 3.0, 0.0, 2.0),\n"
-		"\t                               vec4(-1.0, -1.0, 0.0, 0.0),\n"
-		"\t                               vec4(3.0, -1.0, 2.0, 0.0));\n\n"
-		"\tgl_Position = vec4(Vertices[gl_VertexID].xy, 0.5, 1.0);\n"
-		"\tTexCoord = Vertices[gl_VertexID].zw;\n"
-	"}\n", true);
-
-FString UOpenGLRenderDevice::FramebufferFragmentShaderText(
-	SHADER_HEADER
-	"layout(binding = 0) uniform sampler2D Screen;\n\n"
-	"in vec2 TexCoord;\n\n"
-	"out vec4 FragColor;\n\n"
-	"void main(void){\n"
-		"\tFragColor = texture2D(Screen, TexCoord.xy);\n"
 	"}\n", true);
 
 #undef UNIFORM_STRUCT_MEMBER

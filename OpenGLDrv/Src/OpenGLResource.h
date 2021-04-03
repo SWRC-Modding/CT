@@ -91,6 +91,7 @@ public:
 	GLuint FBO;
 	GLuint DepthStencilAttachment;
 	bool   IsCubemap;
+	bool   HasSharedDepthStencil;
 
 private:
 	static FSolidColorTexture ErrorTexture;

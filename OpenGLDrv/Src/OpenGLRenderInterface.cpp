@@ -174,26 +174,24 @@ void FOpenGLRenderInterface::PopState(INT Flags){
 UBOOL FOpenGLRenderInterface::SetRenderTarget(FRenderTarget* RenderTarget, bool MatchBackbuffer){
 	guardFunc;
 
-	// Flip framebuffer unless we're rendering to the screen.
-	if(MatchBackbuffer || RenderTarget == NULL)
+	check(RenderTarget);
+
+	if(MatchBackbuffer)
 		glClipControl(GL_LOWER_LEFT, GL_NEGATIVE_ONE_TO_ONE);
 	else
 		glClipControl(GL_UPPER_LEFT, GL_ZERO_TO_ONE);
 
-	if(RenderTarget){
-		QWORD CacheId = RenderTarget->GetCacheId();
-		FOpenGLTexture* Framebuffer = static_cast<FOpenGLTexture*>(RenDev->GetCachedResource(CacheId));
+	QWORD CacheId = RenderTarget->GetCacheId();
+	FOpenGLTexture* Framebuffer = static_cast<FOpenGLTexture*>(RenDev->GetCachedResource(CacheId));
 
-		if(!Framebuffer)
-			Framebuffer = new FOpenGLTexture(RenDev, CacheId);
+	if(!Framebuffer)
+		Framebuffer = new FOpenGLTexture(RenDev, CacheId);
 
-		if(Framebuffer->Revision != RenderTarget->GetRevision())
-			Framebuffer->Cache(RenderTarget, MatchBackbuffer);
+	if(Framebuffer->Revision != RenderTarget->GetRevision())
+		Framebuffer->Cache(RenderTarget, MatchBackbuffer);
 
-		Framebuffer->BindRenderTarget();
-	}else{
-		glBindFramebuffer(GL_FRAMEBUFFER, GL_NONE);
-	}
+	Framebuffer->BindRenderTarget();
+	SetViewport(0, 0, Framebuffer->Width, Framebuffer->Height);
 
 	CurrentState->RenderTarget = RenderTarget;
 	CurrentState->RenderTargetMatchesBackbuffer = MatchBackbuffer;
@@ -1752,9 +1750,6 @@ void FOpenGLRenderInterface::DrawPrimitive(EPrimitiveType PrimitiveType, INT Fir
 	case PT_TriangleFan:
 		Mode = GL_TRIANGLE_FAN;
 		Count += 2;
-		break;
-	default:
-		appErrorf("Unexpected EPrimitiveType (%i)", PrimitiveType);
 	};
 
 	if(CurrentState->IndexBuffer){
@@ -1764,7 +1759,7 @@ void FOpenGLRenderInterface::DrawPrimitive(EPrimitiveType PrimitiveType, INT Fir
 		                    MinIndex,
 		                    MaxIndex,
 		                    Count,
-		                    IndexSize == sizeof(DWORD) ? GL_UNSIGNED_INT : GL_UNSIGNED_SHORT,
+		                    IndexSize == sizeof(_WORD) ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT,
 		                    reinterpret_cast<void*>((FirstIndex + CurrentState->IndexBufferBaseIndex) * IndexSize));
 	}else{
 		glDrawArrays(Mode, 0, Count);

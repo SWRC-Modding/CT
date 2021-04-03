@@ -157,6 +157,13 @@ static const TCHAR* SaturateFuncs =
 	"vec3  saturate(vec3  v){ return min(max(v, 0.0), 1.0); }\n"
 	"vec4  saturate(vec4  v){ return min(max(v, 0.0), 1.0); }\n\n";
 
+static FStringTemp GetShaderHeaderComment(UHardwareShader* Shader){
+	return FString::Printf("/*\n"
+	                       " * %s\n"
+	                       " */\n",
+						   Shader->GetPathName());
+}
+
 FStringTemp UOpenGLRenderDevice::GLSLVertexShaderFromD3DVertexShader(UHardwareShader* Shader){
 	FString D3DShaderText = Shader->VertexShaderText;
 	FString VertexAttributes;
@@ -215,7 +222,8 @@ FStringTemp UOpenGLRenderDevice::GLSLVertexShaderFromD3DVertexShader(UHardwareSh
 	else
 		VertexAttributes += "\n";
 
-	FString GLSLShaderText = VertexShaderVarsText +
+	FStringTemp GLSLShaderText = GetShaderHeaderComment(Shader) +
+		                VertexShaderVarsText +
 		FString::Printf("layout(location = %i) uniform vec4 VSConstants[%i];\n", HSU_VSConstants, MAX_VERTEX_SHADER_CONSTANTS) +
 		                "#define c VSConstants\n\n" +
 		                VertexAttributes +
@@ -266,7 +274,8 @@ FStringTemp UOpenGLRenderDevice::GLSLFragmentShaderFromD3DPixelShader(UHardwareS
 
 	ExpandHardwareShaderMacros(&D3DShaderText);
 
-	FStringTemp GLSLShaderText = FragmentShaderVarsText +
+	FStringTemp GLSLShaderText = GetShaderHeaderComment(Shader) +
+		                FragmentShaderVarsText +
 		FString::Printf("layout(location = %i) uniform vec4 PSConstants[%i];\n", HSU_PSConstants, MAX_PIXEL_SHADER_CONSTANTS) +
 		                "#define c PSConstants\n\n"
 		                "#define v0 Diffuse\n"

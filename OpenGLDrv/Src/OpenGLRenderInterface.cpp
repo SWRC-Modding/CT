@@ -1581,6 +1581,26 @@ static GLenum GetStencilOp(EStencilOp StencilOp){
 	return GL_KEEP;
 }
 
+void FOpenGLRenderInterface::CopyBackBufferToTarget(FAuxRenderTarget* Target){
+	FOpenGLTexture* OGLTarget = static_cast<FOpenGLTexture*>(RenDev->GetCachedResource(Target->GetCacheId()));
+	FOpenGLTexture* Backbuffer = static_cast<FOpenGLTexture*>(RenDev->GetCachedResource(RenDev->Backbuffer.GetCacheId()));
+
+	if(!OGLTarget || !Backbuffer)
+		return;
+
+	GLbitfield Flags = GL_COLOR_BUFFER_BIT;
+
+	if(OGLTarget->DepthStencilAttachment && Backbuffer->DepthStencilAttachment)
+		Flags |= GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT;
+
+	glBlitNamedFramebuffer(Backbuffer->FBO,
+	                       OGLTarget->FBO,
+	                       0, 0, Backbuffer->Width, Backbuffer->Height,
+	                       0, 0, OGLTarget->Width, OGLTarget->Height,
+	                       Flags,
+	                       GL_NEAREST);
+}
+
 void FOpenGLRenderInterface::SetStencilOp(ECompareFunction Test, DWORD Ref, DWORD Mask, EStencilOp FailOp, EStencilOp ZFailOp, EStencilOp PassOp, DWORD WriteMask){
 	CurrentState->StencilCompare = Test;
 	CurrentState->StencilRef = Ref;

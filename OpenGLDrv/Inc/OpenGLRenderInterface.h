@@ -263,6 +263,7 @@ public:
 	virtual FMatrix GetTransform(ETransformType Type) const;
 	virtual void SetMaterial(UMaterial* Material, FString* ErrorString = NULL, UMaterial** ErrorMaterial = NULL, INT* NumPasses = NULL);
 	virtual UBOOL SetHardwareShaderMaterial(UHardwareShader* Material, FString* ErrorString = NULL, UMaterial** ErrorMaterial = NULL);
+	virtual void CopyBackBufferToTarget(FAuxRenderTarget* Target);
 	virtual void SetStencilOp(ECompareFunction Test, DWORD Ref, DWORD Mask, EStencilOp FailOp, EStencilOp ZFailOp, EStencilOp PassOp, DWORD WriteMask);
 	virtual void EnableStencilTest(UBOOL Enable);
 	virtual void EnableZWrite(UBOOL Enable);

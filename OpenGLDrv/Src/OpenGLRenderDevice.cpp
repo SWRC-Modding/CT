@@ -1177,7 +1177,7 @@ FString UOpenGLRenderDevice::FixedFunctionFragmentShaderText(
 			"\t\t}\n"
 		"\t}\n"
 		"\n"
-		"\treturn LightColor * LightFactor;\n"
+		"\treturn LightColor * LightFactor * Specular;\n"
 	"}\n"
 	"\n"
 	"// Main\n"

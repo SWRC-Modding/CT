@@ -229,7 +229,8 @@ FOpenGLTexture::FOpenGLTexture(UOpenGLRenderDevice* InRenDev, QWORD InCacheId) :
                                                                                  TextureHandle(GL_NONE),
                                                                                  FBO(GL_NONE),
                                                                                  DepthStencilAttachment(GL_NONE),
-                                                                                 IsCubemap(false){}
+                                                                                 IsCubemap(false),
+                                                                                 HasSharedDepthStencil(false){}
 
 FOpenGLTexture::~FOpenGLTexture(){
 	Free();
@@ -294,11 +295,26 @@ void FOpenGLTexture::Cache(FBaseTexture* BaseTexture, bool RenderTargetMatchBack
 			checkSlow(RenDev->BackbufferDepthStencil != GL_NONE);
 			DepthStencilAttachment = RenDev->BackbufferDepthStencil;
 		}else{
-			glCreateRenderbuffers(1, &DepthStencilAttachment);
-			glNamedRenderbufferStorage(DepthStencilAttachment, GL_DEPTH24_STENCIL8, Width, Height);
+			bool IsMipTarget = false;
+
+			for(INT i = 0; i < UFrameFX::MaxMips; ++i){
+				if(RenderTarget == UFrameFX::MipTargets[i]){
+					IsMipTarget = true;
+
+					break;
+				}
+			}
+
+			if(IsMipTarget){ // The FrameFX Mip targets don't need a depth and stencil buffer
+				DepthStencilAttachment = GL_NONE;
+			}else{
+				glCreateRenderbuffers(1, &DepthStencilAttachment);
+				glNamedRenderbufferStorage(DepthStencilAttachment, GL_DEPTH24_STENCIL8, Width, Height);
+			}
 		}
 
-		glNamedFramebufferRenderbuffer(FBO, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, DepthStencilAttachment);
+		if(DepthStencilAttachment)
+			glNamedFramebufferRenderbuffer(FBO, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, DepthStencilAttachment);
 
 		checkSlow(glCheckNamedFramebufferStatus(FBO, GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE);
 	}

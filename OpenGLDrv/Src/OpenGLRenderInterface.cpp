@@ -463,6 +463,8 @@ void FOpenGLRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorStri
 	ECullMode CullMode = CurrentState->CullMode;
 	EFillMode FillMode = CurrentState->FillMode;
 
+	CurrentState->bZTest = true; // ZTest is explicitly set to false if it isn't desired, so we default it to true at the beginning
+
 	Material->PreSetMaterial(GEngineTime);
 
 	bool Result = false;

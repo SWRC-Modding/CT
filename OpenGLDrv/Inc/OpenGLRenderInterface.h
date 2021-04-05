@@ -172,7 +172,6 @@ public:
 		ECullMode             CullMode;
 		EFillMode             FillMode;
 
-		bool                  bStencilTest;
 		bool                  bZWrite;
 		bool                  bZTest;
 
@@ -198,10 +197,14 @@ public:
 	UOpenGLRenderDevice*      RenDev;
 	UViewport*                LockedViewport;
 
+	bool                      bStencilEnabled;
+
 	EPrecacheMode             PrecacheMode;
 
 	FOpenGLSavedState         SavedStates[MAX_STATESTACKDEPTH];
 	FOpenGLSavedState*        CurrentState;
+
+	FOpenGLShader*            CurrentShader;
 
 	bool                      NeedUniformUpdate;
 	unsigned int              GlobalUBO;

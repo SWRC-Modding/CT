@@ -23,7 +23,7 @@ public:
 
 	// Virtual functions
 	virtual ~FMovie(){}
-	virtual int Play(UBOOL LoopMovie) = 0;
+	virtual UBOOL Play(UBOOL LoopMovie) = 0;
 	virtual void Pause(UBOOL Pause) = 0;
 	virtual UBOOL IsPaused() = 0;
 	virtual void StopNow() = 0;
@@ -33,7 +33,7 @@ public:
 	virtual INT GetHeight() = 0;
 	virtual void PreRender(void* RenderTarget, INT PosX, INT PosY) = 0;
 	virtual void RenderToRGBAArray(BYTE* Buffer) = 0;
-	virtual void RenderToNative(void* RebderTarget, INT PosX, INT PosY){}
+	virtual void RenderToNative(void* RenderTarget, INT PosX, INT PosY){}
 	virtual void RenderToTexture(UTexture* Texture); // Calls RenderToRGBAArray by default
 	virtual void Serialize(FArchive& Ar){}
 

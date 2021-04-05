@@ -700,6 +700,33 @@ FRenderCaps* UOpenGLRenderDevice::GetRenderCaps(){
 	return &RenderCaps;
 }
 
+void UOpenGLRenderDevice::RenderMovie(UViewport* Viewport){
+	FMovie* Movie = NULL;
+
+	if(Viewport->Actor && Viewport->Actor->myHUD && Viewport->Actor->myHUD->Movie)
+		Movie = Viewport->Actor->myHUD->Movie->fMovie;
+
+	if(!Movie)
+		return;
+
+	bool NeedLock = RenderInterface.LockedViewport == NULL;
+
+	if(NeedLock)
+		Lock(Viewport, NULL, NULL);
+
+	// TODO: Implement
+
+	if(NeedLock)
+		Unlock(&RenderInterface);
+}
+
+FMovie* UOpenGLRenderDevice::GetNewMovie(ECodecType Codec, FString Filename, UBOOL UseSound, INT FrameRate, int){
+	if(Codec == CODEC_RoQ)
+		return new FRoQMovie(Filename, UseSound, FrameRate);
+
+	return NULL;
+}
+
 void UOpenGLRenderDevice::TakeScreenshot(const TCHAR* Name, UViewport* Viewport, INT Width, INT Height){
 	check(Width == Viewport->SizeX);
 	check(Height == Viewport->SizeY);

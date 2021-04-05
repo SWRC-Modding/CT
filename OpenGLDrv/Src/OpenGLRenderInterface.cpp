@@ -131,8 +131,6 @@ void FOpenGLRenderInterface::PopState(INT Flags){
 		SetViewport(CurrentState->ViewportX, CurrentState->ViewportY, CurrentState->ViewportWidth, CurrentState->ViewportHeight);
 	}
 
-	bool StencilTest = CurrentState->bStencilTest;
-
 	if(CurrentState->StencilCompare != PoppedState->StencilCompare ||
 	   CurrentState->StencilRef != PoppedState->StencilRef ||
 	   CurrentState->StencilMask != PoppedState->StencilMask ||
@@ -148,11 +146,6 @@ void FOpenGLRenderInterface::PopState(INT Flags){
 		             CurrentState->StencilPassOp,
 		             CurrentState->StencilWriteMask);
 	}
-
-	CurrentState->bStencilTest = StencilTest;
-
-	if(CurrentState->bStencilTest != PoppedState->bStencilTest)
-		EnableStencilTest(CurrentState->bStencilTest);
 
 	if(CurrentState->bZTest != PoppedState->bZTest)
 		EnableZTest(CurrentState->bZTest);
@@ -1618,12 +1611,14 @@ void FOpenGLRenderInterface::SetStencilOp(ECompareFunction Test, DWORD Ref, DWOR
 }
 
 void FOpenGLRenderInterface::EnableStencilTest(UBOOL Enable){
-	CurrentState->bStencilTest = Enable != 0;
+	if(!!Enable != bStencilEnabled){
+		bStencilEnabled = Enable != 0;
 
-	if(Enable)
-		glEnable(GL_STENCIL_TEST);
-	else
-		glDisable(GL_STENCIL_TEST);
+		if(Enable)
+			glEnable(GL_STENCIL_TEST);
+		else
+			glDisable(GL_STENCIL_TEST);
+	}
 }
 
 void FOpenGLRenderInterface::EnableZWrite(UBOOL Enable){
@@ -1806,10 +1801,15 @@ void FOpenGLRenderInterface::SetShader(FShaderGLSL* NewShader){
 	if(!Shader)
 		Shader = new FOpenGLShader(RenDev, CacheId);
 
-	if(Shader->Revision != NewShader->GetRevision())
+	if(Shader->Revision != NewShader->GetRevision()){
+		glUseProgram(GL_NONE);
 		Shader->Cache(NewShader);
+		Shader->Bind();
+	}else if(Shader != CurrentShader){
+		Shader->Bind();
+	}
 
-	Shader->Bind();
+	CurrentShader = Shader;
 }
 
 void FOpenGLRenderInterface::SetupPerFrameShaderConstants(){

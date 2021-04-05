@@ -126,9 +126,10 @@ public:
 	virtual UBOOL PixoIsVisible(FBox&){ return 1; }
 	virtual bool IsVertexBufferBusy(FVertexStream*){ return false; }
 	virtual void SetFillMode(EFillMode FillMode){}
-	virtual int vtpad3(){ return 1; }
-	virtual int vtpad4(){ return 1; }
-	virtual int vtpad5(){ return 1; }
+	// Occlusion query functions. (Only implemented for XBox
+	virtual UBOOL BeginOcclusionQuery(){ return 1; }
+	virtual UBOOL EndOcclusionQuery(DWORD QueryNum){ return 1; }
+	virtual UBOOL GetOcclusionQueryResults(DWORD QueryNum, DWORD& dwPixels){ return 1; }
 };
 
 /*------------------------------------------------------------------------------------

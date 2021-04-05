@@ -128,10 +128,10 @@ char(&ArrayCountHelper(T (&array)[N]))[N];
 class FArray{
 protected:
 	void* Data;
-	INT ArrayNum          : 29;
-	BITFIELD bIsReference : 1; // Array doesn't own the data it points to and thus is not allowed to free it
-	BITFIELD bIsTemporary : 1; // This is a temporary object (e.g. returned from a function)
-	BITFIELD bNoShrink    : 1; // Don't shrink allocation when elements are removed
+	INT ArrayNum     : 29;
+	INT bIsReference : 1; // Array doesn't own the data it points to and thus is not allowed to free it
+	INT bIsTemporary : 1; // This is a temporary object (e.g. returned from a function)
+	INT bNoShrink    : 1; // Don't shrink allocation when elements are removed
 
 	FArray(bool NoShrink = false) : Data(NULL), ArrayNum(0), bIsReference(0), bIsTemporary(0), bNoShrink(NoShrink){}
 	FArray(void* Src, INT Count) : Data(Src), ArrayNum(Count), bIsReference(1), bIsTemporary(0), bNoShrink(0){}

@@ -56,8 +56,8 @@ public:
 	virtual void ReadPixels(UViewport* Viewport, FColor* Pixels);
 	virtual void SetEmulationMode(EHardwareEmulationMode Mode){}
 	virtual FRenderCaps* GetRenderCaps();
-	virtual void RenderMovie(UViewport* Viewport){}
-	virtual FMovie* GetNewMovie(ECodecType Codec, FString Filename, UBOOL UseSound, INT FrameRate, int){ return NULL; }
+	virtual void RenderMovie(UViewport* Viewport);
+	virtual FMovie* GetNewMovie(ECodecType Codec, FString Filename, UBOOL UseSound, INT FrameRate, int);
 	virtual int GetStateCaching(){ return 0; }
 	virtual int SetStateCaching(int){ return 0; }
 	virtual int RefreshStates(){ return 0; }

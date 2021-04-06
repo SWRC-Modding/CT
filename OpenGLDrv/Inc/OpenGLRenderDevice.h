@@ -95,10 +95,6 @@ private:
 	UBOOL                     bIsFullscreen;
 	INT                       SavedViewportWidth;
 	INT                       SavedViewportHeight;
-	INT                       ViewportX;
-	INT                       ViewportY;
-	INT                       ViewportWidth;
-	INT                       ViewportHeight;
 
 	FOpenGLIndexBuffer*       DynamicIndexBuffer16;
 	FOpenGLIndexBuffer*       DynamicIndexBuffer32;

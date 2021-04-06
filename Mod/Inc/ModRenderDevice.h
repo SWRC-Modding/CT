@@ -49,8 +49,8 @@ public:
 	virtual void SetMaterial(UMaterial* Material, FString* ErrorString, UMaterial** ErrorMaterial, INT* NumPasses);
 	virtual UBOOL SetHardwareShaderMaterial(UHardwareShader* Material, FString* ErrorString, UMaterial** ErrorMaterial);
 	virtual void SetStencilOp(ECompareFunction Test, DWORD Ref, DWORD Mask, EStencilOp FailOp, EStencilOp ZFailOp, EStencilOp PassOp, DWORD WriteMask){}
-	virtual void EnableStencilTest(UBOOL Enable){}
-	virtual void EnableZWrite(UBOOL Enable){ Impl->EnableZWrite(Enable); }
+	virtual void EnableStencil(UBOOL Enable){}
+	virtual void EnableDepth(UBOOL Enable){ Impl->EnableDepth(Enable); }
 	virtual void SetPrecacheMode(EPrecacheMode PrecacheMode){ Impl->SetPrecacheMode(PrecacheMode); }
 	virtual void SetZBias(INT ZBias){ Impl->SetZBias(ZBias); }
 	virtual INT SetVertexStreams(EVertexShader Shader, FVertexStream** Streams, INT NumStreams){ return Impl->SetVertexStreams(Shader, Streams, NumStreams); }

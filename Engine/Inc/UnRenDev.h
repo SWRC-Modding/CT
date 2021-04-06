@@ -111,8 +111,8 @@ public:
 	virtual void SetLODDiffuseFade(FLOAT Distance){}
 	virtual void SetLODSpecularFade(FLOAT Distance){}
 	virtual void SetStencilOp(ECompareFunction Test, DWORD Ref, DWORD Mask, EStencilOp FailOp, EStencilOp ZFailOp, EStencilOp PassOp, DWORD WriteMask) = 0;
-	virtual void EnableStencilTest(UBOOL Enable) = 0;
-	virtual void EnableZWrite(UBOOL Enable) = 0;
+	virtual void EnableStencil(UBOOL Enable) = 0;
+	virtual void EnableDepth(UBOOL Enable) = 0;
 	virtual void SetPrecacheMode(EPrecacheMode PrecacheMode) = 0;
 	virtual void SetZBias(INT ZBias) = 0;
 	virtual INT SetVertexStreams(EVertexShader Shader, FVertexStream** Streams, INT NumStreams) = 0;

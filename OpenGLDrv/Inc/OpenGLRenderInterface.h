@@ -142,48 +142,60 @@ struct FOpenGLGlobalUniforms{
 
 #pragma warning(pop)
 
+struct FOpenGLTextureUnit{
+	FOpenGLTexture* Texture;
+	BYTE            ClampU; // ETexClampMode
+	BYTE            ClampV; // ETexClampMode
+};
+
+struct FOpenGLRenderState{
+	ECullMode             CullMode;
+	EFillMode             FillMode;
+
+	bool                  bZWrite;
+	bool                  bZTest;
+	bool                  bStencilTest;
+
+	ECompareFunction      StencilCompare;
+	DWORD                 StencilRef;
+	DWORD                 StencilMask;
+	EStencilOp            StencilFailOp;
+	EStencilOp            StencilZFailOp;
+	EStencilOp            StencilPassOp;
+	DWORD                 StencilWriteMask;
+
+	INT                   ZBias;
+
+	INT                   ViewportX;
+	INT                   ViewportY;
+	INT                   ViewportWidth;
+	INT                   ViewportHeight;
+
+	unsigned int          SrcBlend;
+	unsigned int          DstBlend;
+
+	FRenderTarget*        RenderTarget;
+
+	FOpenGLIndexBuffer*   IndexBuffer;
+	INT                   NumVertexStreams;
+	FOpenGLVertexStream*  VertexStreams[MAX_VERTEX_STREAMS];
+
+	INT                   NumTextures;
+	FOpenGLTextureUnit    TextureUnits[MAX_TEXTURES];
+};
+
 /*
  * OpenGL RenderInterface
  */
 class FOpenGLRenderInterface : public FRenderInterface{
 public:
-	struct FOpenGLSavedState{
-		// Buffers
-
+	struct FOpenGLSavedState : FOpenGLGlobalUniforms, FOpenGLRenderState{
 		INT                   UniformRevision;
-		FOpenGLGlobalUniforms Uniforms;
 
 		unsigned int          VAO;
 		INT                   IndexBufferBaseIndex;
-		FOpenGLIndexBuffer*   IndexBuffer;
 
-		// RenderTarget
-
-		FRenderTarget*        RenderTarget;
 		bool                  RenderTargetMatchesBackbuffer;
-
-		INT                   ViewportX;
-		INT                   ViewportY;
-		INT                   ViewportWidth;
-		INT                   ViewportHeight;
-
-		// Render modes
-
-		ECullMode             CullMode;
-		EFillMode             FillMode;
-
-		bool                  bZWrite;
-		bool                  bZTest;
-
-		ECompareFunction      StencilCompare;
-		DWORD                 StencilRef;
-		DWORD                 StencilMask;
-		EStencilOp            StencilFailOp;
-		EStencilOp            StencilZFailOp;
-		EStencilOp            StencilPassOp;
-		DWORD                 StencilWriteMask;
-
-		INT                   ZBias;
 
 		// Light
 
@@ -203,6 +215,7 @@ public:
 
 	FOpenGLSavedState         SavedStates[MAX_STATESTACKDEPTH];
 	FOpenGLSavedState*        CurrentState;
+	FOpenGLRenderState        RenderState;
 
 	FOpenGLShader*            CurrentShader;
 
@@ -211,8 +224,6 @@ public:
 
 	INT                       TextureAnisotropy;
 	unsigned int              Samplers[MAX_TEXTURES];
-	BYTE                      CurrentTexClampModeUV[MAX_TEXTURES][2];
-	BYTE                      DesiredTexClampModeUV[MAX_TEXTURES][2];
 
 	// Fixed function emulation
 
@@ -221,7 +232,6 @@ public:
 	bool                      ModifyColor;
 	bool                      ModifyFramebufferBlending;
 	INT                       NumStages;
-	INT                       NumTextures;
 	INT                       TexCoordCount;
 	INT                       StageTexCoordSources[MAX_SHADER_STAGES];
 	FMatrix                   StageTexMatrices[MAX_SHADER_STAGES];
@@ -231,19 +241,15 @@ public:
 	INT                       StageAlphaOps[MAX_SHADER_STAGES];     // EAlphaOp
 	FPlane                    ConstantColor;
 
-	// Blending
-
-	BYTE                      FramebufferBlending; // EFrameBufferBlending
-	unsigned int              SrcBlend; // Blending parameters used when Framebufferblending == FB_MAX
-	unsigned int              DstBlend;
-
 	FOpenGLRenderInterface(UOpenGLRenderDevice* InRenDev);
 
 	void Init();
 	void Exit();
+	void CommitRenderState();
 	void Locked(UViewport* Viewport);
 	void Unlocked();
 	void UpdateGlobalShaderUniforms();
+	void SetFramebufferBlending(EFrameBufferBlending Mode);
 
 	// Overrides
 	virtual void PushState(INT Flags = 0);
@@ -268,8 +274,8 @@ public:
 	virtual UBOOL SetHardwareShaderMaterial(UHardwareShader* Material, FString* ErrorString = NULL, UMaterial** ErrorMaterial = NULL);
 	virtual void CopyBackBufferToTarget(FAuxRenderTarget* Target);
 	virtual void SetStencilOp(ECompareFunction Test, DWORD Ref, DWORD Mask, EStencilOp FailOp, EStencilOp ZFailOp, EStencilOp PassOp, DWORD WriteMask);
-	virtual void EnableStencilTest(UBOOL Enable);
-	virtual void EnableZWrite(UBOOL Enable);
+	virtual void EnableStencil(UBOOL Enable);
+	virtual void EnableDepth(UBOOL Enable);
 	virtual void SetPrecacheMode(EPrecacheMode InPrecacheMode){ PrecacheMode = InPrecacheMode; }
 	virtual void SetZBias(INT ZBias);
 	virtual INT SetVertexStreams(EVertexShader Shader, FVertexStream** Streams, INT NumStreams);
@@ -279,7 +285,6 @@ public:
 	virtual void DrawPrimitive(EPrimitiveType PrimitiveType, INT FirstIndex, INT NumPrimitives, INT MinIndex = INDEX_NONE, INT MaxIndex = INDEX_NONE);
 	virtual void SetFillMode(EFillMode FillMode);
 
-	void EnableZTest(UBOOL Enable);
 	void SetShader(FShaderGLSL* NewShader);
 	void SetupPerFrameShaderConstants();
 
@@ -341,11 +346,11 @@ private:
 
 						switch(TexModifier->TexCoordSource){
 						case TCS_CameraCoords:
-							*StageTexMatrix *= CurrentState->Uniforms.WorldToCamera.Transpose();
+							*StageTexMatrix *= CurrentState->WorldToCamera.Transpose();
 							break;
 						case TCS_CubeCameraSpaceReflection:
 							{
-								FMatrix Tmp = CurrentState->Uniforms.WorldToCamera;
+								FMatrix Tmp = CurrentState->WorldToCamera;
 								Tmp.M[3][0] = 0.0f;
 								Tmp.M[3][1] = 0.0f;
 								Tmp.M[3][2] = 0.0f;
@@ -362,16 +367,16 @@ private:
 
 					if(TextureIndex >= 0){
 						if(TexModifier->UClampMode != TCO_UseTextureMode)
-							DesiredTexClampModeUV[TextureIndex][0] = TexModifier->UClampMode - 1;
+							CurrentState->TextureUnits[TextureIndex].ClampU = TexModifier->UClampMode - 1;
 
 						if(TexModifier->VClampMode != TCO_UseTextureMode)
-							DesiredTexClampModeUV[TextureIndex][1] = TexModifier->UClampMode - 1;
+							CurrentState->TextureUnits[TextureIndex].ClampV = TexModifier->VClampMode - 1;
 					}
 				}else if(Modifier->IsA<UFinalBlend>()){
 					UFinalBlend* FinalBlend = static_cast<UFinalBlend*>(Modifier);
 
 					ModifyFramebufferBlending = true;
-					FramebufferBlending = FinalBlend->FrameBufferBlending;
+					SetFramebufferBlending(static_cast<EFrameBufferBlending>(FinalBlend->FrameBufferBlending));
 					CurrentState->bZTest = FinalBlend->ZTest != 0;
 					CurrentState->bZWrite = FinalBlend->ZWrite != 0;
 
@@ -379,7 +384,7 @@ private:
 						CurrentState->CullMode = CM_None;
 
 					if(FinalBlend->AlphaTest)
-						CurrentState->Uniforms.AlphaRef = FinalBlend->AlphaRef / 255.0f;
+						CurrentState->AlphaRef = FinalBlend->AlphaRef / 255.0f;
 				}else if(Modifier->IsA<UColorModifier>()){
 					UColorModifier* ColorModifier = static_cast<UColorModifier*>(Modifier);
 
@@ -391,7 +396,7 @@ private:
 						CurrentState->CullMode = CM_None;
 
 					if(!ModifyFramebufferBlending && ColorModifier->AlphaBlend)
-						FramebufferBlending = FB_AlphaBlend;
+						SetFramebufferBlending(FB_AlphaBlend);
 				}
 
 				Modifier = static_cast<UModifier*>(Modifier->Material);

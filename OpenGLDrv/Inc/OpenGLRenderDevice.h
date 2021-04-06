@@ -103,7 +103,6 @@ private:
 	FOpenGLIndexBuffer*       DynamicIndexBuffer16;
 	FOpenGLIndexBuffer*       DynamicIndexBuffer32;
 	FOpenGLVertexStream*      DynamicVertexStream;
-	TMap<DWORD, unsigned int> VAOsByDeclId;
 
 	TArray<BYTE>              Scratch;
 	FOpenGLResource*          ResourceHash[4096];
@@ -115,7 +114,6 @@ private:
 	void AddResource(FOpenGLResource* Resource);
 	void RemoveResource(FOpenGLResource* Resource);
 
-	unsigned int GetVAO(const FStreamDeclaration* Declarations, INT NumStreams);
 	FOpenGLIndexBuffer* GetDynamicIndexBuffer(INT IndexSize);
 	FOpenGLVertexStream* GetDynamicVertexStream();
 

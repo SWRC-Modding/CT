@@ -453,21 +453,7 @@ UBOOL UOpenGLRenderDevice::SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL
 
 		#undef CHECK_EXT
 
-		// Setup initial state
-
-		glEnable(GL_BLEND);
-		glEnable(GL_DEPTH_TEST);
-		glEnable(GL_STENCIL_TEST);
-		glEnable(GL_POLYGON_OFFSET_FILL);
-
 		RenderInterface.Init();
-		RenderInterface.EnableZTest(1);
-		RenderInterface.EnableZWrite(1);
-		RenderInterface.SetStencilOp(CF_Always, 0xF, 0xFF, SO_Keep, SO_Keep, SO_Keep, 0xFF);
-		RenderInterface.EnableStencilTest(UseStencil);
-		RenderInterface.SetShader(&FixedFunctionShader);
-		RenderInterface.SetCullMode(CM_CW);
-		RenderInterface.SetFillMode(FM_Solid);
 		EnableVSync(bVSync != 0);
 
 		// Set default values for unspecified vertex attributes
@@ -574,9 +560,6 @@ UBOOL UOpenGLRenderDevice::SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL
 	ViewportX = ScreenWidth / 2 - ViewportWidth / 2;
 	ViewportY = ScreenHeight / 2 - ViewportHeight / 2;
 
-	// Set default render target
-	RenderInterface.SetRenderTarget(&Backbuffer, false);
-
 	return 1;
 
 	unguard;
@@ -606,13 +589,6 @@ void UOpenGLRenderDevice::Flush(UViewport* Viewport){
 	DynamicIndexBuffer32 = NULL;
 	DynamicIndexBuffer16 = NULL;
 	DynamicVertexStream  = NULL;
-
-	for(TMap<DWORD, unsigned int>::TIterator It(VAOsByDeclId); It; ++It){
-		if(It.Value())
-			glDeleteVertexArrays(1, &It.Value());
-	}
-
-	VAOsByDeclId.Empty();
 }
 
 void UOpenGLRenderDevice::FlushResource(QWORD CacheId){

@@ -472,6 +472,9 @@ UBOOL UOpenGLRenderDevice::SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL
 		++Backbuffer.Revision;
 	}
 
+	// Set initial viewport
+	RenderInterface.SetViewport(0, 0, NewX, NewY);
+
 	// Figure out viewport size for aspect ratio correction
 
 	INT FramebufferWidth = NewX;

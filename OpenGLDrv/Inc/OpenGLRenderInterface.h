@@ -289,7 +289,6 @@ public:
 
 	void SetShader(FShaderGLSL* NewShader);
 	unsigned int GetVAO(const FStreamDeclaration* Declarations, INT NumStreams);
-	void SetupPerFrameShaderConstants();
 
 private:
 	INT SetIndexBuffer(FIndexBuffer* IndexBuffer, INT BaseIndex, bool IsDynamic);

@@ -449,8 +449,6 @@ UBOOL UOpenGLRenderDevice::SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL
 		if(bSaveSize){
 			UClient* Client = Viewport->GetOuterUClient();
 
-			check(Client);
-
 			// NOTE: We have to do it like this since the bSaveSize parameter for ResizeViewport seems to have no effect
 			Client->FullscreenViewportX = Viewport->SizeX;
 			Client->FullscreenViewportY = Viewport->SizeY;
@@ -474,44 +472,6 @@ UBOOL UOpenGLRenderDevice::SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL
 
 	// Set initial viewport
 	RenderInterface.SetViewport(0, 0, NewX, NewY);
-
-	// Figure out viewport size for aspect ratio correction
-
-	INT FramebufferWidth = NewX;
-	INT FramebufferHeight = NewY;
-	INT ScreenWidth;
-	INT ScreenHeight;
-
-	if(bIsFullscreen){
-		ScreenWidth  = SavedViewportWidth;
-		ScreenHeight = SavedViewportHeight;
-	}else{
-		ScreenWidth  = NewX;
-		ScreenHeight = NewY;
-	}
-
-	FLOAT XScale = 1.0f;
-	FLOAT YScale = 1.0f;
-
-	if(bKeepAspectRatio || bIsFullscreen){
-		FLOAT ViewportAspectRatio = static_cast<FLOAT>(ScreenWidth) / ScreenHeight;
-		FLOAT FramebufferAspectRatio = static_cast<FLOAT>(FramebufferWidth) / FramebufferHeight;
-
-		if(FramebufferAspectRatio < ViewportAspectRatio){
-			FLOAT Scale = static_cast<FLOAT>(ScreenHeight) / FramebufferHeight;
-
-			XScale = FramebufferWidth * Scale / ScreenWidth;
-		}else{
-			FLOAT Scale = static_cast<FLOAT>(ScreenWidth) / FramebufferWidth;
-
-			YScale = FramebufferHeight * Scale / ScreenHeight;
-		}
-	}
-
-	ViewportWidth = static_cast<INT>(ScreenWidth * XScale);
-	ViewportHeight = static_cast<INT>(ScreenHeight * YScale);
-	ViewportX = ScreenWidth / 2 - ViewportWidth / 2;
-	ViewportY = ScreenHeight / 2 - ViewportHeight / 2;
 
 	return 1;
 
@@ -589,25 +549,65 @@ void UOpenGLRenderDevice::Unlock(FRenderInterface* RI){
 void UOpenGLRenderDevice::Present(UViewport* Viewport){
 	checkSlow(IsCurrent());
 
-	if(bIsFullscreen && bKeepAspectRatio){
+	INT ViewportX;
+	INT ViewportY;
+	INT ViewportWidth;
+	INT ViewportHeight;
+
+	if(bKeepAspectRatio && bIsFullscreen){
 		// Clear black bars.
 		// This shouldn't have to happen every frame but for some reason the old pixels are still visible outside of the draw region
 		// after a resolution change, even if the buffer was cleared in SetRes.
 		FPlane Black(0.0f, 0.0f, 0.0f, 1.0f);
 		glClearNamedFramebufferfv(GL_NONE, GL_COLOR, GL_NONE, reinterpret_cast<GLfloat*>(&Black));
+
+		INT FramebufferWidth = Viewport->SizeX;
+		INT FramebufferHeight = Viewport->SizeY;
+		INT ScreenWidth = SavedViewportWidth;
+		INT ScreenHeight = SavedViewportHeight;
+
+		FLOAT XScale = 1.0f;
+		FLOAT YScale = 1.0f;
+		FLOAT ViewportAspectRatio = static_cast<FLOAT>(ScreenWidth) / ScreenHeight;
+		FLOAT FramebufferAspectRatio = static_cast<FLOAT>(FramebufferWidth) / FramebufferHeight;
+
+		if(FramebufferAspectRatio < ViewportAspectRatio){
+			FLOAT Scale = static_cast<FLOAT>(ScreenHeight) / FramebufferHeight;
+
+			XScale = FramebufferWidth * Scale / ScreenWidth;
+		}else{
+			FLOAT Scale = static_cast<FLOAT>(ScreenWidth) / FramebufferWidth;
+
+			YScale = FramebufferHeight * Scale / ScreenHeight;
+		}
+
+		ViewportWidth = static_cast<INT>(ScreenWidth * XScale);
+		ViewportHeight = static_cast<INT>(ScreenHeight * YScale);
+		ViewportX = ScreenWidth / 2 - ViewportWidth / 2;
+		ViewportY = ScreenHeight / 2 - ViewportHeight / 2;
+	}else{
+		ViewportX = 0;
+		ViewportY = 0;
+
+		if(bIsFullscreen){
+			ViewportWidth = SavedViewportWidth;
+			ViewportHeight = SavedViewportHeight;
+		}else{
+			ViewportWidth = Viewport->SizeX;
+			ViewportHeight = Viewport->SizeY;
+		}
 	}
 
-	FOpenGLTexture* Framebuffer = static_cast<FOpenGLTexture*>(GetCachedResource(Backbuffer.GetCacheId()));
+	FOpenGLTexture* BackbufferTexture = static_cast<FOpenGLTexture*>(GetCachedResource(Backbuffer.GetCacheId()));
 
-	if(Framebuffer){
-		glBlitNamedFramebuffer(Framebuffer->FBO, GL_NONE,
-		                       0, 0, Framebuffer->Width, Framebuffer->Height,
-		                       ViewportX, ViewportHeight, ViewportX + ViewportWidth, ViewportY,
-		                       GL_COLOR_BUFFER_BIT,
-		                       bBilinearFramebuffer ? GL_LINEAR : GL_NEAREST);
+	checkSlow(BackbufferTexture);
+	glBlitNamedFramebuffer(BackbufferTexture->FBO, GL_NONE,
+	                       0, 0, BackbufferTexture->Width, BackbufferTexture->Height,
+	                       ViewportX, ViewportHeight, ViewportX + ViewportWidth, ViewportY,
+	                       GL_COLOR_BUFFER_BIT,
+	                       bBilinearFramebuffer ? GL_LINEAR : GL_NEAREST);
 
-		SwapBuffers(DeviceContext);
-	}
+	SwapBuffers(DeviceContext);
 
 	check(glGetError() == GL_NO_ERROR);
 }

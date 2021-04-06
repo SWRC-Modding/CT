@@ -290,7 +290,14 @@ void FOpenGLRenderInterface::Locked(UViewport* Viewport){
 	if(RenderState.bStencilTest != !!RenDev->UseStencil)
 		CurrentState->bStencilTest = true;
 
-	SetupPerFrameShaderConstants();
+	// Setup per-frame shader constants
+
+	FLOAT Time = appFmod(static_cast<FLOAT>(appSeconds()), 120.0f);
+
+	CurrentState->Time = Time;
+	CurrentState->SinTime = appSin(Time);
+	CurrentState->CosTime = appCos(Time);
+	CurrentState->TanTime = appTan(Time);
 }
 
 void FOpenGLRenderInterface::Unlocked(){
@@ -1930,13 +1937,4 @@ unsigned int FOpenGLRenderInterface::GetVAO(const FStreamDeclaration* Declaratio
 	}
 
 	return VAO;
-}
-
-void FOpenGLRenderInterface::SetupPerFrameShaderConstants(){
-	FLOAT Time = appFmod(static_cast<FLOAT>(appSeconds()), 120.0f);
-
-	CurrentState->Time = Time;
-	CurrentState->SinTime = appSin(Time);
-	CurrentState->CosTime = appCos(Time);
-	CurrentState->TanTime = appTan(Time);
 }

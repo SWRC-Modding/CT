@@ -225,6 +225,8 @@ public:
 	INT                       TextureAnisotropy;
 	unsigned int              Samplers[MAX_TEXTURES];
 
+	TMap<DWORD, unsigned int> VAOsByDeclId;
+
 	// Fixed function emulation
 
 	bool                      Unlit;
@@ -286,6 +288,7 @@ public:
 	virtual void SetFillMode(EFillMode FillMode);
 
 	void SetShader(FShaderGLSL* NewShader);
+	unsigned int GetVAO(const FStreamDeclaration* Declarations, INT NumStreams);
 	void SetupPerFrameShaderConstants();
 
 private:

@@ -162,56 +162,6 @@ FShaderGLSL* UOpenGLRenderDevice::GetShader(UHardwareShader* HardwareShader){
 	return Shader;
 }
 
-unsigned int UOpenGLRenderDevice::GetVAO(const FStreamDeclaration* Declarations, INT NumStreams){
-	// Check if there is an existing VAO for this format by hashing the shader declarations
-	GLuint& VAO = VAOsByDeclId[appMemCrc(Declarations, sizeof(FStreamDeclaration) * NumStreams)];
-
-	// Create and setup VAO if none was found matching the vertex format
-	if(!VAO){
-		glCreateVertexArrays(1, &VAO);
-
-		for(INT StreamIndex = 0; StreamIndex < NumStreams; ++StreamIndex){
-			const FStreamDeclaration& Decl = Declarations[StreamIndex];
-			GLuint Offset = 0;
-
-			for(INT i = 0; i < Decl.NumComponents; ++i){
-				BYTE Function = Decl.Components[i].Function; // EFixedVertexFunction
-				BYTE Type     = Decl.Components[i].Type;     // EComponentType
-
-				checkSlow(Function < FVF_MAX);
-				checkSlow(Type < CT_MAX);
-
-				switch(Type){
-				case CT_Float4:
-					glVertexArrayAttribFormat(VAO, Function, 4, GL_FLOAT, GL_FALSE, Offset);
-					Offset += sizeof(FLOAT) * 4;
-					break;
-				case CT_Float3:
-					glVertexArrayAttribFormat(VAO, Function, 3, GL_FLOAT, GL_FALSE, Offset);
-					Offset += sizeof(FLOAT) * 3;
-					break;
-				case CT_Float2:
-					glVertexArrayAttribFormat(VAO, Function, 2, GL_FLOAT, GL_FALSE, Offset);
-					Offset += sizeof(FLOAT) * 2;
-					break;
-				case CT_Float1:
-					glVertexArrayAttribFormat(VAO, Function, 1, GL_FLOAT, GL_FALSE, Offset);
-					Offset += sizeof(FLOAT);
-					break;
-				case CT_Color:
-					glVertexArrayAttribFormat(VAO, Function, GL_BGRA, GL_UNSIGNED_BYTE, GL_TRUE, Offset);
-					Offset += sizeof(FColor);
-				}
-
-				glEnableVertexArrayAttrib(VAO, Function);
-				glVertexArrayAttribBinding(VAO, Function, StreamIndex);
-			}
-		}
-	}
-
-	return VAO;
-}
-
 FOpenGLIndexBuffer* UOpenGLRenderDevice::GetDynamicIndexBuffer(INT IndexSize){
 	if(IndexSize == sizeof(DWORD)){
 		if(!DynamicIndexBuffer32)

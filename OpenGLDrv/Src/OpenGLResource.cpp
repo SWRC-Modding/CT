@@ -276,6 +276,32 @@ void FOpenGLTexture::Cache(FBaseTexture* BaseTexture, bool RenderTargetMatchBack
 		if(Width == 0 || Height == 0)
 			return;
 
+		if(Width != RenDev->Backbuffer.GetWidth() || Height != RenDev->Backbuffer.GetHeight())
+			RenderTargetMatchBackbuffer = true;
+
+		if(RenderTargetMatchBackbuffer){
+			bool IsMipTarget = false;
+
+			for(INT i = 0; i < UFrameFX::MaxMips; ++i){
+				if(RenderTarget == UFrameFX::MipTargets[i]){
+					IsMipTarget = true;
+					break;
+				}
+			}
+
+			if(IsMipTarget){
+				DepthStencilAttachment = GL_NONE; // The FrameFX mip targets don't need a depth or stencil buffer
+			}else{
+				glCreateRenderbuffers(1, &DepthStencilAttachment);
+				glNamedRenderbufferStorage(DepthStencilAttachment, GL_DEPTH24_STENCIL8, Width, Height);
+				HasSharedDepthStencil = false;
+			}
+		}else{
+			checkSlow(RenDev->BackbufferDepthStencil);
+			DepthStencilAttachment = RenDev->BackbufferDepthStencil;
+			HasSharedDepthStencil = true;
+		}
+
 		GLenum Format;
 
 		if(RenderTargetMatchBackbuffer)
@@ -287,31 +313,6 @@ void FOpenGLTexture::Cache(FBaseTexture* BaseTexture, bool RenderTargetMatchBack
 		glCreateTextures(GL_TEXTURE_2D, 1, &TextureHandle);
 		glTextureStorage2D(TextureHandle, 1, Format, Width, Height);
 		glNamedFramebufferTexture(FBO, GL_COLOR_ATTACHMENT0, TextureHandle, 0);
-
-		// NOTE: This is a special case: The backbuffer and FrameFX working target need to share their depth and stencil buffers
-		HasSharedDepthStencil = RenderTarget == &RenDev->Backbuffer || RenderTarget == UFrameFX::WorkingTarget;
-
-		if(HasSharedDepthStencil){
-			checkSlow(RenDev->BackbufferDepthStencil != GL_NONE);
-			DepthStencilAttachment = RenDev->BackbufferDepthStencil;
-		}else{
-			bool IsMipTarget = false;
-
-			for(INT i = 0; i < UFrameFX::MaxMips; ++i){
-				if(RenderTarget == UFrameFX::MipTargets[i]){
-					IsMipTarget = true;
-
-					break;
-				}
-			}
-
-			if(IsMipTarget){ // The FrameFX Mip targets don't need a depth and stencil buffer
-				DepthStencilAttachment = GL_NONE;
-			}else{
-				glCreateRenderbuffers(1, &DepthStencilAttachment);
-				glNamedRenderbufferStorage(DepthStencilAttachment, GL_DEPTH24_STENCIL8, Width, Height);
-			}
-		}
 
 		if(DepthStencilAttachment)
 			glNamedFramebufferRenderbuffer(FBO, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, DepthStencilAttachment);

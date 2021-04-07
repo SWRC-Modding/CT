@@ -245,7 +245,7 @@ public:
 
 	FOpenGLRenderInterface(UOpenGLRenderDevice* InRenDev);
 
-	void Init();
+	void Init(INT ViewportWidth, INT ViewportHeight);
 	void Exit();
 	void CommitRenderState();
 	void Locked(UViewport* Viewport);

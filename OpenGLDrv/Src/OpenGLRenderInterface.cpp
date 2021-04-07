@@ -63,15 +63,20 @@ static GLint GetTextureWrapMode(BYTE Mode){
 
 FOpenGLRenderInterface::FOpenGLRenderInterface(UOpenGLRenderDevice* InRenDev) : RenDev(InRenDev),
                                                                                 PrecacheMode(PRECACHE_All),
-																				CurrentState(&SavedStates[0]),
-																				GlobalUBO(GL_NONE){}
+																				CurrentState(&SavedStates[0]){}
 
-void FOpenGLRenderInterface::Init(){
+void FOpenGLRenderInterface::Init(INT ViewportWidth, INT ViewportHeight){
 	// Setup initial state
 
 	glEnable(GL_BLEND);
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_POLYGON_OFFSET_FILL);
+
+	RenderState.ViewportX = 0;
+	RenderState.ViewportY = 0;
+	RenderState.ViewportWidth = ViewportWidth;
+	RenderState.ViewportHeight = ViewportHeight;
+	glViewport(0, 0, ViewportWidth, ViewportHeight);
 
 	RenderState.CullMode = CM_CW;
 	glCullFace(GL_BACK);
@@ -152,12 +157,10 @@ void FOpenGLRenderInterface::Exit(){
 
 void FOpenGLRenderInterface::CommitRenderState(){
 	if(RenderState.CullMode != CurrentState->CullMode){
-		ECullMode CullMode = CurrentState->CullMode;
-
-		if(CullMode != CM_None){
+		if(CurrentState->CullMode != CM_None){
 			GLenum NewCullMode;
 
-			if(CullMode == CM_CCW)
+			if(CurrentState->CullMode == CM_CCW)
 				NewCullMode = GL_FRONT;
 			else
 				NewCullMode = GL_BACK;
@@ -168,7 +171,7 @@ void FOpenGLRenderInterface::CommitRenderState(){
 			glDisable(GL_CULL_FACE);
 		}
 
-		RenderState.CullMode = CullMode;
+		RenderState.CullMode = CurrentState->CullMode;
 	}
 
 	if(RenderState.FillMode != CurrentState->FillMode){

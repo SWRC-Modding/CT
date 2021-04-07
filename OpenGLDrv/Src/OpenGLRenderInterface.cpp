@@ -295,7 +295,7 @@ void FOpenGLRenderInterface::Locked(UViewport* Viewport){
 
 	// Setup per-frame shader constants
 
-	FLOAT Time = appFmod(static_cast<FLOAT>(appSeconds()), 120.0f);
+	FLOAT Time = appFmod(GEngineTime, 120.0f);
 
 	CurrentState->Time = Time;
 	CurrentState->SinTime = appSin(Time);

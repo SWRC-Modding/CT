@@ -188,15 +188,15 @@ void FOpenGLRenderInterface::CommitRenderState(){
 
 	if(bStencilEnabled){
 		if(RenderState.bStencilTest != CurrentState->bStencilTest){
-			if(CurrentState->bStencilTest){
-				CurrentState->StencilCompare = CF_Always;
-				CurrentState->StencilFailOp = SO_Keep;
-				CurrentState->StencilZFailOp = SO_Keep;
-				CurrentState->StencilPassOp = SO_Keep;
+			CurrentState->StencilCompare = CF_Always;
+			CurrentState->StencilFailOp = SO_Keep;
+			CurrentState->StencilZFailOp = SO_Keep;
+			CurrentState->StencilPassOp = SO_Keep;
+
+			if(CurrentState->bStencilTest)
 				CurrentState->StencilWriteMask = 0xFF;
-			}else{
+			else
 				CurrentState->StencilWriteMask = 0x00;
-			}
 
 			RenderState.bStencilTest = CurrentState->bStencilTest;
 		}
@@ -399,8 +399,8 @@ void FOpenGLRenderInterface::PopState(INT Flags){
 
 	check(CurrentState >= &SavedStates[0] && "PopState underflow");
 
-	if(CurrentState->RenderTarget != PoppedState->RenderTarget)
-		SetRenderTarget(CurrentState->RenderTarget, CurrentState->RenderTargetMatchesBackbuffer);
+	if(CurrentState->RenderTarget != PoppedState->RenderTarget || CurrentState->RenderTargetMatchesBackbuffer != PoppedState->RenderTargetMatchesBackbuffer)
+		SetGLRenderTarget(CurrentState->RenderTarget, CurrentState->RenderTargetMatchesBackbuffer);
 
 	if(CurrentState->VAO != PoppedState->VAO){
 		if(CurrentState->VAO != GL_NONE)
@@ -418,27 +418,20 @@ UBOOL FOpenGLRenderInterface::SetRenderTarget(FRenderTarget* RenderTarget, bool 
 	checkSlow(RenderTarget);
 
 	QWORD CacheId = RenderTarget->GetCacheId();
-	FOpenGLTexture* Framebuffer = static_cast<FOpenGLTexture*>(RenDev->GetCachedResource(CacheId));
+	FOpenGLTexture* GLRenderTarget = static_cast<FOpenGLTexture*>(RenDev->GetCachedResource(CacheId));
 
-	if(!Framebuffer || RenderTarget != RenderState.RenderTarget || MatchBackbuffer != CurrentState->RenderTargetMatchesBackbuffer){
-		if(MatchBackbuffer)
-			glClipControl(GL_LOWER_LEFT, GL_NEGATIVE_ONE_TO_ONE);
-		else
-			glClipControl(GL_UPPER_LEFT, GL_ZERO_TO_ONE);
+	if(!GLRenderTarget)
+		GLRenderTarget = new FOpenGLTexture(RenDev, CacheId);
 
-		if(!Framebuffer)
-			Framebuffer = new FOpenGLTexture(RenDev, CacheId);
+	bool NeedsUpdate = false;
 
-		if(Framebuffer->Revision != RenderTarget->GetRevision())
-			Framebuffer->Cache(RenderTarget, MatchBackbuffer);
-
-		Framebuffer->BindRenderTarget();
-		SetViewport(0, 0, Framebuffer->Width, Framebuffer->Height);
-
-		RenderState.RenderTarget = RenderTarget;
-		CurrentState->RenderTarget = RenderTarget;
-		CurrentState->RenderTargetMatchesBackbuffer = MatchBackbuffer;
+	if(GLRenderTarget->Revision != RenderTarget->GetRevision()){
+		GLRenderTarget->Cache(RenderTarget, MatchBackbuffer);
+		NeedsUpdate = true;
 	}
+
+	if(NeedsUpdate || GLRenderTarget != CurrentState->RenderTarget || MatchBackbuffer != CurrentState->RenderTargetMatchesBackbuffer)
+		SetGLRenderTarget(GLRenderTarget, MatchBackbuffer);
 
 	return 1;
 
@@ -1394,6 +1387,21 @@ bool FOpenGLRenderInterface::HandleCombinedMaterial(UMaterial* Material, INT& St
 	}
 
 	return true;
+}
+
+void FOpenGLRenderInterface::SetGLRenderTarget(FOpenGLTexture* GLRenderTarget, bool MatchBackbuffer){
+	checkSlow(GLRenderTarget);
+
+	if(MatchBackbuffer)
+		glClipControl(GL_LOWER_LEFT, GL_NEGATIVE_ONE_TO_ONE);
+	else
+		glClipControl(GL_UPPER_LEFT, GL_ZERO_TO_ONE);
+
+	GLRenderTarget->BindRenderTarget();
+	SetViewport(0, 0, GLRenderTarget->Width, GLRenderTarget->Height);
+
+	CurrentState->RenderTarget = GLRenderTarget;
+	CurrentState->RenderTargetMatchesBackbuffer = MatchBackbuffer;
 }
 
 bool FOpenGLRenderInterface::SetShaderMaterial(UShader* Shader, FString* ErrorString, UMaterial** ErrorMaterial){

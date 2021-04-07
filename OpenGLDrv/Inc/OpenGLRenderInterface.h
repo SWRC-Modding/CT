@@ -174,8 +174,6 @@ struct FOpenGLRenderState{
 	unsigned int          SrcBlend;
 	unsigned int          DstBlend;
 
-	FRenderTarget*        RenderTarget;
-
 	FOpenGLIndexBuffer*   IndexBuffer;
 	INT                   NumVertexStreams;
 	FOpenGLVertexStream*  VertexStreams[MAX_VERTEX_STREAMS];
@@ -195,6 +193,7 @@ public:
 		unsigned int          VAO;
 		INT                   IndexBufferBaseIndex;
 
+		FOpenGLTexture*       RenderTarget;
 		bool                  RenderTargetMatchesBackbuffer;
 
 		// Light
@@ -287,6 +286,7 @@ public:
 	virtual void DrawPrimitive(EPrimitiveType PrimitiveType, INT FirstIndex, INT NumPrimitives, INT MinIndex = INDEX_NONE, INT MaxIndex = INDEX_NONE);
 	virtual void SetFillMode(EFillMode FillMode);
 
+	void SetGLRenderTarget(FOpenGLTexture* GLRenderTarget, bool MatchBackbuffer);
 	void SetShader(FShaderGLSL* NewShader);
 	unsigned int GetVAO(const FStreamDeclaration* Declarations, INT NumStreams);
 

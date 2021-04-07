@@ -422,6 +422,7 @@ UBOOL UOpenGLRenderDevice::SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL
 		MakeCurrent();
 		glDeleteRenderbuffers(1, &BackbufferDepthStencil);
 		BackbufferDepthStencil = GL_NONE;
+		RenderInterface.SetViewport(0, 0, NewX, NewY);
 	}
 
 	// Set window size

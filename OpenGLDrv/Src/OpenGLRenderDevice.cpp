@@ -10,7 +10,7 @@
 IMPLEMENT_CLASS(UOpenGLRenderDevice)
 
 UOpenGLRenderDevice::UOpenGLRenderDevice() : RenderInterface(this),
-                                             Backbuffer(0, 0, TEXF_RGBA8, false, true){}
+                                             Backbuffer(0, 0, TEXF_RGBA8, false, false){}
 
 void UOpenGLRenderDevice::StaticConstructor(){
 	SupportsCubemaps = 1;
@@ -403,7 +403,7 @@ UBOOL UOpenGLRenderDevice::SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL
 
 		#undef CHECK_EXT
 
-		RenderInterface.Init();
+		RenderInterface.Init(NewX, NewY);
 		EnableVSync(bVSync != 0);
 
 		// Set default values for unspecified vertex attributes
@@ -469,9 +469,6 @@ UBOOL UOpenGLRenderDevice::SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL
 		Backbuffer.Height = NewY;
 		++Backbuffer.Revision;
 	}
-
-	// Set initial viewport
-	RenderInterface.SetViewport(0, 0, NewX, NewY);
 
 	return 1;
 
@@ -600,14 +597,15 @@ void UOpenGLRenderDevice::Present(UViewport* Viewport){
 
 	FOpenGLTexture* BackbufferTexture = static_cast<FOpenGLTexture*>(GetCachedResource(Backbuffer.GetCacheId()));
 
-	checkSlow(BackbufferTexture);
-	glBlitNamedFramebuffer(BackbufferTexture->FBO, GL_NONE,
-	                       0, 0, BackbufferTexture->Width, BackbufferTexture->Height,
-	                       ViewportX, ViewportHeight, ViewportX + ViewportWidth, ViewportY,
-	                       GL_COLOR_BUFFER_BIT,
-	                       bBilinearFramebuffer ? GL_LINEAR : GL_NEAREST);
+	if(BackbufferTexture){
+		glBlitNamedFramebuffer(BackbufferTexture->FBO, GL_NONE,
+		                       0, 0, BackbufferTexture->Width, BackbufferTexture->Height,
+		                       ViewportX, ViewportHeight, ViewportX + ViewportWidth, ViewportY,
+		                       GL_COLOR_BUFFER_BIT,
+		                       bBilinearFramebuffer ? GL_LINEAR : GL_NEAREST);
 
-	SwapBuffers(DeviceContext);
+		SwapBuffers(DeviceContext);
+	}
 
 	check(glGetError() == GL_NO_ERROR);
 }

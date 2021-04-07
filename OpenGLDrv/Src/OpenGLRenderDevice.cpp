@@ -408,8 +408,8 @@ UBOOL UOpenGLRenderDevice::SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL
 
 		// Set default values for unspecified vertex attributes
 
-		glVertexAttrib4f(FVF_Diffuse, 0.0f, 0.0f, 0.0f, 1.0f);
-		glVertexAttrib4f(FVF_Specular, 1.0f, 1.0f, 1.0f, 1.0f);
+		glVertexAttrib4f(FVF_Diffuse,   0.0f, 0.0f, 0.0f, 1.0f);
+		glVertexAttrib4f(FVF_Specular,  1.0f, 1.0f, 1.0f, 1.0f);
 		glVertexAttrib4f(FVF_TexCoord0, 0.0f, 0.0f, 1.0f, 1.0f);
 		glVertexAttrib4f(FVF_TexCoord1, 0.0f, 0.0f, 1.0f, 1.0f);
 		glVertexAttrib4f(FVF_TexCoord2, 0.0f, 0.0f, 1.0f, 1.0f);

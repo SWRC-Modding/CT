@@ -90,7 +90,9 @@ void FOpenGLRenderInterface::Init(INT ViewportWidth, INT ViewportHeight){
 	RenderState.bZWrite = true;
 	glDepthMask(GL_TRUE);
 
-	RenderState.bStencilTest = RenDev->UseStencil != 0;
+	bStencilEnabled = false;
+
+	RenderState.bStencilTest = false;
 	RenderState.StencilCompare = CF_Always;
 	RenderState.StencilRef = 0xF;
 	RenderState.StencilMask = 0xFF;
@@ -98,11 +100,6 @@ void FOpenGLRenderInterface::Init(INT ViewportWidth, INT ViewportHeight){
 	RenderState.StencilZFailOp = SO_Keep;
 	RenderState.StencilPassOp = SO_Keep;
 	RenderState.StencilWriteMask = 0xFF;
-
-	if(RenderState.bStencilTest)
-		glEnable(GL_STENCIL_TEST);
-	else
-		glDisable(GL_STENCIL_TEST);
 
 	glStencilOp(GetStencilOp(RenderState.StencilFailOp), GetStencilOp(RenderState.StencilZFailOp), GetStencilOp(RenderState.StencilPassOp));
 	glStencilFunc(GetStencilFunc(RenderState.StencilCompare), RenderState.StencilRef & 0xFF, RenderState.StencilMask & 0xFF);
@@ -189,33 +186,43 @@ void FOpenGLRenderInterface::CommitRenderState(){
 		RenderState.bZWrite = CurrentState->bZWrite;
 	}
 
-	if(RenderState.bStencilTest != CurrentState->bStencilTest){
-		if(CurrentState->bStencilTest)
-			glEnable(GL_STENCIL_TEST);
-		else
-			glDisable(GL_STENCIL_TEST);
+	if(bStencilEnabled){
+		if(RenderState.bStencilTest != CurrentState->bStencilTest){
+			if(CurrentState->bStencilTest){
+				CurrentState->StencilCompare = CF_Always;
+				CurrentState->StencilFailOp = SO_Keep;
+				CurrentState->StencilZFailOp = SO_Keep;
+				CurrentState->StencilPassOp = SO_Keep;
+				CurrentState->StencilWriteMask = 0xFF;
+			}else{
+				CurrentState->StencilWriteMask = 0x00;
+			}
 
-		RenderState.bStencilTest = CurrentState->bStencilTest;
-	}
+			RenderState.bStencilTest = CurrentState->bStencilTest;
+		}
 
-	if(RenderState.StencilCompare != CurrentState->StencilCompare ||
-	   RenderState.StencilRef != CurrentState->StencilRef ||
-	   RenderState.StencilMask != CurrentState->StencilMask ||
-	   RenderState.StencilFailOp != CurrentState->StencilFailOp ||
-	   RenderState.StencilZFailOp != CurrentState->StencilZFailOp ||
-	   RenderState.StencilPassOp != CurrentState->StencilPassOp ||
-	   RenderState.StencilWriteMask != CurrentState->StencilWriteMask){
-		glStencilOp(GetStencilOp(CurrentState->StencilFailOp), GetStencilOp(CurrentState->StencilZFailOp), GetStencilOp(CurrentState->StencilPassOp));
-		glStencilFunc(GetStencilFunc(CurrentState->StencilCompare), CurrentState->StencilRef & 0xFF, CurrentState->StencilMask & 0xFF);
-		glStencilMask(CurrentState->StencilWriteMask & 0xFF);
+		if(RenderState.StencilFailOp != CurrentState->StencilFailOp ||
+		   RenderState.StencilZFailOp != CurrentState->StencilZFailOp ||
+		   RenderState.StencilPassOp != CurrentState->StencilPassOp){
+			glStencilOp(GetStencilOp(CurrentState->StencilFailOp), GetStencilOp(CurrentState->StencilZFailOp), GetStencilOp(CurrentState->StencilPassOp));
+			RenderState.StencilFailOp = CurrentState->StencilFailOp;
+			RenderState.StencilZFailOp = CurrentState->StencilZFailOp;
+			RenderState.StencilPassOp = CurrentState->StencilPassOp;
+		}
 
-		RenderState.StencilCompare = CurrentState->StencilCompare;
-		RenderState.StencilRef = CurrentState->StencilRef;
-		RenderState.StencilMask = CurrentState->StencilMask;
-		RenderState.StencilFailOp = CurrentState->StencilFailOp;
-		RenderState.StencilZFailOp = CurrentState->StencilZFailOp;
-		RenderState.StencilPassOp = CurrentState->StencilPassOp;
-		RenderState.StencilWriteMask = CurrentState->StencilWriteMask;
+		if(RenderState.StencilCompare != CurrentState->StencilCompare ||
+		   RenderState.StencilRef != CurrentState->StencilRef ||
+		   RenderState.StencilMask != CurrentState->StencilMask){
+			glStencilFunc(GetStencilFunc(CurrentState->StencilCompare), CurrentState->StencilRef & 0xFF, CurrentState->StencilMask & 0xFF);
+			RenderState.StencilCompare = CurrentState->StencilCompare;
+			RenderState.StencilRef = CurrentState->StencilRef;
+			RenderState.StencilMask = CurrentState->StencilMask;
+		}
+
+		if(RenderState.StencilWriteMask != CurrentState->StencilWriteMask){
+			glStencilMask(CurrentState->StencilWriteMask & 0xFF);
+			RenderState.StencilWriteMask = CurrentState->StencilWriteMask;
+		}
 	}
 
 	if(RenderState.ZBias != CurrentState->ZBias){
@@ -292,6 +299,16 @@ void FOpenGLRenderInterface::Locked(UViewport* Viewport){
 
 	if(RenderState.bStencilTest != !!RenDev->UseStencil)
 		CurrentState->bStencilTest = true;
+
+	if(bStencilEnabled != !!RenDev->UseStencil){
+		if(RenDev->UseStencil){
+			glEnable(GL_STENCIL_TEST);
+			bStencilEnabled = true;
+		}else{
+			glDisable(GL_STENCIL_TEST);
+			bStencilEnabled = false;
+		}
+	}
 
 	// Setup per-frame shader constants
 
@@ -454,7 +471,13 @@ void FOpenGLRenderInterface::Clear(UBOOL UseColor, FColor Color, UBOOL UseDepth,
 		Flags |= GL_DEPTH_BUFFER_BIT;
 	}
 
-	if(UseStencil){
+	if(UseStencil && bStencilEnabled){
+		// Same thing as with depth
+		if((RenderState.StencilWriteMask & 0xFF) != 0xFF){
+			glStencilMask(0xFF);
+			RenderState.StencilWriteMask = 0xFF;
+		}
+
 		glClearStencil(Stencil & 0xFF);
 		Flags |= GL_STENCIL_BUFFER_BIT;
 	}

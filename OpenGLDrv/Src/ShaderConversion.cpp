@@ -1033,12 +1033,11 @@ static bool WriteShaderInstructionRhs(FString* Out, FShaderInstruction& Instruct
 		if(Instruction.Destination[0] != 't' || !appIsDigit(Instruction.Destination[1]) || Args[0].Register != 't')
 			return false;
 
-		*Out += FString::Printf("sample_texture%c(TexCoord%c + (sample_texture%i(TexCoord%i) - 0.5) * 2 * TextureInfo[%c].BumpSize)",
-		                        Instruction.Destination[1],
-		                        Instruction.Destination[1],
-		                        Args[0].RegisterIndex,
-		                        Args[0].RegisterIndex,
-		                        Instruction.Destination[1]);
+		*Out += FString::Printf("sample_texture%c(TexCoord%c + ", Instruction.Destination[1], Instruction.Destination[1]);
+		Args[0].BiasX2 = true; // Needed to bring the value to the -1/1 range
+		WriteShaderInstructionArg(Args[0], EXPR_Float4, Out);
+		*Out += FString::Printf(" * TextureInfo[%c].BumpSize)", Instruction.Destination[1]);
+
 		break;
 	case INS_texbeml:
 		return false; // TODO: Implement

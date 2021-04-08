@@ -169,7 +169,7 @@ public:
 	BITFIELD UseStencil;
 	BITFIELD Use16bit;
 	BITFIELD Use16bitTextures;
-	BITFIELD IsVoodoo3;
+	BITFIELD CanDoDistortionEffects;
 	BITFIELD Is3dfx;
 	BITFIELD LowQualityTerrain;
 	BITFIELD SkyboxHack;

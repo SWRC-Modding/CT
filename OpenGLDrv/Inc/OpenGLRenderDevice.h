@@ -9,21 +9,29 @@ class FOpenGLResource;
 #define FRAGMENT_SHADER_FILE_EXTENSION ".fs"
 #define VERTEX_SHADER_FILE_EXTENSION ".vs"
 
+enum ETextureFilter{
+	TF_Nearest,
+	TF_Bilinear,
+	TF_Trilinear
+};
+
 class OPENGLDRV_API UOpenGLRenderDevice : public URenderDevice{
 	DECLARE_CLASS(UOpenGLRenderDevice,URenderDevice,CLASS_Config,OpenGLDrv)
 	friend class FOpenGLResource;
 	friend class FOpenGLTexture;
 	friend class FOpenGLRenderInterface;
 public:
-	UBOOL                  bUseDesktopResolution;
-	UBOOL                  bKeepAspectRatio;
-	UBOOL                  bBilinearFramebuffer;
+	UBOOL          bUseDesktopResolution;
+	UBOOL          bKeepAspectRatio;
+	UBOOL          bBilinearFramebuffer;
+	BYTE           TextureFilter; // ETextureFilter
+	INT            TextureAnisotropy;
 
 	// Default shader code
-	static FString            VertexShaderVarsText;
-	static FString            FragmentShaderVarsText;
-	static FString            FixedFunctionVertexShaderText;
-	static FString            FixedFunctionFragmentShaderText;
+	static FString VertexShaderVarsText;
+	static FString FragmentShaderVarsText;
+	static FString FixedFunctionVertexShaderText;
+	static FString FixedFunctionFragmentShaderText;
 
 	UOpenGLRenderDevice();
 	void StaticConstructor();
@@ -88,7 +96,6 @@ private:
 
 	UBOOL                     bFirstRun;
 	UBOOL                     bFixCanvasScaling;
-	INT                       TextureAnisotropy;
 	UBOOL                     bVSync;
 	UBOOL                     bAdaptiveVSync;
 	UBOOL                     bDebugOpenGL;

@@ -16,6 +16,7 @@ void UOpenGLRenderDevice::StaticConstructor(){
 	SupportsCubemaps = 1;
 	SupportsZBIAS = 1;
 	bBilinearFramebuffer = 1;
+	TextureFilter = TF_Bilinear;
 	TextureAnisotropy = 8;
 	bFirstRun = 1;
 	bFixCanvasScaling = 1;
@@ -24,6 +25,7 @@ void UOpenGLRenderDevice::StaticConstructor(){
 	new(GetClass(), "UseDesktopResolution", RF_Public) UBoolProperty(CPP_PROPERTY(bUseDesktopResolution), "Options", CPF_Config);
 	new(GetClass(), "KeepAspectRatio", RF_Public) UBoolProperty(CPP_PROPERTY(bKeepAspectRatio), "Options", CPF_Config);
 	new(GetClass(), "BilinearFramebuffer", RF_Public) UBoolProperty(CPP_PROPERTY(bBilinearFramebuffer), "Options", CPF_Config);
+	new(GetClass(), "TextureFilter", RF_Public) UByteProperty(CPP_PROPERTY(TextureFilter), "Options", CPF_Config);
 	new(GetClass(), "TextureAnisotropy", RF_Public) UIntProperty(CPP_PROPERTY(TextureAnisotropy), "Options", CPF_Config);
 	new(GetClass(), "VSync", RF_Public) UBoolProperty(CPP_PROPERTY(bVSync), "Options", CPF_Config);
 	new(GetClass(), "AdaptiveVSync", RF_Public) UBoolProperty(CPP_PROPERTY(bAdaptiveVSync), "Options", CPF_Config);

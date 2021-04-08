@@ -4,7 +4,7 @@
 #include "OpenGLResource.h"
 #include "GL/glew.h"
 
-static GLenum GetStencilFunc(ECompareFunction Test){
+static GLenum GetStencilFunc(/*ECompareFunction*/BYTE Test){
 	switch(Test){
 	case CF_Never:
 		return GL_NEVER;
@@ -27,7 +27,7 @@ static GLenum GetStencilFunc(ECompareFunction Test){
 	return GL_NEVER;
 };
 
-static GLenum GetStencilOp(EStencilOp StencilOp){
+static GLenum GetStencilOp(/*EStencilOp*/BYTE StencilOp){
 	switch(StencilOp){
 	case SO_Keep:
 		return GL_KEEP;
@@ -50,7 +50,7 @@ static GLenum GetStencilOp(EStencilOp StencilOp){
 	return GL_KEEP;
 }
 
-static GLint GetTextureWrapMode(BYTE Mode){
+static GLint GetTextureWrapMode(/*ETexClampMode*/BYTE Mode){
 	if(Mode == TC_Clamp)
 		return GL_CLAMP_TO_EDGE;
 
@@ -102,16 +102,16 @@ void FOpenGLRenderInterface::Init(INT ViewportWidth, INT ViewportHeight){
 	RenderState.StencilWriteMask = 0xFF;
 
 	glStencilOp(GetStencilOp(RenderState.StencilFailOp), GetStencilOp(RenderState.StencilZFailOp), GetStencilOp(RenderState.StencilPassOp));
-	glStencilFunc(GetStencilFunc(RenderState.StencilCompare), RenderState.StencilRef & 0xFF, RenderState.StencilMask & 0xFF);
-	glStencilMask(RenderState.StencilWriteMask & 0xFF);
+	glStencilFunc(GetStencilFunc(RenderState.StencilCompare), RenderState.StencilRef, RenderState.StencilMask);
+	glStencilMask(RenderState.StencilWriteMask);
 
 	glCreateSamplers(MAX_TEXTURES, Samplers);
 	glBindSamplers(0, MAX_TEXTURES, Samplers);            // 2D texture samplers
 	glBindSamplers(MAX_TEXTURES, MAX_TEXTURES, Samplers); // Cubemap samplers
 
+	SetTextureFilter(RenDev->TextureFilter);
+
 	for(int i = 0; i < MAX_TEXTURES; ++i){
-		glSamplerParameteri(Samplers[i], GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-		glSamplerParameteri(Samplers[i], GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		glSamplerParameteri(Samplers[i], GL_TEXTURE_WRAP_S, GL_REPEAT);
 		glSamplerParameteri(Samplers[i], GL_TEXTURE_WRAP_T, GL_REPEAT);
 		glSamplerParameteri(Samplers[i], GL_TEXTURE_WRAP_R, GL_REPEAT);
@@ -213,14 +213,14 @@ void FOpenGLRenderInterface::CommitRenderState(){
 		if(RenderState.StencilCompare != CurrentState->StencilCompare ||
 		   RenderState.StencilRef != CurrentState->StencilRef ||
 		   RenderState.StencilMask != CurrentState->StencilMask){
-			glStencilFunc(GetStencilFunc(CurrentState->StencilCompare), CurrentState->StencilRef & 0xFF, CurrentState->StencilMask & 0xFF);
+			glStencilFunc(GetStencilFunc(CurrentState->StencilCompare), CurrentState->StencilRef, CurrentState->StencilMask);
 			RenderState.StencilCompare = CurrentState->StencilCompare;
 			RenderState.StencilRef = CurrentState->StencilRef;
 			RenderState.StencilMask = CurrentState->StencilMask;
 		}
 
 		if(RenderState.StencilWriteMask != CurrentState->StencilWriteMask){
-			glStencilMask(CurrentState->StencilWriteMask & 0xFF);
+			glStencilMask(CurrentState->StencilWriteMask);
 			RenderState.StencilWriteMask = CurrentState->StencilWriteMask;
 		}
 	}
@@ -290,15 +290,15 @@ void FOpenGLRenderInterface::Locked(UViewport* Viewport){
 
 	// Detect settings changes in UOpenGLRenderDevice and act accordingly
 
+	if(TextureFilter != RenDev->TextureFilter)
+		SetTextureFilter(RenDev->TextureFilter);
+
 	if(GLEW_EXT_texture_filter_anisotropic && TextureAnisotropy != RenDev->TextureAnisotropy){
 		TextureAnisotropy = RenDev->TextureAnisotropy;
 
 		for(INT i = 0; i < MAX_TEXTURES; ++i)
 			glSamplerParameterf(Samplers[i], GL_TEXTURE_MAX_ANISOTROPY, Clamp<FLOAT>(TextureAnisotropy, 1, 16));
 	}
-
-	if(RenderState.bStencilTest != !!RenDev->UseStencil)
-		CurrentState->bStencilTest = true;
 
 	if(bStencilEnabled != !!RenDev->UseStencil){
 		if(RenDev->UseStencil){
@@ -384,11 +384,107 @@ void FOpenGLRenderInterface::SetFramebufferBlending(EFrameBufferBlending Mode){
 
 }
 
+void FOpenGLRenderInterface::SetTextureFilter(BYTE Filter){
+	GLint MinFilter;
+	GLint MagFilter;
+
+	switch(Filter){
+	case TF_Nearest:
+		MinFilter = GL_NEAREST_MIPMAP_NEAREST;
+		MagFilter = GL_NEAREST;
+		break;
+	case TF_Bilinear:
+		MinFilter = GL_LINEAR_MIPMAP_NEAREST;
+		MagFilter = GL_LINEAR;
+		break;
+	case TF_Trilinear:
+		MinFilter = GL_LINEAR_MIPMAP_LINEAR;
+		MagFilter = GL_LINEAR;
+		break;
+	default:
+		return;
+	}
+
+	for(INT i = 0; i < MAX_TEXTURES; ++i){
+		glSamplerParameteri(Samplers[i], GL_TEXTURE_MIN_FILTER, MinFilter);
+		glSamplerParameteri(Samplers[i], GL_TEXTURE_MAG_FILTER, MagFilter);
+	}
+
+	TextureFilter = Filter;
+}
+
+void FOpenGLRenderInterface::SetShader(FShaderGLSL* NewShader){
+	QWORD CacheId = NewShader->GetCacheId();
+	FOpenGLShader* Shader = static_cast<FOpenGLShader*>(RenDev->GetCachedResource(CacheId));
+
+	if(!Shader)
+		Shader = new FOpenGLShader(RenDev, CacheId);
+
+	if(Shader->Revision != NewShader->GetRevision()){
+		glUseProgram(GL_NONE);
+		Shader->Cache(NewShader);
+		Shader->Bind();
+	}else if(Shader != CurrentShader){
+		Shader->Bind();
+	}
+
+	CurrentShader = Shader;
+}
+
+unsigned int FOpenGLRenderInterface::GetVAO(const FStreamDeclaration* Declarations, INT NumStreams){
+	// Check if there is an existing VAO for this format by hashing the shader declarations
+	GLuint& VAO = VAOsByDeclId[appMemCrc(Declarations, sizeof(FStreamDeclaration) * NumStreams)];
+
+	// Create and setup VAO if none was found matching the vertex format
+	if(!VAO){
+		glCreateVertexArrays(1, &VAO);
+
+		for(INT StreamIndex = 0; StreamIndex < NumStreams; ++StreamIndex){
+			const FStreamDeclaration& Decl = Declarations[StreamIndex];
+			GLuint Offset = 0;
+
+			for(INT i = 0; i < Decl.NumComponents; ++i){
+				BYTE Function = Decl.Components[i].Function; // EFixedVertexFunction
+				BYTE Type     = Decl.Components[i].Type;     // EComponentType
+
+				checkSlow(Function < FVF_MAX);
+				checkSlow(Type < CT_MAX);
+
+				switch(Type){
+				case CT_Float4:
+					glVertexArrayAttribFormat(VAO, Function, 4, GL_FLOAT, GL_FALSE, Offset);
+					Offset += sizeof(FLOAT) * 4;
+					break;
+				case CT_Float3:
+					glVertexArrayAttribFormat(VAO, Function, 3, GL_FLOAT, GL_FALSE, Offset);
+					Offset += sizeof(FLOAT) * 3;
+					break;
+				case CT_Float2:
+					glVertexArrayAttribFormat(VAO, Function, 2, GL_FLOAT, GL_FALSE, Offset);
+					Offset += sizeof(FLOAT) * 2;
+					break;
+				case CT_Float1:
+					glVertexArrayAttribFormat(VAO, Function, 1, GL_FLOAT, GL_FALSE, Offset);
+					Offset += sizeof(FLOAT);
+					break;
+				case CT_Color:
+					glVertexArrayAttribFormat(VAO, Function, GL_BGRA, GL_UNSIGNED_BYTE, GL_TRUE, Offset);
+					Offset += sizeof(FColor);
+				}
+
+				glEnableVertexArrayAttrib(VAO, Function);
+				glVertexArrayAttribBinding(VAO, Function, StreamIndex);
+			}
+		}
+	}
+
+	return VAO;
+}
+
 void FOpenGLRenderInterface::PushState(INT Flags){
 	++CurrentState;
 
 	check(CurrentState <= &SavedStates[MAX_STATESTACKDEPTH] && "PushState overflow");
-
 	appMemcpy(CurrentState, CurrentState - 1, sizeof(FOpenGLSavedState));
 }
 
@@ -466,12 +562,12 @@ void FOpenGLRenderInterface::Clear(UBOOL UseColor, FColor Color, UBOOL UseDepth,
 
 	if(UseStencil && bStencilEnabled){
 		// Same thing as with depth
-		if((RenderState.StencilWriteMask & 0xFF) != 0xFF){
+		if((RenderState.StencilWriteMask) != 0xFF){
 			glStencilMask(0xFF);
 			RenderState.StencilWriteMask = 0xFF;
 		}
 
-		glClearStencil(Stencil & 0xFF);
+		glClearStencil(Stencil);
 		Flags |= GL_STENCIL_BUFFER_BIT;
 	}
 
@@ -1729,12 +1825,12 @@ void FOpenGLRenderInterface::CopyBackBufferToTarget(FAuxRenderTarget* Target){
 
 void FOpenGLRenderInterface::SetStencilOp(ECompareFunction Test, DWORD Ref, DWORD Mask, EStencilOp FailOp, EStencilOp ZFailOp, EStencilOp PassOp, DWORD WriteMask){
 	CurrentState->StencilCompare = Test;
-	CurrentState->StencilRef = Ref;
-	CurrentState->StencilMask = Mask;
+	CurrentState->StencilRef = static_cast<BYTE>(Ref);
+	CurrentState->StencilMask = static_cast<BYTE>(Mask);
 	CurrentState->StencilFailOp = FailOp;
 	CurrentState->StencilZFailOp = ZFailOp;
 	CurrentState->StencilPassOp = PassOp;
-	CurrentState->StencilWriteMask = WriteMask;
+	CurrentState->StencilWriteMask = static_cast<BYTE>(WriteMask);
 }
 
 void FOpenGLRenderInterface::EnableStencil(UBOOL Enable){
@@ -1903,72 +1999,4 @@ void FOpenGLRenderInterface::DrawPrimitive(EPrimitiveType PrimitiveType, INT Fir
 
 void FOpenGLRenderInterface::SetFillMode(EFillMode FillMode){
 	CurrentState->FillMode = FillMode;
-}
-
-void FOpenGLRenderInterface::SetShader(FShaderGLSL* NewShader){
-	QWORD CacheId = NewShader->GetCacheId();
-	FOpenGLShader* Shader = static_cast<FOpenGLShader*>(RenDev->GetCachedResource(CacheId));
-
-	if(!Shader)
-		Shader = new FOpenGLShader(RenDev, CacheId);
-
-	if(Shader->Revision != NewShader->GetRevision()){
-		glUseProgram(GL_NONE);
-		Shader->Cache(NewShader);
-		Shader->Bind();
-	}else if(Shader != CurrentShader){
-		Shader->Bind();
-	}
-
-	CurrentShader = Shader;
-}
-
-unsigned int FOpenGLRenderInterface::GetVAO(const FStreamDeclaration* Declarations, INT NumStreams){
-	// Check if there is an existing VAO for this format by hashing the shader declarations
-	GLuint& VAO = VAOsByDeclId[appMemCrc(Declarations, sizeof(FStreamDeclaration) * NumStreams)];
-
-	// Create and setup VAO if none was found matching the vertex format
-	if(!VAO){
-		glCreateVertexArrays(1, &VAO);
-
-		for(INT StreamIndex = 0; StreamIndex < NumStreams; ++StreamIndex){
-			const FStreamDeclaration& Decl = Declarations[StreamIndex];
-			GLuint Offset = 0;
-
-			for(INT i = 0; i < Decl.NumComponents; ++i){
-				BYTE Function = Decl.Components[i].Function; // EFixedVertexFunction
-				BYTE Type     = Decl.Components[i].Type;     // EComponentType
-
-				checkSlow(Function < FVF_MAX);
-				checkSlow(Type < CT_MAX);
-
-				switch(Type){
-				case CT_Float4:
-					glVertexArrayAttribFormat(VAO, Function, 4, GL_FLOAT, GL_FALSE, Offset);
-					Offset += sizeof(FLOAT) * 4;
-					break;
-				case CT_Float3:
-					glVertexArrayAttribFormat(VAO, Function, 3, GL_FLOAT, GL_FALSE, Offset);
-					Offset += sizeof(FLOAT) * 3;
-					break;
-				case CT_Float2:
-					glVertexArrayAttribFormat(VAO, Function, 2, GL_FLOAT, GL_FALSE, Offset);
-					Offset += sizeof(FLOAT) * 2;
-					break;
-				case CT_Float1:
-					glVertexArrayAttribFormat(VAO, Function, 1, GL_FLOAT, GL_FALSE, Offset);
-					Offset += sizeof(FLOAT);
-					break;
-				case CT_Color:
-					glVertexArrayAttribFormat(VAO, Function, GL_BGRA, GL_UNSIGNED_BYTE, GL_TRUE, Offset);
-					Offset += sizeof(FColor);
-				}
-
-				glEnableVertexArrayAttrib(VAO, Function);
-				glVertexArrayAttribBinding(VAO, Function, StreamIndex);
-			}
-		}
-	}
-
-	return VAO;
 }

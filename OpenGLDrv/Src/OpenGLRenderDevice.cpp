@@ -15,6 +15,7 @@ UOpenGLRenderDevice::UOpenGLRenderDevice() : RenderInterface(this),
 void UOpenGLRenderDevice::StaticConstructor(){
 	SupportsCubemaps = 1;
 	SupportsZBIAS = 1;
+	CanDoDistortionEffects = 0; // TODO: Set to 1 once the required shader instructions are implemented in ShaderConversion.cpp
 	bBilinearFramebuffer = 1;
 	TextureFilter = TF_Bilinear;
 	TextureAnisotropy = 8;
@@ -22,6 +23,7 @@ void UOpenGLRenderDevice::StaticConstructor(){
 	bFixCanvasScaling = 1;
 	ShaderDir = "OpenGLShaders";
 
+	new(GetClass(), "DistortionEffects", RF_Public) UBoolProperty(CPP_PROPERTY(CanDoDistortionEffects), "Options", CPF_Config);
 	new(GetClass(), "UseDesktopResolution", RF_Public) UBoolProperty(CPP_PROPERTY(bUseDesktopResolution), "Options", CPF_Config);
 	new(GetClass(), "KeepAspectRatio", RF_Public) UBoolProperty(CPP_PROPERTY(bKeepAspectRatio), "Options", CPF_Config);
 	new(GetClass(), "BilinearFramebuffer", RF_Public) UBoolProperty(CPP_PROPERTY(bBilinearFramebuffer), "Options", CPF_Config);

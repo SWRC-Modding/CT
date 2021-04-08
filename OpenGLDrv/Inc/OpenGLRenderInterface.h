@@ -149,30 +149,30 @@ struct FOpenGLTextureUnit{
 };
 
 struct FOpenGLRenderState{
-	ECullMode             CullMode;
-	EFillMode             FillMode;
+	BYTE                  CullMode; // ECullMode
+	BYTE                  FillMode; // EFillMode
 
 	bool                  bZWrite;
 	bool                  bZTest;
 	bool                  bStencilTest;
 
-	ECompareFunction      StencilCompare;
-	DWORD                 StencilRef;
-	DWORD                 StencilMask;
-	EStencilOp            StencilFailOp;
-	EStencilOp            StencilZFailOp;
-	EStencilOp            StencilPassOp;
-	DWORD                 StencilWriteMask;
+	BYTE                  StencilCompare; // ECompareFunction
+	BYTE                  StencilRef;
+	BYTE                  StencilMask;
+	BYTE                  StencilFailOp;  // EStencilOp
+	BYTE                  StencilZFailOp; // EStencilOp
+	BYTE                  StencilPassOp;  // EStencilOp
+	BYTE                  StencilWriteMask;
 
-	INT                   ZBias;
+	_WORD                 ZBias;
 
-	INT                   ViewportX;
-	INT                   ViewportY;
-	INT                   ViewportWidth;
-	INT                   ViewportHeight;
+	_WORD                 ViewportX;
+	_WORD                 ViewportY;
+	_WORD                 ViewportWidth;
+	_WORD                 ViewportHeight;
 
-	unsigned int          SrcBlend;
-	unsigned int          DstBlend;
+	unsigned int          SrcBlend; // GLenum
+	unsigned int          DstBlend; // GLenum
 
 	FOpenGLIndexBuffer*   IndexBuffer;
 	INT                   NumVertexStreams;
@@ -221,6 +221,7 @@ public:
 	bool                      NeedUniformUpdate;
 	unsigned int              GlobalUBO;
 
+	BYTE                      TextureFilter; // ETextureFilter
 	INT                       TextureAnisotropy;
 	unsigned int              Samplers[MAX_TEXTURES];
 
@@ -251,6 +252,10 @@ public:
 	void Unlocked();
 	void UpdateGlobalShaderUniforms();
 	void SetFramebufferBlending(EFrameBufferBlending Mode);
+	void SetTextureFilter(BYTE Filter);
+	void SetGLRenderTarget(FOpenGLTexture* GLRenderTarget, bool MatchBackbuffer);
+	void SetShader(FShaderGLSL* NewShader);
+	unsigned int GetVAO(const FStreamDeclaration* Declarations, INT NumStreams);
 
 	// Overrides
 	virtual void PushState(INT Flags = 0);
@@ -285,10 +290,6 @@ public:
 	virtual INT SetDynamicIndexBuffer(FIndexBuffer* IndexBuffer, INT BaseIndex);
 	virtual void DrawPrimitive(EPrimitiveType PrimitiveType, INT FirstIndex, INT NumPrimitives, INT MinIndex = INDEX_NONE, INT MaxIndex = INDEX_NONE);
 	virtual void SetFillMode(EFillMode FillMode);
-
-	void SetGLRenderTarget(FOpenGLTexture* GLRenderTarget, bool MatchBackbuffer);
-	void SetShader(FShaderGLSL* NewShader);
-	unsigned int GetVAO(const FStreamDeclaration* Declarations, INT NumStreams);
 
 private:
 	INT SetIndexBuffer(FIndexBuffer* IndexBuffer, INT BaseIndex, bool IsDynamic);

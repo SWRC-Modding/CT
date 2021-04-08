@@ -1069,8 +1069,10 @@ UBOOL FOpenGLRenderInterface::SetHardwareShaderMaterial(UHardwareShader* Materia
 	}
 
 	for(INT i = 0; i < MAX_TEXTURES; ++i){
-		if(Material->Textures[i])
+		if(Material->Textures[i]){
 			SetBitmapTexture(Material->Textures[i], i);
+			CurrentState->TextureInfo[i].BumpSize = Material->BumpSettings[i].BumpSize;
+		}
 
 		++CurrentState->NumTextures;
 	}
@@ -1118,8 +1120,6 @@ void FOpenGLRenderInterface::SetTexture(FBaseTexture* Texture, INT TextureUnit){
 			CurrentState->TextureUnits[TextureUnit].ClampV = TC_Clamp;
 		}
 	}
-
-	CurrentState->TextureInfo[TextureUnit].IsBumpmap = IsBumpmap(Texture->GetFormat());
 }
 
 void FOpenGLRenderInterface::SetBitmapTexture(UBitmapMaterial* Bitmap, INT TextureUnit){

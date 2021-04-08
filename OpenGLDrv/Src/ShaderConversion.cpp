@@ -261,7 +261,7 @@ FStringTemp UOpenGLRenderDevice::GLSLVertexShaderFromD3DVertexShader(UHardwareSh
 		                    "\tvec4 TmpPos = vec4(InPosition.xyz, 1.0);\n\n";
 
 	if(!ConvertD3DAssemblyToGLSL(*D3DShaderText, &GLSLShaderText)){
-		appErrorf("Shader conversion failed"); // TODO: Fall back to default implementation
+		appErrorf("Vertex shader conversion failed (%s)", Shader->GetPathName()); // TODO: Fall back to default implementation
 	}
 
 	GLSLShaderText +=   "}\n";
@@ -299,7 +299,7 @@ FStringTemp UOpenGLRenderDevice::GLSLFragmentShaderFromD3DPixelShader(UHardwareS
 		                    "\tvec4 r5;\n\n";
 
 	if(!ConvertD3DAssemblyToGLSL(*D3DShaderText, &GLSLShaderText)){
-		appErrorf("Shader conversion failed"); // TODO: Fall back to default implementation
+		appErrorf("Pixel shader conversion failed (%s)", Shader->GetPathName()); // TODO: Fall back to default implementation
 	}
 
 	GLSLShaderText +=       "\n\tFragColor = r0;\n\n"
@@ -1027,7 +1027,19 @@ static bool WriteShaderInstructionRhs(FString* Out, FShaderInstruction& Instruct
 		*Out += FString::Printf("sample_texture%c(TexCoord%c)", Instruction.Destination[1], Instruction.Destination[1]);
 		break;
 	case INS_texbem:
-		return false; // TODO: Implement
+		REQUIRE_ARGS(1);
+		*ResultExpr = EXPR_Float4;
+
+		if(Instruction.Destination[0] != 't' || !appIsDigit(Instruction.Destination[1]) || Args[0].Register != 't')
+			return false;
+
+		*Out += FString::Printf("sample_texture%c(TexCoord%c + (sample_texture%i(TexCoord%i) - 0.5) * 2 * TextureInfo[%c].BumpSize)",
+		                        Instruction.Destination[1],
+		                        Instruction.Destination[1],
+		                        Args[0].RegisterIndex,
+		                        Args[0].RegisterIndex,
+		                        Instruction.Destination[1]);
+		break;
 	case INS_texbeml:
 		return false; // TODO: Implement
 	case INS_texcoord:

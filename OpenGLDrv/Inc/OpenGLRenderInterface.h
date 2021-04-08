@@ -115,7 +115,7 @@ enum EHardwareShaderUniforms{
 	UNIFORM_BLOCK_MEMBER(vec4, AmbientLightColor) \
 	UNIFORM_BLOCK_MEMBER(STRUCT(TextureInfo){ \
 		UNIFORM_STRUCT_MEMBER(bool, IsCubemap) \
-		UNIFORM_STRUCT_MEMBER(bool, IsBumpmap) \
+		UNIFORM_STRUCT_MEMBER(float, BumpSize) \
 	}, TextureInfo[MAX_TEXTURES]) \
 	UNIFORM_BLOCK_MEMBER(STRUCT(Light){ \
 		UNIFORM_STRUCT_MEMBER(vec4, Color) \

@@ -797,6 +797,8 @@ FString UOpenGLRenderDevice::FragmentShaderVarsText(
 				"\t\t\tResult = texture(Texture ## n, Coords.xy); \\\n"
 			"\t\telse \\\n"
 				"\t\t\tResult = texture(Cubemap ## n, Coords.xyz); \\\n"
+			"\t\tif(TextureInfo[n].IsBumpmap) \\\n"
+				"\t\t\tResult.rg = (Result.rg - 0.5) * 2; \\\n"
 			"\t\treturn Result; \\\n"
 		"\t}\n\n"
 	"SAMPLE_TEX_FUNC(0)\n"

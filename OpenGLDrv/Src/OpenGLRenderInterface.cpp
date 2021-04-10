@@ -1120,6 +1120,8 @@ void FOpenGLRenderInterface::SetTexture(FBaseTexture* Texture, INT TextureUnit){
 			CurrentState->TextureUnits[TextureUnit].ClampV = TC_Clamp;
 		}
 	}
+
+	CurrentState->TextureInfo[TextureUnit].IsBumpmap = IsBumpmap(Texture->GetFormat());
 }
 
 void FOpenGLRenderInterface::SetBitmapTexture(UBitmapMaterial* Bitmap, INT TextureUnit){

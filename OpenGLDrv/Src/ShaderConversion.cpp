@@ -1034,7 +1034,6 @@ static bool WriteShaderInstructionRhs(FString* Out, FShaderInstruction& Instruct
 			return false;
 
 		*Out += FString::Printf("sample_texture%c(TexCoord%c + ", Instruction.Destination[1], Instruction.Destination[1]);
-		Args[0].BiasX2 = true; // Needed to bring the value to the -1/1 range
 		WriteShaderInstructionArg(Args[0], EXPR_Float4, Out);
 		*Out += FString::Printf(" * TextureInfo[%c].BumpSize)", Instruction.Destination[1]);
 

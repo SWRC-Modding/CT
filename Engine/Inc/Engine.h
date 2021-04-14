@@ -25,11 +25,20 @@ LINK_LIB(Engine)
 	Global variables.
 -----------------------------------------------------------------------------*/
 
-ENGINE_API extern class UEngine*  GEngine;
-ENGINE_API extern class FMemStack GEngineMem;
-ENGINE_API extern class FMemCache GCache;
-ENGINE_API extern FLOAT           GEngineDeltaTime;
-ENGINE_API extern FLOAT           GEngineTime;
+ENGINE_API extern class UEngine*            GEngine;
+ENGINE_API extern class FMemStack           GEngineMem;
+ENGINE_API extern class FMemCache           GCache;
+ENGINE_API extern class UGlobalTempObjects* GGlobalTempObjects;
+ENGINE_API extern FLOAT                     GEngineDeltaTime;
+ENGINE_API extern FLOAT                     GEngineTime;
+
+#define DECLARE_STATIC_UOBJECT(ObjectClass, ObjectName, ExtraJunk) \
+	static ObjectClass* ObjectName = NULL; \
+	if(!ObjectName ){ \
+		ObjectName = ConstructObject<ObjectClass>(ObjectClass::StaticClass()); \
+		GGlobalTempObjects->AddGlobalObject((UObject**)&ObjectName); \
+		ExtraJunk; \
+	}
 
 /*-----------------------------------------------------------------------------
 	Size of the world.

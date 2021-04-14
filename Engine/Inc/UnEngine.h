@@ -117,11 +117,50 @@ class ENGINE_API UEngine : public USubsystem{
 	UServerCommandlet.
 -----------------------------------------------------------------------------*/
 
-class ENGINE_API UServerCommandlet : public UCommandlet
-{
+class ENGINE_API UServerCommandlet : public UCommandlet{
 	DECLARE_CLASS(UServerCommandlet,UCommandlet,CLASS_Transient,Engine);
 	void StaticConstructor();
 	INT Main( const TCHAR* Parms );
+};
+
+/*-----------------------------------------------------------------------------
+	UGlobalTempObjects.
+-----------------------------------------------------------------------------*/
+
+class UGlobalTempObjects : public UObject{
+	DECLARE_CLASS(UGlobalTempObjects,UObject,CLASS_Transient,Engine);
+	TArray<UObject**> GlobalObjectPtrs;
+
+	// Constructor
+	UGlobalTempObjects(){ AddToRoot(); }
+
+	// UGlobalTempObjects interface
+	void AddGlobalObject(UObject** InObjectPtr){ GlobalObjectPtrs.AddItem(InObjectPtr); }
+
+	// UObject interface
+	void Serialize(FArchive& Ar){
+		guardFunc;
+
+		Super::Serialize(Ar);
+
+		if(!(Ar.IsLoading() || Ar.IsSaving())){
+			for(INT i = 0; i < GlobalObjectPtrs.Num(); ++i)
+				*(GlobalObjectPtrs[i]) = NULL;
+
+			GlobalObjectPtrs.Empty();
+		}
+
+		unguard;
+	}
+
+	void Destroy(){
+		Super::Destroy();
+
+		for(INT i = 0; i < GlobalObjectPtrs.Num(); ++i)
+			*(GlobalObjectPtrs[i]) = NULL;
+
+		GlobalObjectPtrs.Empty();
+	}
 };
 
 /*-----------------------------------------------------------------------------

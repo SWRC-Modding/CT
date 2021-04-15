@@ -44,8 +44,8 @@ class ENGINE_API UPlayer : public UObject, public FOutputDevice, public FExec{
 
 	// UPlayer Interface
 
-	virtual void ReadInput(FLOAT DeltaSeconds);
-	virtual bool CheckPad();
+	virtual void ReadInput(FLOAT DeltaSeconds) = 0;
+	virtual bool CheckPad() = 0;
 };
 
 /*-----------------------------------------------------------------------------

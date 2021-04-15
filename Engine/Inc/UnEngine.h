@@ -114,16 +114,6 @@ class ENGINE_API UEngine : public USubsystem{
 };
 
 /*-----------------------------------------------------------------------------
-	UServerCommandlet.
------------------------------------------------------------------------------*/
-
-class ENGINE_API UServerCommandlet : public UCommandlet{
-	DECLARE_CLASS(UServerCommandlet,UCommandlet,CLASS_Transient,Engine);
-	void StaticConstructor();
-	INT Main( const TCHAR* Parms );
-};
-
-/*-----------------------------------------------------------------------------
 	UGlobalTempObjects.
 -----------------------------------------------------------------------------*/
 

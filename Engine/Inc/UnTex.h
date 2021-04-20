@@ -380,29 +380,6 @@ struct ENGINE_API FFontCharacter{
 };
 
 //
-// A font page.
-//
-/*
-struct ENGINE_API FFontPage{
-	// Variables.
-	UTexture* Texture;
-	TArray<FFontCharacter> Characters;
-
-	// Serializer.
-
-	friend FArchive& operator<<(FArchive& Ar, FFontPage& Ch)
-	{
-		guard(FFontCharacter<<);
-		return Ar << Ch.Texture << Ch.Characters;
-		unguard;
-	}
-
-
-	struct FFontPage& operator=(struct FFontCharacter const &);
-};
-*/
-
-//
 // A font object, containing information about a set of glyphs.
 // The glyph bitmaps are stored in the contained textures, while
 // the font database only contains the coordinates of the individual
@@ -413,40 +390,20 @@ class ENGINE_API UFont : public UObject{
 
 	// Variables.
 	TArray<FFontCharacter> Characters;
-	TArray<class UTexture*> Textures;
-	TMap<TCHAR, TCHAR> CharRemap;
+	TArray<UTexture*> Textures;
+	TMap<UNICHAR, UNICHAR> CharRemap;
 	UBOOL IsRemapped;
-
-	// Found in UT2003, IDK what gam means, probably the signature
-	INT Kerning; // gam
+	INT Kerning;
 
 	// Constructors.
 	UFont();
-
-	// Found in IDA
-	UFont(UFont const &);
-
 
 	// UObject interface.
 	void Serialize(FArchive& Ar);
 
 	// UFont interface
-	TCHAR RemapChar(TCHAR ch)
-	{
-		TCHAR *p;
-		if(!IsRemapped)
-			return ch;
-		p = CharRemap.Find(ch);
-		return p ? *p : 32; // return space if not found.
-	}
-
-	// Found in IDA
-	void GetCharSize(UFont* Font, TCHAR InCh, INT& Width, INT& Height);
-
-	// Also found in IDA
-	UFont& operator=(class UFont const &);
-
-
+	UNICHAR RemapChar(UNICHAR ch);
+	void GetCharSize(TCHAR InCh, INT& Width, INT& Height);
 };
 
 /*----------------------------------------------------------------------------

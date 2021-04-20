@@ -334,25 +334,26 @@ UBOOL UOpenGLRenderDevice::SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL
 			appErrorf("GLEW failed to initialize: %s", glewGetErrorString(GlewStatus));
 
 		if(WGLEW_ARB_create_context){
-			TArray<int> Attributes;
+			int Attribs[16];
+			int NumAttribs = 0;
 
-			Attributes.Add(WGL_CONTEXT_MAJOR_VERSION_ARB);
-			Attributes.Add(MIN_OPENGL_MAJOR_VERSION);
-			Attributes.Add(WGL_CONTEXT_MINOR_VERSION_ARB);
-			Attributes.Add(MIN_OPENGL_MINOR_VERSION);
-			Attributes.Add(WGL_CONTEXT_FLAGS_ARB);
-			Attributes.Add(WGL_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB);
+			Attribs[NumAttribs++] = WGL_CONTEXT_MAJOR_VERSION_ARB;
+			Attribs[NumAttribs++] = MIN_OPENGL_MAJOR_VERSION;
+			Attribs[NumAttribs++] = WGL_CONTEXT_MINOR_VERSION_ARB;
+			Attribs[NumAttribs++] = MIN_OPENGL_MINOR_VERSION;
+			Attribs[NumAttribs++] = WGL_CONTEXT_FLAGS_ARB;
+			Attribs[NumAttribs++] = WGL_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB;
 
 			if(bDebugOpenGL){
 				debugf("OpenGL debugging enabled");
-				Attributes.Last() |= WGL_CONTEXT_DEBUG_BIT_ARB;
+				Attribs[NumAttribs - 1] |= WGL_CONTEXT_DEBUG_BIT_ARB;
 			}
 
-			Attributes.Add(WGL_CONTEXT_PROFILE_MASK_ARB);
-			Attributes.Add(WGL_CONTEXT_CORE_PROFILE_BIT_ARB);
-			Attributes.Add(0);
+			Attribs[NumAttribs++] = WGL_CONTEXT_PROFILE_MASK_ARB;
+			Attribs[NumAttribs++] = WGL_CONTEXT_CORE_PROFILE_BIT_ARB;
+			Attribs[NumAttribs++] = 0;
 
-			OpenGLContext = wglCreateContextAttribsARB(DeviceContext, NULL, Attributes.GetData());
+			OpenGLContext = wglCreateContextAttribsARB(DeviceContext, NULL, Attribs);
 
 			if(OpenGLContext){
 				wglMakeCurrent(DeviceContext, OpenGLContext);

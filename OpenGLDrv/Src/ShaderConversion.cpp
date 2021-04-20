@@ -207,7 +207,6 @@ FStringTemp UOpenGLRenderDevice::GLSLVertexShaderFromD3DVertexShader(UHardwareSh
 			break;
 		case FVF_Binormal:
 			VertexAttributes += FString::Printf("#define v%i InBinormal\n", i);
-			break;
 		}
 	}
 
@@ -992,23 +991,14 @@ static bool WriteShaderInstructionRhs(FString* Out, FShaderInstruction& Instruct
 	case INS_tex:
 		REQUIRE_ARGS(0);
 		*ResultExpr = EXPR_Float4;
-
-		if(Instruction.Destination[0] != 't' || !appIsDigit(Instruction.Destination[1]))
-			return false;
-
 		*Out += FString::Printf("sample_texture%c(TexCoord%c)", Instruction.Destination[1], Instruction.Destination[1]);
 		break;
 	case INS_texbem:
 		REQUIRE_ARGS(1);
 		*ResultExpr = EXPR_Float4;
-
-		if(Instruction.Destination[0] != 't' || !appIsDigit(Instruction.Destination[1]) || Args[0].Register != 't')
-			return false;
-
 		*Out += FString::Printf("sample_texture%c(TexCoord%c + ", Instruction.Destination[1], Instruction.Destination[1]);
 		WriteShaderInstructionArg(Args[0], EXPR_Float4, Out);
 		*Out += FString::Printf(" * TextureInfo[%c].BumpSize)", Instruction.Destination[1]);
-
 		break;
 	case INS_texbeml:
 		return false; // TODO: Implement

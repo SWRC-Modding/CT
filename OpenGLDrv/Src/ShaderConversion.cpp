@@ -167,7 +167,7 @@ FStringTemp UOpenGLRenderDevice::GLSLVertexShaderFromD3DVertexShader(UHardwareSh
 	for(INT i = 0; i < Shader->StreamMapping.Num(); ++i){
 		switch(Shader->StreamMapping[i]){
 		case FVF_Position:
-			VertexAttributes += FString::Printf("#define v%i TmpPos\n", i);
+			VertexAttributes += FString::Printf("#define v%i InPosition\n", i);
 			break;
 		case FVF_Normal:
 			VertexAttributes += FString::Printf("#define v%i InNormal\n", i);
@@ -231,8 +231,7 @@ FStringTemp UOpenGLRenderDevice::GLSLVertexShaderFromD3DVertexShader(UHardwareSh
 		                "#define oT7 TexCoord7\n"
 		                "#define oFog Fog\n"
 		                "#define oPts gl_PointSize\n\n" +
-		                "void main(void){\n"
-	                        "\tconst vec4 TmpPos = vec4(InPosition.xyz, 1.0);\n";
+		                "void main(void){\n";
 
 	INT RegistersUsed = 0;
 	FString ConvertedShaderText = "\n";
@@ -847,7 +846,6 @@ static bool WriteShaderInstructionRhs(FString* Out, FShaderInstruction& Instruct
 		++Args[1].RegisterIndex;
 		WriteShaderInstructionArg(Args[1], EXPR_Float3, Out);
 		*Out += ")";
-
 		break;
 	case INS_m4x3:
 		REQUIRE_ARGS(2);
@@ -872,7 +870,6 @@ static bool WriteShaderInstructionRhs(FString* Out, FShaderInstruction& Instruct
 		++Args[1].RegisterIndex;
 		WriteShaderInstructionArg(Args[1], EXPR_Float3, Out);
 		*Out += ")";
-
 		break;
 	case INS_m4x4:
 		REQUIRE_ARGS(2);
@@ -904,7 +901,6 @@ static bool WriteShaderInstructionRhs(FString* Out, FShaderInstruction& Instruct
 		++Args[1].RegisterIndex;
 		WriteShaderInstructionArg(Args[1], EXPR_Float4, Out);
 		*Out += ")";
-
 		break;
 	case INS_mad:
 		{

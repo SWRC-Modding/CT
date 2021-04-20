@@ -265,7 +265,7 @@ void FOpenGLRenderInterface::CommitRenderState(){
 	for(INT i = 0; i < CurrentState->NumTextures; ++i){
 		if(RenderState.TextureUnits[i].Texture != CurrentState->TextureUnits[i].Texture){
 			if(CurrentState->TextureUnits[i].Texture) // Texture might not be set if the current material is a hardware shader
-				CurrentState->TextureUnits[i].Texture->BindTexture(i);
+				CurrentState->TextureUnits[i].Texture->BindTexture(i + CurrentState->TextureInfo[i].IsCubemap * MAX_TEXTURES);
 
 			RenderState.TextureUnits[i].Texture = CurrentState->TextureUnits[i].Texture;
 		}
@@ -1093,6 +1093,8 @@ UBOOL FOpenGLRenderInterface::SetHardwareShaderMaterial(UHardwareShader* Materia
 }
 
 void FOpenGLRenderInterface::SetTexture(FBaseTexture* Texture, INT TextureUnit){
+	checkSlow(Texture);
+
 	QWORD CacheId = Texture->GetCacheId();
 	FOpenGLTexture* GLTexture = static_cast<FOpenGLTexture*>(RenDev->GetCachedResource(CacheId));
 
@@ -1125,9 +1127,7 @@ void FOpenGLRenderInterface::SetTexture(FBaseTexture* Texture, INT TextureUnit){
 }
 
 void FOpenGLRenderInterface::SetBitmapTexture(UBitmapMaterial* Bitmap, INT TextureUnit){
-	checkSlow(Bitmap);
 	FBaseTexture* Texture = Bitmap->Get(LockedViewport->CurrentTime, LockedViewport)->GetRenderInterface();
-	checkSlow(Texture);
 	SetTexture(Texture, TextureUnit);
 }
 

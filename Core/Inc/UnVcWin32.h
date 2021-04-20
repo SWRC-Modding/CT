@@ -85,8 +85,7 @@ typedef signed __int64      SQWORD; // 64-bit signed.
 // Character types.
 typedef char                ANSICHAR;  // An ANSI character.
 typedef unsigned short      UNICHAR;   // A unicode character.
-typedef unsigned char       ANSICHARU; // An ANSI character.
-typedef unsigned short      UNICHARU;  // A unicode character.
+typedef ANSICHAR            TCHAR;
 
 // Other base types.
 typedef signed int          UBOOL;  // Boolean 0 (false) or 1 (true).

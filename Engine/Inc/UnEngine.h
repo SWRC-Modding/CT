@@ -154,5 +154,44 @@ class UGlobalTempObjects : public UObject{
 };
 
 /*-----------------------------------------------------------------------------
+	UCubemapManager.
+-----------------------------------------------------------------------------*/
+
+class ENGINE_API UCubemapManager : public UObject{
+	DECLARE_CLASS(UCubemapManager, UObject, 0, Engine);
+
+	BITFIELD  bEnabled:1;
+	AActor*   Actor;
+	FLOAT     BumpSize;
+	FVector   CameraLocation;
+	FRotator  CameraRotation;
+	UTexture* StaticDiffuse;
+	UTexture* StaticSpecularMatte;
+	UTexture* StaticSpecularDull;
+	UTexture* StaticSpecularPolished;
+	UTexture* StaticSpecularShiny;
+
+	UCubemapManager();
+
+	// UObject interface
+	virtual void Destroy();
+
+	// UCubemapManager interface
+	void Init();
+	void Enable();
+	bool IsEnabled() const;
+	void Disable();
+	void CleanupObjects();
+	FLOAT GetBumpSize() const;
+	void SetBumpSize(FLOAT BumpSize);
+	const FVector& GetCameraLocation();
+	const FRotator& GetCameraRotation();
+	void SetCamera(const FVector& Location, const FRotator& Rotation);
+	AActor* GetCurrentActor();
+	void SetCurrentActor(AActor* Actor, TList<FDynamicLight*>*);
+	UTexture* GetEnvLightmap(EBumpMapType BumpmapType, UShader* Shader, FMatrix**, bool&);
+};
+
+/*-----------------------------------------------------------------------------
 	The End.
 -----------------------------------------------------------------------------*/

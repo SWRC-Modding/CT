@@ -212,17 +212,16 @@ FStringTemp UOpenGLRenderDevice::GLSLVertexShaderFromD3DVertexShader(UHardwareSh
 	}
 
 	if(VertexAttributes.Len() == 0)
-		VertexAttributes += "#define v0 Position\n\n";
-	else
-		VertexAttributes += "\n";
+		VertexAttributes += "#define v0 Position\n";
 
 	FStringTemp GLSLShaderText = GetShaderHeaderComment(Shader) +
-		FString::Printf("layout(location = %i) uniform vec4 VSConstants[%i];\n", HSU_VSConstants, MAX_VERTEX_SHADER_CONSTANTS) +
-		                "#define c VSConstants\n\n" +
+		FString::Printf("layout(location = %i) uniform vec4 VSConstants[%i];\n\n", HSU_VSConstants, MAX_VERTEX_SHADER_CONSTANTS) +
+		                "out float Fog;\n\n"
+		                "#define c VSConstants\n" +
 		                VertexAttributes +
-		                "#define oPos gl_Position\n\n"
+		                "#define oPos gl_Position\n"
 		                "#define oD0 Diffuse\n"
-		                "#define oD1 Specular\n\n"
+		                "#define oD1 Specular\n"
 		                "#define oT0 TexCoord0\n"
 		                "#define oT1 TexCoord1\n"
 		                "#define oT2 TexCoord2\n"
@@ -230,33 +229,22 @@ FStringTemp UOpenGLRenderDevice::GLSLVertexShaderFromD3DVertexShader(UHardwareSh
 		                "#define oT4 TexCoord4\n"
 		                "#define oT5 TexCoord5\n"
 		                "#define oT6 TexCoord6\n"
-		                "#define oT7 TexCoord7\n\n"
-		                "#define oPts gl_PointSize\n\n"
-		                "out float Fog;\n"
-		                "#define oFog gl_PointSize\n\n"
+		                "#define oT7 TexCoord7\n"
+		                "#define oFog Fog\n"
 		                "#define oPts gl_PointSize\n\n" +
 		                "void main(void){\n"
-		                    "\t// Temporary registers\n"
-		                    "\tvec4 r0;\n"
-		                    "\tvec4 r1;\n"
-		                    "\tvec4 r2;\n"
-		                    "\tvec4 r3;\n"
-		                    "\tvec4 r4;\n"
-		                    "\tvec4 r5;\n"
-		                    "\tvec4 r6;\n"
-		                    "\tvec4 r7;\n"
-		                    "\tvec4 r8;\n"
-		                    "\tvec4 r9;\n"
-		                    "\tvec4 r10;\n"
-		                    "\tvec4 r11;\n"
-		                    "\tvec4 r12;\n\n"
-		                    "\tvec4 TmpPos = vec4(InPosition.xyz, 1.0);\n\n";
+	                        "\tconst vec4 TmpPos = vec4(InPosition.xyz, 1.0);\n";
 
-	if(!ConvertD3DAssemblyToGLSL(*D3DShaderText, &GLSLShaderText)){
+	INT RegistersUsed = 0;
+	FString ConvertedShaderText = "\n";
+
+	if(!ConvertD3DAssemblyToGLSL(*D3DShaderText, &ConvertedShaderText, &RegistersUsed))
 		appErrorf("Vertex shader conversion failed (%s)", Shader->GetPathName()); // TODO: Fall back to default implementation
-	}
 
-	GLSLShaderText +=   "}\n";
+	for(INT i = 0; i < RegistersUsed; ++i)
+		GLSLShaderText += FString::Printf("\tvec4 r%i;\n", i);
+
+	GLSLShaderText += ConvertedShaderText + "}\n";
 
 	return GLSLShaderText;
 }
@@ -267,35 +255,29 @@ FStringTemp UOpenGLRenderDevice::GLSLFragmentShaderFromD3DPixelShader(UHardwareS
 	ExpandHardwareShaderMacros(&D3DShaderText);
 
 	FStringTemp GLSLShaderText = GetShaderHeaderComment(Shader) +
-		FString::Printf("layout(location = %i) uniform vec4 PSConstants[%i];\n", HSU_PSConstants, MAX_PIXEL_SHADER_CONSTANTS) +
-		                "#define c PSConstants\n\n"
+		FString::Printf("layout(location = %i) uniform vec4 PSConstants[%i];\n\n", HSU_PSConstants, MAX_PIXEL_SHADER_CONSTANTS) +
+		                "#define c PSConstants\n"
 		                "#define v0 Diffuse\n"
 		                "#define v1 Specular\n\n"
 		                "in float Fog;\n\n" +
-		                "void main(void){\n"
-		                    "\t// Texture registers\n"
-		                    "\tvec4 t0;\n"
-		                    "\tvec4 t1;\n"
-		                    "\tvec4 t2;\n"
-		                    "\tvec4 t3;\n"
-		                    "\tvec4 t4;\n"
-		                    "\tvec4 t5;\n"
-		                    "\t// Temporary registers\n"
-		                    "\tvec4 r0;\n"
-		                    "\tvec4 r1;\n"
-		                    "\tvec4 r2;\n"
-		                    "\tvec4 r3;\n"
-		                    "\tvec4 r4;\n"
-		                    "\tvec4 r5;\n\n";
+		                "void main(void){\n";
 
-	if(!ConvertD3DAssemblyToGLSL(*D3DShaderText, &GLSLShaderText)){
+	INT RegistersUsed = 1; // r0 is always required
+	FString ConvertedShaderText = "\n";
+
+	if(!ConvertD3DAssemblyToGLSL(*D3DShaderText, &ConvertedShaderText, &RegistersUsed))
 		appErrorf("Pixel shader conversion failed (%s)", Shader->GetPathName()); // TODO: Fall back to default implementation
-	}
 
-	GLSLShaderText +=       "\n\tFragColor = r0;\n\n"
-		                    "\tif(FragColor.a <= AlphaRef)\n"
-	                            "\t\tdiscard;\n"
-		                "}\n";
+	checkSlow(RegistersUsed > 0); // At least one register must always be used
+
+	for(INT i = 0; i < RegistersUsed; ++i)
+		GLSLShaderText += FString::Printf("\tvec4 r%i;\n", i);
+
+	GLSLShaderText += ConvertedShaderText +
+	                  "\n\tFragColor = r0;\n\n"
+		              "\tif(FragColor.a <= AlphaRef)\n"
+	                      "\t\tdiscard;\n"
+		              "}\n";
 
 	return GLSLShaderText;
 }
@@ -1080,7 +1062,9 @@ static bool WriteShaderInstruction(FShaderInstruction& Instruction, FString* Out
 	if(!WriteShaderInstructionRhs(&Rhs, Instruction, &ResultExpr))
 		return false;
 
-	if(Instruction.Type < INS_m3x2 || Instruction.Type > INS_m4x4) // Matrix instructions are special and write the assignment themselves
+	if(Instruction.Type >= INS_tex && Instruction.Type <= INS_texreg2rgb) // Declare variable for texture instruction
+		*Out += FString::Printf("\tconst vec4 %s = ", Instruction.Destination);
+	else if(Instruction.Type < INS_m3x2 || Instruction.Type > INS_m4x4) // Matrix instructions are special and write the assignment themselves
 		*Out += FString::Printf("\t%s = ", Instruction.Destination);
 
 	// Move saturate modifier to the beginning of the list since it needs to be applied first.
@@ -1147,7 +1131,7 @@ static bool WriteShaderInstruction(FShaderInstruction& Instruction, FString* Out
 	return true;
 }
 
-bool UOpenGLRenderDevice::ConvertD3DAssemblyToGLSL(const TCHAR* Text, FString* Out){
+bool UOpenGLRenderDevice::ConvertD3DAssemblyToGLSL(const TCHAR* Text, FString* Out, INT* RegistersUsed){
 	SkipWhitespaceAndComments(&Text);
 
 	// Skip shader type and version. We don't care and just assume the highest supported versions are vs.1.1 and ps.1.4
@@ -1169,6 +1153,13 @@ bool UOpenGLRenderDevice::ConvertD3DAssemblyToGLSL(const TCHAR* Text, FString* O
 
 		if(!WriteShaderInstruction(Instruction, Out))
 			return false;
+
+		// Keep track of how many temporary registers are actually used so that the calling code can generate only what's necessary.
+		// NOTE: This leads to compile errors if a register is ever only used as a write destination. However this is fine since it is wrong to do that anyway.
+		for(INT i = 0; i < Instruction.NumArgs; ++i){
+			if(Instruction.Args[i].Register == 'r')
+				*RegistersUsed = Max(*RegistersUsed, Instruction.Args[i].RegisterIndex + 1);
+		}
 
 		if(*Text)
 			SkipWhitespaceAndComments(&Text, Out);

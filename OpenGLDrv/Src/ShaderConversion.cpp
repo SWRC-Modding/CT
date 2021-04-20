@@ -139,8 +139,8 @@ void UOpenGLRenderDevice::ExpandHardwareShaderMacros(FString* ShaderText){
 					INT Index = static_cast<INT>(First - **ShaderText); // Save index since Pos is invalidated when the string is reallocated
 
 					*ShaderText = FStringTemp(Index, **ShaderText) +
-					              "// ==================== Macro: " + Name + " ====================\n" +
-					              *MacroText + "// ==================== End macro ====================\n" +
+					              "// ################################################ Macro: " + Name + " ################################################\n" +
+					              *MacroText + "// ################################################ End macro ################################################\n" +
 					              (Pos + 1);
 					Pos = &(*ShaderText)[Index];
 				}
@@ -151,16 +151,10 @@ void UOpenGLRenderDevice::ExpandHardwareShaderMacros(FString* ShaderText){
 	}
 }
 
-static const TCHAR* SaturateFuncs =
-	"float saturate(float v){ return min(max(v, 0.0), 1.0); }\n"
-	"vec2  saturate(vec2  v){ return min(max(v, 0.0), 1.0); }\n"
-	"vec3  saturate(vec3  v){ return min(max(v, 0.0), 1.0); }\n"
-	"vec4  saturate(vec4  v){ return min(max(v, 0.0), 1.0); }\n\n";
-
 static FStringTemp GetShaderHeaderComment(UHardwareShader* Shader){
 	return FString::Printf("/*\n"
 	                       " * %s\n"
-	                       " */\n",
+	                       " */\n\n",
 						   Shader->GetPathName());
 }
 
@@ -223,7 +217,6 @@ FStringTemp UOpenGLRenderDevice::GLSLVertexShaderFromD3DVertexShader(UHardwareSh
 		VertexAttributes += "\n";
 
 	FStringTemp GLSLShaderText = GetShaderHeaderComment(Shader) +
-		                VertexShaderVarsText +
 		FString::Printf("layout(location = %i) uniform vec4 VSConstants[%i];\n", HSU_VSConstants, MAX_VERTEX_SHADER_CONSTANTS) +
 		                "#define c VSConstants\n\n" +
 		                VertexAttributes +
@@ -242,7 +235,6 @@ FStringTemp UOpenGLRenderDevice::GLSLVertexShaderFromD3DVertexShader(UHardwareSh
 		                "out float Fog;\n"
 		                "#define oFog gl_PointSize\n\n"
 		                "#define oPts gl_PointSize\n\n" +
-		                SaturateFuncs +
 		                "void main(void){\n"
 		                    "\t// Temporary registers\n"
 		                    "\tvec4 r0;\n"
@@ -275,13 +267,11 @@ FStringTemp UOpenGLRenderDevice::GLSLFragmentShaderFromD3DPixelShader(UHardwareS
 	ExpandHardwareShaderMacros(&D3DShaderText);
 
 	FStringTemp GLSLShaderText = GetShaderHeaderComment(Shader) +
-		                FragmentShaderVarsText +
 		FString::Printf("layout(location = %i) uniform vec4 PSConstants[%i];\n", HSU_PSConstants, MAX_PIXEL_SHADER_CONSTANTS) +
 		                "#define c PSConstants\n\n"
 		                "#define v0 Diffuse\n"
 		                "#define v1 Specular\n\n"
 		                "in float Fog;\n\n" +
-		                SaturateFuncs +
 		                "void main(void){\n"
 		                    "\t// Texture registers\n"
 		                    "\tvec4 t0;\n"

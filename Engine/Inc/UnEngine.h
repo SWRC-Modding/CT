@@ -189,7 +189,7 @@ class ENGINE_API UCubemapManager : public UObject{
 	void SetCamera(const FVector& Location, const FRotator& Rotation);
 	AActor* GetCurrentActor();
 	void SetCurrentActor(AActor* Actor, TList<FDynamicLight*>*);
-	UTexture* GetEnvLightmap(EBumpMapType BumpmapType, UShader* Shader, FMatrix**, bool&);
+	UTexture* GetEnvLightmap(EBumpMapType BumpMapType, UShader* Shader, FMatrix**, bool&);
 };
 
 /*-----------------------------------------------------------------------------

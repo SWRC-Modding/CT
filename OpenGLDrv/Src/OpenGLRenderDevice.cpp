@@ -251,8 +251,8 @@ UBOOL UOpenGLRenderDevice::Init(){
 		SetHardwareShaderMacros(CastChecked<UHardwareShaderMacros>(GEngine->HBumpShaderMacros));
 
 	FixedFunctionShader.SetName("FixedFunction");
-	FixedFunctionShader.SetVertexShaderText(VertexShaderVarsText + FixedFunctionVertexShaderText);
-	FixedFunctionShader.SetFragmentShaderText(FragmentShaderVarsText + FixedFunctionFragmentShaderText);
+	FixedFunctionShader.SetVertexShaderText(FixedFunctionVertexShaderText);
+	FixedFunctionShader.SetFragmentShaderText(FixedFunctionFragmentShaderText);
 
 	LoadShaders();
 
@@ -736,7 +736,11 @@ void UOpenGLRenderDevice::SaveFragmentShader(FShaderGLSL* Shader){
 	"// Global shared uniforms\n\n" \
 	"layout(std140, binding = 0) uniform Globals{\n" \
 		UNIFORM_BLOCK_CONTENTS \
-	"};\n\n"
+	"};\n\n" \
+	"float saturate(float v){ return min(max(v, 0.0), 1.0); }\n" \
+	"vec2  saturate(vec2  v){ return min(max(v, 0.0), 1.0); }\n" \
+	"vec3  saturate(vec3  v){ return min(max(v, 0.0), 1.0); }\n" \
+	"vec4  saturate(vec4  v){ return min(max(v, 0.0), 1.0); }\n\n"
 
 FString UOpenGLRenderDevice::VertexShaderVarsText(
 	SHADER_HEADER

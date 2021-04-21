@@ -360,9 +360,8 @@ void FOpenGLRenderInterface::SetFramebufferBlending(EFrameBufferBlending Mode){
 		CurrentState->DstBlend = GL_ONE;
 		break;
 	case FB_Darken:
-		glBlendFunc(GL_ZERO, GL_ONE_MINUS_SRC_COLOR);
-		CurrentState->SrcBlend = GL_ONE;
-		CurrentState->DstBlend = GL_ONE;
+		CurrentState->SrcBlend = GL_ZERO;
+		CurrentState->DstBlend = GL_ONE_MINUS_SRC_COLOR;
 		break;
 	case FB_Brighten:
 		CurrentState->SrcBlend = GL_ONE;

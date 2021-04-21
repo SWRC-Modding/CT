@@ -76,16 +76,16 @@ enum EAlphaOpModifier{
 
 enum EShaderUniforms{
 	SU_NumStages            = 0,  // int
-	SU_TexCoordCount        = 1,  // int
-	SU_StageTexCoordSources = 2,  // int[8]
-	SU_StageTexMatrices     = 10, // mat4[8]
-	SU_StageColorArgs       = 18, // int[16]
-	SU_StageColorOps        = 34, // int[8]
-	SU_StageAlphaArgs       = 42, // int[16]
-	SU_StageAlphaOps        = 58, // int[8]
-	SU_ConstantColor        = 66, // vec4
-	SU_LightingEnabled      = 67, // bool
-	SU_LightFactor          = 68  // float
+	SU_StageTexCoordCount   = 1,  // int[8]
+	SU_StageTexCoordSources = 9,  // int[8]
+	SU_StageTexMatrices     = 17, // mat4[8]
+	SU_StageColorArgs       = 25, // int[16]
+	SU_StageColorOps        = 41, // int[8]
+	SU_StageAlphaArgs       = 49, // int[16]
+	SU_StageAlphaOps        = 65, // int[8]
+	SU_ConstantColor        = 73, // vec4
+	SU_LightingEnabled      = 74, // bool
+	SU_LightFactor          = 75  // float
 };
 
 enum EHardwareShaderUniforms{
@@ -235,7 +235,7 @@ public:
 	bool                      ModifyColor;
 	bool                      ModifyFramebufferBlending;
 	INT                       NumStages;
-	INT                       TexCoordCount;
+	INT                       StageTexCoordCount[MAX_SHADER_STAGES];
 	INT                       StageTexCoordSources[MAX_SHADER_STAGES];
 	FMatrix                   StageTexMatrices[MAX_SHADER_STAGES];
 	INT                       StageColorArgs[MAX_SHADER_STAGES][2]; // EColorArg for Arg1 and Arg2
@@ -363,7 +363,7 @@ private:
 							}
 						}
 
-						TexCoordCount = TexModifier->TexCoordCount + 2;
+						StageTexCoordCount[StageIndex] = TexModifier->TexCoordCount + 2;
 					}
 
 					if(Matrix)

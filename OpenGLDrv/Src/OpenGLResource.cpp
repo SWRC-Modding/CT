@@ -76,16 +76,18 @@ void FOpenGLShader::Bind() const{
 
 GLuint FOpenGLShader::CompileShader(FShaderGLSL* Shader, GLenum Type){
 	GLuint Handle = glCreateShader(Type);
-	const TCHAR* ShaderText[2];
+	const TCHAR* ShaderText[3];
 	const TCHAR* FileExt = NULL;
+
+	ShaderText[1] = "#line 0\n";
 
 	if(Type == GL_VERTEX_SHADER){
 		ShaderText[0] = *RenDev->VertexShaderVarsText;
-		ShaderText[1] = Shader->GetVertexShaderText();
+		ShaderText[2] = Shader->GetVertexShaderText();
 		FileExt = VERTEX_SHADER_FILE_EXTENSION;
 	}else if(Type == GL_FRAGMENT_SHADER){
 		ShaderText[0] = *RenDev->FragmentShaderVarsText;
-		ShaderText[1] = Shader->GetFragmentShaderText();
+		ShaderText[2] = Shader->GetFragmentShaderText();
 		FileExt = FRAGMENT_SHADER_FILE_EXTENSION;
 	}else{
 		appErrorf("Unsupported shader type (%i)", Type);

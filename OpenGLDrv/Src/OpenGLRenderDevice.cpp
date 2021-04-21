@@ -838,16 +838,16 @@ FString UOpenGLRenderDevice::FragmentShaderVarsText(
 #define FIXED_FUNCTION_UNIFORMS \
 	"// Shader specific uniforms\n\n" \
 	"layout(location = 0)  uniform int NumStages;\n" \
-	"layout(location = 1)  uniform int TexCoordCount;\n" \
-	"layout(location = 2)  uniform int StageTexCoordSources[8];\n" \
-	"layout(location = 10) uniform mat4 StageTexMatrices[8];\n" \
-	"layout(location = 18) uniform int StageColorArgs[16];\n" \
-	"layout(location = 34) uniform int StageColorOps[8];\n" \
-	"layout(location = 42) uniform int StageAlphaArgs[16];\n" \
-	"layout(location = 58) uniform int StageAlphaOps[8];\n" \
-	"layout(location = 66) uniform vec4 ConstantColor;\n" \
-	"layout(location = 67) uniform bool LightingEnabled;\n" \
-	"layout(location = 68) uniform float LightFactor;\n\n"
+	"layout(location = 1)  uniform int StageTexCoordCount[8];\n" \
+	"layout(location = 9)  uniform int StageTexCoordSources[8];\n" \
+	"layout(location = 17) uniform mat4 StageTexMatrices[8];\n" \
+	"layout(location = 25) uniform int StageColorArgs[16];\n" \
+	"layout(location = 41) uniform int StageColorOps[8];\n" \
+	"layout(location = 49) uniform int StageAlphaArgs[16];\n" \
+	"layout(location = 65) uniform int StageAlphaOps[8];\n" \
+	"layout(location = 73) uniform vec4 ConstantColor;\n" \
+	"layout(location = 74) uniform bool LightingEnabled;\n" \
+	"layout(location = 75) uniform float LightFactor;\n\n"
 
 FString UOpenGLRenderDevice::FixedFunctionVertexShaderText(
 	FIXED_FUNCTION_UNIFORMS
@@ -913,18 +913,17 @@ FString UOpenGLRenderDevice::FixedFunctionVertexShaderText(
 		"\tDiffuse = InDiffuse;\n"
 		"\tSpecular = InSpecular;\n"
 		"\n"
-		"\tswitch(TexCoordCount){\n"
-		"\tcase 2:\n"
-			"\t\tfor(int i = 0; i < NumStages; ++i)\n"
+		"\tfor(int i = 0; i < NumStages; ++i){\n"
+			"\t\tswitch(StageTexCoordCount[i]){\n"
+			"\t\tcase 2:\n"
 				"\t\t\tStageTexCoords[i] = StageTexMatrices[i] * vec4(tex_coord_source(StageTexCoordSources[i]).xy, 1.0, 1.0);\n"
-			"\t\tbreak;\n"
-		"\tcase 3:\n"
-			"\t\tfor(int i = 0; i < NumStages; ++i)\n"
+				"\t\t\tbreak;\n"
+			"\t\tcase 3:\n"
 				"\t\t\tStageTexCoords[i] = StageTexMatrices[i] * vec4(tex_coord_source(StageTexCoordSources[i]).xyz, 1.0);\n"
-			"\t\tbreak;\n"
-		"\tcase 4:\n"
-			"\t\tfor(int i = 0; i < NumStages; ++i)\n"
+				"\t\t\tbreak;\n"
+			"\t\tcase 4:\n"
 				"\t\t\tStageTexCoords[i] = StageTexMatrices[i] * tex_coord_source(StageTexCoordSources[i]);\n"
+			"\t\t}\n"
 		"\t}\n"
 		"\n"
 		"\tgl_Position = LocalToScreen * vec4(InPosition.xyz, 1.0);\n"

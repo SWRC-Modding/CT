@@ -133,7 +133,6 @@ void FOpenGLRenderInterface::Init(INT ViewportWidth, INT ViewportHeight){
 
 	UsingConstantColor = false;
 	NumStages = 0;
-	TexCoordCount = 2;
 	ConstantColor = FPlane(1.0f, 1.0f, 1.0f, 1.0f);
 	CurrentState->AlphaRef = -1.0f;
 
@@ -705,6 +704,7 @@ FMatrix FOpenGLRenderInterface::GetTransform(ETransformType Type) const{
 
 void FOpenGLRenderInterface::InitDefaultMaterialStageState(INT StageIndex){
 	// Init default material state
+	StageTexCoordCount[StageIndex] = 2;
 	StageTexCoordSources[StageIndex] = 0;
 	StageTexMatrices[StageIndex] = FMatrix::Identity;
 	StageColorArgs[StageIndex][0] = CA_Diffuse;
@@ -770,7 +770,6 @@ void FOpenGLRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorStri
 	ModifyColor = false;
 	ModifyFramebufferBlending = false;
 	NumStages = 0;
-	TexCoordCount = 2;
 	ConstantColor = FPlane(1.0f, 1.0f, 1.0f, 1.0f);
 	Unlit = false;
 
@@ -825,7 +824,7 @@ void FOpenGLRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorStri
 	if(UseFixedFunction){
 		SetShader(&RenDev->FixedFunctionShader);
 		glUniform1i(SU_NumStages, NumStages);
-		glUniform1i(SU_TexCoordCount, TexCoordCount);
+		glUniform1iv(SU_StageTexCoordCount, ARRAY_COUNT(StageTexCoordCount), StageTexCoordCount);
 		glUniform1iv(SU_StageTexCoordSources, ARRAY_COUNT(StageTexCoordSources), StageTexCoordSources);
 		glUniformMatrix4fv(SU_StageTexMatrices, ARRAY_COUNT(StageTexMatrices), GL_FALSE, (GLfloat*)StageTexMatrices);
 		glUniform1iv(SU_StageColorArgs, ARRAY_COUNT(StageColorArgs), &StageColorArgs[0][0]);
@@ -1639,8 +1638,8 @@ bool FOpenGLRenderInterface::SetTerrainMaterial(UTerrainMaterial* Terrain, FStri
 		Material = static_cast<UShader*>(Material)->Diffuse;
 
 	StageTexMatrices[StagesUsed] = Terrain->Layers[0].TextureMatrix;
+	StageTexCoordCount[StagesUsed] = 3;
 	StageTexCoordSources[StagesUsed] = TCS_WorldCoords;
-	TexCoordCount = 3;
 
 	if(CheckMaterial<UBitmapMaterial>(&Material, StagesUsed, TexturesUsed)){
 		if(Terrain->FirstPass){

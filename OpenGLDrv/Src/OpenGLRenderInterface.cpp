@@ -669,8 +669,6 @@ void FOpenGLRenderInterface::SetGlobalColor(FColor Color){
 }
 
 void FOpenGLRenderInterface::SetTransform(ETransformType Type, const FMatrix& Matrix){
-	checkSlow(Type < 3);
-
 	/*
 	 * HACK:
 	 * GIsOpenGL needs to be set to 0. However, it is checked for in UCanvas::Update which applies a 0.5 pixel offset for d3d.
@@ -699,8 +697,6 @@ void FOpenGLRenderInterface::SetTransform(ETransformType Type, const FMatrix& Ma
 }
 
 FMatrix FOpenGLRenderInterface::GetTransform(ETransformType Type) const{
-	checkSlow(Type < 3);
-
 	switch(Type){
 	case TT_LocalToWorld:
 		return CurrentState->LocalToWorld;

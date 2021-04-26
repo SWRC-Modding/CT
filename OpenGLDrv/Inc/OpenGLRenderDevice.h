@@ -137,4 +137,10 @@ private:
 	static FStringTemp GLSLVertexShaderFromD3DVertexShader(UHardwareShader* Shader);
 	static FStringTemp GLSLFragmentShaderFromD3DPixelShader(UHardwareShader* Shader);
 	static bool ConvertD3DAssemblyToGLSL(const TCHAR* Text, FString* Out, INT* RegistersUsed);
+
+	// Movie playback
+
+	HWND CurrentMovieWindow;
+
+	void HandleMovieWindow(UViewport* Viewport);
 };

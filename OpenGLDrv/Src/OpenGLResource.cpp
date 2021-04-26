@@ -311,7 +311,7 @@ void FOpenGLTexture::Cache(FBaseTexture* BaseTexture, bool RenderTargetMatchBack
 		if(RenderTargetMatchBackbuffer)
 			Format = RenDev->Use16bit ? GL_RGB565 : GL_RGB8;
 		else
-			Format = GL_RGBA8;
+			Format = RenDev->Use16bit ? GL_RGBA4 : GL_RGBA8;
 
 		glCreateFramebuffers(1, &FBO);
 		glCreateTextures(GL_TEXTURE_2D, 1, &TextureHandle);
@@ -401,12 +401,12 @@ void FOpenGLTexture::UploadTextureData(GLenum Target, ETextureFormat Format, voi
 		if(Target == GL_TEXTURE_2D){
 			checkSlow(!TextureHandle);
 			glCreateTextures(GL_TEXTURE_2D, 1, &TextureHandle);
-			glTextureStorage2D(TextureHandle, NumMips, GL_RGBA8, Width, Height);
+			glTextureStorage2D(TextureHandle, NumMips, RenDev->Use16bitTextures ? GL_RGBA4 : GL_RGBA8, Width, Height);
 			glTextureSubImage2D(TextureHandle, 0, 0, 0, Width, Height, GLFormat, GLType, Data);
 		}else if(Target == GL_TEXTURE_CUBE_MAP){
 			if(!TextureHandle){
 				glCreateTextures(GL_TEXTURE_CUBE_MAP, 1, &TextureHandle);
-				glTextureStorage2D(TextureHandle, NumMips, GL_RGBA8, Width, Height);
+				glTextureStorage2D(TextureHandle, NumMips, RenDev->Use16bitTextures ? GL_RGB4 : GL_RGBA8, Width, Height);
 			}
 
 			glTextureSubImage3D(TextureHandle, 0, 0, 0, CubemapFace, Width, Height, 1, GLFormat, GLType, Data);

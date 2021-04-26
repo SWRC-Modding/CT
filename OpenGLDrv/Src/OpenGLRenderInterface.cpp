@@ -671,6 +671,18 @@ void FOpenGLRenderInterface::SetGlobalColor(FColor Color){
 void FOpenGLRenderInterface::SetTransform(ETransformType Type, const FMatrix& Matrix){
 	checkSlow(Type < 3);
 
+	/*
+	 * HACK:
+	 * GIsOpenGL needs to be set to 0. However, it is checked for in UCanvas::Update which applies a 0.5 pixel offset for d3d.
+	 * Here we check if the given matrix belongs to the viewport's canvas and remove the offset.
+	 */
+	if(&Matrix == &LockedViewport->Canvas->pCanvasUtil->CanvasToScreen){
+		FMatrix& Mat = const_cast<FMatrix&>(Matrix);
+
+		Mat.M[3][0] = (INT)Mat.M[3][0];
+		Mat.M[3][1] = (INT)Mat.M[3][1];
+	}
+
 	switch(Type){
 	case TT_LocalToWorld:
 		CurrentState->LocalToWorld = Matrix;

@@ -428,8 +428,6 @@ struct FX8L8V8U8Pixel{
 	BYTE  X;
 };
 
-typedef FColor FRGBA8Pixel;
-
 /*
  * Bumpmap format to RGBA8 conversion.
  */
@@ -463,7 +461,7 @@ inline void ConvertV8U8ToRGBA8(const void* In, void* Out, INT Width, INT Height)
 		for(INT X = 0; X < Width; ++X){
 			INT Index = Y * Width + X;
 			const FV8U8Pixel* P1 = static_cast<const FV8U8Pixel*>(In) + Index;
-			FRGBA8Pixel* P2 = static_cast<FRGBA8Pixel*>(Out) + Index;
+			FColor* P2 = static_cast<FColor*>(Out) + Index;
 
 			P2->R = Map8BitSignedTo8BitUnsigned(P1->U);
 			P2->G = Map8BitSignedTo8BitUnsigned(P1->V);
@@ -480,7 +478,7 @@ inline void ConvertL6V5U5ToRGBA8(const void* In, void* Out, INT Width, INT Heigh
 		for(INT X = 0; X < Width; ++X){
 			INT Index = Y * Width + X;
 			const FL6V5U5Pixel* P1 = static_cast<const FL6V5U5Pixel*>(In) + Index;
-			FRGBA8Pixel* P2 = static_cast<FRGBA8Pixel*>(Out) + Index;
+			FColor* P2 = static_cast<FColor*>(Out) + Index;
 
 			P2->R = Map8BitSignedTo8BitUnsigned(Map5BitSignedTo8BitSigned(P1->U));
 			P2->G = Map8BitSignedTo8BitUnsigned(Map5BitSignedTo8BitSigned(P1->V));
@@ -497,7 +495,7 @@ inline void ConvertX8L8V8U8ToRGB8(const void* In, void* Out, INT Width, INT Heig
 		for(INT X = 0; X < Width; ++X){
 			INT Index = Y * Width + X;
 			const FX8L8V8U8Pixel* P1 = static_cast<const FX8L8V8U8Pixel*>(In) + Index;
-			FRGBA8Pixel* P2 = static_cast<FRGBA8Pixel*>(Out) + Index;
+			FColor* P2 = static_cast<FColor*>(Out) + Index;
 
 			P2->R = Map8BitSignedTo8BitUnsigned(P1->U);
 			P2->G = Map8BitSignedTo8BitUnsigned(P1->V);

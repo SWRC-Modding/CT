@@ -89,6 +89,8 @@ void UOpenGLRenderDevice::ClearHardwareShaderMacros(){
 }
 
 void UOpenGLRenderDevice::SetHardwareShaderMacros(UHardwareShaderMacros* Macros){
+	checkSlow(Macros);
+
 	HardwareShaderMacros = Macros;
 
 	const TCHAR* Pos = *Macros->Macros;

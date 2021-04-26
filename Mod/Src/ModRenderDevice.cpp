@@ -125,7 +125,7 @@ static HRESULT __stdcall D3DTextureLockRectOverride(IDirect3DTexture8* D3DTextur
 
 	switch(CurrentTextureSourceFormat){
 	case D3DFMT_A8R8G8B8:
-		BytesPerPixel = sizeof(FRGBA8Pixel);
+		BytesPerPixel = sizeof(FColor);
 		break;
 	case D3DFMT_V8U8:
 		BytesPerPixel = sizeof(FV8U8Pixel);

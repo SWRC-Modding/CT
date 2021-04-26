@@ -247,8 +247,7 @@ UBOOL UOpenGLRenderDevice::Init(){
 	if(bFixCanvasScaling && !UCanvasUpdateOriginal)
 		UCanvasUpdateOriginal = static_cast<UCanvasUpdateFunc>(PatchDllClassVTable("Engine.dll", "UCanvas", NULL, 31, UCanvasUpdateOverride));
 
-	if(!HardwareShaderMacros)
-		SetHardwareShaderMacros(CastChecked<UHardwareShaderMacros>(GEngine->HBumpShaderMacros));
+	SetHardwareShaderMacros(CastChecked<UHardwareShaderMacros>(GEngine->HBumpShaderMacros));
 
 	FixedFunctionShader.SetName("FixedFunction");
 	FixedFunctionShader.SetVertexShaderText(FixedFunctionVertexShaderText);

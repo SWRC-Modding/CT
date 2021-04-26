@@ -3,6 +3,7 @@
 #include "GL/glew.h"
 #include "GL/wglew.h"
 #include "OpenGLResource.h"
+#include <conio.h>
 
 #define MIN_OPENGL_MAJOR_VERSION 4
 #define MIN_OPENGL_MINOR_VERSION 5
@@ -535,6 +536,8 @@ void UOpenGLRenderDevice::Unlock(FRenderInterface* RI){
 void UOpenGLRenderDevice::Present(UViewport* Viewport){
 	checkSlow(IsCurrent());
 
+	HandleMovieWindow(Viewport);
+
 	INT ViewportX;
 	INT ViewportY;
 	INT ViewportWidth;
@@ -708,6 +711,50 @@ void UOpenGLRenderDevice::SaveVertexShader(FShaderGLSL* Shader){
 
 void UOpenGLRenderDevice::SaveFragmentShader(FShaderGLSL* Shader){
 	SaveShaderText(MakeShaderFilename(Shader, FRAGMENT_SHADER_FILE_EXTENSION), FString(Shader->GetFragmentShaderText(), true));
+}
+
+/*
+ * HACK:
+ * Movies like the intros and extras are played in a separate window. We resize and position it on top of the game window.
+ * Works alright, except for the mouse cursor which is visible in the center of the window in fullscreen mode.
+ */
+void UOpenGLRenderDevice::HandleMovieWindow(UViewport* Viewport){
+	if(Viewport->GetOuterUClient()->IsMoviePlaying()){
+		HWND MovieWindow = FindWindowA(NULL, "ActiveMovie Window");
+
+		if(CurrentMovieWindow != MovieWindow){
+			CurrentMovieWindow = MovieWindow;
+
+			if(!CurrentMovieWindow)
+				return;
+
+			SetWindowLongA(CurrentMovieWindow, GWL_STYLE, GetWindowLongA(CurrentMovieWindow, GWL_STYLE) & ~(WS_CAPTION | WS_THICKFRAME));
+		}
+
+		HWND ViewportWindow = static_cast<HWND>(Viewport->GetWindow());
+		RECT Rect;
+
+		GetClientRect(ViewportWindow, &Rect);
+		MapWindowPoints(ViewportWindow, NULL, reinterpret_cast<POINT*>(&Rect), 2); // Map client rect to screen coordinates
+
+		if(GetAsyncKeyState(VK_LBUTTON) || GetAsyncKeyState(VK_RBUTTON)){
+			POINT CursorPos;
+			GetCursorPos(&CursorPos);
+
+			// Stop movie if mouse was clicked in client area
+			if(CursorPos.x >= Rect.left && CursorPos.x <= Rect.right &&
+			   CursorPos.y >= Rect.top && CursorPos.y <= Rect.bottom){
+				Viewport->GetOuterUClient()->StopMovie();
+
+				return;
+			}
+		}
+
+		SetWindowPos(CurrentMovieWindow, HWND_TOPMOST, Rect.left, Rect.top, Rect.right - Rect.left, Rect.bottom - Rect.top, SWP_SHOWWINDOW);
+		SetFocus(ViewportWindow); // Focus on viewport window to let the engine handle any keyboard input
+	}else{
+		CurrentMovieWindow = NULL;
+	}
 }
 
 // Default shader code

@@ -97,9 +97,9 @@ void USWRCFix::Init(){
 		ResolutionList += FString::Printf("\"%ix%i\")", LOWORD(AvailableResolutions.Last()), HIWORD(AvailableResolutions.Last()));
 
 		GConfig->SetString("CTGraphicsOptionsPCMenu",
-						   "Options[2].Items",
-						   *ResolutionList,
-						   *(FString("XInterfaceCTMenus.") + UObject::GetLanguage()));
+		                   "Options[2].Items",
+		                   *ResolutionList,
+		                   *(FString("XInterfaceCTMenus.") + UObject::GetLanguage()));
 	}
 
 	InitScript();
@@ -112,9 +112,10 @@ void CDECL InitSWRCFix(void){
 	USWRCFix::Instance = FindObject<USWRCFix>(ANY_PACKAGE, "SWRCFixInstance");
 
 	if(!USWRCFix::Instance){
+		// NOTE: Need to use LoadClass here since the class might not be registered yet if Mod.dll was loaded directly with LoadLibrary
 		USWRCFix::Instance = ConstructObject<USWRCFix>(LoadClass<USWRCFix>(NULL, "Mod.SWRCFix", NULL, LOAD_NoFail | LOAD_Throw, NULL),
-		                                    ANY_PACKAGE,
-		                                    FName("SWRCFixInstance"));
+		                                               ANY_PACKAGE,
+		                                               FName("SWRCFixInstance"));
 		USWRCFix::Instance->AddToRoot(); // This object should never be garbage collected
 		USWRCFix::Instance->Init();
 	}

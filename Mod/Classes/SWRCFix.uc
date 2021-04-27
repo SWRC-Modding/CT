@@ -19,15 +19,18 @@ var FunctionOverride MenuBaseOverlayMenuClassOverride;
 var FunctionOverride MenuBaseGotoMenuClassOverride;
 
 event InitScript(){
+	// Hook necessary functions
+
+	// CTPlayer
+	CTPlayerEndZoomOverride = new class'FunctionOverride';
+	CTPlayerEndZoomOverride.Init(class'CTPlayer', 'EndZoom', self, 'CTPlayerEndZoom');
+	CTPlayerResetFOVOverride = new class'FunctionOverride';
+	CTPlayerResetFOVOverride.Init(class'CTPlayer', 'ResetFOV', self, 'CTPlayerResetFOV');
+	// Weapon
+	WeaponSetWeapFOVOverride = new class'FunctionOverride';
+	WeaponSetWeapFOVOverride.Init(class'Weapon', 'SetWeapFOV', self, 'WeaponSetWeapFOV');
+
 	if(EnableCustomMenu){
-		// CTPlayer
-		CTPlayerEndZoomOverride = new class'FunctionOverride';
-		CTPlayerEndZoomOverride.Init(class'CTPlayer', 'EndZoom', self, 'CTPlayerEndZoom');
-		CTPlayerResetFOVOverride = new class'FunctionOverride';
-		CTPlayerResetFOVOverride.Init(class'CTPlayer', 'ResetFOV', self, 'CTPlayerResetFOV');
-		// Weapon
-		WeaponSetWeapFOVOverride = new class'FunctionOverride';
-		WeaponSetWeapFOVOverride.Init(class'Weapon', 'SetWeapFOV', self, 'WeaponSetWeapFOV');
 		// MenuBase
 		MenuBaseCallMenuClassOverride = new class'FunctionOverride';
 		MenuBaseCallMenuClassOverride.Init(class'MenuBase', 'CallMenuClass', self, 'MenuBaseCallMenuClass');

@@ -729,6 +729,8 @@ void UOpenGLRenderDevice::HandleMovieWindow(UViewport* Viewport){
 				return;
 
 			SetWindowLongA(CurrentMovieWindow, GWL_STYLE, GetWindowLongA(CurrentMovieWindow, GWL_STYLE) & ~(WS_CAPTION | WS_THICKFRAME));
+		}else if(!CurrentMovieWindow){
+			return;
 		}
 
 		HWND ViewportWindow = static_cast<HWND>(Viewport->GetWindow());

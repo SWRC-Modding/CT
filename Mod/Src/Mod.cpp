@@ -2,6 +2,9 @@
 
 /*
  * FunctionOverride
+ * - Allows hooking UnrealScript functions of a specific object or all objects of a class.
+ * - This works by replacing UFunction::Func with a custom function and adding the FUNC_Native flag to make sure it is always called directly.
+ * - The hook then performs mapping between the UFunction and the override and calls it if the Self pointer is the target object.
  */
 
 static TMap<UFunction*, UFunctionOverride*> FunctionOverrides;
@@ -21,8 +24,8 @@ static void __fastcall ScriptFunctionHook(UObject* Self, int, FFrame& Stack, voi
 
 		appMemcpy(&FunctionName, Stack.Code - sizeof(FName), sizeof(FName));
 
-		if((reinterpret_cast<DWORD>(FunctionName.GetEntry()) & 0xFFFF0000) != 0 && // Seems to be enough to check for a valid name
-		   !IsBadReadPtr(FunctionName.GetEntry(), sizeof(FNameEntry) - NAME_SIZE)){ // Using IsBadReadPtr as a backup check just in case
+		if(!((reinterpret_cast<DWORD>(FunctionName.GetEntry()) & 0xFFFF0000) == 0 || // Seems to be enough to check for a valid name
+		     IsBadReadPtr(FunctionName.GetEntry(), sizeof(FNameEntry) - NAME_SIZE))){ // Using IsBadReadPtr as a backup check just in case
 			Function = Self->FindFunction(FunctionName);
 		}
 
@@ -47,7 +50,7 @@ static void __fastcall ScriptFunctionHook(UObject* Self, int, FFrame& Stack, voi
 			Override->OverrideObject->ProcessEvent(Override->OverrideFunction, Stack.Locals);
 		else
 			Override->OverrideObject->CallFunction(Stack, Result, Override->OverrideFunction);
-	}else{
+	}else{ // Function was not called on the target object so just call the original one
 		if(IsEvent)
 			(Self->*Function->Func)(Stack, Result);
 		else

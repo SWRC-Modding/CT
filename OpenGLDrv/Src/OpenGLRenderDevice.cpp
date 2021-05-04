@@ -3,7 +3,6 @@
 #include "GL/glew.h"
 #include "GL/wglew.h"
 #include "OpenGLResource.h"
-#include <conio.h>
 
 #define MIN_OPENGL_MAJOR_VERSION 4
 #define MIN_OPENGL_MINOR_VERSION 5

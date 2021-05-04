@@ -640,27 +640,25 @@ void FOpenGLRenderInterface::SetLight(INT LightIndex, FDynamicLight* Light, FLOA
 }
 
 void FOpenGLRenderInterface::SetDistanceFog(UBOOL Enable, FLOAT FogStart, FLOAT FogEnd, FColor Color){
-	// EnableFog(Enable);
-	// CurrentState->FogStart = FogStart;
-	// CurrentState->FogEnd = FogEnd;
-	// CurrentState->FogColor = Color;
-	// ++CurrentState->UniformRevision;
-	// NeedUniformUpdate = true;
+	CurrentState->FogEnabled = Enable;
+	CurrentState->FogStart = FogStart;
+	CurrentState->FogEnd = FogEnd;
+	CurrentState->FogColor = Color;
+	++CurrentState->UniformRevision;
+	NeedUniformUpdate = true;
 }
 
 UBOOL FOpenGLRenderInterface::EnableFog(UBOOL Enable){
-	// CurrentState->FogEnabled = Enable != 0;
-	// ++CurrentState->UniformRevision;
-	// NeedUniformUpdate = true;
+	CurrentState->FogEnabled = Enable != 0;
+	++CurrentState->UniformRevision;
+	NeedUniformUpdate = true;
 
-	// return Enable;
-	return 0;
+	return Enable;
 }
 
 UBOOL FOpenGLRenderInterface::IsFogEnabled(){
-	return 0;//CurrentState->FogEnabled;
+	return CurrentState->FogEnabled;
 }
-
 
 void FOpenGLRenderInterface::SetGlobalColor(FColor Color){
 	++CurrentState->UniformRevision;

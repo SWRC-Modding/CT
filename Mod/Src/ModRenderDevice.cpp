@@ -538,30 +538,6 @@ UBOOL UModRenderDevice::Exec(const TCHAR* Cmd, FOutputDevice& Ar){
 
 			return 1;
 		}
-	}else if(USWRCFix::Instance){
-		if(ParseCommand(&Cmd, "SETFOV")){
-			TObjectIterator<UViewport> It;
-
-			checkSlow(It);
-
-			FLOAT FOV = appAtof(Cmd);
-
-			Ar.Logf("Setting field of view to %f", FOV);
-			USWRCFix::Instance->SetFOV(It->Actor, FOV);
-
-			return 1;
-		}else if(ParseCommand(&Cmd, "SETFPSLIMIT")){
-			if(appStrlen(Cmd) > 0){
-				USWRCFix::Instance->FpsLimit = Max(0.0f, appAtof(Cmd));
-				USWRCFix::Instance->SaveConfig();
-			}
-
-			return 1;
-		}else if(ParseCommand(&Cmd, "GETFPSLIMIT")){
-			Ar.Logf("%f", USWRCFix::Instance->FpsLimit);
-
-			return 1;
-		}
 	}
 
 	return Super::Exec(Cmd, Ar);

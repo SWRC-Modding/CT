@@ -7,7 +7,7 @@ var() MenuSprite		OptionsDescBorder;
 
 var() MenuText			OptionDesc;
 
-const NUM_OPTIONS = 12;
+const NUM_OPTIONS = 13;
 
 var() MenuText			OptionLabels[NUM_OPTIONS];
 var() MenuButtonEnum	Options[NUM_OPTIONS];
@@ -185,6 +185,7 @@ simulated function Refresh()
 
 	Options[10].Current = i;
 	Options[11].Current = SWRCFix.HudArmsFOVFactor * 10;
+	Options[12].Current = SWRCFix.ViewShake * 10;
 
 	if ( !bInMultiplayer )
 	{
@@ -339,22 +340,25 @@ simulated function ChangeOption( int i, int Delta )
 			GetPlayerOwner().TacticalModeIntensity = float(Options[i].Current) / 10.0f;
 			GetPlayerOwner().SaveConfig();
 			GetPlayerOwner().PassOnTacticalIntensity();
-
 			break;
 
 		case 9:
 			SWRCFix.FpsLimit = float(Options[9].Items[Options[9].Current]);
-
+			SWRCFix.SaveConfig();
 			break;
 
 		case 10:
 			SWRCFix.SetFov(GetPlayerOwner(), float(Options[10].Items[Options[10].Current]));
-
 			break;
 
 		case 11:
 			SWRCFix.HudArmsFOVFactor = float(Options[11].Items[Options[11].Current]);
 			SWRCFix.SetFOV(GetPlayerOwner(), SWRCFix.FOV);
+			break;
+
+		case 12:
+			SWRCFix.ViewShake = float(Options[12].Items[Options[12].Current]);
+			SWRCFix.SaveConfig();
 	}
 
 	GetPlayerOwner().PropagateSettings();
@@ -436,6 +440,7 @@ defaultproperties
      OptionLabels(9)=(Text="FPS LIMIT")
      OptionLabels(10)=(Text="FIELD OF VIEW")
      OptionLabels(11)=(Text="WEAPON FOV FACTOR")
+     OptionLabels(12)=(Text="VIEW SHAKE")
      Options(0)=(Items=("1","2","3","4","5","6","7","8","9","10"),Blurred=(PosX=0.77375,PosY=0.12,ScaleX=0.6,ScaleY=0.6),BackgroundBlurred=(PosX=0.77375,PosY=0.12,ScaleX=0.26,ScaleY=0.02666),OnLeft="OnLeft",OnRight="OnRight",Pass=2,Style="ButtonEnumStyle1")
      Options(1)=(Items=("YES","NO"),Blurred=(PosY=0.16),BackgroundBlurred=(PosY=0.16))
      Options(2)=(Items=("ON","OFF"))
@@ -448,6 +453,7 @@ defaultproperties
      Options(9)=(Items=("NONE","30","60","75","100","120","144","240","360"));
      Options(10)=(Items=("85","90","95","100","105","110","115","120","125","130"))
      Options(11)=(Items=("0.0","0.1","0.2","0.3","0.4","0.5","0.6","0.7","0.8","0.9","1.0"))
+     Options(12)=(Items=("0.0","0.1","0.2","0.3","0.4","0.5","0.6","0.7","0.8","0.9","1.0"))
      OptionLeftArrows(0)=(Blurred=(WidgetTexture=Texture'GUIContent.Menu.CT_ArrowLeft',DrawColor=(B=255,G=255,R=255,A=255),DrawPivot=DP_MiddleMiddle,PosX=0.62625,PosY=0.12,ScaleX=0.5,ScaleY=0.5),Focused=(DrawColor=(B=255,G=255,R=255,A=255),ScaleX=0.65,ScaleY=0.65),bIgnoreController=1,OnSelect="OnLeft",Pass=2)
      OptionLeftArrows(1)=(Blurred=(PosX=0.62625,PosY=0.16))
      OptionLeftArrows(2)=(Blurred=(PosX=0.62625))
@@ -460,6 +466,7 @@ defaultproperties
      OptionLeftArrows(9)=(Blurred=(PosX=0.62625))
      OptionLeftArrows(10)=(Blurred=(PosX=0.62625))
      OptionLeftArrows(11)=(Blurred=(PosX=0.62625))
+     OptionLeftArrows(12)=(Blurred=(PosX=0.62625))
      OptionRightArrows(0)=(Blurred=(WidgetTexture=Texture'GUIContent.Menu.CT_ArrowRight',DrawColor=(B=255,G=255,R=255,A=255),DrawPivot=DP_MiddleMiddle,PosX=0.9225,PosY=0.12,ScaleX=0.5,ScaleY=0.5),Focused=(DrawColor=(B=255,G=255,R=255,A=255),ScaleX=0.65,ScaleY=0.65),bIgnoreController=1,OnSelect="OnRight",Pass=2)
      OptionRightArrows(1)=(Blurred=(PosX=0.9225,PosY=0.16))
      OptionRightArrows(2)=(Blurred=(PosX=0.9225))
@@ -472,6 +479,7 @@ defaultproperties
      OptionRightArrows(9)=(Blurred=(PosX=0.9225))
      OptionRightArrows(10)=(Blurred=(PosX=0.9225))
      OptionRightArrows(11)=(Blurred=(PosX=0.9225))
+     OptionRightArrows(12)=(Blurred=(PosX=0.9225))
      OptionDefaults(0)=5
      OptionDefaults(1)=1
      OptionDefaults(2)=1
@@ -479,6 +487,7 @@ defaultproperties
      OptionDefaults(7)=2
      OptionDefaults(8)=2
      OptionDefaults(11)=10
+     OptionDefaults(12)=10
      GameLabel=(MenuFont=Font'OrbitFonts.OrbitBold15',Text="GAME",DrawColor=(A=255),DrawPivot=DP_MiddleLeft,PosX=0.05375,PosY=0.2,ScaleX=1,ScaleY=0.8,Pass=2)
      GameLabelBackground=(WidgetTexture=Texture'GUIContent.Menu.CT_ButtonFocus',DrawColor=(B=255,G=255,R=255,A=192),DrawPivot=DP_MiddleLeft,PosX=0.04375,PosY=0.2,ScaleX=0.245,ScaleY=0.04333,ScaleMode=MSCM_FitStretch,Pass=1)
      GameLabelConnector=(WidgetTexture=Texture'GUIContent.Menu.CT_ButtonFocus',DrawColor=(B=255,G=255,R=255,A=192),DrawPivot=DP_MiddleLeft,PosX=0.295,PosY=0.2,ScaleX=0.005,ScaleY=0.04333,ScaleMode=MSCM_FitStretch)

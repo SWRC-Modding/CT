@@ -114,6 +114,10 @@ enum EHardwareShaderUniforms{
 	UNIFORM_BLOCK_MEMBER(float, TanTime) \
 	UNIFORM_BLOCK_MEMBER(vec4, GlobalColor) \
 	UNIFORM_BLOCK_MEMBER(vec4, AmbientLightColor) \
+	UNIFORM_BLOCK_MEMBER(vec4, FogColor) \
+	UNIFORM_BLOCK_MEMBER(bool, FogEnabled) \
+	UNIFORM_BLOCK_MEMBER(float, FogStart) \
+	UNIFORM_BLOCK_MEMBER(float, FogEnd) \
 	UNIFORM_BLOCK_MEMBER(STRUCT(TextureInfo){ \
 		UNIFORM_STRUCT_MEMBER(bool, IsCubemap) \
 		UNIFORM_STRUCT_MEMBER(bool, IsBumpmap) \

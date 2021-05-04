@@ -2,6 +2,7 @@ class SWRCFix extends Object config native transient;
 
 #exec OBJ LOAD FILE="Properties.u"
 
+var() config float   ViewShake;
 var() config float   FpsLimit;
 var() config float   FOV;
 var() config float   HudArmsFOVFactor;
@@ -11,6 +12,8 @@ var() config bool    EnableEditorSelectionFix; // Only here for convenience. The
 
 var FunctionOverride CTPlayerEndZoomOverride;
 var FunctionOverride CTPlayerResetFOVOverride;
+
+var FunctionOverride PlayerControllerShakeViewOverride;
 
 var FunctionOverride WeaponSetWeapFOVOverride;
 
@@ -26,6 +29,9 @@ event InitScript(){
 	CTPlayerEndZoomOverride.Init(class'CTPlayer', 'EndZoom', self, 'CTPlayerEndZoom');
 	CTPlayerResetFOVOverride = new class'FunctionOverride';
 	CTPlayerResetFOVOverride.Init(class'CTPlayer', 'ResetFOV', self, 'CTPlayerResetFOV');
+	// PlayerController
+	PlayerControllerShakeViewOverride = new class'FunctionOverride';
+	PlayerControllerShakeViewOverride.Init(class'PlayerController', 'ShakeView', self, 'PlayerControllerShakeView');
 	// Weapon
 	WeaponSetWeapFOVOverride = new class'FunctionOverride';
 	WeaponSetWeapFOVOverride.Init(class'Weapon', 'SetWeapFOV', self, 'WeaponSetWeapFOV');
@@ -132,11 +138,27 @@ function SetViewFOV(PlayerController Player){
 	Player.FOVAngle = CurrentFOV;
 }
 
-event SetFOV(PlayerController Player, float NewFOV){
+function SetFOV(PlayerController Player, float NewFOV){
 	FOV = NewFOV;
 
 	SaveConfig();
 	SetViewFOV(Player);
+}
+
+// View shake
+
+function PlayerControllerShakeView(float InTime, float SustainTime, float OutTime, float XMag, float YMag, float ZMag, float YawMag, float PitchMag, float Frequency){
+	if(ViewShake > 0){
+		PlayerController(PlayerControllerShakeViewOverride.CurrentSelf).ShakeView(InTime,
+		                                                                          SustainTime,
+		                                                                          OutTime,
+		                                                                          XMag * ViewShake,
+		                                                                          YMag * ViewShake,
+		                                                                          ZMag * ViewShake,
+		                                                                          YawMag * ViewShake,
+		                                                                          PitchMag * ViewShake,
+		                                                                          Frequency);
+	}
 }
 
 // Menu stuff
@@ -183,6 +205,7 @@ cpptext
 
 defaultproperties
 {
+	ViewShake=1.0
 	FOV=85.0
 	HUDArmsFOVFactor=1.0
 	LimitHudArmsFOV=true

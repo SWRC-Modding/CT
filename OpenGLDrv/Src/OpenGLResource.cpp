@@ -79,7 +79,7 @@ GLuint FOpenGLShader::CompileShader(FShaderGLSL* Shader, GLenum Type){
 	const TCHAR* ShaderText[3];
 	const TCHAR* FileExt = NULL;
 
-	ShaderText[1] = "#line 0\n";
+	ShaderText[1] = "#line 1\n";
 
 	if(Type == GL_VERTEX_SHADER){
 		ShaderText[0] = *RenDev->VertexShaderVarsText;

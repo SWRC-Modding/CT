@@ -264,7 +264,7 @@ void FOpenGLRenderInterface::CommitRenderState(){
 	for(INT i = 0; i < CurrentState->NumTextures; ++i){
 		if(RenderState.TextureUnits[i].Texture != CurrentState->TextureUnits[i].Texture){
 			if(CurrentState->TextureUnits[i].Texture) // Texture might not be set if the current material is a hardware shader
-				CurrentState->TextureUnits[i].Texture->BindTexture(i + CurrentState->TextureInfo[i].IsCubemap * MAX_TEXTURES);
+				CurrentState->TextureUnits[i].Texture->BindTexture(i + CurrentState->TextureInfos[i].IsCubemap * MAX_TEXTURES);
 
 			RenderState.TextureUnits[i].Texture = CurrentState->TextureUnits[i].Texture;
 		}
@@ -1077,7 +1077,7 @@ UBOOL FOpenGLRenderInterface::SetHardwareShaderMaterial(UHardwareShader* Materia
 	for(INT i = 0; i < MAX_TEXTURES; ++i){
 		if(Material->Textures[i]){
 			SetBitmapTexture(Material->Textures[i], i);
-			CurrentState->TextureInfo[i].BumpSize = Material->BumpSettings[i].BumpSize;
+			CurrentState->TextureInfos[i].BumpSize = Material->BumpSettings[i].BumpSize;
 		}
 
 		++CurrentState->NumTextures;
@@ -1113,11 +1113,11 @@ void FOpenGLRenderInterface::SetTexture(FBaseTexture* Texture, INT TextureUnit){
 	CurrentState->TextureUnits[TextureUnit].Texture = GLTexture;
 
 	if(GLTexture->IsCubemap){
-		CurrentState->TextureInfo[TextureUnit].IsCubemap = 1;
+		CurrentState->TextureInfos[TextureUnit].IsCubemap = 1;
 		CurrentState->TextureUnits[TextureUnit].ClampU = TC_Clamp;
 		CurrentState->TextureUnits[TextureUnit].ClampV = TC_Clamp;
 	}else{
-		CurrentState->TextureInfo[TextureUnit].IsCubemap = 0;
+		CurrentState->TextureInfos[TextureUnit].IsCubemap = 0;
 
 		if(GLTexture->FBO == GL_NONE){
 			CurrentState->TextureUnits[TextureUnit].ClampU = Texture->GetUClamp();
@@ -1129,7 +1129,7 @@ void FOpenGLRenderInterface::SetTexture(FBaseTexture* Texture, INT TextureUnit){
 		}
 	}
 
-	CurrentState->TextureInfo[TextureUnit].IsBumpmap = IsBumpmap(Texture->GetFormat());
+	CurrentState->TextureInfos[TextureUnit].IsBumpmap = IsBumpmap(Texture->GetFormat());
 }
 
 void FOpenGLRenderInterface::SetBitmapTexture(UBitmapMaterial* Bitmap, INT TextureUnit){

@@ -805,7 +805,8 @@ FString UOpenGLRenderDevice::VertexShaderVarsText(
 	"out vec4 TexCoord6;\n"
 	"out vec4 TexCoord7;\n"
 	"out vec3 Tangent;\n"
-	"out vec3 Binormal;\n\n", true);
+	"out vec3 Binormal;\n"
+	"out float Fog;\n\n", true);
 
 FString UOpenGLRenderDevice::FragmentShaderVarsText(
 	SHADER_HEADER
@@ -830,11 +831,11 @@ FString UOpenGLRenderDevice::FragmentShaderVarsText(
 	"#define SAMPLE_TEX_FUNC(n) \\\n"
 		"\tvec4 sample_texture ## n(vec4 Coords){ \\\n"
 			"\t\tvec4 Result; \\\n"
-			"\t\tif(!TextureInfo[n].IsCubemap) \\\n"
+			"\t\tif(!TextureInfos[n].IsCubemap) \\\n"
 				"\t\t\tResult = texture(Texture ## n, Coords.xy); \\\n"
 			"\t\telse \\\n"
 				"\t\t\tResult = texture(Cubemap ## n, Coords.xyz); \\\n"
-			"\t\tif(TextureInfo[n].IsBumpmap) \\\n"
+			"\t\tif(TextureInfos[n].IsBumpmap) \\\n"
 				"\t\t\tResult.rg = (Result.rg - 0.5) * 2; \\\n"
 			"\t\treturn Result; \\\n"
 		"\t}\n\n"
@@ -861,7 +862,9 @@ FString UOpenGLRenderDevice::FragmentShaderVarsText(
 	"in vec4 TexCoord7;\n"
 	"in vec3 Tangent;\n"
 	"in vec3 Binormal;\n"
-	"out vec4 FragColor;\n\n", true);
+	"in float Fog;\n"
+	"out vec4 FragColor;\n\n"
+	"void  alpha_test(vec4  c){ if(c.a <= AlphaRef) discard; }\n\n", true);
 
 #define FIXED_FUNCTION_UNIFORMS \
 	"// Shader specific uniforms\n\n" \
@@ -1162,9 +1165,9 @@ FString UOpenGLRenderDevice::FixedFunctionFragmentShaderText(
 		"\n"
 		"\tfor(int i = 0; i < NumLights; ++i){\n"
 			"\t\tif(Lights[i].Type == 0){\n"
-				"\t\t\tLightColor += Lights[i].Color * max(dot(Lights[i].Direction, NormalizedNormal), 0.0);\n"
+				"\t\t\tLightColor += Lights[i].Color * max(dot(Lights[i].Direction.xyz, NormalizedNormal), 0.0);\n"
 			"\t\t}else{\n"
-				"\t\t\tvec3 Dir = Lights[i].Position - Position;\n"
+				"\t\t\tvec3 Dir = Lights[i].Position.xyz - Position;\n"
 				"\t\t\tfloat Dist = length(Dir);\n"
 				"\n"
 				"\t\t\tif(Dist <= Lights[i].Radius)\n"
@@ -1183,8 +1186,7 @@ FString UOpenGLRenderDevice::FixedFunctionFragmentShaderText(
 		"\tfor(int i = 0; i < NumStages; ++i)\n"
 			"\t\tshader_stage(i);\n"
 		"\n"
-		"\tif(FragColor.a <= AlphaRef)\n"
-			"\t\tdiscard;\n"
+		"\talpha_test(FragColor);\n"
 		"\n"
 		"\tif(LightingEnabled)\n"
 			"\t\tFragColor.rgb = mix(FragColor.rgb, FragColor.rgb * light_color().rgb, LightInfluence);\n"

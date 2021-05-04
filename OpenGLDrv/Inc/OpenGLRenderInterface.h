@@ -93,7 +93,8 @@ enum EHardwareShaderUniforms{
 	HSU_PSConstants = MAX_VERTEX_SHADER_CONSTANTS
 };
 
-#define GLSL_STRUCT(x) GLSL_struct x // Workaround to get struct name to show up in C++ but not GLSL
+// NOTE: There seems to be a compiler bug that produces incorrect alignment if both the struct and variable have the same name
+#define GLSL_STRUCT(x) GLSL_struct x
 #define STRUCT(x) struct
 
 // Macro to synchronize the GLSL uniform block with the C++ struct
@@ -117,11 +118,11 @@ enum EHardwareShaderUniforms{
 		UNIFORM_STRUCT_MEMBER(bool, IsCubemap) \
 		UNIFORM_STRUCT_MEMBER(bool, IsBumpmap) \
 		UNIFORM_STRUCT_MEMBER(float, BumpSize) \
-	}, TextureInfo[MAX_TEXTURES]) \
+	}, TextureInfos[MAX_TEXTURES]) \
 	UNIFORM_BLOCK_MEMBER(STRUCT(Light){ \
 		UNIFORM_STRUCT_MEMBER(vec4, Color) \
-		UNIFORM_STRUCT_MEMBER(vec3, Position) \
-		UNIFORM_STRUCT_MEMBER(vec3, Direction) \
+		UNIFORM_STRUCT_MEMBER(vec4, Position) \
+		UNIFORM_STRUCT_MEMBER(vec4, Direction) \
 		UNIFORM_STRUCT_MEMBER(float, Radius) \
 		UNIFORM_STRUCT_MEMBER(float, InvRadius) \
 		UNIFORM_STRUCT_MEMBER(float, CosCone) \

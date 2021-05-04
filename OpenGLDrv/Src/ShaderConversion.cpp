@@ -217,7 +217,6 @@ FStringTemp UOpenGLRenderDevice::GLSLVertexShaderFromD3DVertexShader(UHardwareSh
 
 	FStringTemp GLSLShaderText = GetShaderHeaderComment(Shader) +
 		FString::Printf("layout(location = %i) uniform vec4 VSConstants[%i];\n\n", HSU_VSConstants, MAX_VERTEX_SHADER_CONSTANTS) +
-		                "out float Fog;\n\n"
 		                "#define c VSConstants\n" +
 		                VertexAttributes +
 		                "#define oPos gl_Position\n"
@@ -259,7 +258,6 @@ FStringTemp UOpenGLRenderDevice::GLSLFragmentShaderFromD3DPixelShader(UHardwareS
 		                "#define c PSConstants\n"
 		                "#define v0 Diffuse\n"
 		                "#define v1 Specular\n\n"
-		                "in float Fog;\n\n" +
 		                "void main(void){\n";
 
 	INT RegistersUsed = 1; // r0 is always required
@@ -274,9 +272,9 @@ FStringTemp UOpenGLRenderDevice::GLSLFragmentShaderFromD3DPixelShader(UHardwareS
 		GLSLShaderText += FString::Printf("\tvec4 r%i;\n", i);
 
 	GLSLShaderText += ConvertedShaderText +
-	                  "\n\tFragColor = r0;\n\n"
-		              "\tif(FragColor.a <= AlphaRef)\n"
-	                      "\t\tdiscard;\n"
+	                      "\n"
+	                      "\talpha_test(r0);\n"
+	                      "\tFragColor = r0;\n\n"
 		              "}\n";
 
 	return GLSLShaderText;
@@ -996,7 +994,7 @@ static bool WriteShaderInstructionRhs(FString* Out, FShaderInstruction& Instruct
 		*ResultExpr = EXPR_Float4;
 		*Out += FString::Printf("sample_texture%c(TexCoord%c + ", Instruction.Destination[1], Instruction.Destination[1]);
 		WriteShaderInstructionArg(Args[0], EXPR_Float4, Out);
-		*Out += FString::Printf(" * TextureInfo[%c].BumpSize)", Instruction.Destination[1]);
+		*Out += FString::Printf(" * TextureInfos[%c].BumpSize)", Instruction.Destination[1]);
 		break;
 	case INS_texbeml:
 		return false; // TODO: Implement

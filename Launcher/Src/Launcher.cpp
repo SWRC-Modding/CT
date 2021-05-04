@@ -184,7 +184,6 @@ static void InitEngine(){
 
 	GLogWindow->SetExec(GEngine);
 	GLogWindow->Log(NAME_Title, LocalizeGeneral("Run", "SWRepublicCommando"));
-	GEngine->Init();
 
 	// Init SWRCFix if it exists
 	void* ModDLL = appGetDllHandle("Mod.dll");
@@ -195,6 +194,8 @@ static void InitEngine(){
 		if(InitSWRCFix)
 			InitSWRCFix();
 	}
+
+	GEngine->Init();
 
 	debugf("Startup time: %f seconds", appSeconds() - LoadTime);
 	unguard;

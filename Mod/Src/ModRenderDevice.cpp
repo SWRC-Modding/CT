@@ -584,47 +584,43 @@ void UModRenderDevice::Unlock(FRenderInterface* RI){
 
 		INT HitProxyIndex = INDEX_NONE;
 
-		if(LockedViewport->ColorBytes != 4){
-			appMsgf(3, "16-bit color is not supported when using the selection fix. Switch to 32 or use the 'FIXSELECT' command to toggle the fix off");
-		}else{
-			// The actual hit test location is offset by two pixels so that it is at the center of the cross cursor.
-			INT HitX = LockedViewport->HitX + 2;
-			INT HitY = LockedViewport->HitY + 2;
-			INT PreferredHitProxyIndex = INDEX_NONE;
-			FLOAT PreferredHitDist = 999999.0f;
-			FLOAT HitDist = 999999.0f;
-			DWORD* src = (DWORD*)LockedRect.pBits;
-			src = (DWORD*)((BYTE*)src + HitX * 4 + (HitY - LockedViewport->HitYL) * LockedRect.Pitch);
+		// The actual hit test location is offset by two pixels so that it is at the center of the cross cursor.
+		INT HitX = LockedViewport->HitX + 2;
+		INT HitY = LockedViewport->HitY + 2;
+		INT PreferredHitProxyIndex = INDEX_NONE;
+		FLOAT PreferredHitDist = 999999.0f;
+		FLOAT HitDist = 999999.0f;
+		DWORD* src = (DWORD*)LockedRect.pBits;
+		src = (DWORD*)((BYTE*)src + HitX * 4 + (HitY - LockedViewport->HitYL) * LockedRect.Pitch);
 
-			/*
-			 * Hits are checked in a square area to make it easier to select stuff that is only a few pixels in size.
-			 * Some hit types are preferred over others. E.g the gizmo axes or wireframe brushes. If there is more than one possible selection, the preferred ones will be used.
-			 * If there is no preferred selection type, anything at the exact cursor position is also considered a preferred selection.
-			 */
-			for(INT Y = -LockedViewport->HitYL; Y < LockedViewport->HitYL + 1; Y++, src = (DWORD*)((BYTE*)src + LockedRect.Pitch)){
-				for(INT X = -LockedViewport->HitXL; X < LockedViewport->HitXL + 1; X++){
-					if(src + X >= LockedRect.pBits && src[X] != 0x0){
-						FColor HitColor = FColor((src[X] >> 16) & 0xff, (src[X] >> 8) & 0xff, (src[X]) & 0xff);
-						INT Index = INDEX_NONE;
-						FLOAT Dist = FVector(X, Y, 0.0f).Size2D(); // Distance of the hit from the center of the hit area. The closer it is, the higher the priority over other hits.
+		/*
+		 * Hits are checked in a square area to make it easier to select stuff that is only a few pixels in size.
+		 * Some hit types are preferred over others. E.g the gizmo axes or wireframe brushes. If there is more than one possible selection, the preferred ones will be used.
+		 * If there is no preferred selection type, anything at the exact cursor position is also considered a preferred selection.
+		 */
+		for(INT Y = -LockedViewport->HitYL; Y < LockedViewport->HitYL + 1; Y++, src = (DWORD*)((BYTE*)src + LockedRect.Pitch)){
+			for(INT X = -LockedViewport->HitXL; X < LockedViewport->HitXL + 1; X++){
+				if(src + X >= LockedRect.pBits && src[X] != 0x0){
+					FColor HitColor = FColor((src[X] >> 16) & 0xff, (src[X] >> 8) & 0xff, (src[X]) & 0xff);
+					INT Index = INDEX_NONE;
+					FLOAT Dist = FVector(X, Y, 0.0f).Size2D(); // Distance of the hit from the center of the hit area. The closer it is, the higher the priority over other hits.
 
-						if(RenderInterface.ProcessHitColor(HitColor, &Index)){
-							if(Dist < PreferredHitDist){
-								PreferredHitDist = Dist;
-								PreferredHitProxyIndex = Index;
-							}
-						}else if(Index >= 0){
-							if(Dist < HitDist){
-								HitDist = Dist;
-								HitProxyIndex = Index;
-							}
+					if(RenderInterface.ProcessHitColor(HitColor, &Index)){
+						if(Dist < PreferredHitDist){
+							PreferredHitDist = Dist;
+							PreferredHitProxyIndex = Index;
+						}
+					}else if(Index >= 0){
+						if(Dist < HitDist){
+							HitDist = Dist;
+							HitProxyIndex = Index;
 						}
 					}
 				}
 			}
 
-			if(PreferredHitProxyIndex >= 0)
-				HitProxyIndex = PreferredHitProxyIndex;
+		if(PreferredHitProxyIndex >= 0)
+			HitProxyIndex = PreferredHitProxyIndex;
 		}
 
 		RenderTarget->UnlockRect();

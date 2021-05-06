@@ -29,6 +29,31 @@ static FLOAT __fastcall EngineGetMaxTickRateOverride(UEngine* Self, DWORD Edx){
 	return MaxTickRate <= 0.0f ? USWRCFix::Instance->FpsLimit : MaxTickRate;
 }
 
+/*
+ * Hide reticle when zoomed in
+ */
+
+void(__fastcall*OriginalUEngineDraw)(UEngine*, DWORD, UViewport*, UBOOL, BYTE*, INT*) = NULL;
+
+static void __fastcall EngineDrawOverride(UEngine* Self, DWORD Edx, UViewport* Viewport, UBOOL Blit, BYTE* HitData, INT* HitSize){
+	if(Viewport->Actor && Viewport->Actor->Pawn && Viewport->Actor->Pawn->Weapon){
+		AWeapon* Weapon = Viewport->Actor->Pawn->Weapon;
+
+		if(!Weapon->bZoomedUsesNoHUDArms){
+			if(Weapon->bWeaponZoom)
+				Weapon->Reticle = NULL;
+			else if(!Weapon->Reticle)
+				Weapon->Reticle = static_cast<AWeapon*>(Weapon->GetClass()->GetDefaultActor())->Reticle;
+		}
+	}
+
+	OriginalUEngineDraw(Self, Edx, Viewport, Blit, HitData, HitSize);
+}
+
+/*
+ * Fix initialization
+ */
+
 void USWRCFix::Init(){
 	guardFunc;
 	debugf("Applying fixes");
@@ -101,6 +126,15 @@ void USWRCFix::Init(){
 		                   *ResolutionList,
 		                   *(FString("XInterfaceCTMenus.") + UObject::GetLanguage()));
 	}
+
+	/*
+	 * Fix 6:
+	 * This mods FOV options revealed an issue with how the game draws the weapon's reticles. It basically checks if the current FOV is lower than the default one
+	 * and only then draws the reticle. This way it it hidden when zoomed in. However if you set a very high custom FOV, this check will always fail and the reticle is always drawn.
+	 * To fix it, we hook the UEngine::Draw function and set the current weapon's reticle property to NULL if zoomed in which causes it to be hidden.
+	 */
+	if(!GIsEditor)
+		OriginalUEngineDraw = static_cast<void(__fastcall*)(UEngine*, DWORD, UViewport*, UBOOL, BYTE*, INT*)>(PatchVTable(GEngine, 41, EngineDrawOverride));
 
 	InitScript();
 	unguard;

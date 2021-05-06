@@ -235,7 +235,12 @@ simulated function Refresh()
 		DisableOption( 6 );
 		DisableOption( 7 );
 		DisableOption( 8 );
-		DisableOption( 9 );
+
+		// Disable FPS limit option for clients if the engine caps the frame rate
+		if(Level.NetMode == NM_Client){
+			if(Level.bCapFramerate)
+				DisableOption( 9 );
+		}
 	}
 }
 

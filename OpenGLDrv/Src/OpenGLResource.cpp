@@ -253,30 +253,7 @@ void FOpenGLTexture::Cache(FBaseTexture* BaseTexture, bool RenderTargetMatchBack
 	Height = BaseTexture->GetHeight();
 	IsCubemap = false;
 
-	if(Cubemap){
-		IsCubemap = true;
-
-		for(INT FaceIndex = 0; FaceIndex < 6; ++FaceIndex){
-			FTexture* Face = Cubemap->GetFace(FaceIndex);
-
-			if(!Face)
-				Face = &ErrorTexture;
-
-			void* Data = ConvertTextureData(Face, DestFormat, Width, Height, 0);
-
-			UploadTextureData(GL_TEXTURE_CUBE_MAP, DestFormat, Data, Width, Height, Face->GetNumMips(), FaceIndex);
-			Face->UnloadRawTextureData(0);
-		}
-
-		if(TextureHandle)
-			glGenerateTextureMipmap(TextureHandle);
-	}else if(Texture){
-		void* Data = ConvertTextureData(Texture, DestFormat, Width, Height, 0);
-
-		UploadTextureData(GL_TEXTURE_2D, DestFormat, Data, Width, Height, Texture->GetNumMips());
-		glGenerateTextureMipmap(TextureHandle);
-		Texture->UnloadRawTextureData(0);
-	}else if(RenderTarget){
+	if(RenderTarget){
 		if(Width == 0 || Height == 0)
 			return;
 
@@ -322,6 +299,37 @@ void FOpenGLTexture::Cache(FBaseTexture* BaseTexture, bool RenderTargetMatchBack
 			glNamedFramebufferRenderbuffer(FBO, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, DepthStencilAttachment);
 
 		checkSlow(glCheckNamedFramebufferStatus(FBO, GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE);
+	}else if(Cubemap){
+		IsCubemap = true;
+
+		for(INT FaceIndex = 0; FaceIndex < 6; ++FaceIndex){
+			FTexture* CubemapFace = Cubemap->GetFace(FaceIndex);
+
+			check(CubemapFace);
+
+			INT MipIndex = CubemapFace->GetFirstMip();
+			INT MipWidth = Width >> MipIndex;
+			INT MipHeight = Height >> MipIndex;
+			void* Data = ConvertTextureData(CubemapFace, DestFormat, MipWidth, MipHeight, MipIndex);
+
+			UploadTextureData(GL_TEXTURE_CUBE_MAP, DestFormat, Data, MipWidth, MipHeight, CubemapFace->GetNumMips() - MipIndex, FaceIndex);
+
+			for(INT i = 0; i < CubemapFace->GetNumMips(); ++i)
+				CubemapFace->UnloadRawTextureData(i);
+		}
+
+		glGenerateTextureMipmap(TextureHandle);
+	}else if(Texture){
+		INT MipIndex = Texture->GetFirstMip();
+		INT MipWidth = Width >> MipIndex;
+		INT MipHeight = Height >> MipIndex;
+		void* Data = ConvertTextureData(Texture, DestFormat, MipWidth, MipHeight, MipIndex);
+
+		UploadTextureData(GL_TEXTURE_2D, DestFormat, Data, MipWidth, MipHeight, Texture->GetNumMips() - MipIndex);
+		glGenerateTextureMipmap(TextureHandle);
+
+		for(INT i = 0; i < Texture->GetNumMips(); ++i)
+			Texture->UnloadRawTextureData(i);
 	}
 
 	Revision = BaseTexture->GetRevision();

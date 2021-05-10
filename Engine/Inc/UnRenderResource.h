@@ -341,7 +341,7 @@ public:
 	virtual FTexture* GetTextureInterface(){ return this; }
 	virtual void* GetRawTextureData(INT MipIndex) = 0;
 	virtual void GetTextureData(INT MipIndex, void* Dest, INT DestStride, ETextureFormat DestFormat, UBOOL ColoredMips = 0, UBOOL UnloadMip = 0) = 0;
-	virtual void UnloadRawTextureData( INT MipIndex ) = 0;
+	virtual void UnloadRawTextureData(INT MipIndex) = 0;
 	virtual UTexture* GetUTexture() = 0;
 };
 
@@ -352,7 +352,7 @@ class FCompositeTexture : public FBaseTexture{
 public:
 	virtual FCompositeTexture* GetCompositeTextureInterface(){ return this; }
 	virtual INT GetNumChildren() = 0;
-	virtual FTexture* GetChild(INT ChildIndex,INT* OutChildX,INT* OutChildY) = 0;
+	virtual FTexture* GetChild(INT ChildIndex, INT* OutChildX, INT* OutChildY) = 0;
 };
 
 //

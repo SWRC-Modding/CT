@@ -243,9 +243,10 @@ FOpenGLTexture::~FOpenGLTexture(){
 void FOpenGLTexture::Cache(FBaseTexture* BaseTexture, bool RenderTargetMatchBackbuffer){
 	Free();
 
-	FTexture* Texture = BaseTexture->GetTextureInterface();
-	FCubemap* Cubemap = BaseTexture->GetCubemapInterface();
 	FRenderTarget* RenderTarget = BaseTexture->GetRenderTargetInterface();
+	FCubemap* Cubemap = BaseTexture->GetCubemapInterface();
+	FCompositeTexture* CompositeTexture = BaseTexture->GetCompositeTextureInterface();
+	FTexture* Texture = BaseTexture->GetTextureInterface();
 	ETextureFormat SrcFormat = BaseTexture->GetFormat();
 	ETextureFormat DestFormat = IsDXTC(SrcFormat) ? SrcFormat : TEXF_RGBA8;
 
@@ -319,6 +320,27 @@ void FOpenGLTexture::Cache(FBaseTexture* BaseTexture, bool RenderTargetMatchBack
 		}
 
 		glGenerateTextureMipmap(TextureHandle);
+	}else if(CompositeTexture){
+		check(DestFormat == SrcFormat);
+
+		INT NumChildren = CompositeTexture->GetNumChildren();
+		INT Pitch = GetBytesPerPixel(DestFormat, Width);
+		void* Data = RenDev->GetScratchBuffer(GetBytesPerPixel(DestFormat, Width * Height));
+
+		for(INT ChildIndex = 0; ChildIndex < NumChildren; ++ChildIndex){
+			INT ChildX = 0;
+			INT ChildY = 0;
+			FTexture* Child = CompositeTexture->GetChild(ChildIndex, &ChildX, &ChildY);
+
+			Child->GetTextureData(0,
+			                      CalculateTexelPointer(static_cast<BYTE*>(Data), DestFormat, Pitch, ChildX, ChildY),
+			                      Pitch,
+			                      DestFormat,
+			                      0,
+			                      1);
+		}
+
+		UploadTextureData(GL_TEXTURE_2D, DestFormat, Data, Width, Height, 1);
 	}else if(Texture){
 		INT MipIndex = Texture->GetFirstMip();
 		INT MipWidth = Width >> MipIndex;

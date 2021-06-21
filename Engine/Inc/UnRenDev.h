@@ -80,11 +80,36 @@ enum EPrecacheMode{
 	PRECACHE_All
 };
 
+// Optimization flags for PushState
+enum EPushOptFlags{
+	PUSHOPT_DISABLE_FULLCOPY        = (1 << 0),
+	PUSHOPT_DISABLE_SHADER          = (1 << 1),
+	PUSHOPT_DISABLE_VERTEX_STREAMS  = (1 << 2),
+	PUSHOPT_DISABLE_INDEX_BUFFER    = (1 << 3),
+	PUSHOPT_DISABLE_HARDWARE_LIGHTS = (1 << 4),
+	// Bits 16-30 can be used to set an optimisation
+	PUSHOPT_ENABLE_FULLCOPY         = (PUSHOPT_DISABLE_FULLCOPY << 16),
+	PUSHOPT_ENABLE_SHADER           = (PUSHOPT_DISABLE_SHADER << 16),
+	PUSHOPT_ENABLE_VERTEX_STREAMS   = (PUSHOPT_DISABLE_VERTEX_STREAMS << 16),
+	PUSHOPT_ENABLE_INDEX_BUFFER     = (PUSHOPT_DISABLE_INDEX_BUFFER << 16),
+	PUSHOPT_ENABLE_HARDWARE_LIGHTS  = (PUSHOPT_DISABLE_HARDWARE_LIGHTS << 16),
+	// This is just used to tell the system no user optimisation was required
+	PUSHOPT_NOTHINGSET              = (1 << 31),
+	// Masks used to check if anything wants enabling or disabling
+	PUSHOPT_DISABLE_MASK            = ((1 << 14) - 1),
+	PUSHOPT_ENABLE_MASK             = (PUSHOPT_DISABLE_MASK << 16)
+};
+
+enum EPopFlags{
+	DONT_RESTORE_RENDER_TARGET  = 0x1,
+	FORCE_RESTORE_RENDER_TARGET = 0x2
+};
+
 class FRenderInterface{
 public:
-	virtual void PushState(INT Flags = 0) = 0;
-	virtual void PopState(INT Flags = 0) = 0;
-	virtual UBOOL SetRenderTarget(FRenderTarget* RenderTarget, bool MatchBackbuffer) = 0;
+	virtual void PushState(DWORD Flags = 0) = 0;
+	virtual void PopState(DWORD Flags = 0) = 0;
+	virtual UBOOL SetRenderTarget(FRenderTarget* RenderTarget, bool bOwnDepthBuffer) = 0;
 	virtual UBOOL SetCubeRenderTarget(class FDynamicCubemap*, int, int){ return 0; }
 	virtual void SetViewport(INT X, INT Y, INT Width, INT Height) = 0;
 	virtual void Clear(UBOOL UseColor = 1, FColor Color = FColor(0, 0, 0), UBOOL UseDepth = 1, FLOAT Depth = 1.0f, UBOOL UseStencil = 1, DWORD Stencil = 0) = 0;
@@ -126,7 +151,7 @@ public:
 	virtual UBOOL PixoIsVisible(FBox&){ return 1; }
 	virtual bool IsVertexBufferBusy(FVertexStream*){ return false; }
 	virtual void SetFillMode(EFillMode FillMode){}
-	// Occlusion query functions. (Only implemented for XBox
+	// Occlusion query functions. (Only implemented for XBox)
 	virtual UBOOL BeginOcclusionQuery(){ return 1; }
 	virtual UBOOL EndOcclusionQuery(DWORD QueryNum){ return 1; }
 	virtual UBOOL GetOcclusionQueryResults(DWORD QueryNum, DWORD& dwPixels){ return 1; }

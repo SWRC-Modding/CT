@@ -865,7 +865,7 @@ FString UOpenGLRenderDevice::FragmentShaderVarsText(
 	"in float Fog;\n"
 	"out vec4 FragColor;\n\n"
 	"void alpha_test(vec4  c){ if(c.a <= AlphaRef) discard; }\n"
-	"vec4 apply_fog(vec4 BaseColor){ return vec4(mix(BaseColor.rgb, FogColor.rgb, (saturate(Fog)) * BaseColor.a), BaseColor.a); }\n\n", true);
+	"vec4 apply_fog(vec4 BaseColor){ return vec4(mix(BaseColor.rgb, FogColor.rgb, Fog * BaseColor.a), BaseColor.a); }\n\n", true);
 
 #define FIXED_FUNCTION_UNIFORMS \
 	"// Shader specific uniforms\n\n" \

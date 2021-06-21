@@ -479,22 +479,28 @@ unsigned int FOpenGLRenderInterface::GetVAO(const FStreamDeclaration* Declaratio
 	return VAO;
 }
 
-void FOpenGLRenderInterface::PushState(INT Flags){
+void FOpenGLRenderInterface::PushState(DWORD Flags){
 	++CurrentState;
 
 	check(CurrentState <= &SavedStates[MAX_STATESTACKDEPTH] && "PushState overflow");
 	appMemcpy(CurrentState, CurrentState - 1, sizeof(FOpenGLSavedState));
 }
 
-void FOpenGLRenderInterface::PopState(INT Flags){
+void FOpenGLRenderInterface::PopState(DWORD Flags){
 	FOpenGLSavedState* PoppedState = CurrentState;
 
 	--CurrentState;
 
 	check(CurrentState >= &SavedStates[0] && "PopState underflow");
 
-	if(CurrentState->RenderTarget != PoppedState->RenderTarget || CurrentState->RenderTargetMatchesBackbuffer != PoppedState->RenderTargetMatchesBackbuffer)
-		SetGLRenderTarget(CurrentState->RenderTarget, CurrentState->RenderTargetMatchesBackbuffer);
+	if((Flags & DONT_RESTORE_RENDER_TARGET) != 0){
+		CurrentState->RenderTarget = PoppedState->RenderTarget;
+		CurrentState->RenderTargetOwnDepthBuffer = PoppedState->RenderTargetOwnDepthBuffer;
+	}else if((Flags & FORCE_RESTORE_RENDER_TARGET) != 0 ||
+	         (CurrentState->RenderTarget != PoppedState->RenderTarget ||
+	          CurrentState->RenderTargetOwnDepthBuffer != PoppedState->RenderTargetOwnDepthBuffer)){
+		SetGLRenderTarget(CurrentState->RenderTarget, CurrentState->RenderTargetOwnDepthBuffer);
+	}
 
 	if(CurrentState->VAO != PoppedState->VAO){
 		if(CurrentState->VAO != GL_NONE)
@@ -506,7 +512,7 @@ void FOpenGLRenderInterface::PopState(INT Flags){
 	NeedUniformUpdate = CurrentState->UniformRevision != PoppedState->UniformRevision;
 }
 
-UBOOL FOpenGLRenderInterface::SetRenderTarget(FRenderTarget* RenderTarget, bool MatchBackbuffer){
+UBOOL FOpenGLRenderInterface::SetRenderTarget(FRenderTarget* RenderTarget, bool bOwnDepthBuffer){
 	guardFunc;
 
 	checkSlow(RenderTarget);
@@ -520,12 +526,12 @@ UBOOL FOpenGLRenderInterface::SetRenderTarget(FRenderTarget* RenderTarget, bool 
 	bool NeedsUpdate = false;
 
 	if(GLRenderTarget->Revision != RenderTarget->GetRevision()){
-		GLRenderTarget->Cache(RenderTarget, MatchBackbuffer);
+		GLRenderTarget->Cache(RenderTarget, bOwnDepthBuffer);
 		NeedsUpdate = true;
 	}
 
-	if(NeedsUpdate || GLRenderTarget != CurrentState->RenderTarget || MatchBackbuffer != CurrentState->RenderTargetMatchesBackbuffer)
-		SetGLRenderTarget(GLRenderTarget, MatchBackbuffer);
+	if(NeedsUpdate || GLRenderTarget != CurrentState->RenderTarget || bOwnDepthBuffer != CurrentState->RenderTargetOwnDepthBuffer)
+		SetGLRenderTarget(GLRenderTarget, bOwnDepthBuffer);
 
 	return 1;
 
@@ -1491,10 +1497,10 @@ bool FOpenGLRenderInterface::HandleCombinedMaterial(UMaterial* Material, INT& St
 	return true;
 }
 
-void FOpenGLRenderInterface::SetGLRenderTarget(FOpenGLTexture* GLRenderTarget, bool MatchBackbuffer){
+void FOpenGLRenderInterface::SetGLRenderTarget(FOpenGLTexture* GLRenderTarget, bool bOwnDepthBuffer){
 	checkSlow(GLRenderTarget);
 
-	if(MatchBackbuffer)
+	if(bOwnDepthBuffer) // If the depth is shared with the backbuffer, we need to flip the image
 		glClipControl(GL_LOWER_LEFT, GL_NEGATIVE_ONE_TO_ONE);
 	else
 		glClipControl(GL_UPPER_LEFT, GL_ZERO_TO_ONE);
@@ -1503,7 +1509,7 @@ void FOpenGLRenderInterface::SetGLRenderTarget(FOpenGLTexture* GLRenderTarget, b
 	SetViewport(0, 0, GLRenderTarget->Width, GLRenderTarget->Height);
 
 	CurrentState->RenderTarget = GLRenderTarget;
-	CurrentState->RenderTargetMatchesBackbuffer = MatchBackbuffer;
+	CurrentState->RenderTargetOwnDepthBuffer = bOwnDepthBuffer;
 }
 
 bool FOpenGLRenderInterface::SetShaderMaterial(UShader* Shader, FString* ErrorString, UMaterial** ErrorMaterial){

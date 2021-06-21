@@ -240,7 +240,7 @@ FOpenGLTexture::~FOpenGLTexture(){
 	Free();
 }
 
-void FOpenGLTexture::Cache(FBaseTexture* BaseTexture, bool RenderTargetMatchBackbuffer){
+void FOpenGLTexture::Cache(FBaseTexture* BaseTexture, bool bOwnDepthBuffer){
 	Free();
 
 	FRenderTarget* RenderTarget = BaseTexture->GetRenderTargetInterface();
@@ -258,10 +258,13 @@ void FOpenGLTexture::Cache(FBaseTexture* BaseTexture, bool RenderTargetMatchBack
 		if(Width == 0 || Height == 0)
 			return;
 
-		if(Width != RenDev->Backbuffer.GetWidth() || Height != RenDev->Backbuffer.GetHeight())
-			RenderTargetMatchBackbuffer = true;
+		// NOTE: bOwnDepthBuffer is also used here to determine whether to use the same format for the target as the backbuffer.
+		//       While not technically correct, it works the way it is supposed to.
 
-		if(RenderTargetMatchBackbuffer){
+		if(Width != RenDev->Backbuffer.GetWidth() || Height != RenDev->Backbuffer.GetHeight())
+			bOwnDepthBuffer = true;
+
+		if(bOwnDepthBuffer){
 			bool IsMipTarget = false;
 
 			for(INT i = 0; i < UFrameFX::MaxMips; ++i){
@@ -286,7 +289,7 @@ void FOpenGLTexture::Cache(FBaseTexture* BaseTexture, bool RenderTargetMatchBack
 
 		GLenum Format;
 
-		if(RenderTargetMatchBackbuffer)
+		if(bOwnDepthBuffer)
 			Format = RenDev->Use16bit ? GL_RGB565 : GL_RGB8;
 		else
 			Format = RenDev->Use16bit ? GL_RGBA4 : GL_RGBA8;

@@ -200,7 +200,7 @@ public:
 		INT                   IndexBufferBaseIndex;
 
 		FOpenGLTexture*       RenderTarget;
-		bool                  RenderTargetMatchesBackbuffer;
+		bool                  RenderTargetOwnDepthBuffer;
 
 		// Light
 
@@ -259,14 +259,14 @@ public:
 	void UpdateGlobalShaderUniforms();
 	void SetFramebufferBlending(EFrameBufferBlending Mode);
 	void SetTextureFilter(BYTE Filter);
-	void SetGLRenderTarget(FOpenGLTexture* GLRenderTarget, bool MatchBackbuffer);
+	void SetGLRenderTarget(FOpenGLTexture* GLRenderTarget, bool bOwnDepthBuffer);
 	void SetShader(FShaderGLSL* NewShader);
 	unsigned int GetVAO(const FStreamDeclaration* Declarations, INT NumStreams);
 
 	// Overrides
-	virtual void PushState(INT Flags = 0);
-	virtual void PopState(INT Flags = 0);
-	virtual UBOOL SetRenderTarget(FRenderTarget* RenderTarget, bool MatchBackbuffer);
+	virtual void PushState(DWORD Flags = 0);
+	virtual void PopState(DWORD Flags = 0);
+	virtual UBOOL SetRenderTarget(FRenderTarget* RenderTarget, bool bOwnDepthBuffer);
 	virtual void SetViewport(INT X, INT Y, INT Width, INT Height);
 	virtual void Clear(UBOOL UseColor = 1, FColor Color = FColor(0, 0, 0), UBOOL UseDepth = 1, FLOAT Depth = 1.0f, UBOOL UseStencil = 1, DWORD Stencil = 0);
 	virtual void PushHit(const BYTE* Data, INT Count){}

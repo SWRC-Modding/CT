@@ -1164,7 +1164,7 @@ bool UOpenGLRenderDevice::ConvertD3DAssemblyToGLSL(const TCHAR* Text, FString* O
 		*Out += "\n\tif(FogEnabled)\n";
 
 		if(UsesFog)
-			*Out += "\t\tFog = calculate_fog(Fog);\n";
+			*Out += "\t\tFog = calculate_fog(oFog);\n";
 		else
 			*Out += "\t\tFog = calculate_fog((LocalToCamera * vec4(InPosition.xyz, 1.0)).z);\n";
 	}

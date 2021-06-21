@@ -805,7 +805,8 @@ FString UOpenGLRenderDevice::VertexShaderVarsText(
 	"out vec4 TexCoord7;\n"
 	"out vec3 Tangent;\n"
 	"out vec3 Binormal;\n"
-	"out float Fog;\n\n", true);
+	"out float Fog;\n\n"
+	"float calculate_fog(float Dist){ return 1 - saturate((FogEnd - Dist) / (FogEnd - FogStart)); }\n\n", true);
 
 FString UOpenGLRenderDevice::FragmentShaderVarsText(
 	SHADER_HEADER
@@ -863,7 +864,8 @@ FString UOpenGLRenderDevice::FragmentShaderVarsText(
 	"in vec3 Binormal;\n"
 	"in float Fog;\n"
 	"out vec4 FragColor;\n\n"
-	"void  alpha_test(vec4  c){ if(c.a <= AlphaRef) discard; }\n\n", true);
+	"void alpha_test(vec4  c){ if(c.a <= AlphaRef) discard; }\n"
+	"vec4 apply_fog(vec4 BaseColor){ return vec4(mix(BaseColor.rgb, FogColor.rgb, (saturate(Fog)) * BaseColor.a), BaseColor.a); }\n\n", true);
 
 #define FIXED_FUNCTION_UNIFORMS \
 	"// Shader specific uniforms\n\n" \
@@ -942,6 +944,7 @@ FString UOpenGLRenderDevice::FixedFunctionVertexShaderText(
 		"\tNormal = (LocalToWorld * vec4(InNormal.xyz, 0.0)).xyz;\n"
 		"\tDiffuse = InDiffuse;\n"
 		"\tSpecular = InSpecular;\n"
+		"\tFog = calculate_fog((LocalToCamera * vec4(InPosition.xyz, 1.0)).z);\n"
 		"\n"
 		"\tfor(int i = 0; i < NumStages; ++i){\n"
 			"\t\tswitch(StageTexCoordCount[i]){\n"
@@ -1189,6 +1192,9 @@ FString UOpenGLRenderDevice::FixedFunctionFragmentShaderText(
 		"\n"
 		"\tif(LightingEnabled)\n"
 			"\t\tFragColor.rgb = mix(FragColor.rgb, FragColor.rgb * light_color().rgb, LightInfluence);\n"
+		"\n"
+		"\tif(FogEnabled)\n"
+			"\t\tFragColor = apply_fog(FragColor);\n"
 	"}\n", true);
 
 #undef UNIFORM_STRUCT_MEMBER

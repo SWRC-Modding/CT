@@ -70,7 +70,7 @@ public:
 	virtual int SetStateCaching(int){ return 0; }
 	virtual int RefreshStates(){ return 0; }
 	virtual INT DoesSupportFSAA(INT Level){ return 0; }
-	virtual void TakeScreenshot(const char*, class UViewport*, int, int);
+	virtual void TakeScreenshot(const TCHAR* Name, UViewport* Viewport, INT Width, INT Height);
 	virtual UBOOL SupportsTextureFormat(ETextureFormat){ return 0; }
 
 	void* GetScratchBuffer(INT Size){
@@ -136,7 +136,7 @@ private:
 	static void ExpandHardwareShaderMacros(FString* ShaderText);
 	static FStringTemp GLSLVertexShaderFromD3DVertexShader(UHardwareShader* Shader);
 	static FStringTemp GLSLFragmentShaderFromD3DPixelShader(UHardwareShader* Shader);
-	static bool ConvertD3DAssemblyToGLSL(const TCHAR* Text, FString* Out, INT* RegistersUsed);
+	static bool ConvertD3DAssemblyToGLSL(const TCHAR* Text, FString* Out, INT* RegistersUsed, bool VertexFog);
 
 	// Movie playback
 

@@ -30,8 +30,8 @@ public:
 	bool ProcessHitColor(FColor HitColor, INT* OutIndex);
 	void ProcessHit(INT HitProxyIndex);
 
-	virtual void PushState(int a){ Impl->PushState(a); }
-	virtual void PopState(int a){ Impl->PopState(a); }
+	virtual void PushState(DWORD Flags){ Impl->PushState(Flags); }
+	virtual void PopState(DWORD Flags){ Impl->PopState(Flags); }
 	virtual UBOOL SetRenderTarget(FRenderTarget* RenderTarget, bool a){ return 0; }
 	virtual void SetViewport(INT X, INT Y, INT Width, INT Height){ Impl->SetViewport(X, Y, Width, Height); }
 	virtual void Clear(UBOOL UseColor, FColor Color, UBOOL UseDepth, FLOAT Depth, UBOOL UseStencil, DWORD Stencil){ Impl->Clear(UseColor, FColor(0x00000000), UseDepth, Depth, UseStencil, Stencil); }

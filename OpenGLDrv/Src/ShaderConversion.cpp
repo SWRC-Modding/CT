@@ -237,7 +237,7 @@ FStringTemp UOpenGLRenderDevice::GLSLVertexShaderFromD3DVertexShader(UHardwareSh
 	INT RegistersUsed = 0;
 	FString ConvertedShaderText = "\n";
 
-	if(!ConvertD3DAssemblyToGLSL(*D3DShaderText, &ConvertedShaderText, &RegistersUsed))
+	if(!ConvertD3DAssemblyToGLSL(*D3DShaderText, &ConvertedShaderText, &RegistersUsed, true))
 		appErrorf("Vertex shader conversion failed (%s)", Shader->GetPathName()); // TODO: Fall back to default implementation
 
 	for(INT i = 0; i < RegistersUsed; ++i)
@@ -263,7 +263,7 @@ FStringTemp UOpenGLRenderDevice::GLSLFragmentShaderFromD3DPixelShader(UHardwareS
 	INT RegistersUsed = 1; // r0 is always required
 	FString ConvertedShaderText = "\n";
 
-	if(!ConvertD3DAssemblyToGLSL(*D3DShaderText, &ConvertedShaderText, &RegistersUsed))
+	if(!ConvertD3DAssemblyToGLSL(*D3DShaderText, &ConvertedShaderText, &RegistersUsed, false))
 		appErrorf("Pixel shader conversion failed (%s)", Shader->GetPathName()); // TODO: Fall back to default implementation
 
 	checkSlow(RegistersUsed > 0); // At least one register must always be used
@@ -275,6 +275,8 @@ FStringTemp UOpenGLRenderDevice::GLSLFragmentShaderFromD3DPixelShader(UHardwareS
 	                      "\n"
 	                      "\talpha_test(r0);\n"
 	                      "\tFragColor = r0;\n\n"
+						  "\tif(FogEnabled)\n"
+							"\t\tFragColor = apply_fog(FragColor);\n"
 		              "}\n";
 
 	return GLSLShaderText;
@@ -1117,7 +1119,7 @@ static bool WriteShaderInstruction(FShaderInstruction& Instruction, FString* Out
 	return true;
 }
 
-bool UOpenGLRenderDevice::ConvertD3DAssemblyToGLSL(const TCHAR* Text, FString* Out, INT* RegistersUsed){
+bool UOpenGLRenderDevice::ConvertD3DAssemblyToGLSL(const TCHAR* Text, FString* Out, INT* RegistersUsed, bool VertexFog){
 	SkipWhitespaceAndComments(&Text);
 
 	// Skip shader type and version. We don't care and just assume the highest supported versions are vs.1.1 and ps.1.4
@@ -1132,6 +1134,7 @@ bool UOpenGLRenderDevice::ConvertD3DAssemblyToGLSL(const TCHAR* Text, FString* O
 	SkipWhitespaceAndComments(&Text, Out);
 
 	FShaderInstruction Instruction;
+	bool UsesFog = false;
 
 	while(*Text){
 		if(!ParseShaderInstruction(&Text, &Instruction))
@@ -1147,12 +1150,24 @@ bool UOpenGLRenderDevice::ConvertD3DAssemblyToGLSL(const TCHAR* Text, FString* O
 				*RegistersUsed = Max(*RegistersUsed, Instruction.Args[i].RegisterIndex + 1);
 		}
 
+		if(!UsesFog && appStrncmp(Instruction.Destination, "oFog", 4) == 0)
+			UsesFog = true;
+
 		if(*Text)
 			SkipWhitespaceAndComments(&Text, Out);
 	}
 
 	if((*Out)[Out->Len() - 1] != '\n')
 		*Out += "\n";
+
+	if(VertexFog){
+		*Out += "\n\tif(FogEnabled)\n";
+
+		if(UsesFog)
+			*Out += "\t\tFog = calculate_fog(Fog);\n";
+		else
+			*Out += "\t\tFog = calculate_fog((LocalToCamera * vec4(InPosition.xyz, 1.0)).z);\n";
+	}
 
 	return true;
 }

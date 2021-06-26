@@ -234,17 +234,26 @@ FStringTemp UOpenGLRenderDevice::GLSLVertexShaderFromD3DVertexShader(UHardwareSh
 		                "#define oT6 TexCoord6\n"
 		                "#define oT7 TexCoord7\n"
 		                "#define oFog Fog\n"
-		                "#define oPts gl_PointSize\n\n" +
+		                "#define oPts gl_PointSize\n\n"
+		                "// Temporary registers\n"
+		                "vec4 r0;\n"
+		                "vec4 r1;\n"
+		                "vec4 r2;\n"
+		                "vec4 r3;\n"
+		                "vec4 r4;\n"
+		                "vec4 r5;\n"
+		                "vec4 r6;\n"
+		                "vec4 r7;\n"
+		                "vec4 r8;\n"
+		                "vec4 r9;\n"
+						"vec4 r10;\n"
+		                "vec4 r11;\n\n"
 		                "void main(void){\n";
 
-	INT RegistersUsed = 0;
 	FString ConvertedShaderText = "\n";
 
-	if(!ConvertD3DAssemblyToGLSL(*D3DShaderText, &ConvertedShaderText, &RegistersUsed, true))
+	if(!ConvertD3DAssemblyToGLSL(*D3DShaderText, &ConvertedShaderText, true))
 		appErrorf("Vertex shader conversion failed (%s)", Shader->GetPathName()); // TODO: Fall back to default implementation
-
-	for(INT i = 0; i < RegistersUsed; ++i)
-		GLSLShaderText += FString::Printf("\tvec4 r%i;\n", i);
 
 	GLSLShaderText += ConvertedShaderText + "}\n";
 
@@ -263,18 +272,19 @@ FStringTemp UOpenGLRenderDevice::GLSLFragmentShaderFromD3DPixelShader(UHardwareS
 		                "#define c PSConstants\n"
 		                "#define v0 Diffuse\n"
 		                "#define v1 Specular\n\n"
+		                "// Temporary registers\n"
+		                "vec4 r0;\n"
+		                "vec4 r1;\n"
+		                "vec4 r2;\n"
+		                "vec4 r3;\n"
+		                "vec4 r4;\n"
+		                "vec4 r5;\n\n"
 		                "void main(void){\n";
 
-	INT RegistersUsed = 1; // r0 is always required
 	FString ConvertedShaderText = "\n";
 
-	if(!ConvertD3DAssemblyToGLSL(*D3DShaderText, &ConvertedShaderText, &RegistersUsed, false))
+	if(!ConvertD3DAssemblyToGLSL(*D3DShaderText, &ConvertedShaderText, false))
 		appErrorf("Pixel shader conversion failed (%s)", Shader->GetPathName()); // TODO: Fall back to default implementation
-
-	checkSlow(RegistersUsed > 0); // At least one register must always be used
-
-	for(INT i = 0; i < RegistersUsed; ++i)
-		GLSLShaderText += FString::Printf("\tvec4 r%i;\n", i);
 
 	GLSLShaderText += ConvertedShaderText +
 	                      "\n"
@@ -1124,7 +1134,7 @@ static bool WriteShaderInstruction(FShaderInstruction& Instruction, FString* Out
 	return true;
 }
 
-bool UOpenGLRenderDevice::ConvertD3DAssemblyToGLSL(const TCHAR* Text, FString* Out, INT* RegistersUsed, bool VertexFog){
+bool UOpenGLRenderDevice::ConvertD3DAssemblyToGLSL(const TCHAR* Text, FString* Out, bool VertexFog){
 	SkipWhitespaceAndComments(&Text);
 
 	// Skip shader type and version. We don't care and just assume the highest supported versions are vs.1.1 and ps.1.4
@@ -1147,13 +1157,6 @@ bool UOpenGLRenderDevice::ConvertD3DAssemblyToGLSL(const TCHAR* Text, FString* O
 
 		if(!WriteShaderInstruction(Instruction, Out))
 			return false;
-
-		// Keep track of how many temporary registers are actually used so that the calling code can generate only what's necessary.
-		// NOTE: This leads to compile errors if a register is ever only used as a write destination. However this is fine since it is wrong to do that anyway.
-		for(INT i = 0; i < Instruction.NumArgs; ++i){
-			if(Instruction.Args[i].Register == 'r')
-				*RegistersUsed = Max(*RegistersUsed, Instruction.Args[i].RegisterIndex + 1);
-		}
 
 		if(!UsesFog && appStrncmp(Instruction.Destination, "oFog", 4) == 0)
 			UsesFog = true;

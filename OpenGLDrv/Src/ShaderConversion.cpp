@@ -90,6 +90,7 @@ void UOpenGLRenderDevice::ClearHardwareShaderMacros(){
 
 void UOpenGLRenderDevice::SetHardwareShaderMacros(UHardwareShaderMacros* Macros){
 	checkSlow(Macros);
+	debugf("Parsing shader macros from '%s'", Macros->GetPathName());
 
 	HardwareShaderMacros = Macros;
 
@@ -161,6 +162,8 @@ static FStringTemp GetShaderHeaderComment(UHardwareShader* Shader){
 }
 
 FStringTemp UOpenGLRenderDevice::GLSLVertexShaderFromD3DVertexShader(UHardwareShader* Shader){
+	debugf("Converting D3D shader assembly to GLSL for '%s.VertexShader'", Shader->GetPathName());
+
 	FString D3DShaderText = Shader->VertexShaderText;
 	FString VertexAttributes;
 
@@ -249,6 +252,8 @@ FStringTemp UOpenGLRenderDevice::GLSLVertexShaderFromD3DVertexShader(UHardwareSh
 }
 
 FStringTemp UOpenGLRenderDevice::GLSLFragmentShaderFromD3DPixelShader(UHardwareShader* Shader){
+	debugf("Converting D3D shader assembly to GLSL for '%s.PixelShader'", Shader->GetPathName());
+
 	FString D3DShaderText = Shader->PixelShaderText;
 
 	ExpandHardwareShaderMacros(&D3DShaderText);
@@ -507,9 +512,9 @@ static bool ParseShaderInstructionArg(const TCHAR** Text, FShaderInstructionArg*
 
 		if(appStrncmp(*Text, "x2", 2) == 0)
 			Arg->ModulateX2 = true;
-		else if(appStrncmp(*Text, "bx2", 2) == 0)
+		else if(appStrncmp(*Text, "bx2", 3) == 0)
 			Arg->BiasX2 = true;
-		else if(appStrncmp(*Text, "bias", 2) == 0)
+		else if(appStrncmp(*Text, "bias", 4) == 0)
 			Arg->Bias = true;
 		else
 			return false;

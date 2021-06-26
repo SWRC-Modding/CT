@@ -10,6 +10,7 @@
 IMPLEMENT_CLASS(UOpenGLRenderDevice)
 
 UOpenGLRenderDevice::UOpenGLRenderDevice() : RenderInterface(this),
+                                             FixedFunctionShader(FStringTemp("FixedFunction", true)),
                                              Backbuffer(0, 0, TEXF_RGBA8, false, false){}
 
 void UOpenGLRenderDevice::StaticConstructor(){
@@ -113,37 +114,34 @@ FShaderGLSL* UOpenGLRenderDevice::GetShader(UHardwareShader* HardwareShader){
 
 	if(!Shader){
 		Shader = &GLShaderByHardwareShader[HardwareShader];
-		*Shader = FShaderGLSL(); // Explicitly create object because TMap does not call the constructor!
+		// Explicitly create object because TMap does not call the constructor!!!
+		*Shader = FShaderGLSL(FStringTemp(HardwareShader->GetPathName()).Substitute(".", "\\").Substitute(".", "\\"));
+
+		// Cache number of vertex and pixel shader constants
+
+		for(INT i = MAX_VERTEX_SHADER_CONSTANTS - 1; i >= 0; --i){
+			if(HardwareShader->VSConstants[i].Type != EVC_Unused){
+				HardwareShader->NumVSConstants = i + 1;
+
+				if(IsMatrixShaderConstant(HardwareShader->VSConstants[i].Type))
+					HardwareShader->NumVSConstants += 3;
+
+				break;
+			}
+		}
+
+		for(INT i = MAX_PIXEL_SHADER_CONSTANTS - 1; i >= 0; --i){
+			if(HardwareShader->VSConstants[i].Type != EVC_Unused){
+				HardwareShader->NumPSConstants = i + 1;
+
+				if(IsMatrixShaderConstant(HardwareShader->PSConstants[i].Type))
+					HardwareShader->NumPSConstants += 3;
+
+				break;
+			}
+		}
 
 		if(!HardwareShader->IsIn(UObject::GetTransientPackage())){
-			FString ShaderName = HardwareShader->GetPathName();
-
-			Shader->SetName(ShaderName.Substitute(".", "\\").Substitute(".", "\\"));
-
-			// Cache number of vertex and pixel shader constants
-
-			for(INT i = MAX_VERTEX_SHADER_CONSTANTS - 1; i >= 0; --i){
-				if(HardwareShader->VSConstants[i].Type != EVC_Unused){
-					HardwareShader->NumVSConstants = i + 1;
-
-					if(IsMatrixShaderConstant(HardwareShader->VSConstants[i].Type))
-						HardwareShader->NumVSConstants += 3;
-
-					break;
-				}
-			}
-
-			for(INT i = MAX_PIXEL_SHADER_CONSTANTS - 1; i >= 0; --i){
-				if(HardwareShader->VSConstants[i].Type != EVC_Unused){
-					HardwareShader->NumPSConstants = i + 1;
-
-					if(IsMatrixShaderConstant(HardwareShader->PSConstants[i].Type))
-						HardwareShader->NumPSConstants += 3;
-
-					break;
-				}
-			}
-
 			// Convert d3d shader assembly to glsl or load existing shader from disk
 
 			if(!LoadVertexShader(Shader)){
@@ -229,7 +227,6 @@ UBOOL UOpenGLRenderDevice::Init(){
 
 	SetHardwareShaderMacros(CastChecked<UHardwareShaderMacros>(GEngine->HBumpShaderMacros));
 
-	FixedFunctionShader.SetName("FixedFunction");
 	FixedFunctionShader.SetVertexShaderText(FixedFunctionVertexShaderText);
 	FixedFunctionShader.SetFragmentShaderText(FixedFunctionFragmentShaderText);
 

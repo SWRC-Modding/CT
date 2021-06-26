@@ -136,7 +136,7 @@ private:
 	static void ExpandHardwareShaderMacros(FString* ShaderText);
 	static FStringTemp GLSLVertexShaderFromD3DVertexShader(UHardwareShader* Shader);
 	static FStringTemp GLSLFragmentShaderFromD3DPixelShader(UHardwareShader* Shader);
-	static bool ConvertD3DAssemblyToGLSL(const TCHAR* Text, FString* Out, INT* RegistersUsed, bool VertexFog);
+	static bool ConvertD3DAssemblyToGLSL(const TCHAR* Text, FString* Out, bool VertexFog);
 
 	// Movie playback
 

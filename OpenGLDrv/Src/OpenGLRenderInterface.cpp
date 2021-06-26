@@ -850,7 +850,7 @@ void FOpenGLRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorStri
 	unguard;
 }
 
-static GLenum GetBlendFunc(ED3DBLEND D3DBlend){
+static GLenum GetBlendFunc(BYTE /* ED3DBLEND */ D3DBlend){
 	switch(D3DBlend){
 	case NOBLEND:
 		return GL_ONE;
@@ -1074,8 +1074,8 @@ UBOOL FOpenGLRenderInterface::SetHardwareShaderMaterial(UHardwareShader* Materia
 		CurrentState->AlphaRef = Material->AlphaRef / 255.0f;
 
 	if(Material->AlphaBlending){
-		CurrentState->SrcBlend = GetBlendFunc(static_cast<ED3DBLEND>(Material->SrcBlend));
-		CurrentState->DstBlend = GetBlendFunc(static_cast<ED3DBLEND>(Material->DestBlend));
+		CurrentState->SrcBlend = GetBlendFunc(Material->SrcBlend);
+		CurrentState->DstBlend = GetBlendFunc(Material->DestBlend);
 	}
 
 	for(INT i = 0; i < MAX_TEXTURES; ++i){

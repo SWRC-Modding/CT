@@ -27,6 +27,7 @@ void UOpenGLRenderDevice::StaticConstructor(){
 	new(GetClass(), "UseDesktopResolution", RF_Public) UBoolProperty(CPP_PROPERTY(bUseDesktopResolution), "Options", CPF_Config);
 	new(GetClass(), "KeepAspectRatio", RF_Public) UBoolProperty(CPP_PROPERTY(bKeepAspectRatio), "Options", CPF_Config);
 	new(GetClass(), "BilinearFramebuffer", RF_Public) UBoolProperty(CPP_PROPERTY(bBilinearFramebuffer), "Options", CPF_Config);
+	new(GetClass(), "AutoReloadShaders", RF_Public) UBoolProperty(CPP_PROPERTY(bAutoReloadShaders), "Options", CPF_Config);
 	new(GetClass(), "TextureFilter", RF_Public) UByteProperty(CPP_PROPERTY(TextureFilter), "Options", CPF_Config);
 	new(GetClass(), "TextureAnisotropy", RF_Public) UIntProperty(CPP_PROPERTY(TextureAnisotropy), "Options", CPF_Config);
 	new(GetClass(), "VSync", RF_Public) UBoolProperty(CPP_PROPERTY(bVSync), "Options", CPF_Config);
@@ -517,9 +518,11 @@ void UOpenGLRenderDevice::EnableVSync(bool bEnable){
 
 FRenderInterface* UOpenGLRenderDevice::Lock(UViewport* Viewport, BYTE* HitData, INT* HitSize){
 	MakeCurrent();
-	bFrameFX = !Viewport->GetOuterUClient()->FrameFXDisabled;
 	RenderInterface.Locked(Viewport);
 	RenderInterface.SetRenderTarget(&Backbuffer, false);
+
+	if(bAutoReloadShaders)
+		LoadShaders();
 
 	return &RenderInterface;
 }
@@ -670,11 +673,21 @@ FStringTemp UOpenGLRenderDevice::MakeShaderFilename(FShaderGLSL* Shader, const T
 	return ShaderDir * Shader->GetName() + Extension;
 }
 
+bool UOpenGLRenderDevice::ShaderFileNeedsReload(const char* Filename){
+	SQWORD CurrentFileTime = GFileManager->GetGlobalTime(Filename);
+	SQWORD PreviousFileTime = ShaderFileTimes[Filename];
+
+	return CurrentFileTime == 0 || CurrentFileTime != PreviousFileTime;
+}
+
 bool UOpenGLRenderDevice::LoadVertexShader(FShaderGLSL* Shader){
 	FStringTemp ShaderText(0);
 	FFilename Filename = MakeShaderFilename(Shader, VERTEX_SHADER_FILE_EXTENSION);
 
-	if(GFileManager->FileSize(*Filename) > 0 && appLoadFileToString(ShaderText, *Filename)){
+	if(!ShaderFileNeedsReload(*Filename))
+		return true;
+
+	if(LoadShaderText(Filename, &ShaderText)){
 		Shader->SetVertexShaderText(ShaderText);
 
 		return true;
@@ -687,8 +700,21 @@ bool UOpenGLRenderDevice::LoadFragmentShader(FShaderGLSL* Shader){
 	FStringTemp ShaderText(0);
 	FFilename Filename = MakeShaderFilename(Shader, FRAGMENT_SHADER_FILE_EXTENSION);
 
-	if(GFileManager->FileSize(*Filename) > 0 && appLoadFileToString(ShaderText, *Filename)){
+	if(!ShaderFileNeedsReload(*Filename))
+		return true;
+
+	if(LoadShaderText(Filename, &ShaderText)){
 		Shader->SetFragmentShaderText(ShaderText);
+
+		return true;
+	}
+
+	return false;
+}
+
+bool UOpenGLRenderDevice::LoadShaderText(const FFilename& Filename, FString* Out){
+	if(GFileManager->FileSize(*Filename) > 0 && appLoadFileToString(*Out, *Filename)){
+		ShaderFileTimes[*Filename] = GFileManager->GetGlobalTime(*Filename);
 
 		return true;
 	}
@@ -698,7 +724,9 @@ bool UOpenGLRenderDevice::LoadFragmentShader(FShaderGLSL* Shader){
 
 void UOpenGLRenderDevice::SaveShaderText(const FFilename& Filename, const FString& Text){
 	GFileManager->MakeDirectory(*(Filename.GetPath() + "\\"), 1);
-	appSaveStringToFile(Text, *Filename, GFileManager);
+
+	if(appSaveStringToFile(Text, *Filename, GFileManager))
+		ShaderFileTimes[*Filename] = GFileManager->GetGlobalTime(*Filename);
 }
 
 void UOpenGLRenderDevice::SaveVertexShader(FShaderGLSL* Shader){

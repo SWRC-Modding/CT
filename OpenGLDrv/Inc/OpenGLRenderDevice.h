@@ -24,6 +24,7 @@ public:
 	UBOOL          bUseDesktopResolution;
 	UBOOL          bKeepAspectRatio;
 	UBOOL          bBilinearFramebuffer;
+	UBOOL          bAutoReloadShaders;
 	BYTE           TextureFilter; // ETextureFilter
 	INT            TextureAnisotropy;
 
@@ -90,7 +91,6 @@ private:
 
 	FShaderGLSL               FixedFunctionShader;
 
-	UBOOL                     bFrameFX;
 	FAuxRenderTarget          Backbuffer;
 	unsigned int              BackbufferDepthStencil; // Shared with UFrameFX::WorkingTarget
 
@@ -111,6 +111,7 @@ private:
 
 	FStringNoInit             ShaderDir;
 
+	TMap<FString, SQWORD>               ShaderFileTimes;
 	TMap<UHardwareShader*, FShaderGLSL> GLShaderByHardwareShader;
 
 	void AddResource(FOpenGLResource* Resource);
@@ -119,12 +120,14 @@ private:
 	FOpenGLIndexBuffer* GetDynamicIndexBuffer(INT IndexSize);
 	FOpenGLVertexStream* GetDynamicVertexStream();
 
+	bool ShaderFileNeedsReload(const char* Filename);
 	bool LoadVertexShader(FShaderGLSL* Shader);
 	bool LoadFragmentShader(FShaderGLSL* Shader);
 	void SaveVertexShader(FShaderGLSL* Shader);
 	void SaveFragmentShader(FShaderGLSL* Shader);
 
 	FStringTemp MakeShaderFilename(FShaderGLSL* Shader, const TCHAR* Extension);
+	bool LoadShaderText(const FFilename& Filename, FString* Out);
 	void SaveShaderText(const FFilename& Filename, const FString& Text);
 
 	// Shader conversion

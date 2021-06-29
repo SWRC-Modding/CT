@@ -17,7 +17,11 @@ typedef ALIGN(16) FMatrix GLSL_mat4;
 
 class OPENGLDRV_API FShaderGLSL : public FRenderResource{
 public:
-	FShaderGLSL(const FString& InName) : Name(InName){
+	FShaderGLSL(const FString& InName,
+	            const FString& InVertexShaderText = FString(),
+	            const FString& InFragmentShaderText = FString()) : Name(InName),
+	                                                               VertexShaderText(InVertexShaderText),
+	                                                               FragmentShaderText(InFragmentShaderText){
 		CacheId = MakeCacheID(CID_RenderShader);
 	}
 

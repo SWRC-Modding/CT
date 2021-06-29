@@ -31,9 +31,10 @@ public:
 	virtual ~FOpenGLShader();
 
 	void Cache(FShaderGLSL* Shader);
-	void Bind() const;
+	void Bind();
 
 	GLuint Program;
+	UBOOL  IsErrorShader;
 
 private:
 	GLuint CompileShader(FShaderGLSL* Shader, GLenum Type);

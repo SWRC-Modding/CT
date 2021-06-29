@@ -35,6 +35,9 @@ public:
 	static FString FixedFunctionVertexShaderText;
 	static FString FixedFunctionFragmentShaderText;
 
+	// Error shader
+	static FShaderGLSL ErrorShader;
+
 	UOpenGLRenderDevice();
 	void StaticConstructor();
 

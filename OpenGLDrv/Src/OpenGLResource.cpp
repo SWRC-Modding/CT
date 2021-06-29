@@ -17,7 +17,8 @@ FOpenGLResource::~FOpenGLResource(){
 // FOpenGLShader
 
 FOpenGLShader::FOpenGLShader(UOpenGLRenderDevice* InRenDev, QWORD InCacheId) : FOpenGLResource(InRenDev, InCacheId),
-                                                                                               Program(GL_NONE){}
+                                                                                               Program(GL_NONE),
+                                                                                               IsErrorShader(0){}
 
 FOpenGLShader::~FOpenGLShader(){
 	if(Program)
@@ -66,10 +67,19 @@ void FOpenGLShader::Cache(FShaderGLSL* Shader){
 			glDeleteProgram(Program);
 
 		Program = NewProgram;
+		IsErrorShader = 0;
 	}
 }
 
-void FOpenGLShader::Bind() const{
+void FOpenGLShader::Bind(){
+	if(!Program){
+		INT ErrorRevision = Revision;
+
+		Cache(&UOpenGLRenderDevice::ErrorShader);
+		IsErrorShader = 1;
+		Revision = ErrorRevision;
+	}
+
 	checkSlow(Program);
 	glUseProgram(Program);
 }

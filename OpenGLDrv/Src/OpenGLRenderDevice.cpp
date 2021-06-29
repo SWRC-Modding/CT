@@ -9,6 +9,15 @@
 
 IMPLEMENT_CLASS(UOpenGLRenderDevice)
 
+FShaderGLSL UOpenGLRenderDevice::ErrorShader(
+	"ERRORSHADER",
+	"void main(void){\n"
+		"\tgl_Position = LocalToScreen * vec4(InPosition.xyz, 1.0);\n"
+	"}\n",
+	"void main(void){\n"
+		"\tFragColor = vec4(1.0, 0.0, 1.0, 1.0);\n"
+	"}\n");
+
 UOpenGLRenderDevice::UOpenGLRenderDevice() : RenderInterface(this),
                                              FixedFunctionShader(FStringTemp("FixedFunction", true)),
                                              Backbuffer(0, 0, TEXF_RGBA8, false, false){}
@@ -132,7 +141,7 @@ FShaderGLSL* UOpenGLRenderDevice::GetShader(UHardwareShader* HardwareShader){
 		}
 
 		for(INT i = MAX_PIXEL_SHADER_CONSTANTS - 1; i >= 0; --i){
-			if(HardwareShader->VSConstants[i].Type != EVC_Unused){
+			if(HardwareShader->PSConstants[i].Type != EVC_Unused){
 				HardwareShader->NumPSConstants = i + 1;
 
 				if(IsMatrixShaderConstant(HardwareShader->PSConstants[i].Type))

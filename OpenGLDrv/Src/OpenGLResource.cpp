@@ -39,6 +39,11 @@ void FOpenGLShader::Cache(FShaderGLSL* Shader){
 		if(FragmentShader)
 			glDeleteShader(FragmentShader);
 
+		if(Program){
+			glDeleteProgram(Program);
+			Program = GL_NONE;
+		}
+
 		return;
 	}
 
@@ -56,18 +61,18 @@ void FOpenGLShader::Cache(FShaderGLSL* Shader){
 
 	glGetProgramiv(NewProgram, GL_LINK_STATUS, &Status);
 
-	if(!Status){
-		GLchar Buffer[512];
-
-		glGetProgramInfoLog(NewProgram, ARRAY_COUNT(Buffer), NULL, Buffer);
-		debugf("Shader program linking failed for %s: %s", Shader->GetName(), Buffer);
-		glDeleteProgram(NewProgram);
-	}else{
+	if(Status){
 		if(Program)
 			glDeleteProgram(Program);
 
 		Program = NewProgram;
 		IsErrorShader = 0;
+	}else{
+		GLchar Buffer[512];
+
+		glGetProgramInfoLog(NewProgram, ARRAY_COUNT(Buffer), NULL, Buffer);
+		debugf("Shader program linking failed for %s: %s", Shader->GetName(), Buffer);
+		glDeleteProgram(NewProgram);
 	}
 }
 

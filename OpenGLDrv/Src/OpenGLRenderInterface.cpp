@@ -681,8 +681,8 @@ void FOpenGLRenderInterface::SetTransform(ETransformType Type, const FMatrix& Ma
 	if(&Matrix == &LockedViewport->Canvas->pCanvasUtil->CanvasToScreen){
 		FMatrix& Mat = const_cast<FMatrix&>(Matrix);
 
-		Mat.M[3][0] = (INT)Mat.M[3][0];
-		Mat.M[3][1] = (INT)Mat.M[3][1];
+		Mat.M[3][0] = static_cast<INT>(Mat.M[3][0]);
+		Mat.M[3][1] = static_cast<INT>(Mat.M[3][1]);
 	}
 
 	switch(Type){

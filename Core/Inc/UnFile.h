@@ -296,7 +296,7 @@ inline bool appIsAlnum(TCHAR c){
 }
 
 inline UBOOL appIsSpace(TCHAR c){
-    return c == ' ' || (c >= '\t' && c <= '\r');
+	return c == ' ' || (c >= '\t' && c <= '\r');
 }
 
 /*-----------------------------------------------------------------------------

@@ -2,6 +2,7 @@
 
 UHardwareShaderMacros* UOpenGLRenderDevice::HardwareShaderMacros = NULL;
 TMap<FString, FString> UOpenGLRenderDevice::HardwareShaderMacroText;
+TArray<FString>        UOpenGLRenderDevice::ExpandedMacros;
 
 static void SkipWhitespaceSingleLine(const TCHAR** Text){
 	while(**Text && appIsSpace(**Text) && **Text != '\n')
@@ -10,7 +11,7 @@ static void SkipWhitespaceSingleLine(const TCHAR** Text){
 
 // If Out is specified, comments and newlines will be written to it
 static void SkipWhitespaceAndComments(const TCHAR** Text, FString* Out = NULL){
-	while(appIsSpace(**Text) || **Text == ';' || **Text == '/'){
+	for(;;){
 		while(appIsSpace(**Text)){
 			if(Out && **Text == '\n'){
 				if(*(*Text + 1) == '\r' && *(*Text + 1) == '\n')
@@ -44,7 +45,7 @@ static void SkipWhitespaceAndComments(const TCHAR** Text, FString* Out = NULL){
 				++*Text;
 
 			if(Out){
-				if(appIsSpace((*Out)[Out->Len() - 1]))
+				if(Out->Len() == 0 || (*Out)[Out->Len() - 1] == '\n')
 					*Out += "\t";
 				else
 					*Out += " ";
@@ -79,13 +80,10 @@ static void SkipWhitespaceAndComments(const TCHAR** Text, FString* Out = NULL){
 
 			if(Out)
 				*Out += FStringTemp(static_cast<INT>(*Text - Start), Start);
+		}else if(!appIsSpace(**Text)){
+			break;
 		}
 	}
-}
-
-void UOpenGLRenderDevice::ClearHardwareShaderMacros(){
-	HardwareShaderMacros = NULL;
-	HardwareShaderMacroText.Empty();
 }
 
 void UOpenGLRenderDevice::SetHardwareShaderMacros(UHardwareShaderMacros* Macros){
@@ -100,18 +98,104 @@ void UOpenGLRenderDevice::SetHardwareShaderMacros(UHardwareShaderMacros* Macros)
 		if(*Pos == ';' || *Pos == '/'){
 			SkipWhitespaceAndComments(&Pos);
 		}else if(*Pos == '{'){
-			const TCHAR* First = Pos;
+			const TCHAR* First = Pos + 1;
 
 			while(*Pos && *Pos != '}')
 				++Pos;
 
 			if(*Pos){
-				FStringTemp Name(static_cast<INT>(Pos - First) + 1, First);
+				FStringTemp Name(static_cast<INT>(Pos - First), First);
 
 				++Pos;
 				First = Pos;
 
 				while(*Pos && *Pos != '{')
+					++Pos;
+
+				FStringTemp MacroText(static_cast<INT>(Pos - First), First);
+				FString MacroGLSL;
+
+				if(ConvertD3DAssemblyToGLSL(*MacroText, &MacroGLSL, false))
+					HardwareShaderMacroText[*Name] = MacroGLSL;
+				else
+					debugf(NAME_Error, "Failed to convert hardware shader macro '%s' to GLSL", *Name);
+			}
+		}else{
+			++Pos;
+		}
+	}
+}
+
+void UOpenGLRenderDevice::ExpandShaderMacros(FString* Text){
+	const TCHAR* Pos = **Text;
+
+	while(*Pos){
+		if(*Pos == '$'){
+			const TCHAR* First = Pos;
+
+			++Pos;
+
+			while(appIsAlnum(*Pos) || *Pos == '_')
+				++Pos;
+
+			FStringTemp Name(static_cast<INT>(Pos - First) - 1, First + 1);
+			FString* MacroTextPtr = HardwareShaderMacroText.Find(*Name);
+			FString MacroText;
+
+			if(MacroTextPtr)
+				MacroText = FString(**MacroTextPtr, true);
+			else
+				debugf(NAME_Error, "Unknown shader macro '%s'", *Name);
+
+			FString Tmp;
+
+			for(INT i = 0; i < ExpandedMacros.Num(); ++i){
+				if(ExpandedMacros[i] == Name){
+					for(INT j = 0; j < ExpandedMacros.Num(); ++j)
+						Tmp += ExpandedMacros[j] + "->";
+
+					Tmp += Name;
+
+					debugf(NAME_Error, "Recursive shader macro '%s'", *Tmp);
+
+					return;
+				}
+			}
+
+			// Expand macros within macro
+			Tmp = MacroText;
+			ExpandedMacros.AddItem(Name);
+			ExpandShaderMacros(&Tmp);
+			ExpandedMacros.Pop();
+
+			INT MacroOffset = static_cast<INT>(First - **Text);
+
+			*Text = FStringTemp(MacroOffset, **Text) + Tmp + Pos;
+			Pos = **Text + MacroOffset + Tmp.Len();
+		}else{
+			++Pos;
+		}
+	}
+}
+
+void UOpenGLRenderDevice::ParseGLSLMacros(const FString& Text){
+	const TCHAR* Pos = *Text;
+
+	while(*Pos){
+		if(*Pos == '@'){
+			++Pos;
+
+			const TCHAR* First = Pos;
+
+			while(appIsAlnum(*Pos) || *Pos == '_')
+				++Pos;
+
+			if(*Pos){
+				FStringTemp Name(static_cast<INT>(Pos - First), First);
+
+				First = Pos;
+
+				while(*Pos && *Pos != '@')
 					++Pos;
 
 				HardwareShaderMacroText[*Name] = FStringTemp(static_cast<INT>(Pos - First), First);
@@ -122,43 +206,12 @@ void UOpenGLRenderDevice::SetHardwareShaderMacros(UHardwareShaderMacros* Macros)
 	}
 }
 
-void UOpenGLRenderDevice::ExpandHardwareShaderMacros(FString* ShaderText){
-	const TCHAR* Pos = **ShaderText;
-
-	while(*Pos){
-		if(*Pos == ';' || *Pos == '/'){
-			SkipWhitespaceAndComments(&Pos);
-		}else if(*Pos == '{'){
-			const TCHAR* First = Pos;
-
-			while(*Pos && *Pos != '}')
-				++Pos;
-
-			if(*Pos){
-				FStringTemp Name(static_cast<INT>(Pos - First) + 1, First);
-				FString* MacroText = HardwareShaderMacroText.Find(Name);
-
-				if(MacroText){
-					INT Index = static_cast<INT>(First - **ShaderText); // Save index since Pos is invalidated when the string is reallocated
-
-					*ShaderText = FStringTemp(Index, **ShaderText) +
-					              "// ################################################ Macro: " + Name + " ################################################\n" +
-					              *MacroText + "// ################################################ End macro ################################################\n" +
-					              (Pos + 1);
-					Pos = &(*ShaderText)[Index];
-				}
-			}
-		}else{
-			++Pos;
-		}
-	}
-}
-
-static FStringTemp GetShaderHeaderComment(UHardwareShader* Shader){
+static FStringTemp GetShaderHeaderComment(UHardwareShader* Shader, const char* ShaderType){
 	return FString::Printf("/*\n"
-	                       " * %s\n"
+	                       " * %s - %s\n"
 	                       " */\n\n",
-						   Shader->GetPathName());
+						   Shader->GetPathName(),
+	                       ShaderType);
 }
 
 FStringTemp UOpenGLRenderDevice::GLSLVertexShaderFromD3DVertexShader(UHardwareShader* Shader){
@@ -166,8 +219,6 @@ FStringTemp UOpenGLRenderDevice::GLSLVertexShaderFromD3DVertexShader(UHardwareSh
 
 	FString D3DShaderText = Shader->VertexShaderText;
 	FString VertexAttributes;
-
-	ExpandHardwareShaderMacros(&D3DShaderText);
 
 	for(INT i = 0; i < Shader->StreamMapping.Num(); ++i){
 		switch(Shader->StreamMapping[i]){
@@ -218,7 +269,7 @@ FStringTemp UOpenGLRenderDevice::GLSLVertexShaderFromD3DVertexShader(UHardwareSh
 	if(VertexAttributes.Len() == 0)
 		VertexAttributes += "#define v0 Position\n";
 
-	FStringTemp GLSLShaderText = GetShaderHeaderComment(Shader) +
+	FStringTemp GLSLShaderText = GetShaderHeaderComment(Shader, "vertex shader") +
 		FString::Printf("layout(location = %i) uniform vec4 VSConstants[%i];\n\n", HSU_VSConstants, MAX_VERTEX_SHADER_CONSTANTS) +
 		                "#define c VSConstants\n" +
 		                VertexAttributes +
@@ -250,7 +301,7 @@ FStringTemp UOpenGLRenderDevice::GLSLVertexShaderFromD3DVertexShader(UHardwareSh
 		                "vec4 r11;\n\n"
 		                "void main(void){\n";
 
-	FString ConvertedShaderText = "\n";
+	FString ConvertedShaderText;
 
 	if(!ConvertD3DAssemblyToGLSL(*D3DShaderText, &ConvertedShaderText, true))
 		appErrorf("Vertex shader conversion failed (%s)", Shader->GetPathName()); // TODO: Fall back to default implementation
@@ -265,9 +316,7 @@ FStringTemp UOpenGLRenderDevice::GLSLFragmentShaderFromD3DPixelShader(UHardwareS
 
 	FString D3DShaderText = Shader->PixelShaderText;
 
-	ExpandHardwareShaderMacros(&D3DShaderText);
-
-	FStringTemp GLSLShaderText = GetShaderHeaderComment(Shader) +
+	FStringTemp GLSLShaderText = GetShaderHeaderComment(Shader, "pixel shader") +
 		FString::Printf("layout(location = %i) uniform vec4 PSConstants[%i];\n\n", HSU_PSConstants, MAX_PIXEL_SHADER_CONSTANTS) +
 		                "#define c PSConstants\n"
 		                "#define v0 Diffuse\n"
@@ -281,7 +330,7 @@ FStringTemp UOpenGLRenderDevice::GLSLFragmentShaderFromD3DPixelShader(UHardwareS
 		                "vec4 r5;\n\n"
 		                "void main(void){\n";
 
-	FString ConvertedShaderText = "\n";
+	FString ConvertedShaderText;
 
 	if(!ConvertD3DAssemblyToGLSL(*D3DShaderText, &ConvertedShaderText, false))
 		appErrorf("Pixel shader conversion failed (%s)", Shader->GetPathName()); // TODO: Fall back to default implementation
@@ -1152,14 +1201,26 @@ bool UOpenGLRenderDevice::ConvertD3DAssemblyToGLSL(const TCHAR* Text, FString* O
 	bool UsesFog = false;
 
 	while(*Text){
-		if(!ParseShaderInstruction(&Text, &Instruction))
-			return false;
+		if(*Text != '{'){
+			if(!ParseShaderInstruction(&Text, &Instruction))
+				return false;
 
-		if(!WriteShaderInstruction(Instruction, Out))
-			return false;
+			if(!WriteShaderInstruction(Instruction, Out))
+				return false;
 
-		if(!UsesFog && appStrncmp(Instruction.Destination, "oFog", 4) == 0)
-			UsesFog = true;
+			if(!UsesFog && appStrncmp(Instruction.Destination, "oFog", 4) == 0)
+				UsesFog = true;
+		}else{
+			const TCHAR* First = Text + 1;
+
+			while(*Text && *Text != '}')
+				++Text;
+
+			if(*Text){
+				*Out += "\t$" + FStringTemp(static_cast<INT>(Text - First), First);
+				++Text;
+			}
+		}
 
 		if(*Text)
 			SkipWhitespaceAndComments(&Text, Out);

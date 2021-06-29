@@ -667,10 +667,13 @@ void UOpenGLRenderDevice::LoadShaders(){
 				SaveFragmentShader(&It.Value());
 		}
 	}
+
+	if(!LoadShaderMacroText())
+		SaveShaderMacroText();
 }
 
-FStringTemp UOpenGLRenderDevice::MakeShaderFilename(FShaderGLSL* Shader, const TCHAR* Extension){
-	return ShaderDir * Shader->GetName() + Extension;
+FStringTemp UOpenGLRenderDevice::MakeShaderFilename(const FString& ShaderName, const TCHAR* Extension){
+	return ShaderDir * ShaderName + Extension;
 }
 
 bool UOpenGLRenderDevice::ShaderFileNeedsReload(const char* Filename){
@@ -682,7 +685,7 @@ bool UOpenGLRenderDevice::ShaderFileNeedsReload(const char* Filename){
 
 bool UOpenGLRenderDevice::LoadVertexShader(FShaderGLSL* Shader){
 	FStringTemp ShaderText(0);
-	FFilename Filename = MakeShaderFilename(Shader, VERTEX_SHADER_FILE_EXTENSION);
+	FFilename Filename = MakeShaderFilename(Shader->GetName(), VERTEX_SHADER_FILE_EXTENSION);
 
 	if(!ShaderFileNeedsReload(*Filename))
 		return true;
@@ -698,7 +701,7 @@ bool UOpenGLRenderDevice::LoadVertexShader(FShaderGLSL* Shader){
 
 bool UOpenGLRenderDevice::LoadFragmentShader(FShaderGLSL* Shader){
 	FStringTemp ShaderText(0);
-	FFilename Filename = MakeShaderFilename(Shader, FRAGMENT_SHADER_FILE_EXTENSION);
+	FFilename Filename = MakeShaderFilename(Shader->GetName(), FRAGMENT_SHADER_FILE_EXTENSION);
 
 	if(!ShaderFileNeedsReload(*Filename))
 		return true;
@@ -722,6 +725,29 @@ bool UOpenGLRenderDevice::LoadShaderText(const FFilename& Filename, FString* Out
 	return false;
 }
 
+bool UOpenGLRenderDevice::LoadShaderMacroText(){
+	FFilename Filename = MakeShaderFilename("Macros", SHADER_MACROS_FILE_EXTENSION);
+
+	if(!ShaderFileNeedsReload(*Filename))
+		return true;
+
+	FString Macros;
+
+	if(LoadShaderText(Filename, &Macros)){
+		ParseGLSLMacros(Macros);
+
+		// Increment revision of all shaders since they might use the macros and need to be updated
+		for(TMap<UHardwareShader*, FShaderGLSL>::TIterator It(GLShaderByHardwareShader); It; ++It)
+			++It.Value().Revision;
+
+		++FixedFunctionShader.Revision;
+
+		return true;
+	}
+
+	return false;
+}
+
 void UOpenGLRenderDevice::SaveShaderText(const FFilename& Filename, const FString& Text){
 	GFileManager->MakeDirectory(*(Filename.GetPath() + "\\"), 1);
 
@@ -730,11 +756,20 @@ void UOpenGLRenderDevice::SaveShaderText(const FFilename& Filename, const FStrin
 }
 
 void UOpenGLRenderDevice::SaveVertexShader(FShaderGLSL* Shader){
-	SaveShaderText(MakeShaderFilename(Shader, VERTEX_SHADER_FILE_EXTENSION), FString(Shader->GetVertexShaderText(), true));
+	SaveShaderText(MakeShaderFilename(Shader->GetName(), VERTEX_SHADER_FILE_EXTENSION), FString(Shader->GetVertexShaderText(), true));
 }
 
 void UOpenGLRenderDevice::SaveFragmentShader(FShaderGLSL* Shader){
-	SaveShaderText(MakeShaderFilename(Shader, FRAGMENT_SHADER_FILE_EXTENSION), FString(Shader->GetFragmentShaderText(), true));
+	SaveShaderText(MakeShaderFilename(Shader->GetName(), FRAGMENT_SHADER_FILE_EXTENSION), FString(Shader->GetFragmentShaderText(), true));
+}
+
+void UOpenGLRenderDevice::SaveShaderMacroText(){
+	FString Macros;
+
+	for(TMap<FString, FString>::TIterator It(HardwareShaderMacroText); It; ++It)
+		Macros += "@" + It.Key() + "\n" + It.Value() + "\n";
+
+	SaveShaderText(MakeShaderFilename("Macros", SHADER_MACROS_FILE_EXTENSION), Macros);
 }
 
 /*

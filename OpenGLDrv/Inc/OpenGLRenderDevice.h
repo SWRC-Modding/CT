@@ -8,6 +8,7 @@ class FOpenGLResource;
 
 #define FRAGMENT_SHADER_FILE_EXTENSION ".fs"
 #define VERTEX_SHADER_FILE_EXTENSION ".vs"
+#define SHADER_MACROS_FILE_EXTENSION ".glsl"
 
 enum ETextureFilter{
 	TF_Nearest,
@@ -44,6 +45,7 @@ public:
 	FShaderGLSL* GetShader(UHardwareShader* HardwareShader);
 
 	static void SetHardwareShaderMacros(UHardwareShaderMacros* Macros);
+	static void ExpandShaderMacros(FString* Text);
 
 	// Overrides
 	virtual UBOOL Exec(const TCHAR* Cmd, FOutputDevice& Ar);
@@ -123,10 +125,12 @@ private:
 	bool ShaderFileNeedsReload(const char* Filename);
 	bool LoadVertexShader(FShaderGLSL* Shader);
 	bool LoadFragmentShader(FShaderGLSL* Shader);
+	bool LoadShaderMacroText();
 	void SaveVertexShader(FShaderGLSL* Shader);
 	void SaveFragmentShader(FShaderGLSL* Shader);
+	void SaveShaderMacroText();
 
-	FStringTemp MakeShaderFilename(FShaderGLSL* Shader, const TCHAR* Extension);
+	FStringTemp MakeShaderFilename(const FString& ShaderName, const TCHAR* Extension);
 	bool LoadShaderText(const FFilename& Filename, FString* Out);
 	void SaveShaderText(const FFilename& Filename, const FString& Text);
 
@@ -134,9 +138,9 @@ private:
 
 	static UHardwareShaderMacros* HardwareShaderMacros;
 	static TMap<FString, FString> HardwareShaderMacroText;
+	static TArray<FString>        ExpandedMacros; // Used to check for circular references in macros
 
-	static void ClearHardwareShaderMacros();
-	static void ExpandHardwareShaderMacros(FString* ShaderText);
+	static void ParseGLSLMacros(const FString& Text);
 	static FStringTemp GLSLVertexShaderFromD3DVertexShader(UHardwareShader* Shader);
 	static FStringTemp GLSLFragmentShaderFromD3DPixelShader(UHardwareShader* Shader);
 	static bool ConvertD3DAssemblyToGLSL(const TCHAR* Text, FString* Out, bool VertexFog);

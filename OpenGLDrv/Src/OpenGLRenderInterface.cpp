@@ -834,17 +834,20 @@ void FOpenGLRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorStri
 
 	if(UseFixedFunction){
 		SetShader(&RenDev->FixedFunctionShader);
-		glUniform1i(SU_NumStages, NumStages);
-		glUniform1iv(SU_StageTexCoordCount, ARRAY_COUNT(StageTexCoordCount), StageTexCoordCount);
-		glUniform1iv(SU_StageTexCoordSources, ARRAY_COUNT(StageTexCoordSources), StageTexCoordSources);
-		glUniformMatrix4fv(SU_StageTexMatrices, ARRAY_COUNT(StageTexMatrices), GL_FALSE, (GLfloat*)StageTexMatrices);
-		glUniform1iv(SU_StageColorArgs, ARRAY_COUNT(StageColorArgs), &StageColorArgs[0][0]);
-		glUniform1iv(SU_StageColorOps, ARRAY_COUNT(StageColorOps), StageColorOps);
-		glUniform1iv(SU_StageAlphaArgs, ARRAY_COUNT(StageAlphaArgs), &StageAlphaArgs[0][0]);
-		glUniform1iv(SU_StageAlphaOps, ARRAY_COUNT(StageAlphaOps), StageAlphaOps);
-		glUniform4fv(SU_ConstantColor, 1, (GLfloat*)&ConstantColor);
-		glUniform1i(SU_LightingEnabled, CurrentState->UseDynamicLighting && !Unlit);
-		glUniform1f(SU_LightFactor, CurrentState->LightingModulate2X ? 2.0f : 1.0f);
+
+		if(!CurrentShader->IsErrorShader){
+			glUniform1i(SU_NumStages, NumStages);
+			glUniform1iv(SU_StageTexCoordCount, ARRAY_COUNT(StageTexCoordCount), StageTexCoordCount);
+			glUniform1iv(SU_StageTexCoordSources, ARRAY_COUNT(StageTexCoordSources), StageTexCoordSources);
+			glUniformMatrix4fv(SU_StageTexMatrices, ARRAY_COUNT(StageTexMatrices), GL_FALSE, (GLfloat*)StageTexMatrices);
+			glUniform1iv(SU_StageColorArgs, ARRAY_COUNT(StageColorArgs), &StageColorArgs[0][0]);
+			glUniform1iv(SU_StageColorOps, ARRAY_COUNT(StageColorOps), StageColorOps);
+			glUniform1iv(SU_StageAlphaArgs, ARRAY_COUNT(StageAlphaArgs), &StageAlphaArgs[0][0]);
+			glUniform1iv(SU_StageAlphaOps, ARRAY_COUNT(StageAlphaOps), StageAlphaOps);
+			glUniform4fv(SU_ConstantColor, 1, (GLfloat*)&ConstantColor);
+			glUniform1i(SU_LightingEnabled, CurrentState->UseDynamicLighting && !Unlit);
+			glUniform1f(SU_LightFactor, CurrentState->LightingModulate2X ? 2.0f : 1.0f);
+		}
 	}
 
 	unguard;
@@ -1094,10 +1097,12 @@ UBOOL FOpenGLRenderInterface::SetHardwareShaderMaterial(UHardwareShader* Materia
 
 	static FPlane Constants[MAX_VERTEX_SHADER_CONSTANTS];
 
-	GetShaderConstants(Material->VSConstants, Constants, Material->NumVSConstants);
-	glUniform4fv(HSU_VSConstants, Material->NumVSConstants, (GLfloat*)Constants);
-	GetShaderConstants(Material->PSConstants, Constants, Material->NumPSConstants);
-	glUniform4fv(HSU_PSConstants, Material->NumPSConstants, (GLfloat*)Constants);
+	if(!CurrentShader->IsErrorShader){
+		GetShaderConstants(Material->VSConstants, Constants, Material->NumVSConstants);
+		glUniform4fv(HSU_VSConstants, Material->NumVSConstants, (GLfloat*)Constants);
+		GetShaderConstants(Material->PSConstants, Constants, Material->NumPSConstants);
+		glUniform4fv(HSU_PSConstants, Material->NumPSConstants, (GLfloat*)Constants);
+	}
 
 	return 1;
 }

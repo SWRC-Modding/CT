@@ -1,0 +1,2 @@
+CLASS: BowcasterAmmoDefaults(876), BASE: BowcasterAmmo
+PROPERTIES:

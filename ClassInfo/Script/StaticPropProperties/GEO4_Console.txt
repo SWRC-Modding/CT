@@ -1,0 +1,2 @@
+CLASS: GEO4_Console(836), BASE: StaticProp
+PROPERTIES:

@@ -1,0 +1,22 @@
+CLASS: CTGameOptionsPCMenu(34328), BASE: MenuTemplateTitled
+PROPERTIES:
+	18320 Label                    Struct  <MenuText>
+	18432 OptionsBorder            Struct  <MenuSprite>
+	18504 OptionsDescBorder        Struct  <MenuSprite>
+	18576 OptionDesc               Struct  <MenuText>
+	18688 OptionLabels             Struct  <MenuText>[9]
+	19696 Options                  Struct  <MenuButtonEnum>[9]
+	24196 OptionLeftArrows         Struct  <MenuButtonSprite>[9]
+	27832 OptionRightArrows        Struct  <MenuButtonSprite>[9]
+	31468 OptionDefaults           Int     [9]
+	31504 GameLabel                Struct  <MenuText>
+	31616 GameLabelBackground      Struct  <MenuSprite>
+	31688 GameLabelConnector       Struct  <MenuSprite>
+	31760 Sound                    Struct  <MenuButtonText>
+	32244 Graphics                 Struct  <MenuButtonText>
+	32728 Controls                 Struct  <MenuButtonText>
+	33212 RestoreToDefault         Struct  <MenuButtonText>
+	33696 DefaultConnector         Struct  <MenuSprite>
+	33768 DefaultLine              Struct  <MenuSprite>
+	33840 Done                     Struct  <MenuButtonText>
+	34324 bInMultiplayer           Bool    <0 : 0x00000001>

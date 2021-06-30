@@ -1,0 +1,7 @@
+CLASS: GoalObject(76), BASE: GoalQueue
+PROPERTIES:
+	56   NextGoal                 Object  <GoalObject>
+	60   PrevGoal                 Object  <GoalObject>
+	64   Status                   Byte    <EGoalStatus>
+	68   TopLevel                 Bool    <0 : 0x00000001>
+	72   Utility                  Float   

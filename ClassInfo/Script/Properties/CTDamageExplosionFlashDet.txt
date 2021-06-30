@@ -1,0 +1,2 @@
+CLASS: CTDamageExplosionFlashDet(112), BASE: CTDamageExplosion
+PROPERTIES:

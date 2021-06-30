@@ -1,0 +1,2 @@
+CLASS: Grievous(1712), BASE: Droid
+PROPERTIES:

@@ -1,0 +1,11 @@
+CLASS: ClientBeaconReceiver(2148), BASE: UdpBeacon
+STRUCTS:
+	BeaconInfo(44)
+		0    Addr                     Struct  <IpAddr>
+		8    Time                     Float   
+		12   Text                     Str     
+		20   RemoteSessionID          Str     
+		28   RemoteExchangeKey        Str     
+		36   RemoteHostAddr           Str     
+PROPERTIES:
+	740  Beacons                  Struct  <BeaconInfo>[32]

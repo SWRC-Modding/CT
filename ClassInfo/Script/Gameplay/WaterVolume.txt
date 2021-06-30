@@ -1,0 +1,5 @@
+CLASS: WaterVolume(920), BASE: PhysicsVolume
+PROPERTIES:
+	896  EntrySoundName           Str     
+	904  ExitSoundName            Str     
+	912  EntryActorName           Str     

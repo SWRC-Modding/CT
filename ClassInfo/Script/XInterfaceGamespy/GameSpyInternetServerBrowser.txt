@@ -1,0 +1,3 @@
+CLASS: GameSpyInternetServerBrowser(37588), BASE: GameSpyServerBrowserBase
+PROPERTIES:
+	37104 FilterButton             Struct  <MenuButtonText>

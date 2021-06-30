@@ -1,0 +1,16 @@
+CLASS: ActivateTrap(976), BASE: ActivateItem
+PROPERTIES:
+	712  TrapDetected             Struct  <ActivationInfo>
+	768  TrapDisarmed             Struct  <ActivationInfo>
+	824  TrapSet                  Struct  <ActivationInfo>
+	880  TrapExplode              Struct  <ActivationInfo>
+	936  TeamIndex                Int     
+	940  TriggerRadius            Float   
+	944  NextCheckTime            Float   
+	948  DetonationPreviewMesh    Object  <StaticMesh>
+	952  DetonationPreviewActor   Object  <Actor>
+	956  EventTargeted            Name    
+	960  AlertTimeLimit           Float   
+	964  LastNoDetectTime         Float   
+	968  AlertSound               Object  <Sound>
+	972  bSetTrapReferences       Bool    <0 : 0x00000001>

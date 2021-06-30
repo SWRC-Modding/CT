@@ -1,0 +1,3 @@
+CLASS: ACTION_ShowVisor(68), BASE: ScriptedAction
+PROPERTIES:
+	64   bVisor                   Bool    <0 : 0x00000001>

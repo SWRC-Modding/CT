@@ -1,0 +1,19 @@
+CLASS: CoverPoint(768), BASE: NavigationPoint
+PROPERTIES:
+	724  bOverrideStrafe          Bool    <0 : 0x00000001>
+	724  bOverrideHeight          Bool    <1 : 0x00000002>
+	724  bOverrideLean            Bool    <2 : 0x00000004>
+	724  bOverrideCorner          Bool    <3 : 0x00000008>
+	724  CanLeanLeft              Bool    <4 : 0x00000010>
+	724  CanLeanRight             Bool    <5 : 0x00000020>
+	724  CanCornerLeft            Bool    <6 : 0x00000040>
+	724  CanCornerRight           Bool    <7 : 0x00000080>
+	724  bHadCoverProvider        Bool    <8 : 0x00000100>
+	728  FOVdegrees               Float   
+	732  StrafeDistLeft           Float   
+	736  StrafeDistRight          Float   
+	740  CoverHeight              Float   
+	744  DistanceToCover          Float   
+	748  CoverProvider            Object  <Actor>
+	752  LookDir                  Struct  <Vector>
+	764  minDotProduct            Float   

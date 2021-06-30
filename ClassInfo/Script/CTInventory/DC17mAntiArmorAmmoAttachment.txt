@@ -1,0 +1,2 @@
+CLASS: DC17mAntiArmorAmmoAttachment(644), BASE: Actor
+PROPERTIES:

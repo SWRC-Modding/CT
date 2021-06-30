@@ -1,0 +1,15 @@
+CLASS: CTMultiplayerPCMenu(22384), BASE: MenuTemplateTitledB
+PROPERTIES:
+	19060 KaminoBorder             Struct  <MenuSprite>
+	19132 Kamino                   Struct  <MenuSprite>
+	19204 GeonosisBorder           Struct  <MenuSprite>
+	19276 Geonosis                 Struct  <MenuSprite>
+	19348 AssaultShipBorder        Struct  <MenuSprite>
+	19420 AssaultShip              Struct  <MenuSprite>
+	19492 KashyyykBorder           Struct  <MenuSprite>
+	19564 Kashyyyk                 Struct  <MenuSprite>
+	19636 LabelBackground          Struct  <MenuSprite>
+	19708 Label                    Struct  <MenuText>
+	19820 LabelConnector           Struct  <MenuSprite>
+	19892 Border                   Struct  <MenuSprite>
+	19964 MenuOptions              Struct  <MenuButtonText>[5]

@@ -1,0 +1,2 @@
+CLASS: LaserBeam(644), BASE: Actor
+PROPERTIES:

@@ -1,0 +1,2 @@
+CLASS: DC15BlasterCloneTM(1180), BASE: DC15BlasterClone
+PROPERTIES:

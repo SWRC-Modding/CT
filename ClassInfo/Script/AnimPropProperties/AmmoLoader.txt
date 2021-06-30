@@ -1,0 +1,2 @@
+CLASS: AmmoLoader(868), BASE: AnimProp
+PROPERTIES:

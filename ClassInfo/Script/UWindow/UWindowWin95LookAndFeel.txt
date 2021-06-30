@@ -1,0 +1,22 @@
+CLASS: UWindowWin95LookAndFeel(1472), BASE: UWindowLookAndFeel
+PROPERTIES:
+	1176 SBUpUp                   Struct  <Region>
+	1192 SBUpDown                 Struct  <Region>
+	1208 SBUpDisabled             Struct  <Region>
+	1224 SBDownUp                 Struct  <Region>
+	1240 SBDownDown               Struct  <Region>
+	1256 SBDownDisabled           Struct  <Region>
+	1272 SBLeftUp                 Struct  <Region>
+	1288 SBLeftDown               Struct  <Region>
+	1304 SBLeftDisabled           Struct  <Region>
+	1320 SBRightUp                Struct  <Region>
+	1336 SBRightDown              Struct  <Region>
+	1352 SBRightDisabled          Struct  <Region>
+	1368 SBBackground             Struct  <Region>
+	1384 FrameSBL                 Struct  <Region>
+	1400 FrameSB                  Struct  <Region>
+	1416 FrameSBR                 Struct  <Region>
+	1432 CloseBoxUp               Struct  <Region>
+	1448 CloseBoxDown             Struct  <Region>
+	1464 CloseBoxOffsetX          Int     
+	1468 CloseBoxOffsetY          Int     

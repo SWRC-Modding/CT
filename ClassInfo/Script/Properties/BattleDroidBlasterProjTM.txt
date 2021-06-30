@@ -1,0 +1,2 @@
+CLASS: BattleDroidBlasterProjTM(716), BASE: BattleDroidBlasterProj
+PROPERTIES:

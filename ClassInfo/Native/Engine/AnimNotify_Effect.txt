@@ -1,0 +1,11 @@
+CLASS: AnimNotify_Effect(104), BASE: AnimNotify
+PROPERTIES:
+	44   EffectClass              Class   <Emitter>
+	48   Bone                     Name    
+	52   OffsetLocation           Struct  <Vector>
+	64   OffsetRotation           Struct  <Rotator>
+	76   Attach                   Bool    <0 : 0x00000001>
+	80   Tag                      Name    
+	84   DrawScale                Float   
+	88   DrawScale3D              Struct  <Vector>
+	100  LastSpawnedEffect        Object  <Actor>

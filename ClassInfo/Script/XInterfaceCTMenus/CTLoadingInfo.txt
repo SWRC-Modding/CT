@@ -1,0 +1,10 @@
+CLASS: CTLoadingInfo(19908), BASE: CTInfoBase
+PROPERTIES:
+	18876 HintPics                 Struct  <MenuSprite>[6]
+	19308 HintSeparator            Struct  <MenuSprite>
+	19380 HintTitle                Struct  <MenuText>
+	19492 HintText                 Struct  <MenuText>
+	19604 LoadingBar               Struct  <MenuProgressBar>
+	19788 LoadingText              Struct  <MenuText>
+	19900 LastHintTime             Float   
+	19904 bNoHints                 Bool    <0 : 0x00000001>

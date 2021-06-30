@@ -1,0 +1,23 @@
+CLASS: CTMultiplayerPauseXboxMenu(21848), BASE: MenuTemplate
+PROPERTIES:
+	17696 Background               Struct  <MenuSprite>
+	17768 FriendsIcon              Struct  <MenuSprite>
+	17840 FriendRequestIcon        Object  <Material>
+	17844 GameInviteIcon           Object  <Material>
+	17848 MenuOptions              Struct  <MenuButtonText>[8]
+	21720 StringCloakToggleOn      Str     
+	21728 StringCloakToggleOff     Str     
+	21736 StringForfeit            Str     
+	21744 StringDisconnect         Str     
+	21752 StringEndMatch           Str     
+	21760 StringLeaveMatch         Str     
+	21768 StringTutorialDisconnect Str     
+	21776 StringReallyForfeit      Str     
+	21784 StringReallyDisconnect   Str     
+	21792 StringReallyEndMatch     Str     
+	21800 StringReallyLeaveMatch   Str     
+	21808 StringReallySwitchTeams  Str     
+	21816 StringGuestWillGoToo     Str     
+	21824 StringGamePaused         Str     
+	21832 StringEnterSpectatorMode Str     
+	21840 StringExitSpectatorMode  Str     

@@ -1,0 +1,3 @@
+CLASS: UWindowSmallCloseButton(364), BASE: UWindowSmallButton
+PROPERTIES:
+	356  CloseText                Str     

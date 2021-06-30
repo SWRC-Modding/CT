@@ -1,0 +1,2 @@
+CLASS: DC17mAntiArmorWeaponPickupDefaults(704), BASE: DC17mAntiArmorWeaponPickup
+PROPERTIES:

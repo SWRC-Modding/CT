@@ -1,0 +1,2 @@
+CLASS: StateDroneAttackDefaults(132), BASE: StateDroneAttack
+PROPERTIES:

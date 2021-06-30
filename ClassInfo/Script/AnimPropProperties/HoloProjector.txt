@@ -1,0 +1,2 @@
+CLASS: HoloProjector(868), BASE: AnimProp
+PROPERTIES:

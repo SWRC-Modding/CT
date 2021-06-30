@@ -1,0 +1,2 @@
+CLASS: Wookiee_HvyTurret_Impact(828), BASE: Emitter
+PROPERTIES:

@@ -1,0 +1,7 @@
+CLASS: Ambient(1688), BASE: CTPawn
+PROPERTIES:
+	1664 MovementSound            Object  <Sound>
+	1668 AmbientVocalization      Object  <Sound>
+	1672 AmbientVocalizationInterval Struct  <Range>
+	1680 DeactivateTime           Float   
+	1684 SquashOnTouch            Bool    <0 : 0x00000001>

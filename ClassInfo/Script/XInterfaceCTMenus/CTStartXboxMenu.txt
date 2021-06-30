@@ -1,0 +1,7 @@
+CLASS: CTStartXboxMenu(18264), BASE: MenuTemplate
+PROPERTIES:
+	17696 Background               Struct  <MenuSprite>
+	17768 Start                    Struct  <MenuButtonText>
+	18252 bLECIntroWasPlaying      Bool    <0 : 0x00000001>
+	18256 StoredBG                 Object  <Sound>
+	18260 bStartSelected           Bool    <0 : 0x00000001>

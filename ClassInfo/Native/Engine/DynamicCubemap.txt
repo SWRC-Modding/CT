@@ -1,0 +1,3 @@
+CLASS: DynamicCubemap(268), BASE: EnvLightmap
+PROPERTIES:
+	264  CubemapRenderInterface   Int     

@@ -1,0 +1,13 @@
+CLASS: UWindowHSliderControl(280), BASE: UWindowDialogControl
+PROPERTIES:
+	240  MinValue                 Float   
+	244  MaxValue                 Float   
+	248  Value                    Float   
+	252  Step                     Int     
+	256  SliderWidth              Float   
+	260  SliderDrawX              Float   
+	264  SliderDrawY              Float   
+	268  TrackStart               Float   
+	272  TrackWidth               Float   
+	276  bSliding                 Bool    <0 : 0x00000001>
+	276  bNoSlidingNotify         Bool    <1 : 0x00000002>

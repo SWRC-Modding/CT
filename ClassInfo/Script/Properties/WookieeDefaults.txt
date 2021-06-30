@@ -1,0 +1,2 @@
+CLASS: WookieeDefaults(1664), BASE: Wookiee
+PROPERTIES:

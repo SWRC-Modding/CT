@@ -1,0 +1,2 @@
+CLASS: Melee_Impact_Geonosian(828), BASE: Emitter
+PROPERTIES:

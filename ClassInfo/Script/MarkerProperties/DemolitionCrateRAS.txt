@@ -1,0 +1,2 @@
+CLASS: DemolitionCrateRAS(840), BASE: DemolitionCrate
+PROPERTIES:

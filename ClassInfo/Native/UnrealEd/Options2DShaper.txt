@@ -1,0 +1,2 @@
+CLASS: Options2DShaper(48), BASE: OptionsProxy
+PROPERTIES:

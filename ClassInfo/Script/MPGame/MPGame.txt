@@ -1,0 +1,11 @@
+CLASS: MPGame(1144), BASE: CTGameInfo
+PROPERTIES:
+	1076 MinPlayers               Int     
+	1080 bTeamScoreRounds         Bool    <0 : 0x00000001>
+	1080 bSoaking                 Bool    <1 : 0x00000002>
+	1084 EndTime                  Float   
+	1088 EndTimeDelay             Float   
+	1092 LocalStatsScreenClass    Class   <ScoreBoard>
+	1096 MPGIPropsDisplayText     Str     [3]
+	1120 RespawnWaitTime          Float   
+	1124 theMapLists              Class   <MapList>[5]

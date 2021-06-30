@@ -1,0 +1,2 @@
+CLASS: HitDecMetal_DC17_Tracer(1060), BASE: HitDecal
+PROPERTIES:

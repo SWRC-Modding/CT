@@ -1,0 +1,7 @@
+CLASS: TexScaler(192), BASE: TexModifier
+PROPERTIES:
+	112  M                        Struct  <Matrix>
+	176  UScale                   Float   
+	180  VScale                   Float   
+	184  UOffset                  Float   
+	188  VOffset                  Float   

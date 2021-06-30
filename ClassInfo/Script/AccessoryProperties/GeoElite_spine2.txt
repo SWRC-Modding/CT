@@ -1,0 +1,2 @@
+CLASS: GeoElite_spine2(696), BASE: Accessory
+PROPERTIES:

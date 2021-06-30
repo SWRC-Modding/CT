@@ -1,0 +1,2 @@
+CLASS: VertMeshInstance(164), BASE: LodMeshInstance
+PROPERTIES:

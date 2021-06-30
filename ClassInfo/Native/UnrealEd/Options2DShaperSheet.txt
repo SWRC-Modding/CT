@@ -1,0 +1,2 @@
+CLASS: Options2DShaperSheet(48), BASE: Options2DShaper
+PROPERTIES:

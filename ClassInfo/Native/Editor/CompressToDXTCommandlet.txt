@@ -1,0 +1,2 @@
+CLASS: CompressToDXTCommandlet(332), BASE: Commandlet
+PROPERTIES:

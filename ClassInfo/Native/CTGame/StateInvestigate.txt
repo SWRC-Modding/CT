@@ -1,0 +1,5 @@
+CLASS: StateInvestigate(64), BASE: StateObject
+PROPERTIES:
+	52   CurrentStimulus          Object  <Stimulus>
+	56   CurrentStimulusPriority  Float   
+	60   bInvestigating           Bool    <0 : 0x00000001>

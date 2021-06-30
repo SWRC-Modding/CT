@@ -1,0 +1,24 @@
+CLASS: ASMessage(852), BASE: CriticalEventPlus
+PROPERTIES:
+	676  BaseTaken                Str     
+	684  BaseSaved                Str     
+	692  Eliminated               Str     
+	700  RepName                  Str     
+	708  TrandName                Str     
+	716  RepAttack                Str     
+	724  TrandAttack              Str     
+	732  NextRoundIn              Str     
+	740  ReturnSounds             Object  <Sound>[2]
+	748  DroppedSounds            Object  <Sound>[2]
+	756  TakenSounds              Object  <Sound>[2]
+	764  AttackSounds             Object  <Sound>[2]
+	772  SavedSounds              Object  <Sound>[2]
+	780  ScoredSounds             Object  <Sound>[2]
+	788  WonMatchSounds           Object  <Sound>[2]
+	796  TrandoReturnSounds       Object  <Sound>[2]
+	804  TrandoDroppedSounds      Object  <Sound>[2]
+	812  TrandoTakenSounds        Object  <Sound>[2]
+	820  TrandoAttackSounds       Object  <Sound>[2]
+	828  TrandoSavedSounds        Object  <Sound>[2]
+	836  TrandoScoredSounds       Object  <Sound>[2]
+	844  TrandoWonMatchSounds     Object  <Sound>[2]

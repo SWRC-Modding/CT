@@ -1,0 +1,18 @@
+CLASS: ProjectorMultiMaterial(172), BASE: RenderedMaterial
+STRUCTS:
+	ProjectorRenderEntry(100)
+		0    ProjectedTexture         Object  <Material>
+		4    Matrix                   Struct  <Matrix>
+		68   Direction                Struct  <Vector>
+		80   Origin                   Struct  <Vector>
+		92   InvMaxTraceDist          Float   
+		96   bProjectOnBackfaces      Bool    <0 : 0x00000001>
+PROPERTIES:
+	100  RenderEntries            Array   <Struct <ProjectorRenderEntry>>
+	108  RemainingEntries         Int     
+	112  BaseMaterial             Object  <Material>
+	116  FrameBufferBlending      Byte    
+	120  DefaultOpacity           Object  <Texture>
+	124  AddShaders               Object  <HardwareShader>[4]
+	140  BlendShaders             Object  <HardwareShader>[4]
+	156  ModShaders               Object  <HardwareShader>[4]

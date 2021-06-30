@@ -1,0 +1,7 @@
+CLASS: UWindowMessageBox(248), BASE: UWindowFramedWindow
+PROPERTIES:
+	228  Result                   Byte    <MessageBoxResult>
+	232  TimeOutTime              Float   
+	236  Timeout                  Int     
+	240  bSetupSize               Bool    <0 : 0x00000001>
+	244  FrameCount               Int     

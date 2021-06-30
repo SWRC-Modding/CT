@@ -1,0 +1,2 @@
+CLASS: Linker(160), BASE: Object
+PROPERTIES:

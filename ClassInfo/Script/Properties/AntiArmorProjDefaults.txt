@@ -1,0 +1,2 @@
+CLASS: AntiArmorProjDefaults(804), BASE: AntiArmorProj
+PROPERTIES:

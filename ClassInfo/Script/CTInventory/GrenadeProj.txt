@@ -1,0 +1,2 @@
+CLASS: GrenadeProj(804), BASE: CTProjExplosive
+PROPERTIES:

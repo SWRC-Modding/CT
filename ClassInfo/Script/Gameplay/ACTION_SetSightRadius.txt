@@ -1,0 +1,7 @@
+CLASS: ACTION_SetSightRadius(84), BASE: ScriptedAction
+PROPERTIES:
+	64   AffectPawnsWithTag       Name    
+	68   AffectPawnsOfClass       Class   <Pawn>
+	72   AffectAttachedPawn       Bool    <0 : 0x00000001>
+	76   NewSightRadius           Float   
+	80   ResetToDefaults          Bool    <0 : 0x00000001>

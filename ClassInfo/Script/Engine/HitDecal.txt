@@ -1,0 +1,3 @@
+CLASS: HitDecal(1060), BASE: Projector
+PROPERTIES:
+	1056 LifeTime                 Float   

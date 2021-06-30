@@ -1,0 +1,2 @@
+CLASS: MenuActorSkeletalMesh(644), BASE: Actor
+PROPERTIES:

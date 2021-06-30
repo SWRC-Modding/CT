@@ -1,0 +1,2 @@
+CLASS: GrievousShip(1664), BASE: Vehicles
+PROPERTIES:

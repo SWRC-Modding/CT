@@ -1,0 +1,5 @@
+CLASS: ACTION_ChangeSquadMember(76), BASE: ScriptedAction
+PROPERTIES:
+	64   bAddMember               Bool    <0 : 0x00000001>
+	68   MemberTag                Name    
+	72   SquadTag                 Name    

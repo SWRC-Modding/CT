@@ -1,0 +1,2 @@
+CLASS: ScoutDefaults(1652), BASE: Scout
+PROPERTIES:

@@ -1,0 +1,3 @@
+CLASS: ACTION_WaitForTimer(68), BASE: LatentScriptedAction
+PROPERTIES:
+	64   PauseTime                Float   

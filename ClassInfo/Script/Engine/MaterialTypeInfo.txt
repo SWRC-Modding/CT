@@ -1,0 +1,11 @@
+CLASS: MaterialTypeInfo(68), BASE: Object
+STRUCTS:
+	MaterialMapInfo(16)
+		0    TypeOfMaterial           Byte    <EMaterialType>
+		4    Emitter                  Class   <Emitter>
+		8    HitDecal                 Class   <HitDecal>
+		12   ActorSpawner             Class   <ActorSpawner>
+PROPERTIES:
+	40   MaterialMap              Array   <Struct <MaterialMapInfo>>
+	48   DefaultMaterialEffect    Struct  <MaterialMapInfo>
+	64   bSpawnHitDecals          Bool    <0 : 0x00000001>

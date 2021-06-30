@@ -1,0 +1,2 @@
+CLASS: EngineBattleVolume(764), BASE: Volume
+PROPERTIES:

@@ -1,0 +1,2 @@
+CLASS: ScavBeamAttachment(784), BASE: LaserWeaponAttachment
+PROPERTIES:

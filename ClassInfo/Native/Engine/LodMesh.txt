@@ -1,0 +1,2 @@
+CLASS: LodMesh(296), BASE: Mesh
+PROPERTIES:

@@ -1,0 +1,2 @@
+CLASS: Tran_MissileTurret_Rocket(828), BASE: Emitter
+PROPERTIES:

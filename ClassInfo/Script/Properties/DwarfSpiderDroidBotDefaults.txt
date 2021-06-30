@@ -1,0 +1,2 @@
+CLASS: DwarfSpiderDroidBotDefaults(1256), BASE: DwarfSpiderDroidBot
+PROPERTIES:

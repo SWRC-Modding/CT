@@ -1,0 +1,11 @@
+CLASS: UWindowTabControlTabArea(216), BASE: UWindowWindow
+PROPERTIES:
+	180  TabOffset                Int     
+	184  bShowSelected            Bool    <0 : 0x00000001>
+	188  FirstShown               Object  <UWindowTabControlItem>
+	192  bDragging                Bool    <0 : 0x00000001>
+	196  DragTab                  Object  <UWindowTabControlItem>
+	200  TabRows                  Int     
+	204  bArrangeRowsLikeTimHates Bool    <0 : 0x00000001>
+	208  UnFlashTime              Float   
+	212  bFlashShown              Bool    <0 : 0x00000001>

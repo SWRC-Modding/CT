@@ -1,0 +1,2 @@
+CLASS: LevelGameRules(644), BASE: Info
+PROPERTIES:

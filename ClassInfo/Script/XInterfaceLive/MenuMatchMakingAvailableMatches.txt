@@ -1,0 +1,18 @@
+CLASS: MenuMatchMakingAvailableMatches(26212), BASE: MenuTemplateTitledBXA
+PROPERTIES:
+	20396 ServerListBorder         Struct  <MenuSprite>
+	20468 ServerListHeaderBorder   Struct  <MenuSprite>
+	20540 ServerListHeadings       Struct  <MenuText>[5]
+	21100 ServerListColumns        Struct  <MenuStringList>[5]
+	23800 ServerListArrows         Struct  <MenuButtonSprite>[2]
+	24608 ServerListScrollBar      Struct  <MenuScrollBar>
+	25224 ServerListPageUp         Struct  <MenuActiveWidget>
+	25336 ServerListPageDown       Struct  <MenuActiveWidget>
+	25448 ServerScrollArea         Struct  <MenuScrollArea>
+	25500 PleaseWaitText           Struct  <MenuText>
+	25612 PingFriendly             Str     [5]
+	25652 Servers                  Array   <Struct <ServerInfo>>
+	25660 PingWarningThreshold     Int     
+	25664 OnlyShowPinged           Bool    <0 : 0x00000001>
+	25668 PingTimeout              Float   
+	25672 ButtonListStyle3         Struct  <MenuStringList>

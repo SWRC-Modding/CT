@@ -1,0 +1,2 @@
+CLASS: SBDCannonEffects(68), BASE: MaterialTypeInfo
+PROPERTIES:

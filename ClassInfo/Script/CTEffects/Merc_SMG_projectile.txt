@@ -1,0 +1,2 @@
+CLASS: Merc_SMG_projectile(828), BASE: Emitter
+PROPERTIES:

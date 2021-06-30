@@ -1,0 +1,2 @@
+CLASS: TrandoshanHeavy(1668), BASE: Trandoshan
+PROPERTIES:

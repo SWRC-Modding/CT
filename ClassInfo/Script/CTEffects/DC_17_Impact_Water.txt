@@ -1,0 +1,2 @@
+CLASS: DC_17_Impact_Water(828), BASE: Emitter
+PROPERTIES:

@@ -1,0 +1,2 @@
+CLASS: TranHeavyAudio(48), BASE: PawnAudioTable
+PROPERTIES:

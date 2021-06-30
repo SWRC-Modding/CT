@@ -1,0 +1,5 @@
+CLASS: BreachDoor(952), BASE: ActivateDoor
+PROPERTIES:
+	888  DoorChargeLockedState    Struct  <ActivationInfo>
+	944  DoorLeft                 Object  <Mover>
+	948  DoorRight                Object  <Mover>

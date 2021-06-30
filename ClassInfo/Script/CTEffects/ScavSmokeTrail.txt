@@ -1,0 +1,2 @@
+CLASS: ScavSmokeTrail(828), BASE: Emitter
+PROPERTIES:

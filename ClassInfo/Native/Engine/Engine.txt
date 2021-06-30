@@ -1,0 +1,59 @@
+CLASS: Engine(264), BASE: Subsystem
+PROPERTIES:
+	44   AudioDevice              Class   <AudioSubsystem>
+	48   Console                  Class   <Interaction>
+	52   DefaultMenu              Class   <Interaction>
+	56   DefaultPlayerMenu        Class   <Interaction>
+	60   NetworkDevice            Class   <NetDriver>
+	64   Language                 Class   <Language>
+	68   Cylinder                 Object  <Primitive>
+	72   Client                   Object  <Client>
+	76   Audio                    Object  <AudioSubsystem>
+	80   GRenDev                  Object  <RenderDevice>
+	84   CacheSizeMegs            Int     
+	88   UseSound                 Bool    <0 : 0x00000001>
+	88   UpdateDynamicLightmaps   Bool    <1 : 0x00000002>
+	88   UseStaticMeshBatching    Bool    <2 : 0x00000004>
+	92   CurrentTickRate          Float   
+	96   HBumpShaderMacros        Object  <Material>
+	100  ActiveControllerId       Int     
+	104  C_WorldBox               Struct  <Color>
+	108  C_GroundPlane            Struct  <Color>
+	112  C_GroundHighlight        Struct  <Color>
+	116  C_BrushWire              Struct  <Color>
+	120  C_Pivot                  Struct  <Color>
+	124  C_Select                 Struct  <Color>
+	128  C_Current                Struct  <Color>
+	132  C_AddWire                Struct  <Color>
+	136  C_SubtractWire           Struct  <Color>
+	140  C_GreyWire               Struct  <Color>
+	144  C_BrushVertex            Struct  <Color>
+	148  C_BrushSnap              Struct  <Color>
+	152  C_Invalid                Struct  <Color>
+	156  C_ActorWire              Struct  <Color>
+	160  C_ActorHiWire            Struct  <Color>
+	164  C_Black                  Struct  <Color>
+	168  C_White                  Struct  <Color>
+	172  C_Mask                   Struct  <Color>
+	176  C_SemiSolidWire          Struct  <Color>
+	180  C_NonSolidWire           Struct  <Color>
+	184  C_WireBackground         Struct  <Color>
+	188  C_WireGridAxis           Struct  <Color>
+	192  C_ActorArrow             Struct  <Color>
+	196  C_ScaleBox               Struct  <Color>
+	200  C_ScaleBoxHi             Struct  <Color>
+	204  C_ZoneWire               Struct  <Color>
+	208  C_Mover                  Struct  <Color>
+	212  C_OrthoBackground        Struct  <Color>
+	216  C_StaticMesh             Struct  <Color>
+	220  C_VolumeBrush            Struct  <Color>
+	224  C_ConstraintLine         Struct  <Color>
+	228  C_AnimMesh               Struct  <Color>
+	232  C_TerrainWire            Struct  <Color>
+	236  C_KActor                 Struct  <Color>
+	240  C_Ragdoll                Struct  <Color>
+	244  C_Pawn                   Struct  <Color>
+	248  C_Prop                   Struct  <Color>
+	252  C_AnimProp               Struct  <Color>
+	256  C_KarmaProp              Struct  <Color>
+	260  C_Pickup                 Struct  <Color>

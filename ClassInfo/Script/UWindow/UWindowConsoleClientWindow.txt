@@ -1,0 +1,4 @@
+CLASS: UWindowConsoleClientWindow(200), BASE: UWindowDialogClientWindow
+PROPERTIES:
+	192  TextArea                 Object  <UWindowConsoleTextAreaControl>
+	196  EditControl              Object  <UWindowEditControl>

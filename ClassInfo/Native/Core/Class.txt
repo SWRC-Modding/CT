@@ -1,0 +1,2 @@
+CLASS: Class(276), BASE: State
+PROPERTIES:

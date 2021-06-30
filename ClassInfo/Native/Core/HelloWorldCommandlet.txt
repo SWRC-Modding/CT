@@ -1,0 +1,4 @@
+CLASS: HelloWorldCommandlet(344), BASE: Commandlet
+PROPERTIES:
+	332  intparm                  Int     
+	336  strparm                  Str     

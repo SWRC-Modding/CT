@@ -1,0 +1,5 @@
+CLASS: ACTION_EnableAIState(72), BASE: ScriptedAction
+PROPERTIES:
+	64   State                    Class   <StateObject>
+	68   bEnable                  Bool    <0 : 0x00000001>
+	68   bCreateIfNotFound        Bool    <1 : 0x00000002>

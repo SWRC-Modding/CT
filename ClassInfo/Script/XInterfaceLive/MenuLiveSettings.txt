@@ -1,0 +1,6 @@
+CLASS: MenuLiveSettings(21900), BASE: MenuTemplateTitledB
+PROPERTIES:
+	19060 OptionLabels             Struct  <MenuText>[2]
+	19284 ArrowsLeft               Struct  <MenuButtonSprite>[2]
+	20092 ArrowsRight              Struct  <MenuButtonSprite>[2]
+	20900 Options                  Struct  <MenuButtonEnum>[2]

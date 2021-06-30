@@ -1,0 +1,2 @@
+CLASS: StaticProp(836), BASE: Prop
+PROPERTIES:

@@ -1,0 +1,2 @@
+CLASS: ProximityMineDefaults(984), BASE: ProximityMine
+PROPERTIES:

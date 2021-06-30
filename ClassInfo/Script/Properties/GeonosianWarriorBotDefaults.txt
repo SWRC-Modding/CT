@@ -1,0 +1,2 @@
+CLASS: GeonosianWarriorBotDefaults(1256), BASE: GeonosianWarriorBot
+PROPERTIES:

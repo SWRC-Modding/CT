@@ -1,0 +1,2 @@
+CLASS: Shell_Shotgun(828), BASE: Emitter
+PROPERTIES:

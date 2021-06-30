@@ -1,0 +1,8 @@
+CLASS: ACTION_PlayMovie(76), BASE: LatentScriptedAction
+PROPERTIES:
+	64   MovieName                Str     
+	72   bLooping                 Bool    <0 : 0x00000001>
+	72   bInterruptable           Bool    <1 : 0x00000002>
+	72   bPauseLevelMusic         Bool    <2 : 0x00000004>
+	72   bPauseLevelSound         Bool    <3 : 0x00000008>
+	72   bWaitForMovieEnd         Bool    <4 : 0x00000010>

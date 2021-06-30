@@ -1,0 +1,10 @@
+CLASS: ACTION_FlickerActor(84), BASE: LatentScriptedAction
+STRUCTS:
+	FlickerActorData(8)
+		0    FlickerActor             Object  <Actor>
+		4    InitialState             Bool    <0 : 0x00000001>
+PROPERTIES:
+	64   ActorTag                 Name    
+	68   FlickerActors            Array   <Struct <FlickerActorData>>
+	76   FlickerTime              Float   
+	80   FlickerProbability       Float   

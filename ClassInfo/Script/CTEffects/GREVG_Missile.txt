@@ -1,0 +1,2 @@
+CLASS: GREVG_Missile(828), BASE: Emitter
+PROPERTIES:

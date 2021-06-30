@@ -1,0 +1,2 @@
+CLASS: CheckUnicodeCommandlet(332), BASE: Commandlet
+PROPERTIES:

@@ -1,0 +1,22 @@
+CLASS: Accessory(696), BASE: Actor
+ENUMS:
+	EAccessoryDetachStyle
+		ADS_BlowUp               =   0
+		ADS_BlowOut              =   1
+PROPERTIES:
+	644  IsDetachable             Bool    <0 : 0x00000001>
+	644  Explosive                Bool    <1 : 0x00000002>
+	644  Invulnerable             Bool    <2 : 0x00000004>
+	644  WentKarma                Bool    <3 : 0x00000008>
+	648  ExplosionEffect          Class   <Emitter>
+	652  ExplosionDamageType      Class   <DamageType>
+	656  ExplosionRadius          Float   
+	660  ExplosionDamage          Float   
+	664  DetachedLifespan         Float   
+	668  MinDetachForce           Float   
+	672  Health                   Float   
+	676  ArmorFactor              Float   
+	680  MaxDetachImpulse         Float   
+	684  DetachStyle              Byte    <EAccessoryDetachStyle>
+	688  TrailerClass             Class   <Emitter>
+	692  Trailer                  Object  <Emitter>

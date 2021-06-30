@@ -1,0 +1,2 @@
+CLASS: MovingSkyZoneInfo(788), BASE: SkyZoneInfo
+PROPERTIES:

@@ -1,0 +1,4 @@
+CLASS: AnimNotify_MeleeHit(60), BASE: AnimNotify
+PROPERTIES:
+	44   BoneName                 Name    
+	48   Offset                   Struct  <Vector>

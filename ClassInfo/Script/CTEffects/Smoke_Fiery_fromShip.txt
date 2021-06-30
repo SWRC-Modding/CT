@@ -1,0 +1,2 @@
+CLASS: Smoke_Fiery_fromShip(828), BASE: Emitter
+PROPERTIES:

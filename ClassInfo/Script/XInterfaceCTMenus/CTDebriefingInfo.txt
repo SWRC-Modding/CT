@@ -1,0 +1,5 @@
+CLASS: CTDebriefingInfo(19108), BASE: CTInfoBase
+PROPERTIES:
+	18876 TransitionToLevel        Str     
+	18884 UnlockedText1            Struct  <MenuText>
+	18996 UnlockedText2            Struct  <MenuText>

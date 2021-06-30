@@ -1,0 +1,2 @@
+CLASS: DV_DroidsDroidekaShieldDamage(56), BASE: DV_Droids
+PROPERTIES:

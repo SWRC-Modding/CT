@@ -1,0 +1,2 @@
+CLASS: Explosion_Barrels(828), BASE: Emitter
+PROPERTIES:

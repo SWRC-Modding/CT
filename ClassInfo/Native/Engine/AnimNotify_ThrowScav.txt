@@ -1,0 +1,2 @@
+CLASS: AnimNotify_ThrowScav(44), BASE: AnimNotify
+PROPERTIES:

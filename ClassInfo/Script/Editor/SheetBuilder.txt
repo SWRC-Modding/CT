@@ -1,0 +1,13 @@
+CLASS: SheetBuilder(104), BASE: BrushBuilder
+ENUMS:
+	ESheetAxis
+		AX_Horizontal            =   0
+		AX_XAxis                 =   1
+		AX_YAxis                 =   2
+PROPERTIES:
+	80   Height                   Int     
+	84   Width                    Int     
+	88   HorizBreaks              Int     
+	92   VertBreaks               Int     
+	96   Axis                     Byte    <ESheetAxis>
+	100  GroupName                Name    

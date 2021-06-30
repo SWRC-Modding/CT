@@ -1,0 +1,2 @@
+CLASS: RASCeilingTurretDefaults(2068), BASE: RASCeilingTurret
+PROPERTIES:

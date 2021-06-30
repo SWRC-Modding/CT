@@ -1,0 +1,13 @@
+CLASS: TexOscillatorTriggered(244), BASE: TexOscillator
+ENUMS:
+	ERetriggerAction
+		RTA_Reverse              =   0
+		RTA_Reset                =   1
+		RTA_Ignore               =   2
+		RTA_Retrigger            =   3
+PROPERTIES:
+	228  RetriggerAction          Byte    <ERetriggerAction>
+	232  StopAfterPeriod          Float   
+	236  TriggeredTime            Float   
+	240  Reverse                  Bool    <0 : 0x00000001>
+	240  Triggered                Bool    <1 : 0x00000002>

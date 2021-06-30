@@ -1,0 +1,4 @@
+CLASS: BowcasterAmmo(876), BASE: Ammunition
+PROPERTIES:
+	868  bSkewerReady             Bool    <0 : 0x00000001>
+	872  SkewerAmmoUsage          Int     

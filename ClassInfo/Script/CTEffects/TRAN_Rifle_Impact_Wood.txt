@@ -1,0 +1,2 @@
+CLASS: TRAN_Rifle_Impact_Wood(828), BASE: Emitter
+PROPERTIES:

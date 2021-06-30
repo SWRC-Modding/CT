@@ -1,0 +1,47 @@
+CLASS: MenuCreateGame(28448), BASE: MenuTemplateTitled
+PROPERTIES:
+	18320 BorderBoxes              Struct  <MenuSprite>[2]
+	18464 ListLabels               Struct  <MenuText>[2]
+	18688 GameTypeRecords          Array   <Struct <GameTypeRecord>>
+	18696 GameTypeList             Struct  <MenuStringList>
+	19236 GameTypeLabel            Struct  <MenuText>
+	19348 ArrowsLeft               Struct  <MenuButtonSprite>
+	19752 ArrowsRight              Struct  <MenuButtonSprite>
+	20156 GameTypeOptions          Struct  <MenuButtonEnum>
+	20656 GameType                 Struct  <GameTypeRecord>
+	20736 GameTypeName             Str     
+	20744 GameNameEditBox          Struct  <MenuEditBox>
+	21268 GameNameLabel            Struct  <MenuText>
+	21380 GameSettingsButton       Struct  <MenuButtonText>
+	21864 MapListAvailable         Struct  <MenuStringList>
+	22404 MapListSelected          Struct  <MenuStringList>
+	22944 ScrollBarAvailable       Struct  <MenuScrollBar>
+	23560 ScrollBarSelected        Struct  <MenuScrollBar>
+	24176 ScrollBarAvailableArrowUp Struct  <MenuButtonSprite>
+	24580 ScrollBarAvailableArrowDown Struct  <MenuButtonSprite>
+	24984 ScrollBarSelectedArrowUp Struct  <MenuButtonSprite>
+	25388 ScrollBarSelectedArrowDown Struct  <MenuButtonSprite>
+	25792 ScrollAreaAvailable      Struct  <MenuScrollArea>
+	25844 ScrollAreaSelected       Struct  <MenuScrollArea>
+	25896 PageUpAreaAvailable      Struct  <MenuActiveWidget>
+	26008 PageDownAreaAvailable    Struct  <MenuActiveWidget>
+	26120 PageUpAreaSelected       Struct  <MenuActiveWidget>
+	26232 PageDownAreaSelected     Struct  <MenuActiveWidget>
+	26344 MapRecords               Array   <Struct <MapRecord>>
+	26352 StringSize               Str     
+	26360 StringLocation           Str     
+	26368 StringPlayers            Str     
+	26376 StringVersus             Str     
+	26384 StringVersusOn           Str     
+	26392 StringNoMaps             Str     
+	26400 StringTo                 Str     
+	26408 StringAddMap             Str     
+	26416 StringRemoveMap          Str     
+	26424 StringAddAll             Str     
+	26432 StringClearAll           Str     
+	26440 StringBegin              Str     
+	26448 StringNoName             Str     
+	26456 Buttons                  Struct  <MenuButtonText>[4]
+	28392 Settings                 Struct  <GameSettings>
+	28432 URLOptions               Str     
+	28440 LastGameTypeName         Str     

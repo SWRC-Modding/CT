@@ -1,0 +1,2 @@
+CLASS: SlaverBladesAttachment(776), BASE: WeaponAttachment
+PROPERTIES:

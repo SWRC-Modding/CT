@@ -1,0 +1,2 @@
+CLASS: K_GE03EliteIntroChunk5(888), BASE: KarmaProp
+PROPERTIES:

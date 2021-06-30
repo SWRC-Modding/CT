@@ -1,0 +1,2 @@
+CLASS: ShotgunPickupMP(704), BASE: ShotgunPickup
+PROPERTIES:

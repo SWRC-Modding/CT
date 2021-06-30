@@ -1,0 +1,2 @@
+CLASS: WookieeTurretProjDefaults(716), BASE: WookieeTurretProj
+PROPERTIES:

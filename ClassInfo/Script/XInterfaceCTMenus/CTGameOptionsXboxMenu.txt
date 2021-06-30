@@ -1,0 +1,11 @@
+CLASS: CTGameOptionsXboxMenu(30516), BASE: MenuTemplateTitledBXA
+PROPERTIES:
+	20396 Label                    Struct  <MenuText>
+	20508 OptionLabels             Struct  <MenuText>[7]
+	21292 Options                  Struct  <MenuButtonEnum>[7]
+	24792 OptionLeftArrows         Struct  <MenuButtonSprite>[7]
+	27620 OptionRightArrows        Struct  <MenuButtonSprite>[7]
+	30448 OptionDefaults           Int     [7]
+	30476 PreviousSettings         Int     [7]
+	30504 ApplySettingsConfirm     Str     
+	30512 bInMultiplayer           Bool    <0 : 0x00000001>

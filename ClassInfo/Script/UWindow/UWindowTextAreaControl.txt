@@ -1,0 +1,17 @@
+CLASS: UWindowTextAreaControl(6288), BASE: UWindowDialogControl
+PROPERTIES:
+	240  TextArea                 Str     [750]
+	6240 Prompt                   Str     
+	6248 Font                     Int     
+	6252 AbsoluteFont             Object  <Font>
+	6256 BufSize                  Int     
+	6260 Head                     Int     
+	6264 Tail                     Int     
+	6268 Lines                    Int     
+	6272 VisibleRows              Int     
+	6276 bCursor                  Bool    <0 : 0x00000001>
+	6276 bScrollable              Bool    <1 : 0x00000002>
+	6276 bShowCaret               Bool    <2 : 0x00000004>
+	6276 bScrollOnResize          Bool    <3 : 0x00000008>
+	6280 VertSB                   Object  <UWindowVScrollbar>
+	6284 LastDrawTime             Float   

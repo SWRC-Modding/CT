@@ -1,0 +1,2 @@
+CLASS: Blood_Spray_Trandoshan(828), BASE: Emitter
+PROPERTIES:

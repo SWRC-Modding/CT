@@ -1,0 +1,2 @@
+CLASS: StaticMeshMarker(648), BASE: StaticMeshActor
+PROPERTIES:

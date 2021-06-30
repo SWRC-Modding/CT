@@ -1,0 +1,4 @@
+CLASS: MPDeathMessage(692), BASE: LocalMessage
+PROPERTIES:
+	676  KilledString             Str     
+	684  SomeoneString            Str     

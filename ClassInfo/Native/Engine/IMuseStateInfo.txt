@@ -1,0 +1,19 @@
+CLASS: IMuseStateInfo(108), BASE: Object
+PROPERTIES:
+	40   mbPlayerDown             Bool    <0 : 0x00000001>
+	40   mbBattleEngineEnabled    Bool    <1 : 0x00000002>
+	44   mCurrentRoom             Object  <Sound>
+	48   mCurrentOverlay          Object  <Sound>
+	52   mCurrentEpisode          Object  <Sound>
+	56   mNextOverlayTime         Int     
+	60   mMinOverlayTime          Int     
+	64   mMaxOverlayTime          Int     
+	68   mOverlayStartupDelay     Int     
+	72   CurrentBattleZone        Object  <EngineBattleVolume>
+	76   mNextBattleUpdateTime    Int     
+	80   mBattleBaddies           Array   <Object <Pawn>>
+	88   mPlayerDownLoopID        Object  <Sound>
+	92   mActiveBattleCueID       Object  <Sound>
+	96   CurrentBattleTrio        Object  <Sound>
+	100  CurrentOverlayMultiSound Object  <Sound>
+	104  BattleZone               Object  <EngineBattleVolume>

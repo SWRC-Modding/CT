@@ -1,0 +1,57 @@
+CLASS: BeamEmitter(1144), BASE: ParticleEmitter
+ENUMS:
+	EBeamEndPointType
+		PTEP_Velocity            =   0
+		PTEP_Distance            =   1
+		PTEP_Offset              =   2
+		PTEP_Actor               =   3
+		PTEP_TraceOffset         =   4
+		PTEP_OffsetAsAbsolute    =   5
+STRUCTS:
+	ParticleBeamData(16)
+		0    Location                 Struct  <Vector>
+		12   T                        Float   
+	ParticleBeamEndPoint(32)
+		0    ActorTag                 Name    
+		4    Offset                   Struct  <RangeVector>
+		28   Weight                   Float   
+	ParticleBeamScale(16)
+		0    FrequencyScale           Struct  <Vector>
+		12   RelativeLength           Float   
+PROPERTIES:
+	900  BeamDistanceRange        Struct  <Range>
+	908  BeamEndPoints            Array   <Struct <ParticleBeamEndPoint>>
+	916  DetermineEndPointBy      Byte    <EBeamEndPointType>
+	920  BeamTextureUScale        Float   
+	924  BeamTextureVScale        Float   
+	928  RotatingSheets           Int     
+	932  TriggerEndpoint          Bool    <0 : 0x00000001>
+	936  LowFrequencyNoiseRange   Struct  <RangeVector>
+	960  LowFrequencyPoints       Int     
+	964  HighFrequencyNoiseRange  Struct  <RangeVector>
+	988  HighFrequencyPoints      Int     
+	992  LFScaleFactors           Array   <Struct <ParticleBeamScale>>
+	1000 HFScaleFactors           Array   <Struct <ParticleBeamScale>>
+	1008 LFScaleRepeats           Float   
+	1012 HFScaleRepeats           Float   
+	1016 UseHighFrequencyScale    Bool    <0 : 0x00000001>
+	1016 UseLowFrequencyScale     Bool    <1 : 0x00000002>
+	1016 NoiseDeterminesEndPoint  Bool    <2 : 0x00000004>
+	1020 DynamicHFNoiseRange      Struct  <RangeVector>
+	1044 DynamicHFNoisePointsRange Struct  <Range>
+	1052 DynamicTimeBetweenNoiseRange Struct  <Range>
+	1060 UseBranching             Bool    <0 : 0x00000001>
+	1064 BranchProbability        Struct  <Range>
+	1072 BranchHFPointsRange      Struct  <Range>
+	1080 BranchEmitter            Int     
+	1084 BranchSpawnAmountRange   Struct  <Range>
+	1092 LinkupLifetime           Bool    <0 : 0x00000001>
+	1096 SheetsUsed               Int     
+	1100 VerticesPerParticle      Int     
+	1104 IndicesPerParticle       Int     
+	1108 PrimitivesPerParticle    Int     
+	1112 BeamValueSum             Float   
+	1116 HFPoints                 Array   <Struct <ParticleBeamData>>
+	1124 LFPoints                 Array   <Struct <Vector>>
+	1132 HitActors                Array   <Object <Actor>>
+	1140 TimeSinceLastDynamicNoise Float   

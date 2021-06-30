@@ -1,0 +1,17 @@
+CLASS: GameObject(708), BASE: Actor
+PROPERTIES:
+	644  bHome                    Bool    <0 : 0x00000001>
+	644  bHeld                    Bool    <1 : 0x00000002>
+	648  Holder                   Object  <MPPawn>
+	652  HolderPRI                Object  <MPPlayerReplicationInfo>
+	656  HomeBase                 Object  <GameObjective>
+	660  TakenTime                Float   
+	664  MaxDropTime              Float   
+	668  bDisabled                Bool    <0 : 0x00000001>
+	672  OldTeam                  Object  <MPTeam>
+	676  OldHolder                Object  <MPPawn>
+	680  OldHolderTime            Float   
+	684  HoldTime                 Float   
+	688  TeamNum                  Byte    
+	692  HomeLocation             Struct  <Vector>
+	704  ExitSpeed                Int     

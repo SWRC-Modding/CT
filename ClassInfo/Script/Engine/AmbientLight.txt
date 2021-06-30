@@ -1,0 +1,2 @@
+CLASS: AmbientLight(664), BASE: Light
+PROPERTIES:

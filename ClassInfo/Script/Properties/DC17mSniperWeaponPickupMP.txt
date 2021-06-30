@@ -1,0 +1,2 @@
+CLASS: DC17mSniperWeaponPickupMP(704), BASE: DC17mSniperWeaponPickup
+PROPERTIES:

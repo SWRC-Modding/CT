@@ -1,0 +1,2 @@
+CLASS: GEO_Warrior_WingBurn(828), BASE: Emitter
+PROPERTIES:

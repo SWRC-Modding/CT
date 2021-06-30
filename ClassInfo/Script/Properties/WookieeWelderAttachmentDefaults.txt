@@ -1,0 +1,2 @@
+CLASS: WookieeWelderAttachmentDefaults(776), BASE: WookieeWelderAttachment
+PROPERTIES:

@@ -1,0 +1,2 @@
+CLASS: BreachDoorDefaults(952), BASE: BreachDoor
+PROPERTIES:

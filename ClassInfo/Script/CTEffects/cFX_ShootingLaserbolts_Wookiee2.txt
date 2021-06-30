@@ -1,0 +1,2 @@
+CLASS: cFX_ShootingLaserbolts_Wookiee2(828), BASE: Emitter
+PROPERTIES:

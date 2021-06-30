@@ -1,0 +1,6 @@
+CLASS: TDScoreboard(1056), BASE: DMScoreboard
+PROPERTIES:
+	1032 TeamBoxMaterial          Object  <Material>[2]
+	1040 FlagIcon                 Object  <Material>
+	1044 ScoreBack                Object  <Material>
+	1048 RoundLabel               Str     

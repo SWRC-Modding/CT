@@ -1,0 +1,2 @@
+CLASS: MessagingSpectator(2240), BASE: PlayerController
+PROPERTIES:

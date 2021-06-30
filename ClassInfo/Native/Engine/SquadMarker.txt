@@ -1,0 +1,67 @@
+CLASS: SquadMarker(904), BASE: MarkerIconActor
+ENUMS:
+	EMarkerAction
+		MA_None                  =   0
+		MA_Activate              =   1
+		MA_Cancel                =   2
+	EMarkerUsability
+		MU_Invalid               =   0
+		MU_Irrelevant            =   1
+		MU_Incapacitated         =   2
+		MU_Occupied              =   3
+		MU_Usable                =   4
+STRUCTS:
+	MarkerParticipant(28)
+		0    IconMesh                 Object  <StaticMesh>
+		4    IconActor                Object  <MarkerIconActor>
+		8    Member                   Object  <Pawn>
+		12   bIconOnAnchorPt          Bool    <0 : 0x00000001>
+		16   IconOffset               Struct  <Vector>
+PROPERTIES:
+	656  EnableVolume             Object  <Volume>
+	660  Actors                   Array   <Object <Actor>>
+	668  Anchor                   Object  <Actor>
+	672  EventUnderway            Name    
+	676  EventCompleted           Name    
+	680  Squad                    Object  <Squad>
+	684  MaxMembers               Byte    
+	685  MembersRequired          Byte    
+	686  MarkerGoals              Byte    
+	687  TotalParticipants        Byte    
+	688  HUDIconX                 Byte    
+	689  HUDIconY                 Byte    
+	692  MarkerAnims              Array   <Name>
+	700  AlternateMarkers         Object  <SquadMarker>[3]
+	712  CustomInitiateSound      Object  <Sound>
+	716  ActionString             Str     
+	724  LastActivateTime         Float   
+	728  MarkerStage              Int     
+	732  Participants             Struct  <MarkerParticipant>[3]
+	816  bSetupPhase              Bool    <0 : 0x00000001>
+	816  bCanCancelAfterUnderway  Bool    <1 : 0x00000002>
+	816  bComplete                Bool    <2 : 0x00000004>
+	816  bMarkerActive            Bool    <3 : 0x00000008>
+	816  bDisabledByAlternate     Bool    <4 : 0x00000010>
+	816  bValidSetup              Bool    <5 : 0x00000020>
+	816  AlwaysVisible            Bool    <6 : 0x00000040>
+	816  bFailed                  Bool    <7 : 0x00000080>
+	816  bCancelIfMembersNeeded   Bool    <8 : 0x00000100>
+	820  PreferredPawnClass       Class   <Pawn>
+	824  InitiateStance           Class   <SquadStance>
+	828  FinishStance             Class   <SquadStance>
+	832  InitiateCue              Byte    <EPawnAudioEvent>
+	833  ConfirmCue               Byte    <EPawnAudioEvent>
+	834  CancelCue                Byte    <EPawnAudioEvent>
+	835  CancelConfirmCue         Byte    <EPawnAudioEvent>
+	836  IrrelevantCue            Byte    <EPawnAudioEvent>
+	840  ActivatePromptText       Str     
+	848  ActivatePromptButtonFuncs Array   <Str>
+	856  CancelPromptText         Str     
+	864  CancelPromptButtonFuncs  Array   <Str>
+	872  IrrelevantPromptText     Str     
+	880  TargetingRadius          Float   
+	884  TargetingDistance        Float   
+	888  EnabledColor             Struct  <Color>
+	892  OmitColor                Struct  <Color>
+	896  OccupiedColor            Struct  <Color>
+	900  SetupColor               Struct  <Color>

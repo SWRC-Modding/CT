@@ -1,0 +1,19 @@
+CLASS: UGraphVisibilityPage(624), BASE: UWindowPageWindow
+PROPERTIES:
+	196  Labels                   Object  <UWindowLabelControl>[8]
+	228  StatNameText             Str     [8]
+	292  CatNameText              Str     
+	300  DesiredMaxEdit           Object  <UWindowEditControl>[8]
+	332  DesiredMaxText           Str     
+	340  UseBarStatCheck          Object  <UWindowCheckbox>[8]
+	372  UseBarStatText           Str     
+	380  UseLineStatCheck         Object  <UWindowCheckbox>[8]
+	412  UseLineStatText          Str     
+	420  SmallIsBadCheck          Object  <UWindowCheckbox>[8]
+	452  SmallIsBadText           Str     
+	460  DesiredMaxEditSettings   Str     [8]
+	524  SmallIsBadSettings       Int     [8]
+	556  UseBarStatSettings       Int     [8]
+	588  UseLineStatSettings      Int     [8]
+	620  bIsLoading               Bool    <0 : 0x00000001>
+	620  bShouldDelayChange       Bool    <1 : 0x00000002>

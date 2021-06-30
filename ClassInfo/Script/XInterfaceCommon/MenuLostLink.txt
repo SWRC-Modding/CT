@@ -1,0 +1,5 @@
+CLASS: MenuLostLink(19184), BASE: MenuTemplateTitledA
+PROPERTIES:
+	19060 Message                  Struct  <MenuText>
+	19172 WasLiveConnection        Bool    <0 : 0x00000001>
+	19176 ContinueText             Str     

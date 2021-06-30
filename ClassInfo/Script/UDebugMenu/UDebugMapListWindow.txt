@@ -1,0 +1,2 @@
+CLASS: UDebugMapListWindow(228), BASE: UWindowFramedWindow
+PROPERTIES:

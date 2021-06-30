@@ -1,0 +1,2 @@
+CLASS: StaticMeshInstance(96), BASE: Object
+PROPERTIES:

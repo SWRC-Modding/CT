@@ -1,0 +1,2 @@
+CLASS: ACTION_TurnTowardPlayer(64), BASE: LatentScriptedAction
+PROPERTIES:

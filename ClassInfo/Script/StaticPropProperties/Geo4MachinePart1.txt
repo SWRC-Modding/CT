@@ -1,0 +1,2 @@
+CLASS: Geo4MachinePart1(836), BASE: StaticProp
+PROPERTIES:

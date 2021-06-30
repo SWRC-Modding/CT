@@ -1,0 +1,8 @@
+CLASS: StateIdleSquad(76), BASE: StateObject
+PROPERTIES:
+	52   ActivateDistance         Float   
+	56   ReleaseDistance          Float   
+	60   TetherUtility            Float   
+	64   TetherTarget             Object  <Pawn>
+	68   LastCoverCheck           Float   
+	72   UsefulActor              Object  <Actor>

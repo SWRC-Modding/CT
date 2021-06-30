@@ -1,0 +1,2 @@
+CLASS: KreetleAudio(48), BASE: PawnAudioTable
+PROPERTIES:

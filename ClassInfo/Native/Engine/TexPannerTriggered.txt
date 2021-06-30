@@ -1,0 +1,7 @@
+CLASS: TexPannerTriggered(208), BASE: TexPanner
+PROPERTIES:
+	192  RetriggerAction          Byte    <ERetriggerAction>
+	196  StopAfterPeriod          Float   
+	200  TriggeredTime            Float   
+	204  Reverse                  Bool    <0 : 0x00000001>
+	204  Triggered                Bool    <1 : 0x00000002>

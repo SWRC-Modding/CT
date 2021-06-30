@@ -1,0 +1,24 @@
+CLASS: MenuLanGames(24972), BASE: MenuTemplateTitledBXA
+STRUCTS:
+	LanServer(56)
+		0    ServerName               Str     
+		8    GameType                 Str     
+		16   GameAcronym              Str     
+		24   MapFilename              Str     
+		32   DisplayName              Str     
+		40   CurrentPlayers           Int     
+		44   MaxPlayers               Int     
+		48   Address                  Str     
+PROPERTIES:
+	20396 ServerListBorder         Struct  <MenuSprite>
+	20468 ServerListHeaderBorder   Struct  <MenuSprite>
+	20540 ServerListHeadings       Struct  <MenuText>[4]
+	20988 ServerListColumns        Struct  <MenuStringList>[4]
+	23148 ServerListArrows         Struct  <MenuButtonSprite>[2]
+	23956 ServerListScrollBar      Struct  <MenuScrollBar>
+	24572 ServerListPageUp         Struct  <MenuActiveWidget>
+	24684 ServerListPageDown       Struct  <MenuActiveWidget>
+	24796 ServerScrollArea         Struct  <MenuScrollArea>
+	24848 NoServersFound           Struct  <MenuText>
+	24960 BeaconReceiver           Object  <InternetInfo>
+	24964 Servers                  Array   <Struct <LanServer>>

@@ -1,0 +1,5 @@
+CLASS: MarkerTriggerLoop(916), BASE: CTMarker
+PROPERTIES:
+	904  CancelUntriggerEvent     Name    
+	908  CancelTriggerEvent       Name    
+	912  DirectTrigger            Object  <Actor>

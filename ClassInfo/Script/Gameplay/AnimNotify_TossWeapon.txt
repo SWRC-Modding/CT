@@ -1,0 +1,2 @@
+CLASS: AnimNotify_TossWeapon(44), BASE: AnimNotify_Scripted
+PROPERTIES:

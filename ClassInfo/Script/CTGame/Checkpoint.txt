@@ -1,0 +1,2 @@
+CLASS: Checkpoint(644), BASE: Actor
+PROPERTIES:

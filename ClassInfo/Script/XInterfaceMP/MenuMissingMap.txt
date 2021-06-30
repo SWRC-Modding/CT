@@ -1,0 +1,6 @@
+CLASS: MenuMissingMap(19436), BASE: MenuTemplateTitledA
+PROPERTIES:
+	19060 Message                  Struct  <MenuText>
+	19172 ExtraMessageLines        Struct  <MenuText>[2]
+	19396 MissingMapText           Str     [4]
+	19428 MissingMapName           Str     

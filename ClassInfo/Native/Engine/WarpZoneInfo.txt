@@ -1,0 +1,12 @@
+CLASS: WarpZoneInfo(936), BASE: ZoneInfo
+PROPERTIES:
+	788  OtherSideURL             Str     
+	796  ThisTag                  Name    
+	800  bNoTeleFrag              Bool    <0 : 0x00000001>
+	804  iWarpZone                Int     
+	808  WarpCoords               Struct  <Coords>
+	856  OtherSideActor           Object  <WarpZoneInfo>
+	860  OtherSideLevel           Object  <Object>
+	864  Destinations             Str     [8]
+	928  numDestinations          Int     
+	932  MyMarker                 Object  <WarpZoneMarker>

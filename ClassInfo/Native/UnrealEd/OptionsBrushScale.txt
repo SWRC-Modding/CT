@@ -1,0 +1,5 @@
+CLASS: OptionsBrushScale(52), BASE: OptionsProxy
+PROPERTIES:
+	40   X                        Float   
+	44   Y                        Float   
+	48   Z                        Float   

@@ -1,0 +1,2 @@
+CLASS: HoloHUD_Level_End(828), BASE: Emitter
+PROPERTIES:

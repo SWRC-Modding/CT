@@ -1,0 +1,2 @@
+CLASS: BreachDoorCore(952), BASE: BreachDoor
+PROPERTIES:

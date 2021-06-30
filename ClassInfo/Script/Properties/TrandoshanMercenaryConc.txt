@@ -1,0 +1,2 @@
+CLASS: TrandoshanMercenaryConc(1736), BASE: TrandoshanMercenary
+PROPERTIES:

@@ -1,0 +1,6 @@
+CLASS: MenuQuestionYesNo(20512), BASE: MenuTemplateTitledBXA
+PROPERTIES:
+	20396 Question                 Struct  <MenuText>
+	20508 bSelectedYes             Bool    <0 : 0x00000001>
+	20508 bYesNoCancel             Bool    <1 : 0x00000002>
+	20508 bSelectedCancel          Bool    <2 : 0x00000004>

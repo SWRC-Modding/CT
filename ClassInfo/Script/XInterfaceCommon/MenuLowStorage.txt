@@ -1,0 +1,9 @@
+CLASS: MenuLowStorage(19872), BASE: MenuTemplateTitledBA
+PROPERTIES:
+	19728 Message                  Struct  <MenuText>
+	19840 FreeSpace                Int     
+	19844 SaveGameSpace            Int     
+	19848 bInSPGame                Bool    <0 : 0x00000001>
+	19852 DashboardConfirm         Str     
+	19860 bDashboardSelected       Bool    <0 : 0x00000001>
+	19864 XboxLiveMsg              Str     

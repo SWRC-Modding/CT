@@ -1,0 +1,2 @@
+CLASS: Explosion_Droid(828), BASE: Emitter
+PROPERTIES:

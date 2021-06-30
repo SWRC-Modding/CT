@@ -1,0 +1,2 @@
+CLASS: K_YYY_GrandHallBrace(888), BASE: KarmaProp
+PROPERTIES:

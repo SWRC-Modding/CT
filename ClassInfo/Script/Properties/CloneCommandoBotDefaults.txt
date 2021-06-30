@@ -1,0 +1,2 @@
+CLASS: CloneCommandoBotDefaults(1256), BASE: CloneCommandoBot
+PROPERTIES:

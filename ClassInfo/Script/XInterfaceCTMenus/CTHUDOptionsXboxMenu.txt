@@ -1,0 +1,11 @@
+CLASS: CTHUDOptionsXboxMenu(26232), BASE: MenuTemplateTitledBXA
+PROPERTIES:
+	20396 Label                    Struct  <MenuText>
+	20508 OptionLabels             Struct  <MenuText>[4]
+	20956 Options                  Struct  <MenuButtonEnum>[4]
+	22956 OptionLeftArrows         Struct  <MenuButtonSprite>[4]
+	24572 OptionRightArrows        Struct  <MenuButtonSprite>[4]
+	26188 OptionDefaults           Int     [4]
+	26204 PreviousSettings         Int     [4]
+	26220 ApplySettingsConfirm     Str     
+	26228 bInMultiplayer           Bool    <0 : 0x00000001>

@@ -1,0 +1,2 @@
+CLASS: DamageFallToDeath(112), BASE: DamageType
+PROPERTIES:

@@ -1,0 +1,11 @@
+CLASS: UWindowTabControlItem(152), BASE: UWindowList
+PROPERTIES:
+	108  Caption                  Str     
+	116  HelpText                 Str     
+	124  Owner                    Object  <UWindowTabControl>
+	128  TabTop                   Float   
+	132  TabLeft                  Float   
+	136  TabWidth                 Float   
+	140  TabHeight                Float   
+	144  RowNumber                Int     
+	148  bFlash                   Bool    <0 : 0x00000001>

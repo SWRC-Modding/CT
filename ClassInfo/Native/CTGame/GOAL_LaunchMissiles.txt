@@ -1,0 +1,2 @@
+CLASS: GOAL_LaunchMissiles(76), BASE: GoalObject
+PROPERTIES:

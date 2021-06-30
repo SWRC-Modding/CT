@@ -1,0 +1,2 @@
+CLASS: SBDBlasterAttachment(776), BASE: WeaponAttachment
+PROPERTIES:

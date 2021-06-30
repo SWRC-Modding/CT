@@ -1,0 +1,22 @@
+CLASS: TrandoshanScav(1788), BASE: Trandoshan
+PROPERTIES:
+	1668 ExplosionMag             Struct  <Range>
+	1676 ExplosionDir             Struct  <RangeVector>
+	1700 ExplosionEffect          Class   <Emitter>
+	1704 ExplosionDamage          Float   
+	1708 ExplosionRadius          Float   
+	1712 SmokeClass               Class   <Emitter>
+	1716 SmokeTrailClass          Class   <Emitter>
+	1720 Smoke                    Object  <Emitter>
+	1724 InterferenceGen          Object  <InterferenceGenerator>
+	1728 KamikazeeTarget          Object  <Pawn>
+	1732 Thrower                  Object  <Pawn>
+	1736 SecondsOfThrust          Float   
+	1740 EngineThrust             Float   
+	1744 ThrustDirRange           Struct  <RangeVector>
+	1768 DragActor                Object  <Actor>
+	1772 DragBone                 Name    
+	1776 DragConstraintLoc        Object  <KFixedPathJoint>
+	1780 DragConstraintRot        Object  <KAngularJoint>
+	1784 ReadyToDrop              Bool    <0 : 0x00000001>
+	1784 DestroyNextTick          Bool    <1 : 0x00000002>

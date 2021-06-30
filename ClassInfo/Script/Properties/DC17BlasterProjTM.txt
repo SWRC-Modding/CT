@@ -1,0 +1,2 @@
+CLASS: DC17BlasterProjTM(716), BASE: DC17BlasterProj
+PROPERTIES:

@@ -1,0 +1,2 @@
+CLASS: cFX_PRO_WalkingClones_Slow(828), BASE: Emitter
+PROPERTIES:

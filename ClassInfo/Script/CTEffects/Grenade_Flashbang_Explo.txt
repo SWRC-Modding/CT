@@ -1,0 +1,2 @@
+CLASS: Grenade_Flashbang_Explo(828), BASE: Emitter
+PROPERTIES:

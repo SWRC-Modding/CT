@@ -1,0 +1,2 @@
+CLASS: Animation(40), BASE: Object
+PROPERTIES:

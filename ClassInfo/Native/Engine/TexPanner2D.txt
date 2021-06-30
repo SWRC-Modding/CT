@@ -1,0 +1,11 @@
+CLASS: TexPanner2D(208), BASE: TexModifier
+PROPERTIES:
+	112  SpeedU                   Float   
+	116  SpeedV                   Float   
+	120  OffsetU                  Float   
+	124  OffsetV                  Float   
+	128  ScaleU                   Float   
+	132  ScaleV                   Float   
+	136  ClampedSizeU             Float   
+	140  ClampedSizeV             Float   
+	144  M                        Struct  <Matrix>

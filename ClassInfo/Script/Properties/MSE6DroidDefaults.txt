@@ -1,0 +1,2 @@
+CLASS: MSE6DroidDefaults(1688), BASE: MSE6Droid
+PROPERTIES:

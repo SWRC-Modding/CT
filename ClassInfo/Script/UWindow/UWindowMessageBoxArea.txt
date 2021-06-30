@@ -1,0 +1,3 @@
+CLASS: UWindowMessageBoxArea(188), BASE: UWindowWindow
+PROPERTIES:
+	180  Message                  Str     

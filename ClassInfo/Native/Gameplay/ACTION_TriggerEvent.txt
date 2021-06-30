@@ -1,0 +1,3 @@
+CLASS: ACTION_TriggerEvent(68), BASE: ScriptedAction
+PROPERTIES:
+	64   Event                    Name    

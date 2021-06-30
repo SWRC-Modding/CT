@@ -1,0 +1,2 @@
+CLASS: CTDebriefingInfoYYY(19108), BASE: CTDebriefingInfo
+PROPERTIES:

@@ -1,0 +1,7 @@
+CLASS: UWindowListControl(260), BASE: UWindowDialogControl
+PROPERTIES:
+	240  ListClass                Class   <UWindowList>
+	244  Items                    Object  <UWindowList>
+	248  SelectionBkgColor        Struct  <Color>
+	252  SelectionColor           Struct  <Color>
+	256  bNoSelectionBox          Bool    <0 : 0x00000001>

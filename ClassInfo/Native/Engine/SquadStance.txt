@@ -1,0 +1,36 @@
+CLASS: SquadStance(128), BASE: Object
+ENUMS:
+	EStanceTetherObject
+		STO_None                 =   0
+		STO_Leader               =   1
+		STO_Objective            =   2
+		STO_Self                 =   3
+		STO_FutureObjective      =   4
+PROPERTIES:
+	40   StanceName               Str     
+	48   ActivateCue              Byte    <EPawnAudioEvent>
+	52   TetherHighPriority       Float   
+	56   TetherLowPriority        Float   
+	60   TetherHPActivateRadius   Float   
+	64   TetherLPActivateRadius   Float   
+	68   TetherHPDeactivateRadius Float   
+	72   TetherLPDeactivateRadius Float   
+	76   HUDActivateSound         Object  <Sound>
+	80   StanceChangeEvent        Name    
+	84   NextStance               Class   <SquadStance>
+	88   NextStanceTime           Float   
+	92   PreventRange             Float   
+	96   IdlePreventRange         Float   
+	100  BactaPreventRange        Float   
+	104  BattleRestrictionTime    Float   
+	108  TimeBeforeSeekingCover   Float   
+	112  HUDIconX                 Int     
+	116  HUDIconY                 Int     
+	120  PreventType              Byte    <EStanceTetherObject>
+	121  TetherType               Byte    <EStanceTetherObject>
+	122  FacingType               Byte    <EStanceTetherObject>
+	123  StanceType               Byte    <EStanceType>
+	124  bLeapFrog                Bool    <0 : 0x00000001>
+	124  bCheckCorpses            Bool    <1 : 0x00000002>
+	124  FavorCombatNearestTether Bool    <2 : 0x00000004>
+	124  PreventTetherOneWayOnly  Bool    <3 : 0x00000008>

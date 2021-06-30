@@ -1,0 +1,2 @@
+CLASS: cFX_CoreShip_Lasers_ver1(828), BASE: Emitter
+PROPERTIES:

@@ -1,0 +1,2 @@
+CLASS: NameProperty(64), BASE: Property
+PROPERTIES:

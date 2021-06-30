@@ -1,0 +1,2 @@
+CLASS: GenericClone(1532), BASE: VoicePack
+PROPERTIES:

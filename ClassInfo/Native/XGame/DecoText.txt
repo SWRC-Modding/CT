@@ -1,0 +1,4 @@
+CLASS: DecoText(56), BASE: Object
+PROPERTIES:
+	40   TextName                 Str     
+	48   Rows                     Array   <Str>

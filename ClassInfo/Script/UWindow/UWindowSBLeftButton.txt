@@ -1,0 +1,3 @@
+CLASS: UWindowSBLeftButton(360), BASE: UWindowButton
+PROPERTIES:
+	356  NextClickTime            Float   

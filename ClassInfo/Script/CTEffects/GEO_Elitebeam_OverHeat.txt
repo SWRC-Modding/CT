@@ -1,0 +1,2 @@
+CLASS: GEO_Elitebeam_OverHeat(828), BASE: Emitter
+PROPERTIES:

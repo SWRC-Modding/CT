@@ -1,0 +1,5 @@
+CLASS: HsHologram(116), BASE: HardwareShaderWrapper
+PROPERTIES:
+	104  DiffuseTexture           Object  <Texture>
+	108  HologramColor            Struct  <Color>
+	112  UseMarkerColorInstead    Bool    <0 : 0x00000001>

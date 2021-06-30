@@ -1,0 +1,2 @@
+CLASS: SBDDispenserDefaults(1080), BASE: SBDDispenser
+PROPERTIES:

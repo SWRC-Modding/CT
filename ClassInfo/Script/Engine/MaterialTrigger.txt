@@ -1,0 +1,3 @@
+CLASS: MaterialTrigger(652), BASE: Triggers
+PROPERTIES:
+	644  MaterialsToTrigger       Array   <Object <Material>>

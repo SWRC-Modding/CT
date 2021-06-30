@@ -1,0 +1,13 @@
+CLASS: ACTION_AnimateVisorFX(96), BASE: ScriptedAction
+PROPERTIES:
+	64   AddColor                 Struct  <Color>
+	68   MultiplyColor            Struct  <Color>
+	72   Blur                     Int     
+	76   BloomFilter              Int     
+	80   InTime                   Float   
+	84   SustainTime              Float   
+	88   OutTime                  Float   
+	92   AffectAddColor           Bool    <0 : 0x00000001>
+	92   AffectMultiplyColor      Bool    <1 : 0x00000002>
+	92   AffectBlur               Bool    <2 : 0x00000004>
+	92   AffectBloomFilter        Bool    <3 : 0x00000008>

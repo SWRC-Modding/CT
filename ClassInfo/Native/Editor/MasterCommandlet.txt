@@ -1,0 +1,2 @@
+CLASS: MasterCommandlet(440), BASE: Commandlet
+PROPERTIES:

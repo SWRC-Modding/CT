@@ -1,0 +1,15 @@
+CLASS: Teleporter(768), BASE: NavigationPoint
+PROPERTIES:
+	724  URL                      Str     
+	732  ProductRequired          Name    
+	736  bChangesVelocity         Bool    <0 : 0x00000001>
+	736  bChangesYaw              Bool    <1 : 0x00000002>
+	736  bReversesX               Bool    <2 : 0x00000004>
+	736  bReversesY               Bool    <3 : 0x00000008>
+	736  bReversesZ               Bool    <4 : 0x00000010>
+	736  bEnabled                 Bool    <5 : 0x00000020>
+	740  TargetVelocity           Struct  <Vector>
+	752  TriggerActor             Object  <Actor>
+	756  TriggerActor2            Object  <Actor>
+	760  AcceptEvent              Name    
+	764  LastFired                Float   

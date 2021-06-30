@@ -1,0 +1,2 @@
+CLASS: MovingPhysicsVolume(896), BASE: PhysicsVolume
+PROPERTIES:

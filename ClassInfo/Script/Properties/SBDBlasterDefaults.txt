@@ -1,0 +1,2 @@
+CLASS: SBDBlasterDefaults(1180), BASE: SBDBlaster
+PROPERTIES:

@@ -1,0 +1,2 @@
+CLASS: ResavePackageCommandlet(332), BASE: Commandlet
+PROPERTIES:

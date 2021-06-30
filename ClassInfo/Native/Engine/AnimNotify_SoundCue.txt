@@ -1,0 +1,5 @@
+CLASS: AnimNotify_SoundCue(56), BASE: AnimNotify
+PROPERTIES:
+	44   Cue                      Byte    <EPawnAudioEvent>
+	48   MinInterval              Float   
+	52   EnumName                 Name    

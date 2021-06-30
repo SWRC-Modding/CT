@@ -1,0 +1,2 @@
+CLASS: IMuseTrigger(668), BASE: ScriptedTrigger
+PROPERTIES:

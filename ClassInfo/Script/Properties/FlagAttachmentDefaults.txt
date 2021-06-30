@@ -1,0 +1,2 @@
+CLASS: FlagAttachmentDefaults(780), BASE: FlagAttachment
+PROPERTIES:

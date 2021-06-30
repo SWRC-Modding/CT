@@ -1,0 +1,2 @@
+CLASS: BitMatrix(56), BASE: BitArray
+PROPERTIES:

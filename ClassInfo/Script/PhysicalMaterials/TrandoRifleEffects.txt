@@ -1,0 +1,2 @@
+CLASS: TrandoRifleEffects(68), BASE: MaterialTypeInfo
+PROPERTIES:

@@ -1,0 +1,7 @@
+CLASS: GOAL_MeleeAttack(96), BASE: GoalObject
+PROPERTIES:
+	76   Target                   Object  <Actor>
+	80   MaxAttackTime            Float   
+	84   NumAttacks               Int     
+	88   CompletionTime           Float   
+	92   NextReachabilityCheckTime Float   

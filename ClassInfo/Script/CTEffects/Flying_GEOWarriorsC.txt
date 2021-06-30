@@ -1,0 +1,2 @@
+CLASS: Flying_GEOWarriorsC(828), BASE: Emitter
+PROPERTIES:

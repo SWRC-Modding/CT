@@ -1,0 +1,2 @@
+CLASS: BoyDefaults(1180), BASE: Boy
+PROPERTIES:

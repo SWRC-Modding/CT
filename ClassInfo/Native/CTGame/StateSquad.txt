@@ -1,0 +1,3 @@
+CLASS: StateSquad(56), BASE: StateObject
+PROPERTIES:
+	52   PriorityNoGoals          Float   

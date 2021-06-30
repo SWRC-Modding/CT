@@ -1,0 +1,2 @@
+CLASS: AutoDoor(740), BASE: Door
+PROPERTIES:

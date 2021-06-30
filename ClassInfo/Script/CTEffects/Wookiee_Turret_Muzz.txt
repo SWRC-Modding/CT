@@ -1,0 +1,2 @@
+CLASS: Wookiee_Turret_Muzz(828), BASE: Emitter
+PROPERTIES:

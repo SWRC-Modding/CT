@@ -1,0 +1,2 @@
+CLASS: GaloompDefaults(1688), BASE: Galoomp
+PROPERTIES:

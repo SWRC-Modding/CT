@@ -1,0 +1,100 @@
+CLASS: HardwareShader(2372), BASE: RenderedMaterial
+ENUMS:
+	SConstant
+		EVC_Unused               =   0
+		EVC_MaterialDefined      =   1
+		EVC_WorldToScreenMatrix  =   2
+		EVC_ObjectToScreenMatrix =   3
+		EVC_ObjectToWorldMatrix  =   4
+		EVC_CameraToWorldMatrix  =   5
+		EVC_WorldToCameraMatrix  =   6
+		EVC_WorldToObjectMatrix  =   7
+		EVC_Time                 =   8
+		EVC_CosTime              =   9
+		EVC_SinTime              =  10
+		EVC_TanTime              =  11
+		EVC_EyePosition          =  12
+		EVC_XYCircle             =  13
+		EVC_LightPos1            =  14
+		EVC_LightColor1          =  15
+		EVC_LightInvRadius1      =  16
+		EVC_LightPos2            =  17
+		EVC_LightColor2          =  18
+		EVC_LightInvRadius2      =  19
+		EVC_LightPos3            =  20
+		EVC_LightColor3          =  21
+		EVC_LightInvRadius3      =  22
+		EVC_LightPos4            =  23
+		EVC_LightColor4          =  24
+		EVC_LightInvRadius4      =  25
+		EVC_AmbientLightColor    =  26
+		EVC_Flicker              =  27
+		EVC_SpotlightDirection   =  28
+		EVC_SpotlightCosCone     =  29
+		EVC_DrawScale3D          =  30
+		EVC_Fog                  =  31
+		EVC_ObjectToCameraMatrix =  32
+		EVC_EyePositionObjectSpace =  33
+		EVC_2DRotator            =  34
+		EVC_Max                  =  35
+	EFixedVertexFunction
+		FVF_Position             =   0
+		FVF_Normal               =   1
+		FVF_Diffuse              =   2
+		FVF_Specular             =   3
+		FVF_TexCoord0            =   4
+		FVF_TexCoord1            =   5
+		FVF_TexCoord2            =   6
+		FVF_TexCoord3            =   7
+		FVF_TexCoord4            =   8
+		FVF_TexCoord5            =   9
+		FVF_TexCoord6            =  10
+		FVF_TexCoord7            =  11
+		FVF_Tangent              =  12
+		FVF_Binormal             =  13
+		FVF_MAX                  =  14
+	ED3DBLEND
+		NOBLEND                  =   0
+		ZERO                     =   1
+		ONE                      =   2
+		SRCCOLOR                 =   3
+		INVSRCCOLOR              =   4
+		SRCALPHA                 =   5
+		INVSRCALPHA              =   6
+		DESTALPHA                =   7
+		INVDESTALPHA             =   8
+		DESTCOLOR                =   9
+		INVDESTCOLOR             =  10
+		SRCALPHASAT              =  11
+		BOTHSRCALPHA             =  12
+		BOTHINVSRCALPHA          =  13
+STRUCTS:
+	SConstantsInfo(20)
+		0    Type                     Byte    <SConstant>
+		4    Value                    Struct  <Plane>
+	BumpSettingInfo(12)
+		0    BumpSize                 Float   
+		4    BumpLumaOffset           Float   
+		8    BumpLumaScale            Float   
+PROPERTIES:
+	100  StreamMapping            Array   <EFixedVertexFunction>
+	108  VertexShaderText         Str     
+	116  PixelShaderText          Str     
+	124  XVertexShaderText        Str     
+	132  XPixelShaderText         Str     
+	140  VSConstants              Struct  <SConstantsInfo>[96]
+	2060 PSConstants              Struct  <SConstantsInfo>[8]
+	2220 Textures                 Object  <BitmapMaterial>[8]
+	2252 BumpSettings             Struct  <BumpSettingInfo>[8]
+	2348 ZTest                    Bool    <0 : 0x00000001>
+	2348 ZWrite                   Bool    <1 : 0x00000002>
+	2348 AlphaBlending            Bool    <2 : 0x00000004>
+	2348 AlphaTest                Bool    <3 : 0x00000008>
+	2348 SpecularEnable           Bool    <4 : 0x00000010>
+	2352 AlphaRef                 Byte    
+	2353 SrcBlend                 Byte    <ED3DBLEND>
+	2354 DestBlend                Byte    <ED3DBLEND>
+	2356 VertexShader             Int     
+	2360 PixelShader              Int     
+	2364 NumVSConstants           Int     
+	2368 NumPSConstants           Int     

@@ -1,0 +1,2 @@
+CLASS: GeoWarriorKnee_R2(696), BASE: Accessory
+PROPERTIES:

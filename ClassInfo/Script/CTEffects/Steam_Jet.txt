@@ -1,0 +1,2 @@
+CLASS: Steam_Jet(828), BASE: Emitter
+PROPERTIES:

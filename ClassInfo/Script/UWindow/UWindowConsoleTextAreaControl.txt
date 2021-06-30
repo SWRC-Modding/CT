@@ -1,0 +1,2 @@
+CLASS: UWindowConsoleTextAreaControl(304), BASE: UWindowDynamicTextArea
+PROPERTIES:

@@ -1,0 +1,4 @@
+CLASS: DemoRecSpectator(2244), BASE: PlayerController
+PROPERTIES:
+	2240 bTempBehindView          Bool    <0 : 0x00000001>
+	2240 bFoundPlayer             Bool    <1 : 0x00000002>

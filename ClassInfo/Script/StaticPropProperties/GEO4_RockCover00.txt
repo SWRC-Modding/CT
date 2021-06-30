@@ -1,0 +1,2 @@
+CLASS: GEO4_RockCover00(836), BASE: StaticProp
+PROPERTIES:

@@ -1,0 +1,6 @@
+CLASS: TcpNetDriver(184), BASE: NetDriver
+PROPERTIES:
+	160  LogMaxConnPerIPPerMin    Bool    <0 : 0x00000001>
+	156  MaxConnPerIPPerMinute    Int     
+	152  LogPortUnreach           Bool    <0 : 0x00000001>
+	148  AllowPlayerPortUnreach   Bool    <0 : 0x00000001>

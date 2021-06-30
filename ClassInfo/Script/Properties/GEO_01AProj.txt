@@ -1,0 +1,2 @@
+CLASS: GEO_01AProj(804), BASE: CTProjExplosive
+PROPERTIES:

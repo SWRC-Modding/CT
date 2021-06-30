@@ -1,0 +1,2 @@
+CLASS: GEO05_DockingRing(836), BASE: StaticProp
+PROPERTIES:

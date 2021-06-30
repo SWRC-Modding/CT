@@ -1,0 +1,9 @@
+CLASS: GOAL_Goto(112), BASE: GoalObject
+PROPERTIES:
+	76   Destination              Struct  <Vector>
+	88   ToleranceCheckLocation   Struct  <Vector>
+	100  Goal                     Object  <NavigationPoint>
+	104  ToleranceSquared         Float   
+	108  bMatchOrientation        Bool    <0 : 0x00000001>
+	108  bPathComplete            Bool    <1 : 0x00000002>
+	108  bOverrideBlocked         Bool    <2 : 0x00000004>

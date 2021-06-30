@@ -1,0 +1,5 @@
+CLASS: Perch(736), BASE: NavigationPoint
+PROPERTIES:
+	724  bCeiling                 Bool    <0 : 0x00000001>
+	728  WallMesh                 Object  <StaticMesh>
+	732  CeilingMesh              Object  <StaticMesh>

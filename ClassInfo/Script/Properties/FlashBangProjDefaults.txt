@@ -1,0 +1,2 @@
+CLASS: FlashBangProjDefaults(804), BASE: FlashBangProj
+PROPERTIES:

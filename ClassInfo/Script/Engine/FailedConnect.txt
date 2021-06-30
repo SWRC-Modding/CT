@@ -1,0 +1,3 @@
+CLASS: FailedConnect(708), BASE: LocalMessage
+PROPERTIES:
+	676  FailMessage              Str     [4]

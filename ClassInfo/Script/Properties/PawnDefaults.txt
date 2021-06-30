@@ -1,0 +1,2 @@
+CLASS: PawnDefaults(1648), BASE: Pawn
+PROPERTIES:

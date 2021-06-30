@@ -1,0 +1,2 @@
+CLASS: ConcRifleEffects(68), BASE: MaterialTypeInfo
+PROPERTIES:

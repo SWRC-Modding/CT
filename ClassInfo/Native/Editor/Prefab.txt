@@ -1,0 +1,2 @@
+CLASS: Prefab(52), BASE: Object
+PROPERTIES:

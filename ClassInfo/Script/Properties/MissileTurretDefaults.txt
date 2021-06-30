@@ -1,0 +1,2 @@
+CLASS: MissileTurretDefaults(1184), BASE: MissileTurret
+PROPERTIES:

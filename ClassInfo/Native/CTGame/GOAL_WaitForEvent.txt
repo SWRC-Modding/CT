@@ -1,0 +1,4 @@
+CLASS: GOAL_WaitForEvent(84), BASE: GoalObject
+PROPERTIES:
+	76   Event                    Name    
+	80   Triggered                Bool    <0 : 0x00000001>

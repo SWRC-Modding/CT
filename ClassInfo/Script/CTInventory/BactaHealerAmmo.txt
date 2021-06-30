@@ -1,0 +1,2 @@
+CLASS: BactaHealerAmmo(876), BASE: CTAmmoRecharging
+PROPERTIES:

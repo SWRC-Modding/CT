@@ -1,0 +1,2 @@
+CLASS: CTDamageEnergyEWeb(112), BASE: CTDamageEnergy
+PROPERTIES:

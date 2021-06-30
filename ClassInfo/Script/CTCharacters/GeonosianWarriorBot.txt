@@ -1,0 +1,2 @@
+CLASS: GeonosianWarriorBot(1256), BASE: CTBot
+PROPERTIES:

@@ -1,0 +1,2 @@
+CLASS: Falling(112), BASE: DamageType
+PROPERTIES:

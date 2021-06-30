@@ -1,0 +1,2 @@
+CLASS: SpiderDroidBeam(668), BASE: Flashlight
+PROPERTIES:

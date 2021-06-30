@@ -1,0 +1,2 @@
+CLASS: Wook_Weld_Glow(828), BASE: Emitter
+PROPERTIES:

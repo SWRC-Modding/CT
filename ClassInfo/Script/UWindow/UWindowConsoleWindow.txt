@@ -1,0 +1,4 @@
+CLASS: UWindowConsoleWindow(236), BASE: UWindowFramedWindow
+PROPERTIES:
+	228  OldParentWidth           Float   
+	232  OldParentHeight          Float   

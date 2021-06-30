@@ -1,0 +1,2 @@
+CLASS: R2DroidDefaults(1688), BASE: R2Droid
+PROPERTIES:

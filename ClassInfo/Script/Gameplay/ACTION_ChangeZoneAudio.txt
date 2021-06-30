@@ -1,0 +1,4 @@
+CLASS: ACTION_ChangeZoneAudio(72), BASE: ScriptedAction
+PROPERTIES:
+	64   ZoneInfoTag              Name    
+	68   ZoneAudioClass           Class   <AudioEnvironment>

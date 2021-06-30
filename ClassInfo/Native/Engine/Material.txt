@@ -1,0 +1,11 @@
+CLASS: Material(100), BASE: Object
+PROPERTIES:
+	40   FallbackMaterial         Object  <Material>
+	44   DefaultMaterial          Object  <Material>
+	48   NumPassesCached          Byte    
+	52   CachedMaterialPasses     Int     [8]
+	84   MaterialCacheFlags       Int     
+	88   CachedType               Int     
+	92   TypeOfMaterial           Byte    <EMaterialType>
+	96   UseFallback              Bool    <0 : 0x00000001>
+	96   Validated                Bool    <1 : 0x00000002>

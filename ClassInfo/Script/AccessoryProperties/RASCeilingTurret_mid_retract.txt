@@ -1,0 +1,2 @@
+CLASS: RASCeilingTurret_mid_retract(696), BASE: Accessory
+PROPERTIES:

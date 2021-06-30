@@ -1,0 +1,2 @@
+CLASS: Blood_Green(828), BASE: Emitter
+PROPERTIES:

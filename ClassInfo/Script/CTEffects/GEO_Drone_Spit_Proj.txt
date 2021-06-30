@@ -1,0 +1,2 @@
+CLASS: GEO_Drone_Spit_Proj(828), BASE: Emitter
+PROPERTIES:

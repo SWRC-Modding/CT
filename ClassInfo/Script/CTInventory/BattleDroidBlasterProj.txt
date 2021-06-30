@@ -1,0 +1,2 @@
+CLASS: BattleDroidBlasterProj(716), BASE: Projectile
+PROPERTIES:

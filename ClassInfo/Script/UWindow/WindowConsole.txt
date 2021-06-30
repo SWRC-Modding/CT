@@ -1,0 +1,36 @@
+CLASS: WindowConsole(1188), BASE: Console
+PROPERTIES:
+	320  Viewport                 Object  <Viewport>
+	324  Scrollback               Int     
+	328  NumLines                 Int     
+	332  TopLine                  Int     
+	336  TextLines                Int     
+	340  MsgTime                  Float   
+	344  MsgTickTime              Float   
+	348  MsgText                  Str     [64]
+	860  MsgTick                  Float   [64]
+	1116 ConsoleLines             Int     
+	1120 ConsolePos               Float   
+	1124 ConsoleDest              Float   
+	1128 bNoStuff                 Bool    <0 : 0x00000001>
+	1128 bTyping                  Bool    <1 : 0x00000002>
+	1128 bNoDrawWorld             Bool    <2 : 0x00000004>
+	1132 root                     Object  <UWindowRootWindow>
+	1136 RootWindow               Str     
+	1144 OldClipX                 Float   
+	1148 OldClipY                 Float   
+	1152 bCreatedRoot             Bool    <0 : 0x00000001>
+	1156 MouseX                   Float   
+	1160 MouseY                   Float   
+	1164 ConsoleClass             Class   <UWindowConsoleWindow>
+	1168 MouseScale               Float   
+	1172 ShowDesktop              Bool    <0 : 0x00000001>
+	1172 bShowConsole             Bool    <1 : 0x00000002>
+	1172 bBlackout                Bool    <2 : 0x00000004>
+	1172 bUWindowType             Bool    <3 : 0x00000008>
+	1172 bUWindowActive           Bool    <4 : 0x00000010>
+	1172 bQuickKeyEnable          Bool    <5 : 0x00000020>
+	1172 blocked                  Bool    <6 : 0x00000040>
+	1172 bLevelChange             Bool    <7 : 0x00000080>
+	1176 OldLevel                 Str     
+	1184 ConsoleWindow            Object  <UWindowConsoleWindow>

@@ -1,0 +1,3 @@
+CLASS: StateIdle(56), BASE: StateObject
+PROPERTIES:
+	52   TimeUntilNextIdle        Float   

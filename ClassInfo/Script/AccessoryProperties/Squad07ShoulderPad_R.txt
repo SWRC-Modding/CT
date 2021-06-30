@@ -1,0 +1,2 @@
+CLASS: Squad07ShoulderPad_R(696), BASE: Accessory
+PROPERTIES:

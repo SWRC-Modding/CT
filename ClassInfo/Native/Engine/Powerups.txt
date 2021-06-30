@@ -1,0 +1,10 @@
+CLASS: Powerups(748), BASE: Inventory
+PROPERTIES:
+	724  NumCopies                Int     
+	728  bCanHaveMultipleCopies   Bool    <0 : 0x00000001>
+	728  bAutoActivate            Bool    <1 : 0x00000002>
+	728  bActivatable             Bool    <2 : 0x00000004>
+	728  bActive                  Bool    <3 : 0x00000008>
+	732  ExpireMessage            Str     
+	740  ActivateSound            Object  <Sound>
+	744  DeActivateSound          Object  <Sound>

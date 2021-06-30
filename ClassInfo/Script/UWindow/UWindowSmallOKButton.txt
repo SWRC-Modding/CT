@@ -1,0 +1,3 @@
+CLASS: UWindowSmallOKButton(372), BASE: UWindowSmallCloseButton
+PROPERTIES:
+	364  OKText                   Str     

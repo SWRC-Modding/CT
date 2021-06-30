@@ -1,0 +1,2 @@
+CLASS: DC15_Pist_Muzz(828), BASE: Emitter
+PROPERTIES:

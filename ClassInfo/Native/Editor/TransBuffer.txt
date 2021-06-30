@@ -1,0 +1,2 @@
+CLASS: TransBuffer(72), BASE: Object
+PROPERTIES:

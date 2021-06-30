@@ -1,0 +1,5 @@
+CLASS: UWindowDialogClientWindow(192), BASE: UWindowClientWindow
+PROPERTIES:
+	180  DesiredWidth             Float   
+	184  DesiredHeight            Float   
+	188  TabLast                  Object  <UWindowDialogControl>

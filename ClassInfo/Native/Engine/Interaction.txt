@@ -1,0 +1,8 @@
+CLASS: Interaction(52), BASE: Interactions
+PROPERTIES:
+	40   bActive                  Bool    <0 : 0x00000001>
+	40   bVisible                 Bool    <1 : 0x00000002>
+	40   bRequiresTick            Bool    <2 : 0x00000004>
+	40   bNativeEvents            Bool    <3 : 0x00000008>
+	44   ViewportOwner            Object  <Player>
+	48   Master                   Object  <InteractionMaster>

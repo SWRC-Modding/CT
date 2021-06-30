@@ -1,0 +1,2 @@
+CLASS: K_GEO03ABridgeChunk2(888), BASE: KarmaProp
+PROPERTIES:

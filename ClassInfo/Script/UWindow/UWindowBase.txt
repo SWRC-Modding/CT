@@ -1,0 +1,69 @@
+CLASS: UWindowBase(52), BASE: Interaction
+ENUMS:
+	TextAlign
+		TA_Left                  =   0
+		TA_Right                 =   1
+		TA_Center                =   2
+	FrameHitTest
+		HT_NW                    =   0
+		HT_N                     =   1
+		HT_NE                    =   2
+		HT_W                     =   3
+		HT_E                     =   4
+		HT_SW                    =   5
+		HT_S                     =   6
+		HT_SE                    =   7
+		HT_TitleBar              =   8
+		HT_DragHandle            =   9
+		HT_None                  =  10
+	MenuSound
+		MS_MenuPullDown          =   0
+		MS_MenuCloseUp           =   1
+		MS_MenuItem              =   2
+		MS_WindowOpen            =   3
+		MS_WindowClose           =   4
+		MS_ChangeTab             =   5
+	MessageBoxButtons
+		MB_YesNo                 =   0
+		MB_OKCancel              =   1
+		MB_OK                    =   2
+		MB_YesNoCancel           =   3
+	MessageBoxResult
+		MR_None                  =   0
+		MR_Yes                   =   1
+		MR_No                    =   2
+		MR_OK                    =   3
+		MR_Cancel                =   4
+	PropertyCondition
+		PC_None                  =   0
+		PC_LessThan              =   1
+		PC_Equal                 =   2
+		PC_GreaterThan           =   3
+		PC_NotEqual              =   4
+		PC_Contains              =   5
+		PC_NotContains           =   6
+STRUCTS:
+	Region(16)
+		0    X                        Int     
+		4    Y                        Int     
+		8    W                        Int     
+		12   H                        Int     
+	TexRegion(20)
+		0    X                        Int     
+		4    Y                        Int     
+		8    W                        Int     
+		12   H                        Int     
+		16   T                        Object  <Texture>
+	HTMLStyle(24)
+		0    BulletLevel              Int     
+		4    LinkDestination          Str     
+		12   TextColor                Struct  <Color>
+		16   BGColor                  Struct  <Color>
+		20   bCenter                  Bool    <0 : 0x00000001>
+		20   bLink                    Bool    <1 : 0x00000002>
+		20   bUnderline               Bool    <2 : 0x00000004>
+		20   bNoBR                    Bool    <3 : 0x00000008>
+		20   bHeading                 Bool    <4 : 0x00000010>
+		20   bBold                    Bool    <5 : 0x00000020>
+		20   bBlink                   Bool    <6 : 0x00000040>
+PROPERTIES:

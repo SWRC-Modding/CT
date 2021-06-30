@@ -1,0 +1,2 @@
+CLASS: TrandoshanSlaver(1668), BASE: Trandoshan
+PROPERTIES:

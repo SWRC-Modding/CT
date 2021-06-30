@@ -1,0 +1,7 @@
+CLASS: AttachedScavDroid(1200), BASE: Weapon
+PROPERTIES:
+	1180 StartedDrilling          Bool    <0 : 0x00000001>
+	1184 DrillTime                Float   
+	1188 DrillSparksEffectClass   Class   <Emitter>
+	1192 DrillSparksEffect        Object  <Emitter>
+	1196 DrillLoop                Object  <Sound>

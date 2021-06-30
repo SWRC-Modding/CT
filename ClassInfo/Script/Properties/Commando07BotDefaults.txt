@@ -1,0 +1,2 @@
+CLASS: Commando07BotDefaults(1256), BASE: Commando07Bot
+PROPERTIES:

@@ -1,0 +1,13 @@
+CLASS: MenuLivePasscode(20728), BASE: MenuTemplateTitledBA
+PROPERTIES:
+	19728 AccountName              Str     
+	19736 LoginMode                Str     
+	19744 Instructions             Struct  <MenuText>
+	19856 InputBorder              Struct  <MenuSprite>[4]
+	20144 Input                    Struct  <MenuText>[4]
+	20592 Authenticating           Struct  <MenuText>
+	20704 PassCode                 Str     
+	20712 PassCodeLength           Int     
+	20716 T                        Float   
+	20720 BlinkTime                Float   
+	20724 AccountHasNoPasscode     Bool    <0 : 0x00000001>

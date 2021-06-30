@@ -1,0 +1,2 @@
+CLASS: YYY_genJungle_mus01(96), BASE: AudioEnvironment
+PROPERTIES:

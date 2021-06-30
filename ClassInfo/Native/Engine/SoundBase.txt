@@ -1,0 +1,7 @@
+CLASS: SoundBase(40), BASE: Object
+ENUMS:
+	ESoundBattleContext
+		SBC_Either               =   0
+		SBC_BattleOnly           =   1
+		SBC_NoBattleOnly         =   2
+PROPERTIES:

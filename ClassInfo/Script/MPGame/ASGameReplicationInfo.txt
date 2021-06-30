@@ -1,0 +1,3 @@
+CLASS: ASGameReplicationInfo(860), BASE: CTFGameReplicationInfo
+PROPERTIES:
+	856  AttackingTeam            Int     

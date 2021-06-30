@@ -1,0 +1,2 @@
+CLASS: ACTION_Crouch(64), BASE: ScriptedAction
+PROPERTIES:

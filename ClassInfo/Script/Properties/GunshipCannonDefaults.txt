@@ -1,0 +1,2 @@
+CLASS: GunshipCannonDefaults(2052), BASE: GunshipCannon
+PROPERTIES:

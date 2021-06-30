@@ -1,0 +1,2 @@
+CLASS: WookieePawsDefaults(1180), BASE: WookieePaws
+PROPERTIES:

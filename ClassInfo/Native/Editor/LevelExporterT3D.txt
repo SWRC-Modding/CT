@@ -1,0 +1,2 @@
+CLASS: LevelExporterT3D(60), BASE: Exporter
+PROPERTIES:

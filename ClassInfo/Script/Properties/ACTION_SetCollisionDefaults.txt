@@ -1,0 +1,2 @@
+CLASS: ACTION_SetCollisionDefaults(72), BASE: ACTION_SetCollision
+PROPERTIES:

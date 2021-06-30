@@ -1,0 +1,4 @@
+CLASS: XBoxStandardMsgs(960), BASE: Menu
+PROPERTIES:
+	696  ErrorMsg                 Str     [14]
+	808  LiveError                Str     [19]

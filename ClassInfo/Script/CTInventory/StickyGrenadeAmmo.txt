@@ -1,0 +1,2 @@
+CLASS: StickyGrenadeAmmo(868), BASE: Ammunition
+PROPERTIES:

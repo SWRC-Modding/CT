@@ -1,0 +1,2 @@
+CLASS: MarkerHackDoor(904), BASE: MarkerHackDoorNative
+PROPERTIES:

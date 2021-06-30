@@ -1,0 +1,2 @@
+CLASS: AutoTurretDefaults(2068), BASE: AutoTurret
+PROPERTIES:

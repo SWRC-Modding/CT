@@ -1,0 +1,2 @@
+CLASS: Explosion_WookieeShip(828), BASE: Emitter
+PROPERTIES:

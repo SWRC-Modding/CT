@@ -1,0 +1,2 @@
+CLASS: Keypoint(644), BASE: Actor
+PROPERTIES:

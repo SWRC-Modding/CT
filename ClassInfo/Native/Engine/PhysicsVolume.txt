@@ -1,0 +1,34 @@
+CLASS: PhysicsVolume(896), BASE: Volume
+PROPERTIES:
+	764  ZoneVelocity             Struct  <Vector>
+	776  Gravity                  Struct  <Vector>
+	788  GroundFriction           Float   
+	792  TerminalVelocity         Float   
+	796  DamagePerSec             Float   
+	800  DamageType               Class   <DamageType>
+	804  Priority                 Int     
+	808  EntrySound               Object  <Sound>
+	812  ExitSound                Object  <Sound>
+	816  EntryActor               Class   <Actor>
+	820  ExitActor                Class   <Actor>
+	824  FluidFriction            Float   
+	828  ViewFlash                Struct  <Vector>
+	840  ViewFog                  Struct  <Vector>
+	852  ClassProximityType       Class   <Pawn>
+	856  bPainCausing             Bool    <0 : 0x00000001>
+	856  bDestructive             Bool    <1 : 0x00000002>
+	856  bNoInventory             Bool    <2 : 0x00000004>
+	856  bMoveProjectiles         Bool    <3 : 0x00000008>
+	856  bBounceVelocity          Bool    <4 : 0x00000010>
+	856  bNeutralZone             Bool    <5 : 0x00000020>
+	856  bWaterVolume             Bool    <6 : 0x00000040>
+	856  bDistanceFog             Bool    <7 : 0x00000080>
+	860  PainTimer                Object  <Info>
+	864  AudioClass               Class   <AudioEnvironment>
+	868  DistanceFogColor         Struct  <Color>
+	872  DistanceFogStart         Float   
+	876  DistanceFogEnd           Float   
+	880  KExtraLinearDamping      Float   
+	884  KExtraAngularDamping     Float   
+	888  KBuoyancy                Float   
+	892  NextPhysicsVolume        Object  <PhysicsVolume>

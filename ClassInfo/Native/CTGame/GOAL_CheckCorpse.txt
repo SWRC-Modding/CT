@@ -1,0 +1,4 @@
+CLASS: GOAL_CheckCorpse(84), BASE: GoalObject
+PROPERTIES:
+	76   Corpse                   Object  <Pawn>
+	80   OriginalSaveMyCorpse     Bool    <0 : 0x00000001>

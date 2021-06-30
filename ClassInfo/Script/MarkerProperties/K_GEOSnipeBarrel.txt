@@ -1,0 +1,2 @@
+CLASS: K_GEOSnipeBarrel(896), BASE: KnockoverProp
+PROPERTIES:

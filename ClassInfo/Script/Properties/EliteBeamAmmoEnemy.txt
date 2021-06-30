@@ -1,0 +1,2 @@
+CLASS: EliteBeamAmmoEnemy(876), BASE: EliteBeamAmmo
+PROPERTIES:

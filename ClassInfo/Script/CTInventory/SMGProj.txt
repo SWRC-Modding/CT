@@ -1,0 +1,2 @@
+CLASS: SMGProj(716), BASE: Projectile
+PROPERTIES:

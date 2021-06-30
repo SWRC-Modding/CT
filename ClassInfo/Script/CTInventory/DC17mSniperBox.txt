@@ -1,0 +1,2 @@
+CLASS: DC17mSniperBox(704), BASE: Ammo
+PROPERTIES:

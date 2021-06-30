@@ -1,0 +1,18 @@
+CLASS: AnimNotify_Footstep(52), BASE: AnimNotify
+ENUMS:
+	eMaterialWalkType
+		WalkT_Forward            =   0
+		WalkT_Backward           =   1
+		WalkT_CrouchWalk         =   2
+		WalkT_Scuff              =   3
+		WalkT_Slide              =   4
+		WalkT_RunForward         =   5
+		WalkT_RunBackward        =   6
+		WalkT_ArmorSlide         =   7
+		WalkT_JumpUp             =   8
+		WalkT_JumpDown           =   9
+		WalkT_BFPrimary          =  10
+		WalkT_BFSecondary        =  11
+PROPERTIES:
+	44   DefaultSound             Object  <Sound>
+	48   TypeOfWalk               Byte    <eMaterialWalkType>

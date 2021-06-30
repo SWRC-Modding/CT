@@ -1,0 +1,2 @@
+CLASS: CloneTrooperNoWeap(1664), BASE: CloneTrooper
+PROPERTIES:

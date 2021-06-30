@@ -1,0 +1,2 @@
+CLASS: MapProperty(72), BASE: Property
+PROPERTIES:

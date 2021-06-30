@@ -1,0 +1,4 @@
+CLASS: ACTION_ScreenFade(72), BASE: ScriptedAction
+PROPERTIES:
+	64   FadeTime                 Float   
+	68   FadeColor                Struct  <Color>

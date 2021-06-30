@@ -1,0 +1,2 @@
+CLASS: EMPGrenadeMultiPlay(704), BASE: EMPGrenadeBox
+PROPERTIES:

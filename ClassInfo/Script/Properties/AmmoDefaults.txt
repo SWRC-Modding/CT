@@ -1,0 +1,2 @@
+CLASS: AmmoDefaults(704), BASE: Ammo
+PROPERTIES:

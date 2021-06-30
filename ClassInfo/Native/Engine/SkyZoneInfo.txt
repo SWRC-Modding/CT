@@ -1,0 +1,2 @@
+CLASS: SkyZoneInfo(788), BASE: ZoneInfo
+PROPERTIES:

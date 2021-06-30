@@ -1,0 +1,6 @@
+CLASS: RocketLauncherMissile(852), BASE: HomingMissile
+PROPERTIES:
+	832  StartPos                 Struct  <Vector>
+	844  bSecondLockOn            Bool    <0 : 0x00000001>
+	844  bExplosionEffect         Bool    <1 : 0x00000002>
+	848  SecondLockonExplosionEffect Class   <Emitter>

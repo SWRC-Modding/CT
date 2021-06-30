@@ -1,0 +1,2 @@
+CLASS: R2Droid_root(696), BASE: Accessory
+PROPERTIES:

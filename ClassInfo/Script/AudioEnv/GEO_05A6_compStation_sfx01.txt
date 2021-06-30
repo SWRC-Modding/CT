@@ -1,0 +1,2 @@
+CLASS: GEO_05A6_compStation_sfx01(96), BASE: AudioEnvironment
+PROPERTIES:

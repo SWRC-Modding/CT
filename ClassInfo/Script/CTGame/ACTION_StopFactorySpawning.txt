@@ -1,0 +1,5 @@
+CLASS: ACTION_StopFactorySpawning(72), BASE: ScriptedAction
+PROPERTIES:
+	64   FactoryTag               Name    
+	68   PermanentlyDisableFactory Bool    <0 : 0x00000001>
+	68   DestroyFactoryOffspring  Bool    <1 : 0x00000002>

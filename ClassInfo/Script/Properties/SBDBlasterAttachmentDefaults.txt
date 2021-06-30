@@ -1,0 +1,2 @@
+CLASS: SBDBlasterAttachmentDefaults(776), BASE: SBDBlasterAttachment
+PROPERTIES:

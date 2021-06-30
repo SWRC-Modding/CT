@@ -1,0 +1,297 @@
+CLASS: MenuBase(6688), BASE: Menu
+ENUMS:
+	EMenuWidgetPlatform
+		MWP_All                  =   0
+		MWP_PC                   =   1
+		MWP_Console              =   2
+	EMenuScaleMode
+		MSCM_Scale               =   0
+		MSCM_Stretch             =   1
+		MSCM_Fit                 =   2
+		MSCM_FitStretch          =   3
+	MenuBoxFilterMode
+		MBFM_None                =   0
+		MBFM_Alpha               =   1
+		MBFM_Numeric             =   2
+		MBFM_AlphaNumeric        =   3
+	ETransitionDir
+		TD_None                  =   0
+		TD_Out                   =   1
+		TD_In                    =   2
+	EHelpTextState
+		HTS_InitialHidden        =   0
+		HTS_FadeUp               =   1
+		HTS_Show                 =   2
+		HTS_FadeDown             =   3
+		HTS_Hidden               =   4
+STRUCTS:
+	MenuWidgetBase(20)
+		0    Pass                     Int     
+		4    bHidden                  Int     
+		8    Platform                 Byte    <EMenuWidgetPlatform>
+		12   blocked                  Int     
+		16   Style                    Name    
+	MenuMovie(72) : MenuWidgetBase
+		20   MovieTex                 Object  <MovieTexture>
+		24   TextureCoords            Struct  <IntBox>
+		40   RenderStyle              Byte    <ERenderStyle>
+		44   DrawColor                Struct  <Color>
+		48   DrawPivot                Byte    <EDrawPivot>
+		52   PosX                     Float   
+		56   PosY                     Float   
+		60   ScaleX                   Float   
+		64   ScaleY                   Float   
+		68   ScaleMode                Byte    <EMenuScaleMode>
+	MenuSprite(72) : MenuWidgetBase
+		20   WidgetTexture            Object  <Material>
+		24   TextureCoords            Struct  <IntBox>
+		40   RenderStyle              Byte    <ERenderStyle>
+		44   DrawColor                Struct  <Color>
+		48   DrawPivot                Byte    <EDrawPivot>
+		52   PosX                     Float   
+		56   PosY                     Float   
+		60   ScaleX                   Float   
+		64   ScaleY                   Float   
+		68   ScaleMode                Byte    <EMenuScaleMode>
+	MenuText(112) : MenuWidgetBase
+		20   MenuFont                 Object  <Font>
+		24   Text                     Str     
+		32   RenderStyle              Byte    <ERenderStyle>
+		36   DrawColor                Struct  <Color>
+		40   DrawPivot                Byte    <EDrawPivot>
+		44   PosX                     Float   
+		48   PosY                     Float   
+		52   ScaleX                   Float   
+		56   ScaleY                   Float   
+		60   Kerning                  Int     
+		64   MaxSizeX                 Float   
+		68   bEllipsisOnLeft          Int     
+		72   bNoFontRemapping         Int     
+		76   TabStops                 Float   [8]
+		108  bWordWrap                Int     
+	MenuDecoText(120) : MenuWidgetBase
+		20   MenuFont                 Object  <Font>
+		24   TextName                 Str     
+		32   RenderStyle              Byte    <ERenderStyle>
+		36   DrawColor                Struct  <Color>
+		40   PosX                     Float   
+		44   PosY                     Float   
+		48   ScaleX                   Float   
+		52   ScaleY                   Float   
+		56   ColumnCount              Int     
+		60   RowCount                 Int     
+		64   TimePerCharacter         Float   
+		68   TimePerLineFeed          Float   
+		72   TimePerLoopEnd           Float   
+		76   TimePerCursorBlink       Float   
+		80   CursorScale              Float   
+		84   CursorOffset             Float   
+		88   bCapitalizeText          Int     
+		92   bPaused                  Int     
+		96   Text                     Object  <DecoText>
+		100  TickAccumulator          Float   
+		104  BlinkAccumulator         Float   
+		108  CurrentRow               Int     
+		112  CurrentColumn            Int     
+		116  bShowCursor              Int     
+	RenderBounds(24) : FloatBox
+		16   PosX                     Float   
+		20   PosY                     Float   
+	MenuActiveWidget(112) : MenuWidgetBase
+		20   ActiveArea               Struct  <RenderBounds>
+		44   bHasFocus                Int     
+		48   bDisabled                Int     
+		52   bIgnoreController        Int     
+		56   ContextID                Int     
+		60   bNoMouseOverFocus        Int     
+		64   bStickyDrawFocus         Int     
+		68   bDrawFocused             Int     
+		72   HelpText                 Str     
+		80   OnFocus                  Name    
+		84   OnBlur                   Name    
+		88   OnSelect                 Name    
+		92   OnDoubleClick            Name    
+		96   OnLeft                   Name    
+		100  OnRight                  Name    
+		104  OnUp                     Name    
+		108  OnDown                   Name    
+	MenuButton(260) : MenuActiveWidget
+		112  BackgroundBlurred        Struct  <MenuSprite>
+		184  BackgroundFocused        Struct  <MenuSprite>
+		256  bRelativeBackgroundCoords Int     
+	MenuButtonSprite(404) : MenuButton
+		260  Blurred                  Struct  <MenuSprite>
+		332  Focused                  Struct  <MenuSprite>
+	MenuButtonText(484) : MenuButton
+		260  Blurred                  Struct  <MenuText>
+		372  Focused                  Struct  <MenuText>
+	MenuButtonEnum(500) : MenuButtonText
+		484  Items                    Array   <Str>
+		492  Current                  Int     
+		496  bNoWrap                  Int     
+	MenuCheckBox(272) : MenuButton
+		260  Group                    Name    
+		264  bSelected                Int     
+		268  OnToggle                 Name    
+	MenuCheckBoxSprite(560) : MenuCheckBox
+		272  Blurred                  Struct  <MenuSprite>
+		344  Focused                  Struct  <MenuSprite>
+		416  SelectedBlurred          Struct  <MenuSprite>
+		488  SelectedFocused          Struct  <MenuSprite>
+	MenuCheckBoxText(720) : MenuCheckBox
+		272  Blurred                  Struct  <MenuText>
+		384  Focused                  Struct  <MenuText>
+		496  SelectedBlurred          Struct  <MenuText>
+		608  SelectedFocused          Struct  <MenuText>
+	MenuEditBox(524) : MenuButtonText
+		484  bNoSpaces                Int     
+		488  FilterMode               Byte    <MenuBoxFilterMode>
+		492  MaxLength                Int     
+		496  MinLength                Int     
+		500  TextBackup               Str     
+		508  TimePerCursorBlink       Float   
+		512  CursorScale              Float   
+		516  BlinkAccumulator         Float   
+		520  bShowCursor              Int     
+	MenuBindingBox(580) : MenuButtonText
+		484  BackgroundSelected       Struct  <MenuSprite>
+		556  bSelected                Int     
+		560  Alias                    Str     
+		568  CurrentKey               Int     
+		572  AnimationName            Name    
+		576  OnAnim                   Name    
+	MenuStringList(540) : MenuWidgetBase
+		20   Template                 Struct  <MenuButtonText>
+		504  Items                    Array   <Struct <MenuButtonText>>
+		512  PosX1                    Float   
+		516  PosY1                    Float   
+		520  PosX2                    Float   
+		524  PosY2                    Float   
+		528  DisplayCount             Int     
+		532  Position                 Int     
+		536  OnScroll                 Name    
+	MenuLayer(32) : MenuWidgetBase
+		20   Layer                    Object  <Menu>
+		24   MenuClassName            Str     
+	MenuScrollBar(616) : MenuCheckBoxSprite
+		560  Position                 Int     
+		564  Length                   Int     
+		568  DisplayCount             Int     
+		572  PosX1                    Float   
+		576  PosY1                    Float   
+		580  PosX2                    Float   
+		584  PosY2                    Float   
+		588  MinScaleX                Float   
+		592  MinScaleY                Float   
+		596  OnScroll                 Name    
+		600  ClickX                   Float   
+		604  ClickY                   Float   
+		608  PageUpArea               Int     
+		612  PageDownArea             Int     
+	MenuProgressBar(184) : MenuWidgetBase
+		20   BarBack                  Struct  <MenuSprite>
+		92   BarTop                   Struct  <MenuSprite>
+		164  BarWidth                 Float   
+		168  BarHeight                Float   
+		172  Low                      Float   
+		176  High                     Float   
+		180  Value                    Float   
+	MenuActorLight(20)
+		0    Position                 Struct  <Vector>
+		12   Color                    Struct  <Color>
+		16   Radius                   Float   
+	MenuActor(40) : MenuWidgetBase
+		20   Actor                    Object  <Actor>
+		24   FOV                      Float   
+		28   Lights                   Array   <Struct <MenuActorLight>>
+		36   AmbientGlow              Byte    
+	MenuScrollArea(52) : FloatBox
+		16   OnScrollTop              Name    
+		20   OnScrollPageUp           Name    
+		24   OnScrollLineUp           Name    
+		28   OnScrollLineDown         Name    
+		32   OnScrollPageDown         Name    
+		36   OnScrollBottom           Name    
+		40   OnScrollKey              Name    
+		44   bStickyScrollFocus       Int     
+		48   bScrollFocus             Int     
+	FontMapping(20)
+		0    ResX                     Int     
+		4    ResY                     Int     
+		8    OrigFont                 Object  <Font>
+		12   DestFont                 Object  <Font>
+		16   ScaleAdjustment          Float   
+PROPERTIES:
+	696  WidgetInFocus            Int     
+	700  StructInFocus            Int     
+	704  WidgetInAutoFocus        Int     
+	708  StructInAutoFocus        Int     
+	712  DefaultFocusWidget       Int     
+	716  DefaultFocusStruct       Int     
+	720  ResScaleX                Float   
+	724  ResScaleY                Float   
+	728  NormalToScreenScaleX     Float   
+	732  NormalToScreenScaleY     Float   
+	736  ScreenToNormalScaleX     Float   
+	740  ScreenToNormalScaleY     Float   
+	744  bDeferAutoFocus          Bool    <0 : 0x00000001>
+	744  bDeferAutoFocusMouseMove Bool    <1 : 0x00000002>
+	748  MouseCursorTexture       Object  <Material>
+	752  MouseCursorScale         Float   
+	756  WhiteTexture             Object  <Material>
+	760  bAcceptInput             Bool    <0 : 0x00000001>
+	764  MouseRepeatDelayInitial  Float   
+	768  MouseRepeatDelaySubsequent Float   
+	772  MouseRepeatDelayCurrent  Float   
+	776  KeyQueue                 Str     
+	784  KeyQueueTimeout          Float   
+	788  VirtualKeyboardClass     Class   <MenuVirtualKeyboard>
+	792  CrossFadeDir             Byte    <ETransitionDir>
+	796  CrossFadeRate            Float   
+	800  CrossFadeLevel           Float   
+	804  ModulateDir              Byte    <ETransitionDir>
+	808  ModulateRate             Float   
+	812  ModulateLevel            Float   
+	816  ModulateMin              Float   
+	820  SoundTweenIn             Object  <Sound>
+	824  SoundTweenOut            Object  <Sound>
+	828  SoundOnFocus             Object  <Sound>
+	832  SoundOnSelect            Object  <Sound>
+	836  SoundOnError             Object  <Sound>
+	840  ForceFeedbackOnFocus     Str     
+	848  StringYes                Str     
+	856  StringNo                 Str     
+	864  StringOn                 Str     
+	872  StringOff                Str     
+	880  StringOk                 Str     
+	888  StringCancel             Str     
+	896  StringPercent            Str     
+	904  DoubleClickTime          Float   
+	908  ClickTime                Float   
+	912  ClickWidget              Int     
+	916  CanvasSizeX              Float   
+	920  CanvasSizeY              Float   
+	924  bHasFocus                Bool    <0 : 0x00000001>
+	928  DefaultMenuText          Struct  <MenuText>
+	1040 DefaultMenuDecoText      Struct  <MenuDecoText>
+	1160 DefaultMenuButtonSprite  Struct  <MenuButtonSprite>
+	1564 DefaultMenuButtonText    Struct  <MenuButtonText>
+	2048 DefaultMenuButtonEnum    Struct  <MenuButtonEnum>
+	2548 DefaultMenuCheckBoxSprite Struct  <MenuCheckBoxSprite>
+	3108 DefaultMenuCheckBoxText  Struct  <MenuCheckBoxText>
+	3828 DefaultMenuEditBox       Struct  <MenuEditBox>
+	4352 DefaultMenuBindingBox    Struct  <MenuBindingBox>
+	4932 DefaultMenuStringList    Struct  <MenuStringList>
+	5472 DefaultMenuScrollBar     Struct  <MenuScrollBar>
+	6088 FontMappings             Array   <Struct <FontMapping>>
+	6096 HelpText                 Struct  <MenuText>
+	6208 HelpTextState            Byte    <EHelpTextState>
+	6212 HelpTextStateDelays      Float   [5]
+	6232 HelpTextOpacity          Float   
+	6236 DrawRenderBounds         Bool    <0 : 0x00000001>
+	6236 DrawScrollAreas          Bool    <1 : 0x00000002>
+	6240 OverscanWidgets          Struct  <MenuSprite>[4]
+	6528 BackgroundMovieName      Str     
+	6536 BackgroundMovie          Struct  <MenuMovie>
+	6608 InLevelBackgroundMovieReplacement Struct  <MenuSprite>
+	6680 Args                     Str     

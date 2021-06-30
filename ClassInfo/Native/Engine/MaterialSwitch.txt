@@ -1,0 +1,4 @@
+CLASS: MaterialSwitch(116), BASE: Modifier
+PROPERTIES:
+	104  Current                  Int     
+	108  Materials                Array   <Object <Material>>

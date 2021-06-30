@@ -1,0 +1,23 @@
+CLASS: GameObjective(808), BASE: NavigationPoint
+PROPERTIES:
+	724  bDisabled                Bool    <0 : 0x00000001>
+	724  bFirstObjective          Bool    <1 : 0x00000002>
+	724  bTeamControlled          Bool    <2 : 0x00000004>
+	724  bAccruePoints            Bool    <3 : 0x00000008>
+	724  bHasShootSpots           Bool    <4 : 0x00000010>
+	728  DefenderTeamIndex        Byte    
+	729  StartTeam                Byte    
+	730  DefensePriority          Byte    
+	732  Score                    Int     
+	736  ObjectiveName            Str     
+	744  DestructionMessage       Str     
+	752  LocationPrefix           Str     
+	760  LocationPostfix          Str     
+	768  DefenseScriptTags        Name    
+	772  NextObjective            Object  <GameObjective>
+	776  AreaVolumeTag            Name    
+	780  MyBaseVolume             Object  <Volume>
+	784  BaseExitTime             Float   
+	788  BaseRadius               Float   
+	792  ObjectiveStringPrefix    Str     
+	800  ObjectiveStringSuffix    Str     

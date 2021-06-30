@@ -1,0 +1,2 @@
+CLASS: UWindowClientWindow(180), BASE: UWindowWindow
+PROPERTIES:

@@ -1,0 +1,10 @@
+CLASS: ASHUD(2564), BASE: TDHUD
+PROPERTIES:
+	2500 RestartMessage           Str     
+	2508 BaseCapturedMsg          Str     
+	2516 BaseSavedMsg             Str     
+	2524 TrandoshanMsg            Str     
+	2532 CloneMsg                 Str     
+	2540 AttackingText            Str     
+	2548 DefendingText            Str     
+	2556 EndRoundText             Str     

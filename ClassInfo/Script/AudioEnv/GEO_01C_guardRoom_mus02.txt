@@ -1,0 +1,2 @@
+CLASS: GEO_01C_guardRoom_mus02(96), BASE: AudioEnvironment
+PROPERTIES:

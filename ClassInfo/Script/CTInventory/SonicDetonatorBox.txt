@@ -1,0 +1,2 @@
+CLASS: SonicDetonatorBox(704), BASE: Ammo
+PROPERTIES:

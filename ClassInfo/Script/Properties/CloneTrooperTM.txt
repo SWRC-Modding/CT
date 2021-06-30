@@ -1,0 +1,2 @@
+CLASS: CloneTrooperTM(1664), BASE: CloneTrooper
+PROPERTIES:

@@ -1,0 +1,4 @@
+CLASS: HTTPDownload(720), BASE: Download
+PROPERTIES:
+	600  ProxyServerPort          Int     
+	592  ProxyServerHost          Str     

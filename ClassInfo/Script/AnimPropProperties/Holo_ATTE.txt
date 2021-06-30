@@ -1,0 +1,2 @@
+CLASS: Holo_ATTE(868), BASE: AnimProp
+PROPERTIES:

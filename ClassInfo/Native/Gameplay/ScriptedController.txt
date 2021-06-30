@@ -1,0 +1,17 @@
+CLASS: ScriptedController(920), BASE: AIController
+PROPERTIES:
+	868  bBroken                  Bool    <0 : 0x00000001>
+	868  bUseScriptFacing         Bool    <1 : 0x00000002>
+	868  bUnforceStateOnEvent     Bool    <2 : 0x00000004>
+	872  ActionNum                Int     
+	876  AnimsRemaining           Int     
+	880  SequenceScript           Object  <ScriptedSequence>
+	884  CurrentAction            Object  <LatentScriptedAction>
+	888  CurrentAnimation         Object  <ACTION_PlayAnim>
+	892  ScriptPriorityOnEvent    Float   
+	896  ScriptedFocus            Object  <Actor>
+	900  MyPlayerController       Object  <PlayerController>
+	904  NumShots                 Int     
+	908  FiringMode               Name    
+	912  IterationCounter         Int     
+	916  IterationSectionStart    Int     

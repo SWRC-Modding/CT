@@ -1,0 +1,2 @@
+CLASS: GREV_Engine_afterburn(828), BASE: Emitter
+PROPERTIES:

@@ -1,0 +1,2 @@
+CLASS: MarkerSnipe(940), BASE: MarkerWeapon
+PROPERTIES:

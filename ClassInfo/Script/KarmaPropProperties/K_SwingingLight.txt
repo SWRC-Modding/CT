@@ -1,0 +1,2 @@
+CLASS: K_SwingingLight(888), BASE: KarmaProp
+PROPERTIES:

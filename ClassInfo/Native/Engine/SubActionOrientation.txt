@@ -1,0 +1,3 @@
+CLASS: SubActionOrientation(128), BASE: MatSubAction
+PROPERTIES:
+	76   CamOrientation           Struct  <Orientation>

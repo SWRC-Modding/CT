@@ -1,0 +1,2 @@
+CLASS: cFX_RAS4d_EnergyBlast(828), BASE: Emitter
+PROPERTIES:

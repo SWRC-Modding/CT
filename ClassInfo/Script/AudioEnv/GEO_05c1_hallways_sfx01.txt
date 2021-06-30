@@ -1,0 +1,2 @@
+CLASS: GEO_05c1_hallways_sfx01(96), BASE: AudioEnvironment
+PROPERTIES:

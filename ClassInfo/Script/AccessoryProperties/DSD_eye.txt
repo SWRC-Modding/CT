@@ -1,0 +1,2 @@
+CLASS: DSD_eye(696), BASE: Accessory
+PROPERTIES:

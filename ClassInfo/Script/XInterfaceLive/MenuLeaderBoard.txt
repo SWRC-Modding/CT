@@ -1,0 +1,29 @@
+CLASS: MenuLeaderBoard(22892), BASE: MenuTemplateTitledBXA
+STRUCTS:
+	XboxRanking(16)
+		0    Rank                     Int     
+		4    Name                     Str     
+		12   rating                   Int     
+PROPERTIES:
+	20396 Label                    Struct  <MenuText>[3]
+	20732 LeaderBoardType          Struct  <MenuText>
+	20844 RankListColumnsBorder    Struct  <MenuSprite>[3]
+	21060 RankListColumns          Struct  <MenuStringList>[3]
+	22680 GettingStatsMsg          Struct  <MenuText>
+	22792 T                        Float   
+	22796 BlinkTime                Float   
+	22800 SelectedIndex            Int     
+	22804 Rankings                 Array   <Struct <XboxRanking>>
+	22812 LeaderBoardDurations     Str     [3]
+	22836 LeaderBoardIndex         Int     
+	22840 TopOfPageDelta           Int     
+	22844 AtTop                    Bool    <0 : 0x00000001>
+	22844 AtBottom                 Bool    <1 : 0x00000002>
+	22848 LeaderBoardPivot         Int     
+	22852 DisplayName              Str     
+	22860 GameTypeName             Str     
+	22868 SelfColor                Struct  <Color>
+	22872 OtherColor               Struct  <Color>
+	22876 LocalGamer               Str     
+	22884 LastFocusIndex           Int     
+	22888 CurFocusIndex            Int     

@@ -1,0 +1,2 @@
+CLASS: MenuLiveSignOut(20512), BASE: MenuQuestionYesNo
+PROPERTIES:

@@ -1,0 +1,3 @@
+CLASS: ShowMaterialAlpha(104), BASE: Material
+PROPERTIES:
+	100  Material                 Object  <Material>

@@ -1,0 +1,5 @@
+CLASS: AnimEditProps(52), BASE: Object
+PROPERTIES:
+	40   WBrowserAnimationPtr     Int     
+	44   DefaultCompError         Float   
+	48   CoreSet                  Bool    <0 : 0x00000001>

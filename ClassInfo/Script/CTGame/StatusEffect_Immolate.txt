@@ -1,0 +1,2 @@
+CLASS: StatusEffect_Immolate(664), BASE: StatusEffect
+PROPERTIES:

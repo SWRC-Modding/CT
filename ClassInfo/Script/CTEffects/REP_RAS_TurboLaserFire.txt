@@ -1,0 +1,2 @@
+CLASS: REP_RAS_TurboLaserFire(828), BASE: Emitter
+PROPERTIES:

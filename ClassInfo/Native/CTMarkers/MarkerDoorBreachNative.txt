@@ -1,0 +1,6 @@
+CLASS: MarkerDoorBreachNative(920), BASE: CTMarker
+PROPERTIES:
+	904  DestroySwitchEvent       Name    
+	908  TossGrenadeEvent         Name    
+	912  GrenadeClass             Class   <GrenadeProj>
+	916  GrenadeTarget            Object  <Actor>

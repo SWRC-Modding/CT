@@ -1,0 +1,5 @@
+CLASS: GOAL_HealOther(88), BASE: GoalObject
+PROPERTIES:
+	76   Other                    Object  <Pawn>
+	80   Stage                    Int     
+	84   bChangedCommandedEnemy   Bool    <0 : 0x00000001>

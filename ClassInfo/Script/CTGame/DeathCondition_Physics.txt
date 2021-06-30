@@ -1,0 +1,3 @@
+CLASS: DeathCondition_Physics(48), BASE: DeathCondition
+PROPERTIES:
+	44   Physics                  Byte    <EPhysics>

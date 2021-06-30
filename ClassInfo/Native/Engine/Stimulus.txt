@@ -1,0 +1,10 @@
+CLASS: Stimulus(80), BASE: Object
+PROPERTIES:
+	40   StimType                 Byte    <EStimulusType>
+	44   Location                 Struct  <Vector>
+	56   Instigator               Object  <Pawn>
+	60   Subject                  Object  <Actor>
+	64   TeamIndex                Int     
+	68   RefCount                 Int     
+	72   Responses                Int     
+	76   Time                     Float   

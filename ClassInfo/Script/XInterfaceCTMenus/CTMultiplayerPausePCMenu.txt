@@ -1,0 +1,20 @@
+CLASS: CTMultiplayerPausePCMenu(20796), BASE: MenuTemplate
+PROPERTIES:
+	17696 Background               Struct  <MenuSprite>
+	17768 MenuOptions              Struct  <MenuButtonText>[6]
+	20672 StringForfeit            Str     
+	20680 StringDisconnect         Str     
+	20688 StringEndMatch           Str     
+	20696 StringLeaveMatch         Str     
+	20704 StringTutorialDisconnect Str     
+	20712 StringReallyForfeit      Str     
+	20720 StringReallyDisconnect   Str     
+	20728 StringReallyEndMatch     Str     
+	20736 StringReallyLeaveMatch   Str     
+	20744 StringReallySwitchTeams  Str     
+	20752 StringGuestWillGoToo     Str     
+	20760 StringGamePaused         Str     
+	20768 QuitGameConfirm          Str     
+	20776 bQuitGameSelected        Bool    <0 : 0x00000001>
+	20780 StringEnterSpectatorMode Str     
+	20788 StringExitSpectatorMode  Str     

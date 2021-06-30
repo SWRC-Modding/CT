@@ -1,0 +1,11 @@
+CLASS: ReachSpec(60), BASE: Object
+PROPERTIES:
+	40   Distance                 Int     
+	44   Start                    Object  <NavigationPoint>
+	48   End                      Object  <NavigationPoint>
+	52   reachFlags               Int     
+	56   bPruned                  Bool    <0 : 0x00000001>
+	56   bForced                  Bool    <1 : 0x00000002>
+	56   bJump                    Bool    <2 : 0x00000004>
+	56   bPerch                   Bool    <3 : 0x00000008>
+	56   bFly                     Bool    <4 : 0x00000010>

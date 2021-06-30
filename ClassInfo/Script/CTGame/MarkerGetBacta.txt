@@ -1,0 +1,2 @@
+CLASS: MarkerGetBacta(904), BASE: MarkerGetBactaNative
+PROPERTIES:

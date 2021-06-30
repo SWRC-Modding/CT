@@ -1,0 +1,2 @@
+CLASS: SpireBigSmoke(828), BASE: Emitter
+PROPERTIES:

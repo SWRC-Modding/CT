@@ -1,0 +1,2 @@
+CLASS: SwampBlurrg(1688), BASE: Ambient
+PROPERTIES:

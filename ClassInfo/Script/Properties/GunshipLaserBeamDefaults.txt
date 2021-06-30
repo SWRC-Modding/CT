@@ -1,0 +1,2 @@
+CLASS: GunshipLaserBeamDefaults(644), BASE: GunshipLaserBeam
+PROPERTIES:

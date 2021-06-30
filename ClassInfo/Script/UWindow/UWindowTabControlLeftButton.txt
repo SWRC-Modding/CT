@@ -1,0 +1,2 @@
+CLASS: UWindowTabControlLeftButton(356), BASE: UWindowButton
+PROPERTIES:

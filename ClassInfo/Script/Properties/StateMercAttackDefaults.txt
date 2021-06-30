@@ -1,0 +1,2 @@
+CLASS: StateMercAttackDefaults(160), BASE: StateMercAttack
+PROPERTIES:

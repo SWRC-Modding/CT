@@ -1,0 +1,2 @@
+CLASS: TrandoshanRifleMPPickup(704), BASE: TrandoshanRiflePickup
+PROPERTIES:

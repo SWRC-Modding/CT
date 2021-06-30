@@ -1,0 +1,2 @@
+CLASS: K_GEO4Rock3(888), BASE: KarmaProp
+PROPERTIES:

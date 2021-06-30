@@ -1,0 +1,2 @@
+CLASS: WookieeTarffulNoGun(1664), BASE: WookieeTarfful
+PROPERTIES:

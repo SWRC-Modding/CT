@@ -1,0 +1,6 @@
+CLASS: WindowsClient(324), BASE: Client
+PROPERTIES:
+	260  MouseYMultiplier         Float   
+	256  MouseXMultiplier         Float   
+	252  StartupFullscreen        Bool    <0 : 0x00000001>
+	248  UseJoystick              Bool    <0 : 0x00000001>

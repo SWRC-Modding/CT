@@ -1,0 +1,2 @@
+CLASS: DSD_muzzle(696), BASE: Accessory
+PROPERTIES:

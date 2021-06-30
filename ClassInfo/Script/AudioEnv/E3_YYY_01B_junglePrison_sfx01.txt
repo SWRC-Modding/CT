@@ -1,0 +1,2 @@
+CLASS: E3_YYY_01B_junglePrison_sfx01(96), BASE: AudioEnvironment
+PROPERTIES:

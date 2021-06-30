@@ -1,0 +1,7 @@
+CLASS: MeshEmitter(920), BASE: ParticleEmitter
+PROPERTIES:
+	900  StaticMesh               Object  <StaticMesh>
+	904  UseMeshBlendMode         Bool    <0 : 0x00000001>
+	904  RenderTwoSided           Bool    <1 : 0x00000002>
+	904  UseParticleColor         Bool    <2 : 0x00000004>
+	908  MeshExtent               Struct  <Vector>

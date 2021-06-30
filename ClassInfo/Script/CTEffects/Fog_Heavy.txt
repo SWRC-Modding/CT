@@ -1,0 +1,2 @@
+CLASS: Fog_Heavy(828), BASE: Emitter
+PROPERTIES:

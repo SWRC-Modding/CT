@@ -1,0 +1,17 @@
+CLASS: AudioEnvironment(96), BASE: Object
+PROPERTIES:
+	40   Effect                   Object  <I3DL2Listener>
+	44   EffectXBox               Object  <I3DL2Listener>
+	48   PreAmbient               Object  <Sound>
+	52   RandomOneShot            Object  <Sound>
+	56   ROSradiusMin             Float   
+	60   ROSradiusMax             Float   
+	64   ROSintervalMin           Float   
+	68   ROSintervalMax           Float   
+	72   iMuseState               Object  <Sound>
+	76   iMuseOverlays            Object  <Sound>
+	80   OverlayStartupDelay      Int     
+	84   OverlayMinSpacing        Int     
+	88   OverlayMaxSpacing        Int     
+	92   bDoMusicOnceOnly         Bool    <0 : 0x00000001>
+	92   bMusicUsedUp             Bool    <1 : 0x00000002>

@@ -1,0 +1,2 @@
+CLASS: NetConnection(16040), BASE: Player
+PROPERTIES:

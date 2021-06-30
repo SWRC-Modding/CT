@@ -1,0 +1,2 @@
+CLASS: StateEliteAttack(156), BASE: StateFlyingAttack
+PROPERTIES:

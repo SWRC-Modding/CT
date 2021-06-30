@@ -1,0 +1,2 @@
+CLASS: MercGrenadeHead(696), BASE: Accessory
+PROPERTIES:

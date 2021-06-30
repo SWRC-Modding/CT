@@ -1,0 +1,2 @@
+CLASS: Channel(100), BASE: Object
+PROPERTIES:

@@ -1,0 +1,2 @@
+CLASS: ReplicationInfo(644), BASE: Info
+PROPERTIES:

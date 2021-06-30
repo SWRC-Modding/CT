@@ -1,0 +1,2 @@
+CLASS: TeamPlayer(756), BASE: CTTeamInfo
+PROPERTIES:

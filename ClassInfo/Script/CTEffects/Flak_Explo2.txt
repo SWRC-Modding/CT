@@ -1,0 +1,2 @@
+CLASS: Flak_Explo2(828), BASE: Emitter
+PROPERTIES:

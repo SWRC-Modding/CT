@@ -1,0 +1,3 @@
+CLASS: ProjectileFactory(732), BASE: Factory
+PROPERTIES:
+	728  Prototype                Class   <Projectile>

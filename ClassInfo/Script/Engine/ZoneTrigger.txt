@@ -1,0 +1,2 @@
+CLASS: ZoneTrigger(704), BASE: Trigger
+PROPERTIES:

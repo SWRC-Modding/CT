@@ -1,0 +1,2 @@
+CLASS: Therm_Det_Ribbon(828), BASE: Emitter
+PROPERTIES:

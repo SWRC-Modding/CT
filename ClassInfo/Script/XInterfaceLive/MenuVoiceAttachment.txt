@@ -1,0 +1,12 @@
+CLASS: MenuVoiceAttachment(21416), BASE: MenuTemplateTitledB
+PROPERTIES:
+	19060 Gamer                    Struct  <Gamer>
+	19156 ConfirmText              Struct  <MenuText>
+	19268 TimerText                Struct  <MenuText>
+	19380 FailedOperation          Str     
+	19388 bRecordedVoice           Bool    <0 : 0x00000001>
+	19392 TimeLeft                 Int     
+	19396 MaxTime                  Int     
+	19400 Oper                     Str     
+	19408 Options                  Struct  <MenuButtonText>[4]
+	21344 OptionBox                Struct  <MenuSprite>

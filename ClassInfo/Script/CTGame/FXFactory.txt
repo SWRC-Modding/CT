@@ -1,0 +1,6 @@
+CLASS: FXFactory(788), BASE: Factory
+PROPERTIES:
+	728  Prototype                Class   <Emitter>
+	732  EmitterDrawScale         Struct  <Range>
+	740  EmitterDrawScale3D       Struct  <RangeVector>
+	764  SpawnOffset              Struct  <RangeVector>

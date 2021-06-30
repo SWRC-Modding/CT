@@ -1,0 +1,2 @@
+CLASS: ExplosiveEffects(68), BASE: MaterialTypeInfo
+PROPERTIES:

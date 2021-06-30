@@ -1,0 +1,5 @@
+CLASS: SMG(1192), BASE: Weapon
+PROPERTIES:
+	1180 ClipClass                Class   <Actor>
+	1184 Clip                     Object  <Actor>
+	1188 ClipShiftDist            Float   

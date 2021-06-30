@@ -1,0 +1,2 @@
+CLASS: Kaminoan(1664), BASE: Republic
+PROPERTIES:

@@ -1,0 +1,2 @@
+CLASS: amb_RAS_torpBay_lp_01(96), BASE: AudioEnvironment
+PROPERTIES:

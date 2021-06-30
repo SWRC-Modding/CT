@@ -1,0 +1,4 @@
+CLASS: GOAL_ThrowGrenade(84), BASE: GoalObject
+PROPERTIES:
+	76   GrenadeType              Class   <Projectile>
+	80   ThrowAnimation           Name    

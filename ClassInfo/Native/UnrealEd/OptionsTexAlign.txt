@@ -1,0 +1,2 @@
+CLASS: OptionsTexAlign(48), BASE: OptionsProxy
+PROPERTIES:

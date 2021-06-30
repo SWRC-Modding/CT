@@ -1,0 +1,2 @@
+CLASS: DC17mBlasterBoxMP(704), BASE: DC17mBlasterBox
+PROPERTIES:

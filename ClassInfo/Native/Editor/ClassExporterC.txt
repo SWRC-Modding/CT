@@ -1,0 +1,2 @@
+CLASS: ClassExporterC(68), BASE: Exporter
+PROPERTIES:

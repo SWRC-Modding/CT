@@ -1,0 +1,2 @@
+CLASS: GEO_01ARocketEffects(68), BASE: MaterialTypeInfo
+PROPERTIES:

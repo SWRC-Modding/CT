@@ -1,0 +1,2 @@
+CLASS: MarkerTurretNative(904), BASE: CTMarker
+PROPERTIES:

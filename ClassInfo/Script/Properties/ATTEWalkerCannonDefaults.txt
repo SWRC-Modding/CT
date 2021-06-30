@@ -1,0 +1,2 @@
+CLASS: ATTEWalkerCannonDefaults(2056), BASE: ATTEWalkerCannon
+PROPERTIES:

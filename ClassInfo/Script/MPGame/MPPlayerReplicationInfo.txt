@@ -1,0 +1,23 @@
+CLASS: MPPlayerReplicationInfo(860), BASE: PlayerReplicationInfo
+STRUCTS:
+	WeaponStats(16)
+		0    WeaponClass              Class   <Weapon>
+		4    Kills                    Int     
+		8    Deaths                   Int     
+		12   DeathsHolding            Int     
+PROPERTIES:
+	788  LocalStatsScreenClass    Class   <ScoreBoard>
+	792  bHolding                 Bool    <0 : 0x00000001>
+	796  HasFlag                  Object  <GameObject>
+	800  bHasFlag                 Bool    <0 : 0x00000001>
+	800  bFirstBlood              Bool    <1 : 0x00000002>
+	804  WeaponStatsArray         Array   <Struct <WeaponStats>>
+	812  FlagTouches              Int     
+	816  FlagReturns              Int     
+	820  Spree                    Byte    [6]
+	826  MultiKills               Byte    [7]
+	836  Suicides                 Int     
+	840  flakcount                Int     
+	844  combocount               Int     
+	848  headcount                Int     
+	852  Combos                   Byte    [5]

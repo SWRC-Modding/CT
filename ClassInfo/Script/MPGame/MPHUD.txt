@@ -1,0 +1,87 @@
+CLASS: MPHUD(2476), BASE: CTHUD
+STRUCTS:
+	HudLocalizedMessage(68)
+		0    Message                  Class   <LocalMessage>
+		4    StringMessage            Str     
+		12   Switch                   Int     
+		16   RelatedPRI               Object  <PlayerReplicationInfo>
+		20   RelatedPRI2              Object  <PlayerReplicationInfo>
+		24   OptionalObject           Object  <Object>
+		28   EndOfLife                Float   
+		32   LifeTime                 Float   
+		36   StringFont               Object  <Font>
+		40   DrawColor                Struct  <Color>
+		44   DrawPivot                Byte    <EDrawPivot>
+		45   StackMode                Byte    <EStackMode>
+		48   XPos                     Float   
+		52   YPos                     Float   
+		56   dx                       Float   
+		60   dy                       Float   
+		64   Drawn                    Bool    <0 : 0x00000001>
+PROPERTIES:
+	1576 SizeY                    Int     
+	1580 Count                    Int     
+	1584 IdentifyFadeTime         Float   
+	1588 defaultIdentifyFadeTime  Float   
+	1592 IdentifyTarget           Object  <PlayerReplicationInfo>
+	1596 PlayerOwner              Object  <PlayerController>
+	1600 ViewedInfo               Object  <PlayerReplicationInfo>
+	1604 StartupMessageEnd        Float   
+	1608 StartupHeight            Int     
+	1612 StartupStage             Byte    
+	1616 HUDIdentifyTraceDistance Float   
+	1620 DefaultTargerColor       Struct  <Color>
+	1624 VisorIcons               Object  <Material>
+	1628 LocalMessages            Struct  <HudLocalizedMessage>[8]
+	2172 PlayerCount              Int     
+	2176 TutIconBlink             Float   
+	2180 TutDir                   Float   
+	2184 TalkTime                 Float   
+	2188 TalkPRI                  Object  <PlayerReplicationInfo>
+	2192 LastReportedTime         Int     
+	2196 OldClipX                 Int     
+	2200 bStartUpMessage          Bool    <0 : 0x00000001>
+	2200 bTimeValid               Bool    <1 : 0x00000002>
+	2200 bAlwaysHideFrags         Bool    <2 : 0x00000004>
+	2204 Style                    Byte    
+	2208 FaceColor                Struct  <Color>
+	2212 WhiteColor               Struct  <Color>
+	2216 IdentifyName             Str     
+	2224 IdentifyHealth           Str     
+	2232 LiveFeed                 Str     
+	2240 PickupTime               Float   
+	2244 WeaponFadeTime           Float   
+	2248 MessageFadeTime          Float   
+	2252 bDrawFaceArea            Bool    <0 : 0x00000001>
+	2256 FaceAreaOffset           Float   
+	2260 MinFaceAreaOffset        Float   
+	2264 TimeMessageClass         Class   <CriticalEventPlus>
+	2268 FontInfoClass            Str     
+	2276 EdgeOffsetX              Int     
+	2280 EdgeOffsetY              Int     
+	2284 LastTime                 Float   
+	2288 CurrentDeltaTime         Float   
+	2292 Scale                    Float   
+	2296 SingleWaitingMessage     Str     
+	2304 gamegoal                 Str     
+	2312 TourneyMessage           Str     
+	2320 WaitingMessage1          Str     
+	2328 WaitingMessage2          Str     
+	2336 ReadyMessage             Str     
+	2344 NotReadyMessage          Str     
+	2352 StartMessage             Str     
+	2360 LoadoutMessage           Str     
+	2368 LoadoutCycle             Str     
+	2376 WonMatchPrefix           Str     
+	2384 WonMatchPostFix          Str     
+	2392 WaitingToSpawn           Str     
+	2400 YouveWonTheMatch         Str     
+	2408 YouveLostTheMatch        Str     
+	2416 NowViewing               Str     
+	2424 ScoreText                Str     
+	2432 InitialViewingString     Str     
+	2440 ChooseATeam              Str     
+	2448 WaitingToRespawn         Str     
+	2456 RightHud                 Object  <Material>[2]
+	2464 LeftHud                  Object  <Material>[2]
+	2472 LastTraceActor           Object  <Actor>

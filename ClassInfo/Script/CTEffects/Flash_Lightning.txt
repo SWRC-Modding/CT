@@ -1,0 +1,2 @@
+CLASS: Flash_Lightning(828), BASE: Emitter
+PROPERTIES:

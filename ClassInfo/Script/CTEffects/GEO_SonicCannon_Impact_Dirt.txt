@@ -1,0 +1,2 @@
+CLASS: GEO_SonicCannon_Impact_Dirt(828), BASE: Emitter
+PROPERTIES:

@@ -1,0 +1,2 @@
+CLASS: TrandoshanMercenaryBot(1256), BASE: CTBot
+PROPERTIES:

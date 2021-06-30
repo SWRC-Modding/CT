@@ -1,0 +1,2 @@
+CLASS: SpiderDroid_Rocket(828), BASE: Emitter
+PROPERTIES:

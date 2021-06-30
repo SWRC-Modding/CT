@@ -1,0 +1,2 @@
+CLASS: SpiderDroidMissileRack(1180), BASE: MissileRack
+PROPERTIES:

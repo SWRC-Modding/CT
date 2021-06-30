@@ -1,0 +1,2 @@
+CLASS: GeonosianSunFac(1668), BASE: GeonosianWarrior
+PROPERTIES:

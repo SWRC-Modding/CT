@@ -1,0 +1,2 @@
+CLASS: TrandoshanMissileTurretDefaults(2056), BASE: TrandoshanMissileTurret
+PROPERTIES:

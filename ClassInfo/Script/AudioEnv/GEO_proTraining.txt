@@ -1,0 +1,2 @@
+CLASS: GEO_proTraining(96), BASE: AudioEnvironment
+PROPERTIES:

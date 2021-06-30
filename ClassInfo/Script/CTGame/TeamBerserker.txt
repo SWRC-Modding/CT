@@ -1,0 +1,2 @@
+CLASS: TeamBerserker(756), BASE: CTTeamInfo
+PROPERTIES:

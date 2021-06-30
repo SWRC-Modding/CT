@@ -1,0 +1,16 @@
+CLASS: KarmaProp(888), BASE: Prop
+PROPERTIES:
+	836  bKTakeShot               Bool    <0 : 0x00000001>
+	836  bTakeDamageOnWorldImpact Bool    <1 : 0x00000002>
+	836  bOrientImpactEffect      Bool    <2 : 0x00000004>
+	840  ImpactStimulus           Byte    <EStimulusType>
+	844  DamageThreshold          Int     
+	848  ImpactDamageMultiplier   Float   
+	852  ImpactDamageMinVelocity  Float   
+	856  ImpactDamageType         Class   <DamageType>
+	860  ImpactSounds             Array   <Object <Sound>>
+	868  ImpactVolume             Float   
+	872  ImpactEffect             Class   <Actor>
+	876  LifeTime                 Float   
+	880  ImpactInterval           Float   
+	884  LastImpactTime           Float   

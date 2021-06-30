@@ -1,0 +1,2 @@
+CLASS: RASCeilingTurret(2068), BASE: AutoTurret
+PROPERTIES:

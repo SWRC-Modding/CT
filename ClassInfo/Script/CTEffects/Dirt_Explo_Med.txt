@@ -1,0 +1,2 @@
+CLASS: Dirt_Explo_Med(828), BASE: Emitter
+PROPERTIES:

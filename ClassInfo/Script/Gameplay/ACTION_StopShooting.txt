@@ -1,0 +1,2 @@
+CLASS: ACTION_StopShooting(64), BASE: ScriptedAction
+PROPERTIES:

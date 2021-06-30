@@ -1,0 +1,2 @@
+CLASS: RocketLauncherShell(644), BASE: Actor
+PROPERTIES:

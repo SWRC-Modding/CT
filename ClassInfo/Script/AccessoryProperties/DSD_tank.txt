@@ -1,0 +1,2 @@
+CLASS: DSD_tank(696), BASE: Accessory
+PROPERTIES:

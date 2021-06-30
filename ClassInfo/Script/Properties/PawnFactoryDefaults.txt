@@ -1,0 +1,2 @@
+CLASS: PawnFactoryDefaults(784), BASE: PawnFactory
+PROPERTIES:

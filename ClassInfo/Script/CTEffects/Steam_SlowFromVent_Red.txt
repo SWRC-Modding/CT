@@ -1,0 +1,2 @@
+CLASS: Steam_SlowFromVent_Red(828), BASE: Emitter
+PROPERTIES:

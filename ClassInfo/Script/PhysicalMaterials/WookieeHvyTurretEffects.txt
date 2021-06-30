@@ -1,0 +1,2 @@
+CLASS: WookieeHvyTurretEffects(68), BASE: MaterialTypeInfo
+PROPERTIES:

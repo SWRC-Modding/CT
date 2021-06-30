@@ -1,0 +1,2 @@
+CLASS: EngineBattleVolumeDefaults(764), BASE: EngineBattleVolume
+PROPERTIES:

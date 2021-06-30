@@ -1,0 +1,2 @@
+CLASS: HitDec_FragMetal(1060), BASE: HitDecal
+PROPERTIES:

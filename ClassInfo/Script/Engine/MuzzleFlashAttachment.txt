@@ -1,0 +1,5 @@
+CLASS: MuzzleFlashAttachment(652), BASE: InventoryAttachment
+PROPERTIES:
+	644  TickCount                Int     
+	648  FlashLightType           Byte    <ELightType>
+	649  FlashLightEffect         Byte    <ELightEffect>

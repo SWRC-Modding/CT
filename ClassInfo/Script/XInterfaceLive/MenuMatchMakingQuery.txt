@@ -1,0 +1,3 @@
+CLASS: MenuMatchMakingQuery(19172), BASE: MenuTemplateTitledB
+PROPERTIES:
+	19060 PleaseWaitText           Struct  <MenuText>

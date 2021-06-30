@@ -1,0 +1,4 @@
+CLASS: GOAL_WaitUntilNear(84), BASE: GoalObject
+PROPERTIES:
+	76   DistanceSqr              Float   
+	80   Actor                    Object  <Actor>

@@ -1,0 +1,4 @@
+CLASS: ACTION_EnableNavPtSpecial(72), BASE: ScriptedAction
+PROPERTIES:
+	64   bSetting                 Bool    <0 : 0x00000001>
+	68   NavPtTag                 Name    

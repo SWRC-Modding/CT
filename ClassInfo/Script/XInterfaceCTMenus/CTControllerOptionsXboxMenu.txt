@@ -1,0 +1,4 @@
+CLASS: CTControllerOptionsXboxMenu(22744), BASE: MenuTemplateTitledBA
+PROPERTIES:
+	19728 Label                    Struct  <MenuText>
+	19840 Options                  Struct  <MenuButtonText>[6]

@@ -1,0 +1,2 @@
+CLASS: RainWater_Drips(828), BASE: Emitter
+PROPERTIES:

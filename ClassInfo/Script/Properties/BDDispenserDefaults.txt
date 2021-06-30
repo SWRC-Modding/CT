@@ -1,0 +1,2 @@
+CLASS: BDDispenserDefaults(1080), BASE: BDDispenser
+PROPERTIES:

@@ -1,0 +1,2 @@
+CLASS: AutoTurretAmmo(892), BASE: DC15Ammo
+PROPERTIES:

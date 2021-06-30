@@ -1,0 +1,2 @@
+CLASS: K_TRNSnipeBarrel(896), BASE: KnockoverProp
+PROPERTIES:

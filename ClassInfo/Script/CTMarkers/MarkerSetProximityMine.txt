@@ -1,0 +1,2 @@
+CLASS: MarkerSetProximityMine(912), BASE: MarkerSetProximityMineNative
+PROPERTIES:

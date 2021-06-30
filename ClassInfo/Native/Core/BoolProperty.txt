@@ -1,0 +1,2 @@
+CLASS: BoolProperty(68), BASE: Property
+PROPERTIES:

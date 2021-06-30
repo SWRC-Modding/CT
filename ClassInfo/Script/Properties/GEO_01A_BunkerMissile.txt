@@ -1,0 +1,2 @@
+CLASS: GEO_01A_BunkerMissile(804), BASE: CTProjExplosive
+PROPERTIES:

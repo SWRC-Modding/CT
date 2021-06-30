@@ -1,0 +1,2 @@
+CLASS: GEO05_Barrel(836), BASE: StaticProp
+PROPERTIES:

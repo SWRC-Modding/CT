@@ -1,0 +1,2 @@
+CLASS: MissileTurretAmmo(868), BASE: Ammunition
+PROPERTIES:

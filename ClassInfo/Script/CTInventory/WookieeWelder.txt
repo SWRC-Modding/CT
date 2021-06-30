@@ -1,0 +1,2 @@
+CLASS: WookieeWelder(1180), BASE: Weapon
+PROPERTIES:

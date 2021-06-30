@@ -1,0 +1,13 @@
+CLASS: MenuDedicatedServer(20084), BASE: MenuTemplateTitledBA
+PROPERTIES:
+	19728 SessionInfo              Struct  <MenuText>
+	19840 IDC_STATIC               Struct  <MenuSprite>
+	19912 ScreenSaverTime          Float   
+	19916 ScreenSaverActivate      Float   
+	19920 CircBuffer               Str     [16]
+	20048 CircCursor               Int     
+	20052 InitMsg                  Str     
+	20060 PlayersString            Str     
+	20068 PlayerString             Str     
+	20076 LogTextColor             Struct  <Color>
+	20080 SingleLineHeight         Float   

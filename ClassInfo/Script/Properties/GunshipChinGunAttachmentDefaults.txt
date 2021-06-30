@@ -1,0 +1,2 @@
+CLASS: GunshipChinGunAttachmentDefaults(776), BASE: GunshipChinGunAttachment
+PROPERTIES:

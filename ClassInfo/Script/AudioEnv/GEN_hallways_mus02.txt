@@ -1,0 +1,2 @@
+CLASS: GEN_hallways_mus02(96), BASE: AudioEnvironment
+PROPERTIES:

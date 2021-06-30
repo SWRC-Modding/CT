@@ -1,0 +1,2 @@
+CLASS: Holo_TarffulHelmet(696), BASE: TarffulHelmet
+PROPERTIES:

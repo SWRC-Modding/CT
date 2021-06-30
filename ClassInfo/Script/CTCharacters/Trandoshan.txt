@@ -1,0 +1,3 @@
+CLASS: Trandoshan(1668), BASE: CTPawn
+PROPERTIES:
+	1664 AllySearchRadius         Float   

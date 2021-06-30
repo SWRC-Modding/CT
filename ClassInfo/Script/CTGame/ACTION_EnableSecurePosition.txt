@@ -1,0 +1,4 @@
+CLASS: ACTION_EnableSecurePosition(72), BASE: ScriptedAction
+PROPERTIES:
+	64   NavPtTag                 Name    
+	68   bEnable                  Bool    <0 : 0x00000001>

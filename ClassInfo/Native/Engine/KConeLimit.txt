@@ -1,0 +1,5 @@
+CLASS: KConeLimit(812), BASE: KConstraint
+PROPERTIES:
+	800  KHalfAngle               Float   
+	804  KStiffness               Float   
+	808  KDamping                 Float   

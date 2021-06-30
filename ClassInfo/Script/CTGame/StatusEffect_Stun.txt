@@ -1,0 +1,5 @@
+CLASS: StatusEffect_Stun(676), BASE: StatusEffect
+PROPERTIES:
+	664  FlashColor               Struct  <Color>
+	668  NightVisionFlashScale    Float   
+	672  FlashBloom               Int     

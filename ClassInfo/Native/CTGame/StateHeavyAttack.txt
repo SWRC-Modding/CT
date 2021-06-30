@@ -1,0 +1,9 @@
+CLASS: StateHeavyAttack(152), BASE: StateAbstractAttack
+PROPERTIES:
+	124  NextManuverTime          Float   
+	128  MaxManuverTime           Float   
+	132  MoveIntervalDist         Float   
+	136  NextShieldTime           Float   
+	140  MinShieldTime            Float   
+	144  ShieldFactor             Float   
+	148  HatesDroids              Bool    <0 : 0x00000001>

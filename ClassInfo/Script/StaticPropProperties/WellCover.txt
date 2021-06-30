@@ -1,0 +1,2 @@
+CLASS: WellCover(836), BASE: StaticProp
+PROPERTIES:

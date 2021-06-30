@@ -1,0 +1,3 @@
+CLASS: DemolitionCrate(840), BASE: Prop
+PROPERTIES:
+	836  DemoCharge               Object  <ActivateItem>

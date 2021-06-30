@@ -1,0 +1,2 @@
+CLASS: MPCloneDefaults(1900), BASE: MPClone
+PROPERTIES:

@@ -1,0 +1,6 @@
+CLASS: StatePerched(76), BASE: StateShutdown
+PROPERTIES:
+	60   MyPerch                  Object  <Perch>
+	64   NextDetachTime           Float   
+	68   DetachDelayTime          Float   
+	72   StimInstigator           Object  <Actor>

@@ -1,0 +1,3 @@
+CLASS: MusicTrigger(708), BASE: Trigger
+PROPERTIES:
+	704  Episode                  Object  <Sound>

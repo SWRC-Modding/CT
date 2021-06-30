@@ -1,0 +1,2 @@
+CLASS: StatusEffect_StunDefaults(676), BASE: StatusEffect_Stun
+PROPERTIES:

@@ -1,0 +1,14 @@
+CLASS: BrushBuilder(80), BASE: Object
+STRUCTS:
+	BuilderPoly(20)
+		0    VertexIndices            Array   <Int>
+		8    Direction                Int     
+		12   ItemName                 Name    
+		16   PolyFlags                Int     
+PROPERTIES:
+	40   BitmapFilename           Str     
+	48   ToolTip                  Str     
+	56   Vertices                 Array   <Struct <Vector>>
+	64   Polys                    Array   <Struct <BuilderPoly>>
+	72   Group                    Name    
+	76   MergeCoplanars           Bool    <0 : 0x00000001>

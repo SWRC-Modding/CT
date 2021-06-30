@@ -1,0 +1,4 @@
+CLASS: MarkerSetProximityMineNative(912), BASE: CTMarker
+PROPERTIES:
+	904  PlaceEvent               Name    
+	908  ArmEvent                 Name    

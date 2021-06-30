@@ -1,0 +1,2 @@
+CLASS: GeoElite_FS(48), BASE: FootstepInfo
+PROPERTIES:

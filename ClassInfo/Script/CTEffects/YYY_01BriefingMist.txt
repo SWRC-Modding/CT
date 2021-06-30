@@ -1,0 +1,2 @@
+CLASS: YYY_01BriefingMist(828), BASE: Emitter
+PROPERTIES:

@@ -1,0 +1,2 @@
+CLASS: Wookiee_HvyTurret_Projectile(828), BASE: Emitter
+PROPERTIES:

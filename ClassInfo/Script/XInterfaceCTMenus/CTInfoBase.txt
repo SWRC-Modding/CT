@@ -1,0 +1,11 @@
+CLASS: CTInfoBase(18876), BASE: MenuTemplate
+PROPERTIES:
+	17696 Background               Struct  <MenuSprite>
+	17768 InfoTitle                Struct  <MenuText>
+	17880 InfoText                 Struct  <MenuText>
+	17992 InfoTextBorder           Struct  <MenuSprite>
+	18064 InfoPic                  Struct  <MenuSprite>
+	18136 InfoPicBorder            Struct  <MenuSprite>
+	18208 AButtonIcon              Struct  <MenuSprite>
+	18280 ALabel                   Struct  <MenuText>
+	18392 AButton                  Struct  <MenuButtonText>

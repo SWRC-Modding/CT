@@ -1,0 +1,2 @@
+CLASS: BlueLaserHit(828), BASE: Emitter
+PROPERTIES:

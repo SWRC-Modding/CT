@@ -1,0 +1,4 @@
+CLASS: CTTeamInfo(756), BASE: TeamInfo
+PROPERTIES:
+	704  RelationTowards          Byte    <ETeamRelationship>[10]
+	716  KillsBy                  Int     [10]

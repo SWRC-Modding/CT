@@ -1,0 +1,2 @@
+CLASS: BactaDispenserYYY(956), BASE: BactaDispenser
+PROPERTIES:

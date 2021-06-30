@@ -1,0 +1,2 @@
+CLASS: StateScavDroidAttack(156), BASE: StateFlyingAttack
+PROPERTIES:

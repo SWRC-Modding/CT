@@ -1,0 +1,2 @@
+CLASS: DemolitionCrateYYY(840), BASE: DemolitionCrate
+PROPERTIES:

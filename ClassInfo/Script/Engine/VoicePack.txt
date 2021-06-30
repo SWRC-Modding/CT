@@ -1,0 +1,18 @@
+CLASS: VoicePack(1532), BASE: Info
+PROPERTIES:
+	644  Phrase                   Object  <Sound>[8]
+	676  PhraseString             Str     [8]
+	740  PhraseNum                Int     
+	744  DelayedSender            Object  <PlayerReplicationInfo>
+	748  AckSound                 Object  <Sound>[16]
+	812  AckString                Str     [16]
+	940  numAcks                  Int     
+	944  FFireSound               Object  <Sound>[16]
+	1008 FFireString              Str     [16]
+	1136 numFFires                Int     
+	1140 TauntSound               Object  <Sound>[16]
+	1204 TauntString              Str     [16]
+	1332 numTaunts                Int     
+	1336 OrderSound               Object  <Sound>[16]
+	1400 OrderString              Str     [16]
+	1528 numOrders                Int     

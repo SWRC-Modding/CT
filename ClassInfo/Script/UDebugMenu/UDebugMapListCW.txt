@@ -1,0 +1,8 @@
+CLASS: UDebugMapListCW(220), BASE: UWindowDialogClientWindow
+PROPERTIES:
+	192  MapList                  Object  <UDebugMapListBox>
+	196  CloseButton              Object  <UWindowSmallCloseButton>
+	200  OkButton                 Object  <UDebugSmallLoadMapButton>
+	204  GameCombo                Object  <UWindowComboControl>
+	208  NetworkCombo             Object  <UWindowComboControl>
+	212  LastGameType             Str     

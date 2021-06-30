@@ -1,0 +1,5 @@
+CLASS: GOAL_GotoPointBlind(96), BASE: GoalObject
+PROPERTIES:
+	76   Goal                     Struct  <Vector>
+	88   ToleranceSquared         Float   
+	92   StopUponCompletion       Bool    <0 : 0x00000001>

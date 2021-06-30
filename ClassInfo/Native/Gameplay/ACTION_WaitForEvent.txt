@@ -1,0 +1,6 @@
+CLASS: ACTION_WaitForEvent(80), BASE: LatentScriptedAction
+PROPERTIES:
+	64   ExternalEvent            Name    
+	68   T                        Object  <TriggeredCondition>
+	72   ScriptPriorityOnTrigger  Float   
+	76   UnforceStateOnTrigger    Bool    <0 : 0x00000001>

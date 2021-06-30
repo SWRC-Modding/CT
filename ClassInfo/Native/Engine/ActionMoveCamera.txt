@@ -1,0 +1,7 @@
+CLASS: ActionMoveCamera(128), BASE: MatAction
+ENUMS:
+	EPathStyle
+		PATHSTYLE_Linear         =   0
+		PATHSTYLE_Bezier         =   1
+PROPERTIES:
+	124  PathStyle                Byte    <EPathStyle>

@@ -1,0 +1,6 @@
+CLASS: AutoTurret(2068), BASE: Turret
+PROPERTIES:
+	2052 MuzzleDelay              Float   
+	2056 ToggleMuzzle             Int     
+	2060 NumMuzzles               Int     
+	2064 DeploySound              Object  <Sound>

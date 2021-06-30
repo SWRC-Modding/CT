@@ -1,0 +1,146 @@
+CLASS: Weapon(1180), BASE: Inventory
+ENUMS:
+	EFireMode
+		FM_SemiAuto              =   0
+		FM_Burst                 =   1
+		FM_Automatic             =   2
+		FM_AnimationDriven       =   3
+	EWeaponType
+		WT_None                  =   0
+		WT_Primary               =   1
+		WT_Secondary             =   2
+		WT_Thrown                =   3
+		WT_Heal                  =   4
+		WT_Turret                =   5
+		WT_Marker                =   6
+	EPawnWeaponAnimation
+		PWA_Fire                 =   0
+		PWA_Holster              =   1
+		PWA_Load                 =   2
+		PWA_Idle                 =   3
+		PWA_Melee                =   4
+		PWA_Throw                =   5
+		PWA_Reload               =   6
+	EWeaponIndexType
+		WI_Blaster               =   0
+		WI_Sniper                =   1
+		WI_AntiArmor             =   2
+		WI_Pistol                =   3
+		WI_Shotgun               =   4
+		WI_EliteBeam             =   5
+		WI_ConRifle              =   6
+		WI_RocketLauncher        =   7
+		WI_BowCaster             =   8
+		WI_SMG                   =   9
+		WI_TrandoshanRifle       =  10
+PROPERTIES:
+	724  AmmoName                 Class   <Ammunition>
+	728  AmmoType                 Object  <Ammunition>
+	732  PickupAmmoCount          Int     
+	736  InitAmmoAmount           Int     
+	740  ReloadCount              Int     
+	744  FireCount                Int     
+	748  OutOfAmmoEvent           Name    
+	752  bWeaponUp                Bool    <0 : 0x00000001>
+	752  bChangeWeapon            Bool    <1 : 0x00000002>
+	752  bCanThrow                Bool    <2 : 0x00000004>
+	752  bRapidFire               Bool    <3 : 0x00000008>
+	752  bForceReload             Bool    <4 : 0x00000010>
+	752  bCanReload               Bool    <5 : 0x00000020>
+	752  bSpectated               Bool    <6 : 0x00000040>
+	752  bMeleeWeapon             Bool    <7 : 0x00000080>
+	752  bSteadyToggle            Bool    <8 : 0x00000100>
+	752  bForceFire               Bool    <9 : 0x00000200>
+	752  bForceAltFire            Bool    <10: 0x00000400>
+	752  bForcesWeaponChange      Bool    <11: 0x00000800>
+	752  bAutoFire                Bool    <12: 0x00001000>
+	752  bJustTravelled           Bool    <13: 0x00002000>
+	752  bApplyKick               Bool    <14: 0x00004000>
+	752  bRecoilShake             Bool    <15: 0x00008000>
+	752  bWeaponZoom              Bool    <16: 0x00010000>
+	752  bPlayingIdle             Bool    <17: 0x00020000>
+	752  bLoopMelee               Bool    <18: 0x00040000>
+	752  bLoopMuzzleFX            Bool    <19: 0x00080000>
+	752  bZoomedAltFireCapable    Bool    <20: 0x00100000>
+	752  bZoomedUsesNoHUDArms     Bool    <21: 0x00200000>
+	752  bCanSwitchGrenade        Bool    <22: 0x00400000>
+	752  bSaveAsLastWeapon        Bool    <23: 0x00800000>
+	752  bCanThrowGrenadesWhenZoomed Bool    <24: 0x01000000>
+	756  NewWeapon                Object  <Weapon>
+	760  AutoSwitchPriority       Int     
+	764  FireOffset               Struct  <Vector>
+	776  ShakeMag                 Float   
+	780  ShakeTime                Float   
+	784  ShakeVert                Struct  <Vector>
+	796  RollRate                 Float   
+	800  ShakeSpeed               Struct  <Vector>
+	812  NumShakes                Float   
+	816  Reticle                  Object  <Texture>
+	820  Affector                 Object  <Powerups>
+	824  BurstCount               Int     
+	828  FireMode                 Byte    <EFireMode>
+	829  WeaponType               Byte    <EWeaponType>
+	832  FPFireOffset             Struct  <Vector>
+	844  FPGrenadeOffset          Struct  <Vector>
+	856  RecoilConstant           Float   
+	860  RecoilDampening          Float   
+	864  DisableRecoil            Float   
+	868  XRecoilMultiplier        Float   
+	872  XShakeMultiplier         Float   
+	876  WeaponKick               Struct  <Rotator>
+	888  RecoilVelocity           Struct  <Rotator>
+	900  InitRotation             Struct  <Rotator>
+	912  AimError                 Float   
+	916  ZoomedAimError           Float   
+	920  ZoomDamageMultiplier     Float   
+	924  OptimalDist              Float   
+	928  ValidRange               Struct  <Range>
+	936  FireSound                Object  <Sound>
+	940  WeaponEmptySound         Object  <Sound>
+	944  GrenadeEmptySound        Object  <Sound>
+	948  HolsterSound             Object  <Sound>
+	952  MessageNoAmmo            Str     
+	960  WeaponDescription        Str     
+	968  NameColor                Struct  <Color>
+	972  DisplayFOV               Float   
+	976  ZoomFOVs                 Float   [4]
+	992  NumZoomFOVs              Int     
+	996  CurrentZoomFOVIndex      Int     
+	1000 VisionWeapon             Object  <VisionMode>
+	1004 VisionWeaponZoom         Object  <VisionMode>
+	1008 MuzzleClass              Class   <Emitter>
+	1012 MuzzleFlash              Object  <Emitter>
+	1016 FlashCount               Byte    
+	1020 MuzzleBone               Name    
+	1024 BreechEffectClass        Class   <Emitter>
+	1028 BreechEffect             Object  <Emitter>
+	1032 BreechOffset             Struct  <Vector>
+	1044 BreechAttachBone         Name    
+	1048 bHasAmmoNeedle           Bool    <0 : 0x00000001>
+	1052 FullClipAngle            Float   
+	1056 EmptyClipAngle           Float   
+	1060 AnglePerShot             Float   
+	1064 NeedleAngle              Float   
+	1068 NextShotTime             Float   
+	1072 ShotDelay                Float   
+	1076 LastTimeSeconds          Float   
+	1080 WeaponAccuracy           Float   
+	1084 PlayIdleTime             Float   
+	1088 StartIdleTime            Float   
+	1092 MeleeRange               Float   
+	1096 MeleeDamage              Float   
+	1100 MeleeDamageType          Class   <DamageType>
+	1104 MeleeHitEffectsByMaterial Class   <MaterialTypeInfo>
+	1108 MeleeStatusEffect        Class   <StatusEffect>
+	1112 MeleeStatusEffectDuration Float   
+	1116 MeleeStatusEffectDamagePerSec Float   
+	1120 BeginMeleeLoopFrame      Float   
+	1124 LoadAnim                 Name    
+	1128 FireAnim                 Name    
+	1132 HolsterAnim              Name    
+	1136 soundQ                   Int     [5]
+	1156 CurrIndex                Int     
+	1160 FirstTimeSwitchEvent     Name    
+	1164 WeaponIndex              Byte    <EWeaponIndexType>
+	1168 PlayerSpeedModifier      Float   
+	1172 HudArmsShaderIndex       Int     [2]

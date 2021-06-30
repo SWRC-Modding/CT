@@ -1,0 +1,3 @@
+CLASS: CacheGameTypes(56), BASE: xUtil
+PROPERTIES:
+	48   Records                  Array   <Struct <GameTypeRecord>>

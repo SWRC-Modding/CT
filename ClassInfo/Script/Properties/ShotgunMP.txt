@@ -1,0 +1,2 @@
+CLASS: ShotgunMP(1220), BASE: Shotgun
+PROPERTIES:

@@ -1,0 +1,2 @@
+CLASS: DC17mSniperAttachmentDefaults(776), BASE: DC17mSniperAttachment
+PROPERTIES:

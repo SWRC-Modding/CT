@@ -1,0 +1,2 @@
+CLASS: CloneBackIdclip_07(696), BASE: Accessory
+PROPERTIES:

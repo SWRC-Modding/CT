@@ -1,0 +1,3 @@
+CLASS: DeathCondition_DamageType(48), BASE: DeathCondition
+PROPERTIES:
+	44   DamageType               Class   <DamageType>

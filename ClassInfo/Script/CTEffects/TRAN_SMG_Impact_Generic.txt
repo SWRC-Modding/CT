@@ -1,0 +1,2 @@
+CLASS: TRAN_SMG_Impact_Generic(828), BASE: Emitter
+PROPERTIES:

@@ -1,0 +1,2 @@
+CLASS: TextBufferFactory(88), BASE: Factory
+PROPERTIES:

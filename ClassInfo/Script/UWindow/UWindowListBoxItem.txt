@@ -1,0 +1,5 @@
+CLASS: UWindowListBoxItem(128), BASE: UWindowList
+PROPERTIES:
+	108  Caption                  Str     
+	116  bSelected                Bool    <0 : 0x00000001>
+	120  HelpText                 Str     

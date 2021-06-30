@@ -1,0 +1,32 @@
+CLASS: RocketLauncher(1284), BASE: Weapon
+PROPERTIES:
+	1180 bTargeting               Bool    <0 : 0x00000001>
+	1180 bTargetLockOn            Bool    <1 : 0x00000002>
+	1180 bBeginSecondLockOn       Bool    <2 : 0x00000004>
+	1180 bSecondLockOn            Bool    <3 : 0x00000008>
+	1180 bRotateShells            Bool    <4 : 0x00000010>
+	1180 bWrap                    Bool    <5 : 0x00000020>
+	1180 bCanFire                 Bool    <6 : 0x00000040>
+	1184 NumRevolutions           Int     
+	1188 RevCounter               Int     
+	1192 TargetingTimer           Float   
+	1196 SecondTargetingTimer     Float   
+	1200 ResetTimer               Float   
+	1204 ElapsedTargetingTime     Float   
+	1208 ElapsedSecondTargetingTime Float   
+	1212 ChamberSpeed             Float   
+	1216 InitRoll                 Float   
+	1220 LastRoll                 Float   
+	1224 Target                   Object  <Actor>
+	1228 PrevTarget               Object  <Actor>
+	1232 TextColor                Struct  <Color>
+	1236 DesiredAmmoRotation      Struct  <Rotator>
+	1248 AmmoAttachment           Class   <RocketLauncherShell>
+	1252 HomingAmmoA              Object  <RocketLauncherShell>
+	1256 HomingAmmoB              Object  <RocketLauncherShell>
+	1260 HomingAmmoC              Object  <RocketLauncherShell>
+	1264 HomingAmmoD              Object  <RocketLauncherShell>
+	1268 HomingAmmoE              Object  <RocketLauncherShell>
+	1272 LockReticle              Object  <Texture>
+	1276 FirstLockonSound         Object  <Sound>
+	1280 SecondLockonSound        Object  <Sound>

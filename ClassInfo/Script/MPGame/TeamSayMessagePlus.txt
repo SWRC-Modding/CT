@@ -1,0 +1,2 @@
+CLASS: TeamSayMessagePlus(676), BASE: StringMessagePlus
+PROPERTIES:

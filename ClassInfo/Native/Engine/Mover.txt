@@ -1,0 +1,89 @@
+CLASS: Mover(1596), BASE: Actor
+ENUMS:
+	EMoverEncroachType
+		ME_StopWhenEncroach      =   0
+		ME_ReturnWhenEncroach    =   1
+		ME_CrushWhenEncroach     =   2
+		ME_IgnoreWhenEncroach    =   3
+	EMoverGlideType
+		MV_MoveByTime            =   0
+		MV_GlideByTime           =   1
+	EBumpType
+		BT_PlayerBump            =   0
+		BT_PawnBump              =   1
+		BT_AnyBump               =   2
+PROPERTIES:
+	644  MoverEncroachType        Byte    <EMoverEncroachType>
+	645  MoverGlideType           Byte    <EMoverGlideType>
+	646  BumpType                 Byte    <EBumpType>
+	647  KeyNum                   Byte    
+	648  PrevKeyNum               Byte    
+	649  NumKeys                  Byte    
+	650  WorldRaytraceKey         Byte    
+	651  BrushRaytraceKey         Byte    
+	652  MoveTimes                Float   [16]
+	716  StayOpenTime             Float   
+	720  OtherTime                Float   
+	724  EncroachDamage           Int     
+	728  bTriggerOnceOnly         Bool    <0 : 0x00000001>
+	728  bSlave                   Bool    <1 : 0x00000002>
+	728  bUseTriggered            Bool    <2 : 0x00000004>
+	728  bDamageTriggered         Bool    <3 : 0x00000008>
+	728  bDynamicLightMover       Bool    <4 : 0x00000010>
+	728  bUseShortestRotation     Bool    <5 : 0x00000020>
+	728  bIsLeader                Bool    <6 : 0x00000040>
+	732  PlayerBumpEvent          Name    
+	736  BumpEvent                Name    
+	740  SavedTrigger             Object  <Actor>
+	744  DamageThreshold          Float   
+	748  numTriggerEvents         Int     
+	752  Leader                   Object  <Mover>
+	756  Follower                 Object  <Mover>
+	760  DelayTime                Float   
+	764  ReturnLoopTime           Int     
+	768  ScriptTriggeredKeyframe  Int     
+	772  ImpactDamageType         Class   <DamageType>
+	776  OpeningSound             Object  <Sound>
+	780  OpenedSound              Object  <Sound>
+	784  ClosingSound             Object  <Sound>
+	788  ClosedSound              Object  <Sound>
+	792  MoveAmbientSound         Object  <Sound>
+	796  LoopSound                Object  <Sound>
+	800  OpeningEvent             Name    
+	804  OpenedEvent              Name    
+	808  ClosingEvent             Name    
+	812  ClosedEvent              Name    
+	816  LoopEvent                Name    
+	820  KeyPos                   Struct  <Vector>[24]
+	1108 KeyRot                   Struct  <Rotator>[24]
+	1396 BasePos                  Struct  <Vector>
+	1408 OldPos                   Struct  <Vector>
+	1420 OldPrePivot              Struct  <Vector>
+	1432 SavedPos                 Struct  <Vector>
+	1444 InitPos                  Struct  <Vector>
+	1456 BaseRot                  Struct  <Rotator>
+	1468 OldRot                   Struct  <Rotator>
+	1480 SavedRot                 Struct  <Rotator>
+	1492 InitRot                  Struct  <Rotator>
+	1504 PhysAlpha                Float   
+	1508 PhysRate                 Float   
+	1512 MyMarker                 Object  <NavigationPoint>
+	1516 bOpening                 Bool    <0 : 0x00000001>
+	1516 bClosing                 Bool    <1 : 0x00000002>
+	1516 bDelaying                Bool    <2 : 0x00000004>
+	1516 bClientPause             Bool    <3 : 0x00000008>
+	1516 bClosed                  Bool    <4 : 0x00000010>
+	1516 bOpened                  Bool    <5 : 0x00000020>
+	1516 bPlayerOnly              Bool    <6 : 0x00000040>
+	1516 bAutoDoor                Bool    <7 : 0x00000080>
+	1516 bNoAIRelevance           Bool    <8 : 0x00000100>
+	1520 SimOldPos                Struct  <Vector>
+	1532 SimOldRotPitch           Int     
+	1536 SimOldRotYaw             Int     
+	1540 SimOldRotRoll            Int     
+	1544 SimInterpolate           Struct  <Vector>
+	1556 RealPosition             Struct  <Vector>
+	1568 RealRotation             Struct  <Rotator>
+	1580 ClientUpdate             Int     
+	1584 AntiPortals              Array   <Object <AntiPortalActor>>
+	1592 AntiPortalTag            Name    

@@ -1,0 +1,2 @@
+CLASS: TrandoshanMercenaryBotDefaults(1256), BASE: TrandoshanMercenaryBot
+PROPERTIES:

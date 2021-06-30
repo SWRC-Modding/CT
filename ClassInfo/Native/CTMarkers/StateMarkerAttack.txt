@@ -1,0 +1,10 @@
+CLASS: StateMarkerAttack(172), BASE: StateAbstractAttack
+PROPERTIES:
+	124  marker                   Object  <MarkerWeapon>
+	128  ShotInterval             Float   
+	132  LastWeaponChange         Float   
+	136  NumKills                 Int     
+	140  WeaponGroup              Int     
+	144  StartRotation            Struct  <Rotator>
+	156  StartLocation            Struct  <Vector>
+	168  bNormalRifle             Bool    <0 : 0x00000001>

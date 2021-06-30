@@ -1,0 +1,2 @@
+CLASS: Holo_TarffulShoulderPad_R(696), BASE: TarffulShoulderPad_R
+PROPERTIES:

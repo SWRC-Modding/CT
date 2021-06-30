@@ -1,0 +1,15 @@
+CLASS: MatObject(40), BASE: Object
+STRUCTS:
+	Orientation(52)
+		0    CamOrientation           Byte    <ECamOrientation>
+		4    LookAt                   Object  <Actor>
+		8    EaseIntime               Float   
+		12   bReversePitch            Int     
+		16   bReverseYaw              Int     
+		20   bReverseRoll             Int     
+		24   MA                       Int     
+		28   PctInStart               Float   
+		32   PctInEnd                 Float   
+		36   PctInDuration            Float   
+		40   StartingRotation         Struct  <Rotator>
+PROPERTIES:

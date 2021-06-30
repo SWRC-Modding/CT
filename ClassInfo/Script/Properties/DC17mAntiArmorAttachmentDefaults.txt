@@ -1,0 +1,2 @@
+CLASS: DC17mAntiArmorAttachmentDefaults(776), BASE: DC17mAntiArmorAttachment
+PROPERTIES:

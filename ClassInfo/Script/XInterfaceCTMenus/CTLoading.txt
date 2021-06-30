@@ -1,0 +1,14 @@
+CLASS: CTLoading(19056), BASE: MenuTemplate
+PROPERTIES:
+	17696 Background               Struct  <MenuSprite>
+	17768 HintPics                 Struct  <MenuSprite>[6]
+	18200 HintBorder               Struct  <MenuSprite>
+	18272 HintSeparator            Struct  <MenuSprite>
+	18344 HintTitle                Struct  <MenuText>
+	18456 HintText                 Struct  <MenuText>
+	18568 InfoBlurb                Struct  <MenuText>
+	18680 LoadingBorder            Struct  <MenuSprite>
+	18752 LoadingBar               Struct  <MenuProgressBar>
+	18936 LoadingText              Struct  <MenuText>
+	19048 LastHintTime             Float   
+	19052 bNoHints                 Bool    <0 : 0x00000001>

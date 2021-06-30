@@ -1,0 +1,12 @@
+CLASS: SpiralStairBuilder(112), BASE: BrushBuilder
+PROPERTIES:
+	80   InnerRadius              Int     
+	84   StepWidth                Int     
+	88   StepHeight               Int     
+	92   StepThickness            Int     
+	96   NumStepsPer360           Int     
+	100  NumSteps                 Int     
+	104  GroupName                Name    
+	108  SlopedCeiling            Bool    <0 : 0x00000001>
+	108  SlopedFloor              Bool    <1 : 0x00000002>
+	108  CounterClockwise         Bool    <2 : 0x00000004>

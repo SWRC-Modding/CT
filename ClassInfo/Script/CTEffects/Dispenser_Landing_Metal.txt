@@ -1,0 +1,2 @@
+CLASS: Dispenser_Landing_Metal(828), BASE: Emitter
+PROPERTIES:

@@ -1,0 +1,2 @@
+CLASS: ArrayProperty(68), BASE: Property
+PROPERTIES:

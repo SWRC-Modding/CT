@@ -1,0 +1,15 @@
+CLASS: CTPausePCMenu(23144), BASE: MenuTemplate
+PROPERTIES:
+	17696 Background               Struct  <MenuSprite>
+	17768 MenuOptions              Struct  <MenuButtonText>[11]
+	23092 EndMissionConfirm        Str     
+	23100 QuitGameConfirm          Str     
+	23108 RestartMissionConfirm    Str     
+	23116 LoadLastConfirm          Str     
+	23124 EndMissionDemoConfirm    Str     
+	23132 RestartMissionDemoConfirm Str     
+	23140 bEndMissionSelected      Bool    <0 : 0x00000001>
+	23140 bQuitGameSelected        Bool    <1 : 0x00000002>
+	23140 bRestartMissionSelected  Bool    <2 : 0x00000004>
+	23140 bLoadLastSelected        Bool    <3 : 0x00000008>
+	23140 bLoadOrSaveSelected      Bool    <4 : 0x00000010>

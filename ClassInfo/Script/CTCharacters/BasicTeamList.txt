@@ -1,0 +1,2 @@
+CLASS: BasicTeamList(652), BASE: TeamList
+PROPERTIES:

@@ -1,0 +1,2 @@
+CLASS: YYY_MP_prisHallOut_sfx02(96), BASE: AudioEnvironment
+PROPERTIES:

@@ -1,0 +1,18 @@
+CLASS: CTExtrasMenu(24676), BASE: MenuTemplateTitledBA
+PROPERTIES:
+	19728 Label                    Struct  <MenuText>
+	19840 KaminoBorder             Struct  <MenuSprite>
+	19912 Kamino                   Struct  <MenuSprite>
+	19984 GeonosisBorder           Struct  <MenuSprite>
+	20056 Geonosis                 Struct  <MenuSprite>
+	20128 AssaultShipBorder        Struct  <MenuSprite>
+	20200 AssaultShip              Struct  <MenuSprite>
+	20272 KashyyykBorder           Struct  <MenuSprite>
+	20344 Kashyyyk                 Struct  <MenuSprite>
+	20416 Border                   Struct  <MenuSprite>
+	20488 UnlockText               Struct  <MenuText>[5]
+	21048 Extras                   Struct  <MenuButtonText>[5]
+	23468 UnlockedLeftBars         Struct  <MenuSprite>[5]
+	23828 UnlockedRightBars        Struct  <MenuSprite>[5]
+	24188 Credits                  Struct  <MenuButtonText>
+	24672 bMovieWasPlaying         Bool    <0 : 0x00000001>

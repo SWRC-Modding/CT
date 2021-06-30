@@ -1,0 +1,11 @@
+CLASS: WookieeCannon(2104), BASE: Turret
+PROPERTIES:
+	2052 TrackCenter              Struct  <Vector>
+	2064 TrackRadius              Float   
+	2068 TrackAngle               Float   
+	2072 MovementSpeed            Float   
+	2076 MaxTheta                 Float   
+	2080 MinTheta                 Float   
+	2084 CurrentTheta             Float   
+	2088 OrigRot                  Struct  <Rotator>
+	2100 Counter                  Int     

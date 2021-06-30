@@ -1,0 +1,2 @@
+CLASS: PolyMarker(644), BASE: Keypoint
+PROPERTIES:

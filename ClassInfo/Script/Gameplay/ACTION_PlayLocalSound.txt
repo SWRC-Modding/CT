@@ -1,0 +1,3 @@
+CLASS: ACTION_PlayLocalSound(68), BASE: ScriptedAction
+PROPERTIES:
+	64   Sound                    Object  <Sound>

@@ -1,0 +1,2 @@
+CLASS: GeoEliteSpaceHelmet(696), BASE: Accessory
+PROPERTIES:

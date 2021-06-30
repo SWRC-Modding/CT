@@ -1,0 +1,2 @@
+CLASS: Republic(1664), BASE: CTPawn
+PROPERTIES:

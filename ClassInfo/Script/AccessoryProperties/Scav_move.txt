@@ -1,0 +1,2 @@
+CLASS: Scav_move(696), BASE: Accessory
+PROPERTIES:

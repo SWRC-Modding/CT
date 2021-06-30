@@ -1,0 +1,2 @@
+CLASS: MissionObjectivesDefaults(680), BASE: MissionObjectives
+PROPERTIES:

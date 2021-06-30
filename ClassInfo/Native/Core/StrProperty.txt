@@ -1,0 +1,2 @@
+CLASS: StrProperty(64), BASE: Property
+PROPERTIES:

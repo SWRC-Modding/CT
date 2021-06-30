@@ -1,0 +1,2 @@
+CLASS: BabyAmmo(876), BASE: CTAmmoRecharging
+PROPERTIES:

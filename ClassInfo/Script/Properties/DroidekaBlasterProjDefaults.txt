@@ -1,0 +1,2 @@
+CLASS: DroidekaBlasterProjDefaults(716), BASE: DroidekaBlasterProj
+PROPERTIES:

@@ -1,0 +1,2 @@
+CLASS: FXFactoryDefaults(788), BASE: FXFactory
+PROPERTIES:

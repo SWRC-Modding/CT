@@ -1,0 +1,2 @@
+CLASS: CoreShipTurretDefaults(2068), BASE: CoreShipTurret
+PROPERTIES:

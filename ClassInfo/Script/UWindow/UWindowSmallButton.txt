@@ -1,0 +1,2 @@
+CLASS: UWindowSmallButton(356), BASE: UWindowButton
+PROPERTIES:

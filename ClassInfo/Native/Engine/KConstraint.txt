@@ -1,0 +1,16 @@
+CLASS: KConstraint(800), BASE: KActor
+PROPERTIES:
+	696  KConstraintData          Int     
+	700  KConstraintActor1        Object  <Actor>
+	704  KConstraintActor2        Object  <Actor>
+	708  KConstraintBone1         Name    
+	712  KConstraintBone2         Name    
+	716  bKDisableCollision       Bool    <0 : 0x00000001>
+	720  KPos1                    Struct  <Vector>
+	732  KPriAxis1                Struct  <Vector>
+	744  KSecAxis1                Struct  <Vector>
+	756  KPos2                    Struct  <Vector>
+	768  KPriAxis2                Struct  <Vector>
+	780  KSecAxis2                Struct  <Vector>
+	792  bKForceFrameUpdate       Bool    <0 : 0x00000001>
+	796  KForceThreshold          Float   

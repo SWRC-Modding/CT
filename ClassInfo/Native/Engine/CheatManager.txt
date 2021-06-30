@@ -1,0 +1,3 @@
+CLASS: CheatManager(52), BASE: Object
+PROPERTIES:
+	40   LockedRotation           Struct  <Rotator>

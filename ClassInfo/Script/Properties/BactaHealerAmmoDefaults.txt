@@ -1,0 +1,2 @@
+CLASS: BactaHealerAmmoDefaults(876), BASE: BactaHealerAmmo
+PROPERTIES:

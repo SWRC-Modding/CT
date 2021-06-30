@@ -1,0 +1,2 @@
+CLASS: Shield_Generator_Core(828), BASE: Emitter
+PROPERTIES:

@@ -1,0 +1,2 @@
+CLASS: CriticalStringPlus(676), BASE: CriticalEventPlus
+PROPERTIES:

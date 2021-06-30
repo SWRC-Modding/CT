@@ -1,0 +1,2 @@
+CLASS: DC17mBlasterWeaponPickup(704), BASE: CTPickup
+PROPERTIES:

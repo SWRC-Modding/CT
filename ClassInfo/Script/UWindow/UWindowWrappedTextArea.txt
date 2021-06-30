@@ -1,0 +1,2 @@
+CLASS: UWindowWrappedTextArea(6288), BASE: UWindowTextAreaControl
+PROPERTIES:

@@ -1,0 +1,10 @@
+CLASS: MenuPlayerFeedback(25036), BASE: MenuTemplateTitledBA
+PROPERTIES:
+	19728 Gamer                    Struct  <Gamer>
+	19824 bMessageAttached         Bool    <0 : 0x00000001>
+	19824 bFriendFeedback          Bool    <1 : 0x00000002>
+	19828 Borders                  Struct  <MenuSprite>[2]
+	19972 Info                     Struct  <MenuText>[2]
+	20196 FeedbackOptions          Struct  <MenuButtonText>[2]
+	21164 ComplaintOptions         Struct  <MenuButtonText>[6]
+	24068 TypeOptions              Struct  <MenuButtonText>[2]

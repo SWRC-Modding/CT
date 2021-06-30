@@ -1,0 +1,31 @@
+CLASS: Emitter(828), BASE: Actor
+PROPERTIES:
+	644  Emitters                 Array   <Object <ParticleEmitter>>
+	652  AutoDestroy              Bool    <0 : 0x00000001>
+	652  AutoReset                Bool    <1 : 0x00000002>
+	652  DisableFogging           Bool    <2 : 0x00000004>
+	656  GlobalOffsetRange        Struct  <RangeVector>
+	680  TimeTillResetRange       Struct  <Range>
+	688  SkeletalMeshActor        Object  <Actor>
+	692  SpawnSound               Object  <Sound>
+	696  BloomFilter              Int     
+	700  InTime                   Float   
+	704  SustainTime              Float   
+	708  OutTime                  Float   
+	712  ShakeRadius              Float   
+	716  ShakeMag                 Struct  <Vector>
+	728  ShakeRotationMag         Struct  <Rotator>
+	740  ShakeInTime              Float   
+	744  ShakeSustainTime         Float   
+	748  ShakeOutTime             Float   
+	752  ShakeFrequency           Float   
+	756  Initialized              Int     
+	760  BoundingBox              Struct  <Box>
+	788  EmitterRadius            Float   
+	792  EmitterHeight            Float   
+	796  ActorForcesEnabled       Bool    <0 : 0x00000001>
+	800  GlobalOffset             Struct  <Vector>
+	812  TimeTillReset            Float   
+	816  UseParticleProjectors    Bool    <0 : 0x00000001>
+	820  ParticleMaterial         Object  <ParticleMaterial>
+	824  DeleteParticleEmitters   Bool    <0 : 0x00000001>

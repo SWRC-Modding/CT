@@ -1,0 +1,2 @@
+CLASS: ATTEWalkerTurretDefaults(1180), BASE: ATTEWalkerTurret
+PROPERTIES:

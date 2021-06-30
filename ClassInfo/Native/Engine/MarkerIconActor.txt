@@ -1,0 +1,5 @@
+CLASS: MarkerIconActor(656), BASE: Actor
+PROPERTIES:
+	644  CurrentColor             Struct  <Color>
+	648  CurrentAlpha             Float   
+	652  CurrentMorph             Float   

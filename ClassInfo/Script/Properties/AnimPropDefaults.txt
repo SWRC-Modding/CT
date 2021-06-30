@@ -1,0 +1,2 @@
+CLASS: AnimPropDefaults(868), BASE: AnimProp
+PROPERTIES:

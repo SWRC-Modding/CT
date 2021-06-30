@@ -1,0 +1,19 @@
+CLASS: UGraphGame2Page(672), BASE: UWindowPageWindow
+PROPERTIES:
+	196  Labels                   Object  <UWindowLabelControl>[9]
+	232  StatNameText             Str     [9]
+	304  CatNameText              Str     
+	312  DesiredMaxEdit           Object  <UWindowEditControl>[9]
+	348  DesiredMaxText           Str     
+	356  UseBarStatCheck          Object  <UWindowCheckbox>[9]
+	392  UseBarStatText           Str     
+	400  UseLineStatCheck         Object  <UWindowCheckbox>[9]
+	436  UseLineStatText          Str     
+	444  SmallIsBadCheck          Object  <UWindowCheckbox>[9]
+	480  SmallIsBadText           Str     
+	488  DesiredMaxEditSettings   Str     [9]
+	560  SmallIsBadSettings       Int     [9]
+	596  UseBarStatSettings       Int     [9]
+	632  UseLineStatSettings      Int     [9]
+	668  bIsLoading               Bool    <0 : 0x00000001>
+	668  bShouldDelayChange       Bool    <1 : 0x00000002>

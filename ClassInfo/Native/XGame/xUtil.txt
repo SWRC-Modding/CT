@@ -1,0 +1,69 @@
+CLASS: xUtil(48), BASE: Object
+STRUCTS:
+	GameTypeRecord(80)
+		0    GameName                 Str     
+		8    ClassName                Str     
+		16   MapPrefix                Str     
+		24   Acronym                  Str     
+		32   MapListType              Str     
+		40   ScreenShotName           Str     
+		48   Screenshot               Object  <Material>
+		52   DecoTextName             Str     
+		60   DefaultGoalScore         Int     
+		64   MinGoalScore             Int     
+		68   DefaultTimeLimit         Int     
+		72   DefaultRemainingRounds   Int     
+		76   bTeamGame                Int     
+	MapRecord(72)
+		0    LongName                 Str     
+		8    ScreenShotName           Str     
+		16   Screenshot               Object  <Material>
+		20   TextName                 Str     
+		28   Filename                 Str     
+		36   IdealPlayerCountMin      Int     
+		40   IdealPlayerCountMax      Int     
+		44   GoalScore                Int     
+		48   TimeLimit                Int     
+		52   FragLimit                Int     
+		56   MapIndex                 Int     
+		60   SupportedGames           Str     
+		68   bSplitScreenOK           Byte    
+		69   bNetworkOK               Byte    
+	WeaponRecord(40)
+		0    WeaponClassName          Str     
+		8    FriendlyName             Str     
+		16   AttachmentMeshName       Str     
+		24   AttachmentDrawScale      Float   
+		28   PickupMeshName           Str     
+		36   Priority                 Byte    
+		37   ExchangeFireModes        Byte    
+	MutatorRecord(68)
+		0    ClassName                Str     
+		8    mutClass                 Class   <Mutator>
+		12   IconMaterialName         Str     
+		20   IconMaterial             Object  <Material>
+		24   ConfigMenuClassName      Str     
+		32   GroupName                Str     
+		40   SinglePlayerOnly         Int     
+		44   OnByDefault              Int     
+		48   FriendlyName             Str     
+		56   Description              Str     
+		64   bActivated               Byte    
+	PlayerRecord(104)
+		0    DefaultName              Str     
+		8    meshName                 Str     
+		16   BodySkinName             Str     
+		24   FaceSkinName             Str     
+		32   SoundGroupClassName      Str     
+		40   GibGroupClassName        Str     
+		48   PortraitName             Str     
+		56   Portrait                 Object  <Material>
+		60   TextName                 Str     
+		68   ClassName                Str     
+		76   SkeletonMeshName         Str     
+		84   Source                   Int     
+		88   VoiceClassName           Str     
+		96   RecordIndex              Int     
+		100  bLoaded                  Byte    
+PROPERTIES:
+	40   DamagedContentNames      Array   <Str>

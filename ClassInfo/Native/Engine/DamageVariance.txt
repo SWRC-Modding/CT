@@ -1,0 +1,8 @@
+CLASS: DamageVariance(56), BASE: Object
+STRUCTS:
+	DamageIncludedInfo(8)
+		0    DamageTypeClass          Class   <DamageType>
+		4    Multiplier               Float   
+PROPERTIES:
+	40   IncludeTypes             Array   <Struct <DamageIncludedInfo>>
+	48   ExcludeTypes             Array   <Class  <DamageType>>

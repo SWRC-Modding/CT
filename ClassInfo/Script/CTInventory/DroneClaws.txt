@@ -1,0 +1,2 @@
+CLASS: DroneClaws(1180), BASE: Weapon
+PROPERTIES:

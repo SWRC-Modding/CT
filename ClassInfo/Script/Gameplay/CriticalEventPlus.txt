@@ -1,0 +1,2 @@
+CLASS: CriticalEventPlus(676), BASE: LocalMessage
+PROPERTIES:

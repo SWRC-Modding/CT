@@ -1,0 +1,2 @@
+CLASS: RAS_02B_2ndBombHall_mus01(96), BASE: AudioEnvironment
+PROPERTIES:

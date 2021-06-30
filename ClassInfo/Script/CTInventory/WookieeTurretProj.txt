@@ -1,0 +1,2 @@
+CLASS: WookieeTurretProj(716), BASE: Projectile
+PROPERTIES:

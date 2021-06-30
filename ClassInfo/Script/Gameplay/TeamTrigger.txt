@@ -1,0 +1,4 @@
+CLASS: TeamTrigger(712), BASE: Trigger
+PROPERTIES:
+	704  Team                     Byte    
+	708  bTimed                   Bool    <0 : 0x00000001>

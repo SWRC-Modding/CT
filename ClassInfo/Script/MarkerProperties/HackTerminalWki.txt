@@ -1,0 +1,2 @@
+CLASS: HackTerminalWki(940), BASE: HackTerminal
+PROPERTIES:

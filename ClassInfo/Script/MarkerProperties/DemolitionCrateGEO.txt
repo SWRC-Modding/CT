@@ -1,0 +1,2 @@
+CLASS: DemolitionCrateGEO(840), BASE: DemolitionCrate
+PROPERTIES:

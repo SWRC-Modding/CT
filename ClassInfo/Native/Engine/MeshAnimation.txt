@@ -1,0 +1,2 @@
+CLASS: MeshAnimation(68), BASE: Object
+PROPERTIES:

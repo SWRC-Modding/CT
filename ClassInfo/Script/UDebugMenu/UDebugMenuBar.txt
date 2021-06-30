@@ -1,0 +1,20 @@
+CLASS: UDebugMenuBar(348), BASE: UWindowMenuBar
+PROPERTIES:
+	276  Game                     Object  <UWindowPulldownMenu>
+	280  RModes                   Object  <UWindowPulldownMenu>
+	284  Rend                     Object  <UWindowPulldownMenu>
+	288  KDraw                    Object  <UWindowPulldownMenu>
+	292  Stats                    Object  <UWindowPulldownMenu>
+	296  Show                     Object  <UWindowPulldownMenu>
+	300  Player                   Object  <UWindowPulldownMenu>
+	304  Options                  Object  <UWindowPulldownMenu>
+	308  GameItem                 Object  <UWindowMenuBarItem>
+	312  RModesItem               Object  <UWindowMenuBarItem>
+	316  RendItem                 Object  <UWindowMenuBarItem>
+	320  KDrawItem                Object  <UWindowMenuBarItem>
+	324  StatsItem                Object  <UWindowMenuBarItem>
+	328  ShowItem                 Object  <UWindowMenuBarItem>
+	332  PlayerItem               Object  <UWindowMenuBarItem>
+	336  OptionsItem              Object  <UWindowMenuBarItem>
+	340  bShowMenu                Bool    <0 : 0x00000001>
+	344  graphOptions             Object  <UDebugGraphWindow>

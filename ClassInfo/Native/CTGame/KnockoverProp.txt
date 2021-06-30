@@ -1,0 +1,4 @@
+CLASS: KnockoverProp(896), BASE: KarmaProp
+PROPERTIES:
+	888  KnockedOver              Bool    <0 : 0x00000001>
+	892  KnockoverAnim            Name    

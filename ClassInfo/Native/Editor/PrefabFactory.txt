@@ -1,0 +1,2 @@
+CLASS: PrefabFactory(88), BASE: Factory
+PROPERTIES:

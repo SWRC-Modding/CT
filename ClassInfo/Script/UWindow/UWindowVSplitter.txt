@@ -1,0 +1,11 @@
+CLASS: UWindowVSplitter(212), BASE: UWindowWindow
+PROPERTIES:
+	180  TopClientWindow          Object  <UWindowWindow>
+	184  BottomClientWindow       Object  <UWindowWindow>
+	188  bSizing                  Bool    <0 : 0x00000001>
+	192  SplitPos                 Float   
+	196  MinWinHeight             Float   
+	200  MaxSplitPos              Float   
+	204  OldWinHeight             Float   
+	208  bBottomGrow              Bool    <0 : 0x00000001>
+	208  bSizable                 Bool    <1 : 0x00000002>

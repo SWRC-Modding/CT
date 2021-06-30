@@ -1,0 +1,2 @@
+CLASS: HitDecMetal_DroidBlaster(1060), BASE: HitDecal
+PROPERTIES:

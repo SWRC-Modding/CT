@@ -1,0 +1,2 @@
+CLASS: YYY_hallcan_explosion(828), BASE: Emitter
+PROPERTIES:

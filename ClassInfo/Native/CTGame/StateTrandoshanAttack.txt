@@ -1,0 +1,10 @@
+CLASS: StateTrandoshanAttack(160), BASE: StateAbstractAttack
+PROPERTIES:
+	124  CoverHideTime            Struct  <Range>
+	132  MinStepInterval          Float   
+	136  AllySearchRadius         Float   
+	140  AttackGesture            Name    
+	144  RetreatGesture           Name    
+	148  ChangeCoverGesture       Name    
+	152  HoldGesture              Name    
+	156  FavorDefensiveCover      Bool    <0 : 0x00000001>

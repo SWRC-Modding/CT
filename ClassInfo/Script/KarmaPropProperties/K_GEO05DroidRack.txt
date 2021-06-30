@@ -1,0 +1,2 @@
+CLASS: K_GEO05DroidRack(888), BASE: KarmaProp
+PROPERTIES:

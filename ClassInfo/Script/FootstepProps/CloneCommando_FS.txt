@@ -1,0 +1,2 @@
+CLASS: CloneCommando_FS(48), BASE: FootstepInfo
+PROPERTIES:

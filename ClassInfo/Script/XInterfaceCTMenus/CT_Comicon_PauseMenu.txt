@@ -1,0 +1,7 @@
+CLASS: CT_Comicon_PauseMenu(19704), BASE: MenuTemplate
+PROPERTIES:
+	17696 Background               Struct  <MenuSprite>
+	17768 ReturnToGame             Struct  <MenuButtonText>
+	18252 Restart                  Struct  <MenuButtonText>
+	18736 InvertLook               Struct  <MenuButtonText>
+	19220 QuitGame                 Struct  <MenuButtonText>

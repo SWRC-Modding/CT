@@ -1,0 +1,2 @@
+CLASS: BattleDroidBlasterAttachmentTM(776), BASE: BattleDroidBlasterAttachment
+PROPERTIES:

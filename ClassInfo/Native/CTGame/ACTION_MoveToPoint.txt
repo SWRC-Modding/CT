@@ -1,0 +1,6 @@
+CLASS: ACTION_MoveToPoint(76), BASE: LatentScriptedAction
+PROPERTIES:
+	64   DestinationTag           Name    
+	68   MoveTarget               Object  <Actor>
+	72   WalkToPoint              Bool    <0 : 0x00000001>
+	72   OrientToPoint            Bool    <1 : 0x00000002>

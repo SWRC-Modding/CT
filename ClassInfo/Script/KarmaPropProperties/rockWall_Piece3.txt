@@ -1,0 +1,2 @@
+CLASS: rockWall_Piece3(888), BASE: KarmaProp
+PROPERTIES:

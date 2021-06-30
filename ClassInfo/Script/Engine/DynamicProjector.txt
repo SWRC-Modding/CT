@@ -1,0 +1,2 @@
+CLASS: DynamicProjector(1056), BASE: Projector
+PROPERTIES:

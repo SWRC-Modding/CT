@@ -1,0 +1,4 @@
+CLASS: Options2DShaperRevolve(56), BASE: Options2DShaper
+PROPERTIES:
+	52   Sides                    Int     
+	48   SidesPer360              Int     

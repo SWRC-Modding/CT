@@ -1,0 +1,3 @@
+CLASS: ACTION_BlinkHUDGrenade(68), BASE: ScriptedAction
+PROPERTIES:
+	64   BlinkTime                Float   

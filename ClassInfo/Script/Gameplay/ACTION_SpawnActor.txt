@@ -1,0 +1,7 @@
+CLASS: ACTION_SpawnActor(100), BASE: ScriptedAction
+PROPERTIES:
+	64   ActorClass               Class   <Actor>
+	68   LocationOffset           Struct  <Vector>
+	80   RotationOffset           Struct  <Rotator>
+	92   bOffsetFromScriptedPawn  Bool    <0 : 0x00000001>
+	96   ActorTag                 Name    

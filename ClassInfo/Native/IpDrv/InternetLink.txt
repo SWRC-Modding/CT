@@ -1,0 +1,21 @@
+CLASS: InternetLink(672), BASE: InternetInfo
+ENUMS:
+	ELinkMode
+		MODE_Text                =   0
+		MODE_Line                =   1
+		MODE_Binary              =   2
+	EReceiveMode
+		RMODE_Manual             =   0
+		RMODE_Event              =   1
+STRUCTS:
+	IpAddr(8)
+		0    Addr                     Int     
+		4    Port                     Int     
+PROPERTIES:
+	644  LinkMode                 Byte    <ELinkMode>
+	648  Socket                   Int     
+	652  Port                     Int     
+	656  RemoteSocket             Int     
+	660  PrivateResolveInfo       Int     
+	664  DataPending              Int     
+	668  ReceiveMode              Byte    <EReceiveMode>

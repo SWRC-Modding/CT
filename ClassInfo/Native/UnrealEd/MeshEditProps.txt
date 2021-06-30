@@ -1,0 +1,61 @@
+CLASS: MeshEditProps(224), BASE: MeshObject
+STRUCTS:
+	FSectionDigest(16)
+		0    MeshSectionMethod        Byte    <EMeshSectionMethod>
+		4    MaxRigidParts            Int     
+		8    MinPartFaces             Int     
+		12   MeldSize                 Float   
+	LODLevel(36)
+		0    DisplayFactor            Float   
+		4    ReductionFactor          Float   
+		8    Hysteresis               Float   
+		12   MaxInfluences            Int     
+		16   RedigestSwitch           Bool    <0 : 0x00000001>
+		20   Rigidize                 Struct  <FSectionDigest>
+	AttachSocket(44)
+		0    A_Translation            Struct  <Vector>
+		12   A_Rotation               Struct  <Rotator>
+		24   AttachAlias              Name    
+		28   BoneName                 Name    
+		32   Test_Scale               Float   
+		36   TestMesh                 Object  <Mesh>
+		40   TestStaticMesh           Object  <StaticMesh>
+	MEPBonePrimSphere(20)
+		0    BoneName                 Name    
+		4    Offset                   Struct  <Vector>
+		16   Radius                   Float   
+	MEPBonePrimBox(28)
+		0    BoneName                 Name    
+		4    Offset                   Struct  <Vector>
+		16   Radii                    Struct  <Vector>
+PROPERTIES:
+	40   WBrowserAnimationPtr     Int     
+	44   Scale                    Struct  <Vector>
+	56   Translation              Struct  <Vector>
+	68   Rotation                 Struct  <Rotator>
+	80   ExpandMinVisBound        Struct  <Vector>
+	92   ExpandMaxVisBound        Struct  <Vector>
+	104  LODStyle                 Int     
+	108  AnimLinkups              Array   <Object <MeshAnimation>>
+	116  Material                 Array   <Object <Material>>
+	124  LOD_Strength             Float   
+	128  LODLevels                Array   <Struct <LODLevel>>
+	136  SkinTesselationFactor    Float   
+	140  FadeSpecNear             Float   
+	144  FadeSpecFar              Float   
+	148  FadeDiffNear             Float   
+	152  FadeDiffFar              Float   
+	156  TestCollisionRadius      Float   
+	160  TestCollisionHeight      Float   
+	164  Sockets                  Array   <Struct <AttachSocket>>
+	172  ApplyNewSockets          Bool    <0 : 0x00000001>
+	172  ContinuousUpdate         Bool    <1 : 0x00000002>
+	172  bImpostorPresent         Bool    <2 : 0x00000004>
+	176  SpriteMaterial           Object  <Material>
+	180  Scale3D                  Struct  <Vector>
+	192  RelativeRotation         Struct  <Rotator>
+	204  RelativeLocation         Struct  <Vector>
+	216  ImpColor                 Struct  <Color>
+	220  ImpSpaceMode             Byte    <EImpSpaceMode>
+	221  ImpDrawMode              Byte    <EImpDrawMode>
+	222  ImpLightMode             Byte    <EImpLightMode>

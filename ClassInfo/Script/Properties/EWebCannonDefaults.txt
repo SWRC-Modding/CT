@@ -1,0 +1,2 @@
+CLASS: EWebCannonDefaults(2052), BASE: EWebCannon
+PROPERTIES:

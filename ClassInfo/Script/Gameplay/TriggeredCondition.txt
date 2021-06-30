@@ -1,0 +1,6 @@
+CLASS: TriggeredCondition(648), BASE: Triggers
+PROPERTIES:
+	644  bToggled                 Bool    <0 : 0x00000001>
+	644  bEnabled                 Bool    <1 : 0x00000002>
+	644  bTriggerControlled       Bool    <2 : 0x00000004>
+	644  bInitialValue            Bool    <3 : 0x00000008>

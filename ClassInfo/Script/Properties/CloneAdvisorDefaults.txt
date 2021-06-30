@@ -1,0 +1,2 @@
+CLASS: CloneAdvisorDefaults(1664), BASE: CloneAdvisor
+PROPERTIES:

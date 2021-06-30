@@ -1,0 +1,2 @@
+CLASS: SuperBattleDroidDefaults(1740), BASE: SuperBattleDroid
+PROPERTIES:

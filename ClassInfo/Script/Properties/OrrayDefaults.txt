@@ -1,0 +1,2 @@
+CLASS: OrrayDefaults(1688), BASE: Orray
+PROPERTIES:

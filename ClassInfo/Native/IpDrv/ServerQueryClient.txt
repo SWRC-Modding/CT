@@ -1,0 +1,17 @@
+CLASS: ServerQueryClient(740), BASE: MasterServerLink
+ENUMS:
+	EQueryInterfaceCommand
+		QI_Ping                  =   0
+		QI_Rules                 =   1
+		QI_Players               =   2
+		QI_RulesAndPlayers       =   3
+		QI_SmallPing             =   4
+	EPingCause
+		PC_Unknown               =   0
+		PC_Clicked               =   1
+		PC_AutoPing              =   2
+		PC_LANBroadcast          =   3
+PROPERTIES:
+	720  bLANQuery                Bool    <0 : 0x00000001>
+	724  __OnReceivedPingInfo__Delegate Delegate<OnReceivedPingInfo>
+	732  __OnPingTimeout__Delegate Delegate<OnPingTimeout>

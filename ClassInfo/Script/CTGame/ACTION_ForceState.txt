@@ -1,0 +1,5 @@
+CLASS: ACTION_ForceState(76), BASE: ScriptedAction
+PROPERTIES:
+	64   State                    Class   <StateObject>
+	68   bCreateIfNotFound        Bool    <0 : 0x00000001>
+	72   TimeLength               Float   

@@ -1,0 +1,3 @@
+CLASS: SubActionCameraShake(100), BASE: MatSubAction
+PROPERTIES:
+	76   Shake                    Struct  <RangeVector>

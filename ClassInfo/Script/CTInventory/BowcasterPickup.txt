@@ -1,0 +1,2 @@
+CLASS: BowcasterPickup(704), BASE: CTPickup
+PROPERTIES:

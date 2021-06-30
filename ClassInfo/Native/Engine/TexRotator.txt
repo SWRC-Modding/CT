@@ -1,0 +1,16 @@
+CLASS: TexRotator(240), BASE: TexModifier
+ENUMS:
+	ETexRotationType
+		TR_FixedRotation         =   0
+		TR_ConstantlyRotating    =   1
+		TR_OscillatingRotation   =   2
+PROPERTIES:
+	112  M                        Struct  <Matrix>
+	176  TexRotationType          Byte    <ETexRotationType>
+	180  Rotation                 Struct  <Rotator>
+	192  ConstantRotation         Bool    <0 : 0x00000001>
+	196  UOffset                  Float   
+	200  VOffset                  Float   
+	204  OscillationRate          Struct  <Rotator>
+	216  OscillationAmplitude     Struct  <Rotator>
+	228  OscillationPhase         Struct  <Rotator>

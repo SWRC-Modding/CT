@@ -1,0 +1,2 @@
+CLASS: GrievousStaffDefaults(1180), BASE: GrievousStaff
+PROPERTIES:

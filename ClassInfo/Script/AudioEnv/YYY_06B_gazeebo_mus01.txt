@@ -1,0 +1,2 @@
+CLASS: YYY_06B_gazeebo_mus01(96), BASE: AudioEnvironment
+PROPERTIES:

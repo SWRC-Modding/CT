@@ -1,0 +1,4 @@
+CLASS: ACTION_AddAmmo(72), BASE: ScriptedAction
+PROPERTIES:
+	64   WhichWeapon              Class   <Weapon>
+	68   AmmoAmount               Int     

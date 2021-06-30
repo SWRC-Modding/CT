@@ -1,0 +1,2 @@
+CLASS: SecCameraA(868), BASE: AnimProp
+PROPERTIES:

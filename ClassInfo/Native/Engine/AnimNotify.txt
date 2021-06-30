@@ -1,0 +1,3 @@
+CLASS: AnimNotify(44), BASE: Object
+PROPERTIES:
+	40   Revision                 Int     

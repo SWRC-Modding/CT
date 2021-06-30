@@ -1,0 +1,4 @@
+CLASS: ACTION_ChangeSquadStance(72), BASE: ScriptedAction
+PROPERTIES:
+	64   StanceType               Class   <SquadStance>
+	68   ObjectiveTag             Name    

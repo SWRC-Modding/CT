@@ -1,0 +1,3 @@
+CLASS: AnimNotifyProps(44), BASE: Object
+PROPERTIES:
+	40   Notify                   Object  <AnimNotify>

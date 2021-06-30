@@ -1,0 +1,17 @@
+CLASS: UWindowList(108), BASE: UWindowBase
+PROPERTIES:
+	52   Next                     Object  <UWindowList>
+	56   Last                     Object  <UWindowList>
+	60   Prev                     Object  <UWindowList>
+	64   Sentinel                 Object  <UWindowList>
+	68   InternalCount            Int     
+	72   bItemOrderChanged        Bool    <0 : 0x00000001>
+	72   bSuspendableSort         Bool    <1 : 0x00000002>
+	76   CompareCount             Int     
+	80   bSortSuspended           Bool    <0 : 0x00000001>
+	84   CurrentSortItem          Object  <UWindowList>
+	88   bTreeSort                Bool    <0 : 0x00000001>
+	92   BranchLeft               Object  <UWindowList>
+	96   BranchRight              Object  <UWindowList>
+	100  ParentNode               Object  <UWindowList>
+	104  Tag                      Int     

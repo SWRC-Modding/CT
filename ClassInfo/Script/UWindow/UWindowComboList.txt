@@ -1,0 +1,10 @@
+CLASS: UWindowComboList(292), BASE: UWindowListControl
+PROPERTIES:
+	260  Owner                    Object  <UWindowComboControl>
+	264  VertSB                   Object  <UWindowVScrollbar>
+	268  Selected                 Object  <UWindowComboListItem>
+	272  ItemHeight               Int     
+	276  VBorder                  Int     
+	280  HBorder                  Int     
+	284  TextBorder               Int     
+	288  MaxVisible               Int     

@@ -1,0 +1,2 @@
+CLASS: ConcussionRifleAttachment(776), BASE: WeaponAttachment
+PROPERTIES:

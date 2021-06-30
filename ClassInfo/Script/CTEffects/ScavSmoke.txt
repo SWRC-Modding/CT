@@ -1,0 +1,2 @@
+CLASS: ScavSmoke(828), BASE: Emitter
+PROPERTIES:

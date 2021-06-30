@@ -1,0 +1,2 @@
+CLASS: BactaZap(828), BASE: Emitter
+PROPERTIES:

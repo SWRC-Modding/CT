@@ -1,0 +1,2 @@
+CLASS: RocketLauncherAmmoMP(876), BASE: RocketLauncherAmmo
+PROPERTIES:

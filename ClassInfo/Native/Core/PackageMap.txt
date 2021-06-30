@@ -1,0 +1,2 @@
+CLASS: PackageMap(108), BASE: Object
+PROPERTIES:

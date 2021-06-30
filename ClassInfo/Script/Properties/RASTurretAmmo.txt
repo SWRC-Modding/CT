@@ -1,0 +1,2 @@
+CLASS: RASTurretAmmo(892), BASE: DC15Ammo
+PROPERTIES:

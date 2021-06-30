@@ -1,0 +1,2 @@
+CLASS: DoorChargeObject(644), BASE: Actor
+PROPERTIES:

@@ -1,0 +1,3 @@
+CLASS: Ragdoll(700), BASE: KActor
+PROPERTIES:
+	696  Activated                Bool    <0 : 0x00000001>

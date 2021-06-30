@@ -1,0 +1,4 @@
+CLASS: SubActionFade(84), BASE: MatSubAction
+PROPERTIES:
+	76   FadeColor                Struct  <Color>
+	80   bFadeOut                 Bool    <0 : 0x00000001>

@@ -1,0 +1,2 @@
+CLASS: DV_GeonoshansWarriorDamage(56), BASE: DV_Geonoshans
+PROPERTIES:

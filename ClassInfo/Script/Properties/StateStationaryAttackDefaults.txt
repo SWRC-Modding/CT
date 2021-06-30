@@ -1,0 +1,2 @@
+CLASS: StateStationaryAttackDefaults(124), BASE: StateStationaryAttack
+PROPERTIES:

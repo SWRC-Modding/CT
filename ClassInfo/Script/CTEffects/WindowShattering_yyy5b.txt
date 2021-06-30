@@ -1,0 +1,2 @@
+CLASS: WindowShattering_yyy5b(828), BASE: Emitter
+PROPERTIES:

@@ -1,0 +1,2 @@
+CLASS: EMPGrenadeBox(704), BASE: Ammo
+PROPERTIES:

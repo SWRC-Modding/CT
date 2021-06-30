@@ -1,0 +1,2 @@
+CLASS: GEO_Drone_DigOut(828), BASE: Emitter
+PROPERTIES:

@@ -1,0 +1,14 @@
+CLASS: MenuMatchMakingOptiMatchOptions(25444), BASE: MenuTemplateTitledBA
+PROPERTIES:
+	19728 OptionLabels             Struct  <MenuText>[4]
+	20176 ArrowsLeft               Struct  <MenuButtonSprite>[4]
+	21792 ArrowsRight              Struct  <MenuButtonSprite>[4]
+	23408 Options                  Struct  <MenuButtonEnum>[4]
+	25408 MinPlayers               Int     
+	25412 MaxPlayers               Int     
+	25416 AllowMutators            Int     
+	25420 AllowSpeciesStats        Int     
+	25424 DedicatedOnly            Int     
+	25428 MatchSkill               Int     
+	25432 AllowFriendlyFire        Int     
+	25436 GameTypeName             Str     

@@ -1,0 +1,46 @@
+CLASS: Ammunition(868), BASE: Inventory
+ENUMS:
+	EAmmunitionType
+		AT_Random                =   0
+		AT_Line                  =   1
+		AT_Circle                =   2
+		AT_Ring                  =   3
+PROPERTIES:
+	724  MaxAmmo                  Int     
+	728  AmmoAmount               Int     
+	732  DigitalClipDisplay       Bool    <0 : 0x00000001>
+	732  bTossed                  Bool    <1 : 0x00000002>
+	732  bInstantHit              Bool    <2 : 0x00000004>
+	732  bIsRecharge              Bool    <3 : 0x00000008>
+	732  bInfiniteClipsForNonPlayers Bool    <4 : 0x00000010>
+	732  bSquadUsesPlayerClips    Bool    <5 : 0x00000020>
+	736  ProjectileClass          Class   <Projectile>
+	740  MyDamageType             Class   <DamageType>
+	744  MaxAutoAimRange          Float   
+	748  ProjPerFire              Int     
+	752  TracerFreq               Float   
+	756  Spread                   Float   
+	760  Offset                   Float   
+	764  Range                    Float   
+	768  Damage                   Float   
+	772  DamageRadius             Float   
+	776  AreaDamageTimer          Float   
+	780  AmmunitionType           Byte    <EAmmunitionType>
+	781  FireStimulus             Byte    <EStimulusType>
+	784  AimAdjustment            Int     
+	788  ZoomedAimAdjustment      Int     
+	792  LastHitLocation          Struct  <Vector>
+	804  LastHitDir               Struct  <Rotator>
+	816  LastHitActor             Object  <Actor>
+	820  DamageDampening          Float   
+	824  TracerEffect             Class   <Emitter>
+	828  TracerEmitter            Object  <Emitter>
+	832  CurrentHitEffect         Object  <Emitter>
+	836  HitEffectsByMaterial     Class   <MaterialTypeInfo>
+	840  HitEffectsProbability    Float   
+	844  PannerCharge             Object  <TexPanner2D>
+	848  PannerClip               Object  <TexPanner2D>
+	852  PannerDigit1             Object  <TexPanner2D>
+	856  PannerDigit10            Object  <TexPanner2D>
+	860  PannerDigit100           Object  <TexPanner2D>
+	864  bHighPrecision           Bool    <0 : 0x00000001>

@@ -1,0 +1,2 @@
+CLASS: CoverPointDefaults(768), BASE: CoverPoint
+PROPERTIES:

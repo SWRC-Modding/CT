@@ -1,0 +1,14 @@
+CLASS: MenuLiveSignIn(22068), BASE: MenuTemplateTitledBA
+PROPERTIES:
+	19728 BorderBox                Struct  <MenuSprite>
+	19800 AccountList              Struct  <MenuStringList>
+	20340 ScrollArea               Struct  <MenuScrollArea>
+	20392 ScrollBar                Struct  <MenuScrollBar>
+	21008 ScrollBarArrowUp         Struct  <MenuButtonSprite>
+	21412 ScrollBarArrowDown       Struct  <MenuButtonSprite>
+	21816 PageUpArea               Struct  <MenuActiveWidget>
+	21928 PageDownArea             Struct  <MenuActiveWidget>
+	22040 NewAccountIndex          Int     
+	22044 LastAccounts             Str     
+	22052 NewAccountText           Str     
+	22060 GuestText                Str     

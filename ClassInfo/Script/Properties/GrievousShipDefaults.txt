@@ -1,0 +1,2 @@
+CLASS: GrievousShipDefaults(1664), BASE: GrievousShip
+PROPERTIES:

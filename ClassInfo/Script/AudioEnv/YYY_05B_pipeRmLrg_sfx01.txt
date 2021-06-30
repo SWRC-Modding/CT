@@ -1,0 +1,2 @@
+CLASS: YYY_05B_pipeRmLrg_sfx01(96), BASE: AudioEnvironment
+PROPERTIES:

@@ -1,0 +1,28 @@
+CLASS: Combiner(120), BASE: Material
+ENUMS:
+	EColorOperation
+		CO_Use_Color_From_Material1 =   0
+		CO_Use_Color_From_Material2 =   1
+		CO_Multiply              =   2
+		CO_Add                   =   3
+		CO_Subtract              =   4
+		CO_AlphaBlend_With_Mask  =   5
+		CO_Add_With_Mask_Modulation =   6
+		CO_Use_Color_From_Mask   =   7
+	EAlphaOperation
+		AO_Use_Mask              =   0
+		AO_Multiply              =   1
+		AO_Add                   =   2
+		AO_Use_Alpha_From_Material1 =   3
+		AO_Use_Alpha_From_Material2 =   4
+		AO_AlphaBlend_With_Mask  =   5
+PROPERTIES:
+	100  CombineOperation         Byte    <EColorOperation>
+	101  AlphaOperation           Byte    <EAlphaOperation>
+	104  Material1                Object  <Material>
+	108  Material2                Object  <Material>
+	112  Mask                     Object  <Material>
+	116  LightBothMaterials       Bool    <0 : 0x00000001>
+	116  InvertMask               Bool    <1 : 0x00000002>
+	116  Modulate2X               Bool    <2 : 0x00000004>
+	116  Modulate4X               Bool    <3 : 0x00000008>

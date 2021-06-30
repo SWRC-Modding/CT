@@ -1,0 +1,5 @@
+CLASS: MultiKillMessage(772), BASE: LocalMessage
+PROPERTIES:
+	676  KillString               Str     [6]
+	724  KillSound                Object  <Sound>[6]
+	748  TrandoKillSound          Object  <Sound>[6]

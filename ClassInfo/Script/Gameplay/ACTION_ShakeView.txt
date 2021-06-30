@@ -1,0 +1,8 @@
+CLASS: ACTION_ShakeView(104), BASE: ScriptedAction
+PROPERTIES:
+	64   ShakeTranslationMag      Struct  <Vector>
+	76   ShakeRotationMag         Struct  <Rotator>
+	88   InTime                   Float   
+	92   SustainTime              Float   
+	96   OutTime                  Float   
+	100  Frequency                Float   

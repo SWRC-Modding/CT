@@ -1,0 +1,3 @@
+CLASS: UseTrigger(652), BASE: Triggers
+PROPERTIES:
+	644  Message                  Str     

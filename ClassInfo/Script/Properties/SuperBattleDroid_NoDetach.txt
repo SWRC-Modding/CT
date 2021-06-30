@@ -1,0 +1,2 @@
+CLASS: SuperBattleDroid_NoDetach(1740), BASE: SuperBattleDroid
+PROPERTIES:

@@ -1,0 +1,5 @@
+CLASS: MovieTexture(256), BASE: Texture
+PROPERTIES:
+	240  Movie                    Object  <Movie>
+	244  MovieFilename            Str     
+	252  FrameRate                Int     

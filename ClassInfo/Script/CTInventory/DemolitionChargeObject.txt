@@ -1,0 +1,2 @@
+CLASS: DemolitionChargeObject(644), BASE: Actor
+PROPERTIES:

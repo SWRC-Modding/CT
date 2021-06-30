@@ -1,0 +1,2 @@
+CLASS: Steam_HotGunsjhip(828), BASE: Emitter
+PROPERTIES:

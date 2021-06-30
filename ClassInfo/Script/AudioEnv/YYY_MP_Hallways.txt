@@ -1,0 +1,2 @@
+CLASS: YYY_MP_Hallways(96), BASE: AudioEnvironment
+PROPERTIES:

@@ -1,0 +1,30 @@
+CLASS: Info(644), BASE: Actor
+STRUCTS:
+	KeyValuePair(16)
+		0    Key                      Str     
+		8    Value                    Str     
+	PlayerResponseLine(36)
+		0    PlayerNum                Int     
+		4    PlayerID                 Int     
+		8    PlayerName               Str     
+		16   Ping                     Int     
+		20   Score                    Int     
+		24   StatsID                  Int     
+		28   PlayerInfo               Array   <Struct <KeyValuePair>>
+	ServerResponseLine(72)
+		0    ServerID                 Int     
+		4    IP                       Str     
+		12   Port                     Int     
+		16   QueryPort                Int     
+		20   ServerName               Str     
+		28   MapName                  Str     
+		36   GameType                 Str     
+		44   CurrentPlayers           Int     
+		48   MaxPlayers               Int     
+		52   Ping                     Int     
+		56   ServerInfo               Array   <Struct <KeyValuePair>>
+		64   PlayerInfo               Array   <Struct <PlayerResponseLine>>
+	MeshSetLinkup(8)
+		0    Mesh                     Object  <Mesh>
+		4    Set                      Object  <MeshAnimation>
+PROPERTIES:

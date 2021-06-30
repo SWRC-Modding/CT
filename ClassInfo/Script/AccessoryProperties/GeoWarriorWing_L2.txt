@@ -1,0 +1,2 @@
+CLASS: GeoWarriorWing_L2(696), BASE: Accessory
+PROPERTIES:

@@ -1,0 +1,2 @@
+CLASS: K_HallLightB_Dest(888), BASE: KarmaProp
+PROPERTIES:

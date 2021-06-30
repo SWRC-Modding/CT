@@ -1,0 +1,2 @@
+CLASS: ThermalDetonatorInexpensiveProj(804), BASE: ThermalDetonatorProj
+PROPERTIES:

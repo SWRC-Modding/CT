@@ -1,0 +1,2 @@
+CLASS: DeathEffectContainer_BattleDroid(52), BASE: DeathEffectContainer
+PROPERTIES:

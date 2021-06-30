@@ -1,0 +1,8 @@
+CLASS: ACTION_SpawnStatusEffect(88), BASE: ScriptedAction
+PROPERTIES:
+	64   StatusEffectClass        Class   <StatusEffect>
+	68   MaxDuration              Float   
+	72   Radius                   Float   
+	76   DamagePerSecond          Float   
+	80   ActorTag                 Name    
+	84   AffectTaggedActor        Bool    <0 : 0x00000001>

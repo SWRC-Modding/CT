@@ -1,0 +1,2 @@
+CLASS: TRAN_Scav_SmokeTrail(828), BASE: Emitter
+PROPERTIES:

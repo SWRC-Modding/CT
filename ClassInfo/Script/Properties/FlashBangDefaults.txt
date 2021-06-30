@@ -1,0 +1,2 @@
+CLASS: FlashBangDefaults(1180), BASE: FlashBang
+PROPERTIES:

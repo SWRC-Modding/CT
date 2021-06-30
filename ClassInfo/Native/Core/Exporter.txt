@@ -1,0 +1,3 @@
+CLASS: Exporter(60), BASE: Object
+PROPERTIES:
+	44   Formats                  Array   <Str>

@@ -1,0 +1,17 @@
+CLASS: MenuSelectGameType(22344), BASE: MenuTemplateTitledBA
+PROPERTIES:
+	19728 BorderBoxes              Struct  <MenuSprite>[2]
+	19872 Screenshot               Struct  <MenuSprite>
+	19944 DecoText                 Struct  <MenuDecoText>
+	20064 GameTypeRecords          Array   <Struct <GameTypeRecord>>
+	20072 GameTypeList             Struct  <MenuStringList>
+	20612 ScrollBar                Struct  <MenuScrollBar>
+	21228 ScrollBarArrowUp         Struct  <MenuButtonSprite>
+	21632 ScrollBarArrowDown       Struct  <MenuButtonSprite>
+	22036 ScrollArea               Struct  <MenuScrollArea>
+	22088 PageUpArea               Struct  <MenuActiveWidget>
+	22200 PageDownArea             Struct  <MenuActiveWidget>
+	22312 StringAllGameName        Str     
+	22320 AllScreenshotName        Str     
+	22328 AllDecoTextName          Str     
+	22336 GameTypeName             Str     

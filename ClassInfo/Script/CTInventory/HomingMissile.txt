@@ -1,0 +1,10 @@
+CLASS: HomingMissile(832), BASE: CTProjExplosive
+PROPERTIES:
+	804  HangTime                 Float   
+	808  EngineThrust             Float   
+	812  FlashClass               Class   <Emitter>
+	816  SmokeClass               Class   <Emitter>
+	820  Smoke                    Object  <Emitter>
+	824  bIsFlying                Bool    <0 : 0x00000001>
+	824  bPlayingProjSound        Bool    <1 : 0x00000002>
+	828  ProjectileSound          Object  <Sound>

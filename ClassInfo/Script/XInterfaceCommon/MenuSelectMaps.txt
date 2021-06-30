@@ -1,0 +1,40 @@
+CLASS: MenuSelectMaps(27216), BASE: MenuTemplateTitledBXA
+PROPERTIES:
+	20396 BorderBoxes              Struct  <MenuSprite>[3]
+	20612 ListLabels               Struct  <MenuText>[2]
+	20836 Screenshot               Struct  <MenuSprite>
+	20908 DecoText                 Struct  <MenuDecoText>
+	21028 MapListAvailable         Struct  <MenuStringList>
+	21568 MapListSelected          Struct  <MenuStringList>
+	22108 ScrollBarAvailable       Struct  <MenuScrollBar>
+	22724 ScrollBarSelected        Struct  <MenuScrollBar>
+	23340 ScrollBarAvailableArrowUp Struct  <MenuButtonSprite>
+	23744 ScrollBarAvailableArrowDown Struct  <MenuButtonSprite>
+	24148 ScrollBarSelectedArrowUp Struct  <MenuButtonSprite>
+	24552 ScrollBarSelectedArrowDown Struct  <MenuButtonSprite>
+	24956 ScrollAreaAvailable      Struct  <MenuScrollArea>
+	25008 ScrollAreaSelected       Struct  <MenuScrollArea>
+	25060 PageUpAreaAvailable      Struct  <MenuActiveWidget>
+	25172 PageDownAreaAvailable    Struct  <MenuActiveWidget>
+	25284 PageUpAreaSelected       Struct  <MenuActiveWidget>
+	25396 PageDownAreaSelected     Struct  <MenuActiveWidget>
+	25508 GameType                 Struct  <GameTypeRecord>
+	25588 GameTypeName             Str     
+	25596 MapRecords               Array   <Struct <MapRecord>>
+	25604 StringSize               Str     
+	25612 StringLocation           Str     
+	25620 StringPlayers            Str     
+	25628 StringVersus             Str     
+	25636 StringVersusOn           Str     
+	25644 StringNoMaps             Str     
+	25652 StringTo                 Str     
+	25660 StringAddMap             Str     
+	25668 StringRemoveMap          Str     
+	25676 StringAddAll             Str     
+	25684 StringClearAll           Str     
+	25692 StringBegin              Str     
+	25700 Buttons                  Struct  <MenuButtonText>[3]
+	27152 Settings                 Struct  <GameSettings>
+	27192 URLOptions               Str     
+	27200 LastGameTypeName         Str     
+	27208 DamagedContent           Str     

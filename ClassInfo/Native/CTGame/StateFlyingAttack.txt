@@ -1,0 +1,11 @@
+CLASS: StateFlyingAttack(156), BASE: StateAbstractAttack
+PROPERTIES:
+	124  Victim                   Object  <Pawn>
+	128  KamikazeThreshold        Float   
+	132  PostFirePauseTime        Float   
+	136  MinDodgeDist             Float   
+	140  AttachDist               Float   
+	144  DrillTime                Float   
+	148  DrillDamageType          Class   <DamageType>
+	152  CanKamikaze              Bool    <0 : 0x00000001>
+	152  CanHeadAttach            Bool    <1 : 0x00000002>

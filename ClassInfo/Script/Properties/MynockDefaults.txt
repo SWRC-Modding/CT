@@ -1,0 +1,2 @@
+CLASS: MynockDefaults(1688), BASE: Mynock
+PROPERTIES:

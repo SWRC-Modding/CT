@@ -1,0 +1,2 @@
+CLASS: EliteBeamEnemy(1236), BASE: EliteBeam
+PROPERTIES:

@@ -1,0 +1,2 @@
+CLASS: DeathExplode_BDroid(828), BASE: Emitter
+PROPERTIES:

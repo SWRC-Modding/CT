@@ -1,0 +1,2 @@
+CLASS: SkeletalMeshInstance(460), BASE: LodMeshInstance
+PROPERTIES:

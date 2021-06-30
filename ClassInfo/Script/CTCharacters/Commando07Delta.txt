@@ -1,0 +1,4 @@
+CLASS: Commando07Delta(1696), BASE: CloneCommando
+PROPERTIES:
+	1680 HUDDescription           Str     
+	1688 HUDNickname              Str     

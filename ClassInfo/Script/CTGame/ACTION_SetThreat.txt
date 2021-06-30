@@ -1,0 +1,4 @@
+CLASS: ACTION_SetThreat(72), BASE: ScriptedAction
+PROPERTIES:
+	64   PawnTag                  Name    
+	68   IsThreat                 Bool    <0 : 0x00000001>

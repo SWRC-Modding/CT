@@ -1,0 +1,9 @@
+CLASS: IdleInfo(56), BASE: Object
+STRUCTS:
+	IdleAnimInfo(8)
+		0    AnimationName            Name    
+		4    RelativeWeight           Float   
+PROPERTIES:
+	40   IdleAnimations           Array   <Struct <IdleAnimInfo>>
+	48   MinTimeUntilNextCheck    Float   
+	52   MaxTimeUntilNextCheck    Float   

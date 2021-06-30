@@ -1,0 +1,2 @@
+CLASS: UWindowTabControlRightButton(356), BASE: UWindowButton
+PROPERTIES:

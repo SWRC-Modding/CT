@@ -1,0 +1,2 @@
+CLASS: ForcePikeAmmoDefaults(876), BASE: ForcePikeAmmo
+PROPERTIES:

@@ -1,0 +1,3 @@
+CLASS: ACTION_EnableAIVoice(68), BASE: ScriptedAction
+PROPERTIES:
+	64   bEnable                  Bool    <0 : 0x00000001>

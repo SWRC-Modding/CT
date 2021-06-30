@@ -1,0 +1,12 @@
+CLASS: RenderDevice(176), BASE: Subsystem
+PROPERTIES:
+	52   TerrainLOD               Int     
+	108  SkyboxHack               Bool    <0 : 0x00000001>
+	104  LowQualityTerrain        Bool    <0 : 0x00000001>
+	92   Use16bitTextures         Bool    <0 : 0x00000001>
+	88   Use16bit                 Bool    <0 : 0x00000001>
+	84   UseStencil               Bool    <0 : 0x00000001>
+	80   UseCompressedLightmaps   Bool    <0 : 0x00000001>
+	64   DetailTextures           Bool    <0 : 0x00000001>
+	60   SuperHighDetailActors    Bool    <0 : 0x00000001>
+	56   HighDetailActors         Bool    <0 : 0x00000001>

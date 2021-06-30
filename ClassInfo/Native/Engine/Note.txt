@@ -1,0 +1,3 @@
+CLASS: Note(652), BASE: Actor
+PROPERTIES:
+	644  Text                     Str     

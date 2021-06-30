@@ -1,0 +1,2 @@
+CLASS: BactaDispenserGEO(956), BASE: BactaDispenser
+PROPERTIES:

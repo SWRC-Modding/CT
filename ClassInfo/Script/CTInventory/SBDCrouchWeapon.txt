@@ -1,0 +1,2 @@
+CLASS: SBDCrouchWeapon(1180), BASE: Weapon
+PROPERTIES:

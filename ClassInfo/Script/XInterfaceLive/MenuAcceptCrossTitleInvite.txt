@@ -1,0 +1,9 @@
+CLASS: MenuAcceptCrossTitleInvite(20564), BASE: MenuQuestionYesNo
+PROPERTIES:
+	20512 Inviter                  Str     
+	20520 Invited                  Str     
+	20528 Invitation               Bool    <0 : 0x00000001>
+	20532 InviteTitle              Str     
+	20540 JoinTitle                Str     
+	20548 InviteQuestion           Str     
+	20556 JoinQuestion             Str     

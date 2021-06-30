@@ -1,0 +1,2 @@
+CLASS: MissileTurretProj(804), BASE: CTProjExplosive
+PROPERTIES:

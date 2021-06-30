@@ -1,0 +1,2 @@
+CLASS: YYY_WindowProjector(1056), BASE: DynamicProjector
+PROPERTIES:

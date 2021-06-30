@@ -1,0 +1,2 @@
+CLASS: StanceEngageTarget(128), BASE: SquadStance
+PROPERTIES:

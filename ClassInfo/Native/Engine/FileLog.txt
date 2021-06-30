@@ -1,0 +1,4 @@
+CLASS: FileLog(656), BASE: Info
+PROPERTIES:
+	644  LogAr                    Int     
+	648  LogFileName              Str     

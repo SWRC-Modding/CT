@@ -1,0 +1,19 @@
+CLASS: Player(96), BASE: Object
+PROPERTIES:
+	40   vfOut                    Int     
+	44   vfExec                   Int     
+	48   Actor                    Object  <PlayerController>
+	52   Console                  Object  <Console>
+	56   bWindowsMouseAvailable   Bool    <0 : 0x00000001>
+	56   bShowWindowsMouse        Bool    <1 : 0x00000002>
+	56   bSuspendPrecaching       Bool    <2 : 0x00000004>
+	60   WindowsMouseX            Float   
+	64   WindowsMouseY            Float   
+	68   CurrentNetSpeed          Int     
+	72   ConfiguredInternetSpeed  Int     
+	76   ConfiguredLanSpeed       Int     
+	80   GamePadIndex             Byte    
+	81   SplitIndex               Byte    
+	82   SelectedCursor           Byte    
+	84   InteractionMaster        Object  <InteractionMaster>
+	88   LocalInteractions        Array   <Object <Interaction>>

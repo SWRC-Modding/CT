@@ -1,0 +1,12 @@
+CLASS: RumbleParams(96), BASE: SoundBase
+PROPERTIES:
+	40   IntensityLeft            Float   
+	44   IntensityRight           Float   
+	48   OverrideRadius           Float   
+	52   TimeFadeIn               Float   
+	56   TimeHold                 Float   
+	60   TimeFadeOut              Float   
+	64   CamShakeRollMag          Float   
+	68   CamShakeOffsetMag        Struct  <Vector>
+	80   CamShakeRollRate         Float   
+	84   CamShakeOffsetRate       Struct  <Vector>

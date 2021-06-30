@@ -1,0 +1,2 @@
+CLASS: StateAttack(124), BASE: StateAbstractAttack
+PROPERTIES:

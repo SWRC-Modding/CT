@@ -1,0 +1,45 @@
+CLASS: Client(244), BASE: Object
+PROPERTIES:
+	104  NoDistort                Bool    <0 : 0x00000001>
+	100  NoHUD                    Bool    <0 : 0x00000001>
+	96   FrameFXDisabled          Bool    <0 : 0x00000001>
+	92   Shadows                  Bool    <0 : 0x00000001>
+	113  BumpmappingQuality       Byte    
+	88   ReportDynamicUploads     Bool    <0 : 0x00000001>
+	84   Projectors               Bool    <0 : 0x00000001>
+	80   DecoLayers               Bool    <0 : 0x00000001>
+	76   Coronas                  Bool    <0 : 0x00000001>
+	72   NoFractalAnim            Bool    <0 : 0x00000001>
+	68   NoDynamicLights          Bool    <0 : 0x00000001>
+	64   Decals                   Bool    <0 : 0x00000001>
+	216  MinDesiredFrameRate      Float   
+	60   NoLighting               Bool    <0 : 0x00000001>
+	56   ScreenFlashes            Bool    <0 : 0x00000001>
+	212  TextureDetailLightmap    Byte    <ETextureDetail>
+	208  TextureDetailRenderMap   Byte    <ETextureDetail>
+	204  TextureDetailInterface   Byte    <ETextureDetail>
+	200  TextureDetailTerrain     Byte    <ETextureDetail>
+	196  TextureDetailWeaponSkin  Byte    <ETextureDetail>
+	192  TextureDetailPlayerSkin  Byte    <ETextureDetail>
+	188  TextureDetailWorld       Byte    <ETextureDetail>
+	144  ShadowLength             Int     
+	140  ShadowsPerFrame          Int     
+	228  FSAA                     Int     
+	156  Z                        Int     
+	152  Y                        Int     
+	148  X                        Int     
+	132  LightEnvFlag             Int     
+	136  HWCull                   Int     
+	128  LightOpt                 Int     
+	124  FilmGrain                Int     
+	120  BloomFilter              Int     
+	116  Bloom                    Int     
+	112  BloomQuality             Byte    
+	108  BlurEnabled              Bool    <0 : 0x00000001>
+	224  DropLODBy                Int     
+	52   CaptureMouse             Bool    <0 : 0x00000001>
+	180  Gamma                    Float   
+	172  FullscreenViewportY      Int     
+	168  FullscreenViewportX      Int     
+	164  WindowedViewportY        Int     
+	160  WindowedViewportX        Int     

@@ -1,0 +1,2 @@
+CLASS: DeathEffectContainer_Drone(52), BASE: DeathEffectContainer
+PROPERTIES:

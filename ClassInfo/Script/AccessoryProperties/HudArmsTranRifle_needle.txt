@@ -1,0 +1,2 @@
+CLASS: HudArmsTranRifle_needle(696), BASE: Accessory
+PROPERTIES:

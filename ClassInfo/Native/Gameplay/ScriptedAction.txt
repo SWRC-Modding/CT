@@ -1,0 +1,7 @@
+CLASS: ScriptedAction(64), BASE: Object
+PROPERTIES:
+	40   ActionString             Str     
+	48   bValidForTrigger         Bool    <0 : 0x00000001>
+	48   bDisabled                Bool    <1 : 0x00000002>
+	52   ActionColor              Struct  <Color>
+	56   Comment                  Str     

@@ -1,0 +1,19 @@
+CLASS: UGraphMiscGamePage(384), BASE: UWindowPageWindow
+PROPERTIES:
+	196  Labels                   Object  <UWindowLabelControl>[3]
+	208  StatNameText             Str     [3]
+	232  CatNameText              Str     
+	240  DesiredMaxEdit           Object  <UWindowEditControl>[3]
+	252  DesiredMaxText           Str     
+	260  UseBarStatCheck          Object  <UWindowCheckbox>[3]
+	272  UseBarStatText           Str     
+	280  UseLineStatCheck         Object  <UWindowCheckbox>[3]
+	292  UseLineStatText          Str     
+	300  SmallIsBadCheck          Object  <UWindowCheckbox>[3]
+	312  SmallIsBadText           Str     
+	320  DesiredMaxEditSettings   Str     [3]
+	344  SmallIsBadSettings       Int     [3]
+	356  UseBarStatSettings       Int     [3]
+	368  UseLineStatSettings      Int     [3]
+	380  bIsLoading               Bool    <0 : 0x00000001>
+	380  bShouldDelayChange       Bool    <1 : 0x00000002>

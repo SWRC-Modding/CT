@@ -1,0 +1,2 @@
+CLASS: BowcasterDefaults(1196), BASE: Bowcaster
+PROPERTIES:

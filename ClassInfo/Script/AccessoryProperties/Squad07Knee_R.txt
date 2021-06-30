@@ -1,0 +1,2 @@
+CLASS: Squad07Knee_R(696), BASE: Accessory
+PROPERTIES:

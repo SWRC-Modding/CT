@@ -1,0 +1,8 @@
+CLASS: TerrainBuilder(104), BASE: BrushBuilder
+PROPERTIES:
+	80   Height                   Float   
+	84   Width                    Float   
+	88   Breadth                  Float   
+	92   WidthSegments            Int     
+	96   DepthSegments            Int     
+	100  GroupName                Name    

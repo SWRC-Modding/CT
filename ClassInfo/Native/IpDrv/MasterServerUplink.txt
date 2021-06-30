@@ -1,0 +1,6 @@
+CLASS: MasterServerUplink(804), BASE: MasterServerLink
+PROPERTIES:
+	720  ServerState              Struct  <ServerResponseLine>
+	792  GameStats                Object  <MasterServerGameStats>
+	796  CheckCDKey               Int     
+	800  AdvertiseServer          Int     

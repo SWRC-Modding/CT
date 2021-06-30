@@ -1,0 +1,29 @@
+CLASS: MenuLiveErrorMessage(20460), BASE: MenuTemplateTitledBA
+PROPERTIES:
+	19728 ErrorText                Struct  <MenuText>
+	19840 ServiceNumber            Struct  <MenuText>
+	19952 ServiceCode              Struct  <MenuText>
+	20064 ErrorNumber              Struct  <MenuText>
+	20176 ErrorCode                Struct  <MenuText>
+	20288 LiveErrorCode            Str     
+	20296 LiveErrorNumber          Str     
+	20304 LiveErrorString          Str     
+	20312 LiveServiceCode          Str     
+	20320 LiveServiceNumber        Str     
+	20328 LiveServiceString        Str     
+	20336 OperationName            Str     
+	20344 VoiceBanString           Str     
+	20352 LastErrorDash            Str     
+	20360 StringDashMain           Str     
+	20368 StringDashError          Str     
+	20376 StringDashMemory         Str     
+	20384 StringDashSettings       Str     
+	20392 StringDashMusic          Str     
+	20400 StringDashNetwork        Str     
+	20408 StringDashNewAccount     Str     
+	20416 StringDashManageAccount  Str     
+	20424 StringDashOnlineMenu     Str     
+	20432 StringReadMessage        Str     
+	20440 StringCancelLogin        Str     
+	20448 StringContinue           Str     
+	20456 bLowDiscSpace            Bool    <0 : 0x00000001>

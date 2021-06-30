@@ -1,0 +1,2 @@
+CLASS: MarkerSnipeAnchorGEO(648), BASE: MarkerSnipeAnchor
+PROPERTIES:

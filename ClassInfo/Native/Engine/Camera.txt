@@ -1,0 +1,2 @@
+CLASS: Camera(2240), BASE: PlayerController
+PROPERTIES:

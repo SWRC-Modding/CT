@@ -1,0 +1,32 @@
+CLASS: GameReplicationInfo(828), BASE: ReplicationInfo
+PROPERTIES:
+	644  GameName                 Str     
+	652  GameClass                Str     
+	660  bTeamGame                Bool    <0 : 0x00000001>
+	660  bStopCountDown           Bool    <1 : 0x00000002>
+	660  bMatchHasBegun           Bool    <2 : 0x00000004>
+	660  bMatchEnded              Bool    <3 : 0x00000008>
+	660  bTeamSymbolsUpdated      Bool    <4 : 0x00000010>
+	660  bJoinable                Bool    <5 : 0x00000020>
+	660  bInvitable               Bool    <6 : 0x00000040>
+	664  RemainingTime            Int     
+	668  ElapsedTime              Int     
+	672  RemainingMinute          Int     
+	676  SecondCount              Float   
+	680  GoalScore                Int     
+	684  TimeLimit                Int     
+	688  bDedicatedServer         Bool    <0 : 0x00000001>
+	692  Teams                    Object  <TeamInfo>[10]
+	732  TeamSize                 Int     
+	736  ServerName               Str     
+	744  ShortName                Str     
+	752  AdminName                Str     
+	760  AdminEmail               Str     
+	768  ServerRegion             Int     
+	772  MOTDLine1                Str     
+	780  MOTDLine2                Str     
+	788  MOTDLine3                Str     
+	796  MOTDLine4                Str     
+	804  Winner                   Object  <Actor>
+	808  PRIArray                 Array   <Object <PlayerReplicationInfo>>
+	816  FlagPos                  Struct  <Vector>

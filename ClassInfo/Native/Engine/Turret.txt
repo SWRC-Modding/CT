@@ -1,0 +1,72 @@
+CLASS: Turret(2052), BASE: Pawn
+STRUCTS:
+	TurretInfo(32)
+		0    TransitionEvent          Name    
+		4    TransitionMaterial       Object  <Material>
+		8    TransitionMaterialIndex  Int     
+		12   TransitionSound          Object  <Sound>
+		16   TransitionEffect         Class   <Emitter>
+		20   TransitionEffectOffset   Struct  <Vector>
+PROPERTIES:
+	1648 Gunner                   Object  <Pawn>
+	1652 TargetDirection          Struct  <Vector>
+	1664 ControlEvent             Name    
+	1668 ReleaseEvent             Name    
+	1672 PlayerControlEvent       Name    
+	1676 PitchJoint               Name    
+	1680 YawJoint                 Name    
+	1684 MinPitch                 Int     
+	1688 MaxPitch                 Int     
+	1692 MinYaw                   Int     
+	1696 MaxYaw                   Int     
+	1700 LastNewYaw               Int     
+	1704 LastNewPitch             Int     
+	1708 LastPitchAdjustment      Int     
+	1712 Speed                    Int     
+	1716 Yaw                      Int     
+	1720 Pitch                    Int     
+	1724 TurretHeight             Int     
+	1728 FireRate                 Float   
+	1732 LastFireTime             Float   
+	1736 LastPitchAdjustTime      Float   
+	1740 AmmoName                 Class   <Ammunition>
+	1744 AmmoType                 Object  <Ammunition>
+	1748 FireSound                Object  <Sound>
+	1752 CurrentLoopingFireSound  Object  <Sound>
+	1756 ArmorAngle               Float   
+	1760 bUnlimitedYaw            Bool    <0 : 0x00000001>
+	1760 bPlayedStartSound        Bool    <1 : 0x00000002>
+	1760 bLoopingFireSound        Bool    <2 : 0x00000004>
+	1760 bUseSmartShot            Bool    <3 : 0x00000008>
+	1760 bResetTurret             Bool    <4 : 0x00000010>
+	1760 bInitLocation            Bool    <5 : 0x00000020>
+	1760 bFire                    Bool    <6 : 0x00000040>
+	1760 bCooldown                Bool    <7 : 0x00000080>
+	1760 bIsAuto                  Bool    <8 : 0x00000100>
+	1760 SitToUse                 Bool    <9 : 0x00000200>
+	1760 Damagable                Bool    <10: 0x00000400>
+	1760 bDeployed                Bool    <11: 0x00000800>
+	1760 bPlayerUsable            Bool    <12: 0x00001000>
+	1764 ReservedBy               Object  <Pawn>
+	1768 TurretDeltaTime          Float   
+	1772 MinYawRotation           Float   
+	1776 MaxYawRotation           Float   
+	1780 TimeUntilCooldown        Float   
+	1784 CooldownDuration         Float   
+	1788 BeginCooldownTime        Float   
+	1792 BeginFireTime            Float   
+	1796 ShotDelay                Float   
+	1800 FPWeaponClass            Class   <Object>
+	1804 MuzzleEffect             Class   <Emitter>
+	1808 LaserBeamClass           Class   <LaserBeam>
+	1812 Laser                    Object  <Actor>
+	1816 StartRotateSound         Object  <Sound>
+	1820 LoopRotateSound          Object  <Sound>
+	1824 StopRotateSound          Object  <Sound>
+	1828 OffStateEnemy            Struct  <TurretInfo>
+	1860 OffStateFriend           Struct  <TurretInfo>
+	1892 OnStateEnemy             Struct  <TurretInfo>
+	1924 OnStateFriend            Struct  <TurretInfo>
+	1956 CoolStateEnemy           Struct  <TurretInfo>
+	1988 CoolStateFriend          Struct  <TurretInfo>
+	2020 DeadState                Struct  <TurretInfo>

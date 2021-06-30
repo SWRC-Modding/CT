@@ -1,0 +1,10 @@
+CLASS: AnimProp(868), BASE: Prop
+STRUCTS:
+	PropAnimInfo(8)
+		0    Anim                     Name    
+		4    bLoop                    Bool    <0 : 0x00000001>
+PROPERTIES:
+	836  AnimHealthy              Struct  <PropAnimInfo>
+	844  AnimDamaged              Struct  <PropAnimInfo>
+	852  AnimDestroyed            Struct  <PropAnimInfo>
+	860  AnimTriggered            Struct  <PropAnimInfo>

@@ -1,0 +1,11 @@
+CLASS: PlayerStart(744), BASE: NavigationPoint
+PROPERTIES:
+	724  TeamNumber               Byte    
+	728  bSinglePlayerStart       Bool    <0 : 0x00000001>
+	728  bCoopStart               Bool    <1 : 0x00000002>
+	728  bEnabled                 Bool    <2 : 0x00000004>
+	728  bPrimaryStart            Bool    <3 : 0x00000008>
+	728  bClearAllWeapons         Bool    <4 : 0x00000010>
+	728  bClearSecondary          Bool    <5 : 0x00000020>
+	732  LastSpawnCampTime        Float   
+	736  StartInventory           Array   <Str>

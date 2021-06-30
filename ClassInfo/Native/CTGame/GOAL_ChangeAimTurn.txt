@@ -1,0 +1,15 @@
+CLASS: GOAL_ChangeAimTurn(112), BASE: GoalObject
+ENUMS:
+	EAimTurnGoal
+		ATG_Focus                =   0
+		ATG_FocalPoint           =   1
+		ATG_FocalDir             =   2
+PROPERTIES:
+	76   Focus                    Object  <Actor>
+	80   FocalPoint               Struct  <Vector>
+	92   FocalDir                 Struct  <Rotator>
+	104  AimTurnGoal              Byte    <EAimTurnGoal>
+	108  EnableAim                Bool    <0 : 0x00000001>
+	108  EnableTurn               Bool    <1 : 0x00000002>
+	108  TurnExact                Bool    <2 : 0x00000004>
+	108  EnableHead               Bool    <3 : 0x00000008>

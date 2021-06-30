@@ -1,0 +1,2 @@
+CLASS: DC17BlasterProjCommando(716), BASE: DC17BlasterProj
+PROPERTIES:

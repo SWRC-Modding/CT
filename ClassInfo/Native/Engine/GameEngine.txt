@@ -1,0 +1,88 @@
+CLASS: GameEngine(3692), BASE: Engine
+STRUCTS:
+	URL(48)
+		0    Protocol                 Str     
+		8    Host                     Str     
+		16   Port                     Int     
+		20   Map                      Str     
+		28   Op                       Array   <Str>
+		36   Portal                   Str     
+		44   Valid                    Bool    <0 : 0x00000001>
+	LevelLoadingInfoEntry(44)
+		0    MapName                  Str     
+		8    LoadingMenuClass         Str     
+		16   LoadingPic               Str     
+		24   LoadingTitle             Str     
+		32   LoadingText              Str     
+		40   LoadingShowHints         Bool    <0 : 0x00000001>
+	LoadingHint(20)
+		0    Title                    Str     
+		8    Text                     Str     
+		16   PicIndex                 Int     
+PROPERTIES:
+	264  ServerActors             Array   <Str>
+	272  ServerPackages           Array   <Str>
+	280  GLevel                   Object  <Level>
+	284  GEntry                   Object  <Level>
+	288  GPendingLevel            Object  <PendingLevel>
+	292  LevelLoadingController   Object  <PlayerController>
+	296  LoadProgressFraction     Float   
+	300  LastURL                  Struct  <URL>
+	348  PackageValidation        Array   <Object <PackageCheckInfo>>
+	356  MD5Package               Object  <Object>
+	360  bUseXInterface           Bool    <0 : 0x00000001>
+	364  MainMenuClass            Str     
+	372  InitialMenuClass         Str     
+	380  ControllerLayoutMenuClass Str     
+	388  ConnectingMenuClass      Str     
+	396  DisconnectMenuClass      Str     
+	404  DisconnectMenuArgs       Str     
+	412  LoadingClass             Str     
+	420  PauseMenuClass           Str     
+	428  LoadingMenuClass         Str     
+	436  LoadingInfoMenuClass     Str     
+	444  TeamMenuClass            Str     
+	452  ProfileMenuClass         Str     
+	460  MultiplayerPauseMenuClass Str     
+	468  FPSAlarm                 Int     
+	472  bMemoryAlarm             Bool    <0 : 0x00000001>
+	472  bAutoSaveStats           Bool    <1 : 0x00000002>
+	472  bCheatProtection         Bool    <2 : 0x00000004>
+	472  FramePresentPending      Bool    <3 : 0x00000008>
+	476  TimeUntilExit            Float   
+	480  ExitDuringMovie          Bool    <0 : 0x00000001>
+	484  ElapsedExitTime          Float   
+	488  TimeUntilAutoPause       Float   
+	492  ElapsedAutoPauseTime     Float   
+	496  ElapsedInactiveTime      Float   
+	500  InitialAttractTime       Float   
+	504  TimeUntilAttractMode     Float   
+	508  ElapsedInactiveAttractTime Float   
+	512  AttractModeMovie         Str     
+	520  bAttractDuringLevel      Bool    <0 : 0x00000001>
+	520  bAttractExitLevel        Bool    <1 : 0x00000002>
+	520  bLoopAttractModeMovie    Bool    <2 : 0x00000004>
+	524  AttractModeMenuClass     Str     
+	532  bMovieInterruptable      Bool    <0 : 0x00000001>
+	532  bMoviePausedLevelMusic   Bool    <1 : 0x00000002>
+	532  bMoviePausedLevelSound   Bool    <2 : 0x00000004>
+	532  bMovieDisassociatePads   Bool    <3 : 0x00000008>
+	536  ProfilePrefix            Str     
+	544  DeathMatchStr            Str     
+	552  TeamDeathMatchStr        Str     
+	560  CaptureTheFlagStr        Str     
+	568  AssaultStr               Str     
+	576  LevelLoadingInfo         Array   <Struct <LevelLoadingInfoEntry>>
+	584  LoadingHints             Array   <Struct <LoadingHint>>
+	592  LocalizedKeyNames        Str     [255]
+	2632 LocalizedXboxButtonNames Str     [16]
+	2760 ProgressLevels           Str     [56]
+	3208 LevelMissionStartLevels  Str     [56]
+	3656 DiscReadError            Str     
+	3664 NumFriendRequests        Int     
+	3668 NumGameInvites           Int     
+	3672 LastNumFriendRequests    Int     
+	3676 LastNumGameInvites       Int     
+	3680 FriendRequestTimeout     Float   
+	3684 GameInviteTimeout        Float   
+	3688 NextMatchmakingQueryTime Float   

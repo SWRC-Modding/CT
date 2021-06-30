@@ -1,0 +1,2 @@
+CLASS: CloneHeadlamp(668), BASE: Flashlight
+PROPERTIES:

@@ -1,0 +1,2 @@
+CLASS: K_YYYKnockoverCrate(896), BASE: KnockoverProp
+PROPERTIES:

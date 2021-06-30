@@ -1,0 +1,8 @@
+CLASS: GOAL_FinishingMove(112), BASE: GoalObject
+PROPERTIES:
+	76   Target                   Object  <CTPawn>
+	80   Animation                Name    
+	84   OffsetFromEnemy          Struct  <Vector>
+	96   StartPos                 Struct  <Vector>
+	108  ExecutedMove             Bool    <0 : 0x00000001>
+	108  bWasGodMode              Bool    <1 : 0x00000002>

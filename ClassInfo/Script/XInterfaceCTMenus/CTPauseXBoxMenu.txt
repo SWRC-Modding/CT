@@ -1,0 +1,28 @@
+CLASS: CTPauseXBoxMenu(23036), BASE: MenuTemplate
+PROPERTIES:
+	17696 Background               Struct  <MenuSprite>
+	17768 MenuOptions              Struct  <MenuButtonText>[10]
+	22608 EndMissionConfirm        Str     
+	22616 RestartMissionConfirm    Str     
+	22624 LoadLastConfirm          Str     
+	22632 EndMissionDemoConfirm    Str     
+	22640 RestartMissionDemoConfirm Str     
+	22648 bEndMissionSelected      Bool    <0 : 0x00000001>
+	22648 bRestartMissionSelected  Bool    <1 : 0x00000002>
+	22648 bLoadLastSelected        Bool    <2 : 0x00000004>
+	22652 StringCloakToggleOn      Str     
+	22660 StringCloakToggleOff     Str     
+	22668 FriendsIcon              Struct  <MenuSprite>
+	22740 FriendRequestIcon        Object  <Material>
+	22744 GameInviteIcon           Object  <Material>
+	22748 bLoadOrSaveSelected      Bool    <0 : 0x00000001>
+	22752 GodModeSequence          Str     [8]
+	22816 GodModePos               Int     
+	22820 FullAmmoSequence         Str     [8]
+	22884 FullAmmoPos              Int     
+	22888 SkipLevelSequence        Str     [8]
+	22952 SkipLevelPos             Int     
+	22956 AllLevelsSequence        Str     [8]
+	23020 AllLevelsPos             Int     
+	23024 SoundFX                  Object  <Sound>
+	23028 DamagedSave              Str     

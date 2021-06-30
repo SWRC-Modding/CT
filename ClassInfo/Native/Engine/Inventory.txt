@@ -1,0 +1,19 @@
+CLASS: Inventory(724), BASE: Actor
+PROPERTIES:
+	644  InventoryGroup           Byte    
+	645  GroupOffset              Byte    
+	648  bDisplayableInv          Bool    <0 : 0x00000001>
+	648  bTossedOut               Bool    <1 : 0x00000002>
+	652  PickupClass              Class   <Pickup>
+	656  DroppedPickupClass       Class   <Pickup>
+	660  Charge                   Float   
+	664  PlayerViewOffset         Struct  <Vector>
+	676  PlayerViewPivot          Struct  <Rotator>
+	688  bDrawingFirstPerson      Bool    <0 : 0x00000001>
+	692  BobDamping               Float   
+	696  ThirdPersonActor         Object  <Actor>
+	700  AttachmentClass          Class   <InventoryAttachment>
+	704  Icon                     Object  <Material>
+	708  StatusIcon               Object  <Material>
+	712  ItemName                 Str     
+	720  AlternateHUDArmsMesh     Object  <Mesh>

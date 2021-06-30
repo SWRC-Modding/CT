@@ -1,0 +1,5 @@
+CLASS: CTPauseHintText(19544), BASE: CTInfoBase
+PROPERTIES:
+	18876 BButtonIcon              Struct  <MenuSprite>
+	18948 BLabel                   Struct  <MenuText>
+	19060 BButton                  Struct  <MenuButtonText>

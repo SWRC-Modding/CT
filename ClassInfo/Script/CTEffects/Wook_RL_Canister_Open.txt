@@ -1,0 +1,2 @@
+CLASS: Wook_RL_Canister_Open(828), BASE: Emitter
+PROPERTIES:

@@ -1,0 +1,2 @@
+CLASS: SBDroid_Damaged_Head(828), BASE: Emitter
+PROPERTIES:

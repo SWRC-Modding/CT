@@ -1,0 +1,2 @@
+CLASS: AnimNotify_ReleaseDroid(44), BASE: AnimNotify_Scripted
+PROPERTIES:

@@ -1,0 +1,2 @@
+CLASS: AATurret(868), BASE: AnimProp
+PROPERTIES:

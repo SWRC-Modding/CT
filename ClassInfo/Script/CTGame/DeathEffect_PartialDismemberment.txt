@@ -1,0 +1,3 @@
+CLASS: DeathEffect_PartialDismemberment(44), BASE: DeathEffect
+PROPERTIES:
+	40   AllowRagdoll             Bool    <0 : 0x00000001>

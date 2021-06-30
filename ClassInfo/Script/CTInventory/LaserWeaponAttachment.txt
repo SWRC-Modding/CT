@@ -1,0 +1,4 @@
+CLASS: LaserWeaponAttachment(784), BASE: WeaponAttachment
+PROPERTIES:
+	776  LaserBeam                Object  <Actor>
+	780  LaserBeamClass           Class   <LaserBeam>

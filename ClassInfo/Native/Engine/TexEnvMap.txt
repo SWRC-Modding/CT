@@ -1,0 +1,13 @@
+CLASS: TexEnvMap(116), BASE: TexModifier
+ENUMS:
+	ETexEnvMapType
+		EM_CubeWorldSpaceReflection =   0
+		EM_CubeCameraSpaceReflection =   1
+		EM_SphereWorldSpaceReflection =   2
+		EM_SphereCameraSpaceReflection =   3
+		EM_CubeWorldSpaceNormal  =   4
+		EM_CubeCameraSpaceNormal =   5
+		EM_SphereWorldSpaceNormal =   6
+		EM_SphereCameraSpaceNormal =   7
+PROPERTIES:
+	112  EnvMapType               Byte    <ETexEnvMapType>

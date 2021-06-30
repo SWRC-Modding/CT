@@ -1,0 +1,2 @@
+CLASS: DV_DSD(56), BASE: DamageVariance
+PROPERTIES:

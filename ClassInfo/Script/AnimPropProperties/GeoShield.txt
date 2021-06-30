@@ -1,0 +1,2 @@
+CLASS: GeoShield(868), BASE: AnimProp
+PROPERTIES:

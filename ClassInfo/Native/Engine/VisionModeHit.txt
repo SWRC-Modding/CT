@@ -1,0 +1,2 @@
+CLASS: VisionModeHit(172), BASE: VisionMode
+PROPERTIES:

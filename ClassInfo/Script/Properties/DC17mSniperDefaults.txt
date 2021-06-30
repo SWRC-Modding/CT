@@ -1,0 +1,2 @@
+CLASS: DC17mSniperDefaults(1192), BASE: DC17mSniper
+PROPERTIES:

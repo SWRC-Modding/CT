@@ -1,0 +1,10 @@
+CLASS: MPGameReplicationInfo(836), BASE: GameReplicationInfo
+ENUMS:
+	EGameObjectState
+		COS_Home                 =   0
+		COS_HeldFriendly         =   1
+		COS_HeldEnemy            =   2
+		COS_Down                 =   3
+PROPERTIES:
+	828  MPWeaponInvGroup         Int     
+	832  GameObjectState          Byte    <EGameObjectState>[2]

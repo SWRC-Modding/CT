@@ -1,0 +1,2 @@
+CLASS: RAS_03C_halls_sfx01(96), BASE: AudioEnvironment
+PROPERTIES:

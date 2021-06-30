@@ -1,0 +1,2 @@
+CLASS: CloneHeadPad(696), BASE: Accessory
+PROPERTIES:

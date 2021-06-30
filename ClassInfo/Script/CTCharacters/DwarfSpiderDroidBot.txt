@@ -1,0 +1,2 @@
+CLASS: DwarfSpiderDroidBot(1256), BASE: CTBot
+PROPERTIES:

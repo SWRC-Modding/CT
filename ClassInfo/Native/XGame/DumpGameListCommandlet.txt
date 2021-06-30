@@ -1,0 +1,2 @@
+CLASS: DumpGameListCommandlet(332), BASE: Commandlet
+PROPERTIES:

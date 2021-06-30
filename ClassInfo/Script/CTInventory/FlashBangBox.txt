@@ -1,0 +1,2 @@
+CLASS: FlashBangBox(704), BASE: Ammo
+PROPERTIES:

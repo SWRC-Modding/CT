@@ -1,0 +1,2 @@
+CLASS: SpiderDroidDefaults(1664), BASE: SpiderDroid
+PROPERTIES:

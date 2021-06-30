@@ -1,0 +1,2 @@
+CLASS: YYY_grandhallbrace(836), BASE: StaticProp
+PROPERTIES:

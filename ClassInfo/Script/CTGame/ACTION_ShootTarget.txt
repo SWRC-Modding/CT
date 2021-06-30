@@ -1,0 +1,4 @@
+CLASS: ACTION_ShootTarget(72), BASE: LatentScriptedAction
+PROPERTIES:
+	64   TargetTag                Name    
+	68   Duration                 Float   

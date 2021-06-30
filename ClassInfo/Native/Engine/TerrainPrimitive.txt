@@ -1,0 +1,2 @@
+CLASS: TerrainPrimitive(88), BASE: Primitive
+PROPERTIES:

@@ -1,0 +1,2 @@
+CLASS: RASProjector(868), BASE: AnimProp
+PROPERTIES:

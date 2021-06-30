@@ -1,0 +1,2 @@
+CLASS: SBDroid_BodySplit_explo(828), BASE: Emitter
+PROPERTIES:

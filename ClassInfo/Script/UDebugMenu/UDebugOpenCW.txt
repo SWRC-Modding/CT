@@ -1,0 +1,6 @@
+CLASS: UDebugOpenCW(292), BASE: UWindowDialogClientWindow
+PROPERTIES:
+	192  OpenCombo                Object  <UWindowComboControl>
+	196  OpenText                 Str     
+	204  OpenHelp                 Str     
+	212  OpenHistory              Str     [10]

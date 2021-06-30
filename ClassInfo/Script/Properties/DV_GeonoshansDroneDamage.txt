@@ -1,0 +1,2 @@
+CLASS: DV_GeonoshansDroneDamage(56), BASE: DV_Geonoshans
+PROPERTIES:

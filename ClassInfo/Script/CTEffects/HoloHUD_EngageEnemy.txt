@@ -1,0 +1,2 @@
+CLASS: HoloHUD_EngageEnemy(828), BASE: Emitter
+PROPERTIES:

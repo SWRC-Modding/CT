@@ -1,0 +1,2 @@
+CLASS: DC15s(1180), BASE: CTWeaponRecharging
+PROPERTIES:

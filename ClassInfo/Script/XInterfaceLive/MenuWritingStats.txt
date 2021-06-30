@@ -1,0 +1,3 @@
+CLASS: MenuWritingStats(18432), BASE: MenuTemplateTitled
+PROPERTIES:
+	18320 Message                  Struct  <MenuText>

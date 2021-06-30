@@ -1,0 +1,2 @@
+CLASS: DC17mAntiArmorMP(1188), BASE: DC17mAntiArmor
+PROPERTIES:

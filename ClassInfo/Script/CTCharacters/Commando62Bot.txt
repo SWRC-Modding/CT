@@ -1,0 +1,2 @@
+CLASS: Commando62Bot(1256), BASE: CloneCommandoBot
+PROPERTIES:

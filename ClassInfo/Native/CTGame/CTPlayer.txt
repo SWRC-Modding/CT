@@ -1,0 +1,13 @@
+CLASS: CTPlayer(2300), BASE: PlayerController
+PROPERTIES:
+	2240 TargetLastUpdated        Float   
+	2244 HitNormal                Struct  <Vector>
+	2256 HitLocation              Struct  <Vector>
+	2268 DistToTarget             Float   
+	2272 FriendliesKilled         Int     
+	2276 FriendlyFireInstances    Int     
+	2280 TimeOfLastFriendlyFire   Int     
+	2284 BeganFiringTime          Float   
+	2288 PickupTargetDistance     Float   
+	2292 WeaponRolloverEffectClass Class   <Emitter>
+	2296 AmmoRolloverEffectClass  Class   <Emitter>

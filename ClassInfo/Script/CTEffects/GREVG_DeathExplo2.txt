@@ -1,0 +1,2 @@
+CLASS: GREVG_DeathExplo2(828), BASE: Emitter
+PROPERTIES:

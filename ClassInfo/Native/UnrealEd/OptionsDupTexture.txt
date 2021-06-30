@@ -1,0 +1,5 @@
+CLASS: OptionsDupTexture(64), BASE: OptionsProxy
+PROPERTIES:
+	40   Package                  Str     
+	48   Group                    Str     
+	56   Name                     Str     

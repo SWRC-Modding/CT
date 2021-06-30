@@ -1,0 +1,2 @@
+CLASS: DSD_ankle_F_R(696), BASE: Accessory
+PROPERTIES:

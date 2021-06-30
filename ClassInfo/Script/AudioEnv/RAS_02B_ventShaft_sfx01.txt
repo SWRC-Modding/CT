@@ -1,0 +1,2 @@
+CLASS: RAS_02B_ventShaft_sfx01(96), BASE: AudioEnvironment
+PROPERTIES:

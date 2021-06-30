@@ -1,0 +1,3 @@
+CLASS: SquadMarkerSpot(728), BASE: NavigationPoint
+PROPERTIES:
+	724  MyAnchor                 Object  <Actor>

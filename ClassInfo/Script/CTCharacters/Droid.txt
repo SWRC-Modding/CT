@@ -1,0 +1,22 @@
+CLASS: Droid(1712), BASE: CTPawn
+STRUCTS:
+	DSDDamageEffect(40)
+		0    BoneName                 Name    
+		4    EffectClass              Class   <Emitter>
+		8    Health                   Float   
+		12   Offset                   Struct  <Vector>
+		24   Rotation                 Struct  <Rotator>
+		36   Effect                   Object  <Emitter>
+PROPERTIES:
+	1664 ProgressiveDamageEffects Array   <Struct <DSDDamageEffect>>
+	1672 LocationDamageEffects    Array   <Struct <DSDDamageEffect>>
+	1680 LeftArmHealth            Float   
+	1684 RightArmHealth           Float   
+	1688 HeadHealth               Float   
+	1692 EnableCloaking           Bool    <0 : 0x00000001>
+	1692 StartCloaked             Bool    <1 : 0x00000002>
+	1692 Cloaked                  Bool    <2 : 0x00000004>
+	1696 CloakShader              Object  <Material>
+	1700 CloakHealth              Float   
+	1704 CloakEffectClass         Class   <Emitter>
+	1708 UnCloakEffectClass       Class   <Emitter>

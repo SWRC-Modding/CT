@@ -1,0 +1,2 @@
+CLASS: MenuFriendList(24028), BASE: MenuGamerList
+PROPERTIES:

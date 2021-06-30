@@ -1,0 +1,2 @@
+CLASS: ExplosiveBarrelDefaults(892), BASE: ExplosiveBarrel
+PROPERTIES:

@@ -1,0 +1,13 @@
+CLASS: SoundBanter(68), BASE: SoundBase
+STRUCTS:
+	BanterLine(8)
+		0    PawnClass                Class   <Pawn>
+		4    Sound                    Object  <Sound>
+PROPERTIES:
+	40   PawnClass                Class   <Pawn>
+	44   EnumName                 Name    
+	48   Cue                      Byte    <EPawnAudioEvent>
+	49   BattleContext            Byte    <ESoundBattleContext>
+	52   Lines                    Array   <Struct <BanterLine>>
+	60   Likelihood               Float   
+	64   Used                     Bool    <0 : 0x00000001>

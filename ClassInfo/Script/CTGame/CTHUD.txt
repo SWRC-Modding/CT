@@ -1,0 +1,13 @@
+CLASS: CTHUD(1576), BASE: HUD
+PROPERTIES:
+	1524 ScaleX                   Float   
+	1528 ScaleY                   Float   
+	1532 DisplayFOV               Float   
+	1536 MyFont                   Object  <CTFontInfo>
+	1540 MaxSlipDist              Float   
+	1544 MaxSlipDeg               Float   
+	1548 UnslipRate               Float   
+	1552 ScavDroidMaxRange        Float   
+	1556 ScavStaticGamma          Float   
+	1560 RotVelocity              Struct  <Rotator>
+	1572 LastTick                 Float   

@@ -1,0 +1,2 @@
+CLASS: DC17mAntiArmorAmmoCommando(868), BASE: DC17mAntiArmorAmmo
+PROPERTIES:

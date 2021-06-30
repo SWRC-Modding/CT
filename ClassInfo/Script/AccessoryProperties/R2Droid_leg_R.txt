@@ -1,0 +1,2 @@
+CLASS: R2Droid_leg_R(696), BASE: Accessory
+PROPERTIES:

@@ -1,0 +1,2 @@
+CLASS: GunshipHigh(1680), BASE: Gunship
+PROPERTIES:

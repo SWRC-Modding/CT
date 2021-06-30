@@ -1,0 +1,2 @@
+CLASS: CTDamageBallisticDC17MP(112), BASE: CTDamageBallisticSMG
+PROPERTIES:

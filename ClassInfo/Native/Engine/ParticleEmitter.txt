@@ -1,0 +1,224 @@
+CLASS: ParticleEmitter(900), BASE: Object
+ENUMS:
+	EBlendMode
+		BM_MODULATE              =   0
+		BM_MODULATE2X            =   1
+		BM_MODULATE4X            =   2
+		BM_ADD                   =   3
+		BM_ADDSIGNED             =   4
+		BM_ADDSIGNED2X           =   5
+		BM_SUBTRACT              =   6
+		BM_ADDSMOOTH             =   7
+		BM_BLENDDIFFUSEALPHA     =   8
+		BM_BLENDTEXTUREALPHA     =   9
+		BM_BLENDFACTORALPHA      =  10
+		BM_BLENDTEXTUREALPHAPM   =  11
+		BM_BLENDCURRENTALPHA     =  12
+		BM_PREMODULATE           =  13
+		BM_MODULATEALPHA_ADDCOLOR =  14
+		BM_MODULATEINVALPHA_ADDCOLOR =  15
+		BM_MODULATEINVCOLOR_ADDALPHA =  16
+		BM_HACK                  =  17
+	EParticleDrawStyle
+		PTDS_Regular             =   0
+		PTDS_AlphaBlend          =   1
+		PTDS_Modulated           =   2
+		PTDS_Translucent         =   3
+		PTDS_AlphaModulate_MightNotFogCorrectly =   4
+		PTDS_Darken              =   5
+		PTDS_Brighten            =   6
+	EParticleCoordinateSystem
+		PTCS_Independent         =   0
+		PTCS_Relative            =   1
+		PTCS_Absolute            =   2
+	EParticleVelocityDirection
+		PTVD_None                =   0
+		PTVD_StartPositionAndOwner =   1
+		PTVD_OwnerAndStartPosition =   2
+		PTVD_AddRadial           =   3
+	EParticleStartLocationShape
+		PTLS_Box                 =   0
+		PTLS_MovingBox           =   1
+		PTLS_Sphere              =   2
+		PTLS_Polar               =   3
+		PTLS_All                 =   4
+	EParticleEffectAxis
+		PTEA_NegativeX           =   0
+		PTEA_PositiveZ           =   1
+	EParticleCollisionSound
+		PTSC_None                =   0
+		PTSC_LinearGlobal        =   1
+		PTSC_LinearLocal         =   2
+		PTSC_Random              =   3
+	ESkelLocationUpdate
+		PTSU_None                =   0
+		PTSU_SpawnOffset         =   1
+		PTSU_Location            =   2
+STRUCTS:
+	ParticleTimeScale(8)
+		0    RelativeTime             Float   
+		4    RelativeSize             Float   
+	ParticleColorScale(8)
+		0    RelativeTime             Float   
+		4    Color                    Struct  <Color>
+	Particle(184)
+		0    Location                 Struct  <Vector>
+		12   OldLocation              Struct  <Vector>
+		24   Velocity                 Struct  <Vector>
+		36   StartSize                Struct  <Vector>
+		48   SpinsPerSecond           Struct  <Vector>
+		60   StartSpin                Struct  <Vector>
+		72   RevolutionCenter         Struct  <Vector>
+		84   RevolutionsPerSecond     Struct  <Vector>
+		96   RevolutionsMultiplier    Struct  <Vector>
+		108  Size                     Struct  <Vector>
+		120  StartLocation            Struct  <Vector>
+		132  ColorMultiplier          Struct  <Vector>
+		144  OldMeshLocation          Struct  <Vector>
+		156  Color                    Struct  <Color>
+		160  Time                     Float   
+		164  MaxLifetime              Float   
+		168  HitCount                 Int     
+		172  Flags                    Int     
+		176  Subdivision              Int     
+		180  BoneIndex                Int     
+	ParticleSound(40)
+		0    Sound                    Object  <Sound>
+		4    Radius                   Struct  <Range>
+		12   Pitch                    Struct  <Range>
+		20   Weight                   Int     
+		24   Volume                   Struct  <Range>
+		32   Probability              Struct  <Range>
+PROPERTIES:
+	40   Acceleration             Struct  <Vector>
+	52   ExtentMultiplier         Struct  <Vector>
+	64   DampingFactorRange       Struct  <RangeVector>
+	88   CollisionPlanes          Array   <Struct <Plane>>
+	96   MaxCollisions            Struct  <Range>
+	104  SpawnFromOtherEmitter    Int     
+	108  SpawnAmount              Int     
+	112  SpawnedVelocityScaleRange Struct  <RangeVector>
+	136  ColorScale               Array   <Struct <ParticleColorScale>>
+	144  ColorScaleRepeats        Float   
+	148  ColorMultiplierRange     Struct  <RangeVector>
+	172  Opacity                  Float   
+	176  FadeOutFactor            Struct  <Plane>
+	192  FadeOutStartTime         Float   
+	196  FadeInFactor             Struct  <Plane>
+	212  FadeInEndTime            Float   
+	216  CoordinateSystem         Byte    <EParticleCoordinateSystem>
+	220  MaxParticles             Int     
+	224  EffectAxis               Byte    <EParticleEffectAxis>
+	228  AutoResetTimeRange       Struct  <Range>
+	236  Name                     Str     
+	244  StartLocationOffset      Struct  <Vector>
+	256  StartLocationRange       Struct  <RangeVector>
+	280  EndLocationRange         Struct  <RangeVector>
+	304  CurrentLocationRange     Struct  <RangeVector>
+	328  LocationChangeTime       Float   
+	332  LocationSpentTime        Float   
+	336  AddLocationFromOtherEmitter Int     
+	340  StartLocationShape       Byte    <EParticleStartLocationShape>
+	344  SphereRadiusRange        Struct  <Range>
+	352  StartLocationPolarRange  Struct  <RangeVector>
+	376  AlphaRef                 Int     
+	380  RevolutionCenterOffsetRange Struct  <RangeVector>
+	404  RevolutionsPerSecondRange Struct  <RangeVector>
+	428  RotationOffset           Struct  <Rotator>
+	440  SpinCCWorCW              Struct  <Vector>
+	452  SpinsPerSecondRange      Struct  <RangeVector>
+	476  StartSpinRange           Struct  <RangeVector>
+	500  RotationDampingFactorRange Struct  <RangeVector>
+	524  SizeScale                Array   <Struct <ParticleTimeScale>>
+	532  SizeScaleRepeats         Float   
+	536  StartSizeRange           Struct  <RangeVector>
+	560  UseSkeletalLocationAs    Byte    <ESkelLocationUpdate>
+	564  RelativeBoneIndexRange   Struct  <Range>
+	572  SkeletalBoneNames        Array   <Name>
+	580  SkeletalBoneIndices      Array   <Int>
+	588  CollideSound             Object  <Sound>
+	592  CollisionSoundProbability Float   
+	596  ParticlesPerSecond       Float   
+	600  InitialParticlesPerSecond Float   
+	604  DrawStyle                Byte    <EParticleDrawStyle>
+	608  Texture                  Object  <Texture>
+	612  TextureUSubdivisions     Int     
+	616  TextureVSubdivisions     Int     
+	620  SubdivisionScale         Array   <Float>
+	628  SubdivisionStart         Int     
+	632  SubdivisionEnd           Int     
+	636  BlendBetweenSubdivisions Bool    <0 : 0x00000001>
+	636  UseSubdivisionScale      Bool    <1 : 0x00000002>
+	636  UseRandomSubdivision     Bool    <2 : 0x00000004>
+	640  SecondsBeforeInactive    Float   
+	644  MinSquaredVelocity       Float   
+	648  InitialTimeRange         Struct  <Range>
+	656  LifetimeRange            Struct  <Range>
+	664  InitialDelayRange        Struct  <Range>
+	672  StartVelocityRange       Struct  <RangeVector>
+	696  StartVelocityRadialRange Struct  <Range>
+	704  MaxAbsVelocity           Struct  <Vector>
+	716  VelocityLossRange        Struct  <RangeVector>
+	740  WarmupTicksPerSecond     Float   
+	744  RelativeWarmupTime       Float   
+	748  Owner                    Object  <Emitter>
+	752  InactiveTime             Float   
+	756  Particles                Array   <Struct <Particle>>
+	764  ParticleIndex            Int     
+	768  ActiveParticles          Int     
+	772  PPSFraction              Float   
+	776  BoundingBox              Struct  <Box>
+	804  RealExtentMultiplier     Struct  <Vector>
+	816  OtherIndex               Int     
+	820  InitialDelay             Float   
+	824  GlobalOffset             Struct  <Vector>
+	836  TimeTillReset            Float   
+	840  PS2Data                  Int     
+	844  MaxActiveParticles       Int     
+	848  CurrentCollisionSoundIndex Int     
+	852  CurrentSpawningSoundIndex Int     
+	856  CurrentMeshSpawningIndex Int     
+	860  MaxSizeScale             Float   
+	864  KillPending              Int     
+	868  DeferredParticles        Int     
+	872  RealMeshNormal           Struct  <Vector>
+	884  MeshVertsAndNormals      Array   <Struct <Vector>>
+	892  UseCollision             Bool    <0 : 0x00000001>
+	892  UseCollisionPlanes       Bool    <1 : 0x00000002>
+	892  UseMaxCollisions         Bool    <2 : 0x00000004>
+	892  UseSpawnedVelocityScale  Bool    <3 : 0x00000008>
+	892  UseColorScale            Bool    <4 : 0x00000010>
+	892  FadeIn                   Bool    <5 : 0x00000020>
+	892  FadeOut                  Bool    <6 : 0x00000040>
+	892  ResetAfterChange         Bool    <7 : 0x00000080>
+	892  RespawnDeadParticles     Bool    <8 : 0x00000100>
+	892  AutoDestroy              Bool    <9 : 0x00000200>
+	892  AutoReset                Bool    <10: 0x00000400>
+	892  Disabled                 Bool    <11: 0x00000800>
+	892  DisableFogging           Bool    <12: 0x00001000>
+	892  VelocityFromMesh         Bool    <13: 0x00002000>
+	892  UniformMeshScale         Bool    <14: 0x00004000>
+	892  UniformVelocityScale     Bool    <15: 0x00008000>
+	892  UseColorFromMesh         Bool    <16: 0x00010000>
+	892  SpawnOnlyInDirectionOfNormal Bool    <17: 0x00020000>
+	892  AlphaTest                Bool    <18: 0x00040000>
+	892  AcceptsProjectors        Bool    <19: 0x00080000>
+	892  ZTest                    Bool    <20: 0x00100000>
+	892  ZWrite                   Bool    <21: 0x00200000>
+	892  WorldDistortion          Bool    <22: 0x00400000>
+	892  UseRevolution            Bool    <23: 0x00800000>
+	892  UseRevolutionScale       Bool    <24: 0x01000000>
+	892  SpinParticles            Bool    <25: 0x02000000>
+	892  DampRotation             Bool    <26: 0x04000000>
+	892  UseSizeScale             Bool    <27: 0x08000000>
+	892  UseRegularSizeScale      Bool    <28: 0x10000000>
+	892  UniformSize              Bool    <29: 0x20000000>
+	892  AutomaticInitialSpawning Bool    <30: 0x40000000>
+	892  TriggerDisabled          Bool    <31: 0x80000000>
+	896  ResetOnTrigger           Bool    <0 : 0x00000001>
+	896  UseVelocityScale         Bool    <1 : 0x00000002>
+	896  Initialized              Bool    <2 : 0x00000004>
+	896  Inactive                 Bool    <3 : 0x00000008>
+	896  RealDisableFogging       Bool    <4 : 0x00000010>
+	896  AllParticlesDead         Bool    <5 : 0x00000020>
+	896  WarmedUp                 Bool    <6 : 0x00000040>

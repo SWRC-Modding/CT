@@ -1,0 +1,2 @@
+CLASS: Blood_Spray_Geonosian(828), BASE: Emitter
+PROPERTIES:

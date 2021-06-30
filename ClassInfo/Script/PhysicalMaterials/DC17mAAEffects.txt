@@ -1,0 +1,2 @@
+CLASS: DC17mAAEffects(68), BASE: MaterialTypeInfo
+PROPERTIES:

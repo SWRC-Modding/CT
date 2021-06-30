@@ -1,0 +1,3 @@
+CLASS: ACTION_IfRandomPct(68), BASE: ScriptedAction
+PROPERTIES:
+	64   Probability              Float   

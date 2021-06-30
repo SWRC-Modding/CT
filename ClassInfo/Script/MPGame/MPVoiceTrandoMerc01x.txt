@@ -1,0 +1,2 @@
+CLASS: MPVoiceTrandoMerc01x(1532), BASE: VoicePack
+PROPERTIES:

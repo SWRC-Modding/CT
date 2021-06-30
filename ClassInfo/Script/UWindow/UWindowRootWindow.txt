@@ -1,0 +1,38 @@
+CLASS: UWindowRootWindow(560), BASE: UWindowWindow
+PROPERTIES:
+	180  MouseWindow              Object  <UWindowWindow>
+	184  bMouseCapture            Bool    <0 : 0x00000001>
+	188  OldMouseX                Float   
+	192  OldMouseY                Float   
+	196  FocusedWindow            Object  <UWindowWindow>
+	200  KeyFocusWindow           Object  <UWindowWindow>
+	204  NormalCursor             Struct  <MouseCursor>
+	220  MoveCursor               Struct  <MouseCursor>
+	236  DiagCursor1              Struct  <MouseCursor>
+	252  HandCursor               Struct  <MouseCursor>
+	268  HSplitCursor             Struct  <MouseCursor>
+	284  VSplitCursor             Struct  <MouseCursor>
+	300  DiagCursor2              Struct  <MouseCursor>
+	316  NSCursor                 Struct  <MouseCursor>
+	332  WECursor                 Struct  <MouseCursor>
+	348  WaitCursor               Struct  <MouseCursor>
+	364  bQuickKeyEnable          Bool    <0 : 0x00000001>
+	368  HotkeyWindows            Object  <UWindowHotkeyWindowList>
+	372  GUIScale                 Float   
+	376  RealWidth                Float   
+	380  RealHeight               Float   
+	384  Fonts                    Object  <Font>[10]
+	424  LooksAndFeels            Object  <UWindowLookAndFeel>[20]
+	504  LookAndFeelClass         Str     
+	512  bRequestQuit             Bool    <0 : 0x00000001>
+	516  QuitTime                 Float   
+	520  bAllowConsole            Bool    <0 : 0x00000001>
+	524  MouseScale               Float   
+	528  MouseX                   Float   
+	532  MouseY                   Float   
+	536  OldClipX                 Float   
+	540  OldClipY                 Float   
+	544  FrameTick                Float   
+	548  DisplayKey               Byte    <EInputKey>
+	552  ConsoleClass             Class   <UWindowConsoleWindow>
+	556  ConsoleWindow            Object  <UWindowConsoleWindow>

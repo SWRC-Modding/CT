@@ -1,0 +1,2 @@
+CLASS: EMP_Grenade(828), BASE: Emitter
+PROPERTIES:

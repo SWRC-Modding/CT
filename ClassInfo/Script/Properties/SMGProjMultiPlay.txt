@@ -1,0 +1,2 @@
+CLASS: SMGProjMultiPlay(716), BASE: DC17BlasterProj
+PROPERTIES:

@@ -1,0 +1,2 @@
+CLASS: SpiderDroidMissileAmmo(868), BASE: HomingMissileAmmo
+PROPERTIES:

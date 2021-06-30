@@ -1,0 +1,2 @@
+CLASS: WookieeHeavyTurret(2052), BASE: Turret
+PROPERTIES:

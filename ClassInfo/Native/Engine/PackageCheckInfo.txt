@@ -1,0 +1,2 @@
+CLASS: PackageCheckInfo(64), BASE: Object
+PROPERTIES:

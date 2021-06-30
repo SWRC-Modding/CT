@@ -1,0 +1,5 @@
+CLASS: ACTION_DisplayMessage(80), BASE: ScriptedAction
+PROPERTIES:
+	64   Message                  Str     
+	72   Duration                 Float   
+	76   Color                    Struct  <Color>

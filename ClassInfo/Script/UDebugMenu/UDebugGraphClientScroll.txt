@@ -1,0 +1,2 @@
+CLASS: UDebugGraphClientScroll(228), BASE: UWindowScrollingDialogClient
+PROPERTIES:

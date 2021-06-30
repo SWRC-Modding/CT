@@ -1,0 +1,4 @@
+CLASS: VictimMessage(692), BASE: LocalMessage
+PROPERTIES:
+	676  YouWereKilledBy          Str     
+	684  KilledByTrailer          Str     

@@ -1,0 +1,2 @@
+CLASS: Explosion_Rock_Crumble(828), BASE: Emitter
+PROPERTIES:

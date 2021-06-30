@@ -1,0 +1,2 @@
+CLASS: MapListMixedDeathMatch(656), BASE: MapList
+PROPERTIES:

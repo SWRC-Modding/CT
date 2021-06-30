@@ -1,0 +1,3 @@
+CLASS: StaticMeshActor(648), BASE: Actor
+PROPERTIES:
+	644  bExactProjectileCollision Bool    <0 : 0x00000001>

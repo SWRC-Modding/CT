@@ -1,0 +1,2 @@
+CLASS: GEODestructableGrid(836), BASE: StaticProp
+PROPERTIES:

@@ -1,0 +1,7 @@
+CLASS: UWindowGridColumn(204), BASE: UWindowWindow
+PROPERTIES:
+	180  NextColumn               Object  <UWindowGridColumn>
+	184  PrevColumn               Object  <UWindowGridColumn>
+	188  bSizing                  Bool    <0 : 0x00000001>
+	192  ColumnHeading            Str     
+	200  ColumnNum                Int     

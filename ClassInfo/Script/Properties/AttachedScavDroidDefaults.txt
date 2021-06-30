@@ -1,0 +1,2 @@
+CLASS: AttachedScavDroidDefaults(1200), BASE: AttachedScavDroid
+PROPERTIES:

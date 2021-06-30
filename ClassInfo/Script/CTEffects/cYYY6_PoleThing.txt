@@ -1,0 +1,2 @@
+CLASS: cYYY6_PoleThing(828), BASE: Emitter
+PROPERTIES:

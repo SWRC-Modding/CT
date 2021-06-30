@@ -1,0 +1,2 @@
+CLASS: GeoWarriorHead(696), BASE: Accessory
+PROPERTIES:

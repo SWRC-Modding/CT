@@ -1,0 +1,21 @@
+CLASS: Dispatcher(664), BASE: Actor
+ENUMS:
+	EDispatcherBehavior
+		DBV_Pause                =   0
+		DBV_Reset                =   1
+		DBV_StartOver            =   2
+		DBV_Ignore               =   3
+		DBV_OnceOnly             =   4
+STRUCTS:
+	DispatcherEvent(24)
+		0    Event                    Name    
+		4    Delay                    Float   
+		8    DelayMax                 Float   
+		12   SoundSource              Object  <Actor>
+		16   Sound                    Object  <Sound>
+		20   bWaitForSound            Bool    <0 : 0x00000001>
+PROPERTIES:
+	644  bLoop                    Bool    <0 : 0x00000001>
+	648  TriggerBehavior          Byte    <EDispatcherBehavior>
+	652  Events                   Array   <Struct <DispatcherEvent>>
+	660  EventCounter             Int     

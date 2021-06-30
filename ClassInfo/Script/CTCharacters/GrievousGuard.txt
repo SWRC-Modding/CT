@@ -1,0 +1,7 @@
+CLASS: GrievousGuard(1736), BASE: Droid
+PROPERTIES:
+	1712 FallingSound             Object  <Sound>
+	1716 StaffTrailClass          Class   <Emitter>
+	1720 StaffTrailOffset         Float   
+	1724 DeathExplosionForce      Float   
+	1728 StaffTrails              Object  <Emitter>[2]

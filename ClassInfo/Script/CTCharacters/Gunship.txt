@@ -1,0 +1,6 @@
+CLASS: Gunship(1680), BASE: Vehicles
+PROPERTIES:
+	1664 FireCount                Int     
+	1668 LeftTurret               Object  <GunshipBallTurret>
+	1672 RightTurret              Object  <GunshipBallTurret>
+	1676 DisableTurrets           Bool    <0 : 0x00000001>

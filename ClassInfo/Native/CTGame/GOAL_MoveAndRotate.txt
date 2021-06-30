@@ -1,0 +1,7 @@
+CLASS: GOAL_MoveAndRotate(116), BASE: GoalObject
+PROPERTIES:
+	76   Location                 Struct  <Vector>
+	88   Rotation                 Struct  <Rotator>
+	100  LookAt                   Struct  <Vector>
+	112  bUseRotator              Bool    <0 : 0x00000001>
+	112  bExact                   Bool    <1 : 0x00000002>

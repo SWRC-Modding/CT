@@ -1,0 +1,2 @@
+CLASS: CTDamageElectricityDefaults(112), BASE: CTDamageElectricity
+PROPERTIES:

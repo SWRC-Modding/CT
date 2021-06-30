@@ -1,0 +1,2 @@
+CLASS: TranTurretShield(696), BASE: Accessory
+PROPERTIES:

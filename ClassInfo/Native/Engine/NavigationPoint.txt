@@ -1,0 +1,56 @@
+CLASS: NavigationPoint(724), BASE: Actor
+ENUMS:
+	ENavConnectionType
+		NCT_Normal               =   0
+		NCT_NoJump               =   1
+		NCT_NoDoor               =   2
+		NCT_NoPerch              =   3
+		NCT_NoFly                =   4
+		NCT_NoBottleneck         =   5
+		NCT_NotBlocked           =   6
+PROPERTIES:
+	644  PathList                 Array   <Object <ReachSpec>>
+	652  ForcedLinks              Array   <Object <NavigationPoint>>
+	660  IgnoredList              Array   <Object <NavigationPoint>>
+	668  PathSession              Int     
+	672  nextNavigationPoint      Object  <NavigationPoint>
+	676  prevLink                 Object  <ReachSpec>
+	680  DistanceToNextObjective  Float   
+	684  cost                     Int     
+	688  ExtraCost                Int     
+	692  FutureCost               Int     
+	696  CeilingHeight            Float   
+	700  RadiusOverride           Float   
+	704  MostRecentOccupant       Object  <Pawn>
+	708  taken                    Bool    <0 : 0x00000001>
+	708  bBlocked                 Bool    <1 : 0x00000002>
+	708  bPropagatesSound         Bool    <2 : 0x00000004>
+	708  bOneWayPath              Bool    <3 : 0x00000008>
+	708  bCombatNode              Bool    <4 : 0x00000010>
+	708  bCoverPoint              Bool    <5 : 0x00000020>
+	708  bSpecialMove             Bool    <6 : 0x00000040>
+	708  bNoAutoConnect           Bool    <7 : 0x00000080>
+	708  bOpen                    Bool    <8 : 0x00000100>
+	708  bClosed                  Bool    <9 : 0x00000200>
+	708  bNotBased                Bool    <10: 0x00000400>
+	708  bPathsChanged            Bool    <11: 0x00000800>
+	708  bDestinationOnly         Bool    <12: 0x00001000>
+	708  bSourceOnly              Bool    <13: 0x00002000>
+	708  bUseRadiusWhenBasing     Bool    <14: 0x00004000>
+	708  bSquadShouldCrouch       Bool    <15: 0x00008000>
+	708  bValidSecurePosition     Bool    <16: 0x00010000>
+	708  bUseGrenades             Bool    <17: 0x00020000>
+	708  bUseAntiArmor            Bool    <18: 0x00040000>
+	708  bUseSniper               Bool    <19: 0x00080000>
+	708  bDontIdleHere            Bool    <20: 0x00100000>
+	708  bThrownGrenade           Bool    <21: 0x00200000>
+	708  bAntiArmorUsed           Bool    <22: 0x00400000>
+	708  bSniperUsed              Bool    <23: 0x00800000>
+	708  bTempNoCollide           Bool    <24: 0x01000000>
+	708  bRemoveMeOnRebuild       Bool    <25: 0x02000000>
+	708  bEnabled                 Bool    <26: 0x04000000>
+	708  bMayPreferVsCover        Bool    <27: 0x08000000>
+	708  bOverrideCeilingHeight   Bool    <28: 0x10000000>
+	712  TrapCount                Byte    
+	713  referenceCount           Byte    
+	714  CCRegions                Byte    [7]

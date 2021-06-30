@@ -1,0 +1,2 @@
+CLASS: Commando07DeltaDefaults(1696), BASE: Commando07Delta
+PROPERTIES:

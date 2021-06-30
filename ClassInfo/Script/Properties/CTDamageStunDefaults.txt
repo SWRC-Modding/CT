@@ -1,0 +1,2 @@
+CLASS: CTDamageStunDefaults(112), BASE: CTDamageStun
+PROPERTIES:

@@ -1,0 +1,9 @@
+CLASS: MenuNewProfileName(40428), BASE: MenuVirtualKeyboard
+PROPERTIES:
+	40372 EditNameText             Str     
+	40380 InUseText                Str     
+	40388 MinLenText               Str     
+	40396 InvalidName              Str     
+	40404 InvalidNameStart         Str     
+	40412 CharacterName            Str     
+	40420 ProfilePrefix            Str     

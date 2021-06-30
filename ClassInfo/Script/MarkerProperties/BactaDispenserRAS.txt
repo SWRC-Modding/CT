@@ -1,0 +1,2 @@
+CLASS: BactaDispenserRAS(956), BASE: BactaDispenser
+PROPERTIES:

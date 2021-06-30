@@ -1,0 +1,4 @@
+CLASS: ACTION_SetCanCancelMarker(72), BASE: ScriptedAction
+PROPERTIES:
+	64   MarkerTag                Name    
+	68   bCanCancel               Bool    <0 : 0x00000001>

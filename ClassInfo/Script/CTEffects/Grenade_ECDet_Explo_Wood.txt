@@ -1,0 +1,2 @@
+CLASS: Grenade_ECDet_Explo_Wood(828), BASE: Emitter
+PROPERTIES:

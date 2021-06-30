@@ -1,0 +1,12 @@
+CLASS: LineOfSightTrigger(684), BASE: Triggers
+PROPERTIES:
+	644  MaxViewDist              Float   
+	648  OldTickTime              Float   
+	652  bEnabled                 Bool    <0 : 0x00000001>
+	652  bTriggered               Bool    <1 : 0x00000002>
+	656  SeenActorTag             Name    
+	660  SeenActor                Object  <Actor>
+	664  MaxViewAngle             Int     
+	668  RequiredViewDir          Float   
+	672  bRequiresHeadlamp        Bool    <0 : 0x00000001>
+	676  Message                  Str     

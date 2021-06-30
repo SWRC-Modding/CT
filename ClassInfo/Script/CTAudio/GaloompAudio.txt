@@ -1,0 +1,2 @@
+CLASS: GaloompAudio(48), BASE: PawnAudioTable
+PROPERTIES:

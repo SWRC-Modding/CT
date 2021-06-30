@@ -1,0 +1,2 @@
+CLASS: IncindearyGrenadeProjDefaults(804), BASE: IncindearyGrenadeProj
+PROPERTIES:

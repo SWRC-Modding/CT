@@ -1,0 +1,2 @@
+CLASS: TextureExporterTGA(60), BASE: Exporter
+PROPERTIES:

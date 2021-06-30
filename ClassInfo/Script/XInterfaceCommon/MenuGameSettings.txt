@@ -1,0 +1,31 @@
+CLASS: MenuGameSettings(36196), BASE: MenuTemplateTitledBXA
+STRUCTS:
+	GameSettings(40)
+		0    TimeLimit                Int     
+		4    GoalScore                Int     
+		8    RoundsPerMap             Int     
+		12   RoundTime                Int     
+		16   MaxPlayers               Int     
+		20   ReservedSlots            Int     
+		24   FriendlyFireScale        Float   
+		28   GameSpeed                Float   
+		32   RespawnDelay             Int     
+		36   WeaponStay               Bool    <0 : 0x00000001>
+		36   DedicatedServer          Bool    <1 : 0x00000002>
+		36   BalanceTeams             Bool    <2 : 0x00000004>
+PROPERTIES:
+	20396 GameType                 Struct  <GameTypeRecord>
+	20476 TimeLookup               Array   <Int>
+	20484 RTimeLookup              Array   <Int>
+	20492 OptionLabels             Struct  <MenuText>[11]
+	21724 ArrowsLeft               Struct  <MenuButtonSprite>[11]
+	26168 ArrowsRight              Struct  <MenuButtonSprite>[11]
+	30612 Options                  Struct  <MenuButtonEnum>[11]
+	36112 InitialSettings          Int     [11]
+	36156 StringTimeSuffix         Str     
+	36164 IsLive                   Bool    <0 : 0x00000001>
+	36168 MaxBandwidthPlayers      Int     
+	36172 WarnedMaxBandwidth       Bool    <0 : 0x00000001>
+	36176 BandwidthWarningTitle    Str     
+	36184 BandwidthWarningText     Str     
+	36192 bIsSplitscreen           Bool    <0 : 0x00000001>

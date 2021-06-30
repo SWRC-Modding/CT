@@ -1,0 +1,2 @@
+CLASS: CloneHeadBreather(696), BASE: Accessory
+PROPERTIES:

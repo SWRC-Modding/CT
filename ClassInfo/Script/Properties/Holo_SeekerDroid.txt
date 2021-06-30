@@ -1,0 +1,2 @@
+CLASS: Holo_SeekerDroid(1688), BASE: Ambient
+PROPERTIES:

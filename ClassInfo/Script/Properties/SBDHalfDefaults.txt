@@ -1,0 +1,2 @@
+CLASS: SBDHalfDefaults(1712), BASE: SBDHalf
+PROPERTIES:

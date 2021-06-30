@@ -1,0 +1,5 @@
+CLASS: SkelPrefsEditProps(52), BASE: Object
+PROPERTIES:
+	40   WBrowserAnimationPtr     Int     
+	44   LODStyle                 Int     
+	48   RootZero                 Int     

@@ -1,0 +1,2 @@
+CLASS: CTDamageBallisticDC17SniperCommando(112), BASE: CTDamageBallisticDC17Sniper
+PROPERTIES:

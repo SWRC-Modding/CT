@@ -1,0 +1,2 @@
+CLASS: GeoAATurret(2068), BASE: AutoTurret
+PROPERTIES:

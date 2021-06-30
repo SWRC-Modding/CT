@@ -1,0 +1,2 @@
+CLASS: MPTrandoshan(1900), BASE: MPPawn
+PROPERTIES:

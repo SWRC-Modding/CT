@@ -1,0 +1,2 @@
+CLASS: ConcussionRifleMP(1180), BASE: ConcussionRifle
+PROPERTIES:

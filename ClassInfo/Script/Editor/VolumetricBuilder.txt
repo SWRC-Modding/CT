@@ -1,0 +1,6 @@
+CLASS: VolumetricBuilder(96), BASE: BrushBuilder
+PROPERTIES:
+	80   Height                   Float   
+	84   Radius                   Float   
+	88   NumSheets                Int     
+	92   GroupName                Name    

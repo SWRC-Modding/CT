@@ -1,0 +1,28 @@
+CLASS: AudioParams(108), BASE: SoundBase
+ENUMS:
+	EAudioGroup
+		AG_Music                 =   0
+		AG_Voice                 =   1
+		AG_SFX                   =   2
+PROPERTIES:
+	40   Category                 Byte    <EAudioGroup>
+	44   bDisableVoiceCues        Bool    <0 : 0x00000001>
+	48   ActorTag                 Name    
+	52   MaxVolume                Float   
+	56   MinVolume                Float   
+	60   MaxPitch                 Float   
+	64   MinPitch                 Float   
+	68   MaxVolumeXBox            Float   
+	72   MinVolumeXBox            Float   
+	76   MaxPitchXBox             Float   
+	80   MinPitchXBox             Float   
+	84   NonPositional            Bool    <0 : 0x00000001>
+	84   NonPositionalXBoxOverride Bool    <1 : 0x00000002>
+	88   Radius                   Float   
+	92   RadiusXBox               Float   
+	96   bDisable3DOcclusion      Bool    <0 : 0x00000001>
+	96   bDisable3DFalloff        Bool    <1 : 0x00000002>
+	96   bDisable3DOcclusionXBox  Bool    <2 : 0x00000004>
+	96   bDisable3DFalloffXBox    Bool    <3 : 0x00000008>
+	100  XBoxRolloffFactor        Float   
+	104  XBox6dbBoost             Bool    <0 : 0x00000001>

@@ -1,0 +1,2 @@
+CLASS: Flag_BlueProp(868), BASE: AnimProp
+PROPERTIES:

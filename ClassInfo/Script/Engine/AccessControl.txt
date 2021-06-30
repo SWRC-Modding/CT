@@ -1,0 +1,10 @@
+CLASS: AccessControl(1092), BASE: Info
+PROPERTIES:
+	644  IPPolicies               Str     [50]
+	1044 IPBanned                 Str     
+	1052 WrongPassword            Str     
+	1060 NeedPassword             Str     
+	1068 AdminClass               Class   <Admin>
+	1072 AdminPassword            Str     
+	1080 GamePassword             Str     
+	1088 bDontAddDefaultAdmin     Bool    <0 : 0x00000001>

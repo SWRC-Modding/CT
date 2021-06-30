@@ -1,0 +1,9 @@
+CLASS: CylinderBuilder(104), BASE: BrushBuilder
+PROPERTIES:
+	80   Height                   Float   
+	84   OuterRadius              Float   
+	88   InnerRadius              Float   
+	92   Sides                    Int     
+	96   GroupName                Name    
+	100  AlignToSide              Bool    <0 : 0x00000001>
+	100  Hollow                   Bool    <1 : 0x00000002>

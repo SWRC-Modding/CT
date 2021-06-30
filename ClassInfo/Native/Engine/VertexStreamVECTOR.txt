@@ -1,0 +1,2 @@
+CLASS: VertexStreamVECTOR(64), BASE: VertexStreamBase
+PROPERTIES:

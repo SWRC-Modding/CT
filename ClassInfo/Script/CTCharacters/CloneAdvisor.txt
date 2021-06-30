@@ -1,0 +1,2 @@
+CLASS: CloneAdvisor(1664), BASE: Republic
+PROPERTIES:

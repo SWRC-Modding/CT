@@ -1,0 +1,2 @@
+CLASS: StateDroidekaAttack(124), BASE: StateAbstractAttack
+PROPERTIES:

@@ -1,0 +1,2 @@
+CLASS: WarriorAudio(48), BASE: PawnAudioTable
+PROPERTIES:

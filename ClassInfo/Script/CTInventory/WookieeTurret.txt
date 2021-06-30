@@ -1,0 +1,3 @@
+CLASS: WookieeTurret(1184), BASE: Weapon
+PROPERTIES:
+	1180 Counter                  Int     

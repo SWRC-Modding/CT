@@ -1,0 +1,3 @@
+CLASS: MasterServerGameStats(660), BASE: GameStats
+PROPERTIES:
+	656  Uplink                   Object  <MasterServerUplink>

@@ -1,0 +1,2 @@
+CLASS: Watchtower_net(836), BASE: StaticProp
+PROPERTIES:

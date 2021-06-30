@@ -1,0 +1,2 @@
+CLASS: GunshipTurretAmmo(876), BASE: LaserWeaponAmmo
+PROPERTIES:

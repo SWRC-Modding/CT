@@ -1,0 +1,2 @@
+CLASS: SMGProjDefaults(716), BASE: SMGProj
+PROPERTIES:

@@ -1,0 +1,16 @@
+CLASS: ShadowBitmapMaterial(184), BASE: BitmapMaterial
+PROPERTIES:
+	128  TextureInterfaces        Int     
+	132  ShadowActor              Object  <Actor>
+	136  LightDirection           Struct  <Vector>
+	148  LightDistance            Float   
+	152  LightFOV                 Float   
+	156  Dirty                    Bool    <0 : 0x00000001>
+	156  Invalid                  Bool    <1 : 0x00000002>
+	156  bBlobShadow              Bool    <2 : 0x00000004>
+	160  CullDistance             Float   
+	164  ShadowDarkness           Byte    
+	168  bReady                   Bool    <0 : 0x00000001>
+	172  LastUpdateTime           Float   
+	176  BlobShadow               Object  <BitmapMaterial>
+	180  HSMip                    Object  <HardwareShader>

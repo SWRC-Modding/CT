@@ -1,0 +1,27 @@
+CLASS: XBoxPlayerInput(652), BASE: PlayerInput
+STRUCTS:
+	LookPreset(24)
+		0    PresetName               Str     
+		8    HScale                   Float   
+		12   HExponent                Float   
+		16   VScale                   Float   
+		20   VExponent                Float   
+PROPERTIES:
+	464  HScale                   Float   
+	468  HExponent                Float   
+	472  HLookRateMax             Float   
+	476  VScale                   Float   
+	480  VExponent                Float   
+	484  VLookRateMax             Float   
+	488  bInvertVLook             Bool    <0 : 0x00000001>
+	488  bLookSpring              Bool    <1 : 0x00000002>
+	492  HLook                    Float   
+	496  VLook                    Float   
+	500  LookPresets              Struct  <LookPreset>[4]
+	596  SelectedPresetName       Str     
+	604  VelScale                 Float   
+	608  AccelScale               Float   
+	612  DampeningFactor          Float   
+	616  MinAccelComponent        Float   
+	620  ForwardFilter            Float   [4]
+	636  StrafeFilter             Float   [4]

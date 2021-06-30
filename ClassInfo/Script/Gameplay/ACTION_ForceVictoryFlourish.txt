@@ -1,0 +1,2 @@
+CLASS: ACTION_ForceVictoryFlourish(64), BASE: ScriptedAction
+PROPERTIES:

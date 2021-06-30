@@ -1,0 +1,4 @@
+CLASS: AnimNotify_DestroyEffect(52), BASE: AnimNotify
+PROPERTIES:
+	44   DestroyTag               Name    
+	48   bExpireParticles         Bool    <0 : 0x00000001>

@@ -1,0 +1,2 @@
+CLASS: TRAN_SMG_Impact_Wookiee(828), BASE: Emitter
+PROPERTIES:

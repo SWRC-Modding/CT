@@ -1,0 +1,2 @@
+CLASS: GeoTurretProjDefaults(804), BASE: GeoTurretProj
+PROPERTIES:

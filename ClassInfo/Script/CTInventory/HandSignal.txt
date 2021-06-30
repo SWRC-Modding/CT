@@ -1,0 +1,8 @@
+CLASS: HandSignal(1204), BASE: Weapon
+PROPERTIES:
+	1180 DetonatorItem            Object  <StaticMesh>
+	1184 BactaStaticMesh          Object  <StaticMesh>
+	1188 AttachItemClass          Class   <Actor>
+	1192 AttachItem               Object  <Actor>
+	1196 TargetActivate           Object  <ActivateItem>
+	1200 PlayerTargetType         Byte    <ETargetType>

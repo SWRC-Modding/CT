@@ -1,0 +1,2 @@
+CLASS: RAS_01C_machineRoom_sfx01(96), BASE: AudioEnvironment
+PROPERTIES:

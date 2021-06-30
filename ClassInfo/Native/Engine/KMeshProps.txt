@@ -1,0 +1,2 @@
+CLASS: KMeshProps(116), BASE: Object
+PROPERTIES:

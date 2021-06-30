@@ -1,0 +1,4 @@
+CLASS: ACTION_DamageInstigator(72), BASE: ScriptedAction
+PROPERTIES:
+	64   Damage                   Int     
+	68   DamageType               Class   <DamageType>

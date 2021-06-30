@@ -1,0 +1,2 @@
+CLASS: DC17mBlasterWeaponPickupDefaults(704), BASE: DC17mBlasterWeaponPickup
+PROPERTIES:

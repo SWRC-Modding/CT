@@ -1,0 +1,2 @@
+CLASS: YYY_Briefing(96), BASE: AudioEnvironment
+PROPERTIES:

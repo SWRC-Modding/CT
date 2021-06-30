@@ -1,0 +1,2 @@
+CLASS: DC17mBlasterAmmoCommando(868), BASE: DC17mBlasterAmmo
+PROPERTIES:

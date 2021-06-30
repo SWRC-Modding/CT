@@ -1,0 +1,4 @@
+CLASS: GOAL_GoThroughDoor(84), BASE: GoalObject
+PROPERTIES:
+	76   Link                     Object  <ReachSpec>
+	80   Door                     Object  <Mover>

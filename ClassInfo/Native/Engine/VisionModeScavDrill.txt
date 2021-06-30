@@ -1,0 +1,7 @@
+CLASS: VisionModeScavDrill(192), BASE: VisionMode
+PROPERTIES:
+	172  MaxBumpSize              Float   
+	176  MaxSpinSpeed             Float   
+	180  MinTextureScale          Float   
+	184  MaxTextureScale          Float   
+	188  AltVisionShader          Object  <HardwareShader>

@@ -1,0 +1,3 @@
+CLASS: ACTION_WaitForRandomTimer(72), BASE: LatentScriptedAction
+PROPERTIES:
+	64   PauseTime                Struct  <Range>

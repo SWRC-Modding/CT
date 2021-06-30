@@ -1,0 +1,2 @@
+CLASS: GEO_ForcePike_Muzzle(828), BASE: Emitter
+PROPERTIES:

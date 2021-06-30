@@ -1,0 +1,2 @@
+CLASS: EliteBeamAttachment(784), BASE: LaserWeaponAttachment
+PROPERTIES:

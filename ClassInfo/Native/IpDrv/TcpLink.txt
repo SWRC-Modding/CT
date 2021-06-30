@@ -1,0 +1,17 @@
+CLASS: TcpLink(696), BASE: InternetLink
+ENUMS:
+	ELinkState
+		STATE_Initialized        =   0
+		STATE_Ready              =   1
+		STATE_Listening          =   2
+		STATE_Connecting         =   3
+		STATE_Connected          =   4
+		STATE_ListenClosePending =   5
+		STATE_ConnectClosePending =   6
+		STATE_ListenClosing      =   7
+		STATE_ConnectClosing     =   8
+PROPERTIES:
+	672  LinkState                Byte    <ELinkState>
+	676  RemoteAddr               Struct  <IpAddr>
+	684  AcceptClass              Class   <TcpLink>
+	688  SendFIFO                 Array   

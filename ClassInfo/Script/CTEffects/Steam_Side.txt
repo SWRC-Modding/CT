@@ -1,0 +1,2 @@
+CLASS: Steam_Side(828), BASE: Emitter
+PROPERTIES:

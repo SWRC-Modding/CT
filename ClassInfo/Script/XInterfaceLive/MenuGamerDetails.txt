@@ -1,0 +1,21 @@
+CLASS: MenuGamerDetails(27844), BASE: MenuTemplateTitledBA
+PROPERTIES:
+	19728 GamerList                Object  <MenuGamerList>
+	19732 LastGamer                Struct  <Gamer>
+	19828 bHasVoice                Bool    <0 : 0x00000001>
+	19832 Options                  Struct  <MenuButtonText>[15]
+	27092 OptionBox                Struct  <MenuSprite>
+	27164 Info                     Struct  <MenuText>[4]
+	27612 InfoBox                  Struct  <MenuSprite>
+	27684 StringCancelFriendRequest Str     [3]
+	27708 StringBlockFriendRequest Str     [3]
+	27732 StringRemoveFriend       Str     [3]
+	27756 StringCancelInvite       Str     [3]
+	27780 StringGamerTagToken      Str     
+	27788 StringSentRequest        Str     
+	27796 StringReceivedRequest    Str     
+	27804 StringSentInvite         Str     
+	27812 StringInviteRejected     Str     
+	27820 StringInviteAccepted     Str     
+	27828 StringReceivedInvite     Str     
+	27836 StringIsPlaying          Str     

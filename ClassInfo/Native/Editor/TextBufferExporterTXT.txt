@@ -1,0 +1,2 @@
+CLASS: TextBufferExporterTXT(60), BASE: Exporter
+PROPERTIES:

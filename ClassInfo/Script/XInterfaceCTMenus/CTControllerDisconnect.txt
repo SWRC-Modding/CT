@@ -1,0 +1,4 @@
+CLASS: CTControllerDisconnect(19176), BASE: MenuTemplateTitledA
+PROPERTIES:
+	19060 Label                    Struct  <MenuText>
+	19172 Paused                   Bool    <0 : 0x00000001>

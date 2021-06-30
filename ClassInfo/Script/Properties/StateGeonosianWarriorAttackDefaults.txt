@@ -1,0 +1,2 @@
+CLASS: StateGeonosianWarriorAttackDefaults(148), BASE: StateGeonosianWarriorAttack
+PROPERTIES:

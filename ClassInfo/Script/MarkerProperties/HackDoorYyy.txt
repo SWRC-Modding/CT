@@ -1,0 +1,2 @@
+CLASS: HackDoorYyy(888), BASE: HackDoor
+PROPERTIES:

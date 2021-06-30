@@ -1,0 +1,2 @@
+CLASS: BowcasterMP(1196), BASE: Bowcaster
+PROPERTIES:

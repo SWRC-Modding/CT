@@ -1,0 +1,3 @@
+CLASS: GeonosianWarrior(1668), BASE: Geonosian
+PROPERTIES:
+	1664 FallingSound             Object  <Sound>

@@ -1,0 +1,21 @@
+CLASS: MissionObjectives(680), BASE: Actor
+ENUMS:
+	EObjectiveMode
+		OM_Hidden                =   0
+		OM_Incomplete            =   1
+		OM_Completed             =   2
+		OM_Failed                =   3
+		OM_Removed               =   4
+STRUCTS:
+	SingleObjective(12)
+		0    Objective                Str     
+		8    Stat                     Byte    <EObjectiveMode>
+PROPERTIES:
+	644  MissionObj               Array   <Struct <SingleObjective>>
+	652  FadeTime                 Float   
+	656  CritTextColor            Struct  <Color>
+	660  IncompleteColor          Struct  <Color>
+	664  CompletedColor           Struct  <Color>
+	668  FailedColor              Struct  <Color>
+	672  CurrentObjective         Int     
+	676  NumObjectives            Int     

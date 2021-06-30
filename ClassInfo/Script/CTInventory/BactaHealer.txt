@@ -1,0 +1,2 @@
+CLASS: BactaHealer(1180), BASE: CTWeaponRecharging
+PROPERTIES:

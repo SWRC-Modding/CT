@@ -1,0 +1,7 @@
+CLASS: Counter(672), BASE: Triggers
+PROPERTIES:
+	644  NumToCount               Byte    
+	648  bShowMessage             Bool    <0 : 0x00000001>
+	652  CountMessage             Str     
+	660  CompleteMessage          Str     
+	668  OriginalNum              Byte    

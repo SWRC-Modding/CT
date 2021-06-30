@@ -1,0 +1,2 @@
+CLASS: R5DroidDefaults(1688), BASE: R5Droid
+PROPERTIES:

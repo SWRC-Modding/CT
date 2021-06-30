@@ -1,0 +1,2 @@
+CLASS: StateSBDAttack(152), BASE: StateHeavyAttack
+PROPERTIES:

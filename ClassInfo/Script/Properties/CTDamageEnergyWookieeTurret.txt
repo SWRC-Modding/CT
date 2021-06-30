@@ -1,0 +1,2 @@
+CLASS: CTDamageEnergyWookieeTurret(112), BASE: CTDamageEnergy
+PROPERTIES:

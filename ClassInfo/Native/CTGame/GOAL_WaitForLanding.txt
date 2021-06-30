@@ -1,0 +1,2 @@
+CLASS: GOAL_WaitForLanding(76), BASE: GoalObject
+PROPERTIES:

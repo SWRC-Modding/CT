@@ -1,0 +1,2 @@
+CLASS: PrefabExporterT3D(60), BASE: Exporter
+PROPERTIES:

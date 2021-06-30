@@ -1,0 +1,2 @@
+CLASS: GEO_Elitebeam_beamParticles(828), BASE: Emitter
+PROPERTIES:

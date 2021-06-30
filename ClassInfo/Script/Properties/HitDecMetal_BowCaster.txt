@@ -1,0 +1,2 @@
+CLASS: HitDecMetal_BowCaster(1060), BASE: HitDecal
+PROPERTIES:

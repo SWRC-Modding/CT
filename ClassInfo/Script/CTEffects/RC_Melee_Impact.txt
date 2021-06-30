@@ -1,0 +1,2 @@
+CLASS: RC_Melee_Impact(828), BASE: Emitter
+PROPERTIES:

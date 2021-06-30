@@ -1,0 +1,9 @@
+CLASS: AnimNotify_ShakeView(88), BASE: AnimNotify_Scripted
+PROPERTIES:
+	44   ShakeRadius              Float   
+	48   ShakeMag                 Struct  <Vector>
+	60   ShakeRotationMag         Struct  <Rotator>
+	72   InTime                   Float   
+	76   SustainTime              Float   
+	80   OutTime                  Float   
+	84   Frequency                Float   

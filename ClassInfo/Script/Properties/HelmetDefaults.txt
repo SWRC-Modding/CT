@@ -1,0 +1,2 @@
+CLASS: HelmetDefaults(1544), BASE: Helmet
+PROPERTIES:

@@ -1,0 +1,2 @@
+CLASS: ControlChannel(104), BASE: Channel
+PROPERTIES:

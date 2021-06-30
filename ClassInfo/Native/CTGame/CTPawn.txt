@@ -1,0 +1,5 @@
+CLASS: CTPawn(1664), BASE: Pawn
+PROPERTIES:
+	1648 IdleInfoClass            Class   <IdleInfo>
+	1652 IdleInfoClassName        Str     
+	1660 FootstepInfoClass        Class   <FootstepInfo>

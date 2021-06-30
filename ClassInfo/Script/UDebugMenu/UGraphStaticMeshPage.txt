@@ -1,0 +1,19 @@
+CLASS: UGraphStaticMeshPage(960), BASE: UWindowPageWindow
+PROPERTIES:
+	196  Labels                   Object  <UWindowLabelControl>[15]
+	256  StatNameText             Str     [15]
+	376  CatNameText              Str     
+	384  DesiredMaxEdit           Object  <UWindowEditControl>[15]
+	444  DesiredMaxText           Str     
+	452  UseBarStatCheck          Object  <UWindowCheckbox>[15]
+	512  UseBarStatText           Str     
+	520  UseLineStatCheck         Object  <UWindowCheckbox>[15]
+	580  UseLineStatText          Str     
+	588  SmallIsBadCheck          Object  <UWindowCheckbox>[15]
+	648  SmallIsBadText           Str     
+	656  DesiredMaxEditSettings   Str     [15]
+	776  SmallIsBadSettings       Int     [15]
+	836  UseBarStatSettings       Int     [15]
+	896  UseLineStatSettings      Int     [15]
+	956  bIsLoading               Bool    <0 : 0x00000001>
+	956  bShouldDelayChange       Bool    <1 : 0x00000002>

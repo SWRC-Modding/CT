@@ -1,0 +1,7 @@
+CLASS: CameraTextureClient(664), BASE: Info
+PROPERTIES:
+	644  DestTexture              Object  <ScriptedTexture>
+	648  CameraTag                Name    
+	652  RefreshRate              Float   
+	656  FOV                      Float   
+	660  CameraActor              Object  <Actor>

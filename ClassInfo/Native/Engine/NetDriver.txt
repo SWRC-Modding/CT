@@ -1,0 +1,15 @@
+CLASS: NetDriver(148), BASE: Subsystem
+PROPERTIES:
+	140  DownloadManagers         Array   <Str>
+	136  MaxDownloadSize          Int     
+	112  AllowDownloads           Bool    <0 : 0x00000001>
+	108  LanServerMaxTickRate     Int     
+	104  NetServerMaxTickRate     Int     
+	100  MaxInternetClientRate    Int     
+	96   MaxClientRate            Int     
+	92   ServerTravelPause        Float   
+	88   SpawnPrioritySeconds     Float   
+	84   RelevantTimeout          Float   
+	80   KeepAliveTime            Float   
+	76   InitialConnectTimeout    Float   
+	72   ConnectionTimeout        Float   

@@ -1,0 +1,8 @@
+CLASS: AnimNotify_CreateProjectile(92), BASE: AnimNotify
+PROPERTIES:
+	44   ProjectileClass          Class   <Projectile>
+	48   Bone                     Name    
+	52   OffsetLocation           Struct  <Vector>
+	64   OffsetRotation           Struct  <Rotator>
+	76   DrawScale3D              Struct  <Vector>
+	88   LifeSpan                 Float   

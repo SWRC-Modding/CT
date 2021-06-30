@@ -1,0 +1,2 @@
+CLASS: Explosion_Door_TRN(828), BASE: Emitter
+PROPERTIES:

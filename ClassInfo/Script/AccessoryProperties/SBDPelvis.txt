@@ -1,0 +1,2 @@
+CLASS: SBDPelvis(696), BASE: Accessory
+PROPERTIES:

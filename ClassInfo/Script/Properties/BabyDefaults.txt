@@ -1,0 +1,2 @@
+CLASS: BabyDefaults(1180), BASE: Baby
+PROPERTIES:

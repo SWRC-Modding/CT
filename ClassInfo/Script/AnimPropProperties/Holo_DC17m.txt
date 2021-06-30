@@ -1,0 +1,2 @@
+CLASS: Holo_DC17m(868), BASE: AnimProp
+PROPERTIES:

@@ -1,0 +1,10 @@
+CLASS: GOAL_FollowLink(112), BASE: GoalObject
+PROPERTIES:
+	76   Link                     Object  <ReachSpec>
+	80   Destination              Struct  <Vector>
+	92   PreviousLocation         Struct  <Vector>
+	104  StuckTime                Float   
+	108  bLastLink                Bool    <0 : 0x00000001>
+	108  bCheatedCollision        Bool    <1 : 0x00000002>
+	108  bOldBlockActors          Bool    <2 : 0x00000004>
+	108  bOldBlockPlayers         Bool    <3 : 0x00000008>

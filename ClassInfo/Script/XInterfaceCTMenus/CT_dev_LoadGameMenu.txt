@@ -1,0 +1,22 @@
+CLASS: CT_dev_LoadGameMenu(27376), BASE: MenuTemplate
+PROPERTIES:
+	17696 CharacterDemoMap         Struct  <MenuButtonText>
+	18180 GEO_01                   Struct  <MenuButtonText>
+	18664 GEO_03                   Struct  <MenuButtonText>
+	19148 GEO_04                   Struct  <MenuButtonText>
+	19632 GEO_05                   Struct  <MenuButtonText>
+	20116 mp_geo_canyonsmall       Struct  <MenuButtonText>
+	20600 mpserver1                Struct  <MenuButtonText>
+	21084 mpserver2                Struct  <MenuButtonText>
+	21568 RAS_01                   Struct  <MenuButtonText>
+	22052 RAS_02                   Struct  <MenuButtonText>
+	22536 RAS_03                   Struct  <MenuButtonText>
+	23020 RAS_04                   Struct  <MenuButtonText>
+	23504 YYY_01                   Struct  <MenuButtonText>
+	23988 YYY_35                   Struct  <MenuButtonText>
+	24472 YYY_04                   Struct  <MenuButtonText>
+	24956 YYY_05                   Struct  <MenuButtonText>
+	25440 YYY_06                   Struct  <MenuButtonText>
+	25924 GEO_05B                  Struct  <MenuButtonText>
+	26408 YYY_35B                  Struct  <MenuButtonText>
+	26892 back                     Struct  <MenuButtonText>

@@ -1,0 +1,60 @@
+CLASS: UWindowWindow(180), BASE: UWindowBase
+ENUMS:
+	WinMessage
+		WM_LMouseDown            =   0
+		WM_LMouseUp              =   1
+		WM_MMouseDown            =   2
+		WM_MMouseUp              =   3
+		WM_RMouseDown            =   4
+		WM_RMouseUp              =   5
+		WM_KeyUp                 =   6
+		WM_KeyDown               =   7
+		WM_KeyType               =   8
+		WM_Paint                 =   9
+STRUCTS:
+	MouseCursor(16)
+		0    Tex                      Object  <Texture>
+		4    HotX                     Int     
+		8    HotY                     Int     
+		12   WindowsCursor            Byte    
+PROPERTIES:
+	52   WinLeft                  Float   
+	56   WinTop                   Float   
+	60   WinWidth                 Float   
+	64   WinHeight                Float   
+	68   ParentWindow             Object  <UWindowWindow>
+	72   FirstChildWindow         Object  <UWindowWindow>
+	76   LastChildWindow          Object  <UWindowWindow>
+	80   NextSiblingWindow        Object  <UWindowWindow>
+	84   PrevSiblingWindow        Object  <UWindowWindow>
+	88   ActiveWindow             Object  <UWindowWindow>
+	92   root                     Object  <UWindowRootWindow>
+	96   OwnerWindow              Object  <UWindowWindow>
+	100  ModalWindow              Object  <UWindowWindow>
+	104  bWindowVisible           Bool    <0 : 0x00000001>
+	104  bNoClip                  Bool    <1 : 0x00000002>
+	104  bMouseDown               Bool    <2 : 0x00000004>
+	104  bRMouseDown              Bool    <3 : 0x00000008>
+	104  bMMouseDown              Bool    <4 : 0x00000010>
+	104  bAlwaysBehind            Bool    <5 : 0x00000020>
+	104  bAcceptsFocus            Bool    <6 : 0x00000040>
+	104  bAlwaysOnTop             Bool    <7 : 0x00000080>
+	104  bLeaveOnscreen           Bool    <8 : 0x00000100>
+	104  bUWindowActive           Bool    <9 : 0x00000200>
+	104  bTransient               Bool    <10: 0x00000400>
+	104  bAcceptsHotKeys          Bool    <11: 0x00000800>
+	104  bIgnoreLDoubleClick      Bool    <12: 0x00001000>
+	104  bIgnoreMDoubleClick      Bool    <13: 0x00002000>
+	104  bIgnoreRDoubleClick      Bool    <14: 0x00004000>
+	108  ClickTime                Float   
+	112  MClickTime               Float   
+	116  RClickTime               Float   
+	120  ClickX                   Float   
+	124  ClickY                   Float   
+	128  MClickX                  Float   
+	132  MClickY                  Float   
+	136  RClickX                  Float   
+	140  RClickY                  Float   
+	144  LookAndFeel              Object  <UWindowLookAndFeel>
+	148  ClippingRegion           Struct  <Region>
+	164  Cursor                   Struct  <MouseCursor>

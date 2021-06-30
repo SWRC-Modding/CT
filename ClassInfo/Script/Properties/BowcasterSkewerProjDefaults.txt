@@ -1,0 +1,2 @@
+CLASS: BowcasterSkewerProjDefaults(832), BASE: BowcasterSkewerProj
+PROPERTIES:

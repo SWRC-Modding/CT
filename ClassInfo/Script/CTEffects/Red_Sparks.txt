@@ -1,0 +1,2 @@
+CLASS: Red_Sparks(828), BASE: Emitter
+PROPERTIES:

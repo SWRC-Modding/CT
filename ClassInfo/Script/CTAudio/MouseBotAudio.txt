@@ -1,0 +1,2 @@
+CLASS: MouseBotAudio(48), BASE: PawnAudioTable
+PROPERTIES:

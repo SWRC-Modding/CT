@@ -1,0 +1,2 @@
+CLASS: BreachDoorYYY(952), BASE: BreachDoor
+PROPERTIES:

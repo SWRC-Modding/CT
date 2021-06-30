@@ -1,0 +1,3 @@
+CLASS: FlagAttachment(780), BASE: WeaponAttachment
+PROPERTIES:
+	776  theFlag                  Object  <CTFFlag>

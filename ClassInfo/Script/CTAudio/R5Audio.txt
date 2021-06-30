@@ -1,0 +1,2 @@
+CLASS: R5Audio(48), BASE: PawnAudioTable
+PROPERTIES:

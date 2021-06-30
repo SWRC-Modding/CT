@@ -1,0 +1,2 @@
+CLASS: Model(1768), BASE: Primitive
+PROPERTIES:

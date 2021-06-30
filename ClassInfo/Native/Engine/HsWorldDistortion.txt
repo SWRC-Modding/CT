@@ -1,0 +1,10 @@
+CLASS: HsWorldDistortion(136), BASE: HardwareShaderWrapper
+PROPERTIES:
+	104  ColorAdd                 Struct  <Color>
+	108  ColorVariation           Struct  <Color>
+	112  WorldDistortion          Float   
+	116  WobbleScale              Float   
+	120  WobbleSpeed              Float   
+	124  WobbleAmplitute          Float   
+	128  VortexEffect             Bool    <0 : 0x00000001>
+	132  Alpha                    Byte    

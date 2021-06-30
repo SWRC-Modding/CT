@@ -1,0 +1,3 @@
+CLASS: TexMatrix(176), BASE: TexModifier
+PROPERTIES:
+	112  Matrix                   Struct  <Matrix>

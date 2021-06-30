@@ -1,0 +1,2 @@
+CLASS: Dust_Blowing(828), BASE: Emitter
+PROPERTIES:

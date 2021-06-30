@@ -1,0 +1,2 @@
+CLASS: Grenade_Sonic_Glow(828), BASE: Emitter
+PROPERTIES:

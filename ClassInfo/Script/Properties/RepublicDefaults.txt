@@ -1,0 +1,2 @@
+CLASS: RepublicDefaults(1664), BASE: Republic
+PROPERTIES:

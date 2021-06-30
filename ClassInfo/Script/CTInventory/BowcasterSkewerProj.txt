@@ -1,0 +1,9 @@
+CLASS: BowcasterSkewerProj(832), BASE: CTProjExplosive
+PROPERTIES:
+	804  PathConstraint           Object  <KFixedPathJoint>
+	808  AngleConstraint          Object  <KAngularJoint>
+	812  Dragger                  Object  <Actor>
+	816  DragSpeed                Float   
+	820  DragDuration             Float   
+	824  DragEffectClass          Class   <Emitter>
+	828  DragEffectEmitter        Object  <Emitter>

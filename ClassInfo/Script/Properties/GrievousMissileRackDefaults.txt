@@ -1,0 +1,2 @@
+CLASS: GrievousMissileRackDefaults(1180), BASE: GrievousMissileRack
+PROPERTIES:

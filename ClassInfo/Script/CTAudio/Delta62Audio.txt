@@ -1,0 +1,2 @@
+CLASS: Delta62Audio(48), BASE: PawnAudioTable
+PROPERTIES:

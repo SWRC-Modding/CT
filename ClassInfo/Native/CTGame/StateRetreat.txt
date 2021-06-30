@@ -1,0 +1,6 @@
+CLASS: StateRetreat(72), BASE: StateObject
+PROPERTIES:
+	52   RetreatGoal              Object  <NavigationPoint>
+	56   HealthThreshold          Float   
+	60   DamageThreshold          Float   
+	64   EnemyDist                Struct  <Range>

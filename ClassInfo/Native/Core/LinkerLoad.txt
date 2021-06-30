@@ -1,0 +1,2 @@
+CLASS: LinkerLoad(1240), BASE: Linker
+PROPERTIES:

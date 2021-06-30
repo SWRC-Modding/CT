@@ -1,0 +1,25 @@
+CLASS: Canvas(140), BASE: Object
+PROPERTIES:
+	40   Font                     Object  <Font>
+	44   SpaceX                   Float   
+	48   SpaceY                   Float   
+	52   OrgX                     Float   
+	56   OrgY                     Float   
+	60   ClipX                    Float   
+	64   ClipY                    Float   
+	68   CurX                     Float   
+	72   CurY                     Float   
+	76   Z                        Float   
+	80   Style                    Byte    
+	84   CurYL                    Float   
+	88   DrawColor                Struct  <Color>
+	92   bCenter                  Bool    <0 : 0x00000001>
+	92   bNoSmooth                Bool    <1 : 0x00000002>
+	96   SizeX                    Int     
+	100  SizeY                    Int     
+	104  ColorModulate            Struct  <Plane>
+	120  TinyFont                 Object  <Font>
+	124  SmallFont                Object  <Font>
+	128  MedFont                  Object  <Font>
+	132  Viewport                 Object  <Viewport>
+	136  pCanvasUtil              Int     

@@ -1,0 +1,4 @@
+CLASS: ACTION_SetTurretUsable(72), BASE: ScriptedAction
+PROPERTIES:
+	64   TurretTag                Name    
+	68   IsPlayerUsable           Bool    <0 : 0x00000001>

@@ -1,0 +1,30 @@
+CLASS: CTProjExplosive(804), BASE: Projectile
+PROPERTIES:
+	716  FuseTime                 Float   
+	720  PostImpactFuseTime       Float   
+	724  BounceSpin               Float   
+	728  BounceDampening          Float   
+	732  ActorBounceDampening     Float   
+	736  RestSpeed                Float   
+	740  ExplosionProximity       Float   
+	744  ExplosionDelay           Struct  <Range>
+	752  ExplosionEffect          Class   <Emitter>
+	756  ExplosionStatusEffect    Class   <StatusEffect>
+	760  StatusEffectMaxDuration  Float   
+	764  StatusEffectDamagePerSec Float   
+	768  StatusEffectRadiusModifier Float   
+	772  LastCheckTime            Float   
+	776  ElapseTime               Float   
+	780  MinBounceSoundTime       Float   
+	784  LastBounceSoundTime      Float   
+	788  LastTouchedActor         Object  <Actor>
+	792  bActorDetonate           Bool    <0 : 0x00000001>
+	792  bWorldDetonate           Bool    <1 : 0x00000002>
+	792  bProximityDetonate       Bool    <2 : 0x00000004>
+	792  bStickToWorld            Bool    <3 : 0x00000008>
+	792  bStickToActors           Bool    <4 : 0x00000010>
+	792  bStickToDroids           Bool    <5 : 0x00000020>
+	792  bExplodeNow              Bool    <6 : 0x00000040>
+	792  bPlayingTickSound        Bool    <7 : 0x00000080>
+	796  TickSound                Object  <Sound>
+	800  LastMaterialHit          Byte    <EMaterialType>

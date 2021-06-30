@@ -1,0 +1,2 @@
+CLASS: LevelLoadingView(724), BASE: NavigationPoint
+PROPERTIES:

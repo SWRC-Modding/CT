@@ -1,0 +1,2 @@
+CLASS: CloneHelmetInHand(1680), BASE: CloneNoHelmet
+PROPERTIES:

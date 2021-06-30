@@ -1,0 +1,2 @@
+CLASS: TRAN_BackPack(828), BASE: Emitter
+PROPERTIES:

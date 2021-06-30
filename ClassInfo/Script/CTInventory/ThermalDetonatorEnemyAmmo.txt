@@ -1,0 +1,2 @@
+CLASS: ThermalDetonatorEnemyAmmo(868), BASE: ThermalDetonatorAmmo
+PROPERTIES:

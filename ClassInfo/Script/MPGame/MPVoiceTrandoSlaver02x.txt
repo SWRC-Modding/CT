@@ -1,0 +1,2 @@
+CLASS: MPVoiceTrandoSlaver02x(1532), BASE: VoicePack
+PROPERTIES:

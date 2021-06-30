@@ -1,0 +1,2 @@
+CLASS: ShotgunPickup(704), BASE: CTPickup
+PROPERTIES:

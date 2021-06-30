@@ -1,0 +1,3 @@
+CLASS: BlockedPath(728), BASE: NavigationPoint
+PROPERTIES:
+	724  MyBlocker                Object  <Actor>

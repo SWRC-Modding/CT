@@ -1,0 +1,91 @@
+CLASS: TerrainInfo(4756), BASE: Info
+ENUMS:
+	ETexMapAxis
+		TEXMAPAXIS_XY            =   0
+		TEXMAPAXIS_XZ            =   1
+		TEXMAPAXIS_YZ            =   2
+	ESortOrder
+		SORT_NoSort              =   0
+		SORT_BackToFront         =   1
+		SORT_FrontToBack         =   2
+STRUCTS:
+	NormalPair(24)
+		0    Normal1                  Struct  <Vector>
+		12   Normal2                  Struct  <Vector>
+	TerrainLayer(120)
+		0    Texture                  Object  <Material>
+		4    AlphaMap                 Object  <Texture>
+		8    UScale                   Float   
+		12   VScale                   Float   
+		16   UPan                     Float   
+		20   VPan                     Float   
+		24   TextureMapAxis           Byte    <ETexMapAxis>
+		28   TextureRotation          Float   
+		32   LayerRotation            Struct  <Rotator>
+		44   TerrainMatrix            Struct  <Matrix>
+		108  KFriction                Float   
+		112  KRestitution             Float   
+		116  LayerWeightMap           Object  <Texture>
+	DecorationLayer(92)
+		0    ShowOnTerrain            Int     
+		4    ScaleMap                 Object  <Texture>
+		8    DensityMap               Object  <Texture>
+		12   ColorMap                 Object  <Texture>
+		16   StaticMesh               Object  <StaticMesh>
+		20   ScaleMultiplier          Struct  <RangeVector>
+		44   FadeoutRadius            Struct  <Range>
+		52   DensityMultiplier        Struct  <Range>
+		60   MaxPerQuad               Int     
+		64   Seed                     Int     
+		68   AlignToTerrain           Int     
+		72   DrawOrder                Byte    <ESortOrder>
+		76   ShowOnInvisibleTerrain   Int     
+		80   LitDirectional           Int     
+		84   DisregardTerrainLighting Int     
+		88   RandomYaw                Int     
+	DecoInfo(56)
+		0    Location                 Struct  <Vector>
+		12   Rotation                 Struct  <Rotator>
+		24   Scale                    Struct  <Vector>
+		36   TempScale                Struct  <Vector>
+		48   Color                    Struct  <Color>
+		52   Distance                 Int     
+	DecoSectorInfo(24)
+		0    DecoInfo                 Array   <Struct <DecoInfo>>
+		8    Location                 Struct  <Vector>
+		20   Radius                   Float   
+	DecorationLayerData(8)
+		0    Sectors                  Array   <Struct <DecoSectorInfo>>
+PROPERTIES:
+	644  TerrainSectorSize        Int     
+	648  TerrainMap               Object  <Texture>
+	652  TerrainScale             Struct  <Vector>
+	664  Layers                   Struct  <TerrainLayer>[32]
+	4504 DecoLayers               Array   <Struct <DecorationLayer>>
+	4512 DecoLayerOffset          Float   
+	4516 Inverted                 Bool    <0 : 0x00000001>
+	4516 bKCollisionHalfRes       Bool    <1 : 0x00000002>
+	4520 JustLoaded               Int     
+	4524 DecoLayerData            Array   <Struct <DecorationLayerData>>
+	4532 Sectors                  Array   <Object <TerrainSector>>
+	4540 Vertices                 Array   <Struct <Vector>>
+	4548 HeightmapX               Int     
+	4552 HeightmapY               Int     
+	4556 SectorsX                 Int     
+	4560 SectorsY                 Int     
+	4564 Primitive                Object  <TerrainPrimitive>
+	4568 FaceNormals              Array   <Struct <NormalPair>>
+	4576 ToWorld                  Struct  <Vector>[4]
+	4624 ToHeightmap              Struct  <Vector>[4]
+	4672 SelectedVertices         Array   <Int>
+	4680 ShowGrid                 Int     
+	4684 QuadVisibilityBitmap     Array   <Int>
+	4692 EdgeTurnBitmap           Array   <Int>
+	4700 QuadDomMaterialBitmap    Array   <Object <Material>>
+	4708 RenderCombinations       Array   <Int>
+	4716 VertexStreams            Array   <Int>
+	4724 VertexColors             Array   <Struct <Color>>
+	4732 PaintedColor             Array   <Struct <Color>>
+	4740 CollapsedLayers          Object  <Texture>
+	4744 OldTerrainMap            Object  <Texture>
+	4748 OldHeightmap             Array   

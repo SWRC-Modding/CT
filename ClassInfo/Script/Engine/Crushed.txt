@@ -1,0 +1,2 @@
+CLASS: Crushed(112), BASE: DamageType
+PROPERTIES:

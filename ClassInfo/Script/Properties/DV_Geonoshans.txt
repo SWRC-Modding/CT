@@ -1,0 +1,2 @@
+CLASS: DV_Geonoshans(56), BASE: DamageVariance
+PROPERTIES:

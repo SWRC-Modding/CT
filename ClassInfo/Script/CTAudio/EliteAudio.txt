@@ -1,0 +1,2 @@
+CLASS: EliteAudio(48), BASE: PawnAudioTable
+PROPERTIES:

@@ -1,0 +1,2 @@
+CLASS: DC17mBlasterAttachmentDefaults(776), BASE: DC17mBlasterAttachment
+PROPERTIES:

@@ -1,0 +1,2 @@
+CLASS: Shell_Uzi(828), BASE: Emitter
+PROPERTIES:

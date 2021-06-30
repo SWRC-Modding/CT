@@ -1,0 +1,2 @@
+CLASS: DC15LaserBolt(828), BASE: Emitter
+PROPERTIES:

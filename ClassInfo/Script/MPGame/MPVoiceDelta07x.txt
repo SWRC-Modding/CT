@@ -1,0 +1,2 @@
+CLASS: MPVoiceDelta07x(1532), BASE: VoicePack
+PROPERTIES:

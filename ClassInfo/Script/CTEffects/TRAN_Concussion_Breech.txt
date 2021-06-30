@@ -1,0 +1,2 @@
+CLASS: TRAN_Concussion_Breech(828), BASE: Emitter
+PROPERTIES:

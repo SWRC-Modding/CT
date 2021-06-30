@@ -1,0 +1,6 @@
+CLASS: AnimNotify_ReleaseGrenade(68), BASE: AnimNotify
+PROPERTIES:
+	44   Bone                     Name    
+	48   ReleaseDirection         Struct  <Vector>
+	60   ReleaseSpeed             Float   
+	64   UseFlatTrajectory        Bool    <0 : 0x00000001>

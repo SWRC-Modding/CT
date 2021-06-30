@@ -1,0 +1,10 @@
+CLASS: ConeBuilder(108), BASE: BrushBuilder
+PROPERTIES:
+	80   Height                   Float   
+	84   CapHeight                Float   
+	88   OuterRadius              Float   
+	92   InnerRadius              Float   
+	96   Sides                    Int     
+	100  GroupName                Name    
+	104  AlignToSide              Bool    <0 : 0x00000001>
+	104  Hollow                   Bool    <1 : 0x00000002>

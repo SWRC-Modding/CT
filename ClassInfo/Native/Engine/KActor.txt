@@ -1,0 +1,16 @@
+CLASS: KActor(696), BASE: Actor
+PROPERTIES:
+	644  bKTakeShot               Bool    <0 : 0x00000001>
+	644  bOrientImpactEffect      Bool    <1 : 0x00000002>
+	644  bTimingOut               Bool    <2 : 0x00000004>
+	648  ImpactSounds             Array   <Object <Sound>>
+	656  ImpactVolume             Float   
+	660  ImpactEffect             Class   <Actor>
+	664  ImpactDamageType         Class   <DamageType>
+	668  Health                   Int     
+	672  LifeTime                 Float   
+	676  DamageThreshold          Int     
+	680  ImpactInterval           Float   
+	684  LastImpactTime           Float   
+	688  ImpactDamageMultiplier   Float   
+	692  ImpactDamageMinVelocity  Float   

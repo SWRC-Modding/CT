@@ -1,0 +1,2 @@
+CLASS: cGEO_Chair_Crumble(828), BASE: Emitter
+PROPERTIES:

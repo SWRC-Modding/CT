@@ -1,0 +1,2 @@
+CLASS: TeamWookiee(756), BASE: CTTeamInfo
+PROPERTIES:

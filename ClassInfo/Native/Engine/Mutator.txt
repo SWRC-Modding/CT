@@ -1,0 +1,9 @@
+CLASS: Mutator(688), BASE: Info
+PROPERTIES:
+	644  NextMutator              Object  <Mutator>
+	648  DefaultWeapon            Class   <Weapon>
+	652  DefaultWeaponName        Str     
+	660  GroupName                Str     
+	668  FriendlyName             Str     
+	676  Description              Str     
+	684  bUserAdded               Bool    <0 : 0x00000001>

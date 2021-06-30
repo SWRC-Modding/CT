@@ -1,0 +1,12 @@
+CLASS: TriggerLight(700), BASE: Light
+PROPERTIES:
+	664  ChangeTime               Float   
+	668  bInitiallyOn             Bool    <0 : 0x00000001>
+	668  bDelayFullOn             Bool    <1 : 0x00000002>
+	672  RemainOnTime             Float   
+	676  InitialBrightness        Float   
+	680  bInitialCorona           Bool    <0 : 0x00000001>
+	684  Alpha                    Float   
+	688  Direction                Float   
+	692  SavedTrigger             Object  <Actor>
+	696  poundTime                Float   

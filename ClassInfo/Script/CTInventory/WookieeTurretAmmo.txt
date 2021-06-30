@@ -1,0 +1,2 @@
+CLASS: WookieeTurretAmmo(868), BASE: Ammunition
+PROPERTIES:

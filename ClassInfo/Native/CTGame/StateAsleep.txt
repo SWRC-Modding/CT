@@ -1,0 +1,2 @@
+CLASS: StateAsleep(60), BASE: StateShutdown
+PROPERTIES:

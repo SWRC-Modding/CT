@@ -1,0 +1,2 @@
+CLASS: SonicTurret(2052), BASE: Turret
+PROPERTIES:

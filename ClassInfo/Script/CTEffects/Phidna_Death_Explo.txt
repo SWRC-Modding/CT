@@ -1,0 +1,2 @@
+CLASS: Phidna_Death_Explo(828), BASE: Emitter
+PROPERTIES:

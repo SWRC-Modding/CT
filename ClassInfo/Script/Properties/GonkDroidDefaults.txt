@@ -1,0 +1,2 @@
+CLASS: GonkDroidDefaults(1688), BASE: GonkDroid
+PROPERTIES:

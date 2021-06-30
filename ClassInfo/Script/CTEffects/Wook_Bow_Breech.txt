@@ -1,0 +1,2 @@
+CLASS: Wook_Bow_Breech(828), BASE: Emitter
+PROPERTIES:

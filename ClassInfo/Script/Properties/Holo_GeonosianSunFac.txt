@@ -1,0 +1,2 @@
+CLASS: Holo_GeonosianSunFac(1668), BASE: GeonosianSunFac
+PROPERTIES:

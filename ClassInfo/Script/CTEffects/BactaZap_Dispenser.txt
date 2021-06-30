@@ -1,0 +1,2 @@
+CLASS: BactaZap_Dispenser(828), BASE: Emitter
+PROPERTIES:

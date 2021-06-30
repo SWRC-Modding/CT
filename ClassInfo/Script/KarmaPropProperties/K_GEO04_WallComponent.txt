@@ -1,0 +1,2 @@
+CLASS: K_GEO04_WallComponent(888), BASE: KarmaProp
+PROPERTIES:

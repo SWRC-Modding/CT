@@ -1,0 +1,3 @@
+CLASS: CTIncapLoadConfirmMenu(19840), BASE: MenuTemplateTitledBA
+PROPERTIES:
+	19728 Question                 Struct  <MenuText>

@@ -1,0 +1,14 @@
+CLASS: MenuLiveMain(23784), BASE: MenuTemplateTitledBA
+PROPERTIES:
+	19728 Options                  Struct  <MenuButtonText>[8]
+	23600 BorderBox                Struct  <MenuSprite>
+	23672 FriendsIcon              Struct  <MenuSprite>
+	23744 FriendRequestIcon        Object  <Material>
+	23748 GameInviteIcon           Object  <Material>
+	23752 ConfirmSignOutText       Str     
+	23760 ContentDownloadLastCheckTime Float   
+	23764 ContentDownloadIntervalCheckTime Float   
+	23768 ContentDownloadPulse     Int     
+	23772 ContentDownloadPulseSpeed Int     
+	23776 ContentIsAvailable       Bool    <0 : 0x00000001>
+	23780 Position                 Int     

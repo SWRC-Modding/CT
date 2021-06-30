@@ -1,0 +1,7 @@
+CLASS: StimulusVis(664), BASE: Actor
+PROPERTIES:
+	644  Range                    Float   
+	648  Instigator               Object  <Actor>
+	652  Subject                  Object  <Actor>
+	656  StimType                 Byte    <EStimulusType>
+	660  DrawColor                Struct  <Color>

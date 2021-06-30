@@ -1,0 +1,2 @@
+CLASS: DeathEffectContainer_Warrior(52), BASE: DeathEffectContainer
+PROPERTIES:

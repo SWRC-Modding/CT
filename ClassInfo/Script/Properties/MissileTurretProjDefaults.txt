@@ -1,0 +1,2 @@
+CLASS: MissileTurretProjDefaults(804), BASE: MissileTurretProj
+PROPERTIES:

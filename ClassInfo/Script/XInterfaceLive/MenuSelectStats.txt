@@ -1,0 +1,21 @@
+CLASS: MenuSelectStats(22276), BASE: MenuTemplateTitledBA
+PROPERTIES:
+	19728 BorderBox                Struct  <MenuSprite>
+	19800 GameTypeRecords          Array   <Struct <GameTypeRecord>>
+	19808 GameTypeList             Struct  <MenuStringList>
+	20348 ScrollBar                Struct  <MenuScrollBar>
+	20964 ScrollBarArrowUp         Struct  <MenuButtonSprite>
+	21368 ScrollBarArrowDown       Struct  <MenuButtonSprite>
+	21772 ScrollBorder             Struct  <MenuSprite>
+	21844 ScrollArea               Struct  <MenuScrollArea>
+	21896 PageUpArea               Struct  <MenuActiveWidget>
+	22008 PageDownArea             Struct  <MenuActiveWidget>
+	22120 GameTypeName             Str     
+	22128 OverallText              Str     
+	22136 OverallIndex             Int     
+	22140 DedicatedText            Str     
+	22148 DedicatedIndex           Int     
+	22152 GettingStatsMsg          Struct  <MenuText>
+	22264 T                        Float   
+	22268 BlinkTime                Float   
+	22272 SelectedIndex            Int     

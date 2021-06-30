@@ -1,0 +1,20 @@
+CLASS: StateAbstractAttack(124), BASE: StateObject
+PROPERTIES:
+	52   ReadyDistance            Float   
+	56   SafeDistance             Float   
+	60   MoveModePosition         Struct  <Vector>
+	72   LocalEnemyPos            Struct  <Vector>
+	84   DirToEnemy               Struct  <Vector>
+	96   DistToEnemy              Float   
+	100  NextMoveModeTime         Float   
+	104  NextToggleAttackTime     Float   
+	108  FollowEnemyGoal          Object  <GOAL_Follow>
+	112  InOffensiveMode          Bool    <0 : 0x00000001>
+	112  CanSeeEnemy              Bool    <1 : 0x00000002>
+	112  ForceMoveModeDecision    Bool    <2 : 0x00000004>
+	112  MoveModeBegun            Bool    <3 : 0x00000008>
+	112  FinishedMovement         Bool    <4 : 0x00000010>
+	112  Melee                    Bool    <5 : 0x00000020>
+	112  FallBackFromEnemy        Bool    <6 : 0x00000040>
+	116  LastManuver              Int     
+	120  CurMoveMode              Int     

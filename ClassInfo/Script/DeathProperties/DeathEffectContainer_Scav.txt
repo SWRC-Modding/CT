@@ -1,0 +1,2 @@
+CLASS: DeathEffectContainer_Scav(52), BASE: DeathEffectContainer
+PROPERTIES:

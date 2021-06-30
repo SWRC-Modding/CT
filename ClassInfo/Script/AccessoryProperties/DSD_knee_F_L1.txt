@@ -1,0 +1,2 @@
+CLASS: DSD_knee_F_L1(696), BASE: Accessory
+PROPERTIES:

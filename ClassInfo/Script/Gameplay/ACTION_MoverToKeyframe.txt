@@ -1,0 +1,6 @@
+CLASS: ACTION_MoverToKeyframe(76), BASE: LatentScriptedAction
+PROPERTIES:
+	64   KeyFrame                 Int     
+	68   MoverTag                 Name    
+	72   bWaitUntilFinish         Bool    <0 : 0x00000001>
+	72   bBackwards               Bool    <1 : 0x00000002>

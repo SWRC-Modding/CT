@@ -1,0 +1,2 @@
+CLASS: cFX_GEO3_ConveyerShield(828), BASE: Emitter
+PROPERTIES:

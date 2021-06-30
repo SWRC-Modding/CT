@@ -1,0 +1,2 @@
+CLASS: Custom_YYY04f_Explo_Bridge_Main(828), BASE: Emitter
+PROPERTIES:

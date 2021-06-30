@@ -1,0 +1,2 @@
+CLASS: Holo_Projector_GEO(828), BASE: Emitter
+PROPERTIES:

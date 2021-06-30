@@ -1,0 +1,2 @@
+CLASS: TranDropshipDefaults(1664), BASE: TranDropship
+PROPERTIES:

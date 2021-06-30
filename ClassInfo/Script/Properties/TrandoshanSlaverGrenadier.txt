@@ -1,0 +1,2 @@
+CLASS: TrandoshanSlaverGrenadier(1668), BASE: TrandoshanSlaver
+PROPERTIES:

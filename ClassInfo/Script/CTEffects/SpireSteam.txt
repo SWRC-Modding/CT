@@ -1,0 +1,2 @@
+CLASS: SpireSteam(828), BASE: Emitter
+PROPERTIES:

@@ -1,0 +1,2 @@
+CLASS: SunFacPikeAttachment(776), BASE: ForcePikeAttachment
+PROPERTIES:

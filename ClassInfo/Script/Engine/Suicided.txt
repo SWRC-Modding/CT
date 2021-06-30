@@ -1,0 +1,2 @@
+CLASS: Suicided(112), BASE: DamageType
+PROPERTIES:

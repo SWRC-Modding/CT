@@ -1,0 +1,2 @@
+CLASS: CTDamageEnergyBowSkewer(112), BASE: CTDamageEnergy
+PROPERTIES:

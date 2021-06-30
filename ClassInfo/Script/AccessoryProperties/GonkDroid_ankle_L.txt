@@ -1,0 +1,2 @@
+CLASS: GonkDroid_ankle_L(696), BASE: Accessory
+PROPERTIES:

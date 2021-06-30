@@ -1,0 +1,3 @@
+CLASS: CTFGameReplicationInfo(856), BASE: TDGameReplicationInfo
+PROPERTIES:
+	848  theFlags                 Object  <GameObject>[2]

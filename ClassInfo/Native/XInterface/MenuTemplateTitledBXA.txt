@@ -1,0 +1,5 @@
+CLASS: MenuTemplateTitledBXA(20396), BASE: MenuTemplateTitledBA
+PROPERTIES:
+	19728 XButtonIcon              Struct  <MenuSprite>
+	19800 XLabel                   Struct  <MenuText>
+	19912 XButton                  Struct  <MenuButtonText>

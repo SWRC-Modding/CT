@@ -1,0 +1,2 @@
+CLASS: GeoElite_shoulder_L(696), BASE: Accessory
+PROPERTIES:

@@ -1,0 +1,2 @@
+CLASS: WookieeTarfful(1664), BASE: Wookiee
+PROPERTIES:

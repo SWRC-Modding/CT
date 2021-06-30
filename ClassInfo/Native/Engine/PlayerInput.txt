@@ -1,0 +1,50 @@
+CLASS: PlayerInput(464), BASE: Object
+PROPERTIES:
+	40   bWasForward              Bool    <0 : 0x00000001>
+	40   bWasBack                 Bool    <1 : 0x00000002>
+	40   bWasLeft                 Bool    <2 : 0x00000004>
+	40   bWasRight                Bool    <3 : 0x00000008>
+	40   bEdgeForward             Bool    <4 : 0x00000010>
+	40   bEdgeBack                Bool    <5 : 0x00000020>
+	40   bEdgeLeft                Bool    <6 : 0x00000040>
+	40   bEdgeRight               Bool    <7 : 0x00000080>
+	40   bAdjustSampling          Bool    <8 : 0x00000100>
+	40   bInvertLook              Bool    <9 : 0x00000200>
+	40   bCanDClickDodge          Bool    <10: 0x00000400>
+	44   MouseSmoothingMode       Byte    
+	48   MouseSmoothingStrength   Float   
+	52   MouseSensitivity         Float   
+	56   MouseAccelThreshold      Float   
+	60   MouseSamplingTime        Float   
+	64   JoyAcceleration          Float   
+	68   JoyDeadZone              Float   
+	72   TriggerDeadZone          Float   
+	76   ButtonDeadZone           Float   
+	80   ButtonHoldDelay          Float   
+	84   DoubleTapThreshold       Float   
+	88   JoyAccelX                Float   
+	92   JoyAccelY                Float   
+	96   JoyAccelU                Float   
+	100  JoyAccelV                Float   
+	104  JoySensitivityXY         Float   
+	108  JoySensitivityUV         Float   
+	112  JoyResponseCurveX        Float   [16]
+	176  JoyResponseCurveY        Float   [16]
+	240  JoyResponseCurveU        Float   [16]
+	304  JoyResponseCurveV        Float   [16]
+	368  SmoothedMouse            Float   [2]
+	376  ZeroTime                 Float   [2]
+	384  SamplingTime             Float   [2]
+	392  MaybeTime                Float   [2]
+	400  OldSamples               Float   [4]
+	416  MouseSamples             Int     [2]
+	424  JoyTimeToMaxX            Float   
+	428  JoyMaxTimerX             Float   
+	432  JoyTimeToMaxY            Float   
+	436  JoyMaxTimerY             Float   
+	440  JoyTimeToMaxU            Float   
+	444  JoyMaxTimerU             Float   
+	448  JoyTimeToMaxV            Float   
+	452  JoyMaxTimerV             Float   
+	456  DoubleClickTimer         Float   
+	460  DoubleClickTime          Float   

@@ -1,0 +1,2 @@
+CLASS: YYY_01B_prisTunnel_sfx01(96), BASE: AudioEnvironment
+PROPERTIES:

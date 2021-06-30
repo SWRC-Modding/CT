@@ -1,0 +1,2 @@
+CLASS: SBDroid_Cannon_Impact_Generic(828), BASE: Emitter
+PROPERTIES:

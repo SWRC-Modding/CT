@@ -1,0 +1,16 @@
+CLASS: MatAction(124), BASE: MatObject
+PROPERTIES:
+	40   IntPoint                 Object  <InterpolationPoint>
+	44   Comment                  Str     
+	52   Duration                 Float   
+	56   SubActions               Array   <Object <MatSubAction>>
+	64   bSmoothCorner            Bool    <0 : 0x00000001>
+	68   StartControlPoint        Struct  <Vector>
+	80   EndControlPoint          Struct  <Vector>
+	92   bConstantPathVelocity    Bool    <0 : 0x00000001>
+	96   PathVelocity             Float   
+	100  PathLength               Float   
+	104  SampleLocations          Array   <Struct <Vector>>
+	112  PctStarting              Float   
+	116  PctEnding                Float   
+	120  PctDuration              Float   

@@ -1,0 +1,2 @@
+CLASS: DV_OrganicCTSquadDamage(56), BASE: DV_Organic
+PROPERTIES:

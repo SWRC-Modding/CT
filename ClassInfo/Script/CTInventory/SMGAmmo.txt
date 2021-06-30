@@ -1,0 +1,2 @@
+CLASS: SMGAmmo(868), BASE: Ammunition
+PROPERTIES:

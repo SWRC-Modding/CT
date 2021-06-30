@@ -1,0 +1,2 @@
+CLASS: ExplosiveBarrelGEO(892), BASE: ExplosiveBarrel
+PROPERTIES:

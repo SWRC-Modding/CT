@@ -1,0 +1,5 @@
+CLASS: GameStats(656), BASE: Info
+PROPERTIES:
+	644  TempLog                  Object  <FileLog>
+	648  GRI                      Object  <GameReplicationInfo>
+	652  bShowBots                Bool    <0 : 0x00000001>

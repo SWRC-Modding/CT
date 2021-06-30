@@ -1,0 +1,12 @@
+CLASS: TeamInfo(704), BASE: ReplicationInfo
+PROPERTIES:
+	644  HudTeamColor             Struct  <Color>
+	648  TeamName                 Str     
+	656  Size                     Int     
+	660  Score                    Float   
+	664  TeamIndex                Int     
+	668  TeamColor                Struct  <Color>[2]
+	676  HomeBase                 Object  <Actor>
+	680  DefaultPlayerClass       Class   <Pawn>
+	684  ColorNames               Str     [2]
+	700  TeamIcon                 Object  <Material>

@@ -1,0 +1,3 @@
+CLASS: Scout(1652), BASE: Pawn
+PROPERTIES:
+	1648 MaxLandingVelocity       Float   

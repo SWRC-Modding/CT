@@ -1,0 +1,2 @@
+CLASS: DV_TurretsWookieeRail(56), BASE: DV_Turrets
+PROPERTIES:

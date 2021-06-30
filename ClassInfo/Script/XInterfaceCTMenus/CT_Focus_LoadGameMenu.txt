@@ -1,0 +1,7 @@
+CLASS: CT_Focus_LoadGameMenu(20116), BASE: MenuTemplate
+PROPERTIES:
+	17696 GEO_04_C                 Struct  <MenuButtonText>
+	18180 GEO_05_B                 Struct  <MenuButtonText>
+	18664 YYY_035_B                Struct  <MenuButtonText>
+	19148 YYY_06_C                 Struct  <MenuButtonText>
+	19632 MainMenu                 Struct  <MenuButtonText>

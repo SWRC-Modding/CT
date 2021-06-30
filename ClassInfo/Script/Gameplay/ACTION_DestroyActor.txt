@@ -1,0 +1,3 @@
+CLASS: ACTION_DestroyActor(68), BASE: ScriptedAction
+PROPERTIES:
+	64   DestroyTag               Name    

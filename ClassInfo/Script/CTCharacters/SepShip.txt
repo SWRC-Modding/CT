@@ -1,0 +1,2 @@
+CLASS: SepShip(1664), BASE: Vehicles
+PROPERTIES:

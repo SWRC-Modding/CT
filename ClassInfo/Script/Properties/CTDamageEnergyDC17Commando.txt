@@ -1,0 +1,2 @@
+CLASS: CTDamageEnergyDC17Commando(112), BASE: CTDamageEnergyDC17
+PROPERTIES:

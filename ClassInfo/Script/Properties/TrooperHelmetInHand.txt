@@ -1,0 +1,2 @@
+CLASS: TrooperHelmetInHand(1664), BASE: CloneTrooper
+PROPERTIES:

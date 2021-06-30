@@ -1,0 +1,2 @@
+CLASS: RocketLauncherMP(1284), BASE: RocketLauncher
+PROPERTIES:

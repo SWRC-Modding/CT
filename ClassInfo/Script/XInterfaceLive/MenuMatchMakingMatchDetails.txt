@@ -1,0 +1,26 @@
+CLASS: MenuMatchMakingMatchDetails(22704), BASE: MenuTemplateTitledBXA
+STRUCTS:
+	ServerInfo(84)
+		0    HostName                 Str     
+		8    MapFilename              Str     
+		16   GameType                 Str     
+		24   FRIENDLYFIRE             Int     
+		28   Dedicated                Int     
+		32   NumPlayers               Int     
+		36   MaxPlayers               Int     
+		40   AverageSkill             Int     
+		44   BandwidthUsage           Int     
+		48   URLAppend                Str     
+		56   MapName                  Str     
+		64   GameName                 Str     
+		72   GameAcronym              Str     
+		80   Ping                     Int     
+PROPERTIES:
+	20396 Labels                   Struct  <MenuText>[10]
+	21516 Values                   Struct  <MenuText>[10]
+	22636 Servers                  Array   <Struct <ServerInfo>>
+	22644 CurrentServer            Int     
+	22648 PingLabels               Str     [5]
+	22688 DoingProbes              Bool    <0 : 0x00000001>
+	22692 StringNone               Str     
+	22700 FakePings                Bool    <0 : 0x00000001>

@@ -1,0 +1,2 @@
+CLASS: TrandoshanRifleProjDefaults(716), BASE: TrandoshanRifleProj
+PROPERTIES:

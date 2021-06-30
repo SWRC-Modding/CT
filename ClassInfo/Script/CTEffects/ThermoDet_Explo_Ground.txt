@@ -1,0 +1,2 @@
+CLASS: ThermoDet_Explo_Ground(828), BASE: Emitter
+PROPERTIES:

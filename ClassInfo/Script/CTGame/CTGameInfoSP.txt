@@ -1,0 +1,2 @@
+CLASS: CTGameInfoSP(1076), BASE: CTGameInfo
+PROPERTIES:

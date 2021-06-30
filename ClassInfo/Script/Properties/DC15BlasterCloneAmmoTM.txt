@@ -1,0 +1,2 @@
+CLASS: DC15BlasterCloneAmmoTM(876), BASE: DC15BlasterCloneAmmo
+PROPERTIES:

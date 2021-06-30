@@ -1,0 +1,2 @@
+CLASS: TestMathCommandlet(444), BASE: Commandlet
+PROPERTIES:

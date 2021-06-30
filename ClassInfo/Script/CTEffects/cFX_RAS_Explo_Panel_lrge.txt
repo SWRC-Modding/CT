@@ -1,0 +1,2 @@
+CLASS: cFX_RAS_Explo_Panel_lrge(828), BASE: Emitter
+PROPERTIES:

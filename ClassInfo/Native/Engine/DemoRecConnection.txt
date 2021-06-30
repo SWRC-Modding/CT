@@ -1,0 +1,2 @@
+CLASS: DemoRecConnection(16040), BASE: NetConnection
+PROPERTIES:

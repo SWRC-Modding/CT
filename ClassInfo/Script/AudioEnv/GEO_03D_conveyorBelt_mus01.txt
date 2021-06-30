@@ -1,0 +1,2 @@
+CLASS: GEO_03D_conveyorBelt_mus01(96), BASE: AudioEnvironment
+PROPERTIES:

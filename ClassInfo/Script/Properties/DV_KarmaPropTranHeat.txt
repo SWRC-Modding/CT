@@ -1,0 +1,2 @@
+CLASS: DV_KarmaPropTranHeat(56), BASE: DV_KarmaProps
+PROPERTIES:

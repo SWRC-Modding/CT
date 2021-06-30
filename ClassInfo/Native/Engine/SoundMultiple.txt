@@ -1,0 +1,17 @@
+CLASS: SoundMultiple(152), BASE: Sound
+ENUMS:
+	ESoundSelectionStyle
+		SS_Random                =   0
+		SS_InOrder               =   1
+PROPERTIES:
+	112  Sounds                   Array   <Object <Sound>>
+	120  FirstSound               Object  <Sound>
+	124  BattleWonMusic           Object  <Sound>
+	128  BattleLostMusic          Object  <Sound>
+	132  SelectionStyle           Byte    <ESoundSelectionStyle>
+	136  bFirstTime               Bool    <0 : 0x00000001>
+	136  bCheckedRestrictions     Bool    <1 : 0x00000002>
+	136  bAccurateTotalLikelihood Bool    <2 : 0x00000004>
+	140  RenderedSound            Object  <Sound>
+	144  TotalLikelihood          Float   
+	148  WhichSound               Int     

@@ -1,0 +1,3 @@
+CLASS: PickupHealth(708), BASE: CTPickup
+PROPERTIES:
+	704  HealingAmount            Float   

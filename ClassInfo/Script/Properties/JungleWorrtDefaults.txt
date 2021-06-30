@@ -1,0 +1,2 @@
+CLASS: JungleWorrtDefaults(1688), BASE: JungleWorrt
+PROPERTIES:

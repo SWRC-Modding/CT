@@ -1,0 +1,5 @@
+CLASS: TexPanner(192), BASE: TexModifier
+PROPERTIES:
+	112  PanDirection             Struct  <Rotator>
+	124  PanRate                  Float   
+	128  M                        Struct  <Matrix>

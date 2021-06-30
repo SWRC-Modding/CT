@@ -1,0 +1,2 @@
+CLASS: EWebTurretAmmoDefaults(868), BASE: EWebTurretAmmo
+PROPERTIES:

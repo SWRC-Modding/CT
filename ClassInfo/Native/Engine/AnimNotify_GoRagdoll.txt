@@ -1,0 +1,9 @@
+CLASS: AnimNotify_GoRagdoll(88), BASE: AnimNotify
+PROPERTIES:
+	44   InitialImpulse           Struct  <Vector>
+	56   ImpulseMagnitude         Float   
+	60   ImpulseDamageType        Class   <DamageType>
+	64   InitialVelocity          Struct  <Vector>
+	76   VelocityMagnitude        Float   
+	80   Bone                     Name    
+	84   PriorityRagdoll          Bool    <0 : 0x00000001>

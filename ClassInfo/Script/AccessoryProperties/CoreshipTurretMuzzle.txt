@@ -1,0 +1,2 @@
+CLASS: CoreshipTurretMuzzle(696), BASE: Accessory
+PROPERTIES:

@@ -1,0 +1,2 @@
+CLASS: CTDamageMelee(112), BASE: CTDamageType
+PROPERTIES:

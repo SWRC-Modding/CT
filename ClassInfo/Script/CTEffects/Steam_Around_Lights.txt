@@ -1,0 +1,2 @@
+CLASS: Steam_Around_Lights(828), BASE: Emitter
+PROPERTIES:

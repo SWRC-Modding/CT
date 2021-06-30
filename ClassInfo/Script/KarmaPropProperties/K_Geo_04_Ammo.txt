@@ -1,0 +1,2 @@
+CLASS: K_Geo_04_Ammo(888), BASE: KarmaProp
+PROPERTIES:

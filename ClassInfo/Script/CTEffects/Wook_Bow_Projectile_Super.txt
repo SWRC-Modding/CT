@@ -1,0 +1,2 @@
+CLASS: Wook_Bow_Projectile_Super(828), BASE: Emitter
+PROPERTIES:

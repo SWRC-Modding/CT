@@ -1,0 +1,2 @@
+CLASS: SMGPickup(704), BASE: CTPickup
+PROPERTIES:

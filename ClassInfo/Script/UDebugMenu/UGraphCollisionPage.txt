@@ -1,0 +1,19 @@
+CLASS: UGraphCollisionPage(576), BASE: UWindowPageWindow
+PROPERTIES:
+	196  Labels                   Object  <UWindowLabelControl>[7]
+	224  StatNameText             Str     [7]
+	280  CatNameText              Str     
+	288  DesiredMaxEdit           Object  <UWindowEditControl>[7]
+	316  DesiredMaxText           Str     
+	324  UseBarStatCheck          Object  <UWindowCheckbox>[7]
+	352  UseBarStatText           Str     
+	360  UseLineStatCheck         Object  <UWindowCheckbox>[7]
+	388  UseLineStatText          Str     
+	396  SmallIsBadCheck          Object  <UWindowCheckbox>[7]
+	424  SmallIsBadText           Str     
+	432  DesiredMaxEditSettings   Str     [7]
+	488  SmallIsBadSettings       Int     [7]
+	516  UseBarStatSettings       Int     [7]
+	544  UseLineStatSettings      Int     [7]
+	572  bIsLoading               Bool    <0 : 0x00000001>
+	572  bShouldDelayChange       Bool    <1 : 0x00000002>

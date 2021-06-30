@@ -1,0 +1,9 @@
+CLASS: ViewShaker(688), BASE: Triggers
+PROPERTIES:
+	644  ShakeRadius              Float   
+	648  ShakeMag                 Struct  <Vector>
+	660  ShakeRotationMag         Struct  <Rotator>
+	672  InTime                   Float   
+	676  SustainTime              Float   
+	680  OutTime                  Float   
+	684  Frequency                Float   

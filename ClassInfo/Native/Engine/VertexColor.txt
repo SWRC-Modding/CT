@@ -1,0 +1,2 @@
+CLASS: VertexColor(100), BASE: RenderedMaterial
+PROPERTIES:

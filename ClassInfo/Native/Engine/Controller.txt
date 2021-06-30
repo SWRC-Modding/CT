@@ -1,0 +1,59 @@
+CLASS: Controller(848), BASE: Actor
+PROPERTIES:
+	644  Pawn                     Object  <Pawn>
+	648  Machine                  Object  <Actor>
+	652  PlayerNum                Int     
+	656  SightCounter             Float   
+	660  FovAngle                 Float   
+	664  Handedness               Float   
+	668  bIsPlayer                Bool    <0 : 0x00000001>
+	668  bGodMode                 Bool    <1 : 0x00000002>
+	668  bLOSflag                 Bool    <2 : 0x00000004>
+	668  bAdvancedTactics         Bool    <3 : 0x00000008>
+	668  bCanOpenDoors            Bool    <4 : 0x00000010>
+	668  bCanDoSpecial            Bool    <5 : 0x00000020>
+	668  bAdjusting               Bool    <6 : 0x00000040>
+	668  bPreparingMove           Bool    <7 : 0x00000080>
+	668  bControlAnimations       Bool    <8 : 0x00000100>
+	668  bNotifyApex              Bool    <9 : 0x00000200>
+	668  bUsePlayerHearing        Bool    <10: 0x00000400>
+	668  bJumpOverWall            Bool    <11: 0x00000800>
+	668  bEnemyAcquired           Bool    <12: 0x00001000>
+	668  bShouldWalk              Bool    <13: 0x00002000>
+	668  bAdjustFromWalls         Bool    <14: 0x00004000>
+	668  InAttackState            Bool    <15: 0x00008000>
+	668  bEnemyIsPawn             Bool    <16: 0x00010000>
+	668  bSmartShot               Bool    <17: 0x00020000>
+	672  bRun                     Byte    
+	673  bDuck                    Byte    
+	674  bFire                    Byte    
+	675  bAltFire                 Byte    
+	676  AdjustLoc                Struct  <Vector>
+	688  nextController           Object  <Controller>
+	692  MoveTimer                Float   
+	696  MoveTarget               Object  <Actor>
+	700  Destination              Struct  <Vector>
+	712  FocalPoint               Struct  <Vector>
+	724  Focus                    Object  <Actor>
+	728  PendingMover             Object  <Mover>
+	732  MinHitWall               Float   
+	736  RespawnPredictionTime    Float   
+	740  AcquisitionYawRate       Int     
+	744  Enemy                    Object  <Actor>
+	748  Target                   Object  <Actor>
+	752  LastSeenTime             Float   
+	756  WhenEnemyChangedLast     Float   
+	760  OldMessageTime           Float   
+	764  PlayerReplicationInfoClass Class   <PlayerReplicationInfo>
+	768  PlayerReplicationInfo    Object  <PlayerReplicationInfo>
+	772  PawnClass                Class   <Pawn>
+	776  PreviousPawnClass        Class   <Pawn>
+	780  GroundPitchTime          Float   
+	784  ViewX                    Struct  <Vector>
+	796  ViewY                    Struct  <Vector>
+	808  ViewZ                    Struct  <Vector>
+	820  StartSpot                Object  <NavigationPoint>
+	824  MonitorStartLoc          Struct  <Vector>
+	836  MonitoredPawn            Object  <Pawn>
+	840  MonitorMaxDistSq         Float   
+	844  LastPawnWeapon           Class   <Weapon>

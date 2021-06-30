@@ -1,0 +1,2 @@
+CLASS: GREVG_ForcePike_Impact(828), BASE: Emitter
+PROPERTIES:

@@ -1,0 +1,21 @@
+CLASS: MeshObject(40), BASE: Object
+ENUMS:
+	EImpSpaceMode
+		ISM_Sprite               =   0
+		ISM_Fixed                =   1
+		ISM_PivotVertical        =   2
+		ISM_PivotHorizontal      =   3
+	EImpDrawMode
+		IDM_Normal               =   0
+		IDM_Fading               =   1
+	EImpLightMode
+		ILM_Unlit                =   0
+		ILM_PseudoShaded         =   1
+		ILM_Uniform              =   2
+	EMeshSectionMethod
+		MSM_SmoothOnly           =   0
+		MSM_RigidOnly            =   1
+		MSM_Mixed                =   2
+		MSM_SinglePiece          =   3
+		MSM_ForcedRigid          =   4
+PROPERTIES:

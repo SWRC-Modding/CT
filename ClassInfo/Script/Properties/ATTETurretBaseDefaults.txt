@@ -1,0 +1,2 @@
+CLASS: ATTETurretBaseDefaults(2052), BASE: ATTETurretBase
+PROPERTIES:

@@ -1,0 +1,2 @@
+CLASS: GunshipChinGunAttachment(776), BASE: WeaponAttachment
+PROPERTIES:

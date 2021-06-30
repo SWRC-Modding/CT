@@ -1,0 +1,6 @@
+CLASS: AnimNotify_FireWeapon(48), BASE: AnimNotify_Scripted
+PROPERTIES:
+	44   ContinuousFire           Bool    <0 : 0x00000001>
+	44   StopFire                 Bool    <1 : 0x00000002>
+	44   FireSecondary            Bool    <2 : 0x00000004>
+	44   DisableFireAnim          Bool    <3 : 0x00000008>

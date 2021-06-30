@@ -1,0 +1,2 @@
+CLASS: EWebTurretProj(716), BASE: Projectile
+PROPERTIES:

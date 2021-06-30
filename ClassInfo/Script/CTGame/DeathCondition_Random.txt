@@ -1,0 +1,2 @@
+CLASS: DeathCondition_Random(44), BASE: DeathCondition
+PROPERTIES:

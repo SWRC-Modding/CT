@@ -1,0 +1,13 @@
+CLASS: GoalQueue(56), BASE: Object
+ENUMS:
+	EGoalStatus
+		GS_Inactive              =   0
+		GS_PlanFailure           =   1
+		GS_ExecutionFailure      =   2
+		GS_InProgress            =   3
+		GS_Success               =   4
+PROPERTIES:
+	40   Head                     Object  <GoalObject>
+	44   Tail                     Object  <GoalObject>
+	48   FailuresLeft             Int     
+	52   Bot                      Object  <CTBot>

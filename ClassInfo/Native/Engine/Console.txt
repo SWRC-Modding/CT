@@ -1,0 +1,44 @@
+CLASS: Console(320), BASE: Interaction
+ENUMS:
+	HoldingState
+		StandingStill            =   0
+		HoldingLeft              =   1
+		HoldingRight             =   2
+		HoldingUp                =   3
+		HoldingDown              =   4
+		HoldingSelect            =   5
+		HoldingStart             =   6
+		HoldingBack              =   7
+PROPERTIES:
+	52   ConsoleKey               Byte    
+	56   HistoryTop               Int     
+	60   HistoryBot               Int     
+	64   HistoryCur               Int     
+	68   TypedStr                 Str     
+	76   History                  Str     [16]
+	204  bTyping                  Bool    <0 : 0x00000001>
+	204  bIgnoreKeys              Bool    <1 : 0x00000002>
+	208  PrevState                Name    
+	212  ConsoleFont              Object  <Font>
+	216  cSay                     Str     
+	224  cTeamSay                 Str     
+	232  ControllerRepeatDelayInitial Float   
+	236  ControllerRepeatDelaySubsequent Float   
+	240  ControllerRepeatDelayCurrent Float   
+	244  ControllerState          Byte    <HoldingState>
+	248  DeltaPrevJoyX            Float   
+	252  DeltaPrevJoyY            Float   
+	256  DeltaPrevJoyU            Float   
+	260  DeltaPrevJoyV            Float   
+	264  TimeIdle                 Float   
+	268  CurMenu                  Object  <Menu>
+	272  PrevMenu                 Object  <Menu>
+	276  LoadingMenu              Object  <Menu>
+	280  MenuBackgroundMusic      Object  <Sound>
+	284  KeyMenu                  Object  <Menu>
+	288  UsingMenuRes             Bool    <0 : 0x00000001>
+	292  NormalRes                Str     
+	300  bUIEnabled               Bool    <0 : 0x00000001>
+	304  BufferedConsoleCommands  Array   <Str>
+	312  bCleanupMenus            Bool    <0 : 0x00000001>
+	316  LastElapsedFrameTime     Float   

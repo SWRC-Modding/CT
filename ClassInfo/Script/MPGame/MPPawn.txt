@@ -1,0 +1,31 @@
+CLASS: MPPawn(1900), BASE: CTPawn
+PROPERTIES:
+	1664 bAcceptAllInventory      Bool    <0 : 0x00000001>
+	1664 bKeepTaunting            Bool    <1 : 0x00000002>
+	1664 bPlayOwnFootsteps        Bool    <2 : 0x00000004>
+	1668 LoadOut                  Byte    
+	1672 DefaultBlasterAmmo       Int     
+	1676 DefaultGrenadeAmmo       Int     
+	1680 AttackSuitability        Float   
+	1684 LastFootStepTime         Float   
+	1688 CurrentDir               Byte    <EDoubleClickDir>
+	1692 GameObjOffset            Struct  <Vector>
+	1704 GameObjRot               Struct  <Rotator>
+	1716 SquadName                Name    
+	1720 bPlayerShadows           Bool    <0 : 0x00000001>
+	1724 Spree                    Int     
+	1728 TauntAnims               Array   <Name>
+	1736 TauntAnimNames           Str     [8]
+	1800 ChosenAccessories        Int     [5]
+	1820 NumCustomAccessories     Int     
+	1824 PrivateNumCustomAccessories Int     
+	1828 ChosenSkin               Int     
+	1832 PrivateChosenSkin        Int     
+	1836 MPSkins                  Object  <Material>[5]
+	1856 nNumberOfSkins           Int     
+	1860 MPMeshSets               Array   <Struct <MeshSetLinkup>>
+	1868 DodgeCount               Byte    
+	1869 PrivateDodgeCount        Byte    
+	1872 TrandoPistolMesh         Object  <Mesh>
+	1876 HudArmTextures           Object  <Material>[5]
+	1896 LastPlayerController     Object  <PlayerController>

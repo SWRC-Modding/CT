@@ -1,0 +1,2 @@
+CLASS: HackDoorCoreB(888), BASE: HackDoor
+PROPERTIES:

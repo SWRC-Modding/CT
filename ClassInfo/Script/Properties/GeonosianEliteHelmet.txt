@@ -1,0 +1,2 @@
+CLASS: GeonosianEliteHelmet(1676), BASE: GeonosianElite
+PROPERTIES:

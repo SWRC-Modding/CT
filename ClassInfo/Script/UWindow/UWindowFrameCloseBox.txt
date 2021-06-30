@@ -1,0 +1,2 @@
+CLASS: UWindowFrameCloseBox(356), BASE: UWindowButton
+PROPERTIES:

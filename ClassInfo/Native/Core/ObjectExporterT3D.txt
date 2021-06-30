@@ -1,0 +1,2 @@
+CLASS: ObjectExporterT3D(60), BASE: Exporter
+PROPERTIES:

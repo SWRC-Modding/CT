@@ -1,0 +1,2 @@
+CLASS: ATTEWalkerProj(804), BASE: CTProjExplosive
+PROPERTIES:

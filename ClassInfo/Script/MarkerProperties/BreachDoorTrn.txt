@@ -1,0 +1,2 @@
+CLASS: BreachDoorTrn(952), BASE: BreachDoor
+PROPERTIES:

@@ -1,0 +1,2 @@
+CLASS: TexCoordMaterial(108), BASE: RenderedMaterial
+PROPERTIES:

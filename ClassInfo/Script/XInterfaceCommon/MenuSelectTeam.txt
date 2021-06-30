@@ -1,0 +1,11 @@
+CLASS: MenuSelectTeam(19880), BASE: MenuTemplate
+PROPERTIES:
+	17696 Question                 Struct  <MenuText>
+	17808 RepublicButton           Struct  <MenuButtonText>
+	18292 TrandoshanButton         Struct  <MenuButtonText>
+	18776 AutoButton               Struct  <MenuButtonText>
+	19260 SpectateButton           Struct  <MenuButtonText>
+	19744 ResMessage               Struct  <MenuText>
+	19856 StrTooMangRep            Str     
+	19864 StrTooMangTran           Str     
+	19872 StrTooMangSpec           Str     

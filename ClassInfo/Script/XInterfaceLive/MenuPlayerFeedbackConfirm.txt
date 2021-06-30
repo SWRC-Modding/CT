@@ -1,0 +1,10 @@
+CLASS: MenuPlayerFeedbackConfirm(21180), BASE: MenuTemplateTitledBA
+PROPERTIES:
+	19728 Gamer                    Struct  <Gamer>
+	19824 FeedbackEnum             Str     
+	19832 FeedbackText             Str     
+	19840 bFriendFeedback          Bool    <0 : 0x00000001>
+	19844 Borders                  Struct  <MenuSprite>[3]
+	20060 Info                     Struct  <MenuText>[3]
+	20396 Body                     Struct  <MenuText>[6]
+	21068 Confirm                  Struct  <MenuText>

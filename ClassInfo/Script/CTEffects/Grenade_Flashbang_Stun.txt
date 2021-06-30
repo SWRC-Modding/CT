@@ -1,0 +1,2 @@
+CLASS: Grenade_Flashbang_Stun(828), BASE: Emitter
+PROPERTIES:

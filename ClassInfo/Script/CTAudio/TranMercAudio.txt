@@ -1,0 +1,2 @@
+CLASS: TranMercAudio(48), BASE: PawnAudioTable
+PROPERTIES:

@@ -1,0 +1,2 @@
+CLASS: ExplosiveBarrelYYY(892), BASE: ExplosiveBarrel
+PROPERTIES:

@@ -1,0 +1,2 @@
+CLASS: BowcasterPickupDefaults(704), BASE: BowcasterPickup
+PROPERTIES:

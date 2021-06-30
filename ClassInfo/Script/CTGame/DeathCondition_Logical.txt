@@ -1,0 +1,4 @@
+CLASS: DeathCondition_Logical(52), BASE: DeathCondition
+PROPERTIES:
+	44   ConditionA               Object  <DeathCondition>
+	48   ConditionB               Object  <DeathCondition>

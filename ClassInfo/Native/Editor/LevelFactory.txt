@@ -1,0 +1,2 @@
+CLASS: LevelFactory(88), BASE: Factory
+PROPERTIES:

@@ -1,0 +1,2 @@
+CLASS: EditInfo(64), BASE: Object
+PROPERTIES:

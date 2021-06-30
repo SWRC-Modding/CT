@@ -1,0 +1,5 @@
+CLASS: TDHUD(2500), BASE: MPHUD
+PROPERTIES:
+	2476 StartUpTeamMessage       Str     
+	2484 StartupTeamTrailer       Str     
+	2492 CanChangeTeam            Str     

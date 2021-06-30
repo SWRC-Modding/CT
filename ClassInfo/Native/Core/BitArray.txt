@@ -1,0 +1,2 @@
+CLASS: BitArray(52), BASE: Object
+PROPERTIES:

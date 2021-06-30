@@ -1,0 +1,3 @@
+CLASS: UWindowPageWindow(196), BASE: UWindowDialogClientWindow
+PROPERTIES:
+	192  OwnerTab                 Object  <UWindowPageControlPage>

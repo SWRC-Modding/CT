@@ -1,0 +1,21 @@
+CLASS: SpawnPoint(700), BASE: Keypoint
+PROPERTIES:
+	644  bDrawLinks               Bool    <0 : 0x00000001>
+	644  PreserveDeadBodies       Bool    <1 : 0x00000002>
+	644  DisableEmotes            Bool    <2 : 0x00000004>
+	644  CanBeLeader              Bool    <3 : 0x00000008>
+	644  TossWeaponOnDeath        Bool    <4 : 0x00000010>
+	644  DebugAI                  Bool    <5 : 0x00000020>
+	648  AIScriptTag              Name    
+	652  PawnTag                  Name    
+	656  PawnEvent                Name    
+	660  FirstDamagedEvent        Name    
+	664  PatrolRoute              Array   <Struct <PatrolPoint>>
+	672  PatrolMode               Byte    <EPatrolMode>
+	676  PatrolPriority           Float   
+	680  StartState               Byte    <EStartState>
+	681  InitialPhysics           Byte    <EPhysics>
+	684  InitialSpeed             Float   
+	688  TeamIndex                Int     
+	692  OptimalWeaponDist        Float   
+	696  SightRadius              Float   

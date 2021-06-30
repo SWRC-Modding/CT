@@ -1,0 +1,2 @@
+CLASS: SlaverBladesAttachmentDefaults(776), BASE: SlaverBladesAttachment
+PROPERTIES:

@@ -1,0 +1,2 @@
+CLASS: ScavLight(668), BASE: Flashlight
+PROPERTIES:

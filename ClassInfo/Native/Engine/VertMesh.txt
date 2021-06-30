@@ -1,0 +1,2 @@
+CLASS: VertMesh(532), BASE: LodMesh
+PROPERTIES:

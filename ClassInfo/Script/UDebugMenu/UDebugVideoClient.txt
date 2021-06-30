@@ -1,0 +1,23 @@
+CLASS: UDebugVideoClient(328), BASE: UWindowDialogClientWindow
+PROPERTIES:
+	192  ResolutionCombo          Object  <UWindowComboControl>
+	196  ResolutionText           Str     
+	204  ResolutionHelp           Str     
+	212  BrightnessSlider         Object  <UWindowHSliderControl>
+	216  BrightnessText           Str     
+	224  BrightnessHelp           Str     
+	232  ConfirmSettings          Object  <UWindowMessageBox>
+	236  ConfirmDriver            Object  <UWindowMessageBox>
+	240  ConfirmWorldTextureDetail Object  <UWindowMessageBox>
+	244  ConfirmSkinTextureDetail Object  <UWindowMessageBox>
+	248  ConfirmSettingsTitle     Str     
+	256  ConfirmSettingsText      Str     
+	264  ConfirmSettingsCancelTitle Str     
+	272  ConfirmSettingsCancelText Str     
+	280  ConfirmTextureDetailTitle Str     
+	288  ConfirmTextureDetailText Str     
+	296  ConfirmDriverTitle       Str     
+	304  ConfirmDriverText        Str     
+	312  OldSettings              Str     
+	320  bInitialized             Bool    <0 : 0x00000001>
+	324  ControlOffset            Float   

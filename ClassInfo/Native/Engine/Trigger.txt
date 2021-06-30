@@ -1,0 +1,29 @@
+CLASS: Trigger(704), BASE: Triggers
+ENUMS:
+	ETriggerType
+		TT_PlayerProximity       =   0
+		TT_PawnProximity         =   1
+		TT_ClassProximity        =   2
+		TT_AnyProximity          =   3
+		TT_Shoot                 =   4
+		TT_HumanPlayerProximity  =   5
+		TT_Use                   =   6
+		TT_SquadMemberProximity  =   7
+PROPERTIES:
+	644  TriggerType              Byte    <ETriggerType>
+	648  Message                  Str     
+	656  bTriggerOnceOnly         Bool    <0 : 0x00000001>
+	656  bInitiallyActive         Bool    <1 : 0x00000002>
+	656  bMustExceedCountSimultaneously Bool    <2 : 0x00000004>
+	660  TouchThreshold           Int     
+	664  CurrentTouchCount        Int     
+	668  ClassProximityType       Class   <Actor>
+	672  RepeatTriggerTime        Float   
+	676  ReTriggerDelay           Float   
+	680  TriggerTime              Float   
+	684  DamageThreshold          Float   
+	688  ExitEvent                Name    
+	692  EmptyEvent               Name    
+	696  DirectTrigger            Object  <Actor>
+	700  bSavedInitialCollision   Bool    <0 : 0x00000001>
+	700  bSavedInitialActive      Bool    <1 : 0x00000002>

@@ -1,0 +1,8 @@
+CLASS: ACTION_HurtActor(92), BASE: ScriptedAction
+PROPERTIES:
+	64   TargetTag                Name    
+	68   amount                   Float   
+	72   Momentum                 Struct  <Vector>
+	84   Type                     Class   <DamageType>
+	88   bUseOwnerAsInstigator    Bool    <0 : 0x00000001>
+	88   bIgnoreDifficulty        Bool    <1 : 0x00000002>

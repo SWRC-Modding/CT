@@ -1,0 +1,2 @@
+CLASS: Wook_RL_Rocket(828), BASE: Emitter
+PROPERTIES:

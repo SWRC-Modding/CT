@@ -1,0 +1,4 @@
+CLASS: KillerMessagePlus(692), BASE: LocalMessage
+PROPERTIES:
+	676  YouKilled                Str     
+	684  YouKilledTrailer         Str     

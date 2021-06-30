@@ -1,0 +1,2 @@
+CLASS: TeamOverride(756), BASE: CTTeamInfo
+PROPERTIES:

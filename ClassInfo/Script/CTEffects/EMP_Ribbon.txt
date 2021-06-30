@@ -1,0 +1,2 @@
+CLASS: EMP_Ribbon(828), BASE: Emitter
+PROPERTIES:

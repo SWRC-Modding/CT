@@ -1,0 +1,4 @@
+CLASS: UDebugRootWindow(568), BASE: UWindowRootWindow
+PROPERTIES:
+	560  MenuBarClass             Class   <UWindowMenuBar>
+	564  MenuBar                  Object  <UDebugMenuBar>

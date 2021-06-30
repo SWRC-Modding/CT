@@ -1,0 +1,2 @@
+CLASS: DroidekaBlasterAmmo(876), BASE: CTAmmoRecharging
+PROPERTIES:

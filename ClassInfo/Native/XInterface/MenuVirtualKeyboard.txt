@@ -1,0 +1,27 @@
+CLASS: MenuVirtualKeyboard(40372), BASE: MenuTemplateTitledBXA
+STRUCTS:
+	KeyLayout(20)
+		0    Label                    Str     
+		8    Span                     Int     
+		12   bAppendMargin            Int     
+		16   bIsLastInRow             Int     
+PROPERTIES:
+	20396 KeyboardLayout           Struct  <KeyLayout>[39]
+	21176 KeyboardBorder           Struct  <MenuSprite>
+	21248 InputBorder              Struct  <MenuSprite>
+	21320 InputText                Struct  <MenuText>
+	21432 Buttons                  Struct  <MenuButtonText>[39]
+	40308 ButtonSizeX              Float   
+	40312 ButtonSizeY              Float   
+	40316 ButtonGapX               Float   
+	40320 ButtonGapY               Float   
+	40324 MarginSize               Float   
+	40328 KeyboardPosX             Float   
+	40332 KeyboardPosY             Float   
+	40336 pEditBox                 Int     
+	40340 MaxLength                Int     
+	40344 MinLength                Int     
+	40348 bNoDigits                Int     
+	40352 bNoSpaces                Int     
+	40356 TextBackup               Str     
+	40364 SpaceChar                Str     

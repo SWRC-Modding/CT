@@ -1,0 +1,2 @@
+CLASS: REP_ATTE_Turret_Impact(828), BASE: Emitter
+PROPERTIES:

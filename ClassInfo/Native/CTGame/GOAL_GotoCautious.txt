@@ -1,0 +1,10 @@
+CLASS: GOAL_GotoCautious(124), BASE: GoalObject
+PROPERTIES:
+	76   Destination              Struct  <Vector>
+	88   ToleranceCheckLocation   Struct  <Vector>
+	100  Goal                     Object  <NavigationPoint>
+	104  CoverPts                 Array   <Object <NavigationPoint>>
+	112  Index                    Int     
+	116  ToleranceSquared         Float   
+	120  bMatchOrientation        Bool    <0 : 0x00000001>
+	120  bPathComplete            Bool    <1 : 0x00000002>

@@ -1,0 +1,23 @@
+CLASS: MaterialSequence(132), BASE: Modifier
+ENUMS:
+	EMaterialSequenceAction
+		MSA_ShowMaterial         =   0
+		MSA_FadeToMaterial       =   1
+	EMaterialSequenceTriggerActon
+		MSTA_Ignore              =   0
+		MSTA_Reset               =   1
+		MSTA_Pause               =   2
+		MSTA_Stop                =   3
+STRUCTS:
+	MaterialSequenceItem(12)
+		0    Material                 Object  <Material>
+		4    Time                     Float   
+		8    Action                   Byte    <EMaterialSequenceAction>
+PROPERTIES:
+	104  SequenceItems            Array   <Struct <MaterialSequenceItem>>
+	112  TriggerAction            Byte    <EMaterialSequenceTriggerActon>
+	116  Loop                     Bool    <0 : 0x00000001>
+	116  Paused                   Bool    <1 : 0x00000002>
+	120  CurrentTime              Float   
+	124  LastTime                 Float   
+	128  TotalTime                Float   

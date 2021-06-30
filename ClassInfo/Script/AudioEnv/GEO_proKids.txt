@@ -1,0 +1,2 @@
+CLASS: GEO_proKids(96), BASE: AudioEnvironment
+PROPERTIES:

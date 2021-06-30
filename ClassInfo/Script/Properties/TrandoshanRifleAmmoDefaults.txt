@@ -1,0 +1,2 @@
+CLASS: TrandoshanRifleAmmoDefaults(868), BASE: TrandoshanRifleAmmo
+PROPERTIES:

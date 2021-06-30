@@ -1,0 +1,2 @@
+CLASS: Enum(52), BASE: Field
+PROPERTIES:

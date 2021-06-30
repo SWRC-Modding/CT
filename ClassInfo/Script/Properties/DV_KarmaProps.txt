@@ -1,0 +1,2 @@
+CLASS: DV_KarmaProps(56), BASE: DamageVariance
+PROPERTIES:

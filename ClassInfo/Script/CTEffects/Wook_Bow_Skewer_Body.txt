@@ -1,0 +1,2 @@
+CLASS: Wook_Bow_Skewer_Body(828), BASE: Emitter
+PROPERTIES:

@@ -1,0 +1,39 @@
+CLASS: ZoneInfo(788), BASE: Info
+PROPERTIES:
+	644  SkyZone                  Object  <SkyZoneInfo>
+	648  ZoneTag                  Name    
+	652  LocationName             Str     
+	660  ZoneDefaultMaterial      Byte    <EMaterialType>
+	664  KillZ                    Float   
+	668  KillZType                Byte    <eKillZType>
+	672  bSoftKillZ               Bool    <0 : 0x00000001>
+	672  bTerrainZone             Bool    <1 : 0x00000002>
+	672  bDistanceFog             Bool    <2 : 0x00000004>
+	672  bClearToFogColor         Bool    <3 : 0x00000008>
+	672  bUseSkyDome              Bool    <4 : 0x00000010>
+	676  Terrains                 Array   <Object <TerrainInfo>>
+	684  AmbientVector            Struct  <Vector>
+	696  AmbientBrightness        Byte    
+	697  AmbientHue               Byte    
+	698  AmbientSaturation        Byte    
+	700  DistanceFogColor         Struct  <Color>
+	704  DistanceFogStart         Float   
+	708  DistanceFogEnd           Float   
+	712  DistanceFogBlendTime     Float   
+	716  BloomEnable              Bool    <0 : 0x00000001>
+	720  Bloom                    Byte    
+	721  BloomFilter              Byte    
+	724  ZoneVisionMode           Object  <VisionMode>
+	728  SplattersPerMinute       Float   
+	732  SplatterWiperDelay       Float   
+	736  SplatterTextures         Array   <Object <Material>>
+	744  SplatterEffect           Class   <Emitter>
+	748  SplatterScaleMin         Float   
+	752  SplatterScaleMax         Float   
+	756  SplatterSound            Object  <Sound>
+	760  EnvironmentMap           Object  <Texture>
+	764  TexUPanSpeed             Float   
+	768  TexVPanSpeed             Float   
+	772  ZoneAudioClass           Class   <AudioEnvironment>
+	776  bLonelyZone              Bool    <0 : 0x00000001>
+	780  ManualExcludes           Array   <Object <ZoneInfo>>

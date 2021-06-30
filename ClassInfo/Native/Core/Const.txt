@@ -1,0 +1,2 @@
+CLASS: Const(52), BASE: Field
+PROPERTIES:

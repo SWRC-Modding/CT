@@ -1,0 +1,2 @@
+CLASS: FlagDefaults(1192), BASE: Flag
+PROPERTIES:

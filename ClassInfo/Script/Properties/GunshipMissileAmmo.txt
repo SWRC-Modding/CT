@@ -1,0 +1,2 @@
+CLASS: GunshipMissileAmmo(876), BASE: RocketLauncherAmmo
+PROPERTIES:

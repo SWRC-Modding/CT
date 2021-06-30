@@ -1,0 +1,2 @@
+CLASS: ModelExporterT3D(60), BASE: Exporter
+PROPERTIES:

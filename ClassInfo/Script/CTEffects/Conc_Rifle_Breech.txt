@@ -1,0 +1,2 @@
+CLASS: Conc_Rifle_Breech(828), BASE: Emitter
+PROPERTIES:

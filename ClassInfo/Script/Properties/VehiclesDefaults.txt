@@ -1,0 +1,2 @@
+CLASS: VehiclesDefaults(1664), BASE: Vehicles
+PROPERTIES:

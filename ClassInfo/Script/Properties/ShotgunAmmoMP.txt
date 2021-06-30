@@ -1,0 +1,2 @@
+CLASS: ShotgunAmmoMP(868), BASE: ShotgunAmmo
+PROPERTIES:

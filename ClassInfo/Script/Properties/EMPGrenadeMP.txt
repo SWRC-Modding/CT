@@ -1,0 +1,2 @@
+CLASS: EMPGrenadeMP(1180), BASE: EMPGrenade
+PROPERTIES:

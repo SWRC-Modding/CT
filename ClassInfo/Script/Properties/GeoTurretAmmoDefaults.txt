@@ -1,0 +1,2 @@
+CLASS: GeoTurretAmmoDefaults(868), BASE: GeoTurretAmmo
+PROPERTIES:

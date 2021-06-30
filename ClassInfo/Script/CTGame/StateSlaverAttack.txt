@@ -1,0 +1,2 @@
+CLASS: StateSlaverAttack(160), BASE: StateTrandoshanAttack
+PROPERTIES:

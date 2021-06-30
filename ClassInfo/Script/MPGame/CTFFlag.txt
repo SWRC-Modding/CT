@@ -1,0 +1,23 @@
+CLASS: CTFFlag(1020), BASE: GameObject
+PROPERTIES:
+	708  bWasHome                 Bool    <0 : 0x00000001>
+	708  bWasHeld                 Bool    <1 : 0x00000002>
+	708  bWasHidden               Bool    <2 : 0x00000004>
+	712  myFlagProp               Object  <AnimProp>
+	716  FlagPropOffset           Struct  <Vector>
+	728  FlagPropRotation         Struct  <Rotator>
+	740  FlagProp                 Class   <AnimProp>[2]
+	748  myEmitter                Object  <Emitter>[5]
+	768  myEmitterCount           Int     
+	772  EffectOffset             Struct  <Vector>[5]
+	832  EffectRotation           Struct  <Rotator>[5]
+	892  Effect                   Class   <Emitter>[10]
+	932  FlashOffset              Struct  <Vector>
+	944  FlashRotation            Struct  <Rotator>
+	956  Flash                    Class   <Emitter>[2]
+	964  myHeldEffect             Object  <Emitter>
+	968  HeldEffectOffset         Struct  <Vector>
+	980  HeldEffectRotation       Struct  <Rotator>
+	992  HeldEffect               Class   <Emitter>[2]
+	1000 HudArmMesh               Object  <Mesh>[2]
+	1008 FlagTexture              Object  <Material>[3]

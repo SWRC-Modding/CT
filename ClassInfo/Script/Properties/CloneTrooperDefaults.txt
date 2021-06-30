@@ -1,0 +1,2 @@
+CLASS: CloneTrooperDefaults(1664), BASE: CloneTrooper
+PROPERTIES:

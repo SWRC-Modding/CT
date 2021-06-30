@@ -1,0 +1,6 @@
+CLASS: CloneCommando(1680), BASE: Republic
+PROPERTIES:
+	1664 ReviveMarker             Object  <MarkerReviveOther>
+	1668 ReviveEvent              Name    
+	1672 ReviveEffect             Class   <Emitter>
+	1676 ReviveCounter            Int     

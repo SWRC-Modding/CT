@@ -1,0 +1,2 @@
+CLASS: RepublicFighter(1664), BASE: Vehicles
+PROPERTIES:

@@ -1,0 +1,2 @@
+CLASS: CTSquad(872), BASE: CTSquadNative
+PROPERTIES:

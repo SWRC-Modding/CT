@@ -1,0 +1,2 @@
+CLASS: CTDamageExplosionDC17AACommando(112), BASE: CTDamageExplosionDC17AA
+PROPERTIES:

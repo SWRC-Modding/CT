@@ -1,0 +1,4 @@
+CLASS: Security(664), BASE: Info
+PROPERTIES:
+	644  LastType                 Int     
+	648  LastParams               Str     [2]

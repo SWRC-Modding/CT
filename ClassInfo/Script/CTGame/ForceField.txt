@@ -1,0 +1,3 @@
+CLASS: ForceField(672), BASE: Flashlight
+PROPERTIES:
+	668  ScaleSpeed               Float   

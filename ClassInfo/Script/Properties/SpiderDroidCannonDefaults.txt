@@ -1,0 +1,2 @@
+CLASS: SpiderDroidCannonDefaults(1180), BASE: SpiderDroidCannon
+PROPERTIES:

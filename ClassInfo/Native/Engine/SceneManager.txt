@@ -1,0 +1,49 @@
+CLASS: SceneManager(872), BASE: Info
+ENUMS:
+	EAffect
+		AFFECT_ViewportCamera    =   0
+		AFFECT_Actor             =   1
+STRUCTS:
+	Orientation(52)
+		0    CamOrientation           Byte    <ECamOrientation>
+		4    LookAt                   Object  <Actor>
+		8    EaseIntime               Float   
+		12   bReversePitch            Int     
+		16   bReverseYaw              Int     
+		20   bReverseRoll             Int     
+		24   MA                       Int     
+		28   PctInStart               Float   
+		32   PctInEnd                 Float   
+		36   PctInDuration            Float   
+		40   StartingRotation         Struct  <Rotator>
+	Interpolator(24)
+		0    bDone                    Int     
+		4    _value                   Float   
+		8    _remainingTime           Float   
+		12   _totalTime               Float   
+		16   _speed                   Float   
+		20   _acceleration            Float   
+PROPERTIES:
+	644  Actions                  Array   <Object <MatAction>>
+	652  Affect                   Byte    <EAffect>
+	656  AffectedActor            Object  <Actor>
+	660  bLooping                 Bool    <0 : 0x00000001>
+	660  bCinematicView           Bool    <1 : 0x00000002>
+	664  PlayerScriptTag          Name    
+	668  NextSceneTag             Name    
+	672  PctSceneComplete         Float   
+	676  CurrentAction            Object  <MatAction>
+	680  SceneSpeed               Float   
+	684  TotalSceneTime           Float   
+	688  Viewer                   Object  <Actor>
+	692  OldPawn                  Object  <Pawn>
+	696  bIsRunning               Bool    <0 : 0x00000001>
+	696  bIsSceneStarted          Bool    <1 : 0x00000002>
+	700  CurrentTime              Float   
+	704  SampleLocations          Array   <Struct <Vector>>
+	712  SubActions               Array   <Object <MatSubAction>>
+	720  CamOrientation           Struct  <Orientation>
+	772  PrevOrientation          Struct  <Orientation>
+	824  RotInterpolator          Struct  <Interpolator>
+	848  CameraShake              Struct  <Vector>
+	860  DollyOffset              Struct  <Vector>

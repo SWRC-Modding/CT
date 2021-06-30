@@ -1,0 +1,2 @@
+CLASS: musGEO_01B_firstConsole_mus01(96), BASE: AudioEnvironment
+PROPERTIES:

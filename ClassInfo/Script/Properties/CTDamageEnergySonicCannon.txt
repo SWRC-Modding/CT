@@ -1,0 +1,2 @@
+CLASS: CTDamageEnergySonicCannon(112), BASE: CTDamageEnergy
+PROPERTIES:

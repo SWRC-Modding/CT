@@ -1,0 +1,2 @@
+CLASS: MenuDisconnect(20512), BASE: MenuQuestionYesNo
+PROPERTIES:

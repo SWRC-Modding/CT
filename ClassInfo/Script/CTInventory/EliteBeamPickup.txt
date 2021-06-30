@@ -1,0 +1,2 @@
+CLASS: EliteBeamPickup(704), BASE: CTPickup
+PROPERTIES:

@@ -1,0 +1,3 @@
+CLASS: BriefingGunship(1668), BASE: Vehicles
+PROPERTIES:
+	1664 BriefingAnim             Name    

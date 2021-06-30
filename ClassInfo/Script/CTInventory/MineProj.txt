@@ -1,0 +1,2 @@
+CLASS: MineProj(804), BASE: CTProjExplosive
+PROPERTIES:

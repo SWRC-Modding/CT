@@ -1,0 +1,2 @@
+CLASS: BriefingHelmetDefaults(1180), BASE: BriefingHelmet
+PROPERTIES:

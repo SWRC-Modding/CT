@@ -1,0 +1,2 @@
+CLASS: RestrainingBoltPickupDefaults(704), BASE: RestrainingBoltPickup
+PROPERTIES:

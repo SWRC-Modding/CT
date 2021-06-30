@@ -1,0 +1,3 @@
+CLASS: UDebugGraphCW(196), BASE: UWindowDialogClientWindow
+PROPERTIES:
+	192  m_Pages                  Object  <UWindowPageControl>

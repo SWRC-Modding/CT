@@ -1,0 +1,2 @@
+CLASS: DV_GeonoshansEliteDamage(56), BASE: DV_Geonoshans
+PROPERTIES:

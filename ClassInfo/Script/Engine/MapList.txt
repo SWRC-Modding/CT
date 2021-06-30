@@ -1,0 +1,4 @@
+CLASS: MapList(656), BASE: Info
+PROPERTIES:
+	644  Maps                     Array   <Str>
+	652  MapNum                   Int     

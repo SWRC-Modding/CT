@@ -1,0 +1,11 @@
+CLASS: BactaDispenser(956), BASE: ActivateItem
+PROPERTIES:
+	712  BactaStandby             Struct  <ActivationInfo>
+	768  BactaActive              Struct  <ActivationInfo>
+	824  BactaRecharging          Struct  <ActivationInfo>
+	880  BactaDisabled            Struct  <ActivationInfo>
+	936  NextDispenser            Object  <BactaDispenser>
+	940  BactaRate                Float   
+	944  DispenserEffectClass     Class   <Emitter>
+	948  PawnEffectClass          Class   <Emitter>
+	952  PawnEffect               Object  <Emitter>

@@ -1,0 +1,7 @@
+CLASS: UWindowLayoutCell(124), BASE: UWindowLayoutBase
+PROPERTIES:
+	108  RowSpan                  Int     
+	112  ColSpan                  Int     
+	116  HAlign                   Byte    <EHorizAlign>
+	117  VAlign                   Byte    <EVerticalAlign>
+	120  C                        Object  <UWindowDialogControl>

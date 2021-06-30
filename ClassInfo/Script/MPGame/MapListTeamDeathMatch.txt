@@ -1,0 +1,2 @@
+CLASS: MapListTeamDeathMatch(656), BASE: MapList
+PROPERTIES:

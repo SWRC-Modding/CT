@@ -1,0 +1,2 @@
+CLASS: K_GEO5_WallPanelA(888), BASE: KarmaProp
+PROPERTIES:

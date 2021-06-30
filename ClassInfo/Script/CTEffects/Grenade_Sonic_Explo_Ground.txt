@@ -1,0 +1,2 @@
+CLASS: Grenade_Sonic_Explo_Ground(828), BASE: Emitter
+PROPERTIES:

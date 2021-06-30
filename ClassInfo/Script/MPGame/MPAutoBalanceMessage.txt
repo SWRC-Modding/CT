@@ -1,0 +1,2 @@
+CLASS: MPAutoBalanceMessage(676), BASE: LocalMessage
+PROPERTIES:

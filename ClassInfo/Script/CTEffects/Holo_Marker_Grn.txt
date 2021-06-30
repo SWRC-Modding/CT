@@ -1,0 +1,2 @@
+CLASS: Holo_Marker_Grn(828), BASE: Emitter
+PROPERTIES:

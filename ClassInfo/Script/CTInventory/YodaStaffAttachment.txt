@@ -1,0 +1,2 @@
+CLASS: YodaStaffAttachment(776), BASE: WeaponAttachment
+PROPERTIES:

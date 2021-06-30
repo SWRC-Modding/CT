@@ -1,0 +1,3 @@
+CLASS: ACTION_EnableBattleEngine(68), BASE: ScriptedAction
+PROPERTIES:
+	64   onOff                    Bool    <0 : 0x00000001>

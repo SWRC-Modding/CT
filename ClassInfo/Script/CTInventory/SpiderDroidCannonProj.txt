@@ -1,0 +1,2 @@
+CLASS: SpiderDroidCannonProj(804), BASE: CTProjExplosive
+PROPERTIES:

@@ -1,0 +1,2 @@
+CLASS: MarkerDemolition(908), BASE: MarkerDemolitionNative
+PROPERTIES:

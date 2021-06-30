@@ -1,0 +1,2 @@
+CLASS: GeoEliteWing_R2(696), BASE: Accessory
+PROPERTIES:

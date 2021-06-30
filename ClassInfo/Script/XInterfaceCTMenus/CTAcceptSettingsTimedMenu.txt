@@ -1,0 +1,9 @@
+CLASS: CTAcceptSettingsTimedMenu(19964), BASE: MenuTemplateTitledBA
+PROPERTIES:
+	19728 Label                    Struct  <MenuText>
+	19840 CountdownLabel           Struct  <MenuText>
+	19952 bYes                     Bool    <0 : 0x00000001>
+	19952 bNo                      Bool    <1 : 0x00000002>
+	19952 bTimedOut                Bool    <2 : 0x00000004>
+	19956 fTimeoutTime             Float   
+	19960 fElapsedSeconds          Float   

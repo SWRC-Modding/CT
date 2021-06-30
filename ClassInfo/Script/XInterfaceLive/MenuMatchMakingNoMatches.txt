@@ -1,0 +1,2 @@
+CLASS: MenuMatchMakingNoMatches(20512), BASE: MenuQuestionYesNo
+PROPERTIES:

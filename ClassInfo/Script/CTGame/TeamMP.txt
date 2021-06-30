@@ -1,0 +1,3 @@
+CLASS: TeamMP(884), BASE: CTTeamInfo
+PROPERTIES:
+	756  AllowedTeamMembers       Class   <Pawn>[32]

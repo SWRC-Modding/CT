@@ -1,0 +1,2 @@
+CLASS: Explosion_CoreShip(828), BASE: Emitter
+PROPERTIES:

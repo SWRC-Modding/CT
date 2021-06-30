@@ -1,0 +1,3 @@
+CLASS: HardwareShaderWrapper(104), BASE: RenderedMaterial
+PROPERTIES:
+	100  ShaderImplementation     Object  <HardwareShader>

@@ -1,0 +1,2 @@
+CLASS: DeathExplode_SmallCreature(828), BASE: Emitter
+PROPERTIES:

@@ -1,0 +1,2 @@
+CLASS: K_Twr_WallLong(888), BASE: KarmaProp
+PROPERTIES:

@@ -1,0 +1,19 @@
+CLASS: CTMapKeyMenu(21296), BASE: MenuTemplateTitledBXA
+PROPERTIES:
+	20396 Label                    Struct  <MenuText>
+	20508 Border                   Struct  <MenuSprite>
+	20580 ActionLabel              Struct  <MenuText>
+	20692 AssignedToLabel          Struct  <MenuText>
+	20804 ButtonLabel              Struct  <MenuText>
+	20916 Prompt                   Struct  <MenuText>
+	21028 func                     Str     
+	21036 OrigButton               Str     
+	21044 NewKey                   Byte    <EInputKey>
+	21048 Canceled                 Bool    <0 : 0x00000001>
+	21048 DisallowXboxSpecial      Bool    <1 : 0x00000002>
+	21048 DisallowPCSpecial        Bool    <2 : 0x00000004>
+	21052 LabelNoXboxSpecial       Struct  <MenuText>
+	21164 LabelNoPCSpecial         Struct  <MenuText>
+	21276 ClickLeftStickText       Str     
+	21284 ClickRightStickText      Str     
+	21292 ConsoleKey               Byte    

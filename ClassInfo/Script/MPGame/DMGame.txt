@@ -1,0 +1,56 @@
+CLASS: DMGame(1332), BASE: MPGame
+PROPERTIES:
+	1144 NetWait                  Int     
+	1148 MinNetPlayers            Int     
+	1152 RestartWait              Int     
+	1156 bNoCoronas               Bool    <0 : 0x00000001>
+	1156 bForceDefaultCharacter   Bool    <1 : 0x00000002>
+	1156 bTournament              Bool    <2 : 0x00000004>
+	1156 bPlayersMustBeReady      Bool    <3 : 0x00000008>
+	1156 bForceRespawn            Bool    <4 : 0x00000010>
+	1156 bAdjustSkill             Bool    <5 : 0x00000020>
+	1156 bAllowTaunts             Bool    <6 : 0x00000040>
+	1156 bAllowTrans              Bool    <7 : 0x00000080>
+	1156 bWaitForNetPlayers       Bool    <8 : 0x00000100>
+	1156 bMustJoinBeforeStart     Bool    <9 : 0x00000200>
+	1156 bFirstBlood              Bool    <10: 0x00000400>
+	1156 bQuickStart              Bool    <11: 0x00000800>
+	1156 bStartedCountDown        Bool    <12: 0x00001000>
+	1156 bFinalStartup            Bool    <13: 0x00002000>
+	1156 bOverTimeBroadcast       Bool    <14: 0x00004000>
+	1156 bKillBots                Bool    <15: 0x00008000>
+	1156 bCustomBots              Bool    <16: 0x00010000>
+	1160 StartupStage             Byte    
+	1164 RemainingTime            Int     
+	1168 ElapsedTime              Int     
+	1172 CountDown                Int     
+	1176 AdjustedDifficulty       Float   
+	1180 PlayerKills              Int     
+	1184 PlayerDeaths             Int     
+	1188 LevelRulesClass          Class   <LevelGameRules>
+	1192 LevelRules               Object  <LevelGameRules>
+	1196 SpawnProtectionTime      Float   
+	1200 EnemyRoster              Object  <MPTeam>
+	1204 EnemyRosterName          Str     
+	1212 DefaultEnemyRosterClass  Str     
+	1220 RemainingBots            Int     
+	1224 InitialBots              Int     
+	1228 LastPlayerStartSpot      Object  <NavigationPoint>
+	1232 LastStartSpot            Object  <NavigationPoint>
+	1236 NameNumber               Int     
+	1240 EndMessageWait           Int     
+	1244 EndMessageCounter        Int     
+	1248 SinglePlayerWait         Int     
+	1252 EndGameFocus             Object  <Actor>
+	1256 StandalonePlayer         Object  <PlayerController>
+	1260 EndGameSound             Object  <Sound>[2]
+	1268 TrandoEndGameSound       Object  <Sound>[2]
+	1276 AltEndGameSound          Object  <Sound>[2]
+	1284 TrandoAltEndGameSound    Object  <Sound>[2]
+	1292 ADR_Kill                 Float   
+	1296 ADR_MajorKill            Float   
+	1300 ADR_MinorError           Float   
+	1304 ADR_MinorBonus           Float   
+	1308 ADR_KillTeamMate         Float   
+	1312 ValidPawns               Int     
+	1316 ValidPawnClasses         Str     [2]

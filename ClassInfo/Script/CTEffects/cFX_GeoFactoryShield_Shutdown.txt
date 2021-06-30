@@ -1,0 +1,2 @@
+CLASS: cFX_GeoFactoryShield_Shutdown(828), BASE: Emitter
+PROPERTIES:

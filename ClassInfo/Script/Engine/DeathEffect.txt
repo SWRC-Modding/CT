@@ -1,0 +1,9 @@
+CLASS: DeathEffect(40), BASE: Object
+STRUCTS:
+	DeathEffectInfo(36)
+		0    DamageType               Class   <DamageType>
+		4    DamageAmount             Float   
+		8    HitLocation              Struct  <Vector>
+		20   Momentum                 Struct  <Vector>
+		32   HitBone                  Name    
+PROPERTIES:

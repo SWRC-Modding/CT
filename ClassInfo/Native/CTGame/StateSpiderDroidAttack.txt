@@ -1,0 +1,14 @@
+CLASS: StateSpiderDroidAttack(172), BASE: StateAbstractAttack
+PROPERTIES:
+	124  bCanBlock                Bool    <0 : 0x00000001>
+	124  bCanBlockNow             Bool    <1 : 0x00000002>
+	128  ShotRange                Float   
+	132  ProxDefNPCThreshold      Int     
+	136  ProxDefRange             Float   
+	140  ProxDefMinInterval       Float   
+	144  NextProxDefTime          Float   
+	148  MinDefenseInterval       Float   
+	152  NextDefenseTime          Float   
+	156  BlinkInterval            Struct  <Range>
+	164  NextBlinkTime            Float   
+	168  scanner                  Object  <Accessory>

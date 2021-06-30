@@ -1,0 +1,2 @@
+CLASS: InternetInfo(644), BASE: Info
+PROPERTIES:

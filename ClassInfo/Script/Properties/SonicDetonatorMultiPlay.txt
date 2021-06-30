@@ -1,0 +1,2 @@
+CLASS: SonicDetonatorMultiPlay(704), BASE: SonicDetonatorBox
+PROPERTIES:

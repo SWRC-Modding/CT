@@ -1,0 +1,2 @@
+CLASS: BattleDroidBlasterAttachmentDefaults(776), BASE: BattleDroidBlasterAttachment
+PROPERTIES:

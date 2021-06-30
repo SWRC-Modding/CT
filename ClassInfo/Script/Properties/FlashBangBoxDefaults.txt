@@ -1,0 +1,2 @@
+CLASS: FlashBangBoxDefaults(704), BASE: FlashBangBox
+PROPERTIES:

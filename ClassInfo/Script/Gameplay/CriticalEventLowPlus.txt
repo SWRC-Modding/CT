@@ -1,0 +1,2 @@
+CLASS: CriticalEventLowPlus(676), BASE: CriticalEventPlus
+PROPERTIES:

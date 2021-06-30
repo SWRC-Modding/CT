@@ -1,0 +1,2 @@
+CLASS: LevelBase(120), BASE: Object
+PROPERTIES:

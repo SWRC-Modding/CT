@@ -1,0 +1,2 @@
+CLASS: Holo_WookieeTarfful(1664), BASE: WookieeTarfful
+PROPERTIES:

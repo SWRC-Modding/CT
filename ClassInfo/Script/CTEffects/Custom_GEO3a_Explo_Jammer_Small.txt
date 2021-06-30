@@ -1,0 +1,2 @@
+CLASS: Custom_GEO3a_Explo_Jammer_Small(828), BASE: Emitter
+PROPERTIES:

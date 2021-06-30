@@ -1,0 +1,2 @@
+CLASS: Dirt_Explo_Smll(828), BASE: Emitter
+PROPERTIES:

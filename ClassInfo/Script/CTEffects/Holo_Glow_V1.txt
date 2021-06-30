@@ -1,0 +1,2 @@
+CLASS: Holo_Glow_V1(828), BASE: Emitter
+PROPERTIES:

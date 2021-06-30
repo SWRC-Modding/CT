@@ -1,0 +1,6 @@
+CLASS: UWindowBitmap(204), BASE: UWindowWindow
+PROPERTIES:
+	180  T                        Object  <Texture>
+	184  R                        Struct  <Region>
+	200  bStretch                 Bool    <0 : 0x00000001>
+	200  bCenter                  Bool    <1 : 0x00000002>

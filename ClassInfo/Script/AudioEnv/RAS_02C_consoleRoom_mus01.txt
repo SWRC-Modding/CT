@@ -1,0 +1,2 @@
+CLASS: RAS_02C_consoleRoom_mus01(96), BASE: AudioEnvironment
+PROPERTIES:

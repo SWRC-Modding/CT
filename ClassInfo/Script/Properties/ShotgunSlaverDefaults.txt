@@ -1,0 +1,2 @@
+CLASS: ShotgunSlaverDefaults(1220), BASE: ShotgunSlaver
+PROPERTIES:

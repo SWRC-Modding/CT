@@ -1,0 +1,2 @@
+CLASS: StateTrandoHeavyAttack(152), BASE: StateHeavyAttack
+PROPERTIES:

@@ -1,0 +1,2 @@
+CLASS: CTDamageSniperDefaults(112), BASE: CTDamageSniper
+PROPERTIES:

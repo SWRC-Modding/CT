@@ -1,0 +1,2 @@
+CLASS: HackTerminalCore(940), BASE: HackTerminal
+PROPERTIES:

@@ -1,0 +1,8 @@
+CLASS: UWindowTabControl(280), BASE: UWindowListControl
+PROPERTIES:
+	260  LeftButton               Object  <UWindowTabControlLeftButton>
+	264  RightButton              Object  <UWindowTabControlRightButton>
+	268  TabArea                  Object  <UWindowTabControlTabArea>
+	272  SelectedTab              Object  <UWindowTabControlItem>
+	276  bMultiLine               Bool    <0 : 0x00000001>
+	276  bSelectNearestTabOnRemove Bool    <1 : 0x00000002>

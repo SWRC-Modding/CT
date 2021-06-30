@@ -1,0 +1,2 @@
+CLASS: Eliteintro_holeExplosion(828), BASE: Emitter
+PROPERTIES:

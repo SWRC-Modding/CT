@@ -1,0 +1,27 @@
+CLASS: CTSoundOptionsPCMenu(31632), BASE: MenuTemplateTitled
+PROPERTIES:
+	18320 Label                    Struct  <MenuText>
+	18432 OptionsBorder            Struct  <MenuSprite>
+	18504 OptionsDescBorder        Struct  <MenuSprite>
+	18576 OptionDesc               Struct  <MenuText>
+	18688 OptionLabels             Struct  <MenuText>[7]
+	19472 Options                  Struct  <MenuButtonEnum>[7]
+	22972 OptionLeftArrows         Struct  <MenuButtonSprite>[7]
+	25800 OptionRightArrows        Struct  <MenuButtonSprite>[7]
+	28628 OptionDefaults           Int     [7]
+	28656 SoundLabel               Struct  <MenuText>
+	28768 SoundLabelBackground     Struct  <MenuSprite>
+	28840 SoundLabelConnector      Struct  <MenuSprite>
+	28912 Game                     Struct  <MenuButtonText>
+	29396 Graphics                 Struct  <MenuButtonText>
+	29880 Controls                 Struct  <MenuButtonText>
+	30364 RestoreToDefault         Struct  <MenuButtonText>
+	30848 DefaultConnector         Struct  <MenuSprite>
+	30920 DefaultLine              Struct  <MenuSprite>
+	30992 Done                     Struct  <MenuButtonText>
+	31476 OptionApplyRestartRequired Int     [7]
+	31504 RestartRequired          Struct  <MenuText>
+	31616 bRestoreRestart          Bool    <0 : 0x00000001>
+	31620 SoundVoice               Object  <Sound>
+	31624 SoundFX                  Object  <Sound>
+	31628 bInMultiplayer           Bool    <0 : 0x00000001>

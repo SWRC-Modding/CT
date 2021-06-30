@@ -1,0 +1,2 @@
+CLASS: Watchtower_leg2(888), BASE: KarmaProp
+PROPERTIES:

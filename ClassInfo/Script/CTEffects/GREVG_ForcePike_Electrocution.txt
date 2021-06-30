@@ -1,0 +1,2 @@
+CLASS: GREVG_ForcePike_Electrocution(828), BASE: Emitter
+PROPERTIES:

@@ -1,0 +1,2 @@
+CLASS: HitDecWood_DC17(1060), BASE: HitDecal
+PROPERTIES:

@@ -1,0 +1,3 @@
+CLASS: Palette(48), BASE: Object
+PROPERTIES:
+	40   Colors                   Array   <Struct <Color>>

@@ -1,0 +1,2 @@
+CLASS: ActorChannel(184), BASE: Channel
+PROPERTIES:

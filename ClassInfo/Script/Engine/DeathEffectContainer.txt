@@ -1,0 +1,8 @@
+CLASS: DeathEffectContainer(52), BASE: Object
+STRUCTS:
+	DeathEffectPair(8)
+		0    DeathCondition           Object  <DeathCondition>
+		4    DeathEffect              Object  <DeathEffect>
+PROPERTIES:
+	40   DefaultDeathEffect       Object  <DeathEffect>
+	44   DeathEffects             Array   <Struct <DeathEffectPair>>

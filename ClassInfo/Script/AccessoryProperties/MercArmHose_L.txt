@@ -1,0 +1,2 @@
+CLASS: MercArmHose_L(696), BASE: Accessory
+PROPERTIES:

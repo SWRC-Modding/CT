@@ -1,0 +1,8 @@
+CLASS: KillingSpreeMessage(868), BASE: CriticalEventPlus
+PROPERTIES:
+	676  EndSpreeNote             Str     
+	684  EndSelfSpree             Str     
+	692  MultiKillString          Str     
+	700  SpreeNote                Str     [10]
+	780  SelfSpreeNote            Str     [10]
+	860  EndSpreeNoteTrailer      Str     

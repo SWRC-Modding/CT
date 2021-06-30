@@ -1,0 +1,2 @@
+CLASS: WindowShatter_ButtressRoom(836), BASE: StaticProp
+PROPERTIES:

@@ -1,0 +1,2 @@
+CLASS: Admin(2240), BASE: PlayerController
+PROPERTIES:

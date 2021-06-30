@@ -1,0 +1,5 @@
+CLASS: DC17mSniper(1192), BASE: Weapon
+PROPERTIES:
+	1180 LastFireTime             Float   
+	1184 ScopeAttachment          Class   <DC17mSniperScope>
+	1188 Scope                    Object  <DC17mSniperScope>

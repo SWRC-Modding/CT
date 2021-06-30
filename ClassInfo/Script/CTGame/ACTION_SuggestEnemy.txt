@@ -1,0 +1,3 @@
+CLASS: ACTION_SuggestEnemy(68), BASE: ScriptedAction
+PROPERTIES:
+	64   EnemyTag                 Name    

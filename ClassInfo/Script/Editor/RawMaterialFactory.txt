@@ -1,0 +1,3 @@
+CLASS: RawMaterialFactory(52), BASE: MaterialFactory
+PROPERTIES:
+	48   MaterialClass            Class   <Material>

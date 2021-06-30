@@ -1,0 +1,2 @@
+CLASS: DV_TurretsTrandoshan(56), BASE: DV_Turrets
+PROPERTIES:

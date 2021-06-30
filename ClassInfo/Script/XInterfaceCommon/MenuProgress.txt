@@ -1,0 +1,4 @@
+CLASS: MenuProgress(19072), BASE: MenuTemplateTitledB
+PROPERTIES:
+	19060 Time                     Float   
+	19064 ConnectingText           Str     

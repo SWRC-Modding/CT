@@ -1,0 +1,2 @@
+CLASS: SlavGrenadeArm(696), BASE: Accessory
+PROPERTIES:

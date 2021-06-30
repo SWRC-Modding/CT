@@ -1,0 +1,2 @@
+CLASS: TrandoshanScavDefaults(1788), BASE: TrandoshanScav
+PROPERTIES:

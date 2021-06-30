@@ -1,0 +1,2 @@
+CLASS: Font(80), BASE: Object
+PROPERTIES:

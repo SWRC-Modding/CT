@@ -1,0 +1,2 @@
+CLASS: LinkerSave(212), BASE: Linker
+PROPERTIES:

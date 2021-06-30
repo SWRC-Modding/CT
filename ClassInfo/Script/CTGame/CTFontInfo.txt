@@ -1,0 +1,8 @@
+CLASS: CTFontInfo(716), BASE: Info
+PROPERTIES:
+	644  HugeFont                 Object  <Font>
+	648  BigFont                  Object  <Font>
+	652  MediumFont               Object  <Font>
+	656  SmallFont                Object  <Font>
+	660  SavedWidth               Float   [7]
+	688  SavedFont                Object  <Font>[7]

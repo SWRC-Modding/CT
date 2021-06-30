@@ -1,0 +1,2 @@
+CLASS: DV_TrandoDropShip(56), BASE: DamageVariance
+PROPERTIES:

@@ -1,0 +1,2 @@
+CLASS: MuzzleFlash_Shotgun(828), BASE: Emitter
+PROPERTIES:

@@ -1,0 +1,2 @@
+CLASS: DC17mSniperProjDefaults(716), BASE: DC17mSniperProj
+PROPERTIES:

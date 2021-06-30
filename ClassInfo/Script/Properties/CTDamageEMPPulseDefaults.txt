@@ -1,0 +1,2 @@
+CLASS: CTDamageEMPPulseDefaults(112), BASE: CTDamageEMPPulse
+PROPERTIES:

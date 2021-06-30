@@ -1,0 +1,2 @@
+CLASS: DynamicLight(664), BASE: Light
+PROPERTIES:

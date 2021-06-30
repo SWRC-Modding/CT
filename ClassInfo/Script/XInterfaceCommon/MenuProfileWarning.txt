@@ -1,0 +1,8 @@
+CLASS: MenuProfileWarning(19208), BASE: MenuTemplateTitledA
+PROPERTIES:
+	19060 Message                  Struct  <MenuText>
+	19172 MustCreateProfile        Str     
+	19180 MustSelectProfile        Str     
+	19188 WarningText              Str     
+	19196 WelcomeText              Str     
+	19204 bFirst                   Bool    <0 : 0x00000001>

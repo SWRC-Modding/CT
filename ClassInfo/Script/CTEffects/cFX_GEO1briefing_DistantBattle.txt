@@ -1,0 +1,2 @@
+CLASS: cFX_GEO1briefing_DistantBattle(828), BASE: Emitter
+PROPERTIES:

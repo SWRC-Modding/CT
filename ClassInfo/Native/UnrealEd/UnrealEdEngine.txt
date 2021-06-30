@@ -1,0 +1,5 @@
+CLASS: UnrealEdEngine(536), BASE: EditorEngine
+PROPERTIES:
+	524  NotifyVtbl               Int     
+	528  hWndMain                 Int     
+	532  Pad                      Int     

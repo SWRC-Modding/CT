@@ -1,0 +1,2 @@
+CLASS: GunshipShadows(1680), BASE: GunshipHigh
+PROPERTIES:

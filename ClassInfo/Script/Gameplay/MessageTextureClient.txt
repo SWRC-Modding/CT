@@ -1,0 +1,10 @@
+CLASS: MessageTextureClient(692), BASE: Info
+PROPERTIES:
+	644  MessageTexture           Object  <ScriptedTexture>
+	648  ScrollingMessage         Str     
+	656  HisMessage               Str     
+	664  HerMessage               Str     
+	672  Font                     Object  <Font>
+	676  FontColor                Struct  <Color>
+	680  bCaps                    Bool    <0 : 0x00000001>
+	684  OldText                  Str     

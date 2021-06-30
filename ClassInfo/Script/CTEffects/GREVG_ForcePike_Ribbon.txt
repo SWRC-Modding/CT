@@ -1,0 +1,2 @@
+CLASS: GREVG_ForcePike_Ribbon(828), BASE: Emitter
+PROPERTIES:

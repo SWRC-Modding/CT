@@ -1,0 +1,4 @@
+CLASS: ACTION_AttachToTurret(72), BASE: ScriptedAction
+PROPERTIES:
+	64   DestinationTag           Name    
+	68   Attach                   Bool    <0 : 0x00000001>

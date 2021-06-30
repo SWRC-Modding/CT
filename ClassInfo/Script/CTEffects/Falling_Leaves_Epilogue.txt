@@ -1,0 +1,2 @@
+CLASS: Falling_Leaves_Epilogue(828), BASE: Emitter
+PROPERTIES:

@@ -1,0 +1,2 @@
+CLASS: AntiPortalActor(644), BASE: Actor
+PROPERTIES:

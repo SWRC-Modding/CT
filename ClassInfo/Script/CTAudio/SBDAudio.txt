@@ -1,0 +1,2 @@
+CLASS: SBDAudio(48), BASE: PawnAudioTable
+PROPERTIES:

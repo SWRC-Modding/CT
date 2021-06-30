@@ -1,0 +1,2 @@
+CLASS: MenuPlayerList(24028), BASE: MenuGamerList
+PROPERTIES:

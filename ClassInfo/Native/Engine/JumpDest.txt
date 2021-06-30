@@ -1,0 +1,2 @@
+CLASS: JumpDest(724), BASE: NavigationPoint
+PROPERTIES:

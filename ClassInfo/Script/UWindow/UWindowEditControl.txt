@@ -1,0 +1,6 @@
+CLASS: UWindowEditControl(256), BASE: UWindowDialogControl
+PROPERTIES:
+	240  EditBoxWidth             Float   
+	244  EditAreaDrawX            Float   
+	248  EditAreaDrawY            Float   
+	252  EditBox                  Object  <UWindowEditBox>

@@ -1,0 +1,6 @@
+CLASS: StateTurretAttack(140), BASE: StateAbstractAttack
+PROPERTIES:
+	124  NumKills                 Int     
+	128  LastFocusChange          Float   
+	132  LastSetEnemyTime         Float   
+	136  MountedTurret            Bool    <0 : 0x00000001>

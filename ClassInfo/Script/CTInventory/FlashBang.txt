@@ -1,0 +1,2 @@
+CLASS: FlashBang(1180), BASE: Weapon
+PROPERTIES:

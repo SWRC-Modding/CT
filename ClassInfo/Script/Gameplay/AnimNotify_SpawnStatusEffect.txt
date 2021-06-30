@@ -1,0 +1,6 @@
+CLASS: AnimNotify_SpawnStatusEffect(60), BASE: AnimNotify_Scripted
+PROPERTIES:
+	44   StatusEffect             Class   <StatusEffect>
+	48   Duration                 Float   
+	52   Radius                   Float   
+	56   DamagePerSecond          Float   

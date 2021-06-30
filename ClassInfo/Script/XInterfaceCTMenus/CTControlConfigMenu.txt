@@ -1,0 +1,11 @@
+CLASS: CTControlConfigMenu(21640), BASE: MenuTemplate
+PROPERTIES:
+	17696 Background               Struct  <MenuSprite>
+	17768 AltCtrl1                 Struct  <MenuButtonText>
+	18252 AltCtrl2                 Struct  <MenuButtonText>
+	18736 AltCtrl3                 Struct  <MenuButtonText>
+	19220 AltCtrl4                 Struct  <MenuButtonText>
+	19704 AltCtrl5                 Struct  <MenuButtonText>
+	20188 AltCtrl6                 Struct  <MenuButtonText>
+	20672 InvertLook               Struct  <MenuButtonText>
+	21156 back                     Struct  <MenuButtonText>

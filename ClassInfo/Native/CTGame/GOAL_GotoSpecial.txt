@@ -1,0 +1,9 @@
+CLASS: GOAL_GotoSpecial(88), BASE: GoalObject
+PROPERTIES:
+	76   Goal                     Object  <NavigationPoint>
+	80   Tolerance                Float   
+	84   bReleaseNodeOnFinish     Bool    <0 : 0x00000001>
+	84   bEndInCrouch             Bool    <1 : 0x00000002>
+	84   bBackToWall              Bool    <2 : 0x00000004>
+	84   bAtNode                  Bool    <3 : 0x00000008>
+	84   bKnockoverCover          Bool    <4 : 0x00000010>

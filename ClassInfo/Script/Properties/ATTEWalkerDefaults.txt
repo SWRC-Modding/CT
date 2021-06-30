@@ -1,0 +1,2 @@
+CLASS: ATTEWalkerDefaults(1664), BASE: ATTEWalker
+PROPERTIES:

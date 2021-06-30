@@ -1,0 +1,2 @@
+CLASS: LodMeshInstance(124), BASE: MeshInstance
+PROPERTIES:

@@ -1,0 +1,27 @@
+CLASS: CTGraphicsOptionsPCMenu(39332), BASE: MenuTemplateTitled
+PROPERTIES:
+	18320 Label                    Struct  <MenuText>
+	18432 OptionsBorder            Struct  <MenuSprite>
+	18504 OptionsDescBorder        Struct  <MenuSprite>
+	18576 OptionDesc               Struct  <MenuText>
+	18688 OptionLabels             Struct  <MenuText>[12]
+	20032 Options                  Struct  <MenuButtonEnum>[12]
+	26032 OptionLeftArrows         Struct  <MenuButtonSprite>[12]
+	30880 OptionRightArrows        Struct  <MenuButtonSprite>[12]
+	35728 OptionApplyRestartRequired Int     [12]
+	35776 RestartRequired          Struct  <MenuText>
+	35888 PreviousSettings         Int     [12]
+	35936 DirtyBeforeApply         Int     [12]
+	35984 GraphicsLabel            Struct  <MenuText>
+	36096 GraphicsLabelBackground  Struct  <MenuSprite>
+	36168 GraphicsLabelConnector   Struct  <MenuSprite>
+	36240 Game                     Struct  <MenuButtonText>
+	36724 Sound                    Struct  <MenuButtonText>
+	37208 Controls                 Struct  <MenuButtonText>
+	37692 Apply                    Struct  <MenuButtonText>
+	38176 SetRecommended           Struct  <MenuButtonText>
+	38660 DefaultConnector         Struct  <MenuSprite>
+	38732 DefaultLine              Struct  <MenuSprite>
+	38804 Done                     Struct  <MenuButtonText>
+	39288 bApplyNewResolution      Bool    <0 : 0x00000001>
+	39292 PresetKeys               Str     [5]

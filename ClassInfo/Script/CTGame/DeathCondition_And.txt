@@ -1,0 +1,2 @@
+CLASS: DeathCondition_And(52), BASE: DeathCondition_Logical
+PROPERTIES:

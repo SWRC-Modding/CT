@@ -1,0 +1,29 @@
+CLASS: BitmapMaterial(128), BASE: RenderedMaterial
+ENUMS:
+	ETextureFormat
+		TEXF_P8                  =   0
+		TEXF_RGBA7               =   1
+		TEXF_RGB16               =   2
+		TEXF_DXT1                =   3
+		TEXF_RGB8                =   4
+		TEXF_RGBA8               =   5
+		TEXF_NODATA              =   6
+		TEXF_DXT3                =   7
+		TEXF_DXT5                =   8
+		TEXF_L8                  =   9
+		TEXF_G16                 =  10
+		TEXF_RRRGGGBBB           =  11
+	ETexClampMode
+		TC_Wrap                  =   0
+		TC_Clamp                 =   1
+PROPERTIES:
+	100  Format                   Byte    <ETextureFormat>
+	101  UClampMode               Byte    <ETexClampMode>
+	102  VClampMode               Byte    <ETexClampMode>
+	103  UBits                    Byte    
+	104  VBits                    Byte    
+	108  USize                    Int     
+	112  VSize                    Int     
+	116  UClamp                   Int     
+	120  VClamp                   Int     
+	124  DontCache                Bool    <0 : 0x00000001>

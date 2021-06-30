@@ -1,0 +1,6 @@
+CLASS: UWindowHTMLTextRow(188), BASE: UWindowDynamicTextRow
+PROPERTIES:
+	124  StartStyle               Struct  <HTMLStyle>
+	148  EndStyle                 Struct  <HTMLStyle>
+	172  DisplayString            Str     
+	180  StyleString              Str     

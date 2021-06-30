@@ -1,0 +1,7 @@
+CLASS: ACTION_PlayPropAnim(84), BASE: ScriptedAction
+PROPERTIES:
+	64   BaseAnim                 Name    
+	68   AnimRate                 Float   
+	72   StartFrame               Float   
+	76   Channel                  Int     
+	80   AnimPropTag              Name    

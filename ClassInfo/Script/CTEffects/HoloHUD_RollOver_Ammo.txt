@@ -1,0 +1,2 @@
+CLASS: HoloHUD_RollOver_Ammo(828), BASE: Emitter
+PROPERTIES:

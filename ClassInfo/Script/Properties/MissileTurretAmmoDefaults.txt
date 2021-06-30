@@ -1,0 +1,2 @@
+CLASS: MissileTurretAmmoDefaults(868), BASE: MissileTurretAmmo
+PROPERTIES:

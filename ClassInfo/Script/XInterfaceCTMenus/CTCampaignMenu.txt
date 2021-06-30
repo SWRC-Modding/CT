@@ -1,0 +1,55 @@
+CLASS: CTCampaignMenu(27880), BASE: MenuTemplateTitledBA
+PROPERTIES:
+	19728 KaminoBorder             Struct  <MenuSprite>
+	19800 Kamino                   Struct  <MenuSprite>
+	19872 Geonosis                 Struct  <MenuButtonSprite>
+	20276 AssaultShip              Struct  <MenuButtonSprite>
+	20680 Kashyyyk                 Struct  <MenuButtonSprite>
+	21084 CompletedGeonosis        Struct  <MenuSprite>[4]
+	21372 GEO_MissionSubEnd        Int     [4]
+	21388 CompletedAssaultShip     Struct  <MenuSprite>[4]
+	21676 RAS_MissionSubEnd        Int     [4]
+	21692 CompletedKashyyyk        Struct  <MenuSprite>[5]
+	22052 YYY_MissionSubEnd        Int     [5]
+	22072 GEONavigateRight         Struct  <MenuButtonSprite>
+	22476 RASNavigateLeft          Struct  <MenuButtonSprite>
+	22880 RASNavigateRight         Struct  <MenuButtonSprite>
+	23284 YYYNavigateLeft          Struct  <MenuButtonSprite>
+	23688 LabelBackground          Struct  <MenuSprite>
+	23760 Label                    Struct  <MenuText>
+	23872 CampaignBackground       Struct  <MenuSprite>
+	23944 Campaign                 Struct  <MenuText>
+	24056 Campaigns                Str     [3]
+	24080 SelectedCampaign         Int     
+	24084 Border                   Struct  <MenuSprite>
+	24156 DEV_GEO_SubMissions      Str     [15]
+	24276 DEV_GEO_SubMissionDescs  Str     [15]
+	24396 DEV_GEO_SubMissionAvailable Int     [15]
+	24456 DEV_RAS_SubMissions      Str     [16]
+	24584 DEV_RAS_SubMissionDescs  Str     [16]
+	24712 DEV_RAS_SubMissionAvailable Int     [16]
+	24776 DEV_YYY_SubMissions      Str     [25]
+	24976 DEV_YYY_SubMissionDescs  Str     [25]
+	25176 DEV_YYY_SubMissionAvailable Int     [25]
+	25276 GEO_SubMissions          Str     [6]
+	25324 GEO_SubMissionDescs      Str     [6]
+	25372 GEO_SubMissionAvailable  Int     [6]
+	25396 RAS_SubMissions          Str     [4]
+	25428 RAS_SubMissionDescs      Str     [4]
+	25460 RAS_SubMissionAvailable  Int     [4]
+	25476 YYY_SubMissions          Str     [7]
+	25532 YYY_SubMissionDescs      Str     [7]
+	25588 YYY_SubMissionAvailable  Int     [7]
+	25616 LevelList                Struct  <MenuStringList>
+	26156 ScrollBar                Struct  <MenuScrollBar>
+	26772 ScrollBarArrowUp         Struct  <MenuButtonSprite>
+	27176 ScrollBarArrowDown       Struct  <MenuButtonSprite>
+	27580 ScrollArea               Struct  <MenuScrollArea>
+	27632 PageUpArea               Struct  <MenuActiveWidget>
+	27744 PageDownArea             Struct  <MenuActiveWidget>
+	27856 SelectedLevel            Int     
+	27860 BlipPulseTime            Float   
+	27864 ElapsedBlipPulseTime     Float   
+	27868 RingPulseTime            Float   
+	27872 ElapsedRingPulseTime     Float   
+	27876 bDevMode                 Bool    <0 : 0x00000001>

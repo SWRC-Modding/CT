@@ -1,0 +1,2 @@
+CLASS: Therm_Det_Explo(828), BASE: Emitter
+PROPERTIES:

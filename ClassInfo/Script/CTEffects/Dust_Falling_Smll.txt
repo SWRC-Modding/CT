@@ -1,0 +1,2 @@
+CLASS: Dust_Falling_Smll(828), BASE: Emitter
+PROPERTIES:

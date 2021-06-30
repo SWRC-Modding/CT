@@ -1,0 +1,2 @@
+CLASS: Scav_wingR_move(696), BASE: Accessory
+PROPERTIES:

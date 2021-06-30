@@ -1,0 +1,8 @@
+CLASS: MenuGamerConfirm(19964), BASE: MenuTemplateTitledBA
+PROPERTIES:
+	19728 BackClass                Class   <MenuGamerDetails>
+	19732 Gamer                    Struct  <Gamer>
+	19828 ConfirmText              Struct  <MenuText>
+	19940 CommandText              Str     
+	19948 FailedOperation          Str     
+	19956 StringGamerTagToken      Str     

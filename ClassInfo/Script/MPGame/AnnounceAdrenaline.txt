@@ -1,0 +1,3 @@
+CLASS: AnnounceAdrenaline(648), BASE: Info
+PROPERTIES:
+	644  AnnounceSound            Object  <Sound>

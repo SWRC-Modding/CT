@@ -1,0 +1,2 @@
+CLASS: Commando62BotDefaults(1256), BASE: Commando62Bot
+PROPERTIES:

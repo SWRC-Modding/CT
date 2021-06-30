@@ -1,0 +1,2 @@
+CLASS: NetPendingLevel(156), BASE: PendingLevel
+PROPERTIES:

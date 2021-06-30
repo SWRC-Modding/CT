@@ -1,0 +1,2 @@
+CLASS: DeathExplode_RAS_TRANtransport(828), BASE: Emitter
+PROPERTIES:

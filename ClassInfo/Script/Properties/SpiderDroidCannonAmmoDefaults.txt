@@ -1,0 +1,2 @@
+CLASS: SpiderDroidCannonAmmoDefaults(868), BASE: SpiderDroidCannonAmmo
+PROPERTIES:

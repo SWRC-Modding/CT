@@ -1,0 +1,2 @@
+CLASS: VertexStreamUV(64), BASE: VertexStreamBase
+PROPERTIES:

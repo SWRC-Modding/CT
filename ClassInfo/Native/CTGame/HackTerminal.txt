@@ -1,0 +1,7 @@
+CLASS: HackTerminal(940), BASE: ActivateItem
+PROPERTIES:
+	712  DisabledState            Struct  <ActivationInfo>
+	768  StandbyState             Struct  <ActivationInfo>
+	824  HackedState              Struct  <ActivationInfo>
+	880  ActiveState              Struct  <ActivationInfo>
+	936  OptionalDesk             Object  <Actor>

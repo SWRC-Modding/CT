@@ -1,0 +1,2 @@
+CLASS: YYY_MP_ventWays(96), BASE: AudioEnvironment
+PROPERTIES:

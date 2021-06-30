@@ -1,0 +1,8 @@
+CLASS: ACTION_ShowPrompt(88), BASE: ScriptedAction
+PROPERTIES:
+	64   PromptText               Str     
+	72   PromptButtonFuncs        Array   <Str>
+	80   PromptTime               Float   
+	84   bFlash                   Bool    <0 : 0x00000001>
+	84   bShowOnPC                Bool    <1 : 0x00000002>
+	84   bShowOnConsole           Bool    <2 : 0x00000004>

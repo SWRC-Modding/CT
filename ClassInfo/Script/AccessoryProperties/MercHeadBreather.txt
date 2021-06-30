@@ -1,0 +1,2 @@
+CLASS: MercHeadBreather(696), BASE: Accessory
+PROPERTIES:

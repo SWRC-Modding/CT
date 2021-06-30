@@ -1,0 +1,2 @@
+CLASS: UDebugMapListBox(300), BASE: UWindowListBox
+PROPERTIES:

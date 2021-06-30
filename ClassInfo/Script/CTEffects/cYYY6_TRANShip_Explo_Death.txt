@@ -1,0 +1,2 @@
+CLASS: cYYY6_TRANShip_Explo_Death(828), BASE: Emitter
+PROPERTIES:

@@ -1,0 +1,2 @@
+CLASS: DroidekaBlasterProj(716), BASE: Projectile
+PROPERTIES:

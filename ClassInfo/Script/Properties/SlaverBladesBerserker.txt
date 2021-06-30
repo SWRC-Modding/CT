@@ -1,0 +1,2 @@
+CLASS: SlaverBladesBerserker(1184), BASE: SlaverBlades
+PROPERTIES:

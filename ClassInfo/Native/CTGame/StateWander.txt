@@ -1,0 +1,2 @@
+CLASS: StateWander(52), BASE: StateObject
+PROPERTIES:

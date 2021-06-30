@@ -1,0 +1,6 @@
+CLASS: UdpLink(700), BASE: InternetLink
+PROPERTIES:
+	672  BroadcastAddr            Int     
+	676  LocalXSessionID          Str     
+	684  LocalXExchangeKey        Str     
+	692  LocalXHostAddr           Str     

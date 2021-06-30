@@ -1,0 +1,2 @@
+CLASS: TRAN_Dropship_LandingThruster(828), BASE: Emitter
+PROPERTIES:

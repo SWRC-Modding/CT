@@ -1,0 +1,2 @@
+CLASS: HammerDetroyer(836), BASE: StaticProp
+PROPERTIES:

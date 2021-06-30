@@ -1,0 +1,2 @@
+CLASS: Sparks_Orange_large(828), BASE: Emitter
+PROPERTIES:

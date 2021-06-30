@@ -1,0 +1,2 @@
+CLASS: BattleDroidBlasterTM(1180), BASE: BattleDroidBlaster
+PROPERTIES:

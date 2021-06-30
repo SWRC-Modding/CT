@@ -1,0 +1,2 @@
+CLASS: BactaDispenserTRN(956), BASE: BactaDispenser
+PROPERTIES:

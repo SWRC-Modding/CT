@@ -1,0 +1,2 @@
+CLASS: ScriptedTrigger(668), BASE: ScriptedSequence
+PROPERTIES:

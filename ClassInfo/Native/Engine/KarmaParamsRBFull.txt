@@ -1,0 +1,4 @@
+CLASS: KarmaParamsRBFull(196), BASE: KarmaParams
+PROPERTIES:
+	160  KInertiaTensor           Float   [6]
+	184  KCOMOffset               Struct  <Vector>

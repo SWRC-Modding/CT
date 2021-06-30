@@ -1,0 +1,2 @@
+CLASS: HighHallTube(836), BASE: StaticProp
+PROPERTIES:

@@ -1,0 +1,15 @@
+CLASS: Commandlet(332), BASE: Object
+PROPERTIES:
+	40   HelpCmd                  Str     
+	48   HelpOneLiner             Str     
+	56   HelpUsage                Str     
+	64   HelpWebLink              Str     
+	72   HelpParm                 Str     [16]
+	200  HelpDesc                 Str     [16]
+	328  LogToStdout              Bool    <0 : 0x00000001>
+	328  IsServer                 Bool    <1 : 0x00000002>
+	328  IsClient                 Bool    <2 : 0x00000004>
+	328  IsEditor                 Bool    <3 : 0x00000008>
+	328  LazyLoad                 Bool    <4 : 0x00000010>
+	328  ShowErrorCount           Bool    <5 : 0x00000020>
+	328  ShowBanner               Bool    <6 : 0x00000040>

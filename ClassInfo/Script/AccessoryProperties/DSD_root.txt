@@ -1,0 +1,2 @@
+CLASS: DSD_root(696), BASE: Accessory
+PROPERTIES:

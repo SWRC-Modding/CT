@@ -1,0 +1,10 @@
+CLASS: KarmaParamsSkel(212), BASE: KarmaParams
+PROPERTIES:
+	160  KSkeleton                Str     
+	168  bKDoConvulsions          Bool    <0 : 0x00000001>
+	172  KConvulseSpacing         Struct  <Range>
+	180  KShotStart               Struct  <Vector>
+	192  KShotEnd                 Struct  <Vector>
+	204  KShotStrength            Float   
+	208  bKApplyToRoot            Bool    <0 : 0x00000001>
+	208  bKImportantRagdoll       Bool    <1 : 0x00000002>

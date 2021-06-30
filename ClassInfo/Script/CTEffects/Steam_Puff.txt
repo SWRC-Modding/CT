@@ -1,0 +1,2 @@
+CLASS: Steam_Puff(828), BASE: Emitter
+PROPERTIES:

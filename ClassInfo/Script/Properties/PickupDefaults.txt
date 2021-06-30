@@ -1,0 +1,2 @@
+CLASS: PickupDefaults(700), BASE: Pickup
+PROPERTIES:

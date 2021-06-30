@@ -1,0 +1,2 @@
+CLASS: GeoElitePelvis(696), BASE: Accessory
+PROPERTIES:

@@ -1,0 +1,3 @@
+CLASS: ACTION_ShowMenuScreen(72), BASE: ScriptedAction
+PROPERTIES:
+	64   MenuClass                Str     

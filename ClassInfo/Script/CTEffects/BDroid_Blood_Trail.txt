@@ -1,0 +1,2 @@
+CLASS: BDroid_Blood_Trail(828), BASE: Emitter
+PROPERTIES:

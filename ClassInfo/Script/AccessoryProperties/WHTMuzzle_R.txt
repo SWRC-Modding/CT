@@ -1,0 +1,2 @@
+CLASS: WHTMuzzle_R(696), BASE: Accessory
+PROPERTIES:

@@ -1,0 +1,2 @@
+CLASS: cRAS4_ShieldShorted(828), BASE: Emitter
+PROPERTIES:

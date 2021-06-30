@@ -1,0 +1,2 @@
+CLASS: UWindowRightClickMenu(288), BASE: UWindowPulldownMenu
+PROPERTIES:

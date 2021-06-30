@@ -1,0 +1,2 @@
+CLASS: LatentScriptedAction(64), BASE: ScriptedAction
+PROPERTIES:

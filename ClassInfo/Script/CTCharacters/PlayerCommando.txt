@@ -1,0 +1,10 @@
+CLASS: PlayerCommando(1716), BASE: CloneCommando
+STRUCTS:
+	SquadTravelInfo(8)
+		0    SquadMemberClass         Class   <Pawn>
+		4    SquadMemberHealth        Float   
+PROPERTIES:
+	1680 TexCloneVisorIcons       Object  <Texture>
+	1684 TexCloneMarkerArrows     Object  <Texture>
+	1688 SquadInfo                Struct  <SquadTravelInfo>[3]
+	1712 CurrentStance            Class   <SquadStance>

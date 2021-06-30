@@ -1,0 +1,16 @@
+CLASS: MarkerWeapon(940), BASE: CTMarker
+ENUMS:
+	EMarkerWeaponType
+		MWT_Sniper               =   0
+		MWT_AntiArmor            =   1
+		MWT_Grenade              =   2
+PROPERTIES:
+	904  MarkerWeaponType         Byte    <EMarkerWeaponType>
+	908  WeaponTarget             Object  <Actor>
+	912  WeaponTargetRadius       Float   
+	916  Accuracy                 Float   
+	920  FOV                      Float   
+	924  GrenadeClass             Class   <Weapon>
+	928  CompleteCue              Byte    <EPawnAudioEvent>
+	932  LocationPreviewMesh      Object  <StaticMesh>
+	936  LocationPreviewActor     Object  <Actor>

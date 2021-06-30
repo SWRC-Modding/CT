@@ -1,0 +1,2 @@
+CLASS: Primitive(84), BASE: Object
+PROPERTIES:

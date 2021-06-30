@@ -1,0 +1,2 @@
+CLASS: MercGrenadeLeg(696), BASE: Accessory
+PROPERTIES:

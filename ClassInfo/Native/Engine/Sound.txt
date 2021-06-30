@@ -1,0 +1,18 @@
+CLASS: Sound(112), BASE: SoundBase
+PROPERTIES:
+	40   Params                   Object  <AudioParams>
+	44   Rumble                   Object  <RumbleParams>
+	48   Looping                  Bool    <0 : 0x00000001>
+	48   Streaming                Bool    <1 : 0x00000002>
+	52   BattleContext            Byte    <ESoundBattleContext>
+	53   MinCampaign              Byte    
+	54   MaxCampaign              Byte    
+	56   Likelihood               Float   
+	60   XBoxMemoryResident       Bool    <0 : 0x00000001>
+	64   Data                     Byte    [24]
+	88   FileType                 Name    
+	92   OriginalSize             Int     
+	96   Duration                 Float   
+	100  Handle                   Int     
+	104  XBBankHandle             Int     
+	108  Parent                   Object  <Sound>

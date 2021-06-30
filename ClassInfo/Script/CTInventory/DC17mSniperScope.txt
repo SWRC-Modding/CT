@@ -1,0 +1,2 @@
+CLASS: DC17mSniperScope(644), BASE: Actor
+PROPERTIES:

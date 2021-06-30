@@ -1,0 +1,2 @@
+CLASS: ThermalDetonatorEnemyProj(804), BASE: ThermalDetonatorProj
+PROPERTIES:

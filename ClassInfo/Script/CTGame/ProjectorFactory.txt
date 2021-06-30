@@ -1,0 +1,7 @@
+CLASS: ProjectorFactory(792), BASE: Factory
+PROPERTIES:
+	728  Prototype                Class   <Projector>
+	732  ActorDrawScale           Struct  <Range>
+	740  ActorDrawScale3D         Struct  <RangeVector>
+	764  SpawnOffset              Struct  <RangeVector>
+	788  LifeTime                 Float   

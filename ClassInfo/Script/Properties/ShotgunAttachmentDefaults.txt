@@ -1,0 +1,2 @@
+CLASS: ShotgunAttachmentDefaults(776), BASE: ShotgunAttachment
+PROPERTIES:

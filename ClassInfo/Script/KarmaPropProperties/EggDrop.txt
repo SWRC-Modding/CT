@@ -1,0 +1,2 @@
+CLASS: EggDrop(888), BASE: KarmaProp
+PROPERTIES:

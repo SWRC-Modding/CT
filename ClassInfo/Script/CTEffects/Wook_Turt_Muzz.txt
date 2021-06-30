@@ -1,0 +1,2 @@
+CLASS: Wook_Turt_Muzz(828), BASE: Emitter
+PROPERTIES:

@@ -1,0 +1,2 @@
+CLASS: DC17mBlasterBox(704), BASE: Ammo
+PROPERTIES:

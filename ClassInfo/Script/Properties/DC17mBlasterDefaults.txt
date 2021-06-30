@@ -1,0 +1,2 @@
+CLASS: DC17mBlasterDefaults(1180), BASE: DC17mBlaster
+PROPERTIES:

@@ -1,0 +1,2 @@
+CLASS: RAS_03B_hallways_mus01(96), BASE: AudioEnvironment
+PROPERTIES:

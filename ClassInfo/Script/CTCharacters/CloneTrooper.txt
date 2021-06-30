@@ -1,0 +1,2 @@
+CLASS: CloneTrooper(1664), BASE: Republic
+PROPERTIES:

@@ -1,0 +1,4 @@
+CLASS: OptionsNewClassFromSel(56), BASE: OptionsProxy
+PROPERTIES:
+	40   Package                  Str     
+	48   Name                     Str     

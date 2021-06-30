@@ -1,0 +1,3 @@
+CLASS: Options2DShaperExtrudeToPoint(52), BASE: Options2DShaper
+PROPERTIES:
+	48   depth                    Int     

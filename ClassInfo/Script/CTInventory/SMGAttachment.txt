@@ -1,0 +1,2 @@
+CLASS: SMGAttachment(776), BASE: WeaponAttachment
+PROPERTIES:

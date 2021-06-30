@@ -1,0 +1,2 @@
+CLASS: E3_GEO_03C_introhall_mus01(96), BASE: AudioEnvironment
+PROPERTIES:

@@ -1,0 +1,3 @@
+CLASS: WarpZoneMarker(728), BASE: NavigationPoint
+PROPERTIES:
+	724  markedWarpZone           Object  <WarpZoneInfo>

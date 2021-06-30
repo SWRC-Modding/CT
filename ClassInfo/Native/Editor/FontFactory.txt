@@ -1,0 +1,2 @@
+CLASS: FontFactory(88), BASE: TextureFactory
+PROPERTIES:

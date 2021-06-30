@@ -1,0 +1,2 @@
+CLASS: MoverDBSlave_CORE(1596), BASE: MoverDBSlave
+PROPERTIES:

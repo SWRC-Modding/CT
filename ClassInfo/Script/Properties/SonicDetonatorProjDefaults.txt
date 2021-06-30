@@ -1,0 +1,2 @@
+CLASS: SonicDetonatorProjDefaults(804), BASE: SonicDetonatorProj
+PROPERTIES:

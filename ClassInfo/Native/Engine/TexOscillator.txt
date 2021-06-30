@@ -1,0 +1,23 @@
+CLASS: TexOscillator(228), BASE: TexModifier
+ENUMS:
+	ETexOscillationType
+		OT_Pan                   =   0
+		OT_Stretch               =   1
+		OT_StretchRepeat         =   2
+		OT_Jitter                =   3
+PROPERTIES:
+	112  UOscillationRate         Float   
+	116  VOscillationRate         Float   
+	120  UOscillationPhase        Float   
+	124  VOscillationPhase        Float   
+	128  UOscillationAmplitude    Float   
+	132  VOscillationAmplitude    Float   
+	136  UOscillationType         Byte    <ETexOscillationType>
+	137  VOscillationType         Byte    <ETexOscillationType>
+	140  UOffset                  Float   
+	144  VOffset                  Float   
+	148  M                        Struct  <Matrix>
+	212  LastSu                   Float   
+	216  LastSv                   Float   
+	220  CurrentUJitter           Float   
+	224  CurrentVJitter           Float   

@@ -1,0 +1,5 @@
+CLASS: ScriptedSequence(668), BASE: AIScript
+PROPERTIES:
+	652  bDrawLinks               Bool    <0 : 0x00000001>
+	656  Actions                  Array   <Object <ScriptedAction>>
+	664  ScriptControllerClass    Class   <ScriptedController>

@@ -1,0 +1,9 @@
+CLASS: UWindowHTMLTextArea(328), BASE: UWindowDynamicTextArea
+PROPERTIES:
+	304  TextColor                Struct  <Color>
+	308  BGColor                  Struct  <Color>
+	312  LinkColor                Struct  <Color>
+	316  ALinkColor               Struct  <Color>
+	320  LastBlinkTime            Float   
+	324  bShowBlink               Bool    <0 : 0x00000001>
+	324  bReleased                Bool    <1 : 0x00000002>

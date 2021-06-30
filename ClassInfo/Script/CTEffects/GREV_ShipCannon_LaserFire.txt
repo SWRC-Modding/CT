@@ -1,0 +1,2 @@
+CLASS: GREV_ShipCannon_LaserFire(828), BASE: Emitter
+PROPERTIES:

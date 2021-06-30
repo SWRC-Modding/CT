@@ -1,0 +1,4 @@
+CLASS: CT_Demo_ESRBPCMenu(17840), BASE: MenuTemplate
+PROPERTIES:
+	17696 Background               Struct  <MenuSprite>
+	17768 ESRBLogo                 Struct  <MenuSprite>

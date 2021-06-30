@@ -1,0 +1,4 @@
+CLASS: TimeMessage(916), BASE: CriticalEventPlus
+PROPERTIES:
+	676  TimeMessage              Str     [20]
+	836  TimeSound                Object  <Sound>[20]

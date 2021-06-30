@@ -1,0 +1,6 @@
+CLASS: GOAL_ManTurret(84), BASE: GoalObject
+PROPERTIES:
+	76   Turret                   Object  <Turret>
+	80   Activate                 Bool    <0 : 0x00000001>
+	80   InitiatedSequence        Bool    <1 : 0x00000002>
+	80   bWasGodMode              Bool    <2 : 0x00000004>

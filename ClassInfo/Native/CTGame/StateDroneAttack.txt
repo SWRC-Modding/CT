@@ -1,0 +1,4 @@
+CLASS: StateDroneAttack(132), BASE: StateAbstractAttack
+PROPERTIES:
+	124  LungeDist                Float   
+	128  IsMeleeAttacking         Bool    <0 : 0x00000001>

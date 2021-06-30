@@ -1,0 +1,3 @@
+CLASS: StateSquadAttack(132), BASE: StateAbstractAttack
+PROPERTIES:
+	124  BadCombatPts             Array   <Object <NavigationPoint>>

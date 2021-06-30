@@ -1,0 +1,2 @@
+CLASS: CTDamageExplosionDefaults(112), BASE: CTDamageExplosion
+PROPERTIES:

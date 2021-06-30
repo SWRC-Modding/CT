@@ -1,0 +1,2 @@
+CLASS: WookieeTurretShield(696), BASE: Accessory
+PROPERTIES:

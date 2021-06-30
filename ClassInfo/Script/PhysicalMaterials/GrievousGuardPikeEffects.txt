@@ -1,0 +1,2 @@
+CLASS: GrievousGuardPikeEffects(68), BASE: MaterialTypeInfo
+PROPERTIES:

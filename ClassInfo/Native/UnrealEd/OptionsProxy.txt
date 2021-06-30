@@ -1,0 +1,2 @@
+CLASS: OptionsProxy(40), BASE: Object
+PROPERTIES:

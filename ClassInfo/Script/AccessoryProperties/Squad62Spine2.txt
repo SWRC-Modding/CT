@@ -1,0 +1,2 @@
+CLASS: Squad62Spine2(696), BASE: Accessory
+PROPERTIES:

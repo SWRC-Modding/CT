@@ -1,0 +1,2 @@
+CLASS: BactaDispenserCORE(956), BASE: BactaDispenser
+PROPERTIES:

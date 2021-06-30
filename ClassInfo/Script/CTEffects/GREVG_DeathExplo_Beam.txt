@@ -1,0 +1,2 @@
+CLASS: GREVG_DeathExplo_Beam(828), BASE: Emitter
+PROPERTIES:

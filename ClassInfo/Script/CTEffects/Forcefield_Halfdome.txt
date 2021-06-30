@@ -1,0 +1,2 @@
+CLASS: Forcefield_Halfdome(828), BASE: Emitter
+PROPERTIES:

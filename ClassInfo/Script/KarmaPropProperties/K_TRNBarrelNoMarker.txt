@@ -1,0 +1,2 @@
+CLASS: K_TRNBarrelNoMarker(896), BASE: K_TRNSnipeBarrel
+PROPERTIES:

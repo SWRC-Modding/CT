@@ -1,0 +1,5 @@
+CLASS: ColorModifier(112), BASE: Modifier
+PROPERTIES:
+	104  Color                    Struct  <Color>
+	108  RenderTwoSided           Bool    <0 : 0x00000001>
+	108  AlphaBlend               Bool    <1 : 0x00000002>

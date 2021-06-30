@@ -1,0 +1,2 @@
+CLASS: GEO_05B_entrance_mus01(96), BASE: AudioEnvironment
+PROPERTIES:

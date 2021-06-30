@@ -1,0 +1,2 @@
+CLASS: DSDroidMissileEffects(68), BASE: MaterialTypeInfo
+PROPERTIES:

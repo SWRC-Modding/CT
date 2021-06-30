@@ -1,0 +1,3 @@
+CLASS: UWindowControlFrame(184), BASE: UWindowWindow
+PROPERTIES:
+	180  Framed                   Object  <UWindowWindow>

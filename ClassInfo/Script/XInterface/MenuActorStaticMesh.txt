@@ -1,0 +1,2 @@
+CLASS: MenuActorStaticMesh(648), BASE: StaticMeshActor
+PROPERTIES:

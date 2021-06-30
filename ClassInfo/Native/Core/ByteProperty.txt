@@ -1,0 +1,2 @@
+CLASS: ByteProperty(68), BASE: Property
+PROPERTIES:

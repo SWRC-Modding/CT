@@ -1,0 +1,2 @@
+CLASS: GeonosianDroneBot(1256), BASE: CTBot
+PROPERTIES:

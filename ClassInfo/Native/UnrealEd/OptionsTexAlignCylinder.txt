@@ -1,0 +1,4 @@
+CLASS: OptionsTexAlignCylinder(56), BASE: OptionsTexAlign
+PROPERTIES:
+	48   UTile                    Int     
+	52   VTile                    Int     

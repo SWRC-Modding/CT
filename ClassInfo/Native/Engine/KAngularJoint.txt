@@ -1,0 +1,4 @@
+CLASS: KAngularJoint(816), BASE: KConstraint
+PROPERTIES:
+	800  FreeOneAxis              Bool    <0 : 0x00000001>
+	804  FreeAxis                 Struct  <Vector>

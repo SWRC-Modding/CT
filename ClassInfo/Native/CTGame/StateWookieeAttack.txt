@@ -1,0 +1,2 @@
+CLASS: StateWookieeAttack(124), BASE: StateAbstractAttack
+PROPERTIES:

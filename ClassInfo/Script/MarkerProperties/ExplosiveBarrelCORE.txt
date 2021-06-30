@@ -1,0 +1,2 @@
+CLASS: ExplosiveBarrelCORE(892), BASE: ExplosiveBarrel
+PROPERTIES:

@@ -1,0 +1,2 @@
+CLASS: Steam_Jet_Burst(828), BASE: Emitter
+PROPERTIES:

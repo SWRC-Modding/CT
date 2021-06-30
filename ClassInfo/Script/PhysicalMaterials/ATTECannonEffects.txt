@@ -1,0 +1,2 @@
+CLASS: ATTECannonEffects(68), BASE: MaterialTypeInfo
+PROPERTIES:

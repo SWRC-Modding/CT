@@ -1,0 +1,8 @@
+CLASS: LinearStairBuilder(104), BASE: BrushBuilder
+PROPERTIES:
+	80   StepLength               Int     
+	84   StepHeight               Int     
+	88   StepWidth                Int     
+	92   NumSteps                 Int     
+	96   AddToFirstStep           Int     
+	100  GroupName                Name    

@@ -1,0 +1,8 @@
+CLASS: OptionsNewTerrain(76), BASE: OptionsProxy
+PROPERTIES:
+	40   Package                  Str     
+	48   Group                    Str     
+	56   Name                     Str     
+	64   XSize                    Int     
+	68   YSize                    Int     
+	72   Height                   Int     

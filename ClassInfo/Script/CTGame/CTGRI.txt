@@ -1,0 +1,2 @@
+CLASS: CTGRI(828), BASE: GameReplicationInfo
+PROPERTIES:

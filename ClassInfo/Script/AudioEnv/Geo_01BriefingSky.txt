@@ -1,0 +1,2 @@
+CLASS: Geo_01BriefingSky(96), BASE: AudioEnvironment
+PROPERTIES:

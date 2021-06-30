@@ -1,0 +1,2 @@
+CLASS: DSD_gunPivot(696), BASE: Accessory
+PROPERTIES:

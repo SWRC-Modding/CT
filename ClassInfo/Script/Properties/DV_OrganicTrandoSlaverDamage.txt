@@ -1,0 +1,2 @@
+CLASS: DV_OrganicTrandoSlaverDamage(56), BASE: DV_Organic
+PROPERTIES:

@@ -1,0 +1,2 @@
+CLASS: POW_WeakWall(836), BASE: StaticProp
+PROPERTIES:

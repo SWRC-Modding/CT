@@ -1,0 +1,2 @@
+CLASS: cFX_ShootingLaserbolts(828), BASE: Emitter
+PROPERTIES:

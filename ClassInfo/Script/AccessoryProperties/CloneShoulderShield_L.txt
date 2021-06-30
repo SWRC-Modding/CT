@@ -1,0 +1,2 @@
+CLASS: CloneShoulderShield_L(696), BASE: Accessory
+PROPERTIES:

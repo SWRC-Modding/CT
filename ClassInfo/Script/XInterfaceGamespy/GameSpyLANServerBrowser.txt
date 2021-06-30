@@ -1,0 +1,2 @@
+CLASS: GameSpyLANServerBrowser(37104), BASE: GameSpyServerBrowserBase
+PROPERTIES:

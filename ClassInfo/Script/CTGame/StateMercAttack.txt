@@ -1,0 +1,2 @@
+CLASS: StateMercAttack(160), BASE: StateTrandoshanAttack
+PROPERTIES:

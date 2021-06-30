@@ -1,0 +1,2 @@
+CLASS: Scav_head(696), BASE: Accessory
+PROPERTIES:

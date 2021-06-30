@@ -1,0 +1,2 @@
+CLASS: Holo_CloneCommando(868), BASE: AnimProp
+PROPERTIES:

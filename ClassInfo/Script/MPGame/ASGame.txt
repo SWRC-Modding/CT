@@ -1,0 +1,5 @@
+CLASS: ASGame(1484), BASE: CTFGame
+PROPERTIES:
+	1472 DefendingTeam            Int     
+	1476 AttackingTeam            Int     
+	1480 bBaseCaptured            Bool    <0 : 0x00000001>

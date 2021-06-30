@@ -1,0 +1,13 @@
+CLASS: MatchInfo(116), BASE: Object
+PROPERTIES:
+	40   LevelName                Str     
+	48   MenuName                 Str     
+	56   EnemyTeamName            Str     
+	64   SpecialEvent             Str     
+	72   DifficultyModifier       Float   
+	76   GoalScore                Float   
+	80   URLString                Str     
+	88   MenuDescription          Str     
+	96   NumBots                  Int     
+	100  GameType                 Str     
+	108  ThumbName                Str     

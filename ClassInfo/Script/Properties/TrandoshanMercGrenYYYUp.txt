@@ -1,0 +1,2 @@
+CLASS: TrandoshanMercGrenYYYUp(1736), BASE: TrandoshanMercenaryGrenadier
+PROPERTIES:

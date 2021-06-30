@@ -1,0 +1,3 @@
+CLASS: ACTION_SetBattleMusicMulti(68), BASE: ScriptedAction
+PROPERTIES:
+	64   multiSound               Object  <Sound>

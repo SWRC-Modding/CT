@@ -1,0 +1,2 @@
+CLASS: TrandoshanHeavyBot(1256), BASE: CTBot
+PROPERTIES:

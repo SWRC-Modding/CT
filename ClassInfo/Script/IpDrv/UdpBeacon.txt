@@ -1,0 +1,10 @@
+CLASS: UdpBeacon(740), BASE: UdpLink
+PROPERTIES:
+	700  DoBeacon                 Bool    <0 : 0x00000001>
+	704  ServerBeaconPort         Int     
+	708  BeaconPort               Int     
+	712  BeaconTimeout            Float   
+	716  BeaconProduct            Str     
+	724  UdpServerQueryPort       Int     
+	728  boundport                Int     
+	732  BroadcastReplyAddr       Struct  <IpAddr>

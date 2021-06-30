@@ -1,0 +1,2 @@
+CLASS: DV_DroidsBattleDroidDamage(56), BASE: DV_Droids
+PROPERTIES:

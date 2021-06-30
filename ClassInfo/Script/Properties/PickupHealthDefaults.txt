@@ -1,0 +1,2 @@
+CLASS: PickupHealthDefaults(708), BASE: PickupHealth
+PROPERTIES:

@@ -1,0 +1,2 @@
+CLASS: TRAN_Rifle_Beam(828), BASE: Emitter
+PROPERTIES:

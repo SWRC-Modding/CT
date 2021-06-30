@@ -1,0 +1,8 @@
+CLASS: CT_DVDDemo_WarningXboxMenu(18328), BASE: MenuTemplate
+PROPERTIES:
+	17696 Background               Struct  <MenuSprite>
+	17768 Title                    Struct  <MenuText>
+	17880 Header                   Struct  <MenuText>
+	17992 Text1                    Struct  <MenuText>
+	18104 Text2                    Struct  <MenuText>
+	18216 Text3                    Struct  <MenuText>

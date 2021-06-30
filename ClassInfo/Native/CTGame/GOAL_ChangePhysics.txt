@@ -1,0 +1,11 @@
+CLASS: GOAL_ChangePhysics(112), BASE: GoalObject
+STRUCTS:
+	PhysicsData(32)
+		0    Physics                  Byte    <EPhysics>
+		1    IdleState                Byte    <EIdleState>
+		4    Acceleration             Struct  <Vector>
+		16   Velocity                 Struct  <Vector>
+		28   ShouldCrouch             Bool    <0 : 0x00000001>
+PROPERTIES:
+	76   NewPhysicsData           Struct  <PhysicsData>
+	108  ChangeFlags              Int     

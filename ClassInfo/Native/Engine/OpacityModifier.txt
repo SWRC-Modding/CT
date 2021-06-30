@@ -1,0 +1,4 @@
+CLASS: OpacityModifier(112), BASE: Modifier
+PROPERTIES:
+	104  Opacity                  Object  <Material>
+	108  bOverrideTexModifier     Bool    <0 : 0x00000001>

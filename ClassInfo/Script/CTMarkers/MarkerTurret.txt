@@ -1,0 +1,2 @@
+CLASS: MarkerTurret(904), BASE: MarkerTurretNative
+PROPERTIES:

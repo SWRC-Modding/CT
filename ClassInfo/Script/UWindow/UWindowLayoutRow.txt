@@ -1,0 +1,3 @@
+CLASS: UWindowLayoutRow(112), BASE: UWindowLayoutBase
+PROPERTIES:
+	108  CellList                 Object  <UWindowLayoutCell>

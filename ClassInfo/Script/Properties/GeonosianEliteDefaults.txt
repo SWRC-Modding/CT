@@ -1,0 +1,2 @@
+CLASS: GeonosianEliteDefaults(1676), BASE: GeonosianElite
+PROPERTIES:

@@ -1,0 +1,2 @@
+CLASS: WinShat_yyy5D_lrgeSkylight(828), BASE: Emitter
+PROPERTIES:

@@ -1,0 +1,2 @@
+CLASS: RainWater_Pour_A(828), BASE: Emitter
+PROPERTIES:

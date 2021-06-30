@@ -1,0 +1,3 @@
+CLASS: TrandoshanMissileTurret(2056), BASE: Turret
+PROPERTIES:
+	2052 Counter                  Int     

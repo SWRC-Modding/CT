@@ -1,0 +1,2 @@
+CLASS: ScavBeamAmmoDefaults(876), BASE: ScavBeamAmmo
+PROPERTIES:

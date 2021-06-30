@@ -1,0 +1,5 @@
+CLASS: Flag(1192), BASE: Weapon
+PROPERTIES:
+	1180 HoloFXName               Class   <Emitter>
+	1184 HoloFX                   Object  <Emitter>
+	1188 RedFlagTexture           Object  <Material>

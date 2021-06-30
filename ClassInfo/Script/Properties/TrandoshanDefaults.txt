@@ -1,0 +1,2 @@
+CLASS: TrandoshanDefaults(1668), BASE: Trandoshan
+PROPERTIES:

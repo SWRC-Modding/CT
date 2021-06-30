@@ -1,0 +1,2 @@
+CLASS: VertexBuffer(64), BASE: VertexStreamBase
+PROPERTIES:

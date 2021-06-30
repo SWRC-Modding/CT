@@ -1,0 +1,12 @@
+CLASS: StaticMesh(428), BASE: Primitive
+PROPERTIES:
+	244  Materials                Array   <Struct <StaticMeshMaterial>>
+	356  AlwaysBuildBumpData      Bool    <0 : 0x00000001>
+	352  LoadVertexColorInGame    Bool    <0 : 0x00000001>
+	348  UseCollisionForBakedShadowsOnly Bool    <0 : 0x00000001>
+	360  ShaderUsage              Byte    
+	340  UseVertexColor           Bool    <0 : 0x00000001>
+	344  UseSimpleKarmaCollision  Bool    <0 : 0x00000001>
+	336  UseSimpleBoxCollision    Bool    <0 : 0x00000001>
+	332  UseSimpleLineCollision   Bool    <0 : 0x00000001>
+	424  TypeOfMaterial           Byte    <EMaterialType>

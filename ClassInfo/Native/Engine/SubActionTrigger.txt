@@ -1,0 +1,3 @@
+CLASS: SubActionTrigger(80), BASE: MatSubAction
+PROPERTIES:
+	76   EventName                Name    

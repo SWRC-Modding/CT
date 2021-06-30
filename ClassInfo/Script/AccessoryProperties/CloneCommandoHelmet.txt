@@ -1,0 +1,2 @@
+CLASS: CloneCommandoHelmet(696), BASE: Accessory
+PROPERTIES:

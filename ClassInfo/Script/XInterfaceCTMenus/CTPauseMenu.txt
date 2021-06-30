@@ -1,0 +1,31 @@
+CLASS: CTPauseMenu(23284), BASE: MenuTemplate
+PROPERTIES:
+	17696 Background               Struct  <MenuSprite>
+	17768 FriendsIcon              Struct  <MenuSprite>
+	17840 FriendRequestIcon        Object  <Material>
+	17844 GameInviteIcon           Object  <Material>
+	17848 ReturnToGame             Struct  <MenuButtonText>
+	18332 LoadMap                  Struct  <MenuButtonText>
+	18816 QuickLoad                Struct  <MenuButtonText>
+	19300 QuickSave                Struct  <MenuButtonText>
+	19784 ChangeTeams              Struct  <MenuButtonText>
+	20268 PlayerList               Struct  <MenuButtonText>
+	20752 FriendList               Struct  <MenuButtonText>
+	21236 ToggleCloak              Struct  <MenuButtonText>
+	21720 InvertLook               Struct  <MenuButtonText>
+	22204 ControllerConfig         Struct  <MenuButtonText>
+	22688 QuitGame                 Struct  <MenuButtonText>
+	23172 StringCloakToggleOn      Str     
+	23180 StringCloakToggleOff     Str     
+	23188 StringForfeit            Str     
+	23196 StringDisconnect         Str     
+	23204 StringEndMatch           Str     
+	23212 StringLeaveMatch         Str     
+	23220 StringTutorialDisconnect Str     
+	23228 StringReallyForfeit      Str     
+	23236 StringReallyDisconnect   Str     
+	23244 StringReallyEndMatch     Str     
+	23252 StringReallyLeaveMatch   Str     
+	23260 StringReallySwitchTeams  Str     
+	23268 StringGuestWillGoToo     Str     
+	23276 StringGamePaused         Str     

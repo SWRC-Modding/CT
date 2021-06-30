@@ -1,0 +1,2 @@
+CLASS: BreachDoorGeo(952), BASE: BreachDoor
+PROPERTIES:

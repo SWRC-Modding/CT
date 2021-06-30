@@ -1,0 +1,2 @@
+CLASS: GeoTurretDefaults(1180), BASE: GeoTurret
+PROPERTIES:

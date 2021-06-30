@@ -1,0 +1,2 @@
+CLASS: droideka_shoulder_L(696), BASE: Accessory
+PROPERTIES:

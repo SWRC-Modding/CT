@@ -1,0 +1,2 @@
+CLASS: PropDefaults(836), BASE: Prop
+PROPERTIES:

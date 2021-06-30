@@ -1,0 +1,2 @@
+CLASS: DelegateProperty(68), BASE: Property
+PROPERTIES:

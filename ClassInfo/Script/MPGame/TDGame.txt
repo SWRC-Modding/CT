@@ -1,0 +1,29 @@
+CLASS: TDGame(1464), BASE: DMGame
+PROPERTIES:
+	1332 Teams                    Object  <MPTeam>[2]
+	1340 BlueTeamName             Str     
+	1348 RedTeamName              Str     
+	1356 bScoreTeamKills          Bool    <0 : 0x00000001>
+	1356 bBalanceTeams            Bool    <1 : 0x00000002>
+	1356 bSpawnInTeamArea         Bool    <2 : 0x00000004>
+	1356 bScoreVictimsTarget      Bool    <3 : 0x00000008>
+	1356 bEmptyTeamStart          Bool    <4 : 0x00000010>
+	1356 bPermanentDeath          Bool    <5 : 0x00000020>
+	1360 RoundTimeRemain          Int     
+	1364 RoundTime                Int     
+	1368 NumRounds                Int     
+	1372 NumRoundsRemain          Int     
+	1376 TeamAlive                Int     [2]
+	1384 MaxTeamSize              Int     
+	1388 FriendlyFireScale        Float   
+	1392 CaptureSound             Object  <Sound>[2]
+	1400 TakeLead                 Object  <Sound>[2]
+	1408 IncreaseLead             Object  <Sound>[2]
+	1416 TrandoCaptureSound       Object  <Sound>[2]
+	1424 TrandoTakeLead           Object  <Sound>[2]
+	1432 TrandoIncreaseLead       Object  <Sound>[2]
+	1440 ADR_Goal                 Float   
+	1444 ADR_Return               Float   
+	1448 ADR_Control              Float   
+	1452 TempSymbols              Object  <Texture>[2]
+	1460 aTeamList                Class   <TeamList>

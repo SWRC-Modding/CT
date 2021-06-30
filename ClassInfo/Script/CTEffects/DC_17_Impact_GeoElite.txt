@@ -1,0 +1,2 @@
+CLASS: DC_17_Impact_GeoElite(828), BASE: Emitter
+PROPERTIES:

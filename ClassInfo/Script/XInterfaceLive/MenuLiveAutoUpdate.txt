@@ -1,0 +1,5 @@
+CLASS: MenuLiveAutoUpdate(20768), BASE: MenuQuestionYesNo
+PROPERTIES:
+	20512 ExtraQuestionLines       Struct  <MenuText>[2]
+	20736 ConfirmAutoUpdateText    Str     [3]
+	20760 AutoUpdateFailedText     Str     

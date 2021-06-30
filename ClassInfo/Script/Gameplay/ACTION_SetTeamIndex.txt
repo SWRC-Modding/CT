@@ -1,0 +1,4 @@
+CLASS: ACTION_SetTeamIndex(72), BASE: ScriptedAction
+PROPERTIES:
+	64   NewTeamIndex             Int     
+	68   PawnTag                  Name    

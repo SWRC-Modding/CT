@@ -1,0 +1,12 @@
+CLASS: MenuSplitscreenPlayers(25572), BASE: MenuTemplateTitledBA
+PROPERTIES:
+	19728 OptionLabels             Struct  <MenuText>[4]
+	20176 ArrowsLeft               Struct  <MenuButtonSprite>[4]
+	21792 ArrowsRight              Struct  <MenuButtonSprite>[4]
+	23408 Options                  Struct  <MenuButtonEnum>[4]
+	25408 EMessage                 Struct  <MenuText>
+	25520 StringNeedMorePlayers    Str     
+	25528 StringSelectControllers  Str     
+	25536 ActiveControllerIndex    Int     
+	25540 padLeftLast              Int     [4]
+	25556 padRightLast             Int     [4]

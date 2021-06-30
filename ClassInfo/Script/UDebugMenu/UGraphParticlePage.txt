@@ -1,0 +1,19 @@
+CLASS: UGraphParticlePage(432), BASE: UWindowPageWindow
+PROPERTIES:
+	196  Labels                   Object  <UWindowLabelControl>[4]
+	212  StatNameText             Str     [4]
+	244  CatNameText              Str     
+	252  DesiredMaxEdit           Object  <UWindowEditControl>[4]
+	268  DesiredMaxText           Str     
+	276  UseBarStatCheck          Object  <UWindowCheckbox>[4]
+	292  UseBarStatText           Str     
+	300  UseLineStatCheck         Object  <UWindowCheckbox>[4]
+	316  UseLineStatText          Str     
+	324  SmallIsBadCheck          Object  <UWindowCheckbox>[4]
+	340  SmallIsBadText           Str     
+	348  DesiredMaxEditSettings   Str     [4]
+	380  SmallIsBadSettings       Int     [4]
+	396  UseBarStatSettings       Int     [4]
+	412  UseLineStatSettings      Int     [4]
+	428  bIsLoading               Bool    <0 : 0x00000001>
+	428  bShouldDelayChange       Bool    <1 : 0x00000002>

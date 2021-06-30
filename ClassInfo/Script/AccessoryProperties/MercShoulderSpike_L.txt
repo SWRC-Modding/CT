@@ -1,0 +1,2 @@
+CLASS: MercShoulderSpike_L(696), BASE: Accessory
+PROPERTIES:

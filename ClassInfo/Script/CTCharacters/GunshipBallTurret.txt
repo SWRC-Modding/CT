@@ -1,0 +1,2 @@
+CLASS: GunshipBallTurret(2068), BASE: AutoTurret
+PROPERTIES:

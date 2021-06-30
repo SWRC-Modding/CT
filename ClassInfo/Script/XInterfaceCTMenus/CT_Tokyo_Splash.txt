@@ -1,0 +1,4 @@
+CLASS: CT_Tokyo_Splash(18252), BASE: MenuTemplate
+PROPERTIES:
+	17696 Background               Struct  <MenuSprite>
+	17768 Continue                 Struct  <MenuButtonText>

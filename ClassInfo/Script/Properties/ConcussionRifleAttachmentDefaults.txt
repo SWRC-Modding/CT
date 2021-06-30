@@ -1,0 +1,2 @@
+CLASS: ConcussionRifleAttachmentDefaults(776), BASE: ConcussionRifleAttachment
+PROPERTIES:

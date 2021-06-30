@@ -1,0 +1,2 @@
+CLASS: GrievousGuardBotDefaults(1256), BASE: GrievousGuardBot
+PROPERTIES:

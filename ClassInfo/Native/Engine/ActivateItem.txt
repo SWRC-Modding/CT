@@ -1,0 +1,58 @@
+CLASS: ActivateItem(712), BASE: Actor
+ENUMS:
+	EMarkerItemDifficulty
+		MID_Easy                 =   0
+		MID_Medium               =   1
+		MID_Hard                 =   2
+		MID_Hardest              =   3
+	EActivateItemType
+		AIT_HackTerminal         =   0
+		AIT_HackDoor             =   1
+		AIT_BreachDoor           =   2
+		AIT_SetTrap              =   3
+		AIT_DisarmTrap           =   4
+		AIT_Demolition           =   5
+		AIT_Plunger              =   6
+		AIT_BactaDispenser       =   7
+		AIT_ProximityMine        =   8
+STRUCTS:
+	ActivationInfo(56)
+		0    Event                    Name    
+		4    TransitionEffect         Class   <Emitter>
+		8    TransitionEffectOffset   Struct  <Vector>
+		20   TransitionSound          Object  <Sound>
+		24   Material                 Object  <Material>
+		28   MaterialIndex            Int     
+		32   Mesh                     Object  <StaticMesh>
+		36   Duration                 Float   
+		40   MyDamageType             Class   <DamageType>
+		44   Damage                   Float   
+		48   MomentumTransfer         Float   
+		52   DamageRadius             Float   
+PROPERTIES:
+	644  AmmunitionRequired       Class   <Ammunition>
+	648  ActivateItemType         Byte    <EActivateItemType>
+	649  Difficulty               Byte    <EMarkerItemDifficulty>
+	652  EventUnderway            Name    
+	656  bIsUsable                Bool    <0 : 0x00000001>
+	656  bActivated               Bool    <1 : 0x00000002>
+	656  bActivating              Bool    <2 : 0x00000004>
+	656  bUsed                    Bool    <3 : 0x00000008>
+	656  bPlayerActivated         Bool    <4 : 0x00000010>
+	656  bTriggeredByDamage       Bool    <5 : 0x00000020>
+	656  bIsUsableByPlayer        Bool    <6 : 0x00000040>
+	656  bLockPlayerLocation      Bool    <7 : 0x00000080>
+	656  bSavesProgress           Bool    <8 : 0x00000100>
+	656  bNonPlayerUsesTimer      Bool    <9 : 0x00000200>
+	660  HUDIconX                 Byte    
+	661  HUDIconY                 Byte    
+	664  ElapseSetupTime          Float   
+	668  DurationRemaining        Float   
+	672  PlayerRange              Float   
+	676  PlayerOffset             Float   
+	680  FractionComplete         Float   
+	684  ActivateDotProdMax       Float   
+	688  User                     Object  <Controller>
+	692  AttachItemClass          Class   <Actor>
+	696  ActivatePromptText       Str     
+	704  ActivatePromptButtonFuncs Array   <Str>

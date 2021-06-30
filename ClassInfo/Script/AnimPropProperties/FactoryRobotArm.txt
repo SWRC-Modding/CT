@@ -1,0 +1,2 @@
+CLASS: FactoryRobotArm(868), BASE: AnimProp
+PROPERTIES:

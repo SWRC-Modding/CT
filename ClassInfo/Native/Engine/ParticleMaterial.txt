@@ -1,0 +1,21 @@
+CLASS: ParticleMaterial(756), BASE: RenderedMaterial
+STRUCTS:
+	ParticleProjectorInfo(76)
+		0    BitmapMaterial           Object  <BitmapMaterial>
+		4    Matrix                   Struct  <Matrix>
+		68   Projected                Int     
+		72   BlendMode                Int     
+PROPERTIES:
+	100  ParticleBlending         Int     
+	104  BlendBetweenSubdivisions Int     
+	108  RenderTwoSided           Int     
+	112  UseTFactor               Int     
+	116  BitmapMaterial           Object  <BitmapMaterial>
+	120  AlphaTest                Int     
+	124  AlphaRef                 Int     
+	128  ZTest                    Int     
+	132  ZWrite                   Int     
+	136  Wireframe                Int     
+	140  AcceptsProjectors        Bool    <0 : 0x00000001>
+	144  NumProjectors            Int     
+	148  Projectors               Struct  <ParticleProjectorInfo>[8]

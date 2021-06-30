@@ -1,0 +1,4 @@
+CLASS: GOAL_GetBacta(84), BASE: GoalObject
+PROPERTIES:
+	76   Stage                    Int     
+	80   Dispenser                Object  <BactaDispenser>

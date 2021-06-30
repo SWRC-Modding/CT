@@ -1,0 +1,5 @@
+CLASS: ACTION_GotoState(76), BASE: ScriptedAction
+PROPERTIES:
+	64   TargetTag                Name    
+	68   State                    Name    
+	72   Label                    Name    

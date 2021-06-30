@@ -1,0 +1,64 @@
+CLASS: UWindowLookAndFeel(1176), BASE: UWindowBase
+PROPERTIES:
+	52   Active                   Object  <Texture>
+	56   Inactive                 Object  <Texture>
+	60   ActiveS                  Object  <Texture>
+	64   InactiveS                Object  <Texture>
+	68   Misc                     Object  <Texture>
+	72   FrameTL                  Struct  <Region>
+	88   FrameT                   Struct  <Region>
+	104  FrameTR                  Struct  <Region>
+	120  FrameL                   Struct  <Region>
+	136  FrameR                   Struct  <Region>
+	152  FrameBL                  Struct  <Region>
+	168  FrameB                   Struct  <Region>
+	184  FrameBR                  Struct  <Region>
+	200  FrameActiveTitleColor    Struct  <Color>
+	204  FrameInactiveTitleColor  Struct  <Color>
+	208  HeadingActiveTitleColor  Struct  <Color>
+	212  HeadingInActiveTitleColor Struct  <Color>
+	216  FrameTitleX              Int     
+	220  FrameTitleY              Int     
+	224  BevelUpTL                Struct  <Region>
+	240  BevelUpT                 Struct  <Region>
+	256  BevelUpTR                Struct  <Region>
+	272  BevelUpL                 Struct  <Region>
+	288  BevelUpR                 Struct  <Region>
+	304  BevelUpBL                Struct  <Region>
+	320  BevelUpB                 Struct  <Region>
+	336  BevelUpBR                Struct  <Region>
+	352  BevelUpArea              Struct  <Region>
+	368  MiscBevelTL              Struct  <Region>[4]
+	432  MiscBevelT               Struct  <Region>[4]
+	496  MiscBevelTR              Struct  <Region>[4]
+	560  MiscBevelL               Struct  <Region>[4]
+	624  MiscBevelR               Struct  <Region>[4]
+	688  MiscBevelBL              Struct  <Region>[4]
+	752  MiscBevelB               Struct  <Region>[4]
+	816  MiscBevelBR              Struct  <Region>[4]
+	880  MiscBevelArea            Struct  <Region>[4]
+	944  ComboBtnUp               Struct  <Region>
+	960  ComboBtnDown             Struct  <Region>
+	976  ComboBtnDisabled         Struct  <Region>
+	992  ColumnHeadingHeight      Int     
+	996  HLine                    Struct  <Region>
+	1012 EditBoxTextColor         Struct  <Color>
+	1016 EditBoxBevel             Int     
+	1020 TabSelectedL             Struct  <Region>
+	1036 TabSelectedM             Struct  <Region>
+	1052 TabSelectedR             Struct  <Region>
+	1068 TabUnselectedL           Struct  <Region>
+	1084 TabUnselectedM           Struct  <Region>
+	1100 TabUnselectedR           Struct  <Region>
+	1116 TabBackground            Struct  <Region>
+	1132 Size_ScrollbarWidth      Float   
+	1136 Size_ScrollbarButtonHeight Float   
+	1140 Size_MinScrollbarHeight  Float   
+	1144 Size_TabAreaHeight       Float   
+	1148 Size_TabAreaOverhangHeight Float   
+	1152 Size_TabSpacing          Float   
+	1156 Size_TabXOffset          Float   
+	1160 Pulldown_ItemHeight      Float   
+	1164 Pulldown_VBorder         Float   
+	1168 Pulldown_HBorder         Float   
+	1172 Pulldown_TextBorder      Float   

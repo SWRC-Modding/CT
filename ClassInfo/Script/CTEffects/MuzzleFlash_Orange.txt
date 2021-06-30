@@ -1,0 +1,2 @@
+CLASS: MuzzleFlash_Orange(828), BASE: Emitter
+PROPERTIES:

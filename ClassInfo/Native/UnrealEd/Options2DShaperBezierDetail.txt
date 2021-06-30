@@ -1,0 +1,3 @@
+CLASS: Options2DShaperBezierDetail(44), BASE: OptionsProxy
+PROPERTIES:
+	40   DetailLevel              Int     

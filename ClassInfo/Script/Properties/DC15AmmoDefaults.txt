@@ -1,0 +1,2 @@
+CLASS: DC15AmmoDefaults(892), BASE: DC15Ammo
+PROPERTIES:

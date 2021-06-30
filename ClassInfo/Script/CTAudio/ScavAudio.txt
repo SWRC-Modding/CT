@@ -1,0 +1,2 @@
+CLASS: ScavAudio(48), BASE: PawnAudioTable
+PROPERTIES:

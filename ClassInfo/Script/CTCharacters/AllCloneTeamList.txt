@@ -1,0 +1,2 @@
+CLASS: AllCloneTeamList(652), BASE: TeamList
+PROPERTIES:

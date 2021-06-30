@@ -1,0 +1,3 @@
+CLASS: GameRules(648), BASE: Info
+PROPERTIES:
+	644  NextGameRules            Object  <GameRules>

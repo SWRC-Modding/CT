@@ -1,0 +1,2 @@
+CLASS: cRAS4_Explo_RegulatorPipes(828), BASE: Emitter
+PROPERTIES:

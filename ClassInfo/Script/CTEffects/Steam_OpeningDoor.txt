@@ -1,0 +1,2 @@
+CLASS: Steam_OpeningDoor(828), BASE: Emitter
+PROPERTIES:

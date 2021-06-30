@@ -1,0 +1,5 @@
+CLASS: TDGameReplicationInfo(848), BASE: MPGameReplicationInfo
+PROPERTIES:
+	836  RoundTimeRemain          Int     
+	840  NumRoundsRemain          Int     
+	844  NumRounds                Int     

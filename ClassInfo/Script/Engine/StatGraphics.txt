@@ -1,0 +1,2 @@
+CLASS: StatGraphics(40), BASE: Object
+PROPERTIES:

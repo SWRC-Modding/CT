@@ -1,0 +1,2 @@
+CLASS: FlashBangProj(804), BASE: GrenadeProj
+PROPERTIES:

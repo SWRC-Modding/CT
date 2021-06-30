@@ -1,0 +1,2 @@
+CLASS: cFX_GEOfighters(828), BASE: Emitter
+PROPERTIES:

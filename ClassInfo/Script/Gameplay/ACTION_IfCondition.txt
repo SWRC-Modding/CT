@@ -1,0 +1,4 @@
+CLASS: ACTION_IfCondition(72), BASE: ScriptedAction
+PROPERTIES:
+	64   TriggeredConditionTag    Name    
+	68   T                        Object  <TriggeredCondition>

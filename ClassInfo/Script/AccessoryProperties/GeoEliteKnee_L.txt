@@ -1,0 +1,2 @@
+CLASS: GeoEliteKnee_L(696), BASE: Accessory
+PROPERTIES:

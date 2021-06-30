@@ -1,0 +1,2 @@
+CLASS: CTDamageExplosionGeoBarrel(112), BASE: CTDamageExplosion
+PROPERTIES:

@@ -1,0 +1,2 @@
+CLASS: Light_Burst4(828), BASE: Emitter
+PROPERTIES:

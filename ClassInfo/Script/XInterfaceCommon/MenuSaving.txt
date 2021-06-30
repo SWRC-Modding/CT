@@ -1,0 +1,6 @@
+CLASS: MenuSaving(18460), BASE: MenuWarningTransition
+PROPERTIES:
+	18440 NextMenu                 Str     
+	18448 NextURL                  Str     
+	18456 bClientTravel            Bool    <0 : 0x00000001>
+	18456 bCreateNew               Bool    <1 : 0x00000002>

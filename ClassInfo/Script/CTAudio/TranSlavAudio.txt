@@ -1,0 +1,2 @@
+CLASS: TranSlavAudio(48), BASE: PawnAudioTable
+PROPERTIES:

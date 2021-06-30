@@ -1,0 +1,2 @@
+CLASS: EggRoomContainer(836), BASE: StaticProp
+PROPERTIES:

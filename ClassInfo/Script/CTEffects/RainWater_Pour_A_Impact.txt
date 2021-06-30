@@ -1,0 +1,2 @@
+CLASS: RainWater_Pour_A_Impact(828), BASE: Emitter
+PROPERTIES:

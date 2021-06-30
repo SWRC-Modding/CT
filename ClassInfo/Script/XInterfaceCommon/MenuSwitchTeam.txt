@@ -1,0 +1,2 @@
+CLASS: MenuSwitchTeam(20512), BASE: MenuQuestionYesNo
+PROPERTIES:

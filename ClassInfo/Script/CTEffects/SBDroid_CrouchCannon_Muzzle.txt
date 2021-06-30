@@ -1,0 +1,2 @@
+CLASS: SBDroid_CrouchCannon_Muzzle(828), BASE: Emitter
+PROPERTIES:

@@ -1,0 +1,2 @@
+CLASS: DC17mAntiArmorAttachment(776), BASE: WeaponAttachment
+PROPERTIES:

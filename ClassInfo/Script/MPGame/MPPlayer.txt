@@ -1,0 +1,14 @@
+CLASS: MPPlayer(2332), BASE: CTPlayer
+PROPERTIES:
+	2300 bRising                  Bool    <0 : 0x00000001>
+	2300 bLatecomer               Bool    <1 : 0x00000002>
+	2300 bDisplayLoser            Bool    <2 : 0x00000004>
+	2300 bDisplayWinner           Bool    <3 : 0x00000008>
+	2304 LastTaunt                Int     
+	2308 LastWhispTime            Float   
+	2312 MultiKillLevel           Int     
+	2316 LastKillTime             Float   
+	2320 LastTauntAnimTime        Float   
+	2324 RespawnTimer             Float   
+	2328 bRespawn                 Bool    <0 : 0x00000001>
+	2328 bIsTrandoshan            Bool    <1 : 0x00000002>

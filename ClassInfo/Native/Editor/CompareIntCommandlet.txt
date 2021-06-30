@@ -1,0 +1,2 @@
+CLASS: CompareIntCommandlet(332), BASE: Commandlet
+PROPERTIES:

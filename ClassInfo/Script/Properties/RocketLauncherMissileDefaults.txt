@@ -1,0 +1,2 @@
+CLASS: RocketLauncherMissileDefaults(852), BASE: RocketLauncherMissile
+PROPERTIES:

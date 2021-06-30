@@ -1,0 +1,16 @@
+CLASS: Volume(764), BASE: Brush
+STRUCTS:
+	DecorationType(36)
+		0    StaticMesh               Object  <StaticMesh>
+		4    Count                    Struct  <Range>
+		12   DrawScale                Struct  <Range>
+		20   bAlign                   Int     
+		24   bRandomPitch             Int     
+		28   bRandomYaw               Int     
+		32   bRandomRoll              Int     
+PROPERTIES:
+	736  AssociatedActor          Object  <Actor>
+	740  AssociatedActorTag       Name    
+	744  LocationPriority         Int     
+	748  LocationName             Str     
+	756  DecoList                 Array   <Struct <DecorationType>>

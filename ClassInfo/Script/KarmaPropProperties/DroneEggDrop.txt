@@ -1,0 +1,2 @@
+CLASS: DroneEggDrop(888), BASE: KarmaProp
+PROPERTIES:

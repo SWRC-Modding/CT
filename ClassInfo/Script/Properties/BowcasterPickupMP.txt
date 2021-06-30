@@ -1,0 +1,2 @@
+CLASS: BowcasterPickupMP(704), BASE: BowcasterPickup
+PROPERTIES:

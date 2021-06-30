@@ -1,0 +1,2 @@
+CLASS: SkeletalMesh(692), BASE: LodMesh
+PROPERTIES:

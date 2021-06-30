@@ -1,0 +1,2 @@
+CLASS: SBDroid_Damaged(828), BASE: Emitter
+PROPERTIES:

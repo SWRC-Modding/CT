@@ -1,0 +1,9 @@
+CLASS: ACTION_SetCollision(72), BASE: ScriptedAction
+PROPERTIES:
+	64   bCollideActors           Bool    <0 : 0x00000001>
+	64   bBlockPlayers            Bool    <1 : 0x00000002>
+	64   bBlockActors             Bool    <2 : 0x00000004>
+	64   bCollideWorld            Bool    <3 : 0x00000008>
+	64   bBlockZeroExtentTraces   Bool    <4 : 0x00000010>
+	64   bBlockNonZeroExtentTraces Bool    <5 : 0x00000020>
+	68   CollideActorTag          Name    

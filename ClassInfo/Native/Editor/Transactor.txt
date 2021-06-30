@@ -1,0 +1,2 @@
+CLASS: Transactor(40), BASE: Object
+PROPERTIES:

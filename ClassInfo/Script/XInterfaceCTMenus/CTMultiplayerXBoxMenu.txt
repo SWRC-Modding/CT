@@ -1,0 +1,18 @@
+CLASS: CTMultiplayerXBoxMenu(23132), BASE: MenuTemplateTitledBA
+PROPERTIES:
+	19728 KaminoBorder             Struct  <MenuSprite>
+	19800 Kamino                   Struct  <MenuSprite>
+	19872 GeonosisBorder           Struct  <MenuSprite>
+	19944 Geonosis                 Struct  <MenuSprite>
+	20016 AssaultShipBorder        Struct  <MenuSprite>
+	20088 AssaultShip              Struct  <MenuSprite>
+	20160 KashyyykBorder           Struct  <MenuSprite>
+	20232 Kashyyyk                 Struct  <MenuSprite>
+	20304 LabelBackground          Struct  <MenuSprite>
+	20376 Label                    Struct  <MenuText>
+	20488 LabelConnector           Struct  <MenuSprite>
+	20560 Border                   Struct  <MenuSprite>
+	20632 MenuOptions              Struct  <MenuButtonText>[5]
+	23052 FriendsIcon              Struct  <MenuSprite>
+	23124 FriendRequestIcon        Object  <Material>
+	23128 GameInviteIcon           Object  <Material>

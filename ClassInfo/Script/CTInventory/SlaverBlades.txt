@@ -1,0 +1,3 @@
+CLASS: SlaverBlades(1184), BASE: Weapon
+PROPERTIES:
+	1180 SecondKnife              Object  <Actor>

@@ -1,0 +1,2 @@
+CLASS: GEO_05b1_sbdHang_01_sfx01(96), BASE: AudioEnvironment
+PROPERTIES:

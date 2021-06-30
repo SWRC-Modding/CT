@@ -1,0 +1,16 @@
+CLASS: MatSubAction(76), BASE: MatObject
+ENUMS:
+	ESAStatus
+		SASTATUS_Waiting         =   0
+		SASTATUS_Running         =   1
+		SASTATUS_Ending          =   2
+		SASTATUS_Expired         =   3
+PROPERTIES:
+	40   Delay                    Float   
+	44   Duration                 Float   
+	48   Icon                     Object  <Texture>
+	52   Status                   Byte    <ESAStatus>
+	56   Desc                     Str     
+	64   PctStarting              Float   
+	68   PctEnding                Float   
+	72   PctDuration              Float   

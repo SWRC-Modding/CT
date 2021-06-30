@@ -1,0 +1,2 @@
+CLASS: K_YYYCrateA(888), BASE: KarmaProp
+PROPERTIES:

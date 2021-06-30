@@ -1,0 +1,2 @@
+CLASS: cFX_RASbriefing_OpeningDoor_Frozen(828), BASE: Emitter
+PROPERTIES:

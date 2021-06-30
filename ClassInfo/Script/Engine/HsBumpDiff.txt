@@ -1,0 +1,2 @@
+CLASS: HsBumpDiff(128), BASE: HsBumpDiffSpec
+PROPERTIES:

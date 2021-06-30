@@ -1,0 +1,2 @@
+CLASS: SuperBattledroid_FS(48), BASE: FootstepInfo
+PROPERTIES:

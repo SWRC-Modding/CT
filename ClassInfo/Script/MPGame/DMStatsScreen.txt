@@ -1,0 +1,32 @@
+CLASS: DMStatsScreen(960), BASE: ScoreBoard
+PROPERTIES:
+	656  PlayerOwner              Object  <CTPlayer>
+	660  PRI                      Object  <MPPlayerReplicationInfo>
+	664  StatsString              Str     
+	672  AwardsString             Str     
+	680  FirstBloodString         Str     
+	688  SuicidesString           Str     
+	696  LongestSpreeString       Str     
+	704  FlakMonkey               Str     
+	712  ComboWhore               Str     
+	720  HeadHunter               Str     
+	728  FlagTouches              Str     
+	736  FlagReturns              Str     
+	744  GoalsScored              Str     
+	752  HatTrick                 Str     
+	760  KillString               Str     [7]
+	816  AdrenalineCombos         Str     
+	824  ComboNames               Str     [5]
+	864  KillsByWeapon            Str     
+	872  CombatResults            Str     
+	880  Kills                    Str     
+	888  Deaths                   Str     
+	896  Suicides                 Str     
+	904  NextStatsString          Str     
+	912  WeaponString             Str     
+	920  DeathsBy                 Str     
+	928  DeathsHolding            Str     
+	936  EfficiencyString         Str     
+	944  WaitingForStats          Str     
+	952  LastUpdateTime           Float   
+	956  BoxMaterial              Object  <Material>

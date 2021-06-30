@@ -1,0 +1,20 @@
+CLASS: PawnFactory(784), BASE: Factory
+PROPERTIES:
+	728  Prototype                Class   <CTPawn>
+	732  AIScriptFromFactory      Name    
+	736  PawnTagFromFactory       Name    
+	740  FirstDamagedEventFromFactory Name    
+	744  PawnEventFromFactory     Name    
+	748  PatrolRouteFromFactory   Array   <Struct <PatrolPoint>>
+	756  PatrolModeFromFactory    Byte    <EPatrolMode>
+	760  PatrolPriorityFromFactory Float   
+	764  StartStateFromFactory    Byte    <EStartState>
+	768  TeamIndexFromFactory     Int     
+	772  OptimalWeaponDistFromFactory Float   
+	776  SightRadiusFromFactory   Float   
+	780  bAlwaysUseFactorySettings Bool    <0 : 0x00000001>
+	780  PreserveDeadBodiesFromFactory Bool    <1 : 0x00000002>
+	780  DisableEmotesFromFactory Bool    <2 : 0x00000004>
+	780  CanBeLeaderFromFactory   Bool    <3 : 0x00000008>
+	780  TossWeaponOnDeathFromFactory Bool    <4 : 0x00000010>
+	780  DebugAIFromFactory       Bool    <5 : 0x00000020>

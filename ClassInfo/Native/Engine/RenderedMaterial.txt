@@ -1,0 +1,2 @@
+CLASS: RenderedMaterial(100), BASE: Material
+PROPERTIES:

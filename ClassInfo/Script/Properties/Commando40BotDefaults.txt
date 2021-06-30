@@ -1,0 +1,2 @@
+CLASS: Commando40BotDefaults(1256), BASE: Commando40Bot
+PROPERTIES:

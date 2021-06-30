@@ -1,0 +1,2 @@
+CLASS: TrandoshanRifleDefaults(1180), BASE: TrandoshanRifle
+PROPERTIES:

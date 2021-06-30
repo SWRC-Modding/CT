@@ -1,0 +1,2 @@
+CLASS: HeavyTurretDefaults(1188), BASE: HeavyTurret
+PROPERTIES:

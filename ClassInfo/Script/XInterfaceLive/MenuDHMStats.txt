@@ -1,0 +1,14 @@
+CLASS: MenuDHMStats(21308), BASE: MenuTemplateTitledB
+PROPERTIES:
+	19060 Label                    Struct  <MenuText>[10]
+	20180 PlayerName               Struct  <MenuText>
+	20292 AveragePlayers           Struct  <MenuText>
+	20404 UpTime                   Struct  <MenuText>
+	20516 DMSessions               Struct  <MenuText>
+	20628 CTFSessions              Struct  <MenuText>
+	20740 BRSessions               Struct  <MenuText>
+	20852 DDSessions               Struct  <MenuText>
+	20964 TDMSessions              Struct  <MenuText>
+	21076 SVSessions               Struct  <MenuText>
+	21188 TotalSessions            Struct  <MenuText>
+	21300 Gamertag                 Str     

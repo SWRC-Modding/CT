@@ -1,0 +1,3 @@
+CLASS: UWindowComboButton(360), BASE: UWindowButton
+PROPERTIES:
+	356  Owner                    Object  <UWindowComboControl>

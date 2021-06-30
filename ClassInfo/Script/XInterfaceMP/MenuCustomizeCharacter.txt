@@ -1,0 +1,21 @@
+CLASS: MenuCustomizeCharacter(37708), BASE: MenuTemplateTitledBA
+PROPERTIES:
+	19728 cCloneName               Str     
+	19736 cTrandoName              Str     
+	19744 TrandoActor              Struct  <MenuActor>
+	19784 CloneActor               Struct  <MenuActor>
+	19824 PlayerActorPos           Struct  <Vector>
+	19836 PlayerActorRot           Struct  <Rotator>
+	19848 PlayerActorSize          Float   
+	19852 TrandoWeaponActor        Object  <Actor>
+	19856 CloneWeaponActor         Object  <Actor>
+	19860 DefaultName              Str     
+	19868 OptionLabels             Struct  <MenuText>[9]
+	20876 ArrowsLeft               Struct  <MenuButtonSprite>[9]
+	24512 ArrowsRight              Struct  <MenuButtonSprite>[9]
+	28148 CloneOptions             Struct  <MenuButtonEnum>[9]
+	32648 TrandoOptions            Struct  <MenuButtonEnum>[9]
+	37148 Done                     Struct  <MenuButtonText>
+	37632 ModelBackground          Struct  <MenuSprite>
+	37704 bClassArrowLeftSelected  Bool    <0 : 0x00000001>
+	37704 bClassArrowRightSelected Bool    <1 : 0x00000002>

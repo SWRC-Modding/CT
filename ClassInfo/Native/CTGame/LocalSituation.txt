@@ -1,0 +1,9 @@
+CLASS: LocalSituation(68), BASE: Object
+PROPERTIES:
+	40   TotalEnemies             Int     
+	44   TotalAllies              Int     
+	48   EnemiesICanDetect        Int     
+	52   AlliesNearby             Int     
+	56   LastUpdateTime           Float   
+	60   ClosestEnemyDistSqr      Float   
+	64   BestTarget               Object  <Actor>

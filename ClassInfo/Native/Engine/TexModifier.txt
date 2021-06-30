@@ -1,0 +1,39 @@
+CLASS: TexModifier(112), BASE: Modifier
+ENUMS:
+	ETexCoordSrc
+		TCS_Stream0              =   0
+		TCS_Stream1              =   1
+		TCS_Stream2              =   2
+		TCS_Stream3              =   3
+		TCS_Stream4              =   4
+		TCS_Stream5              =   5
+		TCS_Stream6              =   6
+		TCS_Stream7              =   7
+		TCS_WorldCoords          =   8
+		TCS_CameraCoords         =   9
+		TCS_CubeWorldSpaceReflection =  10
+		TCS_CubeCameraSpaceReflection =  11
+		TCS_ProjectorCoords      =  12
+		TCS_NoChange             =  13
+		TCS_SphereWorldSpaceReflection =  14
+		TCS_SphereCameraSpaceReflection =  15
+		TCS_CubeWorldSpaceNormal =  16
+		TCS_CubeCameraSpaceNormal =  17
+		TCS_SphereWorldSpaceNormal =  18
+		TCS_SphereCameraSpaceNormal =  19
+		TCS_BumpSphereCameraSpaceNormal =  20
+		TCS_BumpSphereCameraSpaceReflection =  21
+	ETexCoordCount
+		TCN_2DCoords             =   0
+		TCN_3DCoords             =   1
+		TCN_4DCoords             =   2
+	ETexClampModeOverried
+		TCO_UseTextureMode       =   0
+		TCO_Wrap                 =   1
+		TCO_Clamp                =   2
+PROPERTIES:
+	104  TexCoordSource           Byte    <ETexCoordSrc>
+	105  TexCoordCount            Byte    <ETexCoordCount>
+	106  UClampMode               Byte    <ETexClampModeOverried>
+	107  VClampMode               Byte    <ETexClampModeOverried>
+	108  TexCoordProjected        Bool    <0 : 0x00000001>

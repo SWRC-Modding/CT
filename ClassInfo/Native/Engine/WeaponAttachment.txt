@@ -1,0 +1,36 @@
+CLASS: WeaponAttachment(776), BASE: InventoryAttachment
+PROPERTIES:
+	644  FlashCount               Byte    
+	645  PrivateFlashCount        Byte    
+	646  ThrowCount               Byte    
+	647  PrivateThrowCount        Byte    
+	648  ReloadCount              Byte    
+	649  PrivateReloadCount       Byte    
+	650  MeleeCount               Byte    
+	651  PrivateMeleeCount        Byte    
+	652  HolsterCount             Byte    
+	653  PrivateHolsterCount      Byte    
+	654  LoadCount                Byte    
+	655  PrivateLoadCount         Byte    
+	656  StopFireCount            Byte    
+	657  PrivateStopFireCount     Byte    
+	660  bChangeHolsterCount      Bool    <0 : 0x00000001>
+	664  MuzzleFlash              Object  <Emitter>
+	668  MuzzleClass              Class   <Emitter>
+	672  MuzzleOffset             Struct  <Vector>
+	684  MuzzleRotationOffset     Struct  <Rotator>
+	696  MuzzleLight              Object  <DynamicLight>
+	700  LightOffset              Struct  <Vector>
+	712  EffectLocationOffset     Struct  <Vector>[2]
+	736  bPlayingFireSound        Bool    <0 : 0x00000001>
+	736  bAutoFire                Bool    <1 : 0x00000002>
+	736  bNeedToBreathePawn       Bool    <2 : 0x00000004>
+	740  LastLoopingSound         Object  <Sound>
+	744  MPPawnBreatheAnim        Name    
+	748  MPPawnFireAnim           Name    
+	752  MPPawnHolsterAnim        Name    
+	756  MPPawnLoadAnim           Name    
+	760  MPPawnIdleAnim           Name    
+	764  MPPawnMeleeAnim          Name    
+	768  MPPawnThrowAnim          Name    
+	772  ProjectileClass          Class   <Projectile>

@@ -1,0 +1,2 @@
+CLASS: Engine_Smoke_Relative(828), BASE: Emitter
+PROPERTIES:

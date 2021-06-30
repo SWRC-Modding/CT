@@ -1,0 +1,2 @@
+CLASS: StateGrievousGuardAttackDefaults(148), BASE: StateGrievousGuardAttack
+PROPERTIES:

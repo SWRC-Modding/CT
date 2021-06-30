@@ -1,0 +1,2 @@
+CLASS: SeekerDroidDefaults(1688), BASE: SeekerDroid
+PROPERTIES:

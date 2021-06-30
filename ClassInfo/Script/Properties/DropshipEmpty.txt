@@ -1,0 +1,2 @@
+CLASS: DropshipEmpty(1664), BASE: Dropship
+PROPERTIES:

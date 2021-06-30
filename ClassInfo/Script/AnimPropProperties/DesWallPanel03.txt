@@ -1,0 +1,2 @@
+CLASS: DesWallPanel03(868), BASE: AnimProp
+PROPERTIES:

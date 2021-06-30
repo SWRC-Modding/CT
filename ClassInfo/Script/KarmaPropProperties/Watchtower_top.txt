@@ -1,0 +1,2 @@
+CLASS: Watchtower_top(888), BASE: KarmaProp
+PROPERTIES:

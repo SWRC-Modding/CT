@@ -1,0 +1,2 @@
+CLASS: HomingMissileDefaults(832), BASE: HomingMissile
+PROPERTIES:

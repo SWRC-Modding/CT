@@ -1,0 +1,2 @@
+CLASS: EFFECT_Psychotic(160), BASE: I3DL2Listener
+PROPERTIES:

@@ -1,0 +1,2 @@
+CLASS: AnimNotify_LoadAttachment(44), BASE: AnimNotify
+PROPERTIES:

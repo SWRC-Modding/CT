@@ -1,0 +1,2 @@
+CLASS: DemolitionChargeDefaults(948), BASE: DemolitionCharge
+PROPERTIES:

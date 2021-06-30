@@ -1,0 +1,2 @@
+CLASS: GeoFighter(1664), BASE: Vehicles
+PROPERTIES:

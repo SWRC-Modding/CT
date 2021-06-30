@@ -1,0 +1,2 @@
+CLASS: MarkerDisarmTrap(908), BASE: MarkerDisarmTrapNative
+PROPERTIES:

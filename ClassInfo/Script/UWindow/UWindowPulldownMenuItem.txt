@@ -1,0 +1,11 @@
+CLASS: UWindowPulldownMenuItem(148), BASE: UWindowList
+PROPERTIES:
+	108  Caption                  Str     
+	116  Graphic                  Object  <Texture>
+	120  HotKey                   Byte    
+	124  SubMenu                  Object  <UWindowPulldownMenu>
+	128  Command                  Str     
+	136  bChecked                 Bool    <0 : 0x00000001>
+	136  bDisabled                Bool    <1 : 0x00000002>
+	140  Owner                    Object  <UWindowPulldownMenu>
+	144  ItemTop                  Float   

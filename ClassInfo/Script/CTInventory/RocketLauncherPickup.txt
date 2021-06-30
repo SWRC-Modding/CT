@@ -1,0 +1,2 @@
+CLASS: RocketLauncherPickup(704), BASE: CTPickup
+PROPERTIES:

@@ -1,0 +1,2 @@
+CLASS: AmbientSound(644), BASE: Keypoint
+PROPERTIES:

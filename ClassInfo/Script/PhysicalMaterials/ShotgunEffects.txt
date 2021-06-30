@@ -1,0 +1,2 @@
+CLASS: ShotgunEffects(68), BASE: MaterialTypeInfo
+PROPERTIES:

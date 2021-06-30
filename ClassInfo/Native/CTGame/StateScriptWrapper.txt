@@ -1,0 +1,4 @@
+CLASS: StateScriptWrapper(60), BASE: StateObject
+PROPERTIES:
+	52   Priority                 Float   
+	56   WrappedState             Name    

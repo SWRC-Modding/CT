@@ -1,0 +1,3 @@
+CLASS: DemoRecDriver(268), BASE: NetDriver
+PROPERTIES:
+	156  DemoSpectatorClass       Str     

@@ -1,0 +1,2 @@
+CLASS: VisionModeSniper(172), BASE: VisionMode
+PROPERTIES:

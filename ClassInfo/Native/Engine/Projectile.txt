@@ -1,0 +1,22 @@
+CLASS: Projectile(716), BASE: Actor
+PROPERTIES:
+	644  Speed                    Float   
+	648  MaxSpeed                 Float   
+	652  TossZ                    Float   
+	656  ZeroCollider             Object  <Actor>
+	660  bSwitchToZeroCollision   Bool    <0 : 0x00000001>
+	660  bDelayDestroy            Bool    <1 : 0x00000002>
+	660  bLaserBolt               Bool    <2 : 0x00000004>
+	664  AccelFactor              Int     
+	668  Damage                   Float   
+	672  DamageRadius             Float   
+	676  MyDamageType             Class   <DamageType>
+	680  SpawnSound               Object  <Sound>
+	684  ImpactSound              Object  <Sound>
+	688  WallHitStimulus          Byte    <EStimulusType>
+	692  ProjectileEffect         Class   <Emitter>
+	696  ParticleFX               Object  <Emitter>
+	700  ExploWallOut             Float   
+	704  Target                   Object  <Actor>
+	708  HitEffectsByMaterial     Class   <MaterialTypeInfo>
+	712  HitEffectsProbability    Float   

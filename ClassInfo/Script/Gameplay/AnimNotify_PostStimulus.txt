@@ -1,0 +1,4 @@
+CLASS: AnimNotify_PostStimulus(52), BASE: AnimNotify_Scripted
+PROPERTIES:
+	44   Stimulus                 Byte    <EStimulusType>
+	48   PostOnlyToSelf           Bool    <0 : 0x00000001>

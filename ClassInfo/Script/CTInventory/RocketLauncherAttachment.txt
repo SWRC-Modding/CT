@@ -1,0 +1,2 @@
+CLASS: RocketLauncherAttachment(776), BASE: WeaponAttachment
+PROPERTIES:

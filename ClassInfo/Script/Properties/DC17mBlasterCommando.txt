@@ -1,0 +1,2 @@
+CLASS: DC17mBlasterCommando(1180), BASE: DC17mBlaster
+PROPERTIES:

@@ -1,0 +1,2 @@
+CLASS: TextBuffer(60), BASE: Object
+PROPERTIES:

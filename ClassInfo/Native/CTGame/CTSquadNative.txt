@@ -1,0 +1,31 @@
+CLASS: CTSquadNative(872), BASE: Squad
+STRUCTS:
+	SquadAssignment(24)
+		0    Member                   Object  <Pawn>
+		4    Subject                  Object  <Actor>
+		8    Goal                     Object  <GoalObject>
+		12   Owner                    Object  <Object>
+		16   bParallelGoal            Bool    <0 : 0x00000001>
+		20   StateClass               Class   <StateObject>
+PROPERTIES:
+	784  Head                     Int     
+	788  RallyActor               Object  <Actor>
+	792  OptionalRallyActor       Object  <Actor>
+	796  Assignments              Array   <Struct <SquadAssignment>>
+	804  NextCantFireTime         Float   
+	808  CurrentObjective         Int     
+	812  NextWaitFor              Int     
+	816  NextGoto                 Int     
+	820  NextRequiredGoto         Int     
+	824  LastBattleCueTime        Float   
+	828  LatestGotoPoint          Object  <NavigationPoint>
+	832  NextGotoPoint            Object  <NavigationPoint>
+	836  RallyPointMesh           Object  <StaticMesh>
+	840  SearchAndDestroyMesh     Object  <StaticMesh>
+	844  OptionalSDMesh           Object  <StaticMesh>
+	848  SecureAreaEffect         Class   <Emitter>
+	852  EngageEffectClass        Class   <Emitter>
+	856  FormationFocus           Object  <Actor>
+	860  LastMemberKilledTime     Float   
+	864  SquadDeathSound          Object  <Sound>
+	868  SquadIncapSound          Object  <Sound>

@@ -1,0 +1,2 @@
+CLASS: DC17BlasterProj(716), BASE: Projectile
+PROPERTIES:

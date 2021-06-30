@@ -1,0 +1,2 @@
+CLASS: CTDamageEnergySMGMultiPlay(112), BASE: CTDamageEnergy
+PROPERTIES:

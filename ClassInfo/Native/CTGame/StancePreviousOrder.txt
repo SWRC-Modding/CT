@@ -1,0 +1,2 @@
+CLASS: StancePreviousOrder(128), BASE: SquadStance
+PROPERTIES:

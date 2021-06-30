@@ -1,0 +1,11 @@
+CLASS: ShadowProjector(1088), BASE: Projector
+PROPERTIES:
+	1056 ShadowActor              Object  <Actor>
+	1060 LightDirection           Struct  <Vector>
+	1072 LightDistance            Float   
+	1076 ShadowIntensity          Float   
+	1080 RootMotion               Bool    <0 : 0x00000001>
+	1080 bBlobShadow              Bool    <1 : 0x00000002>
+	1080 bShadowActive            Bool    <2 : 0x00000004>
+	1080 bUseLightAverage         Bool    <3 : 0x00000008>
+	1084 ShadowTexture            Object  <ShadowBitmapMaterial>

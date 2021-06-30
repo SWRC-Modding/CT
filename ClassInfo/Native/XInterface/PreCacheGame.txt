@@ -1,0 +1,4 @@
+CLASS: PreCacheGame(1092), BASE: GameInfo
+PROPERTIES:
+	1076 PackageList              Array   <Str>
+	1084 Cache                    Array   <Object <Object>>

@@ -1,0 +1,2 @@
+CLASS: BattleDroidDefaults(1740), BASE: BattleDroid
+PROPERTIES:

@@ -1,0 +1,2 @@
+CLASS: K_GEOEliteIntroColumnPiece2(888), BASE: KarmaProp
+PROPERTIES:

@@ -1,0 +1,2 @@
+CLASS: CoreShipTurret(2068), BASE: AutoTurret
+PROPERTIES:

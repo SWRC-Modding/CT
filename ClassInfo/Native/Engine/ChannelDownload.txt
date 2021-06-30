@@ -1,0 +1,2 @@
+CLASS: ChannelDownload(596), BASE: Download
+PROPERTIES:

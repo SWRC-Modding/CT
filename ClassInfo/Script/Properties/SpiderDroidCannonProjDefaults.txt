@@ -1,0 +1,2 @@
+CLASS: SpiderDroidCannonProjDefaults(804), BASE: SpiderDroidCannonProj
+PROPERTIES:

@@ -1,0 +1,2 @@
+CLASS: RocketLauncherDefaults(1284), BASE: RocketLauncher
+PROPERTIES:

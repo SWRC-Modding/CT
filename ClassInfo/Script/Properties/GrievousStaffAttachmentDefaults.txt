@@ -1,0 +1,2 @@
+CLASS: GrievousStaffAttachmentDefaults(776), BASE: GrievousStaffAttachment
+PROPERTIES:

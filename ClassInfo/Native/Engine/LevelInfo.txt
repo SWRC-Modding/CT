@@ -1,0 +1,125 @@
+CLASS: LevelInfo(1268), BASE: ZoneInfo
+ENUMS:
+	ELevelCampaign
+		LC_GEO                   =   0
+		LC_RAS                   =   1
+		LC_YYY                   =   2
+	EPhysicsDetailLevel
+		PDL_Low                  =   0
+		PDL_Medium               =   1
+		PDL_High                 =   2
+	ELevelAction
+		LEVACT_None              =   0
+		LEVACT_Loading           =   1
+		LEVACT_Saving            =   2
+		LEVACT_Connecting        =   3
+		LEVACT_Precaching        =   4
+	ENetMode
+		NM_Standalone            =   0
+		NM_DedicatedServer       =   1
+		NM_ListenServer          =   2
+		NM_Client                =   3
+PROPERTIES:
+	788  TimeDilation             Float   
+	792  TimeSeconds              Float   
+	796  Year                     Int     
+	800  Month                    Int     
+	804  Day                      Int     
+	808  DayOfWeek                Int     
+	812  Hour                     Int     
+	816  Minute                   Int     
+	820  Second                   Int     
+	824  Millisecond              Int     
+	828  PauseDelay               Float   
+	832  Title                    Str     
+	840  Author                   Str     
+	848  RecommendedNumPlayers    Int     
+	852  Campaign                 Byte    <ELevelCampaign>
+	856  XACTPackagesAllowed      Array   <Name>
+	864  bAsyncCacheFiles         Bool    <0 : 0x00000001>
+	868  PhysicsDetailLevel       Byte    <EPhysicsDetailLevel>
+	872  KarmaTimeScale           Float   
+	876  RagdollTimeScale         Float   
+	880  MaxRagdolls              Int     
+	884  KarmaGravScale           Float   
+	888  bKStaticFriction         Bool    <0 : 0x00000001>
+	892  MaxKarmaAccessories      Int     
+	896  ActiveKarmaAccessories   Int     
+	900  MaxDeadBodies            Int     
+	904  DeadBodies               Array   <Object <Pawn>>
+	912  bKNoInit                 Bool    <0 : 0x00000001>
+	916  DecalStayScale           Float   
+	920  LevelEnterText           Str     
+	928  LocalizedPkg             Str     
+	936  Pauser                   Object  <PlayerReplicationInfo>
+	940  Summary                  Object  <LevelSummary>
+	944  VisibleGroups            Str     
+	952  SelectedGroups           Str     
+	960  HideFromMenus            Bool    <0 : 0x00000001>
+	960  bLonePlayer              Bool    <1 : 0x00000002>
+	960  bBegunPlay               Bool    <2 : 0x00000004>
+	960  bPlayersOnly             Bool    <3 : 0x00000008>
+	964  DetailMode               Byte    <EDetailMode>
+	968  bDropDetail              Bool    <0 : 0x00000001>
+	968  bAggressiveLOD           Bool    <1 : 0x00000002>
+	968  bStartup                 Bool    <2 : 0x00000004>
+	968  bLowSoundDetail          Bool    <3 : 0x00000008>
+	968  bPathsRebuilt            Bool    <4 : 0x00000010>
+	968  bHasPathNodes            Bool    <5 : 0x00000020>
+	968  bCapFramerate            Bool    <6 : 0x00000040>
+	968  bLevelChange             Bool    <7 : 0x00000080>
+	968  bKickLiveIdlers          Bool    <8 : 0x00000100>
+	968  bUseBottleneckRegions    Bool    <9 : 0x00000200>
+	968  bDisableBlockedRegionRecompute Bool    <10: 0x00000400>
+	968  bLevelContainsHints      Bool    <11: 0x00000800>
+	968  bNeverPrecache           Bool    <12: 0x00001000>
+	972  CameraLocationDynamic    Struct  <Vector>
+	984  CameraLocationTop        Struct  <Vector>
+	996  CameraLocationFront      Struct  <Vector>
+	1008 CameraLocationSide       Struct  <Vector>
+	1020 CameraRotationDynamic    Struct  <Rotator>
+	1032 BattleMusic              Object  <Sound>
+	1036 BattleBaddieThreshold    Int     
+	1040 BattleRadiusInner        Float   
+	1044 BattleRadiusOuter        Float   
+	1048 BattleCriteria           Byte    <EBattleEngineBattleCriteria>
+	1052 Brightness               Float   
+	1056 Screenshot               Object  <Texture>
+	1060 DefaultTexture           Object  <Texture>
+	1064 WhiteSquareTexture       Object  <Texture>
+	1068 LargeVertex              Object  <Texture>
+	1072 HubStackLevel            Int     
+	1076 bIsConsole               Bool    <0 : 0x00000001>
+	1076 ShadowsEnabled           Bool    <1 : 0x00000002>
+	1080 LevelAction              Byte    <ELevelAction>
+	1084 GRI                      Object  <GameReplicationInfo>
+	1088 NetMode                  Byte    <ENetMode>
+	1092 ComputerName             Str     
+	1100 EngineVersion            Str     
+	1108 MinNetVersion            Str     
+	1116 DefaultGameType          Str     
+	1124 PreCacheGame             Str     
+	1132 Game                     Object  <GameInfo>
+	1136 DefaultGravity           Float   
+	1140 NavigationPointList      Object  <NavigationPoint>
+	1144 RegionConnection         Object  <BitArray2D>[7]
+	1172 ControllerList           Object  <Controller>
+	1176 BactaDispenserList       Object  <Actor>
+	1180 AdditionalTargetsList    Object  <Actor>
+	1184 SquadInterestList        Object  <Actor>
+	1188 LocalPlayerController    Object  <PlayerController>
+	1192 NavigationObjective      Object  <NavigationPoint>
+	1196 CustomMeshSets           Array   <Struct <MeshSetLinkup>>
+	1204 NextURL                  Str     
+	1212 bNextItems               Bool    <0 : 0x00000001>
+	1216 NextSwitchCountdown      Float   
+	1220 ObjectPool               Object  <ObjectPool>
+	1224 PrecacheMaterials        Array   <Object <Material>>
+	1232 PrecacheStaticMeshes     Array   <Object <StaticMesh>>
+	1240 MoveRepSize              Float   
+	1244 MaxTimeMargin            Float   
+	1248 TimeMarginSlack          Float   
+	1252 MinTimeMargin            Float   
+	1256 ReplicationViewer        Object  <PlayerController>
+	1260 ReplicationViewTarget    Object  <Actor>
+	1264 MusicState               Object  <IMuseStateInfo>

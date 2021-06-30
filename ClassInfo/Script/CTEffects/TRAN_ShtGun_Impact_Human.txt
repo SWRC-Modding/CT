@@ -1,0 +1,2 @@
+CLASS: TRAN_ShtGun_Impact_Human(828), BASE: Emitter
+PROPERTIES:

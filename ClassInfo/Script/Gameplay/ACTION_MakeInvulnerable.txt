@@ -1,0 +1,4 @@
+CLASS: ACTION_MakeInvulnerable(72), BASE: ScriptedAction
+PROPERTIES:
+	64   Tag                      Name    
+	68   bMakeGod                 Bool    <0 : 0x00000001>

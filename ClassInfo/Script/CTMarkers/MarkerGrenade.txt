@@ -1,0 +1,2 @@
+CLASS: MarkerGrenade(940), BASE: MarkerWeapon
+PROPERTIES:

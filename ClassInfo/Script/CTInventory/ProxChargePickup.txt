@@ -1,0 +1,2 @@
+CLASS: ProxChargePickup(704), BASE: Ammo
+PROPERTIES:

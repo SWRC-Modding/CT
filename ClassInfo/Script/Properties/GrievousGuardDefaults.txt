@@ -1,0 +1,2 @@
+CLASS: GrievousGuardDefaults(1736), BASE: GrievousGuard
+PROPERTIES:

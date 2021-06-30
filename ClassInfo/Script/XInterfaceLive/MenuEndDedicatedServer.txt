@@ -1,0 +1,6 @@
+CLASS: MenuEndDedicatedServer(20544), BASE: MenuQuestionYesNo
+PROPERTIES:
+	20512 EndDedicated             Str     [2]
+	20528 WritingStats             Str     
+	20536 StatWriteTimeout         Float   
+	20540 StatTimeout              Float   

@@ -1,0 +1,2 @@
+CLASS: Grenade_ECDet_Explo_Ground(828), BASE: Emitter
+PROPERTIES:

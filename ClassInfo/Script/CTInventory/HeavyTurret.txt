@@ -1,0 +1,4 @@
+CLASS: HeavyTurret(1188), BASE: Weapon
+PROPERTIES:
+	1180 CoolDownTime             Float   
+	1184 MuzzleFlash2             Object  <Emitter>

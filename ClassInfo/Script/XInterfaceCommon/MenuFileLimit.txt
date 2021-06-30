@@ -1,0 +1,3 @@
+CLASS: MenuFileLimit(19172), BASE: MenuTemplateTitledA
+PROPERTIES:
+	19060 Message                  Struct  <MenuText>

@@ -1,0 +1,2 @@
+CLASS: CTDamageEnergyAutoTurret(112), BASE: CTDamageEnergy
+PROPERTIES:

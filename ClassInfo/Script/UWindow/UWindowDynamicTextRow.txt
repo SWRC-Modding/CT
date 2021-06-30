@@ -1,0 +1,5 @@
+CLASS: UWindowDynamicTextRow(124), BASE: UWindowList
+PROPERTIES:
+	108  Text                     Str     
+	116  WrapParent               Object  <UWindowDynamicTextRow>
+	120  bRowDirty                Bool    <0 : 0x00000001>

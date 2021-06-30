@@ -1,0 +1,2 @@
+CLASS: WookieeWelderAttachment(776), BASE: WeaponAttachment
+PROPERTIES:

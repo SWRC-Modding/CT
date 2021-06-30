@@ -1,0 +1,8 @@
+CLASS: OptionsRotateActors(64), BASE: OptionsProxy
+PROPERTIES:
+	40   Pitch Min                Int     
+	44   Pitch Max                Int     
+	48   Yaw Min                  Int     
+	52   Yaw Max                  Int     
+	56   Roll Min                 Int     
+	60   Roll Max                 Int     

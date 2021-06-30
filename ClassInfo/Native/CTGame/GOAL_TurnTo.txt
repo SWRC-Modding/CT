@@ -1,0 +1,8 @@
+CLASS: GOAL_TurnTo(112), BASE: GoalObject
+PROPERTIES:
+	76   Other                    Object  <Actor>
+	80   OldFocus                 Object  <Actor>
+	84   Location                 Struct  <Vector>
+	96   Rotation                 Struct  <Rotator>
+	108  bExact                   Bool    <0 : 0x00000001>
+	108  bUseRotation             Bool    <1 : 0x00000002>

@@ -1,0 +1,2 @@
+CLASS: WookieeTurretDefaults(1184), BASE: WookieeTurret
+PROPERTIES:

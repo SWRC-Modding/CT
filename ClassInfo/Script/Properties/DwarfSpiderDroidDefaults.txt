@@ -1,0 +1,2 @@
+CLASS: DwarfSpiderDroidDefaults(1740), BASE: DwarfSpiderDroid
+PROPERTIES:

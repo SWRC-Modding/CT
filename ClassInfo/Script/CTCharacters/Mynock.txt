@@ -1,0 +1,2 @@
+CLASS: Mynock(1688), BASE: Ambient
+PROPERTIES:

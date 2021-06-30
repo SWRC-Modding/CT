@@ -1,0 +1,2 @@
+CLASS: BriefingHelmet(1180), BASE: CTWeaponRecharging
+PROPERTIES:

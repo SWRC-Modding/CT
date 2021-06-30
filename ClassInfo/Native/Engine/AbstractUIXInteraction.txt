@@ -1,0 +1,2 @@
+CLASS: AbstractUIXInteraction(52), BASE: Interaction
+PROPERTIES:

@@ -1,0 +1,2 @@
+CLASS: TDGameDefaults(1464), BASE: TDGame
+PROPERTIES:

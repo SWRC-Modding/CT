@@ -1,0 +1,2 @@
+CLASS: StaticMeshExporterT3D(60), BASE: Exporter
+PROPERTIES:

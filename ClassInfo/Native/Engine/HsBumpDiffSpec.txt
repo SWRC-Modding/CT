@@ -1,0 +1,8 @@
+CLASS: HsBumpDiffSpec(128), BASE: HardwareShaderWrapper
+PROPERTIES:
+	104  DiffuseTexture           Object  <Texture>
+	108  NormalMap                Object  <Texture>
+	112  DiffUVScale              Float   
+	116  BumpUVScale              Float   
+	120  Specularity              Byte    
+	124  SpecularTint             Struct  <Color>

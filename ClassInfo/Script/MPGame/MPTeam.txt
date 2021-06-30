@@ -1,0 +1,11 @@
+CLASS: MPTeam(948), BASE: TeamInfo
+PROPERTIES:
+	704  AllowedTeamMembers       Class   <MPPawn>[32]
+	832  TeamAlliance             Byte    
+	836  DesiredTeamSize          Int     
+	840  HudTeamColor             Struct  <Color>
+	844  TeamSymbolName           Str     
+	852  FriendlyFlag             Object  <CTFFlag>
+	856  RosterNames              Array   <Str>
+	864  ValidPawns               Int     
+	868  ValidPawnClasses         Str     [10]

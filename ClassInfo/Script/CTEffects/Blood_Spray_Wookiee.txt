@@ -1,0 +1,2 @@
+CLASS: Blood_Spray_Wookiee(828), BASE: Emitter
+PROPERTIES:

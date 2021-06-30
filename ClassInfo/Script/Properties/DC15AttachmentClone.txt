@@ -1,0 +1,2 @@
+CLASS: DC15AttachmentClone(776), BASE: DC15Attachment
+PROPERTIES:

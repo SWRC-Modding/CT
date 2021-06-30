@@ -1,0 +1,2 @@
+CLASS: BDDispenser_droidAttach1(696), BASE: Accessory
+PROPERTIES:

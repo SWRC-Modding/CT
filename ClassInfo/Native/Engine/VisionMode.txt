@@ -1,0 +1,25 @@
+CLASS: VisionMode(172), BASE: RenderedMaterial
+PROPERTIES:
+	100  VisionShader             Object  <HardwareShader>
+	104  OrganicShader            Object  <HardwareShader>
+	108  MechanicalShader         Object  <HardwareShader>
+	112  StaticShader             Object  <HardwareShader>
+	116  TargetedOrganicShader    Object  <HardwareShader>
+	120  TargetedMechanicalShader Object  <HardwareShader>
+	124  DrawRegularWorld         Bool    <0 : 0x00000001>
+	124  BloomOveride             Bool    <1 : 0x00000002>
+	128  BloomOverideValue        Byte    
+	129  BloomOverideFilter       Byte    
+	130  MotionBlur               Byte    
+	131  Noise                    Byte    
+	132  BlurPasses               Int     
+	136  ExtractGlow              Bool    <0 : 0x00000001>
+	136  OverideFog               Bool    <1 : 0x00000002>
+	140  DistanceFogColor         Struct  <Color>
+	144  DistanceFogStart         Float   
+	148  DistanceFogEnd           Float   
+	152  FadeInTime               Float   
+	156  FadeOutTime              Float   
+	160  FlashlightOn             Bool    <0 : 0x00000001>
+	164  EAXEffect                Object  <I3DL2Listener>
+	168  EAXEffectXbox            Object  <I3DL2Listener>

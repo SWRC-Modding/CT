@@ -1,0 +1,2 @@
+CLASS: GunshipTurretAmmoDefaults(876), BASE: GunshipTurretAmmo
+PROPERTIES:

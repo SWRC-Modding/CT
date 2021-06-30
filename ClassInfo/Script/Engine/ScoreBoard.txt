@@ -1,0 +1,5 @@
+CLASS: ScoreBoard(656), BASE: Info
+PROPERTIES:
+	644  GRI                      Object  <GameReplicationInfo>
+	648  HUDClass                 Class   <HUD>
+	652  bDisplayMessages         Bool    <0 : 0x00000001>

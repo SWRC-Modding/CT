@@ -1,0 +1,2 @@
+CLASS: WookieeRocketLauncher(1664), BASE: Wookiee
+PROPERTIES:

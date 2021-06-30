@@ -1,0 +1,2 @@
+CLASS: YYY_06_hangar_sfx01(96), BASE: AudioEnvironment
+PROPERTIES:

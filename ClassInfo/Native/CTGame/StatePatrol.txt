@@ -1,0 +1,6 @@
+CLASS: StatePatrol(64), BASE: StateObject
+PROPERTIES:
+	52   GoalIndex                Int     
+	56   Step                     Int     
+	60   ChangedGodStatus         Bool    <0 : 0x00000001>
+	60   InitialGodStatus         Bool    <1 : 0x00000002>

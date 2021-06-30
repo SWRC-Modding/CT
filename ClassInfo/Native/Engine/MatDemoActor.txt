@@ -1,0 +1,2 @@
+CLASS: MatDemoActor(644), BASE: Actor
+PROPERTIES:

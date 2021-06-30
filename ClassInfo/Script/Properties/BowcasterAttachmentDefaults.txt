@@ -1,0 +1,2 @@
+CLASS: BowcasterAttachmentDefaults(776), BASE: BowcasterAttachment
+PROPERTIES:

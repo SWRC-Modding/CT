@@ -1,0 +1,2 @@
+CLASS: TextureExporterPCX(60), BASE: Exporter
+PROPERTIES:

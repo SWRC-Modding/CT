@@ -1,0 +1,3 @@
+CLASS: MenuLiveUserHasMessage(19840), BASE: MenuTemplateTitledBA
+PROPERTIES:
+	19728 MessageText              Struct  <MenuText>

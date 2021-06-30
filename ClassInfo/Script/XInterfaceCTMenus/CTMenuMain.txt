@@ -1,0 +1,26 @@
+CLASS: CTMenuMain(24020), BASE: MenuTemplateTitledA
+PROPERTIES:
+	19060 KaminoBorder             Struct  <MenuSprite>
+	19132 Kamino                   Struct  <MenuSprite>
+	19204 GeonosisBorder           Struct  <MenuSprite>
+	19276 Geonosis                 Struct  <MenuSprite>
+	19348 AssaultShipBorder        Struct  <MenuSprite>
+	19420 AssaultShip              Struct  <MenuSprite>
+	19492 KashyyykBorder           Struct  <MenuSprite>
+	19564 Kashyyyk                 Struct  <MenuSprite>
+	19636 GameTitle                Struct  <MenuSprite>
+	19708 LabelBackground          Struct  <MenuSprite>
+	19780 Label                    Struct  <MenuText>
+	19892 LabelConnector           Struct  <MenuSprite>
+	19964 Border                   Struct  <MenuSprite>
+	20036 MenuOptions              Struct  <MenuButtonText>[8]
+	23908 FriendsIcon              Struct  <MenuSprite>
+	23980 FriendRequestIcon        Object  <Material>
+	23984 GameInviteIcon           Object  <Material>
+	23988 bFoundCrossTitleInvite   Bool    <0 : 0x00000001>
+	23988 linkActive               Bool    <1 : 0x00000002>
+	23992 MenuNames                Array   <Str>
+	24000 QuitGameConfirm          Str     
+	24008 QuitXBoxGameConfirm      Str     
+	24016 bLowStorage              Bool    <0 : 0x00000001>
+	24016 bGotInitialProfile       Bool    <1 : 0x00000002>

@@ -1,0 +1,2 @@
+CLASS: GeonosianDrone(1664), BASE: Geonosian
+PROPERTIES:

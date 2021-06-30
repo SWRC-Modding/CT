@@ -1,0 +1,12 @@
+CLASS: ActorSpawner(652), BASE: Actor
+ENUMS:
+	ActorSpawnerType
+		AST_GenericActor         =   0
+		AST_Projector            =   1
+STRUCTS:
+	SpawnInfo(12)
+		0    TypeOfSpawn              Byte    <ActorSpawnerType>
+		4    ActorToSpawn             Class   <Actor>
+		8    ProjectorToSpawn         Class   <Projector>
+PROPERTIES:
+	644  StuffToSpawn             Array   <Struct <SpawnInfo>>

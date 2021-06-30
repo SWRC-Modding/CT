@@ -1,0 +1,3 @@
+CLASS: GOAL_UseActor(80), BASE: GoalObject
+PROPERTIES:
+	76   Other                    Object  <Actor>

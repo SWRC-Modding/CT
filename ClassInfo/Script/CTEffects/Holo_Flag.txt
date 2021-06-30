@@ -1,0 +1,2 @@
+CLASS: Holo_Flag(828), BASE: Emitter
+PROPERTIES:

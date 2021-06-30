@@ -1,0 +1,2 @@
+CLASS: GunshipTurretDefaults(1236), BASE: GunshipTurret
+PROPERTIES:

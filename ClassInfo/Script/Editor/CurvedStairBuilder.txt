@@ -1,0 +1,10 @@
+CLASS: CurvedStairBuilder(112), BASE: BrushBuilder
+PROPERTIES:
+	80   InnerRadius              Int     
+	84   StepHeight               Int     
+	88   StepWidth                Int     
+	92   AngleOfCurve             Int     
+	96   NumSteps                 Int     
+	100  AddToFirstStep           Int     
+	104  GroupName                Name    
+	108  CounterClockwise         Bool    <0 : 0x00000001>

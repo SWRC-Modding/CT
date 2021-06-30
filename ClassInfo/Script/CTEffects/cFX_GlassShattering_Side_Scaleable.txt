@@ -1,0 +1,2 @@
+CLASS: cFX_GlassShattering_Side_Scaleable(828), BASE: Emitter
+PROPERTIES:

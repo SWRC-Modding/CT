@@ -1,0 +1,2 @@
+CLASS: MSE6Droid(1688), BASE: Ambient
+PROPERTIES:

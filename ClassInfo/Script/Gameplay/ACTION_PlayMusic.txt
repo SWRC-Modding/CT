@@ -1,0 +1,8 @@
+CLASS: ACTION_PlayMusic(84), BASE: ScriptedAction
+PROPERTIES:
+	64   Music                    Object  <Sound>
+	68   OverrideFadeDefaults     Bool    <0 : 0x00000001>
+	72   FadeInTime               Float   
+	76   FadeOutTime              Float   
+	80   FadeInType               Byte    <EMusicFadeType>
+	81   FadeOutType              Byte    <EMusicFadeType>

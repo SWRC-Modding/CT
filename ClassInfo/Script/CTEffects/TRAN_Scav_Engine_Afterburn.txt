@@ -1,0 +1,2 @@
+CLASS: TRAN_Scav_Engine_Afterburn(828), BASE: Emitter
+PROPERTIES:

@@ -1,0 +1,2 @@
+CLASS: RocketLauncherAttachmentDefaults(776), BASE: RocketLauncherAttachment
+PROPERTIES:

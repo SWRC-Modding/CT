@@ -1,0 +1,2 @@
+CLASS: TrandoshanMercYYYLow(1736), BASE: TrandoshanMercenary
+PROPERTIES:

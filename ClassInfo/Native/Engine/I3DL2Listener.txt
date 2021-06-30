@@ -1,0 +1,35 @@
+CLASS: I3DL2Listener(160), BASE: Object
+PROPERTIES:
+	40   EnvironmentDiffusion     Float   
+	44   Room                     Int     
+	48   RoomHF                   Int     
+	52   DecayTime                Float   
+	56   Reflections              Int     
+	60   ReflectionsDelay         Float   
+	64   Reverb                   Int     
+	68   ReverbDelay              Float   
+	72   RoomRolloffFactor        Float   
+	76   HFReference              Float   
+	80   Density                  Float   
+	84   EnvironmentSize          Float   
+	88   RoomLF                   Int     
+	92   DecayHFRatio             Float   
+	96   DecayLFRatio             Float   
+	100  ReflectionsPan           Struct  <Vector>
+	112  ReverbPan                Struct  <Vector>
+	124  EchoTime                 Float   
+	128  EchoDepth                Float   
+	132  ModulationTime           Float   
+	136  ModulationDepth          Float   
+	140  AirAbsorptionHF          Float   
+	144  LFReference              Float   
+	148  bDecayTimeScale          Bool    <0 : 0x00000001>
+	148  bReflectionsScale        Bool    <1 : 0x00000002>
+	148  bReflectionsDelayScale   Bool    <2 : 0x00000004>
+	148  bReverbScale             Bool    <3 : 0x00000008>
+	148  bReverbDelayScale        Bool    <4 : 0x00000010>
+	148  bEchoTimeScale           Bool    <5 : 0x00000020>
+	148  bModulationTimeScale     Bool    <6 : 0x00000040>
+	148  bDecayHFLimit            Bool    <7 : 0x00000080>
+	152  Environment              Int     
+	156  Updated                  Int     

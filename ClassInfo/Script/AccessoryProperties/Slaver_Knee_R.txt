@@ -1,0 +1,2 @@
+CLASS: Slaver_Knee_R(696), BASE: Accessory
+PROPERTIES:

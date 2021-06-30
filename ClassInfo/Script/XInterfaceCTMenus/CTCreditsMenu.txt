@@ -1,0 +1,15 @@
+CLASS: CTCreditsMenu(21996), BASE: MenuTemplateTitledB
+STRUCTS:
+	CreditLineEntry(16)
+		0    Text                     Str     
+		8    PosY                     Float   
+		12   Scale                    Float   
+PROPERTIES:
+	19060 ScrollSpeed              Float   
+	19064 YLineOffset              Float   
+	19068 CreditsLineTemplate      Struct  <MenuText>
+	19180 NumCreditsLines          Int     
+	19184 MenuCreditLineBuffer     Struct  <MenuText>[25]
+	21984 bClosed                  Bool    <0 : 0x00000001>
+	21984 bExitAndReturnToMain     Bool    <1 : 0x00000002>
+	21988 CreditLines              Array   <Struct <CreditLineEntry>>

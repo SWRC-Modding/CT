@@ -1,0 +1,12 @@
+CLASS: SpriteEmitter(928), BASE: ParticleEmitter
+ENUMS:
+	EParticleDirectionUsage
+		PTDU_None                =   0
+		PTDU_Up                  =   1
+		PTDU_Forward             =   2
+		PTDU_Normal              =   3
+		PTDU_UpAndNormal         =   4
+PROPERTIES:
+	900  UseDirectionAs           Byte    <EParticleDirectionUsage>
+	904  ProjectionNormal         Struct  <Vector>
+	916  RealProjectionNormal     Struct  <Vector>

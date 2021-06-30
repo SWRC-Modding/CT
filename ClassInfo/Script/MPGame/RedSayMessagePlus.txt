@@ -1,0 +1,2 @@
+CLASS: RedSayMessagePlus(676), BASE: StringMessagePlus
+PROPERTIES:

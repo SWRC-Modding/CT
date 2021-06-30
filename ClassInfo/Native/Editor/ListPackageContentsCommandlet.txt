@@ -1,0 +1,2 @@
+CLASS: ListPackageContentsCommandlet(332), BASE: Commandlet
+PROPERTIES:

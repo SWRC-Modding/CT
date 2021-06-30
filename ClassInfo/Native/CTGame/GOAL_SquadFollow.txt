@@ -1,0 +1,2 @@
+CLASS: GOAL_SquadFollow(120), BASE: GOAL_Follow
+PROPERTIES:

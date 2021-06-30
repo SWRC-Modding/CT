@@ -1,0 +1,2 @@
+CLASS: CTMarker(904), BASE: SquadMarker
+PROPERTIES:

@@ -1,0 +1,4 @@
+CLASS: AnimNotify_BreakJoint(52), BASE: AnimNotify
+PROPERTIES:
+	44   DestroyChildren          Bool    <0 : 0x00000001>
+	48   Bone                     Name    

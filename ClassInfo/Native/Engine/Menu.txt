@@ -1,0 +1,35 @@
+CLASS: Menu(696), BASE: Actor
+ENUMS:
+	InputSource
+		IS_None                  =   0
+		IS_Mouse                 =   1
+		IS_Keyboard              =   2
+		IS_Controller            =   3
+	InputModifier
+		IM_None                  =   0
+		IM_Alt                   =   1
+		IM_Shift                 =   2
+		IM_Ctrl                  =   3
+PROPERTIES:
+	644  UnderlayMenu             Object  <Menu>
+	648  PreviousMenu             Object  <Menu>
+	652  TravelMenu               Object  <Menu>
+	656  BackgroundMusic          Object  <Sound>
+	660  bBackgroundMusicDuringLevel Bool    <0 : 0x00000001>
+	664  LastInputSource          Byte    <InputSource>
+	665  LastInputModifier        Byte    <InputModifier>
+	668  bRenderLevel             Bool    <0 : 0x00000001>
+	668  bPersistent              Bool    <1 : 0x00000002>
+	668  bNetworkOnly             Bool    <2 : 0x00000004>
+	668  bFullscreenOnly          Bool    <3 : 0x00000008>
+	668  bIgnoresInput            Bool    <4 : 0x00000010>
+	668  bFullscreenExclusive     Bool    <5 : 0x00000020>
+	672  FullScreenOnlyTime       Float   
+	676  FullscreenPriority       Int     
+	680  bShowMouseCursor         Bool    <0 : 0x00000001>
+	680  bHideMousecursor         Bool    <1 : 0x00000002>
+	684  MouseX                   Float   
+	688  MouseY                   Float   
+	692  bRawKeyboardInput        Bool    <0 : 0x00000001>
+	692  bVignette                Bool    <1 : 0x00000002>
+	692  bRequiresEthernetLink    Bool    <2 : 0x00000004>

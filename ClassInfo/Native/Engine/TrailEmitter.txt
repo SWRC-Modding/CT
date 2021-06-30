@@ -1,0 +1,24 @@
+CLASS: TrailEmitter(952), BASE: ParticleEmitter
+STRUCTS:
+	ParticleTrailData(28)
+		0    Location                 Struct  <Vector>
+		12   Color                    Struct  <Color>
+		16   Size                     Float   
+		20   DoubleDummy1             Int     
+		24   DoubleDummy2             Int     
+	ParticleTrailInfo(20)
+		0    TrailIndex               Int     
+		4    NumPoints                Int     
+		8    LastLocation             Struct  <Vector>
+PROPERTIES:
+	900  MaxPointsPerTrail        Int     
+	904  DistanceThreshold        Float   
+	908  UseCrossedSheets         Bool    <0 : 0x00000001>
+	912  MaxTrailTwistAngle       Int     
+	916  TrailData                Array   <Struct <ParticleTrailData>>
+	924  TrailInfo                Array   <Struct <ParticleTrailInfo>>
+	932  VertexBuffer             Object  <VertexBuffer>
+	936  IndexBuffer              Object  <IndexBuffer>
+	940  VerticesPerParticle      Int     
+	944  IndicesPerParticle       Int     
+	948  PrimitivesPerParticle    Int     

@@ -1,0 +1,2 @@
+CLASS: BowcasterAttachment(776), BASE: WeaponAttachment
+PROPERTIES:

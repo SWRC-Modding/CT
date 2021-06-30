@@ -1,0 +1,2 @@
+CLASS: IndexBuffer(52), BASE: RenderResource
+PROPERTIES:

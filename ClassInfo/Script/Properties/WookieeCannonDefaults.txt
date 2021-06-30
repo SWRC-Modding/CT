@@ -1,0 +1,2 @@
+CLASS: WookieeCannonDefaults(2104), BASE: WookieeCannon
+PROPERTIES:

@@ -1,0 +1,12 @@
+CLASS: UWindowGrid(212), BASE: UWindowWindow
+PROPERTIES:
+	180  FirstColumn              Object  <UWindowGridColumn>
+	184  LastColumn               Object  <UWindowGridColumn>
+	188  ClientArea               Object  <UWindowGridClient>
+	192  TopRow                   Int     
+	196  RowHeight                Float   
+	200  VertSB                   Object  <UWindowVScrollbar>
+	204  HorizSB                  Object  <UWindowHScrollbar>
+	208  bShowHorizSB             Bool    <0 : 0x00000001>
+	208  bSizingColumn            Bool    <1 : 0x00000002>
+	208  bNoKeyboard              Bool    <2 : 0x00000004>

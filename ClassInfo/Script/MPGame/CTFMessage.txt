@@ -1,0 +1,22 @@
+CLASS: CTFMessage(836), BASE: CriticalEventPlus
+PROPERTIES:
+	676  ReturnBlue               Str     
+	684  ReturnRed                Str     
+	692  ReturnedBlue             Str     
+	700  ReturnedRed              Str     
+	708  CaptureBlue              Str     
+	716  CaptureRed               Str     
+	724  DroppedBlue              Str     
+	732  DroppedRed               Str     
+	740  HasBlue                  Str     
+	748  HasRed                   Str     
+	756  ReturnSounds             Object  <Sound>[2]
+	764  DroppedSounds            Object  <Sound>[2]
+	772  TakenSounds              Object  <Sound>[2]
+	780  CaptureSounds            Object  <Sound>[2]
+	788  WonMatchSounds           Object  <Sound>[2]
+	796  TrandoReturnSounds       Object  <Sound>[2]
+	804  TrandoDroppedSounds      Object  <Sound>[2]
+	812  TrandoTakenSounds        Object  <Sound>[2]
+	820  TrandoCaptureSounds      Object  <Sound>[2]
+	828  TrandoWonMatchSounds     Object  <Sound>[2]

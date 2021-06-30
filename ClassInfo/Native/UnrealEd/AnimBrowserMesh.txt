@@ -1,0 +1,2 @@
+CLASS: AnimBrowserMesh(644), BASE: Actor
+PROPERTIES:

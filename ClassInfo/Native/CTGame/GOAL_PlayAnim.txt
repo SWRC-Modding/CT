@@ -1,0 +1,9 @@
+CLASS: GOAL_PlayAnim(96), BASE: GoalObject
+PROPERTIES:
+	76   Sequence                 Name    
+	80   Bone                     Name    
+	84   Channel                  Int     
+	88   Time                     Float   
+	92   bLoop                    Bool    <0 : 0x00000001>
+	92   DisableImpactAnims       Bool    <1 : 0x00000002>
+	92   IsADodge                 Bool    <2 : 0x00000004>

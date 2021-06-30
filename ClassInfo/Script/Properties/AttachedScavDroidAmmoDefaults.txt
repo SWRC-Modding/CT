@@ -1,0 +1,2 @@
+CLASS: AttachedScavDroidAmmoDefaults(868), BASE: AttachedScavDroidAmmo
+PROPERTIES:

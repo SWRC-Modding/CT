@@ -1,0 +1,6 @@
+CLASS: GOAL_ExecuteMarker(88), BASE: GoalObject
+PROPERTIES:
+	76   marker                   Object  <SquadMarker>
+	80   MarkerPriority           Float   
+	84   bCancelIfUnderway        Bool    <0 : 0x00000001>
+	84   bWaitUntilFinish         Bool    <1 : 0x00000002>

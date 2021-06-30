@@ -1,0 +1,7 @@
+CLASS: DC15Ammo(892), BASE: CTAmmoRecharging
+PROPERTIES:
+	876  bCharging                Bool    <0 : 0x00000001>
+	880  CoolDownTime             Float   
+	884  StartCoolDownTime        Float   
+	888  bCoolAndRecharge         Bool    <0 : 0x00000001>
+	888  bWaitForRecharge         Bool    <1 : 0x00000002>

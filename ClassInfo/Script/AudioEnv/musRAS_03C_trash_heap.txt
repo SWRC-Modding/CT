@@ -1,0 +1,2 @@
+CLASS: musRAS_03C_trash_heap(96), BASE: AudioEnvironment
+PROPERTIES:

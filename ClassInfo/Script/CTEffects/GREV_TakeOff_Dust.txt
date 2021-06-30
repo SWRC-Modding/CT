@@ -1,0 +1,2 @@
+CLASS: GREV_TakeOff_Dust(828), BASE: Emitter
+PROPERTIES:

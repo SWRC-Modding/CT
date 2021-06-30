@@ -1,0 +1,2 @@
+CLASS: DroneSpitProj(804), BASE: GrenadeProj
+PROPERTIES:

@@ -1,0 +1,2 @@
+CLASS: Beast(1664), BASE: CTPawn
+PROPERTIES:

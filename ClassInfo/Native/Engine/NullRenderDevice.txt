@@ -1,0 +1,2 @@
+CLASS: NullRenderDevice(208), BASE: RenderDevice
+PROPERTIES:

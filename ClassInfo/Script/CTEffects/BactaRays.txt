@@ -1,0 +1,2 @@
+CLASS: BactaRays(828), BASE: Emitter
+PROPERTIES:

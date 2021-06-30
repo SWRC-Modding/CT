@@ -1,0 +1,2 @@
+CLASS: MenuLoading(18440), BASE: MenuWarningTransition
+PROPERTIES:

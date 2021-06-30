@@ -1,0 +1,2 @@
+CLASS: GeoDronePelvis(696), BASE: Accessory
+PROPERTIES:

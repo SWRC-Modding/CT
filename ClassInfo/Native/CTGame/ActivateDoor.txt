@@ -1,0 +1,7 @@
+CLASS: ActivateDoor(888), BASE: ActivateItem
+PROPERTIES:
+	712  MatchingComponent        Object  <Actor>
+	716  DoorLockedState          Struct  <ActivationInfo>
+	772  DoorUnlockedState        Struct  <ActivationInfo>
+	828  DoorDamagedState         Struct  <ActivationInfo>
+	884  DamagedDelay             Float   

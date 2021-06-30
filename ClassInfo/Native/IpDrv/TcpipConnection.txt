@@ -1,0 +1,2 @@
+CLASS: TcpipConnection(16076), BASE: NetConnection
+PROPERTIES:

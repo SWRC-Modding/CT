@@ -1,0 +1,2 @@
+CLASS: StripSourceCommandlet(332), BASE: Commandlet
+PROPERTIES:

@@ -1,0 +1,12 @@
+CLASS: MegaForce(660), BASE: Actor
+ENUMS:
+	EImpulseType
+		IT_Line                  =   0
+		IT_Sphere                =   1
+PROPERTIES:
+	644  bApplyToCenterOfMass     Bool    <0 : 0x00000001>
+	644  bUseEmitterDirection     Bool    <1 : 0x00000002>
+	644  bAutoActivateAffected    Bool    <2 : 0x00000004>
+	648  ImpulseType              Byte    <EImpulseType>
+	652  ForceDistance            Float   
+	656  ForceAmount              Float   

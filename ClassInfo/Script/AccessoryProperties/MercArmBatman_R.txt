@@ -1,0 +1,2 @@
+CLASS: MercArmBatman_R(696), BASE: Accessory
+PROPERTIES:

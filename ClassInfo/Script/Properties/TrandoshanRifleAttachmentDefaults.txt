@@ -1,0 +1,2 @@
+CLASS: TrandoshanRifleAttachmentDefaults(776), BASE: TrandoshanRifleAttachment
+PROPERTIES:

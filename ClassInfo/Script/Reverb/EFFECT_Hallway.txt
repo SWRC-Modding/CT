@@ -1,0 +1,2 @@
+CLASS: EFFECT_Hallway(160), BASE: I3DL2Listener
+PROPERTIES:

@@ -1,0 +1,2 @@
+CLASS: UWindowPageControl(280), BASE: UWindowTabControl
+PROPERTIES:

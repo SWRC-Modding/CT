@@ -1,0 +1,2 @@
+CLASS: TrandoshanRifleMPAmmo(868), BASE: TrandoshanRifleAmmo
+PROPERTIES:

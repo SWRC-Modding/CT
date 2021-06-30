@@ -1,0 +1,2 @@
+CLASS: DisarmTrap(976), BASE: ActivateTrap
+PROPERTIES:

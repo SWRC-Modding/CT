@@ -1,0 +1,2 @@
+CLASS: cFX_ZeroG_Wall_A(828), BASE: Emitter
+PROPERTIES:

@@ -1,0 +1,3 @@
+CLASS: MenuCheats(26020), BASE: MenuTemplateTitledBA
+PROPERTIES:
+	19728 Options                  Struct  <MenuButtonText>[13]

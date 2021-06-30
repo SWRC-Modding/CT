@@ -1,0 +1,54 @@
+CLASS: ExtendedConsole(1124), BASE: Console
+ENUMS:
+	ESpeechMenuState
+		SMS_Main                 =   0
+		SMS_Ack                  =   1
+		SMS_FriendFire           =   2
+		SMS_Order                =   3
+		SMS_Taunt                =   4
+		SMS_PlayerSelect         =   5
+STRUCTS:
+	StoredPassword(16)
+		0    Server                   Str     
+		8    Password                 Str     
+	ChatStruct(12)
+		0    Message                  Str     
+		8    Team                     Int     
+PROPERTIES:
+	320  MaxScrollbackSize        Int     
+	324  Scrollback               Array   <Str>
+	332  SBHead                   Int     
+	336  SBPos                    Int     
+	340  bCtrl                    Bool    <0 : 0x00000001>
+	340  bConsoleHotKey           Bool    <1 : 0x00000002>
+	344  ConsoleSoundVol          Float   
+	348  AddedCurrentHead         Str     
+	356  AddedCurrentTail         Str     
+	364  LetterKeys               Byte    <EInputKey>[10]
+	374  NumberKeys               Byte    <EInputKey>[10]
+	384  bSpeechMenuUseLetters    Bool    <0 : 0x00000001>
+	384  bSpeechMenuUseMouseWheel Bool    <1 : 0x00000002>
+	388  HighlightRow             Int     
+	392  SMState                  Byte    <ESpeechMenuState>
+	396  SMLineSpace              Float   
+	400  SMMargin                 Float   
+	404  SMTab                    Float   
+	408  SMOffset                 Int     
+	412  SMOriginX                Float   
+	416  SMOriginY                Float   
+	420  SMStateName              Str     [6]
+	468  SMAllString              Str     
+	476  SMMoreString             Str     
+	484  SMOpenSound              Object  <Sound>
+	488  SMAcceptSound            Object  <Sound>
+	492  SMDenySound              Object  <Sound>
+	496  SMNameArray              Str     [48]
+	880  SMIndexArray             Int     [48]
+	1072 SMArraySize              Int     
+	1076 SMType                   Name    
+	1080 SMIndex                  Int     
+	1084 SavedPasswords           Array   <Struct <StoredPassword>>
+	1092 PasswordPromptMenu       Str     
+	1100 LastConnectedServer      Str     
+	1108 LastURL                  Str     
+	1116 ChatString               Str     

@@ -1,0 +1,2 @@
+CLASS: TexAlignerDefault(68), BASE: TexAligner
+PROPERTIES:

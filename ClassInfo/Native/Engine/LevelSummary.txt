@@ -1,0 +1,6 @@
+CLASS: LevelSummary(68), BASE: Object
+PROPERTIES:
+	40   Title                    Str     
+	48   Author                   Str     
+	56   IdealPlayerCount         Int     
+	60   LevelEnterText           Str     

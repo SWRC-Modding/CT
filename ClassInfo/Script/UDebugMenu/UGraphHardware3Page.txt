@@ -1,0 +1,19 @@
+CLASS: UGraphHardware3Page(1248), BASE: UWindowPageWindow
+PROPERTIES:
+	196  Labels                   Object  <UWindowLabelControl>[21]
+	280  StatNameText             Str     [21]
+	448  CatNameText              Str     
+	456  DesiredMaxEdit           Object  <UWindowEditControl>[21]
+	540  DesiredMaxText           Str     
+	548  UseBarStatCheck          Object  <UWindowCheckbox>[21]
+	632  UseBarStatText           Str     
+	640  UseLineStatCheck         Object  <UWindowCheckbox>[21]
+	724  UseLineStatText          Str     
+	732  SmallIsBadCheck          Object  <UWindowCheckbox>[21]
+	816  SmallIsBadText           Str     
+	824  DesiredMaxEditSettings   Str     [21]
+	992  SmallIsBadSettings       Int     [21]
+	1076 UseBarStatSettings       Int     [21]
+	1160 UseLineStatSettings      Int     [21]
+	1244 bIsLoading               Bool    <0 : 0x00000001>
+	1244 bShouldDelayChange       Bool    <1 : 0x00000002>

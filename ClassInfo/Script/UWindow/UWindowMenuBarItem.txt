@@ -1,0 +1,9 @@
+CLASS: UWindowMenuBarItem(140), BASE: UWindowList
+PROPERTIES:
+	108  Caption                  Str     
+	116  Owner                    Object  <UWindowMenuBar>
+	120  Menu                     Object  <UWindowPulldownMenu>
+	124  ItemLeft                 Float   
+	128  ItemWidth                Float   
+	132  bHelp                    Bool    <0 : 0x00000001>
+	136  HotKey                   Byte    

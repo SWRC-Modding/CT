@@ -1,0 +1,2 @@
+CLASS: RestrainingBoltPickup(704), BASE: CTPickup
+PROPERTIES:

@@ -1,0 +1,2 @@
+CLASS: TerrainSector(176), BASE: Object
+PROPERTIES:

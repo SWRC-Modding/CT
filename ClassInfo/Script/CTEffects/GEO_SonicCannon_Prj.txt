@@ -1,0 +1,2 @@
+CLASS: GEO_SonicCannon_Prj(828), BASE: Emitter
+PROPERTIES:

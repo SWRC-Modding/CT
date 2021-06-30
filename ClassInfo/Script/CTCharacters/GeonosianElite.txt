@@ -1,0 +1,5 @@
+CLASS: GeonosianElite(1676), BASE: Geonosian
+PROPERTIES:
+	1664 FlyDeathProbability      Float   
+	1668 FlyingSound              Object  <Sound>
+	1672 DiedInFlight             Bool    <0 : 0x00000001>

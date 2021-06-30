@@ -1,0 +1,2 @@
+CLASS: SwampBlurrgDefaults(1688), BASE: SwampBlurrg
+PROPERTIES:

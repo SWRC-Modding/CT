@@ -1,0 +1,4 @@
+CLASS: ACTION_ShowTitleCardScreen(80), BASE: ScriptedAction
+PROPERTIES:
+	64   MenuClass                Str     
+	72   Args                     Str     

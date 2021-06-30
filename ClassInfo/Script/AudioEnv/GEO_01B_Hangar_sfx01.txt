@@ -1,0 +1,2 @@
+CLASS: GEO_01B_Hangar_sfx01(96), BASE: AudioEnvironment
+PROPERTIES:

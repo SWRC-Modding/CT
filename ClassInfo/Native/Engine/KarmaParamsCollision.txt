@@ -1,0 +1,9 @@
+CLASS: KarmaParamsCollision(76), BASE: Object
+PROPERTIES:
+	40   KarmaData                Int     
+	44   KScale                   Float   
+	48   KScale3D                 Struct  <Vector>
+	60   KFriction                Float   
+	64   KRestitution             Float   
+	68   KImpactThreshold         Float   
+	72   bContactingLevel         Bool    <0 : 0x00000001>

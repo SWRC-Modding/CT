@@ -1,0 +1,5 @@
+CLASS: UDebugOpenWindow(244), BASE: UWindowFramedWindow
+PROPERTIES:
+	228  CloseButton              Object  <UWindowSmallCloseButton>
+	232  OkButton                 Object  <UWindowSmallButton>
+	236  OKText                   Str     

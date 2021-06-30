@@ -1,0 +1,2 @@
+CLASS: SBDCrouchWeaponDefaults(1180), BASE: SBDCrouchWeapon
+PROPERTIES:

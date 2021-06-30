@@ -1,0 +1,2 @@
+CLASS: DV_OrganicWookieDamage(56), BASE: DV_Organic
+PROPERTIES:

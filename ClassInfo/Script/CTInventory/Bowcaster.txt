@@ -1,0 +1,9 @@
+CLASS: Bowcaster(1196), BASE: Weapon
+PROPERTIES:
+	1180 bReleaseFire             Bool    <0 : 0x00000001>
+	1180 bZoomSkewer              Bool    <1 : 0x00000002>
+	1180 bLoseCharge              Bool    <2 : 0x00000004>
+	1180 bCanFire                 Bool    <3 : 0x00000008>
+	1184 SkewerChargeupTime       Float   
+	1188 SkewerStartTime          Float   
+	1192 SkewerResetTime          Float   

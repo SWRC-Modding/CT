@@ -1,0 +1,2 @@
+CLASS: MenuMPTrando(1900), BASE: MPTrandoshan
+PROPERTIES:

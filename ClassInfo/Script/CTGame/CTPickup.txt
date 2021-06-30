@@ -1,0 +1,3 @@
+CLASS: CTPickup(704), BASE: Pickup
+PROPERTIES:
+	700  bUsableBySquad           Bool    <0 : 0x00000001>

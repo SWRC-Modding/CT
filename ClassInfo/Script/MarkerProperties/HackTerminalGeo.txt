@@ -1,0 +1,2 @@
+CLASS: HackTerminalGeo(940), BASE: HackTerminal
+PROPERTIES:

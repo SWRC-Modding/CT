@@ -1,0 +1,2 @@
+CLASS: Dust_HeavyLanding(828), BASE: Emitter
+PROPERTIES:

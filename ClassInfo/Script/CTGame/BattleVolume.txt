@@ -1,0 +1,3 @@
+CLASS: BattleVolume(772), BASE: EngineBattleVolume
+PROPERTIES:
+	764  Factories                Array   <Object <PawnFactory>>

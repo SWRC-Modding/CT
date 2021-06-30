@@ -1,0 +1,13 @@
+CLASS: MenuDashboardConfirm(19920), BASE: MenuTemplateTitledBA
+PROPERTIES:
+	19728 ConfirmText              Struct  <MenuText>
+	19840 StringDashMain           Str     
+	19848 StringDashError          Str     
+	19856 StringDashMemory         Str     
+	19864 StringDashSettings       Str     
+	19872 StringDashMusic          Str     
+	19880 StringDashNetwork        Str     
+	19888 StringDashNewAccount     Str     
+	19896 StringDashManageAccount  Str     
+	19904 StringDashOnlineMenu     Str     
+	19912 StringAreYouSure         Str     

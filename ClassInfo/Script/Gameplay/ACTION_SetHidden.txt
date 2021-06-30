@@ -1,0 +1,4 @@
+CLASS: ACTION_SetHidden(72), BASE: ScriptedAction
+PROPERTIES:
+	64   bHidden                  Bool    <0 : 0x00000001>
+	68   HideActorTag             Name    

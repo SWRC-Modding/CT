@@ -1,0 +1,2 @@
+CLASS: SonicTurretDefaults(2052), BASE: SonicTurret
+PROPERTIES:

@@ -1,0 +1,2 @@
+CLASS: TriggeredPlayerStart(744), BASE: PlayerStart
+PROPERTIES:

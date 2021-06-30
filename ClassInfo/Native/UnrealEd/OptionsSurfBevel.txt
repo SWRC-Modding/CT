@@ -1,0 +1,4 @@
+CLASS: OptionsSurfBevel(48), BASE: OptionsProxy
+PROPERTIES:
+	44   Bevel                    Int     
+	40   depth                    Int     

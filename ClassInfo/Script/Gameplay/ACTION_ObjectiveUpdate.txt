@@ -1,0 +1,12 @@
+CLASS: ACTION_ObjectiveUpdate(88), BASE: ScriptedAction
+ENUMS:
+	EUpdateAction
+		UA_ObjCompleted          =   0
+		UA_ObjFailed             =   1
+		UA_ObjChanged            =   2
+PROPERTIES:
+	64   ObjectiveNum             Int     
+	68   UpdateAction             Byte    <EUpdateAction>
+	72   ChangeToObjNum           Int     
+	76   DisplayText              Str     
+	84   PlaySound                Object  <Sound>

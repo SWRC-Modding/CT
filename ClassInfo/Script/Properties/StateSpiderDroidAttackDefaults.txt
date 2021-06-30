@@ -1,0 +1,2 @@
+CLASS: StateSpiderDroidAttackDefaults(172), BASE: StateSpiderDroidAttack
+PROPERTIES:

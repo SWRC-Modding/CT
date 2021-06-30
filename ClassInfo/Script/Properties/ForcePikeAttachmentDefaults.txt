@@ -1,0 +1,2 @@
+CLASS: ForcePikeAttachmentDefaults(776), BASE: ForcePikeAttachment
+PROPERTIES:

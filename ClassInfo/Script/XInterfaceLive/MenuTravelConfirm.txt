@@ -1,0 +1,9 @@
+CLASS: MenuTravelConfirm(20616), BASE: MenuQuestionYesNo
+ENUMS:
+	EConfirmType
+		CT_Invitiation           =   0
+		CT_Join                  =   1
+PROPERTIES:
+	20512 ConfirmType              Byte    <EConfirmType>
+	20516 GamerList                Object  <MenuGamerList>
+	20520 LastGamer                Struct  <Gamer>

@@ -1,0 +1,2 @@
+CLASS: EMPGrenadeAmmoDefaults(868), BASE: EMPGrenadeAmmo
+PROPERTIES:

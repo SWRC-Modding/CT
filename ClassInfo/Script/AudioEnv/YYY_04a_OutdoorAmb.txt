@@ -1,0 +1,2 @@
+CLASS: YYY_04a_OutdoorAmb(96), BASE: AudioEnvironment
+PROPERTIES:

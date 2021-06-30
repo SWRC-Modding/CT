@@ -1,0 +1,2 @@
+CLASS: ForcePikeAmmo(876), BASE: CTAmmoRecharging
+PROPERTIES:

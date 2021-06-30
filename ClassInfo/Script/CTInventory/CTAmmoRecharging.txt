@@ -1,0 +1,4 @@
+CLASS: CTAmmoRecharging(876), BASE: Ammunition
+PROPERTIES:
+	868  bNoRecharge              Bool    <0 : 0x00000001>
+	872  RechargeRate             Float   

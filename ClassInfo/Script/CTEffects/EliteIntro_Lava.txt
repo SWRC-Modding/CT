@@ -1,0 +1,2 @@
+CLASS: EliteIntro_Lava(828), BASE: Emitter
+PROPERTIES:

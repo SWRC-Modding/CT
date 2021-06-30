@@ -1,0 +1,9 @@
+CLASS: StateGeonosianWarriorAttack(148), BASE: StateAbstractAttack
+PROPERTIES:
+	124  LungeDist                Float   
+	128  JumpDist                 Float   
+	132  OffensiveJumpProbability Float   
+	136  DefensiveJumpProbability Float   
+	140  DefensiveJumpProbabilityForPlayer Float   
+	144  IsMeleeAttacking         Bool    <0 : 0x00000001>
+	144  MustDoDefensiveJump      Bool    <1 : 0x00000002>

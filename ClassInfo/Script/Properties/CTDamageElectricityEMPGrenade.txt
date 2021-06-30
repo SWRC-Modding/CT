@@ -1,0 +1,2 @@
+CLASS: CTDamageElectricityEMPGrenade(112), BASE: CTDamageElectricity
+PROPERTIES:

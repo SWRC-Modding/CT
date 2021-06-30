@@ -1,0 +1,4 @@
+CLASS: GOAL_WaitForScriptState(84), BASE: GoalObject
+PROPERTIES:
+	76   Other                    Object  <Actor>
+	80   State                    Name    

@@ -1,0 +1,2 @@
+CLASS: VisionModeEnhance(172), BASE: VisionMode
+PROPERTIES:

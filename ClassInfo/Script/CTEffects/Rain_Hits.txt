@@ -1,0 +1,2 @@
+CLASS: Rain_Hits(828), BASE: Emitter
+PROPERTIES:

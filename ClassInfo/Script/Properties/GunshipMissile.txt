@@ -1,0 +1,2 @@
+CLASS: GunshipMissile(852), BASE: RocketLauncherMissile
+PROPERTIES:

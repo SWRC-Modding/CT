@@ -1,0 +1,2 @@
+CLASS: ModelFactory(88), BASE: Factory
+PROPERTIES:

@@ -1,0 +1,14 @@
+CLASS: UWindowComboControl(280), BASE: UWindowDialogControl
+PROPERTIES:
+	240  EditBoxWidth             Float   
+	244  EditAreaDrawX            Float   
+	248  EditAreaDrawY            Float   
+	252  EditBox                  Object  <UWindowEditBox>
+	256  Button                   Object  <UWindowComboButton>
+	260  LeftButton               Object  <UWindowComboLeftButton>
+	264  RightButton              Object  <UWindowComboRightButton>
+	268  ListClass                Class   <UWindowComboList>
+	272  List                     Object  <UWindowComboList>
+	276  bListVisible             Bool    <0 : 0x00000001>
+	276  bCanEdit                 Bool    <1 : 0x00000002>
+	276  bButtons                 Bool    <2 : 0x00000004>

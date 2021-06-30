@@ -1,0 +1,5 @@
+CLASS: MotionBlur(64), BASE: CameraEffect
+PROPERTIES:
+	48   BlurAlpha                Byte    
+	52   RenderTargets            Int     [2]
+	60   LastFrameTime            Float   

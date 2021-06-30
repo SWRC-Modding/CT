@@ -1,0 +1,3 @@
+CLASS: ACTION_Killinstigator(68), BASE: ScriptedAction
+PROPERTIES:
+	64   DamageType               Class   <DamageType>

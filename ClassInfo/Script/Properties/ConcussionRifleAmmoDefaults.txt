@@ -1,0 +1,2 @@
+CLASS: ConcussionRifleAmmoDefaults(868), BASE: ConcussionRifleAmmo
+PROPERTIES:

@@ -1,0 +1,4 @@
+CLASS: ACTION_SetPhysics(72), BASE: ScriptedAction
+PROPERTIES:
+	64   NewPhysicsMode           Byte    <EPhysics>
+	68   ActorTag                 Name    

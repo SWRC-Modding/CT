@@ -1,0 +1,2 @@
+CLASS: GEO_proBabyTank(96), BASE: AudioEnvironment
+PROPERTIES:

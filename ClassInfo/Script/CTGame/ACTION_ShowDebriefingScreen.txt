@@ -1,0 +1,8 @@
+CLASS: ACTION_ShowDebriefingScreen(108), BASE: ScriptedAction
+PROPERTIES:
+	64   MenuClass                Str     
+	72   Title                    Str     
+	80   Text                     Str     
+	88   PicName                  Str     
+	96   NewLevel                 Str     
+	104  bIsForHintText           Bool    <0 : 0x00000001>

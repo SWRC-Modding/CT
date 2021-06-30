@@ -1,0 +1,2 @@
+CLASS: TrandoshanRifleEnemy(1180), BASE: TrandoshanRifle
+PROPERTIES:

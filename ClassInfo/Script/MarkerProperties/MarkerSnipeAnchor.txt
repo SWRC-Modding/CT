@@ -1,0 +1,2 @@
+CLASS: MarkerSnipeAnchor(648), BASE: StaticMeshMarker
+PROPERTIES:

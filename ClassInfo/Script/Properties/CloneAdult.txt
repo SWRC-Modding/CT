@@ -1,0 +1,2 @@
+CLASS: CloneAdult(1680), BASE: CloneCommando
+PROPERTIES:

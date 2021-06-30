@@ -1,0 +1,2 @@
+CLASS: SonicDetonatorAmmo(868), BASE: Ammunition
+PROPERTIES:

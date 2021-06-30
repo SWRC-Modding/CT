@@ -1,0 +1,2 @@
+CLASS: ProxyBitmapMaterial(132), BASE: BitmapMaterial
+PROPERTIES:

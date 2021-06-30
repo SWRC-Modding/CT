@@ -1,0 +1,2 @@
+CLASS: MapListCaptureTheFlag(656), BASE: MapList
+PROPERTIES:

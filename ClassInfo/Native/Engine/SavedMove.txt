@@ -1,0 +1,20 @@
+CLASS: SavedMove(756), BASE: Info
+PROPERTIES:
+	644  NextMove                 Object  <SavedMove>
+	648  TimeStamp                Float   
+	652  Delta                    Float   
+	656  bRun                     Bool    <0 : 0x00000001>
+	656  bDuck                    Bool    <1 : 0x00000002>
+	656  bPressedJump             Bool    <2 : 0x00000004>
+	656  bDoubleJump              Bool    <3 : 0x00000008>
+	660  DoubleClickMove          Byte    <EDoubleClickDir>
+	661  SavedPhysics             Byte    <EPhysics>
+	664  StartLocation            Struct  <Vector>
+	676  StartRelativeLocation    Struct  <Vector>
+	688  StartVelocity            Struct  <Vector>
+	700  StartFloor               Struct  <Vector>
+	712  SavedLocation            Struct  <Vector>
+	724  SavedVelocity            Struct  <Vector>
+	736  SavedRelativeLocation    Struct  <Vector>
+	748  StartBase                Object  <Actor>
+	752  EndBase                  Object  <Actor>

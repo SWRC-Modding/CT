@@ -1,0 +1,2 @@
+CLASS: CTDamageBallisticSMG(112), BASE: CTDamageBallistic
+PROPERTIES:

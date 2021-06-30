@@ -1,0 +1,10 @@
+CLASS: UWindowLayoutControl(140), BASE: UWindowLayoutBase
+PROPERTIES:
+	108  OwnerWindow              Object  <UWindowDialogClientWindow>
+	112  WinTop                   Float   
+	116  WinLeft                  Float   
+	120  WinWidth                 Float   
+	124  WinHeight                Float   
+	128  MinimumWidth             Float   
+	132  MinimumHeight            Float   
+	136  RowList                  Object  <UWindowLayoutRow>

@@ -1,0 +1,2 @@
+CLASS: CTProjExplosiveDefaults(804), BASE: CTProjExplosive
+PROPERTIES:

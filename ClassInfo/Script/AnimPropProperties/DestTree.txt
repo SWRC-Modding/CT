@@ -1,0 +1,2 @@
+CLASS: DestTree(868), BASE: AnimProp
+PROPERTIES:

@@ -1,0 +1,6 @@
+CLASS: UWindowMenuBar(276), BASE: UWindowListControl
+PROPERTIES:
+	260  Selected                 Object  <UWindowMenuBarItem>
+	264  Over                     Object  <UWindowMenuBarItem>
+	268  bAltDown                 Bool    <0 : 0x00000001>
+	272  Spacing                  Int     

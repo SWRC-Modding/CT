@@ -1,0 +1,3 @@
+CLASS: FirstBloodMessage(684), BASE: CriticalEventPlus
+PROPERTIES:
+	676  FirstBloodString         Str     

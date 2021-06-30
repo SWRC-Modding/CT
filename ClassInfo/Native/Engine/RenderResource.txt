@@ -1,0 +1,2 @@
+CLASS: RenderResource(44), BASE: Object
+PROPERTIES:

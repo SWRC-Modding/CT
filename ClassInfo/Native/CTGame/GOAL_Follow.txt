@@ -1,0 +1,19 @@
+CLASS: GOAL_Follow(120), BASE: GoalObject
+PROPERTIES:
+	76   SucceedOnApproach        Bool    <0 : 0x00000001>
+	76   MatchSpeed               Bool    <1 : 0x00000002>
+	76   Formation                Bool    <2 : 0x00000004>
+	76   bNoPath                  Bool    <3 : 0x00000008>
+	76   bAnchor                  Bool    <4 : 0x00000010>
+	76   bFollowAnchor            Bool    <5 : 0x00000020>
+	76   bCanMoveDirect           Bool    <6 : 0x00000040>
+	76   bCheatedCollision        Bool    <7 : 0x00000080>
+	76   bMovedDirectLastTime     Bool    <8 : 0x00000100>
+	80   LastCanMoveToCheck       Float   
+	84   FollowOffsetForward      Float   
+	88   FollowOffsetRight        Float   
+	92   FollowTarget             Object  <Actor>
+	96   MinimumDistance          Float   
+	100  MaximumDistance          Float   
+	104  PreviousLocation         Struct  <Vector>
+	116  StuckTime                Float   

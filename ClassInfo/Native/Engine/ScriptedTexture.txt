@@ -1,0 +1,7 @@
+CLASS: ScriptedTexture(148), BASE: BitmapMaterial
+PROPERTIES:
+	128  RenderTarget             Int     
+	132  RenderViewport           Object  <Viewport>
+	136  Client                   Object  <Actor>
+	140  Revision                 Int     
+	144  OldRevision              Int     

@@ -1,0 +1,35 @@
+CLASS: MenuSelectProfile(23196), BASE: MenuTemplateTitledBXA
+PROPERTIES:
+	20396 SplitBackground          Struct  <MenuSprite>
+	20468 ListBorder               Struct  <MenuSprite>
+	20540 ProfileList              Struct  <MenuStringList>
+	21080 ScrollBar                Struct  <MenuScrollBar>
+	21696 ScrollBarArrowUp         Struct  <MenuButtonSprite>
+	22100 ScrollBarArrowDown       Struct  <MenuButtonSprite>
+	22504 ScrollArea               Struct  <MenuScrollArea>
+	22556 PageUpArea               Struct  <MenuActiveWidget>
+	22668 PageDownArea             Struct  <MenuActiveWidget>
+	22780 SplitTitle               Struct  <MenuText>
+	22892 SplitALabel              Struct  <MenuText>
+	23004 SplitAButtonIcon         Struct  <MenuSprite>
+	23076 profileName              Str     
+	23084 NewProfileText           Str     
+	23092 StringDeleteConfirm      Str     
+	23100 StringDeleteConfirmEnd   Str     
+	23108 StringActiveProfileDelete Str     
+	23116 StringDeleteFloatingSaveGames Str     
+	23124 StringMaxProfiles        Str     
+	23132 bMustCreateProfile       Bool    <0 : 0x00000001>
+	23132 bMustSelectProfile       Bool    <1 : 0x00000002>
+	23136 CurrentProfile           Str     
+	23144 LastFocus                Int     
+	23148 CorruptProfileList       Array   <Int>
+	23156 IsSplit                  Bool    <0 : 0x00000001>
+	23156 IsOnlineOrGuest          Bool    <1 : 0x00000002>
+	23160 SelectedProfile          Int     
+	23164 bDeleteProfile           Bool    <0 : 0x00000001>
+	23164 bDeleteFloatingSaveGames Bool    <1 : 0x00000002>
+	23168 ProfilePrefix            Str     
+	23176 MaxProfiles              Int     
+	23180 DamagedProfileStart      Str     
+	23188 DamagedProfileEnd        Str     

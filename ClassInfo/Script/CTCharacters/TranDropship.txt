@@ -1,0 +1,2 @@
+CLASS: TranDropship(1664), BASE: Vehicles
+PROPERTIES:

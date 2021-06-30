@@ -1,0 +1,4 @@
+CLASS: Cubemap(268), BASE: Texture
+PROPERTIES:
+	240  Faces                    Object  <Texture>[6]
+	264  CubemapRenderInterface   Int     

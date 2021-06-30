@@ -1,0 +1,2 @@
+CLASS: MarkerAntiArmor(940), BASE: MarkerWeapon
+PROPERTIES:

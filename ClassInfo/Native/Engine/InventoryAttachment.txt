@@ -1,0 +1,2 @@
+CLASS: InventoryAttachment(644), BASE: Actor
+PROPERTIES:

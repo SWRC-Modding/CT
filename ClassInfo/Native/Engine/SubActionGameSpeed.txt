@@ -1,0 +1,3 @@
+CLASS: SubActionGameSpeed(84), BASE: MatSubAction
+PROPERTIES:
+	76   GameSpeed                Struct  <Range>

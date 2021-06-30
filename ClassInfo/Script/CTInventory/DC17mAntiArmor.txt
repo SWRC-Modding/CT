@@ -1,0 +1,4 @@
+CLASS: DC17mAntiArmor(1188), BASE: Weapon
+PROPERTIES:
+	1180 AmmoAttachment           Class   <DC17mAntiArmorAmmoAttachment>
+	1184 AntiArmorAmmo            Object  <DC17mAntiArmorAmmoAttachment>

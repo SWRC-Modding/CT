@@ -1,0 +1,2 @@
+CLASS: MercHeadMask(696), BASE: Accessory
+PROPERTIES:

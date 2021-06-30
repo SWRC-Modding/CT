@@ -1,0 +1,3 @@
+CLASS: MarkerReviveOther(908), BASE: CTMarker
+PROPERTIES:
+	904  Duration                 Float   

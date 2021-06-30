@@ -1,0 +1,2 @@
+CLASS: Holo_WHT(868), BASE: AnimProp
+PROPERTIES:

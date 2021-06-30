@@ -1,0 +1,2 @@
+CLASS: WookieeTurretAmmoDefaults(868), BASE: WookieeTurretAmmo
+PROPERTIES:

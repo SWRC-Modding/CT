@@ -1,0 +1,2 @@
+CLASS: EWebCannon(2052), BASE: Turret
+PROPERTIES:

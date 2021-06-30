@@ -1,0 +1,5 @@
+CLASS: LaserWeaponAmmo(876), BASE: Ammunition
+PROPERTIES:
+	868  bNeedTracer              Bool    <0 : 0x00000001>
+	868  bClientNeedTracer        Bool    <1 : 0x00000002>
+	872  RemoteTracerEmitter      Object  <Emitter>

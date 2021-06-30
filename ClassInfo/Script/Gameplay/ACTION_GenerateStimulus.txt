@@ -1,0 +1,4 @@
+CLASS: ACTION_GenerateStimulus(72), BASE: ScriptedAction
+PROPERTIES:
+	64   Type                     Byte    <EStimulusType>
+	68   StimulusSourceTag        Name    

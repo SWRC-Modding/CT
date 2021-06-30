@@ -1,0 +1,2 @@
+CLASS: Fog_Floor(828), BASE: Emitter
+PROPERTIES:

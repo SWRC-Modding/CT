@@ -1,0 +1,2 @@
+CLASS: HitDecMetal_Missile(1060), BASE: HitDecal
+PROPERTIES:

@@ -1,0 +1,3 @@
+CLASS: ACTION_ConsoleCommand(72), BASE: ScriptedAction
+PROPERTIES:
+	64   CommandStr               Str     

@@ -1,0 +1,5 @@
+CLASS: ClassFactoryNew(100), BASE: Factory
+PROPERTIES:
+	96   Superclass               Class   <Object>
+	92   ClassPackage             Object  <Package>
+	88   ClassName                Name    

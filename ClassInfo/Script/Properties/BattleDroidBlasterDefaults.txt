@@ -1,0 +1,2 @@
+CLASS: BattleDroidBlasterDefaults(1180), BASE: BattleDroidBlaster
+PROPERTIES:

@@ -1,0 +1,2 @@
+CLASS: TrandoshanRifleNeedle(644), BASE: Actor
+PROPERTIES:

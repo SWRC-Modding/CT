@@ -1,0 +1,2 @@
+CLASS: TRAN_Scav_Engine_Ignite(828), BASE: Emitter
+PROPERTIES:

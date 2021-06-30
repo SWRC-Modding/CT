@@ -1,0 +1,5 @@
+CLASS: StateBattleDroidAttack(136), BASE: StateAbstractAttack
+PROPERTIES:
+	124  NextManuverTime          Float   
+	128  MaxManuverTime           Float   
+	132  MoveIntervalDist         Float   

@@ -1,0 +1,17 @@
+CLASS: UWindowDialogControl(240), BASE: UWindowWindow
+PROPERTIES:
+	180  NotifyWindow             Object  <UWindowDialogClientWindow>
+	184  Text                     Str     
+	192  Font                     Int     
+	196  TextColor                Struct  <Color>
+	200  Align                    Byte    <TextAlign>
+	204  TextX                    Float   
+	208  TextY                    Float   
+	212  bHasKeyboardFocus        Bool    <0 : 0x00000001>
+	212  bNoKeyboard              Bool    <1 : 0x00000002>
+	212  bAcceptExternalDragDrop  Bool    <2 : 0x00000004>
+	216  HelpText                 Str     
+	224  MinWidth                 Float   
+	228  MinHeight                Float   
+	232  TabNext                  Object  <UWindowDialogControl>
+	236  TabPrev                  Object  <UWindowDialogControl>

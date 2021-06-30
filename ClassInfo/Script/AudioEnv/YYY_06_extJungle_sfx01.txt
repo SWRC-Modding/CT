@@ -1,0 +1,2 @@
+CLASS: YYY_06_extJungle_sfx01(96), BASE: AudioEnvironment
+PROPERTIES:

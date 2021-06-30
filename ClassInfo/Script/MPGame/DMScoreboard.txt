@@ -1,0 +1,32 @@
+CLASS: DMScoreboard(1032), BASE: ScoreBoard
+PROPERTIES:
+	656  RankText                 Str     
+	664  PlayerText               Str     
+	672  PointsText               Str     
+	680  TimeText                 Str     
+	688  PingText                 Str     
+	696  SpeedText                Str     
+	704  DeathsText               Str     
+	712  AdminText                Str     
+	720  NetText                  Str     
+	728  FooterText               Str     
+	736  FragLimit                Str     
+	744  FPH                      Str     
+	752  GameType                 Str     
+	760  MapName                  Str     
+	768  Restart                  Str     
+	776  Continue                 Str     
+	784  Ended                    Str     
+	792  TimeLimit                Str     
+	800  Spacer                   Str     
+	808  OutText                  Str     
+	816  ReadyText                Str     
+	824  NotReadyText             Str     
+	832  YouveLostTheMatch        Str     
+	840  YouveWonTheMatch         Str     
+	848  BoxMaterial              Object  <Material>
+	852  PingFriendly             Str     [5]
+	892  PRIArray                 Object  <PlayerReplicationInfo>[32]
+	1020 OffsetX                  Int     
+	1024 OffsetY                  Int     
+	1028 FPHTime                  Float   

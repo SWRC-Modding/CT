@@ -1,0 +1,8 @@
+CLASS: FluidSurfaceOscillator(668), BASE: Actor
+PROPERTIES:
+	644  FluidInfo                Object  <FluidSurfaceInfo>
+	648  Frequency                Float   
+	652  Phase                    Byte    
+	656  Strength                 Float   
+	660  Radius                   Float   
+	664  OscTime                  Float   

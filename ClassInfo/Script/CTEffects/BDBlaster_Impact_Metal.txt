@@ -1,0 +1,2 @@
+CLASS: BDBlaster_Impact_Metal(828), BASE: Emitter
+PROPERTIES:

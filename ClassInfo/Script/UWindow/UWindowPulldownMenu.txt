@@ -1,0 +1,9 @@
+CLASS: UWindowPulldownMenu(288), BASE: UWindowListControl
+PROPERTIES:
+	260  Selected                 Object  <UWindowPulldownMenuItem>
+	264  Owner                    Object  <UWindowList>
+	268  ItemHeight               Int     
+	272  VBorder                  Int     
+	276  HBorder                  Int     
+	280  TextBorder               Int     
+	284  MyMenuBar                Object  <UWindowMenuBar>

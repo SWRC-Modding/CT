@@ -1,0 +1,8 @@
+CLASS: VisionModeDistort(196), BASE: VisionMode
+PROPERTIES:
+	172  BumpSize                 Float   
+	176  BumpScaleX               Float   
+	180  BumpScaleY               Float   
+	184  PanSpeedX                Float   
+	188  PanSpeedY                Float   
+	192  AltVisionShader          Object  <HardwareShader>

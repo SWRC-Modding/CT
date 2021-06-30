@@ -1,0 +1,2 @@
+CLASS: DC17mBlasterEffects(68), BASE: MaterialTypeInfo
+PROPERTIES:

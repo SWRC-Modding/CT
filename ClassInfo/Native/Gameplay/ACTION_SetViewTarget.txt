@@ -1,0 +1,3 @@
+CLASS: ACTION_SetViewTarget(68), BASE: ScriptedAction
+PROPERTIES:
+	64   ViewTargetTag            Name    

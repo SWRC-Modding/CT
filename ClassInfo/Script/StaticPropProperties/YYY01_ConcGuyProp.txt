@@ -1,0 +1,2 @@
+CLASS: YYY01_ConcGuyProp(836), BASE: StaticProp
+PROPERTIES:

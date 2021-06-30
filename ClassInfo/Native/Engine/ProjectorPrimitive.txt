@@ -1,0 +1,2 @@
+CLASS: ProjectorPrimitive(84), BASE: Primitive
+PROPERTIES:

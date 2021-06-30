@@ -1,0 +1,2 @@
+CLASS: AnimNotify_TurretFire(44), BASE: AnimNotify
+PROPERTIES:

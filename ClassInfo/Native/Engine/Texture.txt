@@ -1,0 +1,51 @@
+CLASS: Texture(240), BASE: BitmapMaterial
+ENUMS:
+	EEnvMapTransformType
+		EMTT_ViewSpace           =   0
+		EMTT_WorldSpace          =   1
+		EMTT_LightSpace          =   2
+	ELODSet
+		LODSET_None              =   0
+		LODSET_World             =   1
+		LODSET_PlayerSkin        =   2
+		LODSET_WeaponSkin        =   3
+		LODSET_Terrain           =   4
+		LODSET_Interface         =   5
+		LODSET_RenderMap         =   6
+		LODSET_Lightmap          =   7
+PROPERTIES:
+	128  Palette                  Object  <Palette>
+	132  Detail                   Object  <Material>
+	136  DetailScale              Float   
+	140  MipZero                  Struct  <Color>
+	144  MaxColor                 Struct  <Color>
+	148  InternalTime             Int     [2]
+	156  DetailTexture            Object  <Texture>
+	160  EnvironmentMap           Object  <Texture>
+	164  EnvMapTransformType      Byte    <EEnvMapTransformType>
+	168  Specular                 Float   
+	172  bMasked                  Bool    <0 : 0x00000001>
+	172  bAlphaTexture            Bool    <1 : 0x00000002>
+	172  bTwoSided                Bool    <2 : 0x00000004>
+	172  bHighColorQuality        Bool    <3 : 0x00000008>
+	172  bHighTextureQuality      Bool    <4 : 0x00000010>
+	172  bRealtime                Bool    <5 : 0x00000020>
+	172  bParametric              Bool    <6 : 0x00000040>
+	172  bRealtimeChanged         Bool    <7 : 0x00000080>
+	172  bHasComp                 Bool    <8 : 0x00000100>
+	172  bNoRawData               Bool    <9 : 0x00000200>
+	176  LODSet                   Byte    <ELODSet>
+	180  NormalLOD                Int     
+	184  MinLOD                   Int     
+	188  MaxLOD                   Int     
+	192  AnimNext                 Object  <Texture>
+	196  AnimCurrent              Object  <Texture>
+	200  PrimeCount               Byte    
+	201  PrimeCurrent             Byte    
+	204  MinFrameRate             Float   
+	208  MaxFrameRate             Float   
+	212  Accumulator              Float   
+	216  Mips                     Array   <Int>
+	224  CompFormat               Byte    <ETextureFormat>
+	228  RenderInterface          Int     
+	232  __LastUpdateTime         Int     [2]

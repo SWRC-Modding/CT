@@ -1,0 +1,2 @@
+CLASS: ImportAseCommandlet(332), BASE: Commandlet
+PROPERTIES:

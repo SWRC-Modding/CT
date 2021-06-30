@@ -1,0 +1,2 @@
+CLASS: DC17mSniperAttachment(776), BASE: WeaponAttachment
+PROPERTIES:

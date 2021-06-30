@@ -1,0 +1,3 @@
+CLASS: CTFGame(1472), BASE: TDGame
+PROPERTIES:
+	1464 GameFlags                Array   <Object <CTFFlag>>

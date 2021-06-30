@@ -1,0 +1,2 @@
+CLASS: DeathEffect_DestroyBody(40), BASE: DeathEffect
+PROPERTIES:

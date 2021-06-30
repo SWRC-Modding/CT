@@ -1,0 +1,2 @@
+CLASS: GunshipBallTurretDefaults(2068), BASE: GunshipBallTurret
+PROPERTIES:

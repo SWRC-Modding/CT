@@ -1,0 +1,8 @@
+CLASS: HsBumpDiffBlend(128), BASE: HardwareShaderWrapper
+PROPERTIES:
+	104  DiffuseTexture           Object  <Texture>
+	108  BlendTexture             Object  <Texture>
+	112  NormalMap                Object  <Texture>
+	116  DiffUVScale              Float   
+	120  BlendUVScale             Float   
+	124  BumpUVScale              Float   

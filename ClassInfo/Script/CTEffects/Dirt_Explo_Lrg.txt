@@ -1,0 +1,2 @@
+CLASS: Dirt_Explo_Lrg(828), BASE: Emitter
+PROPERTIES:

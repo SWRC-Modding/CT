@@ -1,0 +1,2 @@
+CLASS: BDBlasterEffects(68), BASE: MaterialTypeInfo
+PROPERTIES:

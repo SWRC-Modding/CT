@@ -1,0 +1,2 @@
+CLASS: FlagAmmoDefaults(868), BASE: FlagAmmo
+PROPERTIES:

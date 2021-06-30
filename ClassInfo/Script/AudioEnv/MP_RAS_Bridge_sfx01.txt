@@ -1,0 +1,2 @@
+CLASS: MP_RAS_Bridge_sfx01(96), BASE: AudioEnvironment
+PROPERTIES:

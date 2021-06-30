@@ -1,0 +1,3 @@
+CLASS: TexCoordSource(116), BASE: TexModifier
+PROPERTIES:
+	112  SourceChannel            Int     

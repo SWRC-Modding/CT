@@ -1,0 +1,12 @@
+CLASS: CTTitleCardMenu(19172), BASE: MenuTemplate
+PROPERTIES:
+	17696 Background               Struct  <MenuSprite>
+	17768 TitleCardTextTemplate    Struct  <MenuText>
+	17880 NumTextEntries           Int     
+	17884 TextEntries              Struct  <MenuText>[10]
+	19004 FadeInStartTime          Float   [10]
+	19044 FullOnStartTime          Float   [10]
+	19084 FadeOutStartTime         Float   [10]
+	19124 FadeOutEndTime           Float   [10]
+	19164 ElapsedTextTime          Float   
+	19168 bClosed                  Bool    <0 : 0x00000001>

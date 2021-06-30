@@ -1,0 +1,2 @@
+CLASS: State(148), BASE: Struct
+PROPERTIES:

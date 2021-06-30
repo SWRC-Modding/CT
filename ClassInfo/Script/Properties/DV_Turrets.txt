@@ -1,0 +1,2 @@
+CLASS: DV_Turrets(56), BASE: DamageVariance
+PROPERTIES:

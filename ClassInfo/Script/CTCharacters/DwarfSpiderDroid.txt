@@ -1,0 +1,8 @@
+CLASS: DwarfSpiderDroid(1740), BASE: Droid
+PROPERTIES:
+	1712 RemainingShields         Int     
+	1716 DeathExplosionForce      Float   
+	1720 BumpDamage               Float   
+	1724 MinBumpDamageSpeedSqr    Float   
+	1728 Lights                   Object  <DynamicLight>[2]
+	1736 LightTexture             Object  <Texture>

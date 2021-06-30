@@ -1,0 +1,2 @@
+CLASS: CTDamageExplosionEMPPulse(112), BASE: CTDamageExplosion
+PROPERTIES:

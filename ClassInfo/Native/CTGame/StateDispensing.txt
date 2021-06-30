@@ -1,0 +1,2 @@
+CLASS: StateDispensing(52), BASE: StateObject
+PROPERTIES:

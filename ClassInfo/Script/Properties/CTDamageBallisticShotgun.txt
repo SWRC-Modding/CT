@@ -1,0 +1,2 @@
+CLASS: CTDamageBallisticShotgun(112), BASE: CTDamageBallistic
+PROPERTIES:

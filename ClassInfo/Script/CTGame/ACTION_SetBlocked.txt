@@ -1,0 +1,4 @@
+CLASS: ACTION_SetBlocked(72), BASE: ScriptedAction
+PROPERTIES:
+	64   NavPtTag                 Name    
+	68   bBlocked                 Bool    <0 : 0x00000001>

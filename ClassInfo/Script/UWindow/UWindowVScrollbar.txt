@@ -1,0 +1,15 @@
+CLASS: UWindowVScrollbar(232), BASE: UWindowWindow
+PROPERTIES:
+	180  UpButton                 Object  <UWindowSBUpButton>
+	184  DownButton               Object  <UWindowSBDownButton>
+	188  bDisabled                Bool    <0 : 0x00000001>
+	192  MinPos                   Float   
+	196  MaxPos                   Float   
+	200  MaxVisible               Float   
+	204  pos                      Float   
+	208  ThumbStart               Float   
+	212  ThumbHeight              Float   
+	216  NextClickTime            Float   
+	220  DragY                    Float   
+	224  bDragging                Bool    <0 : 0x00000001>
+	228  ScrollAmount             Float   

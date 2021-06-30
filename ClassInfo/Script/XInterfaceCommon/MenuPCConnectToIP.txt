@@ -1,0 +1,5 @@
+CLASS: MenuPCConnectToIP(20436), BASE: MenuTemplateTitledBA
+PROPERTIES:
+	19728 LabelBackground          Struct  <MenuSprite>
+	19800 Label                    Struct  <MenuText>
+	19912 NameBox                  Struct  <MenuEditBox>

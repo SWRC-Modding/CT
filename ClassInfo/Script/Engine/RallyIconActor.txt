@@ -1,0 +1,2 @@
+CLASS: RallyIconActor(644), BASE: IntangibleActor
+PROPERTIES:

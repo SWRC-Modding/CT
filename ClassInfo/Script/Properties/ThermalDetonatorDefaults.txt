@@ -1,0 +1,2 @@
+CLASS: ThermalDetonatorDefaults(1180), BASE: ThermalDetonator
+PROPERTIES:

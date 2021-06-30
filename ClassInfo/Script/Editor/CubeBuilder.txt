@@ -1,0 +1,9 @@
+CLASS: CubeBuilder(104), BASE: BrushBuilder
+PROPERTIES:
+	80   Height                   Float   
+	84   Width                    Float   
+	88   Breadth                  Float   
+	92   WallThickness            Float   
+	96   GroupName                Name    
+	100  Hollow                   Bool    <0 : 0x00000001>
+	100  Tessellated              Bool    <1 : 0x00000002>

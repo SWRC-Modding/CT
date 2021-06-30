@@ -1,0 +1,2 @@
+CLASS: MPPawnDefaults(1900), BASE: MPPawn
+PROPERTIES:

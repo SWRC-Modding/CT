@@ -1,0 +1,2 @@
+CLASS: PulseBeam(828), BASE: Emitter
+PROPERTIES:

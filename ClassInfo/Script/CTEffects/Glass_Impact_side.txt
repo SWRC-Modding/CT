@@ -1,0 +1,2 @@
+CLASS: Glass_Impact_side(828), BASE: Emitter
+PROPERTIES:

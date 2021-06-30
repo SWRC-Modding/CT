@@ -1,0 +1,2 @@
+CLASS: Wookiee_Turret_Proj(828), BASE: Emitter
+PROPERTIES:

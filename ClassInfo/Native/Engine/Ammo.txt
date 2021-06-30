@@ -1,0 +1,3 @@
+CLASS: Ammo(704), BASE: Pickup
+PROPERTIES:
+	700  AmmoAmount               Int     

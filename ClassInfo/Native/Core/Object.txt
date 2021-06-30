@@ -1,0 +1,104 @@
+CLASS: Object(40), BASE: None
+ENUMS:
+	ETeamRelationship
+		TEAM_Enemy               =   0
+		TEAM_Neutral             =   1
+		TEAM_Ally                =   2
+	ECamOrientation
+		CAMORIENT_None           =   0
+		CAMORIENT_LookAtActor    =   1
+		CAMORIENT_FacePath       =   2
+		CAMORIENT_Interpolate    =   3
+		CAMORIENT_Dolly          =   4
+	EAxis
+		AXIS_X                   =   0
+		AXIS_Y                   =   1
+		AXIS_Z                   =   2
+	EDrawPivot
+		DP_UpperLeft             =   0
+		DP_UpperMiddle           =   1
+		DP_UpperRight            =   2
+		DP_MiddleRight           =   3
+		DP_LowerRight            =   4
+		DP_LowerMiddle           =   5
+		DP_LowerLeft             =   6
+		DP_MiddleLeft            =   7
+		DP_MiddleMiddle          =   8
+STRUCTS:
+	Guid(16)
+		0    A                        Int     
+		4    B                        Int     
+		8    C                        Int     
+		12   D                        Int     
+	Vector(12)
+		0    X                        Float   
+		4    Y                        Float   
+		8    Z                        Float   
+	Plane(16) : Vector
+		12   W                        Float   
+	Rotator(12)
+		0    Pitch                    Int     
+		4    Yaw                      Int     
+		8    Roll                     Int     
+	Coords(48)
+		0    Origin                   Struct  <Vector>
+		12   XAxis                    Struct  <Vector>
+		24   YAxis                    Struct  <Vector>
+		36   ZAxis                    Struct  <Vector>
+	Quat(16)
+		0    X                        Float   
+		4    Y                        Float   
+		8    Z                        Float   
+		12   W                        Float   
+	Range(8)
+		0    Min                      Float   
+		4    Max                      Float   
+	RangeVector(24)
+		0    X                        Struct  <Range>
+		8    Y                        Struct  <Range>
+		16   Z                        Struct  <Range>
+	Scale(20)
+		0    Scale                    Struct  <Vector>
+		12   SheerRate                Float   
+		16   SheerAxis                Byte    <ESheerAxis>
+	Color(4)
+		0    B                        Byte    
+		1    G                        Byte    
+		2    R                        Byte    
+		3    A                        Byte    
+	Box(28)
+		0    Min                      Struct  <Vector>
+		12   Max                      Struct  <Vector>
+		24   IsValid                  Byte    
+	IntBox(16)
+		0    X1                       Int     
+		4    Y1                       Int     
+		8    X2                       Int     
+		12   Y2                       Int     
+	FloatBox(16)
+		0    X1                       Float   
+		4    Y1                       Float   
+		8    X2                       Float   
+		12   Y2                       Float   
+	BoundingVolume(44) : Box
+		28   Sphere                   Struct  <Plane>
+	Matrix(64)
+		0    XPlane                   Struct  <Plane>
+		16   YPlane                   Struct  <Plane>
+		32   ZPlane                   Struct  <Plane>
+		48   WPlane                   Struct  <Plane>
+	InterpCurvePoint(8)
+		0    InVal                    Float   
+		4    OutVal                   Float   
+	InterpCurve(8)
+		0    Points                   Array   <Struct <InterpCurvePoint>>
+	CompressedPosition(36)
+		0    Location                 Struct  <Vector>
+		12   Rotation                 Struct  <Rotator>
+		24   Velocity                 Struct  <Vector>
+PROPERTIES:
+	0    ObjectInternal           Int     [6]
+	24   Outer                    Object  <Object>
+	28   ObjectFlags              Int     
+	32   Name                     Name    
+	36   Class                    Class   <Object>

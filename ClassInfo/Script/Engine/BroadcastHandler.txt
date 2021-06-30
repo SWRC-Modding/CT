@@ -1,0 +1,5 @@
+CLASS: BroadcastHandler(652), BASE: Info
+PROPERTIES:
+	644  SentText                 Int     
+	648  bMuteSpectators          Bool    <0 : 0x00000001>
+	648  bPartitionSpectators     Bool    <1 : 0x00000002>

@@ -1,0 +1,2 @@
+CLASS: fan(868), BASE: AnimProp
+PROPERTIES:

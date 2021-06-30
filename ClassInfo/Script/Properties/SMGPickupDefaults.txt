@@ -1,0 +1,2 @@
+CLASS: SMGPickupDefaults(704), BASE: SMGPickup
+PROPERTIES:

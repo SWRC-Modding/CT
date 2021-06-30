@@ -1,0 +1,2 @@
+CLASS: ShotgunDefaults(1220), BASE: Shotgun
+PROPERTIES:

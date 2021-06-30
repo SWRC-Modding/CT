@@ -1,0 +1,2 @@
+CLASS: Fire_Medium_NoFire(828), BASE: Emitter
+PROPERTIES:

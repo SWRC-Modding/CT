@@ -1,0 +1,2 @@
+CLASS: Droideka_NoShields(1724), BASE: Droideka
+PROPERTIES:

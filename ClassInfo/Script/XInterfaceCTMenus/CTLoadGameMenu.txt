@@ -1,0 +1,32 @@
+CLASS: CTLoadGameMenu(23536), BASE: MenuTemplateTitledBXA
+PROPERTIES:
+	20396 KaminoBorder             Struct  <MenuSprite>
+	20468 Kamino                   Struct  <MenuSprite>
+	20540 GeonosisBorder           Struct  <MenuSprite>
+	20612 Geonosis                 Struct  <MenuSprite>
+	20684 AssaultShipBorder        Struct  <MenuSprite>
+	20756 AssaultShip              Struct  <MenuSprite>
+	20828 KashyyykBorder           Struct  <MenuSprite>
+	20900 Kashyyyk                 Struct  <MenuSprite>
+	20972 LabelBackground          Struct  <MenuSprite>
+	21044 Label                    Struct  <MenuText>
+	21156 SelectedCampaign         Int     
+	21160 Border                   Struct  <MenuSprite>
+	21232 SaveList                 Struct  <MenuStringList>
+	21772 ScrollBar                Struct  <MenuScrollBar>
+	22388 ScrollBarArrowUp         Struct  <MenuButtonSprite>
+	22792 ScrollBarArrowDown       Struct  <MenuButtonSprite>
+	23196 ScrollArea               Struct  <MenuScrollArea>
+	23248 PageUpArea               Struct  <MenuActiveWidget>
+	23360 PageDownArea             Struct  <MenuActiveWidget>
+	23472 SelectedSave             Int     
+	23476 StringDeleteConfirm      Str     
+	23484 StringDeleteConfirmEnd   Str     
+	23492 LoadConfirm              Str     
+	23500 bDeleteSelected          Bool    <0 : 0x00000001>
+	23500 bLoadSelected            Bool    <1 : 0x00000002>
+	23500 bLowStorage              Bool    <2 : 0x00000004>
+	23504 SelectedSaveName         Str     
+	23512 DamagedSave              Str     
+	23520 QuickSaveName            Str     
+	23528 AutoSaveName             Str     

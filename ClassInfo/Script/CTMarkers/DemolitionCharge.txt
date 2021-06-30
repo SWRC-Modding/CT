@@ -1,0 +1,2 @@
+CLASS: DemolitionCharge(948), BASE: ExplosiveCharge
+PROPERTIES:

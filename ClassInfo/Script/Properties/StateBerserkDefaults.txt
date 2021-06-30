@@ -1,0 +1,2 @@
+CLASS: StateBerserkDefaults(136), BASE: StateBerserk
+PROPERTIES:

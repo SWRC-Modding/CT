@@ -1,0 +1,4 @@
+CLASS: SayMessagePlus(684), BASE: StringMessagePlus
+PROPERTIES:
+	676  RedTeamColor             Struct  <Color>
+	680  BlueTeamColor            Struct  <Color>

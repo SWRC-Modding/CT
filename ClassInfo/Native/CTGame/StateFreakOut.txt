@@ -1,0 +1,6 @@
+CLASS: StateFreakOut(68), BASE: StateObject
+PROPERTIES:
+	52   Radius                   Float   
+	56   Time                     Float   
+	60   EndTime                  Float   
+	64   DeathDamageType          Class   <DamageType>

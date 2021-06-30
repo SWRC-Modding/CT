@@ -1,0 +1,2 @@
+CLASS: DeathEffect_PlayDying(40), BASE: DeathEffect
+PROPERTIES:

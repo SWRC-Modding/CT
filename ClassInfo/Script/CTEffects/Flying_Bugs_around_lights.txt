@@ -1,0 +1,2 @@
+CLASS: Flying_Bugs_around_lights(828), BASE: Emitter
+PROPERTIES:

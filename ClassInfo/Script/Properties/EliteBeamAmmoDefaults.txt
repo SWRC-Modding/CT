@@ -1,0 +1,2 @@
+CLASS: EliteBeamAmmoDefaults(876), BASE: EliteBeamAmmo
+PROPERTIES:

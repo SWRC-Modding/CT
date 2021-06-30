@@ -1,0 +1,4 @@
+CLASS: ACTION_FadeView(80), BASE: LatentScriptedAction
+PROPERTIES:
+	64   FadeTime                 Float   
+	68   TargetFlash              Struct  <Vector>

@@ -1,0 +1,2 @@
+CLASS: DC17mBlasterAmmo(868), BASE: Ammunition
+PROPERTIES:

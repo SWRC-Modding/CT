@@ -1,0 +1,2 @@
+CLASS: FactoryDefaults(728), BASE: Factory
+PROPERTIES:

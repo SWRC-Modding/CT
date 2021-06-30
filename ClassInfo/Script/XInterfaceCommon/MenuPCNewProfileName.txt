@@ -1,0 +1,10 @@
+CLASS: MenuPCNewProfileName(20412), BASE: MenuTemplateTitledBA
+PROPERTIES:
+	19728 Label                    Struct  <MenuText>
+	19840 NameBox                  Struct  <MenuEditBox>
+	20364 InUseText                Str     
+	20372 MinLenText               Str     
+	20380 InvalidName              Str     
+	20388 InvalidNameStart         Str     
+	20396 CharacterName            Str     
+	20404 ProfilePrefix            Str     

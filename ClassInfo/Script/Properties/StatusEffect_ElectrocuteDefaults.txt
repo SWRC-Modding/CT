@@ -1,0 +1,2 @@
+CLASS: StatusEffect_ElectrocuteDefaults(668), BASE: StatusEffect_Electrocute
+PROPERTIES:

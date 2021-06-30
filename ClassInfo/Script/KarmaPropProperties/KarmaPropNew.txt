@@ -1,0 +1,2 @@
+CLASS: KarmaPropNew(888), BASE: KarmaProp
+PROPERTIES:

@@ -1,0 +1,12 @@
+CLASS: GameSpyMenuTemplate(20180), BASE: MenuTemplate
+PROPERTIES:
+	17696 WhiteBackground          Struct  <MenuSprite>
+	17768 GrayBackground           Struct  <MenuSprite>
+	17840 BlackBackground          Struct  <MenuSprite>
+	17912 GameSpySortButton        Struct  <MenuButtonText>
+	18396 GameSpyButtonList        Struct  <MenuStringList>
+	18936 GameSpySmallButtonList   Struct  <MenuStringList>
+	19476 GameSpyVerticalScrollBar Struct  <MenuScrollBar>
+	20092 GamespyLogo              Struct  <MenuSprite>
+	20164 DedicatedServerLabel     Str     
+	20172 FriendlyFirePctLabel     Str     

@@ -1,0 +1,28 @@
+CLASS: KarmaParams(160), BASE: KarmaParamsCollision
+ENUMS:
+	ESafeTimeMode
+		KST_None                 =   0
+		KST_Auto                 =   1
+		KST_Always               =   2
+PROPERTIES:
+	76   KAng3                    Int     
+	80   KTriList                 Int     
+	84   KLastVel                 Float   
+	88   KMass                    Float   
+	92   KLinearDamping           Float   
+	96   KAngularDamping          Float   
+	100  KBuoyancy                Float   
+	104  KStartEnabled            Bool    <0 : 0x00000001>
+	108  KStartLinVel             Struct  <Vector>
+	120  KStartAngVel             Struct  <Vector>
+	132  bKNonSphericalInertia    Bool    <0 : 0x00000001>
+	136  KActorGravScale          Float   
+	140  KVelDropBelowThreshold   Float   
+	144  bHighDetailOnly          Bool    <0 : 0x00000001>
+	144  bClientOnly              Bool    <1 : 0x00000002>
+	144  bKStayUpright            Bool    <2 : 0x00000004>
+	144  bKAllowRotate            Bool    <3 : 0x00000008>
+	144  bDestroyOnSimError       Bool    <4 : 0x00000010>
+	148  StayUprightStiffness     Float   
+	152  StayUprightDamping       Float   
+	156  SafeTimeMode             Byte    <ESafeTimeMode>

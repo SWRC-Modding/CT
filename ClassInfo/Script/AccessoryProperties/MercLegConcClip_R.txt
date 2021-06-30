@@ -1,0 +1,2 @@
+CLASS: MercLegConcClip_R(696), BASE: Accessory
+PROPERTIES:

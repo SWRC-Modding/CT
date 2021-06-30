@@ -1,0 +1,2 @@
+CLASS: ATTETurretBase(2052), BASE: Turret
+PROPERTIES:

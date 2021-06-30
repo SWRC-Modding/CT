@@ -1,0 +1,4 @@
+CLASS: ACTION_MoveToPlayer(72), BASE: LatentScriptedAction
+PROPERTIES:
+	64   WalkToPoint              Bool    <0 : 0x00000001>
+	68   Tolerance                Float   

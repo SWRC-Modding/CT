@@ -1,0 +1,2 @@
+CLASS: OptionsTexAlignPlanar(48), BASE: OptionsTexAlign
+PROPERTIES:

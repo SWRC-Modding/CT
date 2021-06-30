@@ -1,0 +1,5 @@
+CLASS: MenuLoadingProfile(18460), BASE: MenuWarningTransition
+PROPERTIES:
+	18440 LoadingText              Str     
+	18448 CreatingText             Str     
+	18456 IsSplit                  Bool    <0 : 0x00000001>

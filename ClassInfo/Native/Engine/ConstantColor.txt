@@ -1,0 +1,3 @@
+CLASS: ConstantColor(104), BASE: ConstantMaterial
+PROPERTIES:
+	100  Color                    Struct  <Color>

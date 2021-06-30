@@ -1,0 +1,38 @@
+CLASS: MasterServerClient(780), BASE: ServerQueryClient
+ENUMS:
+	EClientToMaster
+		CTM_Query                =   0
+		CTM_GetMOTD              =   1
+		CTM_QueryUpgrade         =   2
+	EQueryType
+		QT_Equals                =   0
+		QT_NotEquals             =   1
+		QT_LessThan              =   2
+		QT_LessThanEquals        =   3
+		QT_GreaterThan           =   4
+		QT_GreaterThanEquals     =   5
+	EResponseInfo
+		RI_AuthenticationFailed  =   0
+		RI_ConnectionFailed      =   1
+		RI_ConnectionTimeout     =   2
+		RI_Success               =   3
+		RI_MustUpgrade           =   4
+	EMOTDResponse
+		MR_MOTD                  =   0
+		MR_MandatoryUpgrade      =   1
+		MR_OptionalUpgrade       =   2
+		MR_NewServer             =   3
+		MR_IniSetting            =   4
+		MR_Command               =   5
+STRUCTS:
+	QueryData(20)
+		0    Key                      Str     
+		8    Value                    Str     
+		16   QueryType                Byte    <EQueryType>
+PROPERTIES:
+	740  MSLinkPtr                Int     
+	744  Query                    Array   <Struct <QueryData>>
+	752  ResultCount              Int     
+	756  __OnQueryFinished__Delegate Delegate<OnQueryFinished>
+	764  __OnReceivedServer__Delegate Delegate<OnReceivedServer>
+	772  __OnReceivedMOTDData__Delegate Delegate<OnReceivedMOTDData>

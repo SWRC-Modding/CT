@@ -1,0 +1,3 @@
+CLASS: ACTION_PlayAmbientSound(68), BASE: ScriptedAction
+PROPERTIES:
+	64   AmbientSound             Object  <Sound>

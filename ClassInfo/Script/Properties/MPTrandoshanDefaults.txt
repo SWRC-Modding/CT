@@ -1,0 +1,2 @@
+CLASS: MPTrandoshanDefaults(1900), BASE: MPTrandoshan
+PROPERTIES:

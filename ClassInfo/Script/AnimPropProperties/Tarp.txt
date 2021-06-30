@@ -1,0 +1,2 @@
+CLASS: Tarp(868), BASE: AnimProp
+PROPERTIES:

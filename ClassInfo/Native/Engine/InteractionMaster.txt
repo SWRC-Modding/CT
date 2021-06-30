@@ -1,0 +1,7 @@
+CLASS: InteractionMaster(64), BASE: Interactions
+PROPERTIES:
+	40   Client                   Object  <Client>
+	44   BaseMenu                 Object  <Interaction>
+	48   Console                  Object  <Interaction>
+	52   GlobalInteractions       Array   <Object <Interaction>>
+	60   bRequireRawJoystick      Bool    <0 : 0x00000001>

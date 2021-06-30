@@ -1,0 +1,8 @@
+CLASS: Door(740), BASE: NavigationPoint
+PROPERTIES:
+	724  MyDoor                   Object  <Mover>
+	728  DoorTrigger              Name    
+	732  RecommendedTrigger       Object  <Actor>
+	736  bInitiallyClosed         Bool    <0 : 0x00000001>
+	736  bBlockedWhenClosed       Bool    <1 : 0x00000002>
+	736  bDoorOpen                Bool    <2 : 0x00000004>

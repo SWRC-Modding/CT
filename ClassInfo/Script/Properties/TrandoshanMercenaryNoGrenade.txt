@@ -1,0 +1,2 @@
+CLASS: TrandoshanMercenaryNoGrenade(1736), BASE: TrandoshanMercenary
+PROPERTIES:

@@ -1,0 +1,2 @@
+CLASS: InterpolationPoint(644), BASE: Keypoint
+PROPERTIES:

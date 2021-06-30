@@ -1,0 +1,2 @@
+CLASS: ATTEWalkerAmmoDefaults(868), BASE: ATTEWalkerAmmo
+PROPERTIES:

@@ -1,0 +1,4 @@
+CLASS: UDebugMapList(144), BASE: UWindowListBoxItem
+PROPERTIES:
+	128  MapName                  Str     
+	136  DisplayName              Str     

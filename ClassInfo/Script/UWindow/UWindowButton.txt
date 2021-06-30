@@ -1,0 +1,19 @@
+CLASS: UWindowButton(356), BASE: UWindowDialogControl
+PROPERTIES:
+	240  bDisabled                Bool    <0 : 0x00000001>
+	240  bStretched               Bool    <1 : 0x00000002>
+	244  UpTexture                Object  <Texture>
+	248  DownTexture              Object  <Texture>
+	252  DisabledTexture          Object  <Texture>
+	256  OverTexture              Object  <Texture>
+	260  UpRegion                 Struct  <Region>
+	276  DownRegion               Struct  <Region>
+	292  DisabledRegion           Struct  <Region>
+	308  OverRegion               Struct  <Region>
+	324  bUseRegion               Bool    <0 : 0x00000001>
+	328  RegionScale              Float   
+	332  ToolTipString            Str     
+	340  ImageX                   Float   
+	344  ImageY                   Float   
+	348  OverSound                Object  <Sound>
+	352  DownSound                Object  <Sound>

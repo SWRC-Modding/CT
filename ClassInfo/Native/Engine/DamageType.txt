@@ -1,0 +1,27 @@
+CLASS: DamageType(112), BASE: Object
+PROPERTIES:
+	40   DeathString              Str     
+	48   MaleSuicide              Str     
+	56   bBypassesShields         Bool    <0 : 0x00000001>
+	56   bKillsNotIncapacitates   Bool    <1 : 0x00000002>
+	56   bKillsNotIncapacitatesPlayer Bool    <2 : 0x00000004>
+	56   KApplyImpulseToRoot      Bool    <3 : 0x00000008>
+	56   DisallowDeathAnim        Bool    <4 : 0x00000010>
+	56   CannotBeAbsorbed         Bool    <5 : 0x00000020>
+	56   NoDeathEffect            Bool    <6 : 0x00000040>
+	56   bCountFriendlyFire       Bool    <7 : 0x00000080>
+	60   RagdollOnDeathProbability Float   
+	64   FlashScale               Float   
+	68   KDamageImpulse           Float   
+	72   KDeathUpKick             Float   
+	76   HurtAudioEvent           Byte    <EPawnAudioEvent>
+	77   DeathAudioEvent          Byte    <EPawnAudioEvent>
+	78   AllyDownedByEvent        Byte    <EPawnAudioEvent>
+	79   LeaderKilledOtherEvent   Byte    <EPawnAudioEvent>
+	80   FriendlyFireEvent        Byte    <EPawnAudioEvent>
+	84   VisorHitDecals           Array   <Object <Material>>
+	92   VisorHitEffect           Class   <Emitter>
+	96   VisorHitScaleMin         Float   
+	100  VisorHitScaleMax         Float   
+	104  VisorHitSound            Object  <Sound>
+	108  VisorHitDelayNeed        Float   

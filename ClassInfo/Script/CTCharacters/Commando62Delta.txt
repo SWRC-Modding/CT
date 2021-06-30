@@ -1,0 +1,6 @@
+CLASS: Commando62Delta(1704), BASE: CloneCommando
+PROPERTIES:
+	1680 ReviveOutsideTexture     Object  <Texture>
+	1684 ReviveInsideTexture      Object  <Texture>
+	1688 HUDDescription           Str     
+	1696 HUDNickname              Str     

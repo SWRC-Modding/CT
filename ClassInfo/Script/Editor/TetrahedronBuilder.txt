@@ -1,0 +1,5 @@
+CLASS: TetrahedronBuilder(92), BASE: BrushBuilder
+PROPERTIES:
+	80   Radius                   Float   
+	84   SphereExtrapolation      Int     
+	88   GroupName                Name    

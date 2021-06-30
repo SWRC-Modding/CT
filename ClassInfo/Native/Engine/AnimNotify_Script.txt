@@ -1,0 +1,3 @@
+CLASS: AnimNotify_Script(48), BASE: AnimNotify
+PROPERTIES:
+	44   NotifyName               Name    

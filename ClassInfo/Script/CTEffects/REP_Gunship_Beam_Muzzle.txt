@@ -1,0 +1,2 @@
+CLASS: REP_Gunship_Beam_Muzzle(828), BASE: Emitter
+PROPERTIES:

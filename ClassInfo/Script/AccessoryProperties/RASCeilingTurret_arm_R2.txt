@@ -1,0 +1,2 @@
+CLASS: RASCeilingTurret_arm_R2(696), BASE: Accessory
+PROPERTIES:

@@ -1,0 +1,2 @@
+CLASS: HitDecMetal_SBDroid(1060), BASE: HitDecal
+PROPERTIES:

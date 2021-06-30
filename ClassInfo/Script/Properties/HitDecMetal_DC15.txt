@@ -1,0 +1,2 @@
+CLASS: HitDecMetal_DC15(1060), BASE: HitDecal
+PROPERTIES:

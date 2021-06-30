@@ -1,0 +1,2 @@
+CLASS: FactoryShield(836), BASE: StaticProp
+PROPERTIES:

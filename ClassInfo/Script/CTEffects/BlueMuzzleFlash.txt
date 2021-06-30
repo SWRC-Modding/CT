@@ -1,0 +1,2 @@
+CLASS: BlueMuzzleFlash(652), BASE: MuzzleFlashAttachment
+PROPERTIES:

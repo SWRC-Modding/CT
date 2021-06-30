@@ -1,0 +1,2 @@
+CLASS: WookieeBotDefaults(1256), BASE: WookieeBot
+PROPERTIES:

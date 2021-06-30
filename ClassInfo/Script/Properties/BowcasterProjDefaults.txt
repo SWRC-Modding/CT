@@ -1,0 +1,2 @@
+CLASS: BowcasterProjDefaults(804), BASE: BowcasterProj
+PROPERTIES:

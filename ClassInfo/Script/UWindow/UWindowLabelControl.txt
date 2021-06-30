@@ -1,0 +1,2 @@
+CLASS: UWindowLabelControl(240), BASE: UWindowDialogControl
+PROPERTIES:

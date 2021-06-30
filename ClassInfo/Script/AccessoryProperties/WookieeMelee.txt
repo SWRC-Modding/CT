@@ -1,0 +1,2 @@
+CLASS: WookieeMelee(696), BASE: Accessory
+PROPERTIES:

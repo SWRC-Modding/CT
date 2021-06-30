@@ -1,0 +1,34 @@
+CLASS: Prop(836), BASE: Actor
+STRUCTS:
+	TransitionInfo(72)
+		0    Event                    Name    
+		4    TransitionEffect         Class   <Emitter>
+		8    TransitionEffectOffset   Struct  <Vector>
+		20   TransitionSound          Object  <Sound>
+		24   Material                 Object  <Material>
+		28   Mesh                     Object  <StaticMesh>
+		32   ImpulseDir               Struct  <Vector>
+		44   ImpulseMagnitude         Float   
+		48   ImpulseDamageType        Class   <DamageType>
+		52   bDisableCollision        Bool    <0 : 0x00000001>
+		52   bAttachEffect            Bool    <1 : 0x00000002>
+		52   bPreserveEffect          Bool    <2 : 0x00000004>
+		56   TransitionStimulus       Byte    <EStimulusType>
+		60   StateLifeSpan            Float   
+		64   StateLifeSpanMax         Float   
+		68   SpawnedEmitter           Object  <Emitter>
+PROPERTIES:
+	644  Health                   Int     
+	648  DamagedRatio             Float   
+	652  InitialHealth            Int     
+	656  ExplosionRadius          Float   
+	660  ExplosionDamage          Float   
+	664  ExplosionDamageType      Class   <DamageType>
+	668  ExplosionStatusEffect    Class   <StatusEffect>
+	672  StatusEffectMaxDuration  Float   
+	676  StatusEffectDamagePerSec Float   
+	680  ExplosionAIStimulus      Byte    <EStimulusType>
+	684  DeathSpawnActorClass     Class   <Actor>
+	688  DamagedState             Struct  <TransitionInfo>
+	760  DestroyedState           Struct  <TransitionInfo>
+	832  bDisplayStateMessages    Bool    <0 : 0x00000001>

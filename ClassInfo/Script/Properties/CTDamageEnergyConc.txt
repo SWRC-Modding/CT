@@ -1,0 +1,2 @@
+CLASS: CTDamageEnergyConc(112), BASE: CTDamageEnergy
+PROPERTIES:

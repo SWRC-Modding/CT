@@ -1,0 +1,2 @@
+CLASS: DC17mBlasterAttachment(776), BASE: WeaponAttachment
+PROPERTIES:

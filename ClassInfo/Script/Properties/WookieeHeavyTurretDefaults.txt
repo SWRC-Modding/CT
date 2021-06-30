@@ -1,0 +1,2 @@
+CLASS: WookieeHeavyTurretDefaults(2052), BASE: WookieeHeavyTurret
+PROPERTIES:

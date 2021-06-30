@@ -1,0 +1,2 @@
+CLASS: HackDoorTrn(888), BASE: HackDoor
+PROPERTIES:

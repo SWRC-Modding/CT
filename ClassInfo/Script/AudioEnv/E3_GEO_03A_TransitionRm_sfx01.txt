@@ -1,0 +1,2 @@
+CLASS: E3_GEO_03A_TransitionRm_sfx01(96), BASE: AudioEnvironment
+PROPERTIES:

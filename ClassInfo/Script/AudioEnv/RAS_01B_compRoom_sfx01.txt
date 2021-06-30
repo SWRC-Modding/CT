@@ -1,0 +1,2 @@
+CLASS: RAS_01B_compRoom_sfx01(96), BASE: AudioEnvironment
+PROPERTIES:

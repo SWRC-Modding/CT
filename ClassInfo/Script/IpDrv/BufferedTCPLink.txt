@@ -1,0 +1,13 @@
+CLASS: BufferedTCPLink(768), BASE: TcpLink
+PROPERTIES:
+	696  InputBuffer              Str     
+	704  OutputBuffer             Str     
+	712  CRLF                     Str     
+	720  CR                       Str     
+	728  LF                       Str     
+	736  bWaiting                 Bool    <0 : 0x00000001>
+	740  WaitTimeoutTime          Float   
+	744  WaitingFor               Str     
+	752  WaitForCountChars        Int     
+	756  WaitResult               Str     
+	764  WaitMatchData            Int     

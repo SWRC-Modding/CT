@@ -1,0 +1,3 @@
+CLASS: UWindowPageControlPage(156), BASE: UWindowTabControlItem
+PROPERTIES:
+	152  Page                     Object  <UWindowPageWindow>

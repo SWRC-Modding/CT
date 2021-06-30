@@ -1,0 +1,2 @@
+CLASS: Slaver_Armor1(696), BASE: Accessory
+PROPERTIES:

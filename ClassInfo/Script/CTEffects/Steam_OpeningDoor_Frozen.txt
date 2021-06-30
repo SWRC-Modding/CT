@@ -1,0 +1,2 @@
+CLASS: Steam_OpeningDoor_Frozen(828), BASE: Emitter
+PROPERTIES:

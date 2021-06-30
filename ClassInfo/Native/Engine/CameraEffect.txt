@@ -1,0 +1,4 @@
+CLASS: CameraEffect(48), BASE: Object
+PROPERTIES:
+	40   Alpha                    Float   
+	44   FinalEffect              Bool    <0 : 0x00000001>

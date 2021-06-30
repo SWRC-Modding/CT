@@ -1,0 +1,6 @@
+CLASS: ACTION_SetBattleEngineParams(80), BASE: ScriptedAction
+PROPERTIES:
+	64   criteria                 Byte    <EBattleEngineBattleCriteria>
+	68   baddieCount              Int     
+	72   radiusInner              Float   
+	76   radiusOuter              Float   

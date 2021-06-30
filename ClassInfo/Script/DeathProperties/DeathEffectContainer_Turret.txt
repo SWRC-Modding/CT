@@ -1,0 +1,2 @@
+CLASS: DeathEffectContainer_Turret(52), BASE: DeathEffectContainer
+PROPERTIES:

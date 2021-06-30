@@ -1,0 +1,2 @@
+CLASS: AutoTurretBot(1256), BASE: CTBot
+PROPERTIES:

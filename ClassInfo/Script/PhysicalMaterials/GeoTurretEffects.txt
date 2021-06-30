@@ -1,0 +1,2 @@
+CLASS: GeoTurretEffects(68), BASE: MaterialTypeInfo
+PROPERTIES:

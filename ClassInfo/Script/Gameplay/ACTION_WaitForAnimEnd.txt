@@ -1,0 +1,3 @@
+CLASS: ACTION_WaitForAnimEnd(68), BASE: LatentScriptedAction
+PROPERTIES:
+	64   Channel                  Int     

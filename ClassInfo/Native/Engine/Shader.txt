@@ -1,0 +1,54 @@
+CLASS: Shader(192), BASE: RenderedMaterial
+ENUMS:
+	EBumpMapType
+		BMT_Static_Diffuse       =   0
+		BMT_Static_Specular      =   1
+		BMT_Static_Combined      =   2
+		BMT_Diffuse              =   3
+		BMT_Specular             =   4
+		BMT_Combined             =   5
+	ESpecularSharpness
+		BSS_Matte                =   0
+		BSS_Dull                 =   1
+		BSS_Polished             =   2
+		BSS_Shiny                =   3
+	EOutputBlending
+		OB_Normal                =   0
+		OB_Masked                =   1
+		OB_Modulate              =   2
+		OB_Translucent           =   3
+		OB_Invisible             =   4
+		OB_Brighten              =   5
+		OB_Darken                =   6
+PROPERTIES:
+	100  Diffuse                  Object  <Material>
+	104  Opacity                  Object  <Material>
+	108  Specular                 Object  <Material>
+	112  SpecularityMask          Object  <Material>
+	116  SelfIllumination         Object  <Material>
+	120  SelfIlluminationMask     Object  <Material>
+	124  Detail                   Object  <Material>
+	128  DetailScale              Float   
+	132  Bumpmap                  Object  <Material>
+	136  DiffuseEnvMap            Object  <Material>
+	140  BumpMapType              Byte    <EBumpMapType>
+	144  BumpSize                 Float   
+	148  BumpUVScale              Float   
+	152  DiffuseStrength          Byte    
+	153  DiffuseMaskStrength      Byte    
+	154  SpecularSharpness        Byte    <ESpecularSharpness>
+	155  SpecularStrength         Byte    
+	156  SpecularMaskStrength     Byte    
+	160  SpecularInTheDark        Bool    <0 : 0x00000001>
+	160  SpecularBumpX2           Bool    <1 : 0x00000002>
+	160  UseTinting               Bool    <2 : 0x00000004>
+	164  DiffuseColorAdd          Struct  <Color>
+	168  DiffuseColorMultiplyX2   Struct  <Color>
+	172  SpecularColorAdd         Struct  <Color>
+	176  SpecularColorMultiplyX2  Struct  <Color>
+	180  bInvertCubemap           Bool    <0 : 0x00000001>
+	184  OutputBlending           Byte    <EOutputBlending>
+	188  TwoSided                 Bool    <0 : 0x00000001>
+	188  Wireframe                Bool    <1 : 0x00000002>
+	188  ModulateStaticLighting2X Bool    <2 : 0x00000004>
+	188  PerformLightingOnSpecularPass Bool    <3 : 0x00000008>

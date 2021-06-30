@@ -1,0 +1,2 @@
+CLASS: EWebTurretProjDefaults(716), BASE: EWebTurretProj
+PROPERTIES:

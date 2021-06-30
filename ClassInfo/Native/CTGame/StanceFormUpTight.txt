@@ -1,0 +1,2 @@
+CLASS: StanceFormUpTight(128), BASE: StanceFormUp
+PROPERTIES:

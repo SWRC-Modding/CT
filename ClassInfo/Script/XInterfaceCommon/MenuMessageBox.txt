@@ -1,0 +1,3 @@
+CLASS: MenuMessageBox(19172), BASE: MenuTemplateTitledB
+PROPERTIES:
+	19060 Message                  Struct  <MenuText>

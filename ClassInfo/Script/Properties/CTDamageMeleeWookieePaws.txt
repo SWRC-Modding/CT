@@ -1,0 +1,2 @@
+CLASS: CTDamageMeleeWookieePaws(112), BASE: CTDamageMelee
+PROPERTIES:

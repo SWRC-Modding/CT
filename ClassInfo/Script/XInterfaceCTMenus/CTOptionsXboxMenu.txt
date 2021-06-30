@@ -1,0 +1,5 @@
+CLASS: CTOptionsXboxMenu(21780), BASE: MenuTemplateTitledBA
+PROPERTIES:
+	19728 Label                    Struct  <MenuText>
+	19840 Options                  Struct  <MenuButtonText>[4]
+	21776 bInMultiplayer           Bool    <0 : 0x00000001>

@@ -1,0 +1,2 @@
+CLASS: ConcussionRifleDefaults(1180), BASE: ConcussionRifle
+PROPERTIES:

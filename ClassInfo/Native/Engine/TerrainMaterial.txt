@@ -1,0 +1,10 @@
+CLASS: TerrainMaterial(116), BASE: RenderedMaterial
+STRUCTS:
+	TerrainMaterialLayer(72)
+		0    Texture                  Object  <Material>
+		4    AlphaWeight              Object  <BitmapMaterial>
+		8    TextureMatrix            Struct  <Matrix>
+PROPERTIES:
+	100  Layers                   Array   <Struct <TerrainMaterialLayer>>
+	108  RenderMethod             Byte    
+	112  FirstPass                Bool    <0 : 0x00000001>

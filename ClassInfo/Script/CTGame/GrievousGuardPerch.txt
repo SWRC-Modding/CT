@@ -1,0 +1,2 @@
+CLASS: GrievousGuardPerch(736), BASE: Perch
+PROPERTIES:

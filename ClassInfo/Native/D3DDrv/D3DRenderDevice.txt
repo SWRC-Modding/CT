@@ -1,0 +1,25 @@
+CLASS: D3DRenderDevice(65972), BASE: RenderDevice
+PROPERTIES:
+	16720 StateCachingDisabled     Bool    <0 : 0x00000001>
+	16708 TesselationFactor        Float   
+	16704 DefaultTexMipBias        Float   
+	16700 DetailTexMipBias         Float   
+	16696 LevelOfAnisotropy        Int     
+	16716 VideoResetAttempts       Int     
+	16712 DesiredRefreshRate       Int     
+	16692 MaxPixelShaderVersion    Int     
+	16684 AdapterNumber            Int     
+	16676 OverrideDesktopRefreshRate Bool    <0 : 0x00000001>
+	16672 AvoidHitches             Bool    <0 : 0x00000001>
+	16668 DecompressTextures       Bool    <0 : 0x00000001>
+	16660 CheckForOverflow         Bool    <0 : 0x00000001>
+	16664 UseNPatches              Bool    <0 : 0x00000001>
+	16640 UseXBoxFSAA              Bool    <0 : 0x00000001>
+	16636 ReduceMouseLag           Bool    <0 : 0x00000001>
+	16612 UseCubemaps              Bool    <0 : 0x00000001>
+	16632 UseTripleBuffering       Bool    <0 : 0x00000001>
+	16600 UseVSync                 Bool    <0 : 0x00000001>
+	16592 UseTrilinear             Bool    <0 : 0x00000001>
+	16588 UsePrecaching            Bool    <0 : 0x00000001>
+	16608 UseHardwareVS            Bool    <0 : 0x00000001>
+	16604 UseHardwareTL            Bool    <0 : 0x00000001>

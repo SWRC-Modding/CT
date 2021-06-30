@@ -1,0 +1,2 @@
+CLASS: SBDroid_Arm_Shield(828), BASE: Emitter
+PROPERTIES:

@@ -1,0 +1,8 @@
+CLASS: ACTION_PlayAnim(84), BASE: LatentScriptedAction
+PROPERTIES:
+	64   BaseAnim                 Name    
+	68   AnimRate                 Float   
+	72   AnimIterations           Byte    
+	76   bLoopAnim                Bool    <0 : 0x00000001>
+	76   bWaitUntilAnimEnd        Bool    <1 : 0x00000002>
+	80   StartFrame               Float   

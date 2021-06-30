@@ -1,0 +1,2 @@
+CLASS: FlyPoint(724), BASE: NavigationPoint
+PROPERTIES:

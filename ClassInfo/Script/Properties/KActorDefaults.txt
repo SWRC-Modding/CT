@@ -1,0 +1,2 @@
+CLASS: KActorDefaults(696), BASE: KActor
+PROPERTIES:

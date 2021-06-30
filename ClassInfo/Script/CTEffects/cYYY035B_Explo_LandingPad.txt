@@ -1,0 +1,2 @@
+CLASS: cYYY035B_Explo_LandingPad(828), BASE: Emitter
+PROPERTIES:

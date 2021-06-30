@@ -1,0 +1,4 @@
+CLASS: ACTION_PlaySoundCue(72), BASE: ScriptedAction
+PROPERTIES:
+	64   Cue                      Byte    <EPawnAudioEvent>
+	68   MinTriggerInterval       Float   

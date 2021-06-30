@@ -1,0 +1,2 @@
+CLASS: DC17mBlasterAttachmentCommando(776), BASE: DC17mBlasterAttachment
+PROPERTIES:

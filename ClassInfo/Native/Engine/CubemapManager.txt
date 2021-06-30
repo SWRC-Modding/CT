@@ -1,0 +1,2 @@
+CLASS: CubemapManager(96), BASE: Object
+PROPERTIES:

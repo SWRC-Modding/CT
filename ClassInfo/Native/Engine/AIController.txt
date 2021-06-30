@@ -1,0 +1,5 @@
+CLASS: AIController(868), BASE: Controller
+PROPERTIES:
+	848  MyScript                 Object  <AIScript>
+	852  Skill                    Float   
+	856  FinalDestination         Struct  <Vector>

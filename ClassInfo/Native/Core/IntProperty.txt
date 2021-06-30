@@ -1,0 +1,2 @@
+CLASS: IntProperty(64), BASE: Property
+PROPERTIES:

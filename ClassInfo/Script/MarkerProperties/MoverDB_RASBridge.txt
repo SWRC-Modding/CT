@@ -1,0 +1,2 @@
+CLASS: MoverDB_RASBridge(1596), BASE: MoverDB
+PROPERTIES:

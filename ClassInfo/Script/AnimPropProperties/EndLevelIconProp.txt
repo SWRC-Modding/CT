@@ -1,0 +1,2 @@
+CLASS: EndLevelIconProp(868), BASE: AnimProp
+PROPERTIES:

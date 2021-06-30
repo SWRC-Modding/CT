@@ -1,0 +1,20 @@
+CLASS: CTSoundGraphicsOptionsXboxMenu(26496), BASE: MenuTemplateTitledBXA
+PROPERTIES:
+	20396 SoundLabel               Struct  <MenuText>
+	20508 GraphicsLabel            Struct  <MenuText>
+	20620 SliderMin                Struct  <MenuSprite>
+	20692 SliderMax                Struct  <MenuSprite>
+	20764 OptionLabels             Struct  <MenuText>[4]
+	21212 Options                  Struct  <MenuButtonEnum>[4]
+	23212 OptionLeftArrows         Struct  <MenuButtonSprite>[4]
+	24828 OptionRightArrows        Struct  <MenuButtonSprite>[4]
+	26444 OptionDefaults           Int     [4]
+	26460 PreviousSettings         Int     [4]
+	26476 ApplySettingsConfirm     Str     
+	26484 SoundVoice               Object  <Sound>
+	26488 SoundFX                  Object  <Sound>
+	26492 bQueuedSoundVoice        Bool    <0 : 0x00000001>
+	26492 bStartedSoundVoice       Bool    <1 : 0x00000002>
+	26492 bQueuedSoundFX           Bool    <2 : 0x00000004>
+	26492 bStartedSoundFX          Bool    <3 : 0x00000008>
+	26492 bInMultiplayer           Bool    <4 : 0x00000010>

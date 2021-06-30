@@ -1,0 +1,2 @@
+CLASS: GEO_05B_rejoinSquad_mus01(96), BASE: AudioEnvironment
+PROPERTIES:

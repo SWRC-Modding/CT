@@ -1,0 +1,5 @@
+CLASS: StateShutdown(60), BASE: StateObject
+PROPERTIES:
+	52   OldIdleState             Byte    <EIdleState>
+	53   OldPhysics               Byte    <EPhysics>
+	56   StartedShutdown          Bool    <0 : 0x00000001>

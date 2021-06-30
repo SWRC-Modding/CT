@@ -1,0 +1,19 @@
+CLASS: UGraphLightMapPage(336), BASE: UWindowPageWindow
+PROPERTIES:
+	196  Labels                   Object  <UWindowLabelControl>[2]
+	204  StatNameText             Str     [2]
+	220  CatNameText              Str     
+	228  DesiredMaxEdit           Object  <UWindowEditControl>[2]
+	236  DesiredMaxText           Str     
+	244  UseBarStatCheck          Object  <UWindowCheckbox>[2]
+	252  UseBarStatText           Str     
+	260  UseLineStatCheck         Object  <UWindowCheckbox>[2]
+	268  UseLineStatText          Str     
+	276  SmallIsBadCheck          Object  <UWindowCheckbox>[2]
+	284  SmallIsBadText           Str     
+	292  DesiredMaxEditSettings   Str     [2]
+	308  SmallIsBadSettings       Int     [2]
+	316  UseBarStatSettings       Int     [2]
+	324  UseLineStatSettings      Int     [2]
+	332  bIsLoading               Bool    <0 : 0x00000001>
+	332  bShouldDelayChange       Bool    <1 : 0x00000002>

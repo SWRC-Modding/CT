@@ -1,0 +1,18 @@
+CLASS: KHinge(840), BASE: KConstraint
+ENUMS:
+	EHingeType
+		HT_Normal                =   0
+		HT_Springy               =   1
+		HT_Motor                 =   2
+		HT_Controlled            =   3
+PROPERTIES:
+	800  KHingeType               Byte    <EHingeType>
+	804  KStiffness               Float   
+	808  KDamping                 Float   
+	812  KDesiredAngVel           Float   
+	816  KMaxTorque               Float   
+	820  KDesiredAngle            Float   
+	824  KProportionalGap         Float   
+	828  KAltDesiredAngle         Float   
+	832  KUseAltDesired           Bool    <0 : 0x00000001>
+	836  KCurrentAngle            Float   

@@ -1,0 +1,2 @@
+CLASS: RocketLauncherPickupMP(704), BASE: RocketLauncherPickup
+PROPERTIES:

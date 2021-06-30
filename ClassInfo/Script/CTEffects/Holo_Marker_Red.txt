@@ -1,0 +1,2 @@
+CLASS: Holo_Marker_Red(828), BASE: Emitter
+PROPERTIES:

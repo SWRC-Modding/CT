@@ -1,0 +1,2 @@
+CLASS: GEO04_AmmoClip(836), BASE: StaticProp
+PROPERTIES:

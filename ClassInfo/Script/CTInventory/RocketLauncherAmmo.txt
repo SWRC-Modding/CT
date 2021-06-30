@@ -1,0 +1,4 @@
+CLASS: RocketLauncherAmmo(876), BASE: HomingMissileAmmo
+PROPERTIES:
+	868  MissileTarget            Object  <Actor>
+	872  bProjWithEffect          Bool    <0 : 0x00000001>

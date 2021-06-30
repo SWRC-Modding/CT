@@ -1,0 +1,7 @@
+CLASS: CT_DVDDemo_InitialXboxMenu(18580), BASE: MenuTemplate
+PROPERTIES:
+	17696 Background               Struct  <MenuSprite>
+	17768 Movie                    Struct  <MenuButtonSprite>
+	18172 Demo                     Struct  <MenuButtonSprite>
+	18576 bMovieSelected           Bool    <0 : 0x00000001>
+	18576 bDemoSelected            Bool    <1 : 0x00000002>

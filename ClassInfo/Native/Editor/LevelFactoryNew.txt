@@ -1,0 +1,5 @@
+CLASS: LevelFactoryNew(108), BASE: Factory
+PROPERTIES:
+	104  CloseExistingWindows     Bool    <0 : 0x00000001>
+	96   Author                   Str     
+	88   LevelTitle               Str     

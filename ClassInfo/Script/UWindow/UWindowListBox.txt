@@ -1,0 +1,12 @@
+CLASS: UWindowListBox(300), BASE: UWindowListControl
+PROPERTIES:
+	260  ItemHeight               Float   
+	264  VertSB                   Object  <UWindowVScrollbar>
+	268  SelectedItem             Object  <UWindowListBoxItem>
+	272  bCanDrag                 Bool    <0 : 0x00000001>
+	272  bCanDragExternal         Bool    <1 : 0x00000002>
+	276  DefaultHelpText          Str     
+	284  bDragging                Bool    <0 : 0x00000001>
+	288  DragY                    Float   
+	292  DoubleClickList          Object  <UWindowListBox>
+	296  bHotTrack                Bool    <0 : 0x00000001>

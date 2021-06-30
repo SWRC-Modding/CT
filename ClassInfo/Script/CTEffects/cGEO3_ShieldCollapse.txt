@@ -1,0 +1,2 @@
+CLASS: cGEO3_ShieldCollapse(828), BASE: Emitter
+PROPERTIES:

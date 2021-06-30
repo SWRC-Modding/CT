@@ -1,0 +1,2 @@
+CLASS: FlashBangAmmoDefaults(868), BASE: FlashBangAmmo
+PROPERTIES:

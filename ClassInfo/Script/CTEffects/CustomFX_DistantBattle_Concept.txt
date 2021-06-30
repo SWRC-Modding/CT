@@ -1,0 +1,2 @@
+CLASS: CustomFX_DistantBattle_Concept(828), BASE: Emitter
+PROPERTIES:

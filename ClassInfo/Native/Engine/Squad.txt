@@ -1,0 +1,95 @@
+CLASS: Squad(784), BASE: ReplicationInfo
+ENUMS:
+	EStanceType
+		STT_Invalid              =   0
+		STT_FormUp               =   1
+		STT_Hold                 =   2
+		STT_EngagePosition       =   3
+		STT_EngageTarget         =   4
+		STT_SearchAndDestroy     =   5
+		STT_EngageCautious       =   6
+		STT_LastOrder            =   7
+		STT_Default              =   8
+	ESquadCombatRole
+		SCR_None                 =   0
+		SCR_StackTBD             =   1
+		SCR_StackCrouch          =   2
+		SCR_StackStand           =   3
+		SCR_Other                =   4
+	ESquadMovementRole
+		SMR_None                 =   0
+		SMR_TBD                  =   1
+		SMR_FreeAgent            =   2
+		SMR_Point                =   3
+		SMR_FollowPoint1         =   4
+		SMR_FollowPoint2         =   5
+		SMR_FollowPoint3         =   6
+	ESquadObjective
+		SO_Goto                  =   0
+		SO_WaitForEvent          =   1
+		SO_GotoUnlessEvent       =   2
+		SO_InitiateMarker        =   3
+STRUCTS:
+	MemberInfo(16)
+		0    Pawn                     Object  <Pawn>
+		4    MovementRole             Byte    <ESquadMovementRole>
+		5    CombatRole               Byte    <ESquadCombatRole>
+		8    HUDIconX                 Int     
+		12   HUDIconY                 Int     
+	SquadVoiceLine(24)
+		0    Member                   Object  <Pawn>
+		4    Cue                      Byte    <EPawnAudioEvent>
+		8    TriggerInterval          Float   
+		12   Sound                    Object  <Sound>
+		16   Subject                  Object  <Object>
+		20   TimeMustPlayBy           Float   
+	SquadObjective(32)
+		0    ObjectiveType            Byte    <ESquadObjective>
+		4    Tag                      Name    
+		8    Actor                    Object  <Actor>
+		12   CompleteSound            Object  <Sound>
+		16   CompleteText             Str     
+		24   Radius                   Float   
+		28   bOptional                Bool    <0 : 0x00000001>
+		28   bMarkerAllStances        Bool    <1 : 0x00000002>
+		28   bLeapFrog                Bool    <2 : 0x00000004>
+PROPERTIES:
+	644  SquadLeader              Object  <Pawn>
+	648  StanceType               Byte    <EStanceType>
+	652  SquadMembers             Array   <Struct <MemberInfo>>
+	660  Objectives               Array   <Struct <SquadObjective>>
+	668  VoiceLines               Array   <Struct <SquadVoiceLine>>
+	676  Stance                   Class   <SquadStance>
+	680  HUDStance                Class   <SquadStance>
+	684  LastCommandedStance      Class   <SquadStance>
+	688  LastCommandedStanceArgument Object  <Actor>
+	692  PotentialBanter          Array   <Object <SoundBanter>>
+	700  CommandedEnemy           Object  <Actor>
+	704  DefaultSearchAndDestroyRadius Float   
+	708  TetherHighPriority       Float   
+	712  TetherLowPriority        Float   
+	716  TetherHPActivateRadiusSqr Float   
+	720  TetherLPActivateRadiusSqr Float   
+	724  TetherHPDeactivateRadiusSqr Float   
+	728  TetherLPDeactivateRadiusSqr Float   
+	732  CurrentSoundID           Int     
+	736  CurrentSound             Object  <Sound>
+	740  LastRecallTime           Float   
+	744  LastCommandTime          Float   
+	748  LastDirectCommandTime    Float   
+	752  RecentDirectCommandCount Int     
+	756  LastSDChangeTime         Float   
+	760  NextUpdateTime           Float   
+	764  NextVoiceUpdateTime      Float   
+	768  LastExamineTime          Float   
+	772  WhenBattleBegun          Float   
+	776  WhenBattleEnded          Float   
+	780  BeCautious               Bool    <0 : 0x00000001>
+	780  PlayerSquad              Bool    <1 : 0x00000002>
+	780  bUsePlayerPosForObjectives Bool    <2 : 0x00000004>
+	780  bObjectivePrepped        Bool    <3 : 0x00000008>
+	780  bInBattle                Bool    <4 : 0x00000010>
+	780  bSquadSeesEnemy          Bool    <5 : 0x00000020>
+	780  bEnemySeesSquad          Bool    <6 : 0x00000040>
+	780  bEnemiesPresent          Bool    <7 : 0x00000080>
+	780  bNonPlayersIncapacitated Bool    <8 : 0x00000100>

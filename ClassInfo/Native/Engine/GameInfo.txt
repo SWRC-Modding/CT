@@ -1,0 +1,94 @@
+CLASS: GameInfo(1076), BASE: Info
+STRUCTS:
+	VoiceChatterInfo(68)
+		0    Controller               Object  <Controller>
+		4    xbAddr                   Struct  <XboxAddr>
+		60   Handle                   Int     
+		64   VoiceChannels            Int     
+PROPERTIES:
+	644  bRestartLevel            Bool    <0 : 0x00000001>
+	644  bPauseable               Bool    <1 : 0x00000002>
+	644  bWeaponStay              Bool    <2 : 0x00000004>
+	644  bCanChangeSkin           Bool    <3 : 0x00000008>
+	644  bTeamGame                Bool    <4 : 0x00000010>
+	644  bGameEnded               Bool    <5 : 0x00000020>
+	644  bOverTime                Bool    <6 : 0x00000040>
+	644  bAlternateMode           Bool    <7 : 0x00000080>
+	644  bCanViewOthers           Bool    <8 : 0x00000100>
+	644  bDelayedStart            Bool    <9 : 0x00000200>
+	644  bWaitingToStartMatch     Bool    <10: 0x00000400>
+	644  bChangeLevels            Bool    <11: 0x00000800>
+	644  bAlreadyChanged          Bool    <12: 0x00001000>
+	644  bLoggingGame             Bool    <13: 0x00002000>
+	644  bEnableStatLogging       Bool    <14: 0x00004000>
+	644  bAllowWeaponThrowing     Bool    <15: 0x00008000>
+	644  bAllowBehindView         Bool    <16: 0x00010000>
+	644  bAdminCanPause           Bool    <17: 0x00020000>
+	644  bPlayerDeath             Bool    <18: 0x00040000>
+	644  bHideSquadSDIcon         Bool    <19: 0x00080000>
+	644  bGameRestarted           Bool    <20: 0x00100000>
+	644  bKeepSamePlayerStart     Bool    <21: 0x00200000>
+	644  bDedicatedServer         Bool    <22: 0x00400000>
+	644  bBlindAI                 Bool    <23: 0x00800000>
+	644  bDeafAI                  Bool    <24: 0x01000000>
+	644  bBlindEnemies            Bool    <25: 0x02000000>
+	644  bDeafEnemies             Bool    <26: 0x04000000>
+	644  bLogEvents               Bool    <27: 0x08000000>
+	648  GameDifficulty           Float   
+	652  GoreLevel                Int     
+	656  AutoAim                  Float   
+	660  GameSpeed                Float   
+	664  StartTime                Float   
+	668  DefaultPlayerClassName   Str     
+	676  ScoreBoardType           Str     
+	684  BotMenuType              Str     
+	692  RulesMenuType            Str     
+	700  SettingsMenuType         Str     
+	708  GameUMenuType            Str     
+	716  MultiplayerUMenuType     Str     
+	724  GameOptionsMenuType      Str     
+	732  HUDType                  Str     
+	740  MapListType              Str     
+	748  MapPrefix                Str     
+	756  BeaconName               Str     
+	764  MaxSpectators            Int     
+	768  NumSpectators            Int     
+	772  MaxPlayers               Int     
+	776  NumPlayers               Int     
+	780  NumWeaponsAllowed        Int     
+	784  NumGrenadesAllowed       Int     
+	788  NumReservedSlots         Int     
+	792  NumInvitedPlayers        Int     
+	796  NumBots                  Int     
+	800  CurrentID                Int     
+	804  DefaultPlayerName        Str     
+	812  GameName                 Str     
+	820  FearCostFallOff          Float   
+	824  GoalScore                Int     
+	828  TimeLimit                Int     
+	832  DeathMessageClass        Class   <LocalMessage>
+	836  GameMessageClass         Class   <GameMessage>
+	840  OtherMesgGroup           Name    
+	844  MutatorClass             Str     
+	852  BaseMutator              Object  <Mutator>
+	856  AccessControlClass       Str     
+	864  AccessControl            Object  <AccessControl>
+	868  GameRulesModifiers       Object  <GameRules>
+	872  BroadcastHandlerClass    Str     
+	880  BroadcastHandler         Object  <BroadcastHandler>
+	884  PlayerControllerClass    Class   <PlayerController>
+	888  PlayerControllerClassName Str     
+	896  GameReplicationInfoClass Class   <GameReplicationInfo>
+	900  GameReplicationInfo      Object  <GameReplicationInfo>
+	904  bWelcomePending          Bool    <0 : 0x00000001>
+	908  GameStats                Object  <GameStats>
+	912  GameStatsClass           Str     
+	920  VoiceChatters            Array   <Struct <VoiceChatterInfo>>
+	928  SecurityClass            Str     
+	936  ScreenShotName           Str     
+	944  DecoTextName             Str     
+	952  Acronym                  Str     
+	960  GIPropsDisplayText       Str     [11]
+	1048 GIPropsExtras            Str     [2]
+	1064 MaxIdleTime              Float   
+	1068 CustomMeshSets           Array   <Struct <MeshSetLinkup>>

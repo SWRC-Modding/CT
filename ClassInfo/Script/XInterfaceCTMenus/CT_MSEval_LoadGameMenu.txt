@@ -1,0 +1,8 @@
+CLASS: CT_MSEval_LoadGameMenu(20188), BASE: MenuTemplate
+PROPERTIES:
+	17696 Background               Struct  <MenuSprite>
+	17768 GEO_03_A                 Struct  <MenuButtonText>
+	18252 YYY_01_B                 Struct  <MenuButtonText>
+	18736 YYY_01_E                 Struct  <MenuButtonText>
+	19220 RAS_02_E                 Struct  <MenuButtonText>
+	19704 RAS_03_B                 Struct  <MenuButtonText>

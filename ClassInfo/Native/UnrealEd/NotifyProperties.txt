@@ -1,0 +1,10 @@
+CLASS: NotifyProperties(56), BASE: Object
+STRUCTS:
+	NotifyInfo(12)
+		0    NotifyFrame              Float   
+		4    Notify                   Object  <AnimNotify>
+		8    OldRevisionNum           Int     
+PROPERTIES:
+	40   OldArrayCount            Int     
+	44   WBrowserAnimationPtr     Int     
+	48   Notifys                  Array   <Struct <NotifyInfo>>

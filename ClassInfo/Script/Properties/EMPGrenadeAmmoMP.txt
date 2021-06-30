@@ -1,0 +1,2 @@
+CLASS: EMPGrenadeAmmoMP(868), BASE: EMPGrenadeAmmo
+PROPERTIES:

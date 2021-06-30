@@ -1,0 +1,2 @@
+CLASS: BeastClawsDefaults(1180), BASE: BeastClaws
+PROPERTIES:

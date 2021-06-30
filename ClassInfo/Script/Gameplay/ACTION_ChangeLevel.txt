@@ -1,0 +1,4 @@
+CLASS: ACTION_ChangeLevel(76), BASE: ScriptedAction
+PROPERTIES:
+	64   URL                      Str     
+	72   bShowLoadingMessage      Bool    <0 : 0x00000001>

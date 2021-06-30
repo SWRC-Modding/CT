@@ -1,0 +1,4 @@
+CLASS: ACTION_SetCannotDie(72), BASE: ScriptedAction
+PROPERTIES:
+	64   PawnTag                  Name    
+	68   bCannotDie               Bool    <0 : 0x00000001>

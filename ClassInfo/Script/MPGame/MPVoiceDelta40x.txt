@@ -1,0 +1,2 @@
+CLASS: MPVoiceDelta40x(1532), BASE: VoicePack
+PROPERTIES:

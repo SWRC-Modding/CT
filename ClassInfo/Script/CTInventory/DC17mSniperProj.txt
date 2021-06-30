@@ -1,0 +1,2 @@
+CLASS: DC17mSniperProj(716), BASE: Projectile
+PROPERTIES:

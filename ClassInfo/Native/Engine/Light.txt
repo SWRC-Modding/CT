@@ -1,0 +1,7 @@
+CLASS: Light(664), BASE: Actor
+PROPERTIES:
+	644  MinCoronaSize            Float   
+	648  MaxCoronaSize            Float   
+	652  CoronaRotation           Float   
+	656  CoronaRotationOffset     Float   
+	660  UseOwnFinalBlend         Bool    <0 : 0x00000001>

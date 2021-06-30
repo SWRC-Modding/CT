@@ -1,0 +1,7 @@
+CLASS: TextureFactoryNew(108), BASE: Factory
+PROPERTIES:
+	104  VSize                    Int     
+	100  USize                    Int     
+	96   TextureClass             Class   <Object>
+	92   TexturePackage           Object  <Package>
+	88   TextureName              Name    

@@ -1,0 +1,5 @@
+CLASS: CT_Comicon_MenuMain(18736), BASE: MenuTemplate
+PROPERTIES:
+	17696 Background               Struct  <MenuSprite>
+	17768 GEO_05_B                 Struct  <MenuButtonText>
+	18252 Exit                     Struct  <MenuButtonText>

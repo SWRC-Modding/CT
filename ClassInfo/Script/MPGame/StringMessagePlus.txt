@@ -1,0 +1,2 @@
+CLASS: StringMessagePlus(676), BASE: LocalMessage
+PROPERTIES:

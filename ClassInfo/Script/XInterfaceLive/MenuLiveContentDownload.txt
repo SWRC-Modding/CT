@@ -1,0 +1,4 @@
+CLASS: MenuLiveContentDownload(20592), BASE: MenuQuestionYesNo
+PROPERTIES:
+	20512 ConfirmContentDownloadText Str     [9]
+	20584 ConfirmContentDownloadFailedText Str     

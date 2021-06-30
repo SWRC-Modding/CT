@@ -1,0 +1,2 @@
+CLASS: GunshipDoors(868), BASE: AnimProp
+PROPERTIES:

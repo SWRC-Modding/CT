@@ -1,0 +1,2 @@
+CLASS: BactaHealerAttachmentDefaults(776), BASE: BactaHealerAttachment
+PROPERTIES:

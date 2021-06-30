@@ -1,0 +1,2 @@
+CLASS: Geonosian(1664), BASE: CTPawn
+PROPERTIES:

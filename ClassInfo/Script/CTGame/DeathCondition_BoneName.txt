@@ -1,0 +1,3 @@
+CLASS: DeathCondition_BoneName(48), BASE: DeathCondition
+PROPERTIES:
+	44   BoneName                 Name    

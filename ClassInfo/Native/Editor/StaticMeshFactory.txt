@@ -1,0 +1,5 @@
+CLASS: StaticMeshFactory(100), BASE: Factory
+PROPERTIES:
+	96   Yaw                      Int     
+	92   Roll                     Int     
+	88   Pitch                    Int     

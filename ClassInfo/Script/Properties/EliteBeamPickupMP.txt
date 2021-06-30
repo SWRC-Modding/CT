@@ -1,0 +1,2 @@
+CLASS: EliteBeamPickupMP(704), BASE: EliteBeamPickup
+PROPERTIES:

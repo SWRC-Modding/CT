@@ -1,0 +1,21 @@
+CLASS: MenuTemplateTitled(18320), BASE: MenuTemplate
+PROPERTIES:
+	17696 Background               Struct  <MenuSprite>
+	17768 TitleStrip               Struct  <MenuSprite>
+	17840 MenuTitle                Struct  <MenuText>
+	17952 ControllerIcon           Struct  <MenuSprite>
+	18024 HostText                 Struct  <MenuText>
+	18136 ControllerNumText        Struct  <MenuText>
+	18248 bShowGamertag            Bool    <0 : 0x00000001>
+	18248 bShowController          Bool    <1 : 0x00000002>
+	18248 bRequiresXOnline         Bool    <2 : 0x00000004>
+	18252 LiveLabel                Str     
+	18260 LiveSigningIn            Str     
+	18268 LiveSignedIn             Str     
+	18276 LiveFailed               Str     
+	18284 LiveNotInPasscode        Str     
+	18292 LiveNotIn                Str     
+	18300 UstaticMeshActor         Class   <Actor>
+	18304 AmbientLight             Struct  <Color>
+	18308 ActorMaterials           Object  <Material>[2]
+	18316 bAnimateStamp            Bool    <0 : 0x00000001>

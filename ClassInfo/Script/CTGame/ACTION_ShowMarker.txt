@@ -1,0 +1,4 @@
+CLASS: ACTION_ShowMarker(72), BASE: ScriptedAction
+PROPERTIES:
+	64   MarkerTag                Name    
+	68   bShow                    Bool    <0 : 0x00000001>

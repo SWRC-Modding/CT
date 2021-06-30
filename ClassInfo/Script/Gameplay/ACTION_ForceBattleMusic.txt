@@ -1,0 +1,2 @@
+CLASS: ACTION_ForceBattleMusic(64), BASE: ScriptedAction
+PROPERTIES:

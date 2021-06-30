@@ -1,0 +1,2 @@
+CLASS: Slaver_Mask2(696), BASE: Accessory
+PROPERTIES:

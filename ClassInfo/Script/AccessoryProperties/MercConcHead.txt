@@ -1,0 +1,2 @@
+CLASS: MercConcHead(696), BASE: Accessory
+PROPERTIES:

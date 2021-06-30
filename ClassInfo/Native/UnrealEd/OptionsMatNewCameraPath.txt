@@ -1,0 +1,3 @@
+CLASS: OptionsMatNewCameraPath(48), BASE: OptionsProxy
+PROPERTIES:
+	40   Path Name                Str     

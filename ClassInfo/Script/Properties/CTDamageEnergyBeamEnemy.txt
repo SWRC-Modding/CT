@@ -1,0 +1,2 @@
+CLASS: CTDamageEnergyBeamEnemy(112), BASE: CTDamageEnergyBeam
+PROPERTIES:

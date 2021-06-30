@@ -1,0 +1,8 @@
+CLASS: Flashlight(668), BASE: Actor
+PROPERTIES:
+	644  bIsOn                    Bool    <0 : 0x00000001>
+	648  ProjectorClass           Class   <DynamicProjector>
+	652  BeamClass                Class   <Emitter>
+	656  Projector                Object  <DynamicProjector>
+	660  BeamEmitter              Object  <Emitter>
+	664  ProjectorTexture         Object  <Material>

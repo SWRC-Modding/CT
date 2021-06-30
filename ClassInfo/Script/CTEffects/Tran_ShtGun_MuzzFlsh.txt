@@ -1,0 +1,2 @@
+CLASS: Tran_ShtGun_MuzzFlsh(828), BASE: Emitter
+PROPERTIES:

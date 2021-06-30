@@ -1,0 +1,2 @@
+CLASS: R2Droid(1688), BASE: Ambient
+PROPERTIES:

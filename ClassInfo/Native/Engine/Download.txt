@@ -1,0 +1,2 @@
+CLASS: Download(592), BASE: Object
+PROPERTIES:

@@ -1,0 +1,2 @@
+CLASS: DM_CanyonOutside_sfx01(96), BASE: AudioEnvironment
+PROPERTIES:

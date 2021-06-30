@@ -1,0 +1,2 @@
+CLASS: GeonosianWarriorNoWeap(1668), BASE: GeonosianWarrior
+PROPERTIES:

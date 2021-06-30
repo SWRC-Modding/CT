@@ -1,0 +1,13 @@
+CLASS: LaserWeapon(1236), BASE: Weapon
+PROPERTIES:
+	1180 LaserBeamMesh            Class   <LaserBeam>
+	1184 Laser                    Object  <LaserBeam>
+	1188 bChargingUp              Bool    <0 : 0x00000001>
+	1188 bChargeReady             Bool    <1 : 0x00000002>
+	1192 ChargeUpTime             Float   
+	1196 IncShakeRate             Float   
+	1200 MaxShakeSpeed            Struct  <Vector>
+	1212 ChargeUpShakeSpeed       Struct  <Vector>
+	1224 ChargeUpSound            Object  <Sound>
+	1228 FireStartSound           Object  <Sound>
+	1232 FireEndSound             Object  <Sound>

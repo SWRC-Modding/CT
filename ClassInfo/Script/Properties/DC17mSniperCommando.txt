@@ -1,0 +1,2 @@
+CLASS: DC17mSniperCommando(1192), BASE: DC17mSniper
+PROPERTIES:

@@ -1,0 +1,2 @@
+CLASS: EMPGrenadeProjDefaults(804), BASE: EMPGrenadeProj
+PROPERTIES:

@@ -1,0 +1,3 @@
+CLASS: UWindowSmallCancelButton(364), BASE: UWindowButton
+PROPERTIES:
+	356  CancelText               Str     

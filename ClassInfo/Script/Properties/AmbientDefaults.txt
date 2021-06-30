@@ -1,0 +1,2 @@
+CLASS: AmbientDefaults(1688), BASE: Ambient
+PROPERTIES:

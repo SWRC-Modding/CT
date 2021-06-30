@@ -1,0 +1,2 @@
+CLASS: HsBumpMetalMask(128), BASE: HsBumpDiffSpec
+PROPERTIES:

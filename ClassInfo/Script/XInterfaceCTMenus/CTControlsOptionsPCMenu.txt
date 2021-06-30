@@ -1,0 +1,29 @@
+CLASS: CTControlsOptionsPCMenu(43020), BASE: MenuTemplateTitled
+PROPERTIES:
+	18320 Label                    Struct  <MenuText>
+	18432 OptionsBorder            Struct  <MenuSprite>
+	18504 OptionsDescBorder        Struct  <MenuSprite>
+	18576 OptionDesc               Struct  <MenuText>
+	18688 OptionSet0Labels         Struct  <MenuText>[14]
+	20256 OptionSet0               Struct  <MenuButtonText>[14]
+	27032 OptionSet0Funcs          Str     [14]
+	27144 OptionSet1Labels         Struct  <MenuText>[14]
+	28712 OptionSet1               Struct  <MenuButtonText>[14]
+	35488 OptionSet1Funcs          Str     [14]
+	35600 OptionSet2Labels         Struct  <MenuText>[6]
+	36272 OptionSet2               Struct  <MenuButtonText>[6]
+	39176 OptionSet2Funcs          Str     [6]
+	39224 ControlsLabel            Struct  <MenuText>
+	39336 ControlsLabelBackground  Struct  <MenuSprite>
+	39408 ControlsLabelConnector   Struct  <MenuSprite>
+	39480 Game                     Struct  <MenuButtonText>
+	39964 Sound                    Struct  <MenuButtonText>
+	40448 Graphics                 Struct  <MenuButtonText>
+	40932 RestoreToDefault         Struct  <MenuButtonText>
+	41416 DefaultConnector         Struct  <MenuSprite>
+	41488 DefaultLine              Struct  <MenuSprite>
+	41560 Done                     Struct  <MenuButtonText>
+	42044 PrevSet                  Struct  <MenuButtonText>
+	42528 NextSet                  Struct  <MenuButtonText>
+	43012 WhichSet                 Int     
+	43016 bRemapping               Bool    <0 : 0x00000001>

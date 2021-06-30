@@ -1,0 +1,3 @@
+CLASS: ExplosiveBarrel(892), BASE: KarmaProp
+PROPERTIES:
+	888  DemoCharge               Object  <ActivateItem>

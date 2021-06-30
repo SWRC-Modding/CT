@@ -1,0 +1,11 @@
+CLASS: FadeColor(120), BASE: ConstantMaterial
+ENUMS:
+	EColorFadeType
+		FC_Linear                =   0
+		FC_Sinusoidal            =   1
+PROPERTIES:
+	100  Color1                   Struct  <Color>
+	104  Color2                   Struct  <Color>
+	108  FadePeriod               Float   
+	112  FadePhase                Float   
+	116  ColorFadeType            Byte    <EColorFadeType>

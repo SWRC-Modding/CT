@@ -1,0 +1,2 @@
+CLASS: CTDamageElectricityGrievousGuard(112), BASE: CTDamageElectricity
+PROPERTIES:

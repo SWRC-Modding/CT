@@ -1,0 +1,2 @@
+CLASS: MP_RAS_CompRoom(96), BASE: AudioEnvironment
+PROPERTIES:

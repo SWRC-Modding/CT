@@ -1,0 +1,2 @@
+CLASS: YYY_hallcan(828), BASE: Emitter
+PROPERTIES:

@@ -1,0 +1,39 @@
+CLASS: Projector(1056), BASE: Actor
+ENUMS:
+	EProjectorBlending
+		PB_None                  =   0
+		PB_Modulate              =   1
+		PB_AlphaBlend            =   2
+		PB_Add                   =   3
+		PB_Modulate2X            =   4
+PROPERTIES:
+	644  MaterialBlendingOp       Byte    <EProjectorBlending>
+	645  FrameBufferBlendingOp    Byte    <EProjectorBlending>
+	648  ProjTexture              Object  <Material>
+	652  FOV                      Int     
+	656  MaxTraceDistance         Int     
+	660  bProjectBSP              Bool    <0 : 0x00000001>
+	660  bProjectTerrain          Bool    <1 : 0x00000002>
+	660  bProjectStaticMesh       Bool    <2 : 0x00000004>
+	660  bProjectParticles        Bool    <3 : 0x00000008>
+	660  bProjectActor            Bool    <4 : 0x00000010>
+	660  bLevelStatic             Bool    <5 : 0x00000020>
+	660  bClipBSP                 Bool    <6 : 0x00000040>
+	660  bClipStaticMesh          Bool    <7 : 0x00000080>
+	660  bProjectOnUnlit          Bool    <8 : 0x00000100>
+	660  bGradient                Bool    <9 : 0x00000200>
+	660  bProjectOnBackfaces      Bool    <10: 0x00000400>
+	660  bProjectOnAlpha          Bool    <11: 0x00000800>
+	660  bProjectOnParallelBSP    Bool    <12: 0x00001000>
+	660  bDynamicAttach           Bool    <13: 0x00002000>
+	664  ProjectTag               Name    
+	668  bShadow                  Bool    <0 : 0x00000001>
+	672  ExclusionList            Object  <Actor>[4]
+	688  FrustumPlanes            Struct  <Plane>[6]
+	784  FrustumVertices          Struct  <Vector>[8]
+	880  Box                      Struct  <Box>
+	908  RenderInfo               Struct  <ProjectorRenderInfoPtr>
+	912  GradientTexture          Object  <Texture>
+	916  GradientMatrix           Struct  <Matrix>
+	980  Matrix                   Struct  <Matrix>
+	1044 OldLocation              Struct  <Vector>

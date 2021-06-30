@@ -1,0 +1,2 @@
+CLASS: Holo_Gunship(868), BASE: AnimProp
+PROPERTIES:

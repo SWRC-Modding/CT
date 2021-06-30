@@ -1,0 +1,5 @@
+CLASS: MenuWarningTransition(18440), BASE: MenuTemplateTitled
+PROPERTIES:
+	18320 Message                  Struct  <MenuText>
+	18432 bDoneWork                Bool    <0 : 0x00000001>
+	18436 HoldTime                 Float   

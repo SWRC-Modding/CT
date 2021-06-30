@@ -1,0 +1,2 @@
+CLASS: ClassProperty(72), BASE: ObjectProperty
+PROPERTIES:

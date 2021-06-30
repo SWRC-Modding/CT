@@ -1,0 +1,2 @@
+CLASS: Custom_GEO3A_Smoke_Jammer(828), BASE: Emitter
+PROPERTIES:

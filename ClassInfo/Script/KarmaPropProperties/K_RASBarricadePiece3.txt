@@ -1,0 +1,2 @@
+CLASS: K_RASBarricadePiece3(888), BASE: KarmaProp
+PROPERTIES:

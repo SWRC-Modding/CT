@@ -1,0 +1,2 @@
+CLASS: DefaultPhysicsVolume(896), BASE: PhysicsVolume
+PROPERTIES:

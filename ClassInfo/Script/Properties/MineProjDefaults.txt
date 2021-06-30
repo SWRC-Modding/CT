@@ -1,0 +1,2 @@
+CLASS: MineProjDefaults(804), BASE: MineProj
+PROPERTIES:

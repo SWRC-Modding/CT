@@ -1,0 +1,2 @@
+CLASS: AntiArmorProjSquad(804), BASE: AntiArmorProj
+PROPERTIES:

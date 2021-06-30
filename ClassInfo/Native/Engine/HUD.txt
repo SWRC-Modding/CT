@@ -1,0 +1,106 @@
+CLASS: HUD(1524), BASE: Actor
+STRUCTS:
+	ConsoleMessage(20)
+		0    Text                     Str     
+		8    TextColor                Struct  <Color>
+		12   MessageLife              Float   
+		16   PRI                      Object  <PlayerReplicationInfo>
+PROPERTIES:
+	644  SmallFont                Object  <Font>
+	648  MedFont                  Object  <Font>
+	652  BigFont                  Object  <Font>
+	656  LargeFont                Object  <Font>
+	660  HUDConfigWindowType      Str     
+	668  nextHUD                  Object  <HUD>
+	672  PlayerOwner              Object  <PlayerController>
+	676  ProgressFontName         Str     
+	684  ProgressFontFont         Object  <Font>
+	688  ProgressFadeTime         Float   
+	692  MOTDColor                Struct  <Color>
+	696  DefaultTextColor         Struct  <Color>
+	700  ScoreBoard               Object  <ScoreBoard>
+	704  bHideHUD                 Bool    <0 : 0x00000001>
+	704  bShowScores              Bool    <1 : 0x00000002>
+	704  bShowDebugInfo           Bool    <2 : 0x00000004>
+	704  bHideCenterMessages      Bool    <3 : 0x00000008>
+	704  bBadConnectionAlert      Bool    <4 : 0x00000010>
+	704  bMessageBeep             Bool    <5 : 0x00000020>
+	708  GameTypeMaterial         Object  <Material>
+	712  XNotificationFriendIcon  Object  <Material>
+	716  XNotificationInviteIcon  Object  <Material>
+	720  XNotificationTimer       Float   
+	724  LastNumInvites           Int     
+	728  LastNumFriendReqs        Int     
+	732  HudCanvasScale           Float   
+	736  LoadingMessage           Str     
+	744  SavingMessage            Str     
+	752  ConnectingMessage        Str     
+	760  PausedMessage            Str     
+	768  PrecachingMessage        Str     
+	776  Movie                    Object  <Movie>
+	780  MoviePosX                Int     
+	784  MoviePosY                Int     
+	788  TexMovieTop              Float   
+	792  TexMovieLeft             Float   
+	796  TexMovieBottom           Float   
+	800  TexMovieRight            Float   
+	804  TexMovieTranslucent      Bool    <0 : 0x00000001>
+	808  TextureMovie             Object  <MovieTexture>
+	812  bShowSubtitles           Bool    <0 : 0x00000001>
+	812  bShowPromptText          Bool    <1 : 0x00000002>
+	812  bShowCurrentObjective    Bool    <2 : 0x00000004>
+	816  ConsoleColor             Struct  <Color>
+	820  ConsoleMessageCount      Int     
+	824  CriticalMessageCount     Int     
+	828  CriticalMessageDisplayCount Int     
+	832  ConsoleFontSize          Int     
+	836  MessageFontOffset        Int     
+	840  TextMessages             Struct  <ConsoleMessage>[8]
+	1000 CriticalMessages         Struct  <ConsoleMessage>[8]
+	1160 ConsoleMessagePosX       Float   
+	1164 ConsoleMessagePosY       Float   
+	1168 FontArrayNames           Str     [9]
+	1240 FontArrayFonts           Object  <Font>[9]
+	1276 FontScreenWidthMedium    Int     [9]
+	1312 FontScreenWidthSmall     Int     [9]
+	1348 StaticAlpha              Int     
+	1352 bScavangerHead           Bool    <0 : 0x00000001>
+	1356 FlashlightProjector      Object  <DynamicProjector>
+	1360 FlashlightTexture        Object  <Material>
+	1364 Markers                  Object  <Actor>[4]
+	1380 LastPickup               Object  <Pickup>
+	1384 LastPickupTime           Float   
+	1388 TargetNormal             Object  <Sound>
+	1392 TargetFriend             Object  <Sound>
+	1396 TargetFriendInjured      Object  <Sound>
+	1400 TargetFriendToHeal       Object  <Sound>
+	1404 TargetMarker             Object  <Sound>
+	1408 TargetMarkerCancel       Object  <Sound>
+	1412 TargetPickup             Object  <Sound>
+	1416 TargetEnemy              Object  <Sound>
+	1420 TargetPanel              Object  <Sound>
+	1424 HealingTarget            Object  <Sound>
+	1428 TextPrint                Object  <Sound>
+	1432 HealthRecharging         Object  <Sound>
+	1436 HealthCharged            Object  <Sound>
+	1440 ShieldRecharging         Object  <Sound>
+	1444 ShieldCharged            Object  <Sound>
+	1448 ActivateStanceDefense    Object  <Sound>
+	1452 ActivateStanceHold       Object  <Sound>
+	1456 ActivateStanceOffense    Object  <Sound>
+	1460 StaticScavenger          Object  <Sound>
+	1464 StaticIncapacitated      Object  <Sound>
+	1468 FlashlightOn             Object  <Sound>
+	1472 FlashlightOff            Object  <Sound>
+	1476 ZoomIn                   Object  <Sound>
+	1480 ZoomOut                  Object  <Sound>
+	1484 IncapMenuChange          Object  <Sound>
+	1488 IncapMenuSelect          Object  <Sound>
+	1492 BloodSplatter            Object  <Sound>
+	1496 Wiper                    Object  <Sound>
+	1500 SwitchToThermalGrenade   Object  <Sound>
+	1504 SwitchToSonicGrenade     Object  <Sound>
+	1508 SwitchToEMPGrenade       Object  <Sound>
+	1512 SwitchToFlashBang        Object  <Sound>
+	1516 SniperZoomCharging       Object  <Sound>
+	1520 SniperZoomCharged        Object  <Sound>

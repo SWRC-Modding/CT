@@ -1,0 +1,49 @@
+CLASS: RibbonEmitter(1060), BASE: ParticleEmitter
+ENUMS:
+	EGetPointAxis
+		PAXIS_OwnerX             =   0
+		PAXIS_OwnerY             =   1
+		PAXIS_OwnerZ             =   2
+		PAXIS_BoneNormal         =   3
+		PAXIS_StartBoneDirection =   4
+		PAXIS_AxisNormal         =   5
+STRUCTS:
+	RibbonPoint(28)
+		0    Location                 Struct  <Vector>
+		12   AxisNormal               Struct  <Vector>
+		24   Width                    Float   
+PROPERTIES:
+	900  SampleRate               Float   
+	904  DecayRate                Float   
+	908  NumPoints                Int     
+	912  RibbonWidth              Float   
+	916  GetPointAxisFrom         Byte    <EGetPointAxis>
+	920  AxisNormal               Struct  <Vector>
+	932  MinSampleDist            Float   
+	936  MinSampleDot             Float   
+	940  PointOriginOffset        Float   
+	944  RibbonTextureUScale      Float   
+	948  RibbonTextureVScale      Float   
+	952  NumSheets                Int     
+	956  SheetScale               Array   <Float>
+	964  StartBoneOffset          Struct  <Vector>
+	976  EndBoneOffset            Struct  <Vector>
+	988  BoneNameStart            Name    
+	992  BoneNameEnd              Name    
+	996  RibbonPoints             Array   <Struct <RibbonPoint>>
+	1004 bSamplePoints            Bool    <0 : 0x00000001>
+	1004 bDecayPoints             Bool    <1 : 0x00000002>
+	1004 bDecayPointsWhenStopped  Bool    <2 : 0x00000004>
+	1004 bSyncDecayWhenKilled     Bool    <3 : 0x00000008>
+	1004 bLengthBasedTextureU     Bool    <4 : 0x00000010>
+	1004 bUseSheetScale           Bool    <5 : 0x00000020>
+	1004 bUseBones                Bool    <6 : 0x00000040>
+	1004 bUseBoneDistance         Bool    <7 : 0x00000080>
+	1008 SampleTimer              Float   
+	1012 DecayTimer               Float   
+	1016 RealSampleRate           Float   
+	1020 RealDecayRate            Float   
+	1024 SheetsUsed               Int     
+	1028 LastSampledPoint         Struct  <RibbonPoint>
+	1056 bKilled                  Bool    <0 : 0x00000001>
+	1056 bDecaying                Bool    <1 : 0x00000002>

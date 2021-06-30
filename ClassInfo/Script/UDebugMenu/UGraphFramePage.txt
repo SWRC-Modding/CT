@@ -1,0 +1,19 @@
+CLASS: UGraphFramePage(480), BASE: UWindowPageWindow
+PROPERTIES:
+	196  Labels                   Object  <UWindowLabelControl>[5]
+	216  StatNameText             Str     [5]
+	256  CatNameText              Str     
+	264  DesiredMaxEdit           Object  <UWindowEditControl>[5]
+	284  DesiredMaxText           Str     
+	292  UseBarStatCheck          Object  <UWindowCheckbox>[5]
+	312  UseBarStatText           Str     
+	320  UseLineStatCheck         Object  <UWindowCheckbox>[5]
+	340  UseLineStatText          Str     
+	348  SmallIsBadCheck          Object  <UWindowCheckbox>[5]
+	368  SmallIsBadText           Str     
+	376  DesiredMaxEditSettings   Str     [5]
+	416  SmallIsBadSettings       Int     [5]
+	436  UseBarStatSettings       Int     [5]
+	456  UseLineStatSettings      Int     [5]
+	476  bIsLoading               Bool    <0 : 0x00000001>
+	476  bShouldDelayChange       Bool    <1 : 0x00000002>

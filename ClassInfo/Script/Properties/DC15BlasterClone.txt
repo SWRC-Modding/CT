@@ -1,0 +1,2 @@
+CLASS: DC15BlasterClone(1180), BASE: CTWeaponRecharging
+PROPERTIES:

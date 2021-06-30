@@ -1,0 +1,3 @@
+CLASS: VolumeTimer(648), BASE: Info
+PROPERTIES:
+	644  V                        Object  <PhysicsVolume>

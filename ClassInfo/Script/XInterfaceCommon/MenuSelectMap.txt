@@ -1,0 +1,25 @@
+CLASS: MenuSelectMap(23316), BASE: MenuTemplateTitledBXA
+PROPERTIES:
+	20396 BorderBoxes              Struct  <MenuSprite>[3]
+	20612 GameType                 Struct  <GameTypeRecord>
+	20692 MapRecords               Array   <Struct <MapRecord>>
+	20700 Screenshot               Struct  <MenuSprite>
+	20772 DecoText                 Struct  <MenuDecoText>
+	20892 MapList                  Struct  <MenuStringList>
+	21432 StringSize               Str     
+	21440 StringLocation           Str     
+	21448 StringPlayers            Str     
+	21456 StringVersus             Str     
+	21464 StringVersusOn           Str     
+	21472 StringTo                 Str     
+	21480 ScrollBar                Struct  <MenuScrollBar>
+	22096 ScrollBarArrowUp         Struct  <MenuButtonSprite>
+	22500 ScrollBarArrowDown       Struct  <MenuButtonSprite>
+	22904 ScrollBorder             Struct  <MenuSprite>
+	22976 ScrollArea               Struct  <MenuScrollArea>
+	23028 PageUpArea               Struct  <MenuActiveWidget>
+	23140 PageDownArea             Struct  <MenuActiveWidget>
+	23252 MapName                  Str     
+	23260 Settings                 Struct  <GameSettings>
+	23300 URLOptions               Str     
+	23308 LastGameTypeName         Str     

@@ -1,0 +1,4 @@
+CLASS: ACTION_ChangeScript(72), BASE: ScriptedAction
+PROPERTIES:
+	64   NextScriptTag            Name    
+	68   NextScript               Object  <ScriptedSequence>

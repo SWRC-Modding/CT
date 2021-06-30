@@ -1,0 +1,2 @@
+CLASS: EWebTurretDefaults(1180), BASE: EWebTurret
+PROPERTIES:

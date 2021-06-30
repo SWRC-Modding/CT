@@ -1,0 +1,2 @@
+CLASS: StateSBDAttackDefaults(152), BASE: StateSBDAttack
+PROPERTIES:

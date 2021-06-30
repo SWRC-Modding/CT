@@ -1,0 +1,2 @@
+CLASS: MoverGame(1596), BASE: Mover
+PROPERTIES:

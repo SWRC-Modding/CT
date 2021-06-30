@@ -1,0 +1,2 @@
+CLASS: GeoAATurretDefaults(2068), BASE: GeoAATurret
+PROPERTIES:

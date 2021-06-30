@@ -1,0 +1,2 @@
+CLASS: SlaverBladesDefaults(1184), BASE: SlaverBlades
+PROPERTIES:

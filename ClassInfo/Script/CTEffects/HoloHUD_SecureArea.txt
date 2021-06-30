@@ -1,0 +1,2 @@
+CLASS: HoloHUD_SecureArea(828), BASE: Emitter
+PROPERTIES:

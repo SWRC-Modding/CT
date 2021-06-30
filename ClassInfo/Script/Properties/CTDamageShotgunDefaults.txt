@@ -1,0 +1,2 @@
+CLASS: CTDamageShotgunDefaults(112), BASE: CTDamageShotgun
+PROPERTIES:

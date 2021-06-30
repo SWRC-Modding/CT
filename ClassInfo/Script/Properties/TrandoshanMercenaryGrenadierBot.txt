@@ -1,0 +1,2 @@
+CLASS: TrandoshanMercenaryGrenadierBot(1256), BASE: TrandoshanMercenaryBot
+PROPERTIES:

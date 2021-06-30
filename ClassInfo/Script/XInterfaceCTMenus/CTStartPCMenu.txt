@@ -1,0 +1,8 @@
+CLASS: CTStartPCMenu(18372), BASE: MenuTemplate
+PROPERTIES:
+	17696 Background               Struct  <MenuSprite>
+	17768 Start                    Struct  <MenuButtonText>
+	18252 LegalText                Struct  <MenuText>
+	18364 bLECIntroWasPlaying      Bool    <0 : 0x00000001>
+	18364 bNVIDIAIntroWasPlaying   Bool    <1 : 0x00000002>
+	18368 StoredBG                 Object  <Sound>

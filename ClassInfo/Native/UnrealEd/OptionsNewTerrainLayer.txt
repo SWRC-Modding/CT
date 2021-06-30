@@ -1,0 +1,11 @@
+CLASS: OptionsNewTerrainLayer(88), BASE: OptionsProxy
+PROPERTIES:
+	40   Package                  Str     
+	48   Group                    Str     
+	56   Name                     Str     
+	68   AlphaHeight              Int     
+	64   AlphaWidth               Int     
+	72   AlphaFill                Byte    
+	76   ColorFill                Struct  <Color>
+	80   UScale                   Int     
+	84   VScale                   Int     

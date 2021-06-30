@@ -1,0 +1,2 @@
+CLASS: WIP_Emitter(828), BASE: Emitter
+PROPERTIES:

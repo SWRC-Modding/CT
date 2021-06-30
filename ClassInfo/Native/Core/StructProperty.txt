@@ -1,0 +1,2 @@
+CLASS: StructProperty(68), BASE: Property
+PROPERTIES:

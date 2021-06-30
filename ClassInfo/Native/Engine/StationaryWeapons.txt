@@ -1,0 +1,7 @@
+CLASS: StationaryWeapons(720), BASE: Pickup
+PROPERTIES:
+	700  TeamIndex                Int     
+	704  bIgnoreTeammates         Bool    <0 : 0x00000001>
+	708  Meshes                   Object  <StaticMesh>[2]
+	716  bActive                  Byte    
+	717  bLastActive              Byte    

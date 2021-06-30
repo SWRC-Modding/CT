@@ -1,0 +1,2 @@
+CLASS: BitArray2D(56), BASE: BitArray
+PROPERTIES:

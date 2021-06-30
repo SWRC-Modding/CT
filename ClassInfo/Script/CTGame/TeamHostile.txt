@@ -1,0 +1,2 @@
+CLASS: TeamHostile(756), BASE: CTTeamInfo
+PROPERTIES:

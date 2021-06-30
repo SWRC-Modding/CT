@@ -1,0 +1,13 @@
+CLASS: TrandoshanMercenary(1736), BASE: Trandoshan
+PROPERTIES:
+	1668 SecondsOfThrust          Float   
+	1672 ThrustForce              Float   
+	1676 ThrustDir                Struct  <RangeVector>
+	1700 BackpackBone             Name    
+	1704 ExplosionEffectClass     Class   <Emitter>
+	1708 JetpackEffectClass       Class   <Emitter>
+	1712 JetpackEffect            Object  <Emitter>
+	1716 ExplosionProbability     Float   
+	1720 HeatDamageRange          Struct  <Range>
+	1728 HeatDamage               Float   
+	1732 IgniteJetpack            Bool    <0 : 0x00000001>

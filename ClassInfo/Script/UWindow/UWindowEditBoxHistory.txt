@@ -1,0 +1,3 @@
+CLASS: UWindowEditBoxHistory(116), BASE: UWindowList
+PROPERTIES:
+	108  HistoryText              Str     

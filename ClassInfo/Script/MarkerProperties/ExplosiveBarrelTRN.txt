@@ -1,0 +1,2 @@
+CLASS: ExplosiveBarrelTRN(892), BASE: ExplosiveBarrel
+PROPERTIES:

@@ -1,0 +1,2 @@
+CLASS: FileChannel(372), BASE: Channel
+PROPERTIES:

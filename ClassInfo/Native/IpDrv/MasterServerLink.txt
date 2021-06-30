@@ -1,0 +1,8 @@
+CLASS: MasterServerLink(720), BASE: Info
+PROPERTIES:
+	644  LinkPtr                  Int     
+	648  LANPort                  Int     
+	652  LANServerPort            Int     
+	656  CurrentMasterServer      Int     
+	660  MasterServerPort         Int     [5]
+	680  MasterServerAddress      Str     [5]

@@ -1,0 +1,7 @@
+CLASS: OptionsMapScale(60), BASE: OptionsProxy
+PROPERTIES:
+	40   Factor                   Float   
+	44   Adjust Lights?           Bool    <0 : 0x00000001>
+	48   Scale Sprites?           Bool    <0 : 0x00000001>
+	52   Scale Locations?         Bool    <0 : 0x00000001>
+	56   Scale Collision?         Bool    <0 : 0x00000001>

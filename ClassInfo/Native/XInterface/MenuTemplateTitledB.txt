@@ -1,0 +1,6 @@
+CLASS: MenuTemplateTitledB(19060), BASE: MenuTemplateTitled
+PROPERTIES:
+	18320 BottomStrip              Struct  <MenuSprite>
+	18392 BButtonIcon              Struct  <MenuSprite>
+	18464 BLabel                   Struct  <MenuText>
+	18576 BButton                  Struct  <MenuButtonText>

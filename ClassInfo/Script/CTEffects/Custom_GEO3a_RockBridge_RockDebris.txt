@@ -1,0 +1,2 @@
+CLASS: Custom_GEO3a_RockBridge_RockDebris(828), BASE: Emitter
+PROPERTIES:

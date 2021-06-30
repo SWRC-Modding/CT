@@ -1,0 +1,2 @@
+CLASS: cFX_Shield_Impact_Medium(828), BASE: Emitter
+PROPERTIES:

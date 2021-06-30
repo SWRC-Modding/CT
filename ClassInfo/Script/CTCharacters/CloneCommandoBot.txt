@@ -1,0 +1,2 @@
+CLASS: CloneCommandoBot(1256), BASE: CTBot
+PROPERTIES:

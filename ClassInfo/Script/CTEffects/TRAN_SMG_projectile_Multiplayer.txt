@@ -1,0 +1,2 @@
+CLASS: TRAN_SMG_projectile_Multiplayer(828), BASE: Emitter
+PROPERTIES:

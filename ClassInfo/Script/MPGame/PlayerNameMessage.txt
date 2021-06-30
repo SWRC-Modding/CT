@@ -1,0 +1,2 @@
+CLASS: PlayerNameMessage(676), BASE: LocalMessage
+PROPERTIES:

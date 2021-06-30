@@ -1,0 +1,2 @@
+CLASS: CloneCommandoDefaults(1680), BASE: CloneCommando
+PROPERTIES:

@@ -1,0 +1,2 @@
+CLASS: TrandoshanRifleMP(1180), BASE: TrandoshanRifle
+PROPERTIES:

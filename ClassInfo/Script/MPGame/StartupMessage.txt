@@ -1,0 +1,5 @@
+CLASS: StartupMessage(756), BASE: CriticalEventPlus
+PROPERTIES:
+	676  Stage                    Str     [8]
+	740  NotReady                 Str     
+	748  SinglePlayer             Str     

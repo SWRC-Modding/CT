@@ -1,0 +1,13 @@
+CLASS: GameSpyFilters(27856), BASE: GameSpyMenuTemplate
+PROPERTIES:
+	20180 Background               Struct  <MenuSprite>
+	20252 BackButton               Struct  <MenuButtonText>
+	20736 OptionLabels             Struct  <MenuText>[5]
+	21296 ArrowsLeft               Struct  <MenuButtonSprite>[5]
+	23316 ArrowsRight              Struct  <MenuButtonSprite>[5]
+	25336 Options                  Struct  <MenuButtonEnum>[5]
+	27836 ShowFull                 Int     
+	27840 ShowEmpty                Int     
+	27844 DedicatedOnly            Int     
+	27848 AllowFriendlyFire        Int     
+	27852 GameType                 Int     

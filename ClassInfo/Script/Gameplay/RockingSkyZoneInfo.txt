@@ -1,0 +1,2 @@
+CLASS: RockingSkyZoneInfo(788), BASE: SkyZoneInfo
+PROPERTIES:

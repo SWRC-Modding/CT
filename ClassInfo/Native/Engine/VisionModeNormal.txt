@@ -1,0 +1,2 @@
+CLASS: VisionModeNormal(172), BASE: VisionMode
+PROPERTIES:

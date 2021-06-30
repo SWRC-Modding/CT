@@ -1,0 +1,2 @@
+CLASS: SpiderDroid_Cannon_Proj(828), BASE: Emitter
+PROPERTIES:

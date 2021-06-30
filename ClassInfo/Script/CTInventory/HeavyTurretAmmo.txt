@@ -1,0 +1,2 @@
+CLASS: HeavyTurretAmmo(868), BASE: Ammunition
+PROPERTIES:

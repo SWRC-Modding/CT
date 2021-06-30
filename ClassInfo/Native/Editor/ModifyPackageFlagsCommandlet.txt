@@ -1,0 +1,2 @@
+CLASS: ModifyPackageFlagsCommandlet(332), BASE: Commandlet
+PROPERTIES:

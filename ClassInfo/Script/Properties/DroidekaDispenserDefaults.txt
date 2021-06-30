@@ -1,0 +1,2 @@
+CLASS: DroidekaDispenserDefaults(1080), BASE: DroidekaDispenser
+PROPERTIES:

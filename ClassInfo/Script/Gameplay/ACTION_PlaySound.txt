@@ -1,0 +1,8 @@
+CLASS: ACTION_PlaySound(84), BASE: LatentScriptedAction
+PROPERTIES:
+	64   Sound                    Object  <Sound>
+	68   Volume                   Float   
+	72   SoundSourceTag           Name    
+	76   bWaitForFinish           Bool    <0 : 0x00000001>
+	76   bDontOverrideOtherSounds Bool    <1 : 0x00000002>
+	80   Slot                     Byte    <ESoundSlot>

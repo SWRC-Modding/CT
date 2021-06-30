@@ -1,0 +1,6 @@
+CLASS: MenuConnectionFailed(19404), BASE: MenuTemplateTitledA
+PROPERTIES:
+	19060 Message                  Struct  <MenuText>
+	19172 CDKeyMessage             Struct  <MenuText>
+	19284 FullMessage              Struct  <MenuText>
+	19396 MissingContentStr        Str     

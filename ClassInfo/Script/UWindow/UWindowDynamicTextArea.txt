@@ -1,0 +1,22 @@
+CLASS: UWindowDynamicTextArea(304), BASE: UWindowDialogControl
+PROPERTIES:
+	240  MaxLines                 Int     
+	244  bTopCentric              Bool    <0 : 0x00000001>
+	248  DefaultTextHeight        Float   
+	252  bScrollOnResize          Bool    <0 : 0x00000001>
+	252  bVCenter                 Bool    <1 : 0x00000002>
+	252  bHCenter                 Bool    <2 : 0x00000004>
+	252  bAutoScrollbar           Bool    <3 : 0x00000008>
+	252  bVariableRowHeight       Bool    <4 : 0x00000010>
+	256  WrapWidth                Float   
+	260  List                     Object  <UWindowDynamicTextRow>
+	264  VertSB                   Object  <UWindowVScrollbar>
+	268  OldW                     Float   
+	272  OldH                     Float   
+	276  bDirty                   Bool    <0 : 0x00000001>
+	280  Count                    Int     
+	284  VisibleRows              Int     
+	288  Font                     Int     
+	292  AbsoluteFont             Object  <Font>
+	296  TextColor                Struct  <Color>
+	300  RowClass                 Class   <UWindowDynamicTextRow>

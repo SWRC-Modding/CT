@@ -1,0 +1,4 @@
+CLASS: SpectatorCam(652), BASE: Keypoint
+PROPERTIES:
+	644  bSkipView                Bool    <0 : 0x00000001>
+	648  FadeOutTime              Float   

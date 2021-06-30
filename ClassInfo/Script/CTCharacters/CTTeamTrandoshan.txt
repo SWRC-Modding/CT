@@ -1,0 +1,2 @@
+CLASS: CTTeamTrandoshan(948), BASE: MPTeam
+PROPERTIES:

@@ -1,0 +1,2 @@
+CLASS: Grenade_Sonic_Explo_Metal(828), BASE: Emitter
+PROPERTIES:

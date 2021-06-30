@@ -1,0 +1,2 @@
+CLASS: DeathExplode_SpiderDroid_vers3(828), BASE: Emitter
+PROPERTIES:

@@ -1,0 +1,2 @@
+CLASS: Polys(52), BASE: Object
+PROPERTIES:

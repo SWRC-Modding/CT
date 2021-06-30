@@ -1,0 +1,84 @@
+CLASS: GameSpyServerBrowserBase(37104), BASE: GameSpyMenuTemplate
+ENUMS:
+	GameSpySortMode
+		sbcm_int                 =   0
+		sbcm_float               =   1
+		sbcm_strcase             =   2
+		sbcm_stricase            =   3
+	EQueryState
+		eQueryNone               =   0
+		eQueryInProgress         =   1
+		eQueryResultsAvailable   =   2
+		eQueryError              =   3
+STRUCTS:
+	GameSpyServer(60)
+		0    ServerName               Str     
+		8    Address                  Str     
+		16   CurrentPlayers           Int     
+		20   MaxPlayers               Int     
+		24   MapName                  Str     
+		32   GameName                 Str     
+		40   FragLimit                Int     
+		44   TimeLimit                Int     
+		48   NumTeams                 Int     
+		52   Dedicated                Int     
+		56   Ping                     Int     
+	GameSpyPlayer(24)
+		0    Name                     Str     
+		8    Score                    Int     
+		12   Deaths                   Int     
+		16   Ping                     Int     
+		20   Team                     Int     
+	GameSpyInfo(16)
+		0    Key                      Str     
+		8    Value                    Str     
+PROPERTIES:
+	20180 QueryState               Byte    <EQueryState>
+	20184 Background               Struct  <MenuSprite>
+	20256 QueryStatusText          Struct  <MenuText>
+	20368 NoServersFoundText       Struct  <MenuText>
+	20480 SpectateButton           Struct  <MenuButtonText>
+	20964 JoinButton               Struct  <MenuButtonText>
+	21448 RefreshButton            Struct  <MenuButtonText>
+	21932 BackButton               Struct  <MenuButtonText>
+	22416 ServerListHeaderBorder   Struct  <MenuSprite>
+	22488 ServerListBorder         Struct  <MenuSprite>
+	22560 ServerListHeadings       Struct  <MenuButtonText>[5]
+	24980 ServerListColumns        Struct  <MenuStringList>[5]
+	27680 ServerListArrows         Struct  <MenuButtonSprite>[2]
+	28488 ServerListScrollBar      Struct  <MenuScrollBar>
+	29104 ServerListPageUp         Struct  <MenuActiveWidget>
+	29216 ServerListPageDown       Struct  <MenuActiveWidget>
+	29328 ServerListScrollArea     Struct  <MenuScrollArea>
+	29380 ServerListSortKey        Str     [5]
+	29420 ServerListSortColumn     Int     
+	29424 ServerListSortDirection  Int     
+	29428 ServerListSortType       Byte    <GameSpySortMode>
+	29432 ServerListFocusedServerNum Int     
+	29436 PlayerListHeaderBorder   Struct  <MenuSprite>
+	29508 PlayerListBorder         Struct  <MenuSprite>
+	29580 PlayerListHeadings       Struct  <MenuText>[4]
+	30028 PlayerListColumns        Struct  <MenuStringList>[4]
+	32188 PlayerListArrows         Struct  <MenuButtonSprite>[2]
+	32996 PlayerListScrollBar      Struct  <MenuScrollBar>
+	33612 PlayerListPageUp         Struct  <MenuActiveWidget>
+	33724 PlayerListPageDown       Struct  <MenuActiveWidget>
+	33836 PlayerListScrollArea     Struct  <MenuScrollArea>
+	33888 InfoListHeaderBorder     Struct  <MenuSprite>
+	33960 InfoListBorder           Struct  <MenuSprite>
+	34032 InfoListHeadings         Struct  <MenuText>[2]
+	34256 InfoListColumns          Struct  <MenuStringList>[2]
+	35336 InfoListArrows           Struct  <MenuButtonSprite>[2]
+	36144 InfoListScrollBar        Struct  <MenuScrollBar>
+	36760 InfoListPageUp           Struct  <MenuActiveWidget>
+	36872 InfoListPageDown         Struct  <MenuActiveWidget>
+	36984 InfoListScrollArea       Struct  <MenuScrollArea>
+	37036 Servers                  Array   <Struct <GameSpyServer>>
+	37044 Players                  Array   <Struct <GameSpyPlayer>>
+	37052 Info                     Array   <Struct <GameSpyInfo>>
+	37060 QueryString              Str     
+	37068 bRefreshButtonPressed    Bool    <0 : 0x00000001>
+	37072 DeathmatchAbbreviation   Str     
+	37080 TeamDeathmatchAbbreviation Str     
+	37088 CaptureTheFlagAbbreviation Str     
+	37096 AssaultAbbreviation      Str     

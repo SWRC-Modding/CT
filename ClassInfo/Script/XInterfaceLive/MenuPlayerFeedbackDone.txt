@@ -1,0 +1,3 @@
+CLASS: MenuPlayerFeedbackDone(19172), BASE: MenuTemplateTitledA
+PROPERTIES:
+	19060 Text                     Struct  <MenuText>

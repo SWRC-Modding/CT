@@ -1,0 +1,2 @@
+CLASS: GEO_BunkerMissile_Proj(828), BASE: Emitter
+PROPERTIES:

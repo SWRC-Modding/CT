@@ -1,0 +1,2 @@
+CLASS: CTDamageMeleeWarrior(112), BASE: CTDamageMelee
+PROPERTIES:

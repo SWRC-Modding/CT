@@ -1,0 +1,2 @@
+CLASS: HackDoorRasBrg(888), BASE: HackDoor
+PROPERTIES:

@@ -1,0 +1,2 @@
+CLASS: PlayerCommandoDefaults(1716), BASE: PlayerCommando
+PROPERTIES:

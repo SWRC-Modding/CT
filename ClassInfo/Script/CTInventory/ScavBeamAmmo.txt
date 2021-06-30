@@ -1,0 +1,2 @@
+CLASS: ScavBeamAmmo(876), BASE: LaserWeaponAmmo
+PROPERTIES:

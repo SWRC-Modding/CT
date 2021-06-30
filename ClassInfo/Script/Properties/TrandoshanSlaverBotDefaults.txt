@@ -1,0 +1,2 @@
+CLASS: TrandoshanSlaverBotDefaults(1256), BASE: TrandoshanSlaverBot
+PROPERTIES:

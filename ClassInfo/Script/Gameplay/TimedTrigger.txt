@@ -1,0 +1,9 @@
+CLASS: TimedTrigger(656), BASE: Triggers
+ENUMS:
+	ETimerTriggerBehavior
+		TTB_PauseTimer           =   0
+		TTB_RestartTimer         =   1
+PROPERTIES:
+	644  Delay                    Float   
+	648  bRepeating               Bool    <0 : 0x00000001>
+	652  TriggerBehavior          Byte    <ETimerTriggerBehavior>

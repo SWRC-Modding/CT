@@ -1,0 +1,2 @@
+CLASS: GrevGuardMissileEffects(68), BASE: MaterialTypeInfo
+PROPERTIES:

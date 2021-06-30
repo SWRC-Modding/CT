@@ -1,0 +1,2 @@
+CLASS: VertexStreamBase(56), BASE: RenderResource
+PROPERTIES:

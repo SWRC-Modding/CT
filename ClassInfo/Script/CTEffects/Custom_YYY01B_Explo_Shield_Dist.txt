@@ -1,0 +1,2 @@
+CLASS: Custom_YYY01B_Explo_Shield_Dist(828), BASE: Emitter
+PROPERTIES:

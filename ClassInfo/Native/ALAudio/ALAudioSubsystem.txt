@@ -1,0 +1,13 @@
+CLASS: ALAudioSubsystem(744), BASE: AudioSubsystem
+PROPERTIES:
+	736  SelectedEAXVersion       Int     
+	728  LowQualitySound          Bool    <0 : 0x00000001>
+	724  DisablePitch             Bool    <0 : 0x00000001>
+	700  TimeBetweenHWUpdates     Float   
+	720  UseDefaultDriver         Bool    <0 : 0x00000001>
+	716  CompatibilityMode        Bool    <0 : 0x00000001>
+	708  UseEAX                   Bool    <0 : 0x00000001>
+	712  Use3DSound               Bool    <0 : 0x00000001>
+	740  Channels                 Int     
+	704  ReverseStereo            Bool    <0 : 0x00000001>
+	696  NotFirstAudioRun         Bool    <0 : 0x00000001>

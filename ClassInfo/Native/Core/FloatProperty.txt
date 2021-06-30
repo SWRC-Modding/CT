@@ -1,0 +1,2 @@
+CLASS: FloatProperty(64), BASE: Property
+PROPERTIES:

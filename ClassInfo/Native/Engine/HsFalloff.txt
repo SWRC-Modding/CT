@@ -1,0 +1,15 @@
+CLASS: HsFalloff(148), BASE: HardwareShaderWrapper
+PROPERTIES:
+	104  DiffuseTexture           Object  <Texture>
+	108  FalloffGradient          Object  <Texture>
+	112  UPanRate                 Float   
+	116  VPanRate                 Float   
+	120  UOscilationRate          Float   
+	124  VOscilationRate          Float   
+	128  GradientBlendMode        Float   
+	132  DiffuseTint              Struct  <Color>
+	136  GradientTint             Struct  <Color>
+	140  SrcBlend                 Byte    <ED3DBLEND>
+	141  DestBlend                Byte    <ED3DBLEND>
+	144  ZTest                    Bool    <0 : 0x00000001>
+	144  ZWrite                   Bool    <1 : 0x00000002>

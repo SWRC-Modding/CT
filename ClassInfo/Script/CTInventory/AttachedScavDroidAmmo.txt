@@ -1,0 +1,2 @@
+CLASS: AttachedScavDroidAmmo(868), BASE: Ammunition
+PROPERTIES:

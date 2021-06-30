@@ -1,0 +1,2 @@
+CLASS: GeonosianEliteBotDefaults(1256), BASE: GeonosianEliteBot
+PROPERTIES:

@@ -1,0 +1,2 @@
+CLASS: MarkerSnipeAnchorYYY(648), BASE: MarkerSnipeAnchor
+PROPERTIES:

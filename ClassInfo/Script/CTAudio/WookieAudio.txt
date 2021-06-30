@@ -1,0 +1,2 @@
+CLASS: WookieAudio(48), BASE: PawnAudioTable
+PROPERTIES:

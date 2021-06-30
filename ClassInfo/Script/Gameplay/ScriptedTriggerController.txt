@@ -1,0 +1,2 @@
+CLASS: ScriptedTriggerController(920), BASE: ScriptedController
+PROPERTIES:

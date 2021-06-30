@@ -1,0 +1,2 @@
+CLASS: CloneTrooperHelmet(696), BASE: Accessory
+PROPERTIES:

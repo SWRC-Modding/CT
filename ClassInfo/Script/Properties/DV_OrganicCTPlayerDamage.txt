@@ -1,0 +1,2 @@
+CLASS: DV_OrganicCTPlayerDamage(56), BASE: DV_Organic
+PROPERTIES:

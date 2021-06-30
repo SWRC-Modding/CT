@@ -1,0 +1,2 @@
+CLASS: Property(64), BASE: Field
+PROPERTIES:

@@ -1,0 +1,6 @@
+CLASS: UWindowComboListItem(132), BASE: UWindowList
+PROPERTIES:
+	108  Value                    Str     
+	116  Value2                   Str     
+	124  SortWeight               Int     
+	128  ItemTop                  Float   

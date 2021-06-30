@@ -1,0 +1,106 @@
+CLASS: CTBot(1256), BASE: ScriptedController
+ENUMS:
+	EStatePhase
+		SP_Inactive              =   0
+		SP_Activate              =   1
+		SP_Update                =   2
+		SP_Shutdown              =   3
+	EBotGestureSuite
+		BGS_None                 =   0
+		BGS_StateControlled      =   1
+		BGS_Auto                 =   2
+		BGS_Incapacitated        =   3
+PROPERTIES:
+	920  MaxDodgeAngle            Int     
+	924  MinDodgeTime             Float   
+	928  MinGrenadeTime           Float   
+	932  CoverBoredomTime         Float   
+	936  GrenadeProbability       Float   
+	940  MinBurstInterval         Float   
+	944  NextBurstTime            Float   
+	948  NextCoverSearchTime      Float   
+	952  NextGrenadeTime          Float   
+	956  NextDodgeTime            Float   
+	960  ReservedNode             Object  <NavigationPoint>
+	964  Situation                Object  <LocalSituation>
+	968  NextDecisionTime         Float   
+	972  States                   Array   <Object <StateObject>>
+	980  MainGoals                Object  <GoalQueue>
+	984  ScriptedGoals            Object  <GoalQueue>
+	988  SquadGoals               Object  <GoalQueue>
+	992  ReflexGoals              Object  <GoalQueue>
+	996  GestureGoals             Object  <GoalQueue>
+	1000 CurrentState             Object  <StateObject>
+	1004 NextState                Object  <StateObject>
+	1008 BestUtility              Float   
+	1012 StimuliReceived          Array   <Object <Stimulus>>
+	1020 EnemyMemoryTime          Float   
+	1024 LastTimeEnemySeen        Float   
+	1028 LastManeuver             Int     
+	1032 ShotCounter              Int     
+	1036 BurstCount               Int     
+	1040 UnprocessedStimuli       Array   <Object <Stimulus>>
+	1048 StrongestStimulus        Object  <Stimulus>
+	1052 WaitForEventGoal         Object  <GOAL_WaitForEvent>
+	1056 CurrentShootGoal         Object  <GOAL_Shoot>
+	1060 SuggestedCombatPosition  Object  <CoverPoint>
+	1064 SuggestedEnemy           Object  <Actor>
+	1068 TetherTarget             Object  <Actor>
+	1072 TetherPawn               Object  <Pawn>
+	1076 PreventTether            Object  <Actor>
+	1080 PreventRange             Float   
+	1084 NextGunSafetyCheck       Float   
+	1088 TimeOfLastBattleStimulus Float   
+	1092 TimeOfLastStimulus       Float   
+	1096 OffsetDirection          Struct  <Vector>
+	1108 AllyInWay                Object  <Pawn>
+	1112 AllyInWayRadius          Float   
+	1116 ClosestAllyAngle         Float   
+	1120 GrenadeTarget            Object  <Actor>
+	1124 Phase                    Byte    <EStatePhase>
+	1125 GestureSuite             Byte    <EBotGestureSuite>
+	1126 BumpCount                Byte    
+	1127 FriendlyFireCount        Byte    
+	1128 LastFriendlyFireTime     Float   
+	1132 NextIdleGestureTime      Float   
+	1136 NextLookDirectorTime     Float   
+	1140 LastStateClass           Class   <StateObject>
+	1144 StateActivationTime      Float   
+	1148 LastStateLength          Float   
+	1152 DecisionInterval         Float   
+	1156 EmoteProbability         Float   
+	1160 DodgeErrorTime           Float   
+	1164 LastBumpTime             Float   
+	1168 PostWorldCheckFireDuration Float   
+	1172 LastClearShotTime        Float   
+	1176 HostileStimuliResponses  Byte    <EStimulusResponse>[19]
+	1195 BenignStimuliResponses   Byte    <EStimulusResponse>[19]
+	1216 StateWasForced           Bool    <0 : 0x00000001>
+	1216 ExecutingCriticalGoal    Bool    <1 : 0x00000002>
+	1216 bPlayEmoteHear           Bool    <2 : 0x00000004>
+	1216 ShouldReloadSoon         Bool    <3 : 0x00000008>
+	1216 CanReloadNow             Bool    <4 : 0x00000010>
+	1216 CanDodgeNow              Bool    <5 : 0x00000020>
+	1216 bLeapFrog                Bool    <6 : 0x00000040>
+	1216 bBotCombatEnabled        Bool    <7 : 0x00000080>
+	1216 bAutoSelectRunOrWalk     Bool    <8 : 0x00000100>
+	1216 bShouldCrouch            Bool    <9 : 0x00000200>
+	1216 bWantsToFire             Bool    <10: 0x00000400>
+	1216 bLastSafeToShoot         Bool    <11: 0x00000800>
+	1216 bAttackFromCrouch        Bool    <12: 0x00001000>
+	1216 bLookDirectorEnabled     Bool    <13: 0x00002000>
+	1216 bBotCombatAllowsMelee    Bool    <14: 0x00004000>
+	1216 bUseAdditionalTargets    Bool    <15: 0x00008000>
+	1216 bWasProcessingReflexes   Bool    <16: 0x00010000>
+	1216 bCanDecelerate           Bool    <17: 0x00020000>
+	1216 bPreventTetherOneWay     Bool    <18: 0x00040000>
+	1216 bCheckCorpseFire         Bool    <19: 0x00080000>
+	1216 bAutoAntiArmor           Bool    <20: 0x00100000>
+	1216 bAutoSnipe               Bool    <21: 0x00200000>
+	1216 bAutoGrenade             Bool    <22: 0x00400000>
+	1216 bIgnoreFF                Bool    <23: 0x00800000>
+	1216 bAbortShootToDefend      Bool    <24: 0x01000000>
+	1216 bCheckFavoriteWeapon     Bool    <25: 0x02000000>
+	1216 bCanGesture              Bool    <26: 0x04000000>
+	1220 RequiredStates           Class   <StateObject>[8]
+	1252 HearingMultiplier        Float   

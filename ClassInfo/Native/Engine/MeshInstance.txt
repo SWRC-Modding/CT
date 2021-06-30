@@ -1,0 +1,2 @@
+CLASS: MeshInstance(88), BASE: Primitive
+PROPERTIES:

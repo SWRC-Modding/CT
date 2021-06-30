@@ -1,0 +1,7 @@
+CLASS: StatusEffect(664), BASE: Actor
+PROPERTIES:
+	644  DamagePerSecond          Float   
+	648  DamageType               Class   <DamageType>
+	652  EffectClass              Class   <Emitter>
+	656  Effect                   Object  <Emitter>
+	660  RemainingTime            Float   

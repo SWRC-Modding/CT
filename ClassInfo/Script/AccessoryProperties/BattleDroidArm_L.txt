@@ -1,0 +1,2 @@
+CLASS: BattleDroidArm_L(696), BASE: Accessory
+PROPERTIES:

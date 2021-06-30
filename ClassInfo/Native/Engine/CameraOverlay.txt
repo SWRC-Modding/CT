@@ -1,0 +1,4 @@
+CLASS: CameraOverlay(56), BASE: CameraEffect
+PROPERTIES:
+	48   OverlayColor             Struct  <Color>
+	52   OverlayMaterial          Object  <Material>

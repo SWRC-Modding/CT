@@ -1,0 +1,3 @@
+CLASS: StatusEffect_Electrocute(668), BASE: StatusEffect
+PROPERTIES:
+	664  FadeColor                Struct  <Color>

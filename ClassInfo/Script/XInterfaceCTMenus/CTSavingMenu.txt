@@ -1,0 +1,7 @@
+CLASS: CTSavingMenu(18560), BASE: MenuTemplateTitled
+PROPERTIES:
+	18320 Label                    Struct  <MenuText>
+	18432 XbLabel                  Struct  <MenuText>
+	18544 fMinTime                 Float   
+	18548 fElapsedSeconds          Float   
+	18552 SaveGameName             Str     

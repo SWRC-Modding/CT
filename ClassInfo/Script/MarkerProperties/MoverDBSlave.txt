@@ -1,0 +1,2 @@
+CLASS: MoverDBSlave(1596), BASE: MoverDB
+PROPERTIES:

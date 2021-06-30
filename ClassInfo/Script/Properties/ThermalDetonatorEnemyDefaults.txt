@@ -1,0 +1,2 @@
+CLASS: ThermalDetonatorEnemyDefaults(1180), BASE: ThermalDetonatorEnemy
+PROPERTIES:

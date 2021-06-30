@@ -1,0 +1,7 @@
+CLASS: ACTION_TeleportToPoint(80), BASE: LatentScriptedAction
+PROPERTIES:
+	64   ActorToTeleportTag       Name    
+	68   DestinationTag           Name    
+	72   bPlaySpawnEffect         Bool    <0 : 0x00000001>
+	72   bNoCheck                 Bool    <1 : 0x00000002>
+	76   Dest                     Object  <Actor>

@@ -1,0 +1,2 @@
+CLASS: MarkerSnipeAnchorRAS(648), BASE: MarkerSnipeAnchor
+PROPERTIES:

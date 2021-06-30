@@ -1,0 +1,13 @@
+CLASS: UWindowMessageBoxCW(248), BASE: UWindowDialogClientWindow
+PROPERTIES:
+	192  Buttons                  Byte    <MessageBoxButtons>
+	193  EnterResult              Byte    <MessageBoxResult>
+	196  YesButton                Object  <UWindowSmallButton>
+	200  NoButton                 Object  <UWindowSmallButton>
+	204  OkButton                 Object  <UWindowSmallButton>
+	208  CancelButton             Object  <UWindowSmallButton>
+	212  YesText                  Str     
+	220  NoText                   Str     
+	228  OKText                   Str     
+	236  CancelText               Str     
+	244  MessageArea              Object  <UWindowMessageBoxArea>

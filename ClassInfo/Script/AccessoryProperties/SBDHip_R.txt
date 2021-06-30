@@ -1,0 +1,2 @@
+CLASS: SBDHip_R(696), BASE: Accessory
+PROPERTIES:

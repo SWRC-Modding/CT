@@ -1,0 +1,2 @@
+CLASS: Flag_RedProp(868), BASE: AnimProp
+PROPERTIES:

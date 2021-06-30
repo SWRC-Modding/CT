@@ -1,0 +1,9 @@
+CLASS: GOAL_PlaySound(100), BASE: GoalObject
+PROPERTIES:
+	76   Sound                    Object  <Sound>
+	80   AudioCue                 Byte    <EPawnAudioEvent>
+	84   CueInterval              Float   
+	88   CueTimeout               Float   
+	92   CueSubject               Object  <Actor>
+	96   WaitToFinish             Bool    <0 : 0x00000001>
+	96   UseSquadQueue            Bool    <1 : 0x00000002>

@@ -1,0 +1,2 @@
+CLASS: GeoWarriorHip_L(696), BASE: Accessory
+PROPERTIES:

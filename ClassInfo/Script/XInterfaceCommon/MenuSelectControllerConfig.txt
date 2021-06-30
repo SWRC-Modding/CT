@@ -1,0 +1,42 @@
+CLASS: MenuSelectControllerConfig(34832), BASE: MenuTemplateTitledBXA
+ENUMS:
+	EControlGroup
+		ECG_General              =   0
+		ECG_Axial                =   1
+		ECG_Fixed                =   2
+STRUCTS:
+	ControlBinding(32)
+		0    KeyName                  Str     
+		8    Desc                     Str     
+		16   Group                    Byte    <EControlGroup>
+		20   BindingIndex             Int     
+		24   BindingName              Str     
+	BindingAlias(20)
+		0    Alias                    Str     
+		8    AliasName                Str     
+		16   Group                    Byte    <EControlGroup>
+	PresetConfig(648)
+		0    Bindings                 Struct  <ControlBinding>[20]
+		640  PresetName               Str     
+PROPERTIES:
+	20396 ControllerLines          Struct  <MenuSprite>
+	20468 Controls                 Struct  <MenuButtonText>[20]
+	30148 CurrentConfigName        Struct  <MenuButtonText>
+	30632 ButtonPrev               Struct  <MenuButtonSprite>
+	31036 ButtonNext               Struct  <MenuButtonSprite>
+	31440 Bindings                 Struct  <ControlBinding>[20]
+	32080 PresetA                  Struct  <ControlBinding>[20]
+	32720 BindingAliasList         Struct  <BindingAlias>[27]
+	33260 LocalizedAliases         Str     [27]
+	33476 bEditMode                Bool    <0 : 0x00000001>
+	33480 NormalXText              Str     
+	33488 EditXText                Str     
+	33496 NormalBText              Str     
+	33504 EditBText                Str     
+	33512 LPosX                    Float   
+	33516 RPosX                    Float   
+	33520 PosY                     Float   
+	33524 PosYIncr                 Float   
+	33528 PresetList               Struct  <PresetConfig>[2]
+	34824 CurrentConfig            Int     
+	34828 PlayerOwner              Object  <PlayerController>

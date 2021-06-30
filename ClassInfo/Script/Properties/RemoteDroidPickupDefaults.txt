@@ -1,0 +1,2 @@
+CLASS: RemoteDroidPickupDefaults(704), BASE: RemoteDroidPickup
+PROPERTIES:

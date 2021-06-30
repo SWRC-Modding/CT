@@ -1,0 +1,27 @@
+CLASS: Pickup(700), BASE: Actor
+ENUMS:
+	EPickupType
+		PUT_Health               =   0
+		PUT_Ammo                 =   1
+		PUT_Weapon               =   2
+		PUT_Grenade              =   3
+PROPERTIES:
+	644  InventoryType            Class   <Inventory>
+	648  bInstantRespawn          Bool    <0 : 0x00000001>
+	648  bOnlyReplicateHidden     Bool    <1 : 0x00000002>
+	648  bDropped                 Bool    <2 : 0x00000004>
+	648  bPredictRespawns         Bool    <3 : 0x00000008>
+	648  bAddToNav                Bool    <4 : 0x00000010>
+	648  bDroppedWeaponStay       Bool    <5 : 0x00000020>
+	648  bForceRespawn            Bool    <6 : 0x00000040>
+	648  bSpecialPickup           Bool    <7 : 0x00000080>
+	652  RespawnTime              Float   
+	656  RespawnEffectTime        Float   
+	660  DroppedLifetime          Float   
+	664  MPCollisionRadius        Float   
+	668  MPCollisionHeight        Float   
+	672  PickupMessage            Str     
+	680  PickupSound              Object  <Sound>
+	684  PickupForce              Str     
+	692  PickupType               Byte    <EPickupType>
+	696  AlternateHUDArmsMesh     Object  <Mesh>

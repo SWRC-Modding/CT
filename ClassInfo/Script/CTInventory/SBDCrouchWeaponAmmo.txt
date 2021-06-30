@@ -1,0 +1,2 @@
+CLASS: SBDCrouchWeaponAmmo(868), BASE: Ammunition
+PROPERTIES:

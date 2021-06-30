@@ -1,0 +1,2 @@
+CLASS: GEO_SonicCannon_Impact(828), BASE: Emitter
+PROPERTIES:

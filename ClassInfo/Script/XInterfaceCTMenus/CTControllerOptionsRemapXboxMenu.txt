@@ -1,0 +1,18 @@
+CLASS: CTControllerOptionsRemapXboxMenu(30100), BASE: MenuTemplateTitledBXA
+PROPERTIES:
+	20396 Label                    Struct  <MenuText>
+	20508 OptionSet0Labels         Struct  <MenuText>[9]
+	21516 OptionSet0               Struct  <MenuButtonText>[9]
+	25872 OptionSet0Funcs          Str     [9]
+	25944 OptionSet1Labels         Struct  <MenuText>[5]
+	26504 OptionSet1               Struct  <MenuButtonText>[5]
+	28924 OptionSet1Funcs          Str     [5]
+	28964 PrevSet                  Struct  <MenuButtonText>
+	29448 NextSet                  Struct  <MenuButtonText>
+	29932 WhichSet                 Int     
+	29936 ClickRightStickText      Str     
+	29944 ClickLeftStickText       Str     
+	29952 RightStickText           Str     
+	29960 LeftStickText            Str     
+	29968 IniButtonNames           Str     [16]
+	30096 bRemapping               Bool    <0 : 0x00000001>

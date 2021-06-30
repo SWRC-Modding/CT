@@ -1,0 +1,2 @@
+CLASS: CTDamageExplosionThermalDet(112), BASE: CTDamageExplosion
+PROPERTIES:

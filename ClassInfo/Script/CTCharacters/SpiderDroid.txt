@@ -1,0 +1,2 @@
+CLASS: SpiderDroid(1664), BASE: Vehicles
+PROPERTIES:

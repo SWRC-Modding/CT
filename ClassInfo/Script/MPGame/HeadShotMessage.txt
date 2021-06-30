@@ -1,0 +1,5 @@
+CLASS: HeadShotMessage(692), BASE: CriticalEventPlus
+PROPERTIES:
+	676  HeadShotString           Str     
+	684  HeadShotSound            Object  <Sound>
+	688  TrandoHeadShotSound      Object  <Sound>

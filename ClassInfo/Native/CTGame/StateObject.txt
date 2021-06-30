@@ -1,0 +1,5 @@
+CLASS: StateObject(52), BASE: Object
+PROPERTIES:
+	40   Bot                      Object  <CTBot>
+	44   Enabled                  Bool    <0 : 0x00000001>
+	48   Goals                    Object  <GoalQueue>

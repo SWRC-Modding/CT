@@ -1,0 +1,32 @@
+CLASS: Factory(728), BASE: Actor
+ENUMS:
+	ESpawnMode
+		SPM_Cyclic               =   0
+		SPM_Random               =   1
+		SPM_FromFactory          =   2
+		SPM_NearPlayer           =   3
+PROPERTIES:
+	644  bDrawLinks               Bool    <0 : 0x00000001>
+	644  bCovert                  Bool    <1 : 0x00000002>
+	644  bWaitForIllegalSpawns    Bool    <2 : 0x00000004>
+	644  bGenerateForever         Bool    <3 : 0x00000008>
+	644  bStartTimerAfterDeath    Bool    <4 : 0x00000010>
+	648  Capacity                 Int     
+	652  MaxAlive                 Int     
+	656  MaxInWorld               Float   
+	660  SpawnInterval            Float   
+	664  SpawnIntervalMax         Float   
+	668  SpawnMode                Byte    <ESpawnMode>
+	672  MaxPlayerRange           Float   
+	676  MinPlayerRange           Float   
+	680  InitialPhysicsFromFactory Byte    <EPhysics>
+	684  InitialSpeedFromFactory  Float   
+	688  ExhaustedEvent           Name    
+	692  SpawnEvent               Name    
+	696  InternalPrototype        Class   <Actor>
+	700  SpawnedActors            Array   <Object <Actor>>
+	708  SpawnPoints              Array   <Object <SpawnPoint>>
+	716  NextSpawnPoint           Int     
+	720  RemainingItems           Int     
+	724  bEndWaiting              Bool    <0 : 0x00000001>
+	724  bWasOnceOnline           Bool    <1 : 0x00000002>

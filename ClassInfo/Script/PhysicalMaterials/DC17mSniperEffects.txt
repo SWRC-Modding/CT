@@ -1,0 +1,2 @@
+CLASS: DC17mSniperEffects(68), BASE: MaterialTypeInfo
+PROPERTIES:

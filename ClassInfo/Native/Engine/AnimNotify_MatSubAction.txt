@@ -1,0 +1,3 @@
+CLASS: AnimNotify_MatSubAction(48), BASE: AnimNotify
+PROPERTIES:
+	44   SubAction                Object  <MatSubAction>

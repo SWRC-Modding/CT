@@ -1,0 +1,11 @@
+CLASS: ACTION_Briefing(96), BASE: ScriptedAction
+PROPERTIES:
+	64   MaxPitch                 Float   
+	68   MinPitch                 Float   
+	72   MaxYaw                   Float   
+	76   MinYaw                   Float   
+	80   bEndBriefing             Bool    <0 : 0x00000001>
+	80   bSetBriefingWeapon       Bool    <1 : 0x00000002>
+	84   BriefingWeapon           Str     
+	92   bDrawHUD                 Bool    <0 : 0x00000001>
+	92   bOkToChangeWeapon        Bool    <1 : 0x00000002>

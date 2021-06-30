@@ -1,0 +1,2 @@
+CLASS: R5Droid(1688), BASE: Ambient
+PROPERTIES:

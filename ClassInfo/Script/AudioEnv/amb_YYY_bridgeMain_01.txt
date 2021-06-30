@@ -1,0 +1,2 @@
+CLASS: amb_YYY_bridgeMain_01(96), BASE: AudioEnvironment
+PROPERTIES:

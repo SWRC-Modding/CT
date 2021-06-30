@@ -1,0 +1,4 @@
+CLASS: GOAL_Shoot(84), BASE: GoalObject
+PROPERTIES:
+	76   Time                     Float   
+	80   NumShots                 Int     

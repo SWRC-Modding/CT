@@ -1,0 +1,2 @@
+CLASS: ChecksumPackageCommandlet(332), BASE: Commandlet
+PROPERTIES:

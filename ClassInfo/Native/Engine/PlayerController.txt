@@ -1,0 +1,283 @@
+CLASS: PlayerController(2240), BASE: Controller
+ENUMS:
+	ETargetType
+		TGT_Default              =   0
+		TGT_Friend               =   1
+		TGT_FriendInjured        =   2
+		TGT_FriendToHeal         =   3
+		TGT_Marker               =   4
+		TGT_MarkerCancel         =   5
+		TGT_Pickup               =   6
+		TGT_Enemy                =   7
+		TGT_Panel                =   8
+		TGT_DemolitionReady      =   9
+		TGT_KarmaProp            =  10
+		TGT_EngagedEnemy         =  11
+		TGT_MountTurret          =  12
+		TGT_SquadOffensiveStance =  13
+		TGT_SquadDefensiveStance =  14
+		TGT_SquadEngage          =  15
+		TGT_CancelAllMarkers     =  16
+	EColorBlendStage
+		CBS_None                 =   0
+		CBS_In                   =   1
+		CBS_Sustain              =   2
+		CBS_Out                  =   3
+STRUCTS:
+	ColorBlendStageInfo(16)
+		0    BaseColor                Struct  <Color>
+		4    GoalColor                Struct  <Color>
+		8    TotalTime                Float   
+		12   RemainingTime            Float   
+	PlayerNameInfo(20)
+		0    mInfo                    Str     
+		8    mColor                   Struct  <Color>
+		12   mXPos                    Float   
+		16   mYPos                    Float   
+	ClientAdjustment(52)
+		0    TimeStamp                Float   
+		4    newState                 Name    
+		8    newPhysics               Byte    <EPhysics>
+		12   NewLoc                   Struct  <Vector>
+		24   NewVel                   Struct  <Vector>
+		36   NewBase                  Object  <Actor>
+		40   NewFloor                 Struct  <Vector>
+PROPERTIES:
+	848  TargetType               Byte    <ETargetType>
+	849  HandSignalTargetType     Byte    <ETargetType>
+	852  HandSignalTarget         Object  <Actor>
+	856  HandSignalTargetMarker   Object  <SquadMarker>
+	860  OldTargetMarker          Object  <SquadMarker>
+	864  TargetMarker             Object  <SquadMarker>
+	868  TargetDuration           Float   
+	872  HealingTime              Float   
+	876  TotalTimeToRevive        Float   
+	880  OccupiedNode             Object  <NavigationPoint>
+	884  Player                   Object  <Player>
+	888  LevelProgress            Int     
+	892  bLookUpStairs            Bool    <0 : 0x00000001>
+	892  bSnapToLevel             Bool    <1 : 0x00000002>
+	892  bAlwaysMouseLook         Bool    <2 : 0x00000004>
+	892  bKeyboardLook            Bool    <3 : 0x00000008>
+	892  bCenterView              Bool    <4 : 0x00000010>
+	896  XTurnSlowdown            Float   
+	900  XLookUpSlowdown          Float   
+	904  CustomizedClass          Str     
+	912  CloneSkin                Int     
+	916  TrandoSkin               Int     
+	920  CloneAccessories         Int     [5]
+	940  TrandoAccessories        Int     [5]
+	960  VoiceIndex               Int     [2]
+	968  CloneVoicePackNames      Str     [3]
+	992  TrandoVoicePackNames     Str     [3]
+	1016 bVisor                   Bool    <0 : 0x00000001>
+	1020 VisorModeDefault         Int     
+	1024 TacticalModeIntensity    Float   
+	1028 bGlobalRumbleActive      Bool    <0 : 0x00000001>
+	1028 bRumbleActive            Bool    <1 : 0x00000002>
+	1028 bAutoPullManeuvers       Bool    <2 : 0x00000004>
+	1028 bBehindView              Bool    <3 : 0x00000008>
+	1028 bFrozen                  Bool    <4 : 0x00000010>
+	1028 bPressedJump             Bool    <5 : 0x00000020>
+	1028 bDoubleJump              Bool    <6 : 0x00000040>
+	1028 bUpdatePosition          Bool    <7 : 0x00000080>
+	1028 bFixedCamera             Bool    <8 : 0x00000100>
+	1028 bJumpStatus              Bool    <9 : 0x00000200>
+	1028 bUpdating                Bool    <10: 0x00000400>
+	1028 bBriefing                Bool    <11: 0x00000800>
+	1028 bOkToSwitchWeapon        Bool    <12: 0x00001000>
+	1028 bNeverSwitchOnPickup     Bool    <13: 0x00002000>
+	1028 bZooming                 Bool    <14: 0x00004000>
+	1028 bZoom                    Bool    <15: 0x00008000>
+	1028 bUse                     Bool    <16: 0x00010000>
+	1028 bAlwaysLevel             Bool    <17: 0x00020000>
+	1028 bSetTurnRot              Bool    <18: 0x00040000>
+	1028 bCheatFlying             Bool    <19: 0x00080000>
+	1028 bFreeCamera              Bool    <20: 0x00100000>
+	1028 bZeroRoll                Bool    <21: 0x00200000>
+	1028 bCameraPositionLocked    Bool    <22: 0x00400000>
+	1028 bViewBot                 Bool    <23: 0x00800000>
+	1028 UseFixedVisibility       Bool    <24: 0x01000000>
+	1028 bBlockCloseCamera        Bool    <25: 0x02000000>
+	1028 bValidBehindCamera       Bool    <26: 0x04000000>
+	1028 bForcePrecache           Bool    <27: 0x08000000>
+	1028 bClientDemo              Bool    <28: 0x10000000>
+	1028 bAllActorsRelevant       Bool    <29: 0x20000000>
+	1028 bShortConnectTimeOut     Bool    <30: 0x40000000>
+	1028 bPendingDestroy          Bool    <31: 0x80000000>
+	1032 bShouldTravelInv         Bool    <0 : 0x00000001>
+	1032 bNoVoiceMessages         Bool    <1 : 0x00000002>
+	1032 bNoVoiceTaunts           Bool    <2 : 0x00000004>
+	1032 bNoAutoTaunts            Bool    <3 : 0x00000008>
+	1032 bAutoTaunt               Bool    <4 : 0x00000010>
+	1032 bNoMatureLanguage        Bool    <5 : 0x00000020>
+	1032 bDynamicNetSpeed         Bool    <6 : 0x00000040>
+	1032 bKeepHintMenusAwfulHack  Bool    <7 : 0x00000080>
+	1036 AnnouncerLevel           Byte    
+	1037 AnnouncerVolume          Byte    
+	1038 AimingHelp               Byte    
+	1039 MeleeAimingHelp          Byte    
+	1040 MaxResponseTime          Float   
+	1044 WaitDelay                Float   
+	1048 AcknowledgedPawn         Object  <Pawn>
+	1052 aBaseX                   Float   
+	1056 aBaseY                   Float   
+	1060 aBaseZ                   Float   
+	1064 aMouseX                  Float   
+	1068 aMouseY                  Float   
+	1072 aForward                 Float   
+	1076 aTurn                    Float   
+	1080 aStrafe                  Float   
+	1084 aUp                      Float   
+	1088 aLookUp                  Float   
+	1092 bStrafe                  Byte    
+	1093 bSnapLevel               Byte    
+	1094 bLook                    Byte    
+	1095 bFreeLook                Byte    
+	1096 bXAxis                   Byte    
+	1097 bYAxis                   Byte    
+	1098 DoubleClickDir           Byte    <EDoubleClickDir>
+	1100 ShowFlags                Int     
+	1104 Misc1                    Int     
+	1108 Misc2                    Int     
+	1112 RendMap                  Int     
+	1116 OrthoZoom                Float   
+	1120 ViewTarget               Object  <Actor>
+	1124 RealViewTarget           Object  <Controller>
+	1128 DemoViewer               Object  <PlayerController>
+	1132 CameraDist               Float   
+	1136 OldCameraLoc             Struct  <Vector>
+	1148 OldCameraRot             Struct  <Rotator>
+	1160 CameraEffects            Array   <Object <CameraEffect>>
+	1168 FrameFX                  Object  <FrameFX>
+	1172 Helmet                   Object  <Helmet>
+	1176 PlayerSpotLight          Object  <DynamicLight>
+	1180 DesiredFOV               Float   
+	1184 DefaultFOV               Float   
+	1188 ZoomLevel                Float   
+	1192 FixedLocation            Struct  <Vector>
+	1204 FixedRotation            Struct  <Rotator>
+	1216 RenderWorldToCamera      Struct  <Matrix>
+	1280 FlashScale               Struct  <Vector>
+	1292 FlashFog                 Struct  <Vector>
+	1304 ConstantGlowScale        Float   
+	1308 ConstantGlowFog          Struct  <Vector>
+	1320 ColorAdd                 Struct  <Color>
+	1324 CurrentAddStage          Byte    <EColorBlendStage>
+	1328 AddStages                Struct  <ColorBlendStageInfo>[3]
+	1376 ColorMultiply            Struct  <Color>
+	1380 CurrentMultStage         Byte    <EColorBlendStage>
+	1384 MultStages               Struct  <ColorBlendStageInfo>[3]
+	1432 Blur                     Int     
+	1436 CurrentBlurStage         Byte    <EColorBlendStage>
+	1440 BlurStages               Struct  <ColorBlendStageInfo>[3]
+	1488 Bloom                    Int     
+	1492 CurrentBloomStage        Byte    <EColorBlendStage>
+	1496 BloomStages              Struct  <ColorBlendStageInfo>[3]
+	1544 LastDistanceFogColor     Struct  <Color>
+	1548 CurrentDistanceFogColor  Struct  <Color>
+	1552 LastDistanceFogStart     Float   
+	1556 LastDistanceFogEnd       Float   
+	1560 CurrentDistanceFogEnd    Float   
+	1564 TimeSinceLastFogChange   Float   
+	1568 LastZone                 Int     
+	1572 TargetViewRotation       Struct  <Rotator>
+	1584 BlendedTargetViewRotation Struct  <Rotator>
+	1596 TargetEyeHeight          Float   
+	1600 TargetWeaponViewOffset   Struct  <Vector>
+	1612 myHUD                    Object  <HUD>
+	1616 bListObjectives          Bool    <0 : 0x00000001>
+	1620 Objectives               Object  <MissionObjectives>
+	1624 LastPlaySound            Float   
+	1628 LastPlaySpeech           Float   
+	1632 SavedMoves               Object  <SavedMove>
+	1636 FreeMoves                Object  <SavedMove>
+	1640 PendingMove              Object  <SavedMove>
+	1644 CurrentTimeStamp         Float   
+	1648 LastUpdateTime           Float   
+	1652 ServerTimeStamp          Float   
+	1656 TimeMargin               Float   
+	1660 ClientUpdateTime         Float   
+	1664 MaxTimeMargin            Float   
+	1668 OldClientWeapon          Object  <Weapon>
+	1672 WeaponUpdate             Int     
+	1676 FirstTimeSwitch          Int     [15]
+	1736 ProgressMessage          Str     [4]
+	1768 ProgressColor            Struct  <Color>[4]
+	1784 ProgressTimeOut          Float   
+	1788 LastSave                 Str     
+	1796 NoPauseMessage           Str     
+	1804 ViewingFrom              Str     
+	1812 OwnCamera                Str     
+	1820 QuickSaveName            Str     
+	1828 AutoSaveName             Str     
+	1836 NoQuickOrAutoSave        Str     
+	1844 GameReplicationInfo      Object  <GameReplicationInfo>
+	1848 bWasInvited              Bool    <0 : 0x00000001>
+	1852 NetSplitID               Int     
+	1856 Gamertag                 Str     
+	1864 xuid                     Str     
+	1872 bIsGuest                 Bool    <0 : 0x00000001>
+	1876 Skill                    Int     
+	1880 TimeBetweenMatchmakingQueries Float   
+	1884 StatsUsername            Str     
+	1892 StatsPassword            Str     
+	1900 LocalMessageClass        Class   <LocalMessage>
+	1904 MaxShakeOffset           Struct  <Vector>
+	1916 ShakeOffset              Struct  <Vector>
+	1928 ShakeRotMag              Struct  <Vector>
+	1940 ShakeOffsetMag           Struct  <Vector>
+	1952 ShakeRotLastNoise        Struct  <Vector>
+	1964 ShakeOffsetLastNoise     Struct  <Vector>
+	1976 ShakeFrequency           Float   
+	1980 ShakeTimeElapsed         Float   
+	1984 ShakeTimeIn              Float   
+	1988 ShakeTimeSustain         Float   
+	1992 ShakeTimeOut             Float   
+	1996 TurnTarget               Object  <Pawn>
+	2000 EnemyTurnSpeed           Int     
+	2004 GroundPitch              Int     
+	2008 OldFloor                 Struct  <Vector>
+	2020 CheatManager             Object  <CheatManager>
+	2024 CheatClass               Class   <CheatManager>
+	2028 PlayerInput              Object  <PlayerInput>
+	2032 InputClass               Class   <PlayerInput>
+	2036 FailedPathStart          Struct  <Vector>
+	2048 DemoViewPitch            Int     
+	2052 DemoViewYaw              Int     
+	2056 MinPlayerPitch           Int     
+	2060 MaxPlayerPitch           Int     
+	2064 MinPlayerYaw             Int     
+	2068 MaxPlayerYaw             Int     
+	2072 PlayerSecurity           Object  <Security>
+	2076 ForcePrecacheTime        Float   
+	2080 LastPingUpdate           Float   
+	2084 ExactPing                Float   
+	2088 OldPing                  Float   
+	2092 SpectateSpeed            Float   
+	2096 DynamicPingThreshold     Float   
+	2100 NextSpeedChange          Float   
+	2104 ClientCap                Int     
+	2108 bEnablePickupForceFeedback Bool    <0 : 0x00000001>
+	2108 bEnableWeaponForceFeedback Bool    <1 : 0x00000002>
+	2108 bEnableDamageForceFeedback Bool    <2 : 0x00000004>
+	2108 bEnableGUIForceFeedback  Bool    <3 : 0x00000008>
+	2108 bForceFeedbackSupported  Bool    <4 : 0x00000010>
+	2112 TeamBeaconMaxDist        Float   
+	2116 TeamBeaconPlayerInfoMaxDist Float   
+	2120 TeamBeaconTexture        Object  <Texture>
+	2124 TeamBeaconTeamColors     Struct  <Color>[2]
+	2132 PlayerNameArray          Array   <Struct <PlayerNameInfo>>
+	2140 PendingAdjustment        Struct  <ClientAdjustment>
+	2192 LastActiveTime           Float   
+	2196 LastSpeedHackLog         Float   
+	2200 bWasSpeedHack            Bool    <0 : 0x00000001>
+	2204 CachedNumSaves           Int     
+	2208 DifficultyDamageModifier Float   
+	2212 DamageModifierEasy       Float   
+	2216 DamageModifierMedium     Float   
+	2220 DamageModifierHard       Float   
+	2224 SavedVisionMode          Int     
+	2228 bBadCDKey                Bool    <0 : 0x00000001>
+	2228 bMissingContent          Bool    <1 : 0x00000002>
+	2232 MissingContentName       Str     

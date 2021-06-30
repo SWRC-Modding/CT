@@ -1,0 +1,2 @@
+CLASS: MarkerHackTerminal(904), BASE: MarkerHackTerminalNative
+PROPERTIES:

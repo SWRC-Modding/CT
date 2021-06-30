@@ -1,0 +1,3 @@
+CLASS: UWindowProgressBar(184), BASE: UWindowWindow
+PROPERTIES:
+	180  Percent                  Float   

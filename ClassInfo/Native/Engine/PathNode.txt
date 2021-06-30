@@ -1,0 +1,2 @@
+CLASS: PathNode(724), BASE: NavigationPoint
+PROPERTIES:

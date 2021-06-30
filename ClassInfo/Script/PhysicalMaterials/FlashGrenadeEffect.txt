@@ -1,0 +1,2 @@
+CLASS: FlashGrenadeEffect(68), BASE: MaterialTypeInfo
+PROPERTIES:

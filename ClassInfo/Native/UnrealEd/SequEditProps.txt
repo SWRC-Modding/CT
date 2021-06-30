@@ -1,0 +1,11 @@
+CLASS: SequEditProps(80), BASE: Object
+PROPERTIES:
+	40   WBrowserAnimationPtr     Int     
+	44   SequenceName             Name    
+	48   Rate                     Float   
+	52   RateVariance             Float   
+	56   TweenTime                Float   
+	60   RandomStart              Bool    <0 : 0x00000001>
+	64   CompError                Float   
+	68   Probability              Float   
+	72   Groups                   Array   <Name>

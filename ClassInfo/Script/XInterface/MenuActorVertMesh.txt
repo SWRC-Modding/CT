@@ -1,0 +1,2 @@
+CLASS: MenuActorVertMesh(644), BASE: Actor
+PROPERTIES:

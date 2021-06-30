@@ -1,0 +1,2 @@
+CLASS: CTDamageSonicDefaults(112), BASE: CTDamageSonic
+PROPERTIES:

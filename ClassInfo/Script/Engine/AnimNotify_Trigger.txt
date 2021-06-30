@@ -1,0 +1,4 @@
+CLASS: AnimNotify_Trigger(52), BASE: AnimNotify_Scripted
+PROPERTIES:
+	44   EventName                Name    
+	48   TriggerSelf              Bool    <0 : 0x00000001>

@@ -1,0 +1,5 @@
+CLASS: Shotgun(1220), BASE: Weapon
+PROPERTIES:
+	1180 ShellAttach              Class   <Actor>
+	1184 AllShells                Object  <Actor>[8]
+	1216 LastShell                Int     

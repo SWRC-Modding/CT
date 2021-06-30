@@ -1,0 +1,7 @@
+CLASS: CTFBase(828), BASE: GameObjective
+PROPERTIES:
+	808  GRI                      Object  <GameReplicationInfo>
+	812  TakenSound               Object  <Sound>
+	816  myFlag                   Object  <GameObject>
+	820  CTFFlagType              Class   <CTFFlag>
+	824  ASFlagType               Class   <ASFlag>

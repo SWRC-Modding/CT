@@ -1,0 +1,2 @@
+CLASS: StateSlaverAttackDefaults(160), BASE: StateSlaverAttack
+PROPERTIES:

@@ -1,0 +1,53 @@
+CLASS: FluidSurfaceInfo(884), BASE: Info
+ENUMS:
+	EFluidGridType
+		FGT_Square               =   0
+		FGT_Hexagonal            =   1
+PROPERTIES:
+	644  FluidGridType            Byte    <EFluidGridType>
+	648  FluidGridSpacing         Float   
+	652  FluidXSize               Int     
+	656  FluidYSize               Int     
+	660  FluidHeightScale         Float   
+	664  FluidSpeed               Float   
+	668  FluidDamping             Float   
+	672  FluidNoiseFrequency      Float   
+	676  FluidNoiseStrength       Struct  <Range>
+	684  TestRipple               Bool    <0 : 0x00000001>
+	688  TestRippleSpeed          Float   
+	692  TestRippleStrength       Float   
+	696  TestRippleRadius         Float   
+	700  UTiles                   Float   
+	704  UOffset                  Float   
+	708  VTiles                   Float   
+	712  VOffset                  Float   
+	716  AlphaCurveScale          Float   
+	720  AlphaHeightScale         Float   
+	724  AlphaMax                 Byte    
+	728  ShootStrength            Float   
+	732  ShootRadius              Float   
+	736  RippleVelocityFactor     Float   
+	740  TouchStrength            Float   
+	744  ShootEffect              Class   <Actor>
+	748  OrientShootEffect        Bool    <0 : 0x00000001>
+	752  TouchEffect              Class   <Actor>
+	756  OrientTouchEffect        Bool    <0 : 0x00000001>
+	760  ClampBitmap              Array   <Int>
+	768  ClampTerrain             Object  <TerrainInfo>
+	772  bShowBoundingBox         Bool    <0 : 0x00000001>
+	772  bUseNoRenderZ            Bool    <1 : 0x00000002>
+	776  NoRenderZ                Float   
+	780  WarmUpTime               Float   
+	784  UpdateRate               Float   
+	788  FluidColor               Struct  <Color>
+	792  Verts0                   Array   <Float>
+	800  Verts1                   Array   <Float>
+	808  VertAlpha                Array   
+	816  LatestVerts              Int     
+	820  FluidBoundingBox         Struct  <Box>
+	848  FluidOrigin              Struct  <Vector>
+	860  TimeRollover             Float   
+	864  TestRippleAng            Float   
+	868  Primitive                Object  <FluidSurfacePrimitive>
+	872  Oscillators              Array   <Object <FluidSurfaceOscillator>>
+	880  bHasWarmedUp             Bool    <0 : 0x00000001>

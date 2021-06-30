@@ -1,0 +1,2 @@
+CLASS: WarriorPerch(736), BASE: Perch
+PROPERTIES:

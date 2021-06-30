@@ -1,0 +1,2 @@
+CLASS: HitDecMetal_SonicCannon(1060), BASE: HitDecal
+PROPERTIES:

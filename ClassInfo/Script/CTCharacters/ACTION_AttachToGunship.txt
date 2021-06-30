@@ -1,0 +1,7 @@
+CLASS: ACTION_AttachToGunship(100), BASE: ScriptedAction
+PROPERTIES:
+	64   AttachActorTag           Name    
+	68   AttachBone               Name    
+	72   bAttach                  Bool    <0 : 0x00000001>
+	76   LocationOffset           Struct  <Vector>
+	88   RotationOffset           Struct  <Rotator>

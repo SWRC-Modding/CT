@@ -1,0 +1,2 @@
+CLASS: ConcussionRiflePickup(704), BASE: CTPickup
+PROPERTIES:

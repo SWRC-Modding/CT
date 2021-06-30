@@ -1,0 +1,4 @@
+CLASS: GOAL_ChangeWeapon(84), BASE: GoalObject
+PROPERTIES:
+	76   WeaponSlot               Int     
+	80   Weapon                   Object  <Weapon>

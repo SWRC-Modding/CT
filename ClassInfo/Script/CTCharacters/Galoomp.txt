@@ -1,0 +1,2 @@
+CLASS: Galoomp(1688), BASE: Ambient
+PROPERTIES:

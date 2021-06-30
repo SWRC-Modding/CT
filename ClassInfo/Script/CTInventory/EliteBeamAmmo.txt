@@ -1,0 +1,2 @@
+CLASS: EliteBeamAmmo(876), BASE: LaserWeaponAmmo
+PROPERTIES:

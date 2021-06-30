@@ -1,0 +1,2 @@
+CLASS: Explosion_FireBall_wSmokeColumn(828), BASE: Emitter
+PROPERTIES:

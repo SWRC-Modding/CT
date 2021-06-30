@@ -1,0 +1,2 @@
+CLASS: GunshipChinGunAmmoDefaults(868), BASE: GunshipChinGunAmmo
+PROPERTIES:

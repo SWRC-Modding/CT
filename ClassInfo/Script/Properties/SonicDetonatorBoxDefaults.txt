@@ -1,0 +1,2 @@
+CLASS: SonicDetonatorBoxDefaults(704), BASE: SonicDetonatorBox
+PROPERTIES:

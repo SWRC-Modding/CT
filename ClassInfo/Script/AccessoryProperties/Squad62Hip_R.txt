@@ -1,0 +1,2 @@
+CLASS: Squad62Hip_R(696), BASE: Accessory
+PROPERTIES:

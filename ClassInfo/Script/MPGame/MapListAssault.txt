@@ -1,0 +1,2 @@
+CLASS: MapListAssault(656), BASE: MapList
+PROPERTIES:

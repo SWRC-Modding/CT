@@ -1,0 +1,2 @@
+CLASS: OrrayAudio(48), BASE: PawnAudioTable
+PROPERTIES:

@@ -1,0 +1,11 @@
+CLASS: MenuPlayerStats(20636), BASE: MenuTemplateTitledB
+PROPERTIES:
+	19060 Label                    Struct  <MenuText>[7]
+	19844 PlayerName               Struct  <MenuText>
+	19956 Points                   Struct  <MenuText>
+	20068 KillsStat                Struct  <MenuText>
+	20180 Deaths                   Struct  <MenuText>
+	20292 GamesPlayed              Struct  <MenuText>
+	20404 Specials                 Struct  <MenuText>
+	20516 Efficiency               Struct  <MenuText>
+	20628 Gamertag                 Str     

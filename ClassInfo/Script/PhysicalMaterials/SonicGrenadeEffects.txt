@@ -1,0 +1,2 @@
+CLASS: SonicGrenadeEffects(68), BASE: MaterialTypeInfo
+PROPERTIES:

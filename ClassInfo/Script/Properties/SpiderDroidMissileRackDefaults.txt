@@ -1,0 +1,2 @@
+CLASS: SpiderDroidMissileRackDefaults(1180), BASE: SpiderDroidMissileRack
+PROPERTIES:

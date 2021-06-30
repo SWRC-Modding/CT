@@ -1,0 +1,4 @@
+CLASS: AIScript(652), BASE: Actor
+PROPERTIES:
+	644  ControllerClass          Class   <AIController>
+	648  bLoggingEnabled          Bool    <0 : 0x00000001>

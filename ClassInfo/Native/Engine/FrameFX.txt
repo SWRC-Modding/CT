@@ -1,0 +1,21 @@
+CLASS: FrameFX(116), BASE: Object
+PROPERTIES:
+	40   Blur                     Byte    
+	41   BlurMip                  Byte    
+	44   VisionMode               Object  <VisionMode>
+	48   VisionModeFade           Float   
+	52   LastFrameTime            Float   
+	56   BloomEnabled             Bool    <0 : 0x00000001>
+	60   ViewZone                 Object  <ZoneInfo>
+	64   CurrentBloom             Float   
+	68   CurrentBloomFilter       Float   
+	72   ShaderBlur               Object  <HardwareShader>
+	76   ShaderGlow               Object  <HardwareShader>
+	80   ShaderDraw               Object  <HardwareShader>
+	84   ShaderEngage             Object  <HardwareShader>
+	88   ShaderShieldHit          Object  <HardwareShader>
+	92   ShaderShield             Object  <HardwareShader>
+	96   DefaultVisionMode        Object  <VisionMode>
+	100  ActorShaderFX            Array   <Object <HardwareShader>>
+	108  DrawRegularWorld         Bool    <0 : 0x00000001>
+	112  FSAA                     Int     

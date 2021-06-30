@@ -1,0 +1,2 @@
+CLASS: CTPRI(788), BASE: PlayerReplicationInfo
+PROPERTIES:

@@ -1,0 +1,2 @@
+CLASS: ATTEWalkerTurret(1180), BASE: Weapon
+PROPERTIES:

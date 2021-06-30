@@ -1,0 +1,7 @@
+CLASS: GOAL_JumpTo(100), BASE: GoalObject
+PROPERTIES:
+	76   Goal                     Object  <Actor>
+	80   Destination              Struct  <Vector>
+	92   ToleranceSquared         Float   
+	96   StartedJump              Bool    <0 : 0x00000001>
+	96   CompletedJump            Bool    <1 : 0x00000002>

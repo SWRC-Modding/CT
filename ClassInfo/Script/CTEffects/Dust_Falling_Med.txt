@@ -1,0 +1,2 @@
+CLASS: Dust_Falling_Med(828), BASE: Emitter
+PROPERTIES:

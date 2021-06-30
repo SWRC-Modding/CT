@@ -1,0 +1,6 @@
+CLASS: SubActionCameraEffect(92), BASE: MatSubAction
+PROPERTIES:
+	76   CameraEffect             Object  <CameraEffect>
+	80   StartAlpha               Float   
+	84   EndAlpha                 Float   
+	88   DisableAfterDuration     Bool    <0 : 0x00000001>

@@ -1,0 +1,359 @@
+CLASS: Pawn(1648), BASE: Actor
+ENUMS:
+	EPawnMovementStyle
+		MS_None                  =   0
+		MS_Walk                  =   1
+		MS_WalkWounded           =   2
+		MS_Run                   =   3
+		MS_RunWounded            =   4
+		MS_Crouch                =   5
+		MS_Ladder                =   6
+		MS_Swim                  =   7
+		MS_Fly                   =   8
+	EStartState
+		SS_Idle                  =   0
+		SS_Wander                =   1
+		SS_Perched               =   2
+		SS_PerchedCeiling        =   3
+		SS_Shutdown              =   4
+		SS_Asleep                =   5
+		SS_StationaryAttack      =   6
+	EIdleState
+		AS_Shutdown              =   0
+		AS_Relaxed               =   1
+		AS_Alert                 =   2
+		AS_Berserk               =   3
+		AS_PerchedCeiling        =   4
+		AS_PerchedWall           =   5
+		AS_Possessed             =   6
+		AS_StandTurret           =   7
+		AS_SitTurret             =   8
+		AS_BackToWall            =   9
+	EHealthLevel
+		HL_Red                   =   0
+		HL_Orange                =   1
+		HL_Yellow                =   2
+		HL_Green                 =   3
+	EPatrolMode
+		PM_Loop                  =   0
+		PM_PingPong              =   1
+		PM_Random                =   2
+		PM_Once                  =   3
+STRUCTS:
+	PatrolPoint(28)
+		0    Node                     Object  <Actor>
+		4    PauseTime                Float   
+		8    Animation                Name    
+		12   NumAnimLoops             Int     
+		16   Event                    Name    
+		20   RunToNode                Bool    <0 : 0x00000001>
+		20   ShootWhileMoving         Bool    <1 : 0x00000002>
+		20   OrientToNode             Bool    <2 : 0x00000004>
+		20   MakeInvulnerable         Bool    <3 : 0x00000008>
+		24   PatrolPriorityOverride   Float   
+	DamageMultiplier(8)
+		0    BoneName                 Name    
+		4    Multiplier               Float   
+	AccessoryInfo(12)
+		0    HasBeenUsed              Bool    <0 : 0x00000001>
+		0    IsRequired               Bool    <1 : 0x00000002>
+		4    AccessoryClass           Class   <Accessory>
+		8    BoneName                 Name    
+	DismembermentInfo(20)
+		0    Bone                     Name    
+		4    SpawnProbability         Float   
+		8    Part                     Class   <Accessory>
+		12   DismembermentEffectClass Class   <Emitter>
+		16   DisablePartialDismemberment Bool    <0 : 0x00000001>
+	FinishingMove(24)
+		0    EnemyClass               Name    
+		4    Animation                Name    
+		8    DirectionFromEnemy       Byte    <EDirection>
+		12   OffsetFromEnemy          Struct  <Vector>
+	ImpactAnim(8)
+		0    BoneName                 Name    
+		4    Animation                Name    
+PROPERTIES:
+	644  bIsWalking               Bool    <0 : 0x00000001>
+	644  bWantsToCrouch           Bool    <1 : 0x00000002>
+	644  bIsCrouched              Bool    <2 : 0x00000004>
+	644  bTryToUncrouch           Bool    <3 : 0x00000008>
+	644  bJustLanded              Bool    <4 : 0x00000010>
+	644  bWarping                 Bool    <5 : 0x00000020>
+	644  bUpAndOut                Bool    <6 : 0x00000040>
+	644  bCrawler                 Bool    <7 : 0x00000080>
+	644  bRollToDesired           Bool    <8 : 0x00000100>
+	644  bPhysicsAnimUpdate       Bool    <9 : 0x00000200>
+	644  bWasCrouched             Bool    <10: 0x00000400>
+	644  bWasWalking              Bool    <11: 0x00000800>
+	644  bWasOnGround             Bool    <12: 0x00001000>
+	644  bPlayedDeath             Bool    <13: 0x00002000>
+	644  bCannotDie               Bool    <14: 0x00004000>
+	644  bIncapacitated           Bool    <15: 0x00008000>
+	644  bFallOnDeath             Bool    <16: 0x00010000>
+	644  bHasFullFlyAnims         Bool    <17: 0x00020000>
+	644  bDisallowPainAnims       Bool    <18: 0x00040000>
+	644  bIncapacitatedOnTurret   Bool    <19: 0x00080000>
+	644  bIgnoreFriendlyFire      Bool    <20: 0x00100000>
+	644  bCanJump                 Bool    <21: 0x00200000>
+	644  bCanLedgeFall            Bool    <22: 0x00400000>
+	644  bCanCrouch               Bool    <23: 0x00800000>
+	644  bCanWalk                 Bool    <24: 0x01000000>
+	644  bCanRun                  Bool    <25: 0x02000000>
+	644  bCanSwim                 Bool    <26: 0x04000000>
+	644  bCanFly                  Bool    <27: 0x08000000>
+	644  bCanClimbLadders         Bool    <28: 0x10000000>
+	644  bCanStrafe               Bool    <29: 0x20000000>
+	644  bCanDodge                Bool    <30: 0x40000000>
+	644  bCanSideStep             Bool    <31: 0x80000000>
+	648  bCanDive                 Bool    <0 : 0x00000001>
+	648  bCanPerch                Bool    <1 : 0x00000002>
+	648  bCanLean                 Bool    <2 : 0x00000004>
+	648  bMustStopToTurn          Bool    <3 : 0x00000008>
+	648  bDisableFireAnims        Bool    <4 : 0x00000010>
+	648  bSaveMyCorpse            Bool    <5 : 0x00000020>
+	648  bAvoidLedges             Bool    <6 : 0x00000040>
+	648  bStopAtLedges            Bool    <7 : 0x00000080>
+	648  bCanWalkOffLedges        Bool    <8 : 0x00000100>
+	648  bDismembered             Bool    <9 : 0x00000200>
+	648  bNoJumpAdjust            Bool    <10: 0x00000400>
+	648  bIgnoreForces            Bool    <11: 0x00000800>
+	648  bNoVelocityUpdate        Bool    <12: 0x00001000>
+	648  bClientCollision         Bool    <13: 0x00002000>
+	648  bCollideAfterDeath       Bool    <14: 0x00004000>
+	648  bSimulateGravity         Bool    <15: 0x00008000>
+	648  bSimGravityDisabled      Bool    <16: 0x00010000>
+	648  bCachedRelevant          Bool    <17: 0x00020000>
+	648  bUseCompressedPosition   Bool    <18: 0x00040000>
+	648  bIsSquadLeader           Bool    <19: 0x00080000>
+	648  HealthAffectsGameplay    Bool    <20: 0x00100000>
+	648  bDebugAI                 Bool    <21: 0x00200000>
+	648  bDontPossess             Bool    <22: 0x00400000>
+	648  bCanBeSquadMember        Bool    <23: 0x00800000>
+	648  bTossWeaponOnDeath       Bool    <24: 0x01000000>
+	648  bDecelerateOnArrival     Bool    <25: 0x02000000>
+	648  bUseAnalogSpeed          Bool    <26: 0x04000000>
+	648  bUseSpeedScaler          Bool    <27: 0x08000000>
+	648  bBeingRevivedByPlayer    Bool    <28: 0x10000000>
+	648  bPerceivedAsThreat       Bool    <29: 0x20000000>
+	648  bNeverMeleeMe            Bool    <30: 0x40000000>
+	648  bSquadShouldFallBack     Bool    <31: 0x80000000>
+	652  bLOSHearing              Bool    <0 : 0x00000001>
+	652  bSameZoneHearing         Bool    <1 : 0x00000002>
+	652  bAdjacentZoneHearing     Bool    <2 : 0x00000004>
+	652  bMuffledHearing          Bool    <3 : 0x00000008>
+	652  bAroundCornerHearing     Bool    <4 : 0x00000010>
+	652  bOnPathFailNoCollision   Bool    <5 : 0x00000020>
+	652  bOnPathFailTeleport      Bool    <6 : 0x00000040>
+	652  bCanPerformSquadMarkers  Bool    <7 : 0x00000080>
+	652  bUpdateEyeheight         Bool    <8 : 0x00000100>
+	652  bUpdatingDisplay         Bool    <9 : 0x00000200>
+	652  bHideRegularHUD          Bool    <10: 0x00000400>
+	652  bDidDamageThisFrame      Bool    <11: 0x00000800>
+	652  bSetDamageThisFrame      Bool    <12: 0x00001000>
+	652  bWeaponBob               Bool    <13: 0x00002000>
+	652  bCanPickupInventory      Bool    <14: 0x00004000>
+	652  bCanSpecialPickup        Bool    <15: 0x00008000>
+	652  bNoDefaultInventory      Bool    <16: 0x00010000>
+	652  bAutoActivate            Bool    <17: 0x00020000>
+	652  bShowFOV                 Bool    <18: 0x00040000>
+	652  bShowHearing             Bool    <19: 0x00080000>
+	652  bShowPathing             Bool    <20: 0x00100000>
+	652  bShowEnemy               Bool    <21: 0x00200000>
+	652  bShowFocus               Bool    <22: 0x00400000>
+	652  bShowMoveDest            Bool    <23: 0x00800000>
+	652  bShowStateTint           Bool    <24: 0x01000000>
+	652  bCanBeBaseForPawns       Bool    <25: 0x02000000>
+	652  bDirectHitWall           Bool    <26: 0x04000000>
+	652  bSoakDebug               Bool    <27: 0x08000000>
+	652  bIsTrandoshan            Bool    <28: 0x10000000>
+	652  bEnableTurn              Bool    <29: 0x20000000>
+	652  bEnableAim               Bool    <30: 0x40000000>
+	652  bEnableHead              Bool    <31: 0x80000000>
+	656  bHas180Turns             Bool    <0 : 0x00000001>
+	656  bWasHit                  Bool    <1 : 0x00000002>
+	656  bWasHitWasSent           Bool    <2 : 0x00000004>
+	660  Health                   Float   
+	664  MaxHealth                Float   
+	668  Shields                  Float   
+	672  MaxShields               Float   
+	676  ShieldRechargeRate       Float   
+	680  ShieldRechargeDelay      Float   
+	684  HealthLevel              Byte    <EHealthLevel>
+	688  NextShieldRechargeTime   Float   
+	692  DamageMultipliers        Array   <Struct <DamageMultiplier>>
+	700  ShieldDamageVariance     Class   <DamageVariance>
+	704  ArmorFactor              Float   
+	708  BleedOutTime             Float   
+	712  MinImpactDamage          Float   
+	716  MinImpactInterval        Float   
+	720  LastImpactTime           Float   
+	724  MinStaggerDamage         Float   
+	728  MinStaggerInterval       Float   
+	732  LastStaggerTime          Float   
+	736  ImpactAnims              Array   <Struct <ImpactAnim>>
+	744  BestGrenadeAgainst       Class   <Weapon>
+	748  PendingWeapon            Object  <Weapon>
+	752  Weapon                   Object  <Weapon>
+	756  OldWeapon                Object  <Weapon>
+	760  CurrentTossableWeapon    Object  <Weapon>
+	764  CurrentGrenade           Object  <Weapon>
+	768  SelectedItem             Object  <Powerups>
+	772  RequiredEquipment        Str     [16]
+	900  ActionString             Str     
+	908  Flashlight               Object  <Flashlight>
+	912  DropGrenadePercentage    Float   
+	916  ReturnGrenadeClass       Class   <Projectile>
+	920  AvailableAccessories     Array   <Struct <AccessoryInfo>>
+	928  MaxAccessories           Int     
+	932  Accessories              Array   <Object <Accessory>>
+	940  DeathEffect              Class   <Emitter>
+	944  DismembermentParts       Array   <Struct <DismembermentInfo>>
+	952  DismembermentThreshold   Float   
+	956  DeathEffectContainerClass Class   <DeathEffectContainer>
+	960  BurntMaterial            Object  <Material>
+	964  FinishingMoves           Array   <Struct <FinishingMove>>
+	972  MeshSets                 Array   <Struct <MeshSetLinkup>>
+	980  EnemyKilledThisFrame     Object  <Pawn>
+	984  VisorBloodSplatters      Array   <Object <Material>>
+	992  CurrentUserVisionMode    Int     
+	996  VisionPawnUser           Object  <VisionMode>[3]
+	1008 VisionPawnHit            Object  <VisionMode>
+	1012 VisionPawnIncap          Object  <VisionMode>
+	1016 VisionPawnScavDrill      Object  <VisionMode>
+	1020 ShieldColor              Struct  <Color>
+	1024 HearingThreshold         Float   
+	1028 SightRadius              Float   
+	1032 PeripheralVision         Float   
+	1036 AutoDetectRadius         Float   
+	1040 BaseEyeHeight            Float   
+	1044 EyeHeight                Float   
+	1048 OldZ                     Float   
+	1052 Controller               Object  <Controller>
+	1056 ControllerClass          Class   <AIController>
+	1060 StartState               Byte    <EStartState>
+	1061 PatrolMode               Byte    <EPatrolMode>
+	1062 Visibility               Byte    
+	1063 SquadHUDSlot             Byte    
+	1064 PatrolPriority           Float   
+	1068 PatrolRoute              Array   <Struct <PatrolPoint>>
+	1076 AIScriptTag              Name    
+	1080 TeamIndex                Int     
+	1084 TargetedByCount          Int     
+	1088 Squad                    Object  <Squad>
+	1092 Accuracy                 Float   
+	1096 MovementOffsetDir        Struct  <Vector>
+	1108 AnalogSpeed              Float   
+	1112 MaximumDesiredSpeed      Float   
+	1116 TakeHitLocation          Struct  <Vector>
+	1128 HitDamageType            Class   <DamageType>
+	1132 LastHitDamageType        Class   <DamageType>
+	1136 LastHitBy                Object  <Pawn>
+	1140 LastHitLocalTime         Float   
+	1144 LastHitLocation          Struct  <Vector>
+	1156 LastHitBone              Name    
+	1160 MaxDeathLoopTime         Float   
+	1164 DeathLoopStartTime       Float   
+	1168 GunHeight                Float   
+	1172 LastDodgeTime            Float   
+	1176 PreDodgeLocation         Struct  <Vector>
+	1188 FirstDamagedEvent        Name    
+	1192 Anchor                   Object  <NavigationPoint>
+	1196 CurrentLink              Object  <ReachSpec>
+	1200 CurrentLinkDir           Struct  <Vector>
+	1212 LastAnchor               Object  <NavigationPoint>
+	1216 FindAnchorFailedTime     Float   
+	1220 LastValidAnchorTime      Float   
+	1224 DestinationOffset        Float   
+	1228 AvgPhysicsTime           Float   
+	1232 AvoidanceDir             Struct  <Vector>
+	1244 NextAvoidanceTime        Float   
+	1248 OwnerName                Str     
+	1256 PlayerReplicationInfo    Object  <PlayerReplicationInfo>
+	1260 LandMovementState        Name    
+	1264 WaterMovementState       Name    
+	1268 Floor                    Struct  <Vector>
+	1280 CrouchHeight             Float   
+	1284 CrouchRadius             Float   
+	1288 PerchRadius              Float   
+	1292 NextFootstepTime         Float   
+	1296 StrafeDistance           Float   
+	1300 StepDistance             Float   
+	1304 DodgeDistance            Float   
+	1308 LeapDistance             Float   
+	1312 LeanDistance             Float   
+	1316 FlyingRollMult           Int     
+	1320 GroundSpeed              Float   
+	1324 WaterSpeed               Float   
+	1328 AirSpeed                 Float   
+	1332 LadderSpeed              Float   
+	1336 MaxFallSpeed             Float   
+	1340 AccelRate                Float   
+	1344 JumpZ                    Float   
+	1348 AirControl               Float   
+	1352 WalkSpeedRatio           Float   
+	1356 CrouchSpeedRatio         Float   
+	1360 WoundedSpeedRatio        Float   
+	1364 BackSpeedRatio           Float   
+	1368 SideSpeedRatio           Float   
+	1372 AimSpeed                 Float   
+	1376 DecelRate                Float   
+	1380 MinCorrectedSpeed        Float   
+	1384 MaxAnalogOverdriveRatio  Float   
+	1388 RunStimulus              Byte    <EStimulusType>
+	1389 WalkStimulus             Byte    <EStimulusType>
+	1390 OldPhysics               Byte    <EPhysics>
+	1391 CurrentMovementStyle     Byte    <EPawnMovementStyle>
+	1392 CurrentIdleState         Byte    <EIdleState>
+	1393 OldIdleState             Byte    <EIdleState>
+	1396 OldRotYaw                Float   
+	1400 OldAcceleration          Struct  <Vector>
+	1412 MovementAnim             Name    
+	1416 TurnLeftAnim             Name    
+	1420 TurnRightAnim            Name    
+	1424 BreatheWeaponAnim        Name    
+	1428 MovementBlendStartTime   Float   
+	1432 MaxAimYaw                Float   
+	1436 MaxAimPitch              Float   
+	1440 MaxLookYaw               Float   
+	1444 MaxLookPitch             Float   
+	1448 AudioTable               Class   <PawnAudioTable>
+	1452 EndTalkTime              Float   
+	1456 MinYelpTime              Float   
+	1460 LastYelpTime             Float   
+	1464 MinShieldDamageSoundInterval Float   
+	1468 LastShieldDamageSoundTime Float   
+	1472 ShieldDamageSound        Object  <Sound>
+	1476 MostRecentCue            Byte    <EPawnAudioEvent>
+	1477 EnemySpottedCue          Byte    <EPawnAudioEvent>
+	1478 KilledEnemyCue           Byte    <EPawnAudioEvent>
+	1479 AllyDownCue              Byte    <EPawnAudioEvent>
+	1480 DownedByCue              Byte    <EPawnAudioEvent>
+	1481 AssistingAllyCue         Byte    <EPawnAudioEvent>
+	1484 Land                     Object  <Sound>
+	1488 RagImpactSounds          Array   <Object <Sound>>
+	1496 RagImpactSoundInterval   Float   
+	1500 RagImpactVolume          Float   
+	1504 RagLastSoundTime         Float   
+	1508 RagdollLifeSpan          Float   
+	1512 RagdollOverride          Str     
+	1520 AnimAction               Name    
+	1524 LastStartTime            Float   
+	1528 PawnPosition             Struct  <CompressedPosition>
+	1564 NetRelevancyTime         Float   
+	1568 LastRealViewer           Object  <PlayerController>
+	1572 LastViewer               Object  <Actor>
+	1576 LastStartSpot            Object  <PlayerStart>
+	1580 LastLocTime              Float   
+	1584 SplashTime               Float   
+	1588 Bob                      Float   
+	1592 LandBob                  Float   
+	1596 AppliedBob               Float   
+	1600 BobTime                  Float   
+	1604 WalkBob                  Struct  <Vector>
+	1616 UncrouchTime             Float   
+	1620 TearOffMomentum          Struct  <Vector>
+	1632 Shadow                   Object  <Projector>
+	1636 HeadVolume               Object  <PhysicsVolume>
+	1640 SpawnTime                Float   
+	1644 DamageScaling            Float   

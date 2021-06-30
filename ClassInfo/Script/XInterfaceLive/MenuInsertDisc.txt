@@ -1,0 +1,5 @@
+CLASS: MenuInsertDisc(19452), BASE: MenuTemplateTitledB
+PROPERTIES:
+	19060 Gamer                    Struct  <Gamer>
+	19156 Text                     Struct  <MenuText>[2]
+	19380 TextBorder               Struct  <MenuSprite>

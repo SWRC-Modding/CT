@@ -1,0 +1,2 @@
+CLASS: Sparks_Large(828), BASE: Emitter
+PROPERTIES:

@@ -1,0 +1,11 @@
+CLASS: EnvLightmap(264), BASE: Texture
+PROPERTIES:
+	240  SpecialLit               Bool    <0 : 0x00000001>
+	240  RemoveLightColor         Bool    <1 : 0x00000002>
+	240  AddAmbientLight          Bool    <2 : 0x00000004>
+	240  AmbientGrey              Bool    <3 : 0x00000008>
+	244  SpecularPower            Float   
+	248  SpecularBrightness       Byte    
+	252  ColorAdd                 Struct  <Color>
+	256  ColorMultiplyX2          Struct  <Color>
+	260  RenderTarget             Int     

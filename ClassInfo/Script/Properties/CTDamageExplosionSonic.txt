@@ -1,0 +1,2 @@
+CLASS: CTDamageExplosionSonic(112), BASE: CTDamageExplosion
+PROPERTIES:

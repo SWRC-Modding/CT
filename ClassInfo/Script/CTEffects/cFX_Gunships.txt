@@ -1,0 +1,2 @@
+CLASS: cFX_Gunships(828), BASE: Emitter
+PROPERTIES:

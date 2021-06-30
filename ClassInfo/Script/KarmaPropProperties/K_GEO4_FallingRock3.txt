@@ -1,0 +1,2 @@
+CLASS: K_GEO4_FallingRock3(888), BASE: KarmaProp
+PROPERTIES:

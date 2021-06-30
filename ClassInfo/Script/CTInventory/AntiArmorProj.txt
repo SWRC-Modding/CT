@@ -1,0 +1,2 @@
+CLASS: AntiArmorProj(804), BASE: CTProjExplosive
+PROPERTIES:

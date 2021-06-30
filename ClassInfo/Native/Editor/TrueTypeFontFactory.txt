@@ -1,0 +1,26 @@
+CLASS: TrueTypeFontFactory(204), BASE: FontFactory
+PROPERTIES:
+	200  ExtendBoxLeft            Int     
+	196  ExtendBoxRight           Int     
+	192  ExtendBoxBottom          Int     
+	188  ExtendBoxTop             Int     
+	184  DropShadowY              Int     
+	180  DropShadowX              Int     
+	176  Kerning                  Int     
+	148  Wildcard                 Str     
+	156  Path                     Str     
+	140  UnicodeRange             Str     
+	136  AntiAlias                Bool    <0 : 0x00000001>
+	132  ASCIINonPrintable        Bool    <0 : 0x00000001>
+	124  Chars                    Str     
+	120  Gamma                    Float   
+	116  Count                    Int     
+	112  YPad                     Int     
+	108  XPad                     Int     
+	104  VSize                    Int     
+	100  USize                    Int     
+	96   Height                   Float   
+	88   FontName                 Str     
+	172  Underline                Bool    <0 : 0x00000001>
+	168  Italic                   Bool    <0 : 0x00000001>
+	164  Style                    Int     

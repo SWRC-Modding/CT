@@ -1,0 +1,2 @@
+CLASS: CoreShipTurret_mid_pivotYaw(696), BASE: Accessory
+PROPERTIES:

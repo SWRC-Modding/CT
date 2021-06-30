@@ -1,0 +1,2 @@
+CLASS: Trandoshan_Merc(1532), BASE: VoicePack
+PROPERTIES:

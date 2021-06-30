@@ -1,0 +1,2 @@
+CLASS: RemoteDroidPickup(704), BASE: CTPickup
+PROPERTIES:

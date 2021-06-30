@@ -1,0 +1,6 @@
+CLASS: Factory(88), BASE: Object
+PROPERTIES:
+	72   Formats                  Array   <Str>
+	64   OutOfContextCommand      Str     
+	56   InContextCommand         Str     
+	48   Description              Str     

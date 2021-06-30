@@ -1,0 +1,2 @@
+CLASS: Debris_Falling_Vers4(828), BASE: Emitter
+PROPERTIES:

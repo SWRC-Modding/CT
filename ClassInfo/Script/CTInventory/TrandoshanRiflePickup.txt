@@ -1,0 +1,2 @@
+CLASS: TrandoshanRiflePickup(704), BASE: CTPickup
+PROPERTIES:

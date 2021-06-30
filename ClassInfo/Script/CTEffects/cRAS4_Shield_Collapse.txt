@@ -1,0 +1,2 @@
+CLASS: cRAS4_Shield_Collapse(828), BASE: Emitter
+PROPERTIES:

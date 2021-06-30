@@ -1,0 +1,522 @@
+CLASS: Actor(644), BASE: Object
+ENUMS:
+	ELightType
+		LT_None                  =   0
+		LT_Steady                =   1
+		LT_Pulse                 =   2
+		LT_Blink                 =   3
+		LT_Flicker               =   4
+		LT_Strobe                =   5
+		LT_BackdropLight         =   6
+		LT_SubtlePulse           =   7
+		LT_TexturePaletteOnce    =   8
+		LT_TexturePaletteLoop    =   9
+		LT_FadeOut               =  10
+		LT_Flame                 =  11
+	ELightEffect
+		LE_None                  =   0
+		LE_TorchWaver            =   1
+		LE_FireWaver             =   2
+		LE_WateryShimmer         =   3
+		LE_Searchlight           =   4
+		LE_SlowWave              =   5
+		LE_FastWave              =   6
+		LE_CloudCast             =   7
+		LE_StaticSpot            =   8
+		LE_Shock                 =   9
+		LE_Disco                 =  10
+		LE_Warp                  =  11
+		LE_Spotlight             =  12
+		LE_NonIncidence          =  13
+		LE_Shell                 =  14
+		LE_OmniBumpMap           =  15
+		LE_Interference          =  16
+		LE_Cylinder              =  17
+		LE_Rotor                 =  18
+		LE_Sunlight              =  19
+		LE_QuadraticNonIncidence =  20
+	EStimulusGroup
+		SG_WeaponFire            =   0
+		SG_WeaponHit             =   1
+		SG_CharacterNoise        =   2
+		SG_Stunned               =   3
+		SG_Explosion             =   4
+		SG_GrenadeBounce         =   5
+		SG_Died                  =   6
+		SG_DoorBreach            =   7
+		SG_Reloading             =   8
+		SG_Flashlight            =   9
+		SG_Damaged               =  10
+		SG_EnemySpotted          =  11
+		SG_Triggered             =  12
+		SG_Bumped                =  13
+		SG_Targeted              =  14
+		SG_LostEnemy             =  15
+		SG_KilledSomeone         =  16
+		SG_ExplosionLarge        =  17
+		SG_MineChirp             =  18
+	EStimulusType
+		ST_Invalid               =   0
+		ST_WeaponFireDefault     =   1
+		ST_WeaponFireQuiet       =   2
+		ST_WeaponHitDefault      =   3
+		ST_CharacterNoiseDefault =   4
+		ST_FootstepSoft          =   5
+		ST_FootstepLoud          =   6
+		ST_Stunned               =   7
+		ST_ExplosionDefault      =   8
+		ST_ExplosionLarge        =   9
+		ST_GrenadeBounceDefault  =  10
+		ST_DiedDefault           =  11
+		ST_DiedQuiet             =  12
+		ST_DoorBreach            =  13
+		ST_DemolitionExplode     =  14
+		ST_ProxMineExplode       =  15
+		ST_MineChirp             =  16
+		ST_JetpackExplosion      =  17
+		ST_Reloading             =  18
+		ST_Flashlight            =  19
+		ST_Damaged               =  20
+		ST_EnemySpotted          =  21
+		ST_Triggered             =  22
+		ST_Bumped                =  23
+		ST_Targeted              =  24
+		ST_LostEnemy             =  25
+		ST_KilledSomeone         =  26
+	EStimulusResponse
+		SR_None                  =   0
+		SR_WalkToward            =   1
+		SR_RunToward             =   2
+		SR_RunAway               =   3
+		SR_LookAt                =   4
+		SR_Crouch                =   5
+		SR_TakeCover             =   6
+		SR_Duck                  =   7
+		SR_Dodge                 =   8
+		SR_DiveAway              =   9
+		SR_ReturnGrenade         =  10
+		SR_Bump                  =  11
+		SR_GrenadeReaction       =  12
+		SR_CheckCorpse           =  13
+		SR_MeleeStrike           =  14
+		SR_Follow                =  15
+		SR_ExplosionShield       =  16
+		SR_LookAtInstigator      =  17
+		SR_RunTowardInstigator   =  18
+	EDirection
+		DIR_None                 =   0
+		DIR_Up                   =   1
+		DIR_Down                 =   2
+		DIR_Left                 =   3
+		DIR_Right                =   4
+		DIR_Forward              =   5
+		DIR_Backward             =   6
+		DIR_Auto                 =   7
+	EDetailMode
+		DM_Low                   =   0
+		DM_High                  =   1
+		DM_SuperHigh             =   2
+	ESoundOcclusion
+		OCCLUSION_Default        =   0
+		OCCLUSION_None           =   1
+		OCCLUSION_BSP            =   2
+		OCCLUSION_StaticMeshes   =   3
+	ESoundSlot
+		SLOT_None                =   0
+		SLOT_Misc                =   1
+		SLOT_Pain                =   2
+		SLOT_Ambient             =   3
+		SLOT_Interact            =   4
+		SLOT_Talk                =   5
+		SLOT_Interface           =   6
+		SLOT_Music               =   7
+	EMusicTransition
+		MTRAN_None               =   0
+		MTRAN_Instant            =   1
+		MTRAN_Segue              =   2
+		MTRAN_Fade               =   3
+		MTRAN_FastFade           =   4
+		MTRAN_SlowFade           =   5
+	EMaterialType
+		MT_None                  =   0
+		MT_Rock                  =   1
+		MT_Dirt                  =   2
+		MT_Mud                   =   3
+		MT_MetalSolid            =   4
+		MT_MetalGrate            =   5
+		MT_MetalHollow           =   6
+		MT_Sand                  =   7
+		MT_Concrete              =   8
+		MT_Wood                  =   9
+		MT_Forest                =  10
+		MT_Brush                 =  11
+		MT_Puddle                =  12
+		MT_Water                 =  13
+		MT_Marble                =  14
+		MT_Debris_GEO            =  15
+		MT_Debris_RAS            =  16
+		MT_Debris_YYY            =  17
+		MT_Glass                 =  18
+		MT_HumanFlesh            =  19
+		MT_TrandoFlesh           =  20
+		MT_BugFlesh              =  21
+		MT_DroidMetal            =  22
+		MT_WookieeFlesh          =  23
+		MT_Shield                =  24
+		MT_PersonalShield        =  25
+		MT_MetalPipe             =  26
+		MT_EliteFlesh            =  27
+		MT_NoEffectSpawned       =  28
+		MT_ShieldGreen           =  29
+	EBattleEngineBattleCriteria
+		BATTLECRITERIA_Attack    =   0
+		BATTLECRITERIA_Proximity =   1
+		BATTLECRITERIA_AttackAndProximity =   2
+	EMusicFadeType
+		MFT_Linear               =   0
+		MFT_Sine                 =   1
+		MFT_Log                  =   2
+		MFT_LogInverse           =   3
+	EPhysics
+		PHYS_None                =   0
+		PHYS_Walking             =   1
+		PHYS_Falling             =   2
+		PHYS_Swimming            =   3
+		PHYS_Flying              =   4
+		PHYS_Rotating            =   5
+		PHYS_Projectile          =   6
+		PHYS_Interpolating       =   7
+		PHYS_MovingBrush         =   8
+		PHYS_Spider              =   9
+		PHYS_Trailer             =  10
+		PHYS_Ladder              =  11
+		PHYS_RootMotion          =  12
+		PHYS_Karma               =  13
+		PHYS_KarmaRagDoll        =  14
+	EDrawType
+		DT_None                  =   0
+		DT_Sprite                =   1
+		DT_Mesh                  =   2
+		DT_Brush                 =   3
+		DT_RopeSprite            =   4
+		DT_VerticalSprite        =   5
+		DT_Terraform             =   6
+		DT_SpriteAnimOnce        =   7
+		DT_StaticMesh            =   8
+		DT_DrawType              =   9
+		DT_Particle              =  10
+		DT_AntiPortal            =  11
+		DT_FluidSurface          =  12
+	EFilterState
+		FS_Maybe                 =   0
+		FS_Yes                   =   1
+		FS_No                    =   2
+	ENetRole
+		ROLE_None                =   0
+		ROLE_DumbProxy           =   1
+		ROLE_SimulatedProxy      =   2
+		ROLE_AutonomousProxy     =   3
+		ROLE_Authority           =   4
+	ERenderStyle
+		STY_None                 =   0
+		STY_Normal               =   1
+		STY_Masked               =   2
+		STY_Translucent          =   3
+		STY_Modulated            =   4
+		STY_Alpha                =   5
+		STY_Additive             =   6
+		STY_Subtractive          =   7
+		STY_Particle             =   8
+		STY_AlphaZ               =   9
+	ETravelType
+		TRAVEL_Absolute          =   0
+		TRAVEL_Partial           =   1
+		TRAVEL_Relative          =   2
+	EDoubleClickDir
+		DCLICK_None              =   0
+		DCLICK_Left              =   1
+		DCLICK_Right             =   2
+		DCLICK_Forward           =   3
+		DCLICK_Back              =   4
+		DCLICK_Active            =   5
+		DCLICK_Done              =   6
+	eKillZType
+		KILLZ_None               =   0
+		KILLZ_Lava               =   1
+		KILLZ_Suicide            =   2
+	ESpace
+		SPACE_Global             =   0
+		SPACE_Mesh               =   1
+		SPACE_Clear              =   2
+STRUCTS:
+	ActorRenderDataPtr(4)
+		0    Ptr                      Int     
+	LightRenderDataPtr(4)
+		0    Ptr                      Int     
+	BatchReference(8)
+		0    BatchIndex               Int     
+		4    ElementIndex             Int     
+	PointRegion(12)
+		0    Zone                     Object  <ZoneInfo>
+		4    iLeaf                    Int     
+		8    ZoneNumber               Byte    
+	XboxAddr(56)
+		0    ina                      Int     
+		4    inaOnline                Int     
+		8    wPortOnline              Int     
+		12   abEnet                   Byte    [6]
+		18   abOnline                 Byte    [20]
+		40   Gamertag                 Str     
+		48   xuid                     Str     
+	NavPtLocator(16)
+		0    Offset                   Struct  <Vector>
+		12   Yaw                      Float   
+	ProjectorRenderInfoPtr(4)
+		0    Ptr                      Int     
+	StaticMeshProjectorRenderInfoPtr(4)
+		0    Ptr                      Int     
+	KRBVec(12)
+		0    X                        Float   
+		4    Y                        Float   
+		8    Z                        Float   
+	KRigidBodyState(52)
+		0    Position                 Struct  <KRBVec>
+		12   Quaternion               Struct  <Quat>
+		28   LinVel                   Struct  <KRBVec>
+		40   AngVel                   Struct  <KRBVec>
+	AnimRep(8)
+		0    AnimSequence             Name    
+		4    Bone                     Byte    
+		5    Priority                 Byte    
+		6    RateScale                Byte    
+		7    AnimFrame                Byte    
+PROPERTIES:
+	40   ShadowAmbient            Byte    
+	41   LightType                Byte    <ELightType>
+	42   LightEffect              Byte    <ELightEffect>
+	44   LightBrightness          Float   
+	48   LightRadius              Float   
+	52   LightRadiusInner         Byte    
+	53   LightHue                 Byte    
+	54   LightSaturation          Byte    
+	55   LightPeriod              Byte    
+	56   LightPhase               Byte    
+	57   LightCone                Byte    
+	58   Physics                  Byte    <EPhysics>
+	59   DrawType                 Byte    <EDrawType>
+	60   StaticMesh               Object  <StaticMesh>
+	64   Owner                    Object  <Actor>
+	68   Base                     Object  <Actor>
+	72   ActorRenderData          Struct  <ActorRenderDataPtr>
+	76   LightRenderData          Struct  <LightRenderDataPtr>
+	80   RenderRevision           Int     
+	84   StaticFilterState        Byte    <EFilterState>
+	88   StaticSectionBatches     Array   <Struct <BatchReference>>
+	96   ForcedVisibilityZoneTag  Name    
+	100  bLightPriorityOverride   Bool    <0 : 0x00000001>
+	100  bLightObstructed         Bool    <1 : 0x00000002>
+	100  bSpecialLit              Bool    <2 : 0x00000004>
+	100  bActorShadows            Bool    <3 : 0x00000008>
+	100  bReceiveDynamicShadows   Bool    <4 : 0x00000010>
+	100  bBlobShadow              Bool    <5 : 0x00000020>
+	100  bCorona                  Bool    <6 : 0x00000040>
+	100  bLightingVisibility      Bool    <7 : 0x00000080>
+	100  bDisableFog              Bool    <8 : 0x00000100>
+	100  bUseDynamicLights        Bool    <9 : 0x00000200>
+	100  bLightChanged            Bool    <10: 0x00000400>
+	100  bLightStaticEnv          Bool    <11: 0x00000800>
+	100  bLightDynamicEnv         Bool    <12: 0x00001000>
+	100  bStatic                  Bool    <13: 0x00002000>
+	100  bHidden                  Bool    <14: 0x00004000>
+	100  bNoDelete                Bool    <15: 0x00008000>
+	100  bDeleteMe                Bool    <16: 0x00010000>
+	100  bTicked                  Bool    <17: 0x00020000>
+	100  bDynamicLight            Bool    <18: 0x00040000>
+	100  bTimerLoop               Bool    <19: 0x00080000>
+	100  bOnlyOwnerSee            Bool    <20: 0x00100000>
+	100  bHighDetail              Bool    <21: 0x00200000>
+	100  bSuperHighDetail         Bool    <22: 0x00400000>
+	100  bOnlyDrawIfAttached      Bool    <23: 0x00800000>
+	100  bCriticalAttachment      Bool    <24: 0x01000000>
+	100  bStasis                  Bool    <25: 0x02000000>
+	100  bTrailerAllowRotation    Bool    <26: 0x04000000>
+	100  bTrailerSameRotation     Bool    <27: 0x08000000>
+	100  bTrailerPrePivot         Bool    <28: 0x10000000>
+	100  bWorldGeometry           Bool    <29: 0x20000000>
+	100  bAcceptsProjectors       Bool    <30: 0x40000000>
+	100  bOrientOnSlope           Bool    <31: 0x80000000>
+	104  bOnlyAffectPawns         Bool    <0 : 0x00000001>
+	104  bDisableSorting          Bool    <1 : 0x00000002>
+	104  bIgnoreEncroachers       Bool    <2 : 0x00000004>
+	104  bShowOctreeNodes         Bool    <3 : 0x00000008>
+	104  bWasSNFiltered           Bool    <4 : 0x00000010>
+	104  bMovedInEditor           Bool    <5 : 0x00000020>
+	104  bNetTemporary            Bool    <6 : 0x00000040>
+	104  bOnlyRelevantToOwner     Bool    <7 : 0x00000080>
+	104  bNetDirty                Bool    <8 : 0x00000100>
+	104  bAlwaysRelevant          Bool    <9 : 0x00000200>
+	104  bReplicateInstigator     Bool    <10: 0x00000400>
+	104  bReplicateMovement       Bool    <11: 0x00000800>
+	104  bSkipActorPropertyReplication Bool    <12: 0x00001000>
+	104  bUpdateSimulatedPosition Bool    <13: 0x00002000>
+	104  bTearOff                 Bool    <14: 0x00004000>
+	104  bOnlyDirtyReplication    Bool    <15: 0x00008000>
+	104  bReplicateAnimations     Bool    <16: 0x00010000>
+	104  bNetInitialRotation      Bool    <17: 0x00020000>
+	104  bCompressedPosition      Bool    <18: 0x00040000>
+	104  bAlwaysZeroBoneOffset    Bool    <19: 0x00080000>
+	104  bDontBatch               Bool    <20: 0x00100000>
+	104  bUnlit                   Bool    <21: 0x00200000>
+	104  bShadowCast              Bool    <22: 0x00400000>
+	104  bStaticLighting          Bool    <23: 0x00800000>
+	104  bUseLightingFromBase     Bool    <24: 0x01000000>
+	104  bDrawHUDMarkerIcon       Bool    <25: 0x02000000>
+	104  bUseHWOcclusionTests     Bool    <26: 0x04000000>
+	104  EnhancedVisionFade       Bool    <27: 0x08000000>
+	104  bHurtEntry               Bool    <28: 0x10000000>
+	104  bGameRelevant            Bool    <29: 0x20000000>
+	104  bCollideWhenPlacing      Bool    <30: 0x40000000>
+	104  bTravel                  Bool    <31: 0x80000000>
+	108  bMovable                 Bool    <0 : 0x00000001>
+	108  bDestroyInPainVolume     Bool    <1 : 0x00000002>
+	108  bCanBeDamaged            Bool    <2 : 0x00000004>
+	108  bShouldBaseAtStartup     Bool    <3 : 0x00000008>
+	108  bPendingDelete           Bool    <4 : 0x00000010>
+	108  bOwnerNoSee              Bool    <5 : 0x00000020>
+	108  bCanTeleport             Bool    <6 : 0x00000040>
+	108  bClientAnim              Bool    <7 : 0x00000080>
+	108  bDisturbFluidSurface     Bool    <8 : 0x00000100>
+	108  bAlwaysTick              Bool    <9 : 0x00000200>
+	108  bCanBeAutoAimed          Bool    <10: 0x00000400>
+	108  bAlignBottom             Bool    <11: 0x00000800>
+	108  bCollideActors           Bool    <12: 0x00001000>
+	108  bCollideWorld            Bool    <13: 0x00002000>
+	108  bBlockActors             Bool    <14: 0x00004000>
+	108  bBlockPlayers            Bool    <15: 0x00008000>
+	108  bProjTarget              Bool    <16: 0x00010000>
+	108  bBlockZeroExtentTraces   Bool    <17: 0x00020000>
+	108  bBlockNonZeroExtentTraces Bool    <18: 0x00040000>
+	108  bAutoAlignToTerrain      Bool    <19: 0x00080000>
+	108  bUseCylinderCollision    Bool    <20: 0x00100000>
+	108  bBlockKarma              Bool    <21: 0x00200000>
+	108  bUseAltKarmaPrim         Bool    <22: 0x00400000>
+	108  bImmobile                Bool    <23: 0x00800000>
+	108  bNoRagdollPawnCollision  Bool    <24: 0x01000000>
+	108  bNetNotify               Bool    <25: 0x02000000>
+	108  bIgnoreOutOfWorld        Bool    <26: 0x04000000>
+	108  bBounce                  Bool    <27: 0x08000000>
+	108  bFixedRotationDir        Bool    <28: 0x10000000>
+	108  bRotateToDesired         Bool    <29: 0x20000000>
+	108  bInterpolating           Bool    <30: 0x40000000>
+	108  bJustTeleported          Bool    <31: 0x80000000>
+	112  bPriorityRagdoll         Bool    <0 : 0x00000001>
+	112  bIsMover                 Bool    <1 : 0x00000002>
+	116  RemoteRole               Byte    <ENetRole>
+	117  Role                     Byte    <ENetRole>
+	120  NetTag                   Int     
+	124  NetUpdateTime            Float   
+	128  NetUpdateFrequency       Float   
+	132  NetPriority              Float   
+	136  Instigator               Object  <Pawn>
+	140  AmbientSound             Object  <Sound>
+	144  AttachmentBone           Name    
+	148  Level                    Object  <LevelInfo>
+	152  XLevel                   Object  <Level>
+	156  LifeSpan                 Float   
+	160  Region                   Struct  <PointRegion>
+	172  TimerRate                Float   
+	176  Mesh                     Object  <Mesh>
+	180  LastRenderTime           Float   
+	184  Tag                      Name    
+	188  HiddenTag                Name    
+	192  Leaves                   Array   <Int>
+	200  Event                    Name    
+	204  Inventory                Object  <Inventory>
+	208  TimerCounter             Float   
+	212  MeshInstance             Object  <MeshInstance>
+	216  LODBias                  Float   
+	220  InitialState             Name    
+	224  Group                    Name    
+	228  NavPtLocs                Array   <Struct <NavPtLocator>>
+	236  NavPts                   Array   <Object <NavigationPoint>>
+	244  NavPtClass               Class   <NavigationPoint>
+	248  Touching                 Array   <Object <Actor>>
+	256  OctreeNodes              Array   <Int>
+	264  OctreeBox                Struct  <Box>
+	292  Deleted                  Object  <Actor>
+	296  LatentFloat              Float   
+	300  CollisionTag             Int     
+	304  JoinedTag                Int     
+	308  CurrentPhysicsVolume     Object  <PhysicsVolume>
+	312  Location                 Struct  <Vector>
+	324  Rotation                 Struct  <Rotator>
+	336  Velocity                 Struct  <Vector>
+	348  Acceleration             Struct  <Vector>
+	360  AttachTag                Name    
+	364  Attached                 Array   <Object <Actor>>
+	372  RelativeLocation         Struct  <Vector>
+	384  RelativeRotation         Struct  <Rotator>
+	396  SquadMarker              Object  <SquadMarker>
+	400  HUDMarkerIconZOffset     Float   
+	404  Projectors               Array   <Struct <ProjectorRenderInfoPtr>>
+	412  StaticMeshProjectors     Array   <Struct <StaticMeshProjectorRenderInfoPtr>>
+	420  Texture                  Object  <Material>
+	424  StaticMeshInstance       Object  <StaticMeshInstance>
+	428  Brush                    Object  <Model>
+	432  DrawScale                Float   
+	436  DrawScale3D              Struct  <Vector>
+	448  PrePivot                 Struct  <Vector>
+	460  Skins                    Array   <Object <Material>>
+	468  RepSkin                  Object  <Material>
+	472  AntiPortal               Object  <ConvexVolume>
+	476  CullDistance             Float   
+	480  ScaleGlow                Float   
+	484  AmbientGlow              Byte    
+	485  Style                    Byte    <ERenderStyle>
+	486  TypeOfMaterial           Byte    <EMaterialType>
+	487  SoundOcclusion           Byte    <ESoundOcclusion>
+	488  AutoAimOffset            Float   
+	492  MyDamageVariance         Class   <DamageVariance>
+	496  IconScale                Float   
+	500  EnhancedVisionColor      Struct  <Color>
+	504  CollisionRadius          Float   
+	508  CollisionHeight          Float   
+	512  Mass                     Float   
+	516  Buoyancy                 Float   
+	520  RotationRate             Struct  <Rotator>
+	532  DesiredRotation          Struct  <Rotator>
+	544  PendingTouch             Object  <Actor>
+	548  ColLocation              Struct  <Vector>
+	560  KParams                  Object  <KarmaParamsCollision>
+	564  KStepTag                 Int     
+	568  MaxKarmaSpeed            Float   
+	572  SimAnim                  Struct  <AnimRep>[6]
+	620  bNetInitial              Bool    <0 : 0x00000001>
+	620  bNetOwner                Bool    <1 : 0x00000002>
+	620  bNetRelevant             Bool    <2 : 0x00000004>
+	620  bDemoRecording           Bool    <3 : 0x00000008>
+	620  bClientDemoRecording     Bool    <4 : 0x00000010>
+	620  bRepClientDemo           Bool    <5 : 0x00000020>
+	620  bClientDemoNetFunc       Bool    <6 : 0x00000040>
+	620  bDemoOwner               Bool    <7 : 0x00000080>
+	620  bNoRepMesh               Bool    <8 : 0x00000100>
+	620  bHiddenEd                Bool    <9 : 0x00000200>
+	620  bHiddenEdGroup           Bool    <10: 0x00000400>
+	620  bDirectional             Bool    <11: 0x00000800>
+	620  bSelected                Bool    <12: 0x00001000>
+	620  bEdShouldSnap            Bool    <13: 0x00002000>
+	620  bEdSnap                  Bool    <14: 0x00004000>
+	620  bTempEditor              Bool    <15: 0x00008000>
+	620  bPathColliding           Bool    <16: 0x00010000>
+	620  bPathTemp                Bool    <17: 0x00020000>
+	620  bScriptInitialized       Bool    <18: 0x00040000>
+	620  bLockLocation            Bool    <19: 0x00080000>
+	620  bOfSquadInterest         Bool    <20: 0x00100000>
+	620  bAdditionalTarget        Bool    <21: 0x00200000>
+	620  bValidEnemy              Bool    <22: 0x00400000>
+	620  bSquadExamined           Bool    <23: 0x00800000>
+	624  MessageClass             Class   <LocalMessage>
+	628  LastTimeLookedAt         Float   
+	632  LastTouchedMaterialType  Byte    <EMaterialType>
+	636  NextSquadInterestActor   Object  <Actor>
+	640  NextTargetActor          Object  <Actor>

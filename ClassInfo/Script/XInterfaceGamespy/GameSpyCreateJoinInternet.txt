@@ -1,0 +1,6 @@
+CLASS: GameSpyCreateJoinInternet(20776), BASE: MenuTemplateTitledBA
+PROPERTIES:
+	19728 Create                   Struct  <MenuButtonText>
+	20212 Join                     Struct  <MenuButtonText>
+	20696 JoinMenu                 Str     
+	20704 GamespyLogo              Struct  <MenuSprite>

@@ -1,0 +1,2 @@
+CLASS: KashyyykAmbientIdleInfo(56), BASE: IdleInfo
+PROPERTIES:

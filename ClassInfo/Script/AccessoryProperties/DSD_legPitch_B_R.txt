@@ -1,0 +1,2 @@
+CLASS: DSD_legPitch_B_R(696), BASE: Accessory
+PROPERTIES:

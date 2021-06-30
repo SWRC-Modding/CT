@@ -1,0 +1,2 @@
+CLASS: Struct(120), BASE: Field
+PROPERTIES:

@@ -1,0 +1,2 @@
+CLASS: TrandoshanSlaverDefaults(1668), BASE: TrandoshanSlaver
+PROPERTIES:

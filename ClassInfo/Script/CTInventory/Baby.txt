@@ -1,0 +1,2 @@
+CLASS: Baby(1180), BASE: CTWeaponRecharging
+PROPERTIES:

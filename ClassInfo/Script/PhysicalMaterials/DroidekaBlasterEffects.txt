@@ -1,0 +1,2 @@
+CLASS: DroidekaBlasterEffects(68), BASE: MaterialTypeInfo
+PROPERTIES:

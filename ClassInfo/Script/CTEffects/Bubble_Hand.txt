@@ -1,0 +1,2 @@
+CLASS: Bubble_Hand(828), BASE: Emitter
+PROPERTIES:

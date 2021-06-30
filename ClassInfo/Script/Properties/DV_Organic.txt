@@ -1,0 +1,2 @@
+CLASS: DV_Organic(56), BASE: DamageVariance
+PROPERTIES:

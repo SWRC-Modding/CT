@@ -1,0 +1,12 @@
+CLASS: SoundStreamed(148), BASE: Sound
+PROPERTIES:
+	112  Filename                 Str     
+	120  FadeInTime               Float   
+	124  FadeOutTime              Float   
+	128  FadeInType               Byte    <EMusicFadeType>
+	129  FadeOutType              Byte    <EMusicFadeType>
+	132  OverrideFadeInTime       Float   
+	136  OverrideFadeOutTime      Float   
+	140  OverrideFadeInType       Byte    <EMusicFadeType>
+	141  OverrideFadeOutType      Byte    <EMusicFadeType>
+	144  DoOverrideFades          Bool    <0 : 0x00000001>

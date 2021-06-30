@@ -1,0 +1,11 @@
+CLASS: UWindowScrollingDialogClient(228), BASE: UWindowPageWindow
+PROPERTIES:
+	196  bShowHorizSB             Bool    <0 : 0x00000001>
+	196  bShowVertSB              Bool    <1 : 0x00000002>
+	200  ClientArea               Object  <UWindowDialogClientWindow>
+	204  FixedArea                Object  <UWindowDialogClientWindow>
+	208  ClientClass              Class   <UWindowDialogClientWindow>
+	212  FixedAreaClass           Class   <UWindowDialogClientWindow>
+	216  VertSB                   Object  <UWindowVScrollbar>
+	220  HorizSB                  Object  <UWindowHScrollbar>
+	224  BRBitmap                 Object  <UWindowBitmap>

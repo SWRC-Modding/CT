@@ -1,0 +1,64 @@
+CLASS: MenuGamerList(24028), BASE: MenuTemplateTitledBA
+STRUCTS:
+	Gamer(96)
+		0    UID                      Str     
+		8    Gamertag                 Str     
+		16   NickName                 Str     
+		24   GameTitle                Str     
+		32   bIsInDifferentTitle      Int     
+		36   bInviteAccepted          Int     
+		40   bInviteRejected          Int     
+		44   bJoinable                Int     
+		48   bInvitable               Int     
+		52   bOnline                  Int     
+		56   bReceivedRequest         Int     
+		60   bSentRequest             Int     
+		64   bPlaying                 Int     
+		68   bReceivedInvite          Int     
+		72   bSentInvite              Int     
+		76   bHasVoice                Int     
+		80   bIsFriend                Int     
+		84   bIsMuted                 Int     
+		88   bIsGuest                 Int     
+		92   bIsTalking               Int     
+PROPERTIES:
+	19728 MaxFriends               Int     
+	19732 Gamers                   Array   <Struct <Gamer>>
+	19740 CurrentGamer             Int     
+	19744 IconCommunicatorMuted    Object  <Material>
+	19748 IconCommunicatorOn       Object  <Material>
+	19752 IconCommunicatorTalking  Object  <Material>
+	19756 IconCommunicatorTv       Object  <Material>
+	19760 IconFriendInviteReceived Object  <Material>
+	19764 IconFriendInviteSent     Object  <Material>
+	19768 IconFriendOnline         Object  <Material>
+	19772 IconGameInviteReceived   Object  <Material>
+	19776 IconGameInviteSent       Object  <Material>
+	19780 ButtonListHack           Struct  <MenuStringList>
+	20320 GamerListBorder          Struct  <MenuSprite>
+	20392 GamerListColumns         Struct  <MenuStringList>[3]
+	22012 GamerListArrows          Struct  <MenuButtonSprite>[2]
+	22820 GamerListScrollBar       Struct  <MenuScrollBar>
+	23436 GamerListPageUp          Struct  <MenuActiveWidget>
+	23548 GamerListPageDown        Struct  <MenuActiveWidget>
+	23660 GamerScrollArea          Struct  <MenuScrollArea>
+	23712 GamerInfoBorder          Struct  <MenuSprite>
+	23784 GamerInfoText            Struct  <MenuText>
+	23896 ShowGamertags            Bool    <0 : 0x00000001>
+	23900 TextEmptyList            Str     
+	23908 TextReceivedInvite       Str     
+	23916 TextReceivedRequest      Str     
+	23924 TextOnline               Str     
+	23932 TextFriend               Str     
+	23940 TextOffline              Str     
+	23948 TextSentInvite           Str     
+	23956 TextSentRequest          Str     
+	23964 TextVoiceOn              Str     
+	23972 TextVoiceOff             Str     
+	23980 TextVoiceTV              Str     
+	23988 TextVoiceMuted           Str     
+	23996 TextInviteAccepted       Str     
+	24004 TextInviteRejected       Str     
+	24012 TextPlaying              Str     
+	24020 OfflineColor             Struct  <Color>
+	24024 CurrentChosen            Int     

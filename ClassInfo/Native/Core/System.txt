@@ -1,0 +1,11 @@
+CLASS: System(108), BASE: Subsystem
+PROPERTIES:
+	92   Suppress                 Array   <Name>
+	84   Paths                    Array   <Str>
+	104  bLinearSave              Int     
+	100  bLinearLoad              Int     
+	76   SourcePath               Str     
+	68   CacheExt                 Str     
+	60   CachePath                Str     
+	52   SavePath                 Str     
+	48   PurgeCacheDays           Int     

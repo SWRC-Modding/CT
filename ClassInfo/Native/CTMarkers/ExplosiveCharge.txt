@@ -1,0 +1,9 @@
+CLASS: ExplosiveCharge(948), BASE: ActivateItem
+PROPERTIES:
+	712  ChargeUnplaced           Struct  <ActivationInfo>
+	768  ChargePlaced             Struct  <ActivationInfo>
+	824  ChargeArmed              Struct  <ActivationInfo>
+	880  ChargeExplode            Struct  <ActivationInfo>
+	936  PropToDestroy            Object  <Prop>
+	940  ExplosionStimulus        Byte    <EStimulusType>
+	944  bExplodeOnTimer          Bool    <0 : 0x00000001>

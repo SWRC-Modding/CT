@@ -1,0 +1,2 @@
+CLASS: Explosion_Trap_Dirt(828), BASE: Emitter
+PROPERTIES:

@@ -1,0 +1,236 @@
+CLASS: Helmet(1544), BASE: Object
+STRUCTS:
+	SplatInfo(20)
+		0    SplatDecal               Object  <Material>
+		4    SplatPosition            Struct  <Vector>
+		16   SplatRotation            Float   
+	SubtitleGroup(12)
+		0    GroupName                Str     
+		8    NumEntries               Int     
+	SubtitleEntry(16)
+		0    SoundID                  Str     
+		8    Text                     Str     
+	CachedMarkerVisInfo(28)
+		0    mpActor                  Object  <Actor>
+		4    mfElapsedVisCheckTime    Float   
+		8    mfScreenX                Float   
+		12   mfScreenY                Float   
+		16   mfScreenXSize            Float   
+		20   mfScreenYSize            Float   
+		24   mbVisible                Bool    <0 : 0x00000001>
+		24   mbUsedThisFrame          Bool    <1 : 0x00000002>
+		24   mbTargeted               Bool    <2 : 0x00000004>
+	CachedObjectiveVisInfo(8)
+		0    mfElapsedVisCheckTime    Float   
+		4    mbVisible                Bool    <0 : 0x00000001>
+PROPERTIES:
+	40   FrameFX                  Object  <FrameFX>
+	44   BlurNormal               Byte    
+	45   BlurHit                  Byte    
+	48   Splatters                Array   <Struct <SplatInfo>>
+	56   Dirty                    Bool    <0 : 0x00000001>
+	60   NextWipeTime             Float   
+	64   WipeProgress             Float   
+	68   WipeTime                 Float   
+	72   BloodWipeDelay           Float   
+	76   HitWipeDelay             Float   
+	80   TimeSinceVisionChange    Float   
+	84   LastVisionMode           Object  <VisionMode>
+	88   bFadeOut                 Bool    <0 : 0x00000001>
+	92   InteriorHealthLight      Object  <Light>
+	96   InteriorShieldLight      Object  <Light>
+	100  BlurCurrent              Byte    
+	104  LastHealthLevel          Int     
+	108  LastHealth               Float   
+	112  HealthFlashTime          Float   
+	116  HealthFlashDuration      Float   
+	120  LastShield               Float   
+	124  ShieldFlashTime          Float   
+	128  ShieldFlashDuration      Float   
+	132  LastStance               Int     
+	136  StanceGlowTime           Float   
+	140  LastCount                Int     
+	144  LastTargetType           Int     
+	148  StaticSound              Object  <Sound>
+	152  pPrevTarget              Object  <PlayerReplicationInfo>
+	156  TargetHitBlipTime        Float   
+	160  TargetHitBlipDuration    Float   
+	164  LastWeapon               Object  <Weapon>
+	168  LastLastWeapon           Object  <Weapon>
+	172  TimeWeaponChanged        Float   
+	176  AmmoSpinupTime           Float   
+	180  HitLowHealth             Float   
+	184  HitLargeDamage           Float   
+	188  HitLastTime              Float   
+	192  ShieldInitStart          Float   
+	196  ShieldInitEnd            Float   
+	200  ShieldInitText           Str     
+	208  HealthInitStart          Float   
+	212  HealthInitEnd            Float   
+	216  HealthInitText           Str     
+	224  SquadInitStart           Float   
+	228  SquadInitEnd             Float   
+	232  SquadInitText            Str     
+	240  InitTime                 Float   
+	244  PromptFadeInTime         Float   
+	248  CancelManeuverText       Str     
+	256  EngageTargetHealthText   Str     
+	264  IncapacitatedText        Str     
+	272  SquadUnavailableText     Str     
+	280  HealthCriticalText       Str     
+	288  FullHealthText           Str     
+	296  TacticalVisionModeText   Str     
+	304  LowLightVisionModeText   Str     
+	312  IncapMenuMaintainText    Str     
+	320  IncapMenuRecallText      Str     
+	328  IncapMenuReloadPCText    Str     
+	336  IncapMenuReloadXboxText  Str     
+	344  IncapMenuSelectedItem    Int     
+	348  Checkpoint               Str     
+	356  XboxCheckpointAddition   Str     
+	364  ElapsedCheckpointSaveTime Float   
+	368  CheckpointSaveTime       Float   
+	372  GenericPromptText        Str     
+	380  GenericPromptButtonFuncs Array   <Str>
+	388  GenericPromptTime        Float   
+	392  GenericPromptFlash       Bool    <0 : 0x00000001>
+	396  DemolitionReadyPromptText Str     
+	404  DemolitionReadyPromptButtonFuncs Array   <Str>
+	412  MountTurretPromptText    Str     
+	420  MountTurretPromptButtonFuncs Array   <Str>
+	428  SquadOccupiedText        Str     
+	436  SquadIncapacitatedText   Str     
+	444  ReviveSquadmatePromptText Str     
+	452  ReviveSquadmatePromptButtonFuncs Array   <Str>
+	460  PickupPromptText         Str     
+	468  PickupPromptButtonFuncs  Array   <Str>
+	476  RemoveScavPromptText     Str     
+	484  RemoveScavPromptButtonFuncs Array   <Str>
+	492  SearchAndDestroy         Str     
+	500  FormUp                   Str     
+	508  SecurePosition           Str     
+	516  Cancel                   Str     
+	524  SubtitleGroupInfo        Array   <Struct <SubtitleGroup>>
+	532  SubtitleEntries          Array   <Struct <SubtitleEntry>>
+	540  SubtitleText             Str     
+	548  SubtitleDisplayTime      Float   
+	552  SubtitlePriority         Int     
+	556  ObjectiveActor           Object  <Actor>
+	560  ObjectivePosition        Struct  <Vector>
+	572  LastSniperZoomRechargeCenterOffset Float   
+	576  FadeTime                 Float   
+	580  FadeColor                Struct  <Color>
+	584  ElapsedFadeTime          Float   
+	588  SquadCommandPromptDelay  Float   
+	592  ElapsedSquadCommandPromptTime Float   
+	596  SquadCommandPromptFadeInTime Float   
+	600  SelectedSquadCommand     Int     
+	604  ElapsedSelectedSquadCommandTime Float   
+	608  SelectedSquadCommandPulseTime Float   
+	612  bDraw                    Bool    <0 : 0x00000001>
+	612  bWiping                  Bool    <1 : 0x00000002>
+	612  PlayingShieldChargeSound Bool    <2 : 0x00000004>
+	612  PlayingHealthChargeSound Bool    <3 : 0x00000008>
+	612  PlayingHealSound         Bool    <4 : 0x00000010>
+	612  bShowObjectiveTracker    Bool    <5 : 0x00000020>
+	612  bBracketVisibleObjective Bool    <6 : 0x00000040>
+	612  bDoingFade               Bool    <7 : 0x00000080>
+	612  bDoInitSequence          Bool    <8 : 0x00000100>
+	612  bShowSquadCommandPrompt  Bool    <9 : 0x00000200>
+	612  bBlinkSquad              Bool    <10: 0x00000400>
+	612  bBlinkGrenade            Bool    <11: 0x00000800>
+	612  bBlinkHealth             Bool    <12: 0x00001000>
+	612  bBlinkShields            Bool    <13: 0x00002000>
+	612  bBlinkSquadCommandPrompt Bool    <14: 0x00004000>
+	612  bInTacticalVisionMode    Bool    <15: 0x00008000>
+	612  bCheckpointSave          Bool    <16: 0x00010000>
+	612  bSubtitleTextLastFrame   Bool    <17: 0x00020000>
+	612  bGenericPromptTextLastFrame Bool    <18: 0x00040000>
+	612  bCurrentObjectiveTextLastFrame Bool    <19: 0x00080000>
+	612  bMarkerTextLastFrame     Bool    <20: 0x00100000>
+	612  bActivateTextLastFrame   Bool    <21: 0x00200000>
+	612  bDetonateTextLastFrame   Bool    <22: 0x00400000>
+	612  bPickupTextLastFrame     Bool    <23: 0x00800000>
+	612  bTurretTextLastFrame     Bool    <24: 0x01000000>
+	612  bReviveTextLastFrame     Bool    <25: 0x02000000>
+	612  bPickupPromptTextLastFrame Bool    <26: 0x04000000>
+	612  bRemoveScavPromptTextLastFrame Bool    <27: 0x08000000>
+	616  SquadBlinkTime           Float   
+	620  ElapsedSquadBlinkTime    Float   
+	624  GrenadeBlinkTime         Float   
+	628  ElapsedGrenadeBlinkTime  Float   
+	632  HealthBlinkTime          Float   
+	636  ElapsedHealthBlinkTime   Float   
+	640  ShieldsBlinkTime         Float   
+	644  ElapsedShieldsBlinkTime  Float   
+	648  SquadCommandPromptBlinkTime Float   
+	652  ElapsedSquadCommandPromptBlinkTime Float   
+	656  VisorModeTextTime        Float   
+	660  ElapsedVisorModeSwitchTime Float   
+	664  LightArray               Array   <Object <Actor>>
+	672  VisCheckFrequency        Float   
+	676  mCachedMarkerVisInfo     Struct  <CachedMarkerVisInfo>[20]
+	1236 mCachedObjectiveVisInfo  Struct  <CachedObjectiveVisInfo>
+	1244 LastGrenade              Str     
+	1252 LastTime                 Float   
+	1256 LastSubtitleText         Str     
+	1264 fSubtitleStartTime       Float   
+	1268 LastGenericPromptText    Str     
+	1276 fGenericPromptStartTime  Float   
+	1280 LastCurrentObjectiveText Str     
+	1288 fCurrentObjectiveStartTime Float   
+	1292 LastPickupText           Str     
+	1300 fPickupStartTime         Float   
+	1304 LastPickupPromptText     Str     
+	1312 fPickupPromptStartTime   Float   
+	1316 LastRemoveScavPromptText Str     
+	1324 fRemoveScavPromptStartTime Float   
+	1328 LastMarkerText           Str     
+	1336 fMarkerStartTime         Float   
+	1340 LastActivateText         Str     
+	1348 fActivateStartTime       Float   
+	1352 LastDetonateText         Str     
+	1360 fDetonateStartTime       Float   
+	1364 LastTurretText           Str     
+	1372 fTurretStartTime         Float   
+	1376 LastReviveText           Str     
+	1384 fReviveStartTime         Float   
+	1388 LargeVisorIcons          Object  <Texture>
+	1392 CloneVisorIcons          Object  <Texture>
+	1396 MPVisorIcons             Object  <Texture>
+	1400 TexAmmo                  Object  <Texture>
+	1404 TexClip                  Object  <Texture>
+	1408 TexHit                   Object  <Texture>
+	1412 MarkerArrows             Object  <Texture>
+	1416 TexAButton               Object  <Texture>
+	1420 TexBButton               Object  <Texture>
+	1424 TexXButton               Object  <Texture>
+	1428 TexYButton               Object  <Texture>
+	1432 TexBlackButton           Object  <Texture>
+	1436 TexWhiteButton           Object  <Texture>
+	1440 TexDPadMonoButton        Object  <Texture>
+	1444 TexCompassGraphic        Object  <Texture>
+	1448 TexTargetBlip            Object  <Texture>
+	1452 TexObjectiveRing         Object  <Texture>
+	1456 TexDPadBlue              Object  <Texture>
+	1460 TexSniperRecharge        Object  <Texture>
+	1464 TexSniperNonZoomReticle  Object  <Texture>
+	1468 TexTextLine01            Object  <Texture>
+	1472 TexText01                Object  <Texture>
+	1476 TexMarkerArrows          Object  <Texture>
+	1480 TexHealRing              Object  <Texture>
+	1484 TexHealIndicator         Object  <Texture>
+	1488 TexUseRing               Object  <Texture>
+	1492 TexUseIndicator          Object  <Texture>
+	1496 TexTrandoRollReticle     Object  <Texture>
+	1500 TexTacticalLine          Object  <Texture>
+	1504 TexTacticalGraphic       Object  <Texture>
+	1508 TexBowcasterClip         Object  <Texture>
+	1512 TexBowcasterRecharge     Object  <Texture>
+	1516 EventTimer               Object  <Texture>
+	1520 IncapMenuButton          Object  <Texture>
+	1524 HSBloodSplatter          Object  <HardwareShader>
+	1528 HSHitEffect              Object  <HardwareShader>
+	1532 HSWiper                  Object  <HardwareShader>
+	1536 Orbit8Font               Object  <Font>
+	1540 Orbit15Font              Object  <Font>

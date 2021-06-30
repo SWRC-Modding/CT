@@ -1,0 +1,2 @@
+CLASS: WookieeDropship(1664), BASE: Vehicles
+PROPERTIES:

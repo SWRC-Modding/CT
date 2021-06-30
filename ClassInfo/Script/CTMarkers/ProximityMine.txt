@@ -1,0 +1,11 @@
+CLASS: ProximityMine(984), BASE: ExplosiveCharge
+PROPERTIES:
+	948  TeamIndex                Int     
+	952  TriggerRadius            Float   
+	956  NextCheckTime            Float   
+	960  DetonationPreviewMesh    Object  <StaticMesh>
+	964  DetonationPreviewActor   Object  <Actor>
+	968  AlertTimeLimit           Float   
+	972  AlertBeginTime           Float   
+	976  ActivateSound            Object  <Sound>
+	980  AlertSound               Object  <Sound>

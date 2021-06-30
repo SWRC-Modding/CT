@@ -1,0 +1,2 @@
+CLASS: GEO_05A1_begHall_sfx01(96), BASE: AudioEnvironment
+PROPERTIES:

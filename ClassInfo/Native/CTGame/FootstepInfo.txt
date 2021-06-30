@@ -1,0 +1,10 @@
+CLASS: FootstepInfo(48), BASE: Object
+STRUCTS:
+	FootstepSoundInfo(8)
+		0    StepOnMaterial           Byte    <EMaterialType>
+		4    FootstepSound            Object  <Sound>
+	FootstepSoundMap(12)
+		0    Footsteps                Array   <Struct <FootstepSoundInfo>>
+		8    WalkType                 Byte    <eMaterialWalkType>
+PROPERTIES:
+	40   FootstepSounds           Array   <Struct <FootstepSoundMap>>

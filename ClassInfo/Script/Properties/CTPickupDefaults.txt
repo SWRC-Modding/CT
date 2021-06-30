@@ -1,0 +1,2 @@
+CLASS: CTPickupDefaults(704), BASE: CTPickup
+PROPERTIES:

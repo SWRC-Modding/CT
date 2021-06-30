@@ -1,0 +1,2 @@
+CLASS: Dispenser_Damage(828), BASE: Emitter
+PROPERTIES:

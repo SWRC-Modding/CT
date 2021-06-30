@@ -1,0 +1,55 @@
+CLASS: EditorEngine(524), BASE: Engine
+PROPERTIES:
+	264  Level                    Object  <Level>
+	268  TempModel                Object  <Model>
+	272  CurrentTexture           Object  <Texture>
+	276  CurrentStaticMesh        Object  <StaticMesh>
+	280  CurrentMesh              Object  <Mesh>
+	284  CurrentClass             Class   <Object>
+	288  LastClass                Class   <Object>
+	292  Trans                    Object  <TransBuffer>
+	296  Results                  Object  <TextBuffer>
+	300  Pad                      Int     [8]
+	332  Bad                      Object  <Texture>
+	336  Bkgnd                    Object  <Texture>
+	340  BkgndHi                  Object  <Texture>
+	344  BadHighlight             Object  <Texture>
+	348  MaterialArrow            Object  <Texture>
+	352  MaterialBackdrop         Object  <Texture>
+	356  TexPropCube              Object  <StaticMesh>
+	360  TexPropSphere            Object  <StaticMesh>
+	364  bFastRebuild             Bool    <0 : 0x00000001>
+	364  bBootstrapping           Bool    <1 : 0x00000002>
+	368  AutoSaveIndex            Int     
+	372  AutoSaveCount            Int     
+	376  Mode                     Int     
+	380  TerrainEditBrush         Int     
+	384  ClickFlags               Int     
+	388  MightNeedSave            Bool    <0 : 0x00000001>
+	392  MovementSpeed            Float   
+	396  PackageContext           Object  <Package>
+	400  AddLocation              Struct  <Vector>
+	412  AddPlane                 Struct  <Plane>
+	428  Tools                    Array   <Object <Object>>
+	436  BrowseClass              Class   <Object>
+	440  ConstraintsVtbl          Int     
+	444  GridEnabled              Bool    <0 : 0x00000001>
+	444  SnapVertices             Bool    <1 : 0x00000002>
+	448  SnapDistance             Float   
+	452  GridSize                 Struct  <Vector>
+	464  RotGridEnabled           Bool    <0 : 0x00000001>
+	468  RotGridSize              Struct  <Rotator>
+	480  UseSizingBox             Bool    <0 : 0x00000001>
+	480  UseAxisIndicator         Bool    <1 : 0x00000002>
+	484  FovAngleDegrees          Float   
+	488  GodMode                  Bool    <0 : 0x00000001>
+	488  AutoSave                 Bool    <1 : 0x00000002>
+	492  AutoSaveTimeMinutes      Byte    
+	496  GameCommandLine          Str     
+	504  EditPackages             Array   <Str>
+	512  NativePackages           Array   <Str>
+	520  AlwaysShowTerrain        Bool    <0 : 0x00000001>
+	520  UseOldInterface          Bool    <1 : 0x00000002>
+	520  DontUseArcball           Bool    <2 : 0x00000004>
+	520  HideOrthoAxes            Bool    <3 : 0x00000008>
+	520  MayaStyleMovement        Bool    <4 : 0x00000010>

@@ -1,0 +1,18 @@
+CLASS: SparkEmitter(956), BASE: ParticleEmitter
+STRUCTS:
+	ParticleSparkData(32)
+		0    TimeBeforeVisible        Float   
+		4    TimeBetweenSegments      Float   
+		8    StartLocation            Struct  <Vector>
+		20   StartVelocity            Struct  <Vector>
+PROPERTIES:
+	900  LineSegmentsRange        Struct  <Range>
+	908  TimeBeforeVisibleRange   Struct  <Range>
+	916  TimeBetweenSegmentsRange Struct  <Range>
+	924  SparkData                Array   <Struct <ParticleSparkData>>
+	932  VertexBuffer             Object  <VertexBuffer>
+	936  IndexBuffer              Object  <IndexBuffer>
+	940  NumSegments              Int     
+	944  VerticesPerParticle      Int     
+	948  IndicesPerParticle       Int     
+	952  PrimitivesPerParticle    Int     

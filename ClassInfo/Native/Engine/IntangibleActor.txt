@@ -1,0 +1,2 @@
+CLASS: IntangibleActor(644), BASE: Actor
+PROPERTIES:

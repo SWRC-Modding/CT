@@ -1,0 +1,2 @@
+CLASS: DecoVolumeObject(644), BASE: Actor
+PROPERTIES:

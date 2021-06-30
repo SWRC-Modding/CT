@@ -1,0 +1,2 @@
+CLASS: PolysFactory(88), BASE: Factory
+PROPERTIES:

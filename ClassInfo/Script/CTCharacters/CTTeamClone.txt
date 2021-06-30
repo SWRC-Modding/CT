@@ -1,0 +1,2 @@
+CLASS: CTTeamClone(948), BASE: MPTeam
+PROPERTIES:

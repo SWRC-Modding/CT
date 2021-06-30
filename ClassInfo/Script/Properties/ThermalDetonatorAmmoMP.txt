@@ -1,0 +1,2 @@
+CLASS: ThermalDetonatorAmmoMP(868), BASE: ThermalDetonatorAmmo
+PROPERTIES:

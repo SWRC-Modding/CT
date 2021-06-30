@@ -1,0 +1,2 @@
+CLASS: KConstraintDefaults(800), BASE: KConstraint
+PROPERTIES:

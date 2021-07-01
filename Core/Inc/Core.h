@@ -351,10 +351,10 @@ public:
 	virtual UBOOL SetGlobalTime(const TCHAR* Filename) = 0;
 	virtual UBOOL MakeDirectory(const TCHAR* Path, UBOOL Tree = 0) = 0;
 	virtual UBOOL DeleteDirectory(const TCHAR* Path, UBOOL RequireExists = 0, UBOOL Tree = 0) = 0;
-	virtual void FindFiles(TArray<FString>& Result, const TCHAR* Filename, UBOOL Files, UBOOL Directories) = 0;
+	virtual TArray<FString> FindFiles(const TCHAR* Pattern, UBOOL Files, UBOOL Directories) = 0;
 	virtual UBOOL SetDefaultDirectory(const TCHAR* Filename) = 0;
 	virtual FString GetDefaultDirectory() = 0;
-	virtual const TCHAR* CalcHomeDir(); // Returns appBaseDir()
+	virtual const TCHAR* CalcHomeDir();
 	virtual int Cache(const TCHAR*){ return 0; }
 	virtual FFileStats GetStats(bool){ return FFileStats(); }
 	virtual QWORD GetFreeDiscSpace(const TCHAR*){ return 0; }
@@ -371,15 +371,15 @@ enum EFileStreamType{
 };
 
 struct FStream{
-	void* Data;
-	void* Handle;
-	void* TDD;		// type dependent data
-	INT   FileSeek;
-	INT   ChunkSize;
-	INT   ChunksRequested;
-	INT   Locked;
-	INT   Used;
-	INT   EndOfFile;
+	void*           Data;
+	void*           Handle;
+	void*           TDD; // type dependent data
+	INT             FileSeek;
+	INT             ChunkSize;
+	INT             ChunksRequested;
+	INT             Locked;
+	INT             Used;
+	INT             EndOfFile;
 	EFileStreamType	Type;
 };
 

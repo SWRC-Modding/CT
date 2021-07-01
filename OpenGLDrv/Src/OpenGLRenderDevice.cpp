@@ -9,41 +9,36 @@
 
 IMPLEMENT_CLASS(UOpenGLRenderDevice)
 
-FShaderGLSL UOpenGLRenderDevice::ErrorShader(
-	"ERRORSHADER",
-	"void main(void){\n"
-		"\tgl_Position = LocalToScreen * vec4(InPosition.xyz, 1.0);\n"
-	"}\n",
-	"void main(void){\n"
-		"\tFragColor = vec4(1.0, 0.0, 1.0, 1.0);\n"
-	"}\n");
+FShaderGLSL UOpenGLRenderDevice::ErrorShader(FSTR("ERRORSHADER"),
+                                             FSTR("void main(void){ gl_Position = LocalToScreen * vec4(InPosition.xyz, 1.0); }\n"),
+                                             FSTR("void main(void){ FragColor = vec4(1.0, 0.0, 1.0, 1.0); }\n"));
 
 UOpenGLRenderDevice::UOpenGLRenderDevice() : RenderInterface(this),
-                                             FixedFunctionShader(FStringTemp("FixedFunction", true)),
+                                             FixedFunctionShader(FSTR("FixedFunction")),
                                              Backbuffer(0, 0, TEXF_RGBA8, false, false){}
 
 void UOpenGLRenderDevice::StaticConstructor(){
-	SupportsCubemaps = 1;
-	SupportsZBIAS = 1;
+	SupportsCubemaps       = 1;
+	SupportsZBIAS          = 1;
 	CanDoDistortionEffects = 1;
-	bBilinearFramebuffer = 1;
-	TextureFilter = TF_Bilinear;
-	TextureAnisotropy = 8;
-	bFirstRun = 1;
-	ShaderDir = "OpenGLShaders";
+	bBilinearFramebuffer   = 1;
+	TextureFilter          = TF_Bilinear;
+	TextureAnisotropy      = 8;
+	bFirstRun              = 1;
+	ShaderDir              = FSTR("OpenGLShaders");
 
-	new(GetClass(), "DistortionEffects", RF_Public) UBoolProperty(CPP_PROPERTY(CanDoDistortionEffects), "Options", CPF_Config);
-	new(GetClass(), "UseDesktopResolution", RF_Public) UBoolProperty(CPP_PROPERTY(bUseDesktopResolution), "Options", CPF_Config);
-	new(GetClass(), "KeepAspectRatio", RF_Public) UBoolProperty(CPP_PROPERTY(bKeepAspectRatio), "Options", CPF_Config);
-	new(GetClass(), "BilinearFramebuffer", RF_Public) UBoolProperty(CPP_PROPERTY(bBilinearFramebuffer), "Options", CPF_Config);
-	new(GetClass(), "AutoReloadShaders", RF_Public) UBoolProperty(CPP_PROPERTY(bAutoReloadShaders), "Options", CPF_Config);
-	new(GetClass(), "TextureFilter", RF_Public) UByteProperty(CPP_PROPERTY(TextureFilter), "Options", CPF_Config);
-	new(GetClass(), "TextureAnisotropy", RF_Public) UIntProperty(CPP_PROPERTY(TextureAnisotropy), "Options", CPF_Config);
-	new(GetClass(), "VSync", RF_Public) UBoolProperty(CPP_PROPERTY(bVSync), "Options", CPF_Config);
-	new(GetClass(), "AdaptiveVSync", RF_Public) UBoolProperty(CPP_PROPERTY(bAdaptiveVSync), "Options", CPF_Config);
-	new(GetClass(), "FirstRun", RF_Public) UBoolProperty(CPP_PROPERTY(bFirstRun), "", CPF_Config);
-	new(GetClass(), "DebugOpenGL", RF_Public) UBoolProperty(CPP_PROPERTY(bDebugOpenGL), "", CPF_Config);
-	new(GetClass(), "ShaderDir", RF_Public) UStrProperty(CPP_PROPERTY(ShaderDir), "", CPF_Config);
+	new(GetClass(), "DistortionEffects",    RF_Public) UBoolProperty(CPP_PROPERTY(CanDoDistortionEffects), "Options", CPF_Config);
+	new(GetClass(), "UseDesktopResolution", RF_Public) UBoolProperty(CPP_PROPERTY(bUseDesktopResolution),  "Options", CPF_Config);
+	new(GetClass(), "KeepAspectRatio",      RF_Public) UBoolProperty(CPP_PROPERTY(bKeepAspectRatio),       "Options", CPF_Config);
+	new(GetClass(), "BilinearFramebuffer",  RF_Public) UBoolProperty(CPP_PROPERTY(bBilinearFramebuffer),   "Options", CPF_Config);
+	new(GetClass(), "AutoReloadShaders",    RF_Public) UBoolProperty(CPP_PROPERTY(bAutoReloadShaders),     "Options", CPF_Config);
+	new(GetClass(), "TextureFilter",        RF_Public) UByteProperty(CPP_PROPERTY(TextureFilter),          "Options", CPF_Config);
+	new(GetClass(), "TextureAnisotropy",    RF_Public) UIntProperty (CPP_PROPERTY(TextureAnisotropy),      "Options", CPF_Config);
+	new(GetClass(), "VSync",                RF_Public) UBoolProperty(CPP_PROPERTY(bVSync),                 "Options", CPF_Config);
+	new(GetClass(), "AdaptiveVSync",        RF_Public) UBoolProperty(CPP_PROPERTY(bAdaptiveVSync),         "Options", CPF_Config);
+	new(GetClass(), "FirstRun",             RF_Public) UBoolProperty(CPP_PROPERTY(bFirstRun),              "",        CPF_Config);
+	new(GetClass(), "DebugOpenGL",          RF_Public) UBoolProperty(CPP_PROPERTY(bDebugOpenGL),           "",        CPF_Config);
+	new(GetClass(), "ShaderDir",            RF_Public) UStrProperty (CPP_PROPERTY(ShaderDir),              "",        CPF_Config);
 }
 
 void UOpenGLRenderDevice::MakeCurrent(){
@@ -491,6 +486,7 @@ void UOpenGLRenderDevice::Flush(UViewport* Viewport){
 	}
 
 	appMemzero(ResourceHash, sizeof(ResourceHash));
+	GLShaderByHardwareShader.Empty();
 
 	DynamicIndexBuffer32 = NULL;
 	DynamicIndexBuffer16 = NULL;
@@ -668,7 +664,7 @@ void UOpenGLRenderDevice::LoadShaders(){
 		SaveFragmentShader(&FixedFunctionShader);
 
 	for(TMap<UHardwareShader*, FShaderGLSL>::TIterator It(GLShaderByHardwareShader); It; ++It){
-		if(*It.Value().GetName()){
+		if(!It.Key()->IsIn(UObject::GetTransientPackage())){
 			if(!LoadVertexShader(&It.Value()))
 				SaveVertexShader(&It.Value());
 
@@ -696,7 +692,7 @@ bool UOpenGLRenderDevice::LoadVertexShader(FShaderGLSL* Shader){
 	FStringTemp ShaderText(0);
 	FFilename Filename = MakeShaderFilename(Shader->GetName(), VERTEX_SHADER_FILE_EXTENSION);
 
-	if(!ShaderFileNeedsReload(*Filename))
+	if(*Shader->GetVertexShaderText() && !ShaderFileNeedsReload(*Filename))
 		return true;
 
 	if(LoadShaderText(Filename, &ShaderText)){
@@ -712,7 +708,7 @@ bool UOpenGLRenderDevice::LoadFragmentShader(FShaderGLSL* Shader){
 	FStringTemp ShaderText(0);
 	FFilename Filename = MakeShaderFilename(Shader->GetName(), FRAGMENT_SHADER_FILE_EXTENSION);
 
-	if(!ShaderFileNeedsReload(*Filename))
+	if(*Shader->GetFragmentShaderText() && !ShaderFileNeedsReload(*Filename))
 		return true;
 
 	if(LoadShaderText(Filename, &ShaderText)){

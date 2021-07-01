@@ -232,7 +232,7 @@ public:
 	}
 
 	void Transfer(TArray<T>& Src){
-		Realloc(0, 0);
+		Empty();
 
 		Data = Src.Data;
 		ArrayNum = Src.ArrayNum;
@@ -260,15 +260,15 @@ public:
 		}
 	}
 
-	void Set(INT NewSize){ 	Set(NewSize, NewSize); 	}
-	T* GetData(){ 	return static_cast<T*>(Data); 	}
-	const T* GetData() const{ 	return static_cast<T*>(Data); 	}
-	bool IsValidIndex(INT Index) const{ 	return Index >= 0 && Index < Num(); 	}
-	INT Num() const{ 	return ArrayNum; 	}
-	INT Size() const{ 	return Num(); 	}
-	bool IsAllocated() const{ 	return Data != NULL && !bIsReference; 	}
-	T& Last(INT c = 0){ 	return (*this)[Num() - c - 1]; 	}
-	const T& Last(INT c = 0) const{ 	return (*this)[Num() - c - 1]; 	}
+	void Set(INT NewSize){ Set(NewSize, NewSize); }
+	T* GetData(){ return static_cast<T*>(Data); }
+	const T* GetData() const{ return static_cast<T*>(Data); }
+	bool IsValidIndex(INT Index) const{ return Index >= 0 && Index < Num(); }
+	INT Num() const{ return ArrayNum; }
+	INT Size() const{ return Num(); }
+	bool IsAllocated() const{ return Data != NULL && !bIsReference; }
+	T& Last(INT c = 0){ return (*this)[Num() - c - 1]; }
+	const T& Last(INT c = 0) const{ return (*this)[Num() - c - 1]; }
 
 	bool FindItem(const T& Item, INT& Index) const{
 		for(Index = 0; Index < Num(); ++Index){
@@ -288,9 +288,9 @@ public:
 		return INDEX_NONE;
 	}
 
-	void SetNoShrink(bool NoShrink){ 	bNoShrink = NoShrink; 	}
-	void CountBytes(FArchive& Ar){ 	Ar.CountBytes(Data, Num() * sizeof(T)); 	}
-	INT GetMaxSize() const{ 	return Capacity(); 	}
+	void SetNoShrink(bool NoShrink){ bNoShrink = NoShrink; }
+	void CountBytes(FArchive& Ar){ Ar.CountBytes(Data, Num() * sizeof(T)); }
+	INT GetMaxSize() const{ return Capacity(); }
 
 	void Serialize(FArchive& Ar){
 		guard(MyTArray::Serialize);
@@ -436,7 +436,7 @@ public:
 	// Iterator
 	class TIterator{
 	public:
-		TIterator(TArray<T>& InArray) : Array(InArray), Index(-1) { ++*this;           }
+		TIterator(TArray<T>& InArray) : Array(InArray), Index(-1){ ++*this;            }
 		void operator++()     { ++Index;                                               }
 		void RemoveCurrent()  { Array.Remove(Index--);                                 }
 		INT GetIndex()   const{ return Index;                                          }
@@ -868,6 +868,9 @@ protected:
 		return Ar;
 	}
 };
+
+// Helper macro to create an fstring without copying the data
+#define FSTR(str) FString(str, true)
 
 /*
  * Temporary string used to avoid unnecessary copies with temporary objects (e.g. when chaining the + operator)

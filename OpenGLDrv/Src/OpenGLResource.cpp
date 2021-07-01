@@ -13,7 +13,6 @@ FOpenGLResource::FOpenGLResource(UOpenGLRenderDevice* InRenDev, QWORD InCacheId)
 FOpenGLResource::~FOpenGLResource(){
 	RenDev->RemoveResource(this);
 }
-
 // FOpenGLShader
 
 FOpenGLShader::FOpenGLShader(UOpenGLRenderDevice* InRenDev, QWORD InCacheId) : FOpenGLResource(InRenDev, InCacheId),

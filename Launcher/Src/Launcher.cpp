@@ -211,9 +211,10 @@ static void MainLoop(){
 
 	// Loop while running.
 	GIsRunning = 1;
+
 	DOUBLE OldTime = appSeconds();
 	DOUBLE SecondStartTime = OldTime;
-	INT TickCount = 0;
+	DWORD  TickCount = 0;
 
 	while(GIsRunning && !GIsRequestingExit){
 		// Update the world.
@@ -227,7 +228,7 @@ static void MainLoop(){
 			GWindowManager->Tick(DeltaTime);
 
 		OldTime = NewTime;
-		TickCount++;
+		++TickCount;
 
 		if(OldTime > SecondStartTime + 1){
 			GEngine->CurrentTickRate = (FLOAT)TickCount / (OldTime - SecondStartTime);
@@ -254,7 +255,7 @@ static void MainLoop(){
 				GIsRequestingExit = 1;
 
 			TranslateMessage(&Msg);
-			DispatchMessageA( &Msg );
+			DispatchMessageA(&Msg);
 		}
 
 		unguard;
@@ -325,6 +326,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 // Force use of dedicated GPU
 extern "C"{
-	__declspec(dllexport) DWORD NvOptimusEnablement = 1;
-	__declspec(dllexport) DWORD AmdPowerXpressRequestHighPerformance = 1;
+	DLL_EXPORT DWORD NvOptimusEnablement = 1;
+	DLL_EXPORT DWORD AmdPowerXpressRequestHighPerformance = 1;
 }

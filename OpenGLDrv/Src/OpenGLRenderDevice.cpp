@@ -9,12 +9,12 @@
 
 IMPLEMENT_CLASS(UOpenGLRenderDevice)
 
-FShaderGLSL UOpenGLRenderDevice::ErrorShader(FSTR("ERRORSHADER"),
-                                             FSTR("void main(void){ gl_Position = LocalToScreen * vec4(InPosition.xyz, 1.0); }\n"),
-                                             FSTR("void main(void){ FragColor = vec4(1.0, 0.0, 1.0, 1.0); }\n"));
+FShaderGLSL UOpenGLRenderDevice::ErrorShader(FStringTemp("ERRORSHADER"),
+                                             FStringTemp("void main(void){ gl_Position = LocalToScreen * vec4(InPosition.xyz, 1.0); }\n"),
+                                             FStringTemp("void main(void){ FragColor = vec4(1.0, 0.0, 1.0, 1.0); }\n"));
 
 UOpenGLRenderDevice::UOpenGLRenderDevice() : RenderInterface(this),
-                                             FixedFunctionShader(FSTR("FixedFunction")),
+                                             FixedFunctionShader(FStringTemp("FixedFunction")),
                                              Backbuffer(0, 0, TEXF_RGBA8, false, false){}
 
 void UOpenGLRenderDevice::StaticConstructor(){
@@ -25,7 +25,7 @@ void UOpenGLRenderDevice::StaticConstructor(){
 	TextureFilter          = TF_Bilinear;
 	TextureAnisotropy      = 8;
 	bFirstRun              = 1;
-	ShaderDir              = FSTR("OpenGLShaders");
+	ShaderDir              = FStringTemp("OpenGLShaders");
 
 	new(GetClass(), "DistortionEffects",    RF_Public) UBoolProperty(CPP_PROPERTY(CanDoDistortionEffects), "Options", CPF_Config);
 	new(GetClass(), "UseDesktopResolution", RF_Public) UBoolProperty(CPP_PROPERTY(bUseDesktopResolution),  "Options", CPF_Config);
@@ -871,7 +871,7 @@ FString UOpenGLRenderDevice::VertexShaderVarsText(
 	"out vec3 Tangent;\n"
 	"out vec3 Binormal;\n"
 	"out float Fog;\n\n"
-	"float calculate_fog(float Dist){ return 1 - saturate((FogEnd - Dist) / (FogEnd - FogStart)); }\n\n", true);
+	"float calculate_fog(float Dist){ return 1 - saturate((FogEnd - Dist) / (FogEnd - FogStart)); }\n\n");
 
 FString UOpenGLRenderDevice::FragmentShaderVarsText(
 	SHADER_HEADER
@@ -930,7 +930,7 @@ FString UOpenGLRenderDevice::FragmentShaderVarsText(
 	"in float Fog;\n"
 	"out vec4 FragColor;\n\n"
 	"void alpha_test(vec4  c){ if(c.a <= AlphaRef) discard; }\n"
-	"vec4 apply_fog(vec4 BaseColor){ return vec4(mix(BaseColor.rgb, FogColor.rgb, Fog * BaseColor.a), BaseColor.a); }\n\n", true);
+	"vec4 apply_fog(vec4 BaseColor){ return vec4(mix(BaseColor.rgb, FogColor.rgb, Fog * BaseColor.a), BaseColor.a); }\n\n");
 
 #define FIXED_FUNCTION_UNIFORMS \
 	"// Shader specific uniforms\n\n" \
@@ -1025,7 +1025,7 @@ FString UOpenGLRenderDevice::FixedFunctionVertexShaderText(
 		"\t}\n"
 		"\n"
 		"\tgl_Position = LocalToScreen * vec4(InPosition.xyz, 1.0);\n"
-	"}\n", true);
+	"}\n");
 
 FString UOpenGLRenderDevice::FixedFunctionFragmentShaderText(
 	FIXED_FUNCTION_UNIFORMS
@@ -1260,7 +1260,7 @@ FString UOpenGLRenderDevice::FixedFunctionFragmentShaderText(
 		"\n"
 		"\tif(FogEnabled)\n"
 			"\t\tFragColor = apply_fog(FragColor);\n"
-	"}\n", true);
+	"}\n");
 
 #undef UNIFORM_STRUCT_MEMBER
 #undef UNIFORM_BLOCK_MEMBER

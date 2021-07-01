@@ -134,7 +134,7 @@ protected:
 	INT bNoShrink    : 1; // Don't shrink allocation when elements are removed
 
 	FArray(bool NoShrink = false) : Data(NULL), ArrayNum(0), bIsReference(0), bIsTemporary(0), bNoShrink(NoShrink){}
-	FArray(void* Src, INT Count) : Data(Src), ArrayNum(Count), bIsReference(1), bIsTemporary(0), bNoShrink(0){}
+	//FArray(void* Src, INT Count) : Data(Src), ArrayNum(Count), bIsReference(1), bIsTemporary(0), bNoShrink(0){}
 	FArray(ENoInit){}
 };
 
@@ -146,7 +146,7 @@ template<typename T>
 class TArray : public FArray{
 public:
 	TArray() : FArray(){}
-	TArray(T* Src, INT Count) : FArray(Src, Count){}
+	//TArray(T* Src, INT Count) : FArray(Src, Count){}
 	TArray(ENoInit) : FArray(E_NoInit){}
 
 	TArray(INT Size, bool NoShrink = false) : FArray(NoShrink){
@@ -500,10 +500,7 @@ protected:
 				Data = NULL;
 			}
 
-			bIsReference = 0; // To make sure the memory isn't leaked.
-							   // This doesn't exist in the original code which means that either
-							   // the developers made a mistake or I'm missing something else about
-							   // how these flags are used...
+			bIsReference = 0; // The original code doesn't do this which causes memory leaks when a reference array is reallocated
 		}
 
 		ArrayNum = NewSize;
@@ -801,6 +798,7 @@ class FStringTemp;
 class CORE_API FString : protected TArray<TCHAR>{
 public:
 	FString();
+	// NOTE: There is a bug in Core.dll that causes a memory leak if IsReference is true. So do not use it!!!
 	FString(const TCHAR* In, bool IsReference = false);
 	FString(ENoInit);
 	FString(const FString& Other);
@@ -869,15 +867,13 @@ protected:
 	}
 };
 
-// Helper macro to create an fstring without copying the data
-#define FSTR(str) FString(str, true)
-
 /*
  * Temporary string used to avoid unnecessary copies with temporary objects (e.g. when chaining the + operator)
  * This should only be used as a return value.
  */
 class CORE_API FStringTemp : public FString{
 public:
+	// NOTE: There is a bug in Core.dll that causes a memory leak if IsReference is true. So do not use it!!!
 	FStringTemp(const TCHAR* In, bool IsReference = false);
 	FStringTemp(INT Count);
 	FStringTemp(INT Count, const TCHAR* In);
@@ -981,6 +977,7 @@ public:
 	FFilename(const FString& Other) : FString(Other){}
 	FFilename(const TCHAR* In) : FString(In){}
 	FFilename(ENoInit) : FString(E_NoInit){}
+	~FFilename(){ FString::~FString(); }
 
 	// Returns the text following the last period.
 	FStringTemp GetExtension() const{

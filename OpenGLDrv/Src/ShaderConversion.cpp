@@ -94,6 +94,23 @@ void UOpenGLRenderDevice::SetHardwareShaderMacros(UHardwareShaderMacros* Macros)
 
 	const TCHAR* Pos = *Macros->Macros;
 
+	// Extract leading comments into special macro so that they are included in the generated file
+	{
+		FStringTemp Comments("", true);
+		SkipWhitespaceAndComments(&Pos, &Comments);
+
+		if(Comments.Len() > 0){
+			FString* PrevComments = HardwareShaderMacroText.Find("__COMMENTS__");
+
+			if(PrevComments){
+				if(Comments != *PrevComments) // Append new comments if they are not identical to the previous ones
+					*PrevComments += "\n" + Comments;
+			}else{
+				HardwareShaderMacroText["__COMMENTS__"] = Comments;
+			}
+		}
+	}
+
 	while(*Pos){
 		if(*Pos == ';' || *Pos == '/'){
 			SkipWhitespaceAndComments(&Pos);
@@ -143,7 +160,7 @@ void UOpenGLRenderDevice::ExpandShaderMacros(FString* Text){
 			FString MacroText;
 
 			if(MacroTextPtr)
-				MacroText = FString(**MacroTextPtr, true);
+				MacroText = **MacroTextPtr;
 			else
 				debugf(NAME_Error, "Unknown shader macro '%s'", *Name);
 

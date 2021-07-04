@@ -1022,7 +1022,7 @@ static bool WriteShaderInstructionRhs(FString* Out, FShaderInstruction& Instruct
 		break;
 	case INS_mul:
 		REQUIRE_ARGS(2);
-		*ResultExpr = Args[0].ExprType;
+		*ResultExpr = Max(Args[0].ExprType, Args[1].ExprType);
 		WriteShaderInstructionArg(Args[0], *ResultExpr, Out);
 		*Out += " * ";
 		WriteShaderInstructionArg(Args[1], *ResultExpr, Out);

@@ -771,7 +771,7 @@ void UOpenGLRenderDevice::SaveFragmentShader(FShaderGLSL* Shader){
 void UOpenGLRenderDevice::SaveShaderMacroText(){
 	FString Macros;
 
-	for(TMap<FString, FString>::TIterator It(HardwareShaderMacroText); It; ++It)
+	for(TMap<FString, FString>::TIterator It(ShaderMacros); It; ++It)
 		Macros += "@" + It.Key() + "\n" + It.Value() + "\n";
 
 	SaveShaderText(MakeShaderFilename("Macros", SHADER_MACROS_FILE_EXTENSION), Macros);

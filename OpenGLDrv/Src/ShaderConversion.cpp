@@ -1,7 +1,7 @@
 #include "../Inc/OpenGLRenderDevice.h"
 
 UHardwareShaderMacros* UOpenGLRenderDevice::HardwareShaderMacros = NULL;
-TMap<FString, FString> UOpenGLRenderDevice::HardwareShaderMacroText;
+TMap<FString, FString> UOpenGLRenderDevice::ShaderMacros;
 TArray<FString>        UOpenGLRenderDevice::ExpandedMacros;
 
 static void SkipWhitespaceSingleLine(const TCHAR** Text){
@@ -100,13 +100,13 @@ void UOpenGLRenderDevice::SetHardwareShaderMacros(UHardwareShaderMacros* Macros)
 		SkipWhitespaceAndComments(&Pos, &Comments);
 
 		if(Comments.Len() > 0){
-			FString* PrevComments = HardwareShaderMacroText.Find("__COMMENTS__");
+			FString* PrevComments = ShaderMacros.Find("__COMMENTS__");
 
 			if(PrevComments){
 				if(Comments != *PrevComments) // Append new comments if they are not identical to the previous ones
 					*PrevComments += "\n" + Comments;
 			}else{
-				HardwareShaderMacroText["__COMMENTS__"] = Comments;
+				ShaderMacros["__COMMENTS__"] = Comments;
 			}
 		}
 	}
@@ -131,11 +131,16 @@ void UOpenGLRenderDevice::SetHardwareShaderMacros(UHardwareShaderMacros* Macros)
 
 				FStringTemp MacroText(static_cast<INT>(Pos - First), First);
 				FString MacroGLSL;
+				bool UsesFog = false;
 
-				if(ConvertD3DAssemblyToGLSL(*MacroText, &MacroGLSL, false))
-					HardwareShaderMacroText[*Name] = MacroGLSL;
-				else
+				if(ConvertD3DAssemblyToGLSL(*MacroText, &MacroGLSL, &UsesFog)){
+					if(UsesFog)
+						MacroGLSL += "\n#define MACRO_FOG\n";
+
+					ShaderMacros[*Name] = MacroGLSL;
+				}else{
 					debugf(NAME_Error, "Failed to convert hardware shader macro '%s' to GLSL", *Name);
+				}
 			}
 		}else{
 			++Pos;
@@ -156,7 +161,7 @@ void UOpenGLRenderDevice::ExpandShaderMacros(FString* Text){
 				++Pos;
 
 			FStringTemp Name(static_cast<INT>(Pos - First) - 1, First + 1);
-			FString* MacroTextPtr = HardwareShaderMacroText.Find(*Name);
+			FString* MacroTextPtr = ShaderMacros.Find(*Name);
 			FString MacroText;
 
 			if(MacroTextPtr)
@@ -215,7 +220,7 @@ void UOpenGLRenderDevice::ParseGLSLMacros(const FString& Text){
 				while(*Pos && *Pos != '@')
 					++Pos;
 
-				HardwareShaderMacroText[*Name] = FStringTemp(static_cast<INT>(Pos - First), First);
+				ShaderMacros[*Name] = FStringTemp(static_cast<INT>(Pos - First), First);
 			}
 		}else{
 			++Pos;
@@ -319,11 +324,23 @@ FStringTemp UOpenGLRenderDevice::GLSLVertexShaderFromD3DVertexShader(UHardwareSh
 		                "void main(void){\n";
 
 	FString ConvertedShaderText;
+	bool UsesFog = false;
 
-	if(!ConvertD3DAssemblyToGLSL(*D3DShaderText, &ConvertedShaderText, true))
+	if(!ConvertD3DAssemblyToGLSL(*D3DShaderText, &ConvertedShaderText, &UsesFog))
 		appErrorf("Vertex shader conversion failed (%s)", Shader->GetPathName()); // TODO: Fall back to default implementation
 
-	GLSLShaderText += ConvertedShaderText + "}\n";
+	GLSLShaderText += ConvertedShaderText;
+
+	if(UsesFog){
+		GLSLShaderText += "\tFog = calculate_fog(oFog);\n"; // The shader assigns a value to the fog register, so we use that
+	}else{
+		GLSLShaderText += "#ifndef MACRO_FOG\n" // The base shader doesn't write to oFog but a macro might. If it does, MACRO_FOG is defined
+		                      "\tFog = calculate_fog(oFog);\n"
+	                      "#else\n"
+		                      "\tFog = calculate_fog((LocalToCamera * vec4(InPosition.xyz, 1.0)).z);\n"
+	                      "#endif\n"
+	                      "}\n";
+	}
 
 	return GLSLShaderText;
 }
@@ -349,7 +366,7 @@ FStringTemp UOpenGLRenderDevice::GLSLFragmentShaderFromD3DPixelShader(UHardwareS
 
 	FString ConvertedShaderText;
 
-	if(!ConvertD3DAssemblyToGLSL(*D3DShaderText, &ConvertedShaderText, false))
+	if(!ConvertD3DAssemblyToGLSL(*D3DShaderText, &ConvertedShaderText, NULL))
 		appErrorf("Pixel shader conversion failed (%s)", Shader->GetPathName()); // TODO: Fall back to default implementation
 
 	GLSLShaderText += ConvertedShaderText +
@@ -483,7 +500,7 @@ static EShaderInstruction ParseShaderInstructionName(const TCHAR** Text){
 		if(NumMatches > ShaderInstructionStrings[i].NumMatchesWithPrev)
 			break; // Error: invalid instruction
 
-		while(*(*Text + NumMatches) == ShaderInstructionStrings[i].Str[NumMatches] || *(*Text + NumMatches) < ShaderInstructionStrings[i].Str[NumMatches])
+		while(*(*Text + NumMatches) == ShaderInstructionStrings[i].Str[NumMatches])
 			++NumMatches;
 
 		if(!appIsAlnum(*(*Text + NumMatches)) && ShaderInstructionStrings[i].Str[NumMatches] == '\0'){
@@ -1200,7 +1217,7 @@ static bool WriteShaderInstruction(FShaderInstruction& Instruction, FString* Out
 	return true;
 }
 
-bool UOpenGLRenderDevice::ConvertD3DAssemblyToGLSL(const TCHAR* Text, FString* Out, bool VertexFog){
+bool UOpenGLRenderDevice::ConvertD3DAssemblyToGLSL(const TCHAR* Text, FString* Out, bool* UsesFog){
 	SkipWhitespaceAndComments(&Text);
 
 	// Skip shader type and version. We don't care and just assume the highest supported versions are vs.1.1 and ps.1.4
@@ -1215,7 +1232,6 @@ bool UOpenGLRenderDevice::ConvertD3DAssemblyToGLSL(const TCHAR* Text, FString* O
 	SkipWhitespaceAndComments(&Text, Out);
 
 	FShaderInstruction Instruction;
-	bool UsesFog = false;
 
 	while(*Text){
 		if(*Text != '{'){
@@ -1225,8 +1241,10 @@ bool UOpenGLRenderDevice::ConvertD3DAssemblyToGLSL(const TCHAR* Text, FString* O
 			if(!WriteShaderInstruction(Instruction, Out))
 				return false;
 
-			if(!UsesFog && appStrncmp(Instruction.Destination, "oFog", 4) == 0)
-				UsesFog = true;
+			if(UsesFog){
+				if(!*UsesFog && appStrncmp(Instruction.Destination, "oFog", 4) == 0)
+					*UsesFog = true;
+			}
 		}else{
 			const TCHAR* First = Text + 1;
 
@@ -1245,15 +1263,6 @@ bool UOpenGLRenderDevice::ConvertD3DAssemblyToGLSL(const TCHAR* Text, FString* O
 
 	if((*Out)[Out->Len() - 1] != '\n')
 		*Out += "\n";
-
-	if(VertexFog){
-		*Out += "\n\tif(FogEnabled)\n";
-
-		if(UsesFog)
-			*Out += "\t\tFog = calculate_fog(oFog);\n";
-		else
-			*Out += "\t\tFog = calculate_fog((LocalToCamera * vec4(InPosition.xyz, 1.0)).z);\n";
-	}
 
 	return true;
 }

@@ -89,32 +89,32 @@ public:
 	void LoadShaders();
 
 private:
-	HDC                       DeviceContext;
-	HGLRC                     OpenGLContext;
-	FOpenGLRenderInterface    RenderInterface;
-	FRenderCaps               RenderCaps;
+	HDC                                 DeviceContext;
+	HGLRC                               OpenGLContext;
+	FOpenGLRenderInterface              RenderInterface;
+	FRenderCaps                         RenderCaps;
 
-	FShaderGLSL               FixedFunctionShader;
+	FShaderGLSL                         FixedFunctionShader;
 
-	FAuxRenderTarget          Backbuffer;
-	unsigned int              BackbufferDepthStencil; // Shared with UFrameFX::WorkingTarget
+	FAuxRenderTarget                    Backbuffer;
+	unsigned int                        BackbufferDepthStencil; // Shared with UFrameFX::WorkingTarget
 
-	UBOOL                     bFirstRun;
-	UBOOL                     bVSync;
-	UBOOL                     bAdaptiveVSync;
-	UBOOL                     bDebugOpenGL;
-	UBOOL                     bIsFullscreen;
-	INT                       SavedViewportWidth;
-	INT                       SavedViewportHeight;
+	UBOOL                               bFirstRun;
+	UBOOL                               bVSync;
+	UBOOL                               bAdaptiveVSync;
+	UBOOL                               bDebugOpenGL;
+	UBOOL                               bIsFullscreen;
+	INT                                 SavedViewportWidth;
+	INT                                 SavedViewportHeight;
 
-	FOpenGLIndexBuffer*       DynamicIndexBuffer16;
-	FOpenGLIndexBuffer*       DynamicIndexBuffer32;
-	FOpenGLVertexStream*      DynamicVertexStream;
+	FOpenGLIndexBuffer*                 DynamicIndexBuffer16;
+	FOpenGLIndexBuffer*                 DynamicIndexBuffer32;
+	FOpenGLVertexStream*                DynamicVertexStream;
 
-	TArray<BYTE>              Scratch;
-	FOpenGLResource*          ResourceHash[4096];
+	TArray<BYTE>                        Scratch;
+	FOpenGLResource*                    ResourceHash[4096];
 
-	FStringNoInit             ShaderDir;
+	FStringNoInit                       ShaderDir;
 
 	TMap<FString, SQWORD>               ShaderFileTimes;
 	TMap<UHardwareShader*, FShaderGLSL> GLShaderByHardwareShader;
@@ -140,13 +140,13 @@ private:
 	// Shader conversion
 
 	static UHardwareShaderMacros* HardwareShaderMacros;
-	static TMap<FString, FString> HardwareShaderMacroText;
+	static TMap<FString, FString> ShaderMacros;
 	static TArray<FString>        ExpandedMacros; // Used to check for circular references in macros
 
 	static void ParseGLSLMacros(const FString& Text);
 	static FStringTemp GLSLVertexShaderFromD3DVertexShader(UHardwareShader* Shader);
 	static FStringTemp GLSLFragmentShaderFromD3DPixelShader(UHardwareShader* Shader);
-	static bool ConvertD3DAssemblyToGLSL(const TCHAR* Text, FString* Out, bool VertexFog);
+	static bool ConvertD3DAssemblyToGLSL(const TCHAR* Text, FString* Out, bool* UsesFog);
 
 	// Movie playback
 

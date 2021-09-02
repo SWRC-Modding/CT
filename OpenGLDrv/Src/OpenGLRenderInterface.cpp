@@ -66,6 +66,8 @@ FOpenGLRenderInterface::FOpenGLRenderInterface(UOpenGLRenderDevice* InRenDev) : 
 																				CurrentState(&SavedStates[0]){}
 
 void FOpenGLRenderInterface::Init(INT ViewportWidth, INT ViewportHeight){
+	checkSlow(RenDev->IsCurrent());
+
 	// Setup initial state
 
 	glEnable(GL_BLEND);
@@ -282,6 +284,7 @@ void FOpenGLRenderInterface::CommitRenderState(){
 }
 
 void FOpenGLRenderInterface::Locked(UViewport* Viewport){
+	checkSlow(RenDev->IsCurrent());
 	checkSlow(CurrentState == &SavedStates[0]);
 	checkSlow(!LockedViewport);
 
@@ -292,11 +295,13 @@ void FOpenGLRenderInterface::Locked(UViewport* Viewport){
 	if(TextureFilter != RenDev->TextureFilter)
 		SetTextureFilter(RenDev->TextureFilter);
 
-	if(GLEW_EXT_texture_filter_anisotropic && TextureAnisotropy != RenDev->TextureAnisotropy){
+	if(TextureAnisotropy != RenDev->TextureAnisotropy){
 		TextureAnisotropy = RenDev->TextureAnisotropy;
 
-		for(INT i = 0; i < MAX_TEXTURES; ++i)
-			glSamplerParameterf(Samplers[i], GL_TEXTURE_MAX_ANISOTROPY, Clamp<FLOAT>(TextureAnisotropy, 1, 16));
+		if(GLEW_EXT_texture_filter_anisotropic){
+			for(INT i = 0; i < MAX_TEXTURES; ++i)
+				glSamplerParameterf(Samplers[i], GL_TEXTURE_MAX_ANISOTROPY, Clamp<FLOAT>(TextureAnisotropy, 1, 16));
+		}
 	}
 
 	if(bStencilEnabled != !!RenDev->UseStencil){

@@ -48,7 +48,7 @@ static struct FExecHook : public FExec, FNotifyHook{
 			UClass* Class;
 			UObject* Found = NULL;
 			FName ActorName;
-			APlayerController* Player = GEngine->Client->Viewports[0]->Actor;
+			APlayerController* Player = GIsClient ? GEngine->Client->Viewports[0]->Actor : NULL;
 
 			if(ParseObject<UClass>(Cmd, "Class=", Class, ANY_PACKAGE)){
 				FLOAT   MinDist = 999999.0f;
@@ -98,7 +98,7 @@ static struct FExecHook : public FExec, FNotifyHook{
 			SetFocus(Preferences->hWnd);
 
 			return 1;
-		}else if(ParseCommand(&Cmd, "USERENDEV")){
+		}else if(GIsClient && ParseCommand(&Cmd, "USERENDEV")){
 			FString RenderDeviceClass = Cmd;
 
 			if(RenderDeviceClass == "D3D")

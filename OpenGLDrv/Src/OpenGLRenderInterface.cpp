@@ -72,6 +72,8 @@ void FOpenGLRenderInterface::Init(INT ViewportWidth, INT ViewportHeight){
 
 	glEnable(GL_BLEND);
 	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_POLYGON_OFFSET_POINT);
+	glEnable(GL_POLYGON_OFFSET_LINE);
 	glEnable(GL_POLYGON_OFFSET_FILL);
 
 	RenderState.ViewportX = 0;
@@ -1058,9 +1060,9 @@ void FOpenGLRenderInterface::GetShaderConstants(FSConstantsInfo* Info, FPlane* C
 			continue;
 		case EVC_EyePositionObjectSpace:
 			Constants[i] = CurrentState->WorldToLocal.TransformFPlane(FPlane(CurrentState->CameraToWorld.M[3][0],
-			                                                                          CurrentState->CameraToWorld.M[3][1],
-			                                                                          CurrentState->CameraToWorld.M[3][2],
-			                                                                          CurrentState->CameraToWorld.M[3][3]));
+			                                                                 CurrentState->CameraToWorld.M[3][1],
+			                                                                 CurrentState->CameraToWorld.M[3][2],
+			                                                                 CurrentState->CameraToWorld.M[3][3]));
 			continue;
 		case EVC_2DRotator:
 			Constants[i].X = appCos(CurrentState->Time);

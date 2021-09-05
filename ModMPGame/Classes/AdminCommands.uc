@@ -193,8 +193,20 @@ function bool ExecCmd(String Cmd, optional PlayerController PC){
 
 		return true;
 	}else if(ParseCommand(Cmd, "SWITCHMAP")){
-		Level.Game.Broadcast(self, "Switching map");
-		Level.ServerTravel(Cmd, false);
+		if(Len(Cmd) > 0){
+			IntParam = InStr(Cmd, "?");
+
+			if(IntParam == -1)
+				Level.Game.Broadcast(self, "Switching map to " $ Cmd);
+			else if(IntParam == 0)
+				Level.Game.Broadcast(self, "Switching map to " $ AdminControl.GetMapFileName());
+			else
+				Level.Game.Broadcast(self, "Switching map to " $ Left(Cmd, IntParam));
+
+			Level.ServerTravel(Cmd, false);
+		}else{
+			CommandFeedback(PC, "Expected map URL");
+		}
 
 		return true;
 	}else if(ParseCommand(Cmd, "RESTARTMAP")){

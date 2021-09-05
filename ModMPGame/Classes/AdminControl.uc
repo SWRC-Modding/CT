@@ -2,14 +2,14 @@ class AdminControl extends GameStats native config(ModMPGame);
 
 var() config array<String> ServiceClasses;
 
-var() config string EventLogFile;
-var() config bool   AppendEventLog;
-var() config bool   EventLogTimestamp;
-var() config bool   DoStatLogging;
+var() config string        EventLogFile;
+var() config bool          AppendEventLog;
+var() config bool          EventLogTimestamp;
+var() config bool          DoStatLogging;
 
-var bool          bPrintCommands;  // Commands are not executed but instead displayed (e.g. when the 'help' command is used)
-var array<string> CurrentCommands; // Only used as temporary storage when bPrintCommands == true
-var AdminService  Services;        // Linked list of all currently active services
+var bool                   bPrintCommands;  // Commands are not executed but instead displayed (e.g. when the 'help' command is used)
+var array<string>          CurrentCommands; // Only used as temporary storage when bPrintCommands == true
+var AdminService           Services;        // Linked list of all currently active services
 
 native final function EventLog(coerce string Msg, name Tag);
 native final function SaveStats(PlayerController PC);
@@ -37,12 +37,14 @@ function PostBeginPlay(){
 	local class<AdminService> ServiceClass;
 	local AdminService Service;
 
-	if(Level.Game.GameStats != None && Level.Game.GameStats != self){
-		Warn("GameStats will be replaced by AdminControl!");
-	}else if(Level.Game.GameStats.IsA('AdminControl')){
-		Destroy();
+	if(Level.Game.GameStats != None){
+		if(Level.Game.GameStats != self){
+			Warn("GameStats will be replaced by AdminControl!");
+		}else if(Level.Game.GameStats.IsA('AdminControl')){
+			Destroy();
 
-		return;
+			return;
+		}
 	}
 
 	EventLog(GetMapFileName(), 'Map');
@@ -133,7 +135,13 @@ event bool ExecCmd(string Cmd, optional PlayerController PC){
 	local string CommandSource;
 
 	// Common engine commands are ignored
-	if(Left(Cmd, 5) ~= "XLIVE" || Left(Cmd, 7) ~= "GETPING" || Left(Cmd, 13) ~= "GETCURRENTRES" || Left(Cmd, 8) ~= "SETMOUSE")
+	if(Left(Cmd, 5)  ~= "XLIVE" ||
+	   Left(Cmd, 7)  ~= "GETPING" ||
+	   Left(Cmd, 7)  ~= "PROFILE" ||
+	   Left(Cmd, 8)  ~= "SETMOUSE" ||
+	   Left(Cmd, 10) ~= "CLEARSPLIT" ||
+	   Left(Cmd, 12) ~= "NUMVIEWPORTS" ||
+	   Left(Cmd, 13) ~= "GETCURRENTRES")
 		return false;
 
 	if(Cmd ~= "HELP")

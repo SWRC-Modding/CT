@@ -4,6 +4,7 @@
 #include "../../Core/Inc/FFeedbackContextCmd.h"
 #include "../../Core/Inc/FConfigCacheIni.h"
 #include "../../Engine/Inc/Engine.h"
+#include "../../Editor/Inc/Editor.h"
 #include "../../Window/Inc/Window.h"
 #include "../../GameSpyMgr/Inc/GameSpyMgr.h"
 
@@ -46,43 +47,50 @@ static struct FExecHook : public FExec, FNotifyHook{
 			return 1;
 		}else if(ParseCommand(&Cmd, "EDITACTOR")){
 			UClass* Class;
-			UObject* Found = NULL;
+			AActor* Found = NULL;
 			FName ActorName;
 			APlayerController* Player = GIsClient ? GEngine->Client->Viewports[0]->Actor : NULL;
+			ULevel* Level = NULL;
 
-			if(ParseObject<UClass>(Cmd, "Class=", Class, ANY_PACKAGE)){
-				FLOAT   MinDist = 999999.0f;
+			if(GEngine->IsA<UGameEngine>())
+				Level = static_cast<UGameEngine*>(GEngine)->GLevel;
+			else if(GEngine->IsA<UEditorEngine>())
+				Level = static_cast<UEditorEngine*>(GEngine)->Level;
 
-				for(TObjectIterator<AActor> It; It; ++It){
-					FLOAT Dist = Player ? FDist(It->Location, Player->Location) : 0.0f;
+			if(Level){
+				if(ParseObject<UClass>(Cmd, "Class=", Class, ANY_PACKAGE)){
+					FLOAT MinDist = 999999.0f;
 
-					if((!Player || It->GetLevel() == Player->GetLevel()) &&
-					   !It->bDeleteMe &&
-					   It->IsA(Class) &&
-					   Dist < MinDist){
-						MinDist = Dist;
-						Found   = *It;
+					for(TActorIterator<AActor> It(Level); It; ++It){
+						FLOAT Dist = Player ? FDist(It->Location, Player->Pawn ? Player->Pawn->Location : Player->Location) : 0.0f;
+
+						if(!It->bDeleteMe && It->IsA(Class) && Dist < MinDist){
+							MinDist = Dist;
+							Found   = *It;
+						}
 					}
-				}
-			}else if(Parse(Cmd, "Name=", ActorName)){
-				for(TObjectIterator<AActor> It; It; ++It){
-					if(!It->bDeleteMe && It->GetFName() == ActorName){
-						Found = *It;
+				}else if(Parse(Cmd, "Name=", ActorName)){
+					for(TActorIterator<AActor> It(Level); It; ++It){
+						if(!It->bDeleteMe && It->GetFName() == ActorName){
+							Found = *It;
 
-						break;
+							break;
+						}
 					}
+				}else if(Player){
+					Found = Player->Target;
 				}
-			}else if(Player){
-				Found = Player->Target;
-			}
 
-			if(Found){
-				WObjectProperties* P = new WObjectProperties("EditActor", 0, "", NULL, 1);
-				P->OpenWindow(GLogWindow ? GLogWindow->hWnd : NULL);
-				P->Root.SetObjects((UObject**)&Found, 1);
-				P->Show(1);
+				if(Found){
+					WObjectProperties* P = new WObjectProperties("EditActor", 0, "", NULL, 1);
+					P->OpenWindow(GLogWindow ? GLogWindow->hWnd : NULL);
+					P->Root.SetObjects((UObject**)&Found, 1);
+					P->Show(1);
+				}else{
+					Ar.Logf("Target not found");
+				}
 			}else{
-				Ar.Logf("Target not found");
+				Ar.Log("No Level Loaded");
 			}
 
 			return 1;

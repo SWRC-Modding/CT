@@ -94,6 +94,30 @@ public:
 };
 
 
+class MODMPGAME_API ASkinChanger : public AAdminService
+{
+public:
+    TArrayNoInit<class UShader*> CloneSkins;
+    TArrayNoInit<class UShader*> TrandoSkins;
+    FLOAT NextSkinUpdateTime;
+    void execSetSkin(FFrame& Stack, void* Result);
+    DECLARE_CLASS(ASkinChanger,AAdminService,0|CLASS_Config,ModMPGame)
+	// Overrides
+	virtual INT Tick(FLOAT DeltaTime, ELevelTick TickType);
+	virtual void Spawned();
+
+	struct FSkinEntry{
+		INT NumSeenBy;
+		INT CloneIndex;
+		INT TrandoIndex;
+	};
+
+	static TMap<FString, FSkinEntry> SkinsByPlayerID;
+	static INT                       LastSkinResetDay;
+    DECLARE_NATIVES(ASkinChanger)
+};
+
+
 class MODMPGAME_API AMPBot : public ACTBot
 {
 public:
@@ -114,7 +138,9 @@ public:
     BITFIELD AppendEventLog:1 GCC_PACK(4);
     BITFIELD EventLogTimestamp:1;
     BITFIELD DoStatLogging:1;
-    BITFIELD bPrintCommands:1;
+    BITFIELD ShowMOTD:1;
+    FLOAT MOTDInterval GCC_PACK(4);
+    BITFIELD bPrintCommands:1 GCC_PACK(4);
     TArrayNoInit<FString> CurrentCommands GCC_PACK(4);
     class AAdminService* Services;
     void execEventLog(FFrame& Stack, void* Result);
@@ -178,6 +204,7 @@ public:
 #define AUTO_INITIALIZE_REGISTRANTS_MODMPGAME \
 	AAdminService::StaticClass(); \
 	ABotSupport::StaticClass(); \
+	ASkinChanger::StaticClass(); \
 	AMPBot::StaticClass(); \
 	AAdminControl::StaticClass(); \
 	APatrolPoint::StaticClass(); \

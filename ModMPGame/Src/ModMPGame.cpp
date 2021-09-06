@@ -28,15 +28,21 @@ static TMap<FString, FPlayerStats>       CurrentGamePlayersByID;
 static TMap<APlayerController*, FString> PlayerIDsByController; // Only needed because PlayerController::Player is NULL when GameInfo::Logout is called
 
 // Combines ip address with cd key hash to uniquely identify a player even in the same network
-static FString GetPlayerID(UNetConnection* Con){
-	FString IP = Con->LowLevelGetRemoteAddress();
+static FStringTemp GetPlayerID(APlayerController* PC){
+	// IsA(UNetConnection::StaticClass()) returns false for TcpipConnection - WTF???
+	if(PC->Player->IsA<UViewport>()){
+		return "__HOST__";
+	}else{
+		UNetConnection* Con = static_cast<UNetConnection*>(PC->Player);
+		FString IP = Con->LowLevelGetRemoteAddress();
 
-	INT Pos = IP.InStr(":", true);
+		INT Pos = IP.InStr(":", true);
 
-	if(Pos != -1)
-		return IP.Left(Pos) + Con->CDKeyHash;
+		if(Pos != -1)
+			return IP.Left(Pos) + Con->CDKeyHash;
 
-	return IP + Con->CDKeyHash;
+		return IP + Con->CDKeyHash;
+	}
 }
 
 static struct FAdminControlExec : FExec{
@@ -148,7 +154,7 @@ void AAdminControl::execSaveStats(FFrame& Stack, void* Result){
 		if(PC->Player->IsA(UViewport::StaticClass()))
 			return;
 
-		PlayerID = GetPlayerID(static_cast<UNetConnection*>(PC->Player));
+		PlayerID = GetPlayerID(PC);
 		PlayerIDsByController[PC] = PlayerID;
 	}else{ // PC->Player == NULL happens when a player leaves the server. In that case we need to look up the ID using the controller
 		FString* Tmp = PlayerIDsByController.Find(PC);
@@ -184,7 +190,7 @@ void AAdminControl::execRestoreStats(FFrame& Stack, void* Result){
 		PC->PlayerReplicationInfo->bAdmin = 1; // The host is always an admin
 		// It doesn't make sense to restore anything else here as the host cannot leave and rejoin without stopping the server
 	}else{
-		FString PlayerID = GetPlayerID(static_cast<UNetConnection*>(PC->Player));
+		FString PlayerID = GetPlayerID(PC);
 		const FPlayerStats& Stats = CurrentGamePlayersByID[*PlayerID];
 
 		PlayerIDsByController[PC] = PlayerID;
@@ -766,6 +772,137 @@ bool ABotSupport::ExecCmd(const char* Cmd, class APlayerController* PC){
 }
 
 /*
+ * SkinChanger
+ */
+
+void ASkinChanger::execSetSkin(FFrame& Stack, void* Result){
+	P_GET_OBJECT(APlayerController, PC);
+	P_GET_INT(SkinIndex);
+	P_FINISH;
+
+	if(!PC)
+		return;
+
+	FString PlayerID = GetPlayerID(PC);
+
+	if(PC->Pawn){
+		static FName NMPClone("MPClone");
+
+		if(PC->Pawn->IsA(NMPClone))
+			SkinsByPlayerID[*PlayerID].CloneIndex = Clamp(SkinIndex, 0, CloneSkins.Num() - 1);
+		else
+			SkinsByPlayerID[*PlayerID].TrandoIndex = Clamp(SkinIndex, 0, TrandoSkins.Num() - 1);
+	}else{ // Player has no pawn so we just use the same index for both
+		SkinsByPlayerID[*PlayerID].CloneIndex = Clamp(SkinIndex, 0, CloneSkins.Num() - 1);
+		SkinsByPlayerID[*PlayerID].TrandoIndex = Clamp(SkinIndex, 0, TrandoSkins.Num() - 1);
+	}
+
+	NextSkinUpdateTime = 0.0f;
+}
+
+/*
+ * Stupid solution for a stupid issue:
+ * Changing a Pawns Skin via RepSkin only shows up on clients if it is actually replicated, i.e. the client can see the Pawn.
+ * If a player joins a match and the RepSkin has been set before he joined, it is not visible.
+ * Also if the Pawn is out of sight it is despawned and respawned when it gets back. Again, no skin change.
+ * That's why the skins are updated periodically by switching between the Shader and the Diffuse texture.
+ * This is necessary because the property needs to actually have a different value for the new Skin to be applied on clients.
+ * Switching between shader and Diffuse is the best way to do that because visually it is only a short flicker that is only visible when bumpmapping is enabled.
+ */
+INT ASkinChanger::Tick(FLOAT DeltaTime, ELevelTick TickType){
+	INT Result =  Super::Tick(DeltaTime, TickType);
+
+	if(SkinsByPlayerID.Num() == 0) // No need to update skins since none are active
+		return Result;
+
+	static bool bUseShaders = true;
+
+	NextSkinUpdateTime -= DeltaTime;
+
+	if(NextSkinUpdateTime <= 0.0f){
+		if(bUseShaders)
+			NextSkinUpdateTime = 30.0f;
+		else
+			NextSkinUpdateTime = 0.1f; // Only show the diffuse for a very short amount of time before switching back to the shader which we actually want
+
+		for(AController* C = Level->ControllerList; C; C = C->nextController){
+			FString PlayerID;
+			APlayerController* PC = Cast<APlayerController>(C);
+
+			if(PC && C->Pawn){
+				FSkinEntry* Skin = SkinsByPlayerID.Find(GetPlayerID(PC));
+
+				if(Skin){
+					static FName NMPClone("MPClone");
+
+					if(bUseShaders){
+						if(C->Pawn->IsA(NMPClone))
+							C->Pawn->RepSkin = CloneSkins[Skin->CloneIndex];
+						else
+							C->Pawn->RepSkin = TrandoSkins[Skin->TrandoIndex];
+
+						if(C->Pawn->Skins.Num() == 0)
+							C->Pawn->Skins.AddItem(C->Pawn->RepSkin);
+						else
+							C->Pawn->Skins[0] = C->Pawn->RepSkin;
+					}else{
+						if(C->Pawn->IsA(NMPClone))
+							C->Pawn->RepSkin = CloneSkins[Skin->CloneIndex]->Diffuse;
+						else
+							C->Pawn->RepSkin = TrandoSkins[Skin->TrandoIndex]->Diffuse;
+					}
+				}
+
+				C->Pawn->bReplicateMovement = 1;
+				C->Pawn->bNetDirty = 1;
+			}
+		}
+
+		bUseShaders = !bUseShaders;
+	}
+
+	// Check if a Pawn was seen by a player that wasn't seen previously and update skins if that is the case
+	for(AController* C = Level->ControllerList; C; C = C->nextController){
+		FString PlayerID;
+		APlayerController* PC = Cast<APlayerController>(C);
+
+		if(PC && C->Pawn){
+			FSkinEntry* Skin = SkinsByPlayerID.Find(GetPlayerID(PC));
+
+			if(Skin){
+				INT NumSeenBy = 0;
+
+				for(AController* C = Level->ControllerList; C; C = C->nextController){
+					if(C->IsA<APlayerController>() && C->LineOfSightTo(PC->Pawn))
+						++NumSeenBy;
+				}
+
+				if(NumSeenBy != Skin->NumSeenBy){
+					NextSkinUpdateTime = 0.1f;
+				}
+
+				Skin->NumSeenBy = NumSeenBy;
+			}
+		}
+	}
+
+	return Result;
+}
+
+void ASkinChanger::Spawned(){
+	Super::Spawned();
+
+	// Clear skins every day since the IP of most players has probably changed.
+	if(Level->Day != LastSkinResetDay){
+		LastSkinResetDay = Level->Day;
+		SkinsByPlayerID.Empty();
+	}
+}
+
+TMap<FString, ASkinChanger::FSkinEntry> ASkinChanger::SkinsByPlayerID;
+INT                                     ASkinChanger::LastSkinResetDay;
+
+/*
  * MPBot
  */
 
@@ -798,7 +935,7 @@ void AMPBot::execUpdatePawnAccuracy(FFrame& Stack, void* Result){
 }
 
 /*
- * UExportPathsCommandlet
+ * ExportPathsCommandlet
  */
 class UExportPathsCommandlet : public UCommandlet{
 	DECLARE_CLASS(UExportPathsCommandlet, UCommandlet, 0, ModMPGame);

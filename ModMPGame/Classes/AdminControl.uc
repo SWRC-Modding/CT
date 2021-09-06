@@ -6,6 +6,8 @@ var() config string        EventLogFile;
 var() config bool          AppendEventLog;
 var() config bool          EventLogTimestamp;
 var() config bool          DoStatLogging;
+var() config bool          ShowMOTD;
+var() config float         MOTDInterval;
 
 var bool                   bPrintCommands;  // Commands are not executed but instead displayed (e.g. when the 'help' command is used)
 var array<string>          CurrentCommands; // Only used as temporary storage when bPrintCommands == true
@@ -18,6 +20,22 @@ native final function RestoreStats(PlayerController PC);
 function Init(){
 	if(DoStatLogging)
 		Super.Init();
+}
+
+function Timer(){
+	// Print Message of the Day (HUD code has this disabled for some reason)
+
+	if(Len(Level.Game.GameReplicationInfo.MOTDLine1) > 0)
+		Level.Game.Broadcast(self, Level.Game.GameReplicationInfo.MOTDLine1);
+
+	if(Len(Level.Game.GameReplicationInfo.MOTDLine2) > 0)
+		Level.Game.Broadcast(self, Level.Game.GameReplicationInfo.MOTDLine2);
+
+	if(Len(Level.Game.GameReplicationInfo.MOTDLine3) > 0)
+		Level.Game.Broadcast(self, Level.Game.GameReplicationInfo.MOTDLine3);
+
+	if(Len(Level.Game.GameReplicationInfo.MOTDLine4) > 0)
+		Level.Game.Broadcast(self, Level.Game.GameReplicationInfo.MOTDLine4);
 }
 
 function ConnectEvent(PlayerReplicationInfo Who){
@@ -92,6 +110,9 @@ function PostBeginPlay(){
 		Service.nextAdminService = Services;
 		Services = Service;
 	}
+
+	if(ShowMOTD)
+		SetTimer(MOTDInterval, true);
 }
 
 function bool DispatchCmd(PlayerController PC, string Cmd){
@@ -192,6 +213,8 @@ defaultproperties
 	EventLogFile="ServerEvents.log"
 	AppendEventLog=true
 	EventLogTimestamp=true
+	ShowMOTD=true
+	MOTDInterval=60.0
 	ServiceClasses(0)="ModMPGame.AdminAuthentication"
 	ServiceClasses(1)="ModMPGame.AdminCommands"
 	ServiceClasses(2)="ModMPGame.BotSupport"

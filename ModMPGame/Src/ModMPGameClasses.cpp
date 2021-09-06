@@ -25,6 +25,13 @@ LINK_NATIVES(AAdminService);
 
 IMPLEMENT_CLASS(ABotSupport);
 
+IMPLEMENT_CLASS(ASkinChanger);
+FNativeEntry<ASkinChanger> ASkinChanger::StaticNativeMap[] = {
+	MAP_NATIVE(SetSkin,0)
+	{NULL,NULL}
+};
+LINK_NATIVES(ASkinChanger);
+
 IMPLEMENT_CLASS(AMPBot);
 FNativeEntry<AMPBot> AMPBot::StaticNativeMap[] = {
 	MAP_NATIVE(UpdatePawnAccuracy,0)

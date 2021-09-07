@@ -333,7 +333,8 @@ FStringTemp UOpenGLRenderDevice::GLSLVertexShaderFromD3DVertexShader(UHardwareSh
 
 	if(UsesFog){
 		// The shader assigns a value to the fog register, so we use that
-		GLSLShaderText += "\tFog = calculate_fog(oFog);\n";
+		GLSLShaderText += "\tFog = calculate_fog(oFog);\n"
+		                  "}\n";
 	}else{
 		// The base shader doesn't write to oFog but a macro might. If it does, MACRO_FOG is defined and we can use oFog
 		GLSLShaderText += "#ifdef MACRO_FOG\n"

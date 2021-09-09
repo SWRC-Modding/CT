@@ -54,8 +54,15 @@ static struct FAdminControlExec : FExec{
 		if(GAdminControl)
 			RecognizedCmd = GAdminControl->ExecCmd(Cmd, NULL);
 
-		if(!RecognizedCmd)
+		if(!RecognizedCmd){
+			if(ParseCommand(&Cmd, "CLEAREVENTLOG")){
+				AdminControlEventLog.Close();
+				GFileManager->Delete(AdminControlEventLog.Filename);
+				RecognizedCmd = true;
+			}else{
 			RecognizedCmd = OldExec ? OldExec->Exec(Cmd, Ar) : 0;
+			}
+		}
 
 		return RecognizedCmd;
 	}

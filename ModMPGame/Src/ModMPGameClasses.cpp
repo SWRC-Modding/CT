@@ -27,7 +27,8 @@ IMPLEMENT_CLASS(ABotSupport);
 
 IMPLEMENT_CLASS(ASkinChanger);
 FNativeEntry<ASkinChanger> ASkinChanger::StaticNativeMap[] = {
-	MAP_NATIVE(SetSkin,0)
+	MAP_NATIVE(SetCloneSkin,0)
+	MAP_NATIVE(SetTrandoSkin,0)
 	{NULL,NULL}
 };
 LINK_NATIVES(ASkinChanger);
@@ -44,6 +45,7 @@ FNativeEntry<AAdminControl> AAdminControl::StaticNativeMap[] = {
 	MAP_NATIVE(EventLog,0)
 	MAP_NATIVE(SaveStats,0)
 	MAP_NATIVE(RestoreStats,0)
+	MAP_NATIVE(ReleaseAllCDKeys,0)
 	{NULL,NULL}
 };
 LINK_NATIVES(AAdminControl);

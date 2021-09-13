@@ -97,10 +97,14 @@ public:
 class MODMPGAME_API ASkinChanger : public AAdminService
 {
 public:
-    TArrayNoInit<class UShader*> CloneSkins;
+    BITFIELD RandomizeBotSkins:1 GCC_PACK(4);
+    TArrayNoInit<class UShader*> CloneSkins GCC_PACK(4);
     TArrayNoInit<class UShader*> TrandoSkins;
     FLOAT NextSkinUpdateTime;
-    void execSetSkin(FFrame& Stack, void* Result);
+    INT NextBotCloneSkin;
+    INT NextBotTrandoSkin;
+    void execSetCloneSkin(FFrame& Stack, void* Result);
+    void execSetTrandoSkin(FFrame& Stack, void* Result);
     DECLARE_CLASS(ASkinChanger,AAdminService,0|CLASS_Config,ModMPGame)
 	// Overrides
 	virtual INT Tick(FLOAT DeltaTime, ELevelTick TickType);
@@ -138,6 +142,8 @@ public:
     BITFIELD AppendEventLog:1 GCC_PACK(4);
     BITFIELD EventLogTimestamp:1;
     BITFIELD DoStatLogging:1;
+    BITFIELD ReleaseCDKeys:1;
+    BITFIELD ShowKillerHealthAndShields:1;
     BITFIELD ShowMOTD:1;
     FLOAT MOTDInterval GCC_PACK(4);
     BITFIELD bPrintCommands:1 GCC_PACK(4);
@@ -146,6 +152,7 @@ public:
     void execEventLog(FFrame& Stack, void* Result);
     void execSaveStats(FFrame& Stack, void* Result);
     void execRestoreStats(FFrame& Stack, void* Result);
+    void execReleaseAllCDKeys(FFrame& Stack, void* Result);
     UBOOL ExecCmd(FString const& Cmd, class APlayerController* PC)
     {
         DECLARE_NAME(ExecCmd);

@@ -821,6 +821,36 @@ void UOpenGLRenderDevice::HandleMovieWindow(UViewport* Viewport){
 			}
 		}
 
+		// Correct aspect ratio of video player in fullscreen to fit inside black bars
+		if(bIsFullscreen && bKeepAspectRatio){
+			INT FramebufferWidth = Viewport->SizeX;
+			INT FramebufferHeight = Viewport->SizeY;
+			INT ScreenWidth = SavedViewportWidth;
+			INT ScreenHeight = SavedViewportHeight;
+			FLOAT XScale = 1.0f;
+			FLOAT YScale = 1.0f;
+			FLOAT ViewportAspectRatio = static_cast<FLOAT>(ScreenWidth) / ScreenHeight;
+			FLOAT FramebufferAspectRatio = static_cast<FLOAT>(FramebufferWidth) / FramebufferHeight;
+
+			if(FramebufferAspectRatio < ViewportAspectRatio){
+				FLOAT Scale = static_cast<FLOAT>(ScreenHeight) / FramebufferHeight;
+
+				XScale = FramebufferWidth * Scale / ScreenWidth;
+			}else{
+				FLOAT Scale = static_cast<FLOAT>(ScreenWidth) / FramebufferWidth;
+
+				YScale = FramebufferHeight * Scale / ScreenHeight;
+			}
+
+			INT XDiff = static_cast<INT>((ScreenWidth - XScale * ScreenWidth) * 0.5f);
+			INT YDiff = static_cast<INT>((ScreenHeight - YScale * ScreenHeight) * 0.5f);
+
+			Rect.left += XDiff;
+			Rect.right -= XDiff;
+			Rect.top += YDiff;
+			Rect.bottom -= YDiff;
+		}
+
 		SetWindowPos(CurrentMovieWindow, HWND_TOPMOST, Rect.left, Rect.top, Rect.right - Rect.left, Rect.bottom - Rect.top, SWP_SHOWWINDOW);
 		SetFocus(ViewportWindow); // Focus on viewport window to let the engine handle any keyboard input
 	}else{

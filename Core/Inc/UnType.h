@@ -145,12 +145,12 @@ class CORE_API UBoolProperty : public UProperty{
 	DECLARE_CLASS(UBoolProperty,UProperty,CLASS_IsAUProperty,Core)
 
 	// Variables.
-	BITFIELD BitMask;
+	BYTE BitIndex;
 
 	// Constructors.
 	UBoolProperty(){}
 	UBoolProperty(ECppProperty, INT InOffset, const TCHAR* InCategory, DWORD InFlags) : UProperty(EC_CppProperty, InOffset, InCategory, InFlags),
-																						BitMask(1){}
+																						BitIndex(0){}
 
 	// UObject interface.
 	virtual void Serialize(FArchive& Ar);

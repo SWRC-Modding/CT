@@ -6,6 +6,8 @@ var() config string        EventLogFile;
 var() config bool          AppendEventLog;
 var() config bool          EventLogTimestamp;
 var() config bool          DoStatLogging;
+var() config bool          ReleaseCDKeys; // Release CD keys when players join, effectively disabling the check
+var() config bool          ShowKillerHealthAndShields;
 var() config bool          ShowMOTD;
 var() config float         MOTDInterval;
 
@@ -16,6 +18,7 @@ var AdminService           Services;        // Linked list of all currently acti
 native final function EventLog(coerce string Msg, name Tag);
 native final function SaveStats(PlayerController PC);
 native final function RestoreStats(PlayerController PC);
+native final function ReleaseAllCDKeys();
 
 function Init(){
 	if(DoStatLogging)
@@ -40,6 +43,10 @@ function Timer(){
 
 function ConnectEvent(PlayerReplicationInfo Who){
 	EventLog(Who.PlayerName $ " entered the game", 'Join');
+
+	if(ReleaseCDKeys)
+		ReleaseAllCDKeys();
+
 	RestoreStats(PlayerController(Who.Owner));
 	Super.ConnectEvent(Who);
 }
@@ -48,6 +55,32 @@ function DisconnectEvent(PlayerReplicationInfo Who){
 	EventLog(Who.PlayerName $ " left the game", 'Leave');
 	SaveStats(PlayerController(Who.Owner));
 	Super.DisconnectEvent(Who);
+}
+
+function KillEvent(string KillType, PlayerReplicationInfo Killer, PlayerReplicationInfo Victim, class<DamageType> Damage){
+	local Controller       KillerController;
+	local PlayerController VictimController;
+	local float            Health;
+	local float            Shields;
+
+	if(DoStatLogging)
+		Super.KillEvent(KillType, Killer, Victim, Damage);
+
+	if(!ShowKillerHealthAndShields || Killer == Victim || Killer == None || Victim == None)
+		return;
+
+	KillerController = Controller(Killer.Owner);
+	VictimController = PlayerController(Victim.Owner);
+
+	if(VictimController != None && KillerController != None){
+		if(KillerController.Pawn != None){
+			// Health can be negative but we only show 0 in that case
+			Health = FClamp(KillerController.Pawn.Health / KillerController.Pawn.MaxHealth * 100, 0.0, 100.0);
+			Shields = KillerController.Pawn.Shields / KillerController.Pawn.MaxShields * 100;
+		}
+
+		VictimController.ClientMessage(Killer.PlayerName $ " had " $ Health $ "% Health and " $ Shields $ " % Shields");
+	}
 }
 
 function PostBeginPlay(){
@@ -213,6 +246,8 @@ defaultproperties
 	EventLogFile="ServerEvents.log"
 	AppendEventLog=true
 	EventLogTimestamp=true
+	ReleaseCDKeys=true
+	ShowKillerHealthAndShields=true
 	ShowMOTD=true
 	MOTDInterval=60.0
 	ServiceClasses(0)="ModMPGame.AdminAuthentication"

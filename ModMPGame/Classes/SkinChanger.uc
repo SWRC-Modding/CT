@@ -1,18 +1,38 @@
 class SkinChanger extends AdminService native;
 
+var() config bool   RandomizeBotSkins;
+
 var() array<Shader> CloneSkins;
 var() array<Shader> TrandoSkins;
 
-var float NextSkinUpdateTime;
+var float           NextSkinUpdateTime;
 
-native final function SetSkin(PlayerController PC, int SkinIndex);
+var int             NextBotCloneSkin;
+var int             NextBotTrandoSkin;
+
+native final function SetCloneSkin(Controller C, int SkinIndex);
+native final function SetTrandoSkin(Controller C, int SkinIndex);
 
 function bool ExecCmd(String Cmd, optional PlayerController PC){
 	local int SkinIndex;
 
 	if(PC != None){
-		if(ParseCommand(Cmd, "SETSKIN")){
-			SetSkin(PC, int(Cmd));
+		if(ParseCommand(Cmd, "CHANGESKIN")){
+			if(Len(Cmd) > 0){
+				SkinIndex = int(Cmd);
+
+				if(PC.Pawn != None){
+					if(PC.Pawn.IsA('MPClone'))
+						SetCloneSkin(PC, SkinIndex);
+					else if(PC.Pawn.IsA('MPTrandoshan'))
+						SetTrandoSkin(PC, SkinIndex);
+				}else{
+					SetCloneSkin(PC, SkinIndex);
+					SetTrandoSkin(PC, SkinIndex);
+				}
+			}else{
+				CommandFeedback(PC, "Expected skin number");
+			}
 
 			return true;
 		}else if(ParseCommand(Cmd, "SHOWSKINS")){
@@ -54,6 +74,7 @@ cpptext
 defaultproperties
 {
 	bRequiresAdminPermissions=false
+	RandomizeBotSkins=true
 	CloneSkins(0)=Shader'CloneTextures.CloneTextures.CloneCommando38_Shader'
 	CloneSkins(1)=Shader'CloneTextures.CloneTextures.CloneCommando40_Shader'
 	CloneSkins(2)=Shader'CloneTextures.CloneTextures.CloneCommando62_Shader'

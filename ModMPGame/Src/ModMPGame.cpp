@@ -1,6 +1,7 @@
 #include "../Inc/ModMPGame.h"
 
 #include "../../Core/Inc/FOutputDeviceFile.h"
+#include "../../GameSpyMgr/Inc/GameSpyMgr.h"
 
 APlayerController* GetLocalPlayerController(){
 	TObjectIterator<UViewport> It;
@@ -27,21 +28,27 @@ static TArray<FString>                   PreviousGameAdminIDs;
 static TMap<FString, FPlayerStats>       CurrentGamePlayersByID;
 static TMap<APlayerController*, FString> PlayerIDsByController; // Only needed because PlayerController::Player is NULL when GameInfo::Logout is called
 
-// Combines ip address with cd key hash to uniquely identify a player even in the same network
-static FStringTemp GetPlayerID(APlayerController* PC){
-	// IsA(UNetConnection::StaticClass()) returns false for TcpipConnection - WTF???
-	if(PC->Player->IsA<UViewport>()){
-		return "__HOST__";
+
+static FStringTemp GetPlayerID(AController* C){
+	APlayerController* PC = Cast<APlayerController>(C);
+
+	if(PC){
+		// IsA(UNetConnection::StaticClass()) returns false for TcpipConnection - WTF???
+		if(PC->Player->IsA<UViewport>()){
+			return "__HOST__";
+		}else{ // Combine ip address with cd key hash to uniquely identify a player even in the same network
+			UNetConnection* Con = static_cast<UNetConnection*>(PC->Player);
+			FString IP = Con->LowLevelGetRemoteAddress();
+
+			INT Pos = IP.InStr(":", true);
+
+			if(Pos != -1)
+				return IP.Left(Pos) + Con->CDKeyHash;
+
+			return IP + Con->CDKeyHash;
+		}
 	}else{
-		UNetConnection* Con = static_cast<UNetConnection*>(PC->Player);
-		FString IP = Con->LowLevelGetRemoteAddress();
-
-		INT Pos = IP.InStr(":", true);
-
-		if(Pos != -1)
-			return IP.Left(Pos) + Con->CDKeyHash;
-
-		return IP + Con->CDKeyHash;
+		return FStringTemp("__BOT__") + (C->PlayerReplicationInfo ? *C->PlayerReplicationInfo->PlayerName : "");
 	}
 }
 
@@ -60,7 +67,7 @@ static struct FAdminControlExec : FExec{
 				GFileManager->Delete(AdminControlEventLog.Filename);
 				RecognizedCmd = true;
 			}else{
-			RecognizedCmd = OldExec ? OldExec->Exec(Cmd, Ar) : 0;
+				RecognizedCmd = OldExec ? OldExec->Exec(Cmd, Ar) : 0;
 			}
 		}
 
@@ -208,6 +215,11 @@ void AAdminControl::execRestoreStats(FFrame& Stack, void* Result){
 		PC->PlayerReplicationInfo->Score       = Stats.Score;
 		PC->PlayerReplicationInfo->GoalsScored = Stats.GoalsScored;
 	}
+}
+
+void AAdminControl::execReleaseAllCDKeys(FFrame& Stack, void* Result){
+	P_FINISH;
+	((GameSpyMgr*)0x1072AF2C)->ReleaseAllCDKey();
 }
 
 /*
@@ -782,27 +794,28 @@ bool ABotSupport::ExecCmd(const char* Cmd, class APlayerController* PC){
  * SkinChanger
  */
 
-void ASkinChanger::execSetSkin(FFrame& Stack, void* Result){
-	P_GET_OBJECT(APlayerController, PC);
+void ASkinChanger::execSetCloneSkin(FFrame& Stack, void* Result){
+	P_GET_OBJECT(AController, C);
 	P_GET_INT(SkinIndex);
 	P_FINISH;
 
-	if(!PC)
+	if(!C)
 		return;
 
-	FString PlayerID = GetPlayerID(PC);
+	SkinsByPlayerID[*GetPlayerID(C)].CloneIndex = Clamp(SkinIndex, 0, CloneSkins.Num() - 1);
 
-	if(PC->Pawn){
-		static FName NMPClone("MPClone");
+	NextSkinUpdateTime = 0.0f;
+}
 
-		if(PC->Pawn->IsA(NMPClone))
-			SkinsByPlayerID[*PlayerID].CloneIndex = Clamp(SkinIndex, 0, CloneSkins.Num() - 1);
-		else
-			SkinsByPlayerID[*PlayerID].TrandoIndex = Clamp(SkinIndex, 0, TrandoSkins.Num() - 1);
-	}else{ // Player has no pawn so we just use the same index for both
-		SkinsByPlayerID[*PlayerID].CloneIndex = Clamp(SkinIndex, 0, CloneSkins.Num() - 1);
-		SkinsByPlayerID[*PlayerID].TrandoIndex = Clamp(SkinIndex, 0, TrandoSkins.Num() - 1);
-	}
+void ASkinChanger::execSetTrandoSkin(FFrame& Stack, void* Result){
+	P_GET_OBJECT(AController, C);
+	P_GET_INT(SkinIndex);
+	P_FINISH;
+
+	if(!C)
+		return;
+
+	SkinsByPlayerID[*GetPlayerID(C)].TrandoIndex = Clamp(SkinIndex, 0, TrandoSkins.Num() - 1);
 
 	NextSkinUpdateTime = 0.0f;
 }
@@ -819,8 +832,8 @@ void ASkinChanger::execSetSkin(FFrame& Stack, void* Result){
 INT ASkinChanger::Tick(FLOAT DeltaTime, ELevelTick TickType){
 	INT Result =  Super::Tick(DeltaTime, TickType);
 
-	if(SkinsByPlayerID.Num() == 0) // No need to update skins since none are active
-		return Result;
+	//if(SkinsByPlayerID.Num() == 0) // No need to update skins since none are active
+	//	return Result;
 
 	static bool bUseShaders = true;
 
@@ -833,36 +846,55 @@ INT ASkinChanger::Tick(FLOAT DeltaTime, ELevelTick TickType){
 			NextSkinUpdateTime = 0.1f; // Only show the diffuse for a very short amount of time before switching back to the shader which we actually want
 
 		for(AController* C = Level->ControllerList; C; C = C->nextController){
-			FString PlayerID;
-			APlayerController* PC = Cast<APlayerController>(C);
+			if(!C->Pawn)
+				continue;
 
-			if(PC && C->Pawn){
-				FSkinEntry* Skin = SkinsByPlayerID.Find(GetPlayerID(PC));
+			FString PlayerID = GetPlayerID(C);
+			FSkinEntry* Skin = SkinsByPlayerID.Find(PlayerID);
+			APawn* Pawn = C->Pawn;
 
-				if(Skin){
-					static FName NMPClone("MPClone");
+			if(Skin){
+				static FName NMPClone("MPClone");
+				static FName NMPTrandoshan("MPTrandoshan");
 
-					if(bUseShaders){
-						if(C->Pawn->IsA(NMPClone))
-							C->Pawn->RepSkin = CloneSkins[Skin->CloneIndex];
-						else
-							C->Pawn->RepSkin = TrandoSkins[Skin->TrandoIndex];
+				UBOOL IsClone = Pawn->IsA(NMPClone);
+				UBOOL IsTrando = Pawn->IsA(NMPTrandoshan);
 
-						if(C->Pawn->Skins.Num() == 0)
-							C->Pawn->Skins.AddItem(C->Pawn->RepSkin);
-						else
-							C->Pawn->Skins[0] = C->Pawn->RepSkin;
-					}else{
-						if(C->Pawn->IsA(NMPClone))
-							C->Pawn->RepSkin = CloneSkins[Skin->CloneIndex]->Diffuse;
-						else
-							C->Pawn->RepSkin = TrandoSkins[Skin->TrandoIndex]->Diffuse;
-					}
+				if(!IsClone && !IsTrando)
+					continue;
+
+				if(bUseShaders){
+					if(IsClone)
+						Pawn->RepSkin = CloneSkins[Skin->CloneIndex];
+					else if(IsTrando)
+						Pawn->RepSkin = TrandoSkins[Skin->TrandoIndex];
+
+					if(Pawn->Skins.Num() == 0)
+						Pawn->Skins.AddItem(Pawn->RepSkin);
+					else
+						Pawn->Skins[0] = Pawn->RepSkin;
+				}else{
+					if(IsClone)
+						Pawn->RepSkin = CloneSkins[Skin->CloneIndex]->Diffuse;
+					else if(IsTrando)
+						Pawn->RepSkin = TrandoSkins[Skin->TrandoIndex]->Diffuse;
 				}
+			}else if(RandomizeBotSkins && C->IsA<AAIController>()){ // We have an AI controller without a skin, so generate a random one
+				FSkinEntry& NewSkin = SkinsByPlayerID[*PlayerID];
 
-				C->Pawn->bReplicateMovement = 1;
-				C->Pawn->bNetDirty = 1;
+				if(NextBotCloneSkin >= CloneSkins.Num())
+					NextBotCloneSkin = 0;
+
+				NewSkin.CloneIndex = NextBotCloneSkin++;
+
+				if(NextBotTrandoSkin >= TrandoSkins.Num())
+					NextBotTrandoSkin = 0;
+
+				NewSkin.TrandoIndex = NextBotTrandoSkin++;
 			}
+
+			C->Pawn->bReplicateMovement = 1;
+			C->Pawn->bNetDirty = 1;
 		}
 
 		bUseShaders = !bUseShaders;
@@ -870,27 +902,31 @@ INT ASkinChanger::Tick(FLOAT DeltaTime, ELevelTick TickType){
 
 	// Check if a Pawn was seen by a player that wasn't seen previously and update skins if that is the case
 	for(AController* C = Level->ControllerList; C; C = C->nextController){
-		FString PlayerID;
-		APlayerController* PC = Cast<APlayerController>(C);
+		if(!C->Pawn)
+			continue;
 
-		if(PC && C->Pawn){
-			FSkinEntry* Skin = SkinsByPlayerID.Find(GetPlayerID(PC));
+		FSkinEntry* Skin = SkinsByPlayerID.Find(GetPlayerID(C));
 
-			if(Skin){
-				INT NumSeenBy = 0;
+		if(!Skin)
+			continue;
 
-				for(AController* C = Level->ControllerList; C; C = C->nextController){
-					if(C->IsA<APlayerController>() && C->LineOfSightTo(PC->Pawn))
-						++NumSeenBy;
-				}
+		UBOOL IsPlayer = C->IsA<APlayerController>();
+		INT   NumSeenBy = 0;
 
-				if(NumSeenBy != Skin->NumSeenBy){
-					NextSkinUpdateTime = 0.1f;
-				}
-
-				Skin->NumSeenBy = NumSeenBy;
-			}
+		for(AController* C2 = Level->ControllerList; C2; C2 = C2->nextController){
+			// We only care if a player was seen by a bot or vice versa. Bots seeing each other does not need to trigger a skin update
+			if((IsPlayer || C2->IsA<APlayerController>()) && C2->LineOfSightTo(C->Pawn))
+				++NumSeenBy;
 		}
+
+		if(NumSeenBy > Skin->NumSeenBy){
+			NextSkinUpdateTime = 0.1f;
+			Skin->NumSeenBy = NumSeenBy;
+
+			break;
+		}
+
+		Skin->NumSeenBy = NumSeenBy;
 	}
 
 	return Result;
@@ -904,6 +940,9 @@ void ASkinChanger::Spawned(){
 		LastSkinResetDay = Level->Day;
 		SkinsByPlayerID.Empty();
 	}
+
+	NextBotCloneSkin = static_cast<INT>(appFrand() * CloneSkins.Num());
+	NextBotTrandoSkin = static_cast<INT>(appFrand() * TrandoSkins.Num());
 }
 
 TMap<FString, ASkinChanger::FSkinEntry> ASkinChanger::SkinsByPlayerID;

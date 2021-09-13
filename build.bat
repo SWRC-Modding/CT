@@ -1,11 +1,17 @@
 @echo off
 
-if /I "%1" == "debug" (
-	set CONFIG=debug
-	set CMD=%2
+if /I "%1" == "clean" (
+	set CMD=clean
+	set CONFIG="%2"
 ) else (
+	set CMD=build
+	set CONFIG="%1"
+)
+
+if /I %CONFIG% == "release" (
 	set CONFIG=release
-	set CMD=%1
+) else (
+	set CONFIG=debug
 )
 
 if /I not "%CMD%" == "clean" set CMD="build"

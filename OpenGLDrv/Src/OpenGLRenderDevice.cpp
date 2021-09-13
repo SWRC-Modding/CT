@@ -251,6 +251,25 @@ UBOOL UOpenGLRenderDevice::SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL
 	}
 
 	HWND Window = static_cast<HWND>(Viewport->GetWindow());
+	INT FullscreenWidth = NewX;
+	INT FullscreenHeight = NewY;
+
+	// Set NewX and NewY to screen resolution if bUseDesktopResolution is true
+	if(Fullscreen){
+		HMONITOR    Monitor = MonitorFromWindow(Window, MONITOR_DEFAULTTOPRIMARY);
+		MONITORINFO Info    = {sizeof(MONITORINFO)};
+
+		GetMonitorInfoA(Monitor, &Info);
+
+		FullscreenWidth  = Info.rcMonitor.right - Info.rcMonitor.left;
+		FullscreenHeight = Info.rcMonitor.bottom - Info.rcMonitor.top;
+
+		if(bUseDesktopResolution){
+			NewX = FullscreenWidth;
+			NewY = FullscreenHeight;
+		}
+	}
+
 	UBOOL Was16Bit = Use16bit;
 
 	if(ColorBytes == 2)
@@ -415,22 +434,8 @@ UBOOL UOpenGLRenderDevice::SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL
 		RenderInterface.SetViewport(0, 0, NewX, NewY);
 	}
 
-	// Set window size
 	if(Fullscreen){
-		HMONITOR    Monitor = MonitorFromWindow(Window, MONITOR_DEFAULTTOPRIMARY);
-		MONITORINFO Info    = {sizeof(MONITORINFO)};
-
-		verify(GetMonitorInfoA(Monitor, &Info));
-
-		INT Width  = Info.rcMonitor.right - Info.rcMonitor.left;
-		INT Height = Info.rcMonitor.bottom - Info.rcMonitor.top;
-
-		if(bUseDesktopResolution){
-			NewX = Width;
-			NewY = Height;
-		}
-
-		Viewport->ResizeViewport(BLIT_Fullscreen | BLIT_OpenGL, Width, Height);
+		Viewport->ResizeViewport(BLIT_Fullscreen | BLIT_OpenGL, FullscreenWidth, FullscreenHeight);
 		SavedViewportWidth = Viewport->SizeX;
 		SavedViewportHeight = Viewport->SizeY;
 		Viewport->SizeX = NewX;

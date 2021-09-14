@@ -52,9 +52,11 @@ function ConnectEvent(PlayerReplicationInfo Who){
 }
 
 function DisconnectEvent(PlayerReplicationInfo Who){
-	EventLog(Who.PlayerName $ " left the game", 'Leave');
-	SaveStats(PlayerController(Who.Owner));
-	Super.DisconnectEvent(Who);
+	if(!Who.bBot){
+		EventLog(Who.PlayerName $ " left the game", 'Leave');
+		SaveStats(PlayerController(Who.Owner));
+		Super.DisconnectEvent(Who);
+	}
 }
 
 function KillEvent(string KillType, PlayerReplicationInfo Killer, PlayerReplicationInfo Victim, class<DamageType> Damage){

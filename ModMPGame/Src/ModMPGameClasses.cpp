@@ -24,6 +24,12 @@ FNativeEntry<AAdminService> AAdminService::StaticNativeMap[] = {
 LINK_NATIVES(AAdminService);
 
 IMPLEMENT_CLASS(ABotSupport);
+FNativeEntry<ABotSupport> ABotSupport::StaticNativeMap[] = {
+	MAP_NATIVE(StoreBotInfo,0)
+	MAP_NATIVE(GetBotInfo,0)
+	{NULL,NULL}
+};
+LINK_NATIVES(ABotSupport);
 
 IMPLEMENT_CLASS(ASkinChanger);
 FNativeEntry<ASkinChanger> ASkinChanger::StaticNativeMap[] = {

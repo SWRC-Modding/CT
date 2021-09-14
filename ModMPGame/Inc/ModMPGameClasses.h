@@ -65,6 +65,8 @@ public:
     FLOAT BotAccuracy;
     TArrayNoInit<class AMPBot*> Bots;
     BITFIELD bBotsCountAsPlayers:1 GCC_PACK(4);
+    BITFIELD bUseBotNames:1;
+    BITFIELD bBotTag:1;
     BITFIELD bAutoImportPaths:1;
     BITFIELD bAutoBuildPaths:1;
     BITFIELD bShowPaths:1;
@@ -74,6 +76,8 @@ public:
     TArrayNoInit<FVector> NavPtFailLocations GCC_PACK(4);
     TArrayNoInit<FPatrolPoint> BotPatrolRoute;
     TArrayNoInit<class AActor*> NavigationPointIcons;
+    void execStoreBotInfo(FFrame& Stack, void* Result);
+    void execGetBotInfo(FFrame& Stack, void* Result);
     void SetupPatrolRoute()
     {
         DECLARE_NAME(SetupPatrolRoute);
@@ -91,6 +95,7 @@ public:
 	virtual UBOOL Tick(FLOAT DeltaTime, ELevelTick TickType);
 	virtual void PostRender(class FLevelSceneNode* SceneNode, class FRenderInterface* RI);
 	virtual bool ExecCmd(const char* Cmd, class APlayerController* PC);
+    DECLARE_NATIVES(ABotSupport)
 };
 
 

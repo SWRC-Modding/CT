@@ -325,6 +325,10 @@ enum ENavPtType{
 };
 
 /*
+ * BotSupport
+ */
+
+/*
  * FNavPtInfo
  * Information about a navigation point that is written to a file
  */
@@ -790,6 +794,42 @@ bool ABotSupport::ExecCmd(const char* Cmd, class APlayerController* PC){
 	return false;
 }
 
+struct FBotInfo{
+	FString DisplayName;
+	INT     ChosenSkin;
+};
+
+static TArray<FBotInfo> BotInfo;
+
+void ABotSupport::execStoreBotInfo(FFrame& Stack, void* Result){
+	P_GET_OBJECT(AMPBot, Bot);
+	P_FINISH;
+
+	if(!Bot || !Bot->PlayerReplicationInfo)
+		return;
+
+	FBotInfo Info;
+
+	Info.DisplayName = Bot->PlayerReplicationInfo->PlayerName;
+	Info.ChosenSkin  = Bot->ChosenSkin;
+
+	BotInfo.AddItem(Info);
+}
+
+void ABotSupport::execGetBotInfo(FFrame& Stack, void* Result){
+	P_GET_STR_REF(DisplayName);
+	P_GET_INT_REF(ChosenSkin);
+	P_FINISH;
+
+	if(Level->Game->NumBots < BotInfo.Num()){
+		*DisplayName = BotInfo[Level->Game->NumBots].DisplayName;
+		*ChosenSkin = BotInfo[Level->Game->NumBots].ChosenSkin;
+		*static_cast<UBOOL*>(Result) = 1;
+	}else{
+		*static_cast<UBOOL*>(Result) = 0;
+	}
+}
+
 /*
  * SkinChanger
  */
@@ -830,10 +870,7 @@ void ASkinChanger::execSetTrandoSkin(FFrame& Stack, void* Result){
  * Switching between shader and Diffuse is the best way to do that because visually it is only a short flicker that is only visible when bumpmapping is enabled.
  */
 INT ASkinChanger::Tick(FLOAT DeltaTime, ELevelTick TickType){
-	INT Result =  Super::Tick(DeltaTime, TickType);
-
-	//if(SkinsByPlayerID.Num() == 0) // No need to update skins since none are active
-	//	return Result;
+	INT Result = Super::Tick(DeltaTime, TickType);
 
 	static bool bUseShaders = true;
 

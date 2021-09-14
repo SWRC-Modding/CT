@@ -7,6 +7,9 @@ var() config float          BotAccuracy;
 var Array<MPBot>            Bots;
 var() config bool           bBotsCountAsPlayers; // If this is true, adding bots will increase the player count of the server
 
+var() config bool           bUseBotNames; // Give bots unique names
+var() config bool           bBotTag;      // Include the tag "[BOT]" in a bot's name if bUseBotNames is true
+
 var config bool             bAutoImportPaths;
 var config bool             bAutoBuildPaths;
 var config bool             bShowPaths;
@@ -17,6 +20,9 @@ var bool                    bShowPathsOnClients;
 var Array<vector>           NavPtFailLocations;   // Used to debug Navigation points which failed to spawn
 var Array<Pawn.PatrolPoint> BotPatrolRoute;
 var Array<Actor>            NavigationPointIcons; // Intangible actors used to make navigation points visible to clients
+
+native final function StoreBotInfo(MPBot Bot); // Stores a bot's name and other information in order to reuse it later (e.g. when starting the next round)
+native final function bool GetBotInfo(out string DisplayName, out int ChosenSkin);
 
 function PostBeginPlay(){
 	local int i;
@@ -198,10 +204,12 @@ event SetupPatrolRoute(){
 }
 
 function AddBot(optional string Name, optional int Team){
-	local MPBot Bot;
+	local MPBot  Bot;
+	local string DisplayName;
+	local int    ChosenSkin;
 
 	if(bBotsCountAsPlayers && Level.Game.NumPlayers >= Level.Game.MaxPlayers){
-		Log("Game is full and bBotsCountAsPlayers == true");
+		Warn("Game is full and bBotsCountAsPlayers == true");
 
 		return;
 	}
@@ -211,17 +219,29 @@ function AddBot(optional string Name, optional int Team){
 	if(Bot != None){
 		Bot.Accuracy = BotAccuracy;
 
-		if(Name == "")
-			Bot.PlayerReplicationInfo.PlayerName = "Bot" $ Bots.Length;
-		else
-			Bot.PlayerReplicationInfo.PlayerName = Name;
+		if(Name == ""){
+			if(!GetBotInfo(DisplayName, ChosenSkin)){
+				if(bUseBotNames)
+					DisplayName = "RC-" $ int(RandRange(1000, 9999));
+				else
+					DisplayName = "Bot" $ Bots.Length;
 
+				if(bBotTag)
+					DisplayName = DisplayName $ "[BOT]";
+
+				ChosenSkin = Rand(5);
+			}
+		}else{
+			DisplayName = Name;
+			ChosenSkin = Rand(5);
+		}
+
+		Bot.PlayerReplicationInfo.PlayerName = DisplayName;
+		Bot.PlayerReplicationInfo.bBot = true;
+		Bot.ChosenSkin = ChosenSkin;
 		Bot.bCanGesture = false;
-		Bot.ChosenSkin = Rand(5);
 		Bot.GotoState('Dead', 'MPStart');
 		Bots[Bots.Length] = Bot;
-
-		BroadcastLocalizedMessage(Level.Game.GameMessageClass, 1, Bot.PlayerReplicationInfo);
 
 		if(bBotsCountAsPlayers)
 			++Level.Game.NumPlayers;
@@ -230,6 +250,10 @@ function AddBot(optional string Name, optional int Team){
 
 		if(Level.Game.bTeamGame)
 			Level.Game.ChangeTeam(Bot, Team, false, false);
+
+		StoreBotInfo(Bot);
+
+		Level.Game.bWelcomePending = true;
 	}
 }
 
@@ -280,8 +304,10 @@ cpptext
 
 defaultproperties
 {
-	BotAccuracy=1.0
 	bHidden=true
+	BotAccuracy=1.0
+	bUseBotNames=true
+	bBotTag=true
 	bAutoImportPaths=true
 	bAutoBuildPaths=false
 	bShowPaths=false

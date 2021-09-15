@@ -359,16 +359,7 @@ void ABotSupport::SpawnNavigationPoint(UClass* NavPtClass, const FVector& Locati
 
 	GIsEditor = 1;
 
-	// For some reason the game crashes when two navigation points have the same name
-	// SpawnActor should take care of this but whatever...
-	// This guarantees a unique name
-	static unsigned int NavPtNum = 0;
-	ANavigationPoint* NavPt = Cast<ANavigationPoint>(XLevel->SpawnActor(
-		NavPtClass,
-		FName(FString::Printf("CustomNavPt%i", NavPtNum++)),
-		Location,
-		Rotation
-	));
+	ANavigationPoint* NavPt = Cast<ANavigationPoint>(XLevel->SpawnActor(NavPtClass, NAME_None, Location, Rotation));
 
 	if(NavPt){
 		if(XLevel->Actors.Last() == NavPt && !Level->bStartup){ // We shouldn't mess with the actor list if bStartup == true

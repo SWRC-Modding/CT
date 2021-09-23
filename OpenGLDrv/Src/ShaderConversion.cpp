@@ -135,7 +135,7 @@ void UOpenGLRenderDevice::SetHardwareShaderMacros(UHardwareShaderMacros* Macros)
 
 				if(ConvertD3DAssemblyToGLSL(*MacroText, &MacroGLSL, &UsesFog)){
 					if(UsesFog)
-						MacroGLSL += "\n#define MACRO_FOG\n";
+						MacroGLSL += "\n\t#define MACRO_FOG // This macro writes to oFog\n";
 
 					ShaderMacros[*Name] = MacroGLSL;
 				}else{

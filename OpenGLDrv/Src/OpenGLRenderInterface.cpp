@@ -76,23 +76,33 @@ void FOpenGLRenderInterface::Init(INT ViewportWidth, INT ViewportHeight){
 	glEnable(GL_POLYGON_OFFSET_LINE);
 	glEnable(GL_POLYGON_OFFSET_FILL);
 
+	// Viewport
+
 	RenderState.ViewportX = 0;
 	RenderState.ViewportY = 0;
 	RenderState.ViewportWidth = ViewportWidth;
 	RenderState.ViewportHeight = ViewportHeight;
 	glViewport(0, 0, ViewportWidth, ViewportHeight);
 
+	// Culling
+
 	RenderState.CullMode = CM_CW;
 	glCullFace(GL_BACK);
 
+	// Fill mode
+
 	RenderState.FillMode = FM_Solid;
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
+	// ZTest
 
 	RenderState.bZTest = true;
 	glDepthFunc(GL_LEQUAL);
 
 	RenderState.bZWrite = true;
 	glDepthMask(GL_TRUE);
+
+	// Stencil
 
 	bStencilEnabled = false;
 
@@ -109,6 +119,8 @@ void FOpenGLRenderInterface::Init(INT ViewportWidth, INT ViewportHeight){
 	glStencilFunc(GetStencilFunc(RenderState.StencilCompare), RenderState.StencilRef, RenderState.StencilMask);
 	glStencilMask(RenderState.StencilWriteMask);
 
+	// Texture samplers
+
 	glCreateSamplers(MAX_TEXTURES, Samplers);
 	glBindSamplers(0, MAX_TEXTURES, Samplers);            // 2D texture samplers
 	glBindSamplers(MAX_TEXTURES, MAX_TEXTURES, Samplers); // Cubemap samplers
@@ -123,7 +135,7 @@ void FOpenGLRenderInterface::Init(INT ViewportWidth, INT ViewportHeight){
 		RenderState.TextureUnits[i].ClampV = TC_Wrap;
 	}
 
-	*static_cast<FOpenGLRenderState*>(CurrentState) = RenderState;
+	appMemcpy(static_cast<FOpenGLRenderState*>(CurrentState), &RenderState, sizeof(FOpenGLRenderState));
 
 	// Init uniform default values
 
@@ -146,6 +158,20 @@ void FOpenGLRenderInterface::Init(INT ViewportWidth, INT ViewportHeight){
 	glBindBufferBase(GL_UNIFORM_BUFFER, 0, GlobalUBO); // Binding index 0 is reserved for the global uniform block
 
 	VAOsByDeclId.Empty();
+}
+
+void FOpenGLRenderInterface::Flush(){
+	checkSlow(CurrentState == &SavedStates[0]);
+
+	CurrentState->IndexBuffer = NULL;
+	appMemzero(CurrentState->VertexStreams, sizeof(CurrentState->VertexStreams));
+	CurrentState->NumVertexStreams = 0;
+
+	for(INT i = 0; i < CurrentState->NumTextures; ++i)
+		CurrentState->TextureUnits[i].Texture = NULL;
+
+	CurrentState->NumTextures = 0;
+	CurrentShader = NULL;
 }
 
 void FOpenGLRenderInterface::Exit(){

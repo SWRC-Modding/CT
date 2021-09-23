@@ -42,6 +42,8 @@ void UOpenGLRenderDevice::StaticConstructor(){
 }
 
 void UOpenGLRenderDevice::MakeCurrent(){
+	checkSlow(OpenGLContext);
+
 	if(!IsCurrent())
 		wglMakeCurrent(DeviceContext, OpenGLContext);
 }
@@ -56,6 +58,7 @@ void UOpenGLRenderDevice::UnSetRes(){
 	if(OpenGLContext){
 		MakeCurrent();
 		RenderInterface.Exit();
+		wglMakeCurrent(DeviceContext, OpenGLContext);
 		wglDeleteContext(OpenGLContext);
 		OpenGLContext = NULL;
 	}
@@ -478,6 +481,8 @@ void UOpenGLRenderDevice::Exit(UViewport* Viewport){
 }
 
 void UOpenGLRenderDevice::Flush(UViewport* Viewport){
+	RenderInterface.Flush();
+
 	if(Viewport && Viewport->Actor && Viewport->Actor->FrameFX)
 		Viewport->Actor->FrameFX->FreeRenderTargets();
 

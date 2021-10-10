@@ -180,11 +180,6 @@ void FOpenGLIndexBuffer::Free(){
 	}
 }
 
-void FOpenGLIndexBuffer::Bind() const{
-	checkSlow(EBO);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-}
-
 // FOpenGLVertexStream
 
 FOpenGLVertexStream::FOpenGLVertexStream(UOpenGLRenderDevice* InRenDev, QWORD InCacheId, bool InIsDynamic) : FOpenGLResource(InRenDev, InCacheId),
@@ -237,11 +232,6 @@ void FOpenGLVertexStream::Free(){
 		glDeleteBuffers(1, &VBO);
 		VBO = 0;
 	}
-}
-
-void FOpenGLVertexStream::Bind(GLuint BindingIndex) const{
-	checkSlow(VBO);
-	glBindVertexBuffer(BindingIndex, VBO, 0, Stride);
 }
 
 // FOpenGLTexture

@@ -4,6 +4,84 @@
 #include "OpenGLResource.h"
 #include "GL/glew.h"
 
+/*
+ * FOpenGLVertexArrayObject
+ */
+
+FOpenGLVertexArrayObject::~FOpenGLVertexArrayObject(){
+	checkSlow(VAO);
+	glDeleteVertexArrays(1, &VAO);
+}
+
+void FOpenGLVertexArrayObject::Init(const FStreamDeclaration* Declarations, INT NumStreams){
+	checkSlow(VAO == GL_NONE);
+
+	glCreateVertexArrays(1, &VAO);
+
+	for(INT StreamIndex = 0; StreamIndex < NumStreams; ++StreamIndex){
+		const FStreamDeclaration& Decl = Declarations[StreamIndex];
+		GLuint Offset = 0;
+
+		for(INT i = 0; i < Decl.NumComponents; ++i){
+			BYTE Function = Decl.Components[i].Function; // EFixedVertexFunction
+			BYTE Type     = Decl.Components[i].Type;     // EComponentType
+
+			checkSlow(Function < FVF_MAX);
+			checkSlow(Type < CT_MAX);
+
+			switch(Type){
+			case CT_Float4:
+				glVertexArrayAttribFormat(VAO, Function, 4, GL_FLOAT, GL_FALSE, Offset);
+				Offset += sizeof(FLOAT) * 4;
+				break;
+			case CT_Float3:
+				glVertexArrayAttribFormat(VAO, Function, 3, GL_FLOAT, GL_FALSE, Offset);
+				Offset += sizeof(FLOAT) * 3;
+				break;
+			case CT_Float2:
+				glVertexArrayAttribFormat(VAO, Function, 2, GL_FLOAT, GL_FALSE, Offset);
+				Offset += sizeof(FLOAT) * 2;
+				break;
+			case CT_Float1:
+				glVertexArrayAttribFormat(VAO, Function, 1, GL_FLOAT, GL_FALSE, Offset);
+				Offset += sizeof(FLOAT);
+				break;
+			case CT_Color:
+				glVertexArrayAttribFormat(VAO, Function, GL_BGRA, GL_UNSIGNED_BYTE, GL_TRUE, Offset);
+				Offset += sizeof(FColor);
+			}
+
+			glEnableVertexArrayAttrib(VAO, Function);
+			glVertexArrayAttribBinding(VAO, Function, StreamIndex);
+		}
+	}
+}
+
+void FOpenGLVertexArrayObject::Bind(){
+	checkSlow(VAO);
+	glBindVertexArray(VAO);
+}
+
+void FOpenGLVertexArrayObject::BindVertexStream(FOpenGLVertexStream* Stream, INT StreamIndex){
+	GLuint VBO = Stream->VBO;
+
+	if(VBOs[StreamIndex] != VBO){
+		VBOs[StreamIndex] = VBO;
+		glVertexArrayVertexBuffer(VAO, StreamIndex, VBO, 0, Stream->Stride);
+	}
+}
+
+void FOpenGLVertexArrayObject::BindIndexBuffer(FOpenGLIndexBuffer* IndexBuffer){
+	if(EBO != IndexBuffer->EBO){
+		EBO = IndexBuffer->EBO;
+		glVertexArrayElementBuffer(VAO, EBO);
+	}
+}
+
+/*
+ * Helpers
+ */
+
 static GLenum GetStencilFunc(/*ECompareFunction*/BYTE Test){
 	switch(Test){
 	case CF_Never:
@@ -156,8 +234,6 @@ void FOpenGLRenderInterface::Init(INT ViewportWidth, INT ViewportHeight){
 	glCreateBuffers(1, &GlobalUBO);
 	glNamedBufferStorage(GlobalUBO, sizeof(FOpenGLGlobalUniforms), static_cast<FOpenGLGlobalUniforms*>(CurrentState), GL_DYNAMIC_STORAGE_BIT);
 	glBindBufferBase(GL_UNIFORM_BUFFER, 0, GlobalUBO); // Binding index 0 is reserved for the global uniform block
-
-	VAOsByDeclId.Empty();
 }
 
 void FOpenGLRenderInterface::Flush(){
@@ -172,9 +248,13 @@ void FOpenGLRenderInterface::Flush(){
 
 	CurrentState->NumTextures = 0;
 	CurrentShader = NULL;
+
+	VAOsByDeclId.Empty();
+	CurrentState->VAO = NULL;
 }
 
 void FOpenGLRenderInterface::Exit(){
+	VAOsByDeclId.Empty();
 	glDeleteBuffers(1, &GlobalUBO);
 	GlobalUBO = GL_NONE;
 	glDeleteSamplers(MAX_TEXTURES, Samplers);
@@ -191,7 +271,9 @@ void FOpenGLRenderInterface::CommitRenderState(){
 			else
 				NewCullMode = GL_BACK;
 
-			glEnable(GL_CULL_FACE);
+			if(RenderState.CullMode == CM_None)
+				glEnable(GL_CULL_FACE);
+
 			glCullFace(NewCullMode);
 		}else{
 			glDisable(GL_CULL_FACE);
@@ -279,14 +361,14 @@ void FOpenGLRenderInterface::CommitRenderState(){
 
 	if(RenderState.IndexBuffer != CurrentState->IndexBuffer){
 		if(CurrentState->IndexBuffer)
-			CurrentState->IndexBuffer->Bind();
+			CurrentState->VAO->BindIndexBuffer(CurrentState->IndexBuffer);
 
 		RenderState.IndexBuffer = CurrentState->IndexBuffer;
 	}
 
 	for(INT i = 0; i < CurrentState->NumVertexStreams; ++i){
 		if(RenderState.VertexStreams[i] != CurrentState->VertexStreams[i]){
-			CurrentState->VertexStreams[i]->Bind(i);
+			CurrentState->VAO->BindVertexStream(CurrentState->VertexStreams[i], i);
 			RenderState.VertexStreams[i] = CurrentState->VertexStreams[i];
 		}
 	}
@@ -308,6 +390,12 @@ void FOpenGLRenderInterface::CommitRenderState(){
 			glSamplerParameteri(Samplers[i], GL_TEXTURE_WRAP_T, GetTextureWrapMode(CurrentState->TextureUnits[i].ClampV));
 			RenderState.TextureUnits[i].ClampV = CurrentState->TextureUnits[i].ClampV;
 		}
+	}
+
+	if(RenderState.VAO != CurrentState->VAO){
+		checkSlow(CurrentState->VAO)
+		CurrentState->VAO->Bind();
+		RenderState.VAO = CurrentState->VAO;
 	}
 }
 
@@ -462,56 +550,6 @@ void FOpenGLRenderInterface::SetShader(FShaderGLSL* NewShader){
 	CurrentShader = Shader;
 }
 
-unsigned int FOpenGLRenderInterface::GetVAO(const FStreamDeclaration* Declarations, INT NumStreams){
-	// Check if there is an existing VAO for this format by hashing the shader declarations
-	GLuint& VAO = VAOsByDeclId[appMemCrc(Declarations, sizeof(FStreamDeclaration) * NumStreams)];
-
-	// Create and setup VAO if none was found matching the vertex format
-	if(!VAO){
-		glCreateVertexArrays(1, &VAO);
-
-		for(INT StreamIndex = 0; StreamIndex < NumStreams; ++StreamIndex){
-			const FStreamDeclaration& Decl = Declarations[StreamIndex];
-			GLuint Offset = 0;
-
-			for(INT i = 0; i < Decl.NumComponents; ++i){
-				BYTE Function = Decl.Components[i].Function; // EFixedVertexFunction
-				BYTE Type     = Decl.Components[i].Type;     // EComponentType
-
-				checkSlow(Function < FVF_MAX);
-				checkSlow(Type < CT_MAX);
-
-				switch(Type){
-				case CT_Float4:
-					glVertexArrayAttribFormat(VAO, Function, 4, GL_FLOAT, GL_FALSE, Offset);
-					Offset += sizeof(FLOAT) * 4;
-					break;
-				case CT_Float3:
-					glVertexArrayAttribFormat(VAO, Function, 3, GL_FLOAT, GL_FALSE, Offset);
-					Offset += sizeof(FLOAT) * 3;
-					break;
-				case CT_Float2:
-					glVertexArrayAttribFormat(VAO, Function, 2, GL_FLOAT, GL_FALSE, Offset);
-					Offset += sizeof(FLOAT) * 2;
-					break;
-				case CT_Float1:
-					glVertexArrayAttribFormat(VAO, Function, 1, GL_FLOAT, GL_FALSE, Offset);
-					Offset += sizeof(FLOAT);
-					break;
-				case CT_Color:
-					glVertexArrayAttribFormat(VAO, Function, GL_BGRA, GL_UNSIGNED_BYTE, GL_TRUE, Offset);
-					Offset += sizeof(FColor);
-				}
-
-				glEnableVertexArrayAttrib(VAO, Function);
-				glVertexArrayAttribBinding(VAO, Function, StreamIndex);
-			}
-		}
-	}
-
-	return VAO;
-}
-
 void FOpenGLRenderInterface::PushState(DWORD Flags){
 	++CurrentState;
 
@@ -533,13 +571,6 @@ void FOpenGLRenderInterface::PopState(DWORD Flags){
 	         (CurrentState->RenderTarget != PoppedState->RenderTarget ||
 	          CurrentState->RenderTargetOwnDepthBuffer != PoppedState->RenderTargetOwnDepthBuffer)){
 		SetGLRenderTarget(CurrentState->RenderTarget, CurrentState->RenderTargetOwnDepthBuffer);
-	}
-
-	if(CurrentState->VAO != PoppedState->VAO){
-		if(CurrentState->VAO != GL_NONE)
-			glBindVertexArray(CurrentState->VAO);
-		else
-			CurrentState->VAO = PoppedState->VAO;
 	}
 
 	NeedUniformUpdate = CurrentState->UniformRevision != PoppedState->UniformRevision;
@@ -1132,9 +1163,9 @@ UBOOL FOpenGLRenderInterface::SetHardwareShaderMaterial(UHardwareShader* Materia
 
 	if(!CurrentShader->IsErrorShader){
 		GetShaderConstants(Material->VSConstants, Constants, Material->NumVSConstants);
-		glUniform4fv(HSU_VSConstants, Material->NumVSConstants, (GLfloat*)Constants);
+		glProgramUniform4fv(CurrentShader->Program, HSU_VSConstants, Material->NumVSConstants, (GLfloat*)Constants);
 		GetShaderConstants(Material->PSConstants, Constants, Material->NumPSConstants);
-		glUniform4fv(HSU_PSConstants, Material->NumPSConstants, (GLfloat*)Constants);
+		glProgramUniform4fv(CurrentShader->Program, HSU_PSConstants, Material->NumPSConstants, (GLfloat*)Constants);
 	}
 
 	return 1;
@@ -1936,13 +1967,16 @@ INT FOpenGLRenderInterface::SetVertexStreams(EVertexShader Shader, FVertexStream
 	CurrentState->NumVertexStreams = NumStreams;
 
 	// Look up VAO by format
-	GLuint VAO = GetVAO(VertexStreamDeclarations, NumStreams);
+	// Check if there is an existing VAO for this format by hashing the shader declarations
+	FOpenGLVertexArrayObject& VAO = VAOsByDeclId[appMemCrc(VertexStreamDeclarations, sizeof(FStreamDeclaration) * NumStreams)];
 
-	if(VAO != CurrentState->VAO){
+	if(VAO.VAO == GL_NONE)
+		VAO.Init(VertexStreamDeclarations, NumStreams);
+
+	if(&VAO != CurrentState->VAO){
 		RenderState.IndexBuffer = NULL;
 		appMemzero(RenderState.VertexStreams, sizeof(RenderState.VertexStreams));
-		glBindVertexArray(VAO);
-		CurrentState->VAO = VAO;
+		CurrentState->VAO = &VAO;
 	}
 
 	return 0;

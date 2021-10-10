@@ -154,38 +154,53 @@ struct FOpenGLTextureUnit{
 	BYTE            ClampV; // ETexClampMode
 };
 
+struct FOpenGLVertexArrayObject{
+	unsigned int VAO;
+	unsigned int VBOs[MAX_VERTEX_STREAMS];
+	unsigned int EBO;
+
+	~FOpenGLVertexArrayObject();
+
+	void Init(const FStreamDeclaration* Declarations, INT NumStreams);
+	void Bind();
+	void BindVertexStream(FOpenGLVertexStream* Stream, INT StreamIndex);
+	void BindIndexBuffer(FOpenGLIndexBuffer* IndexBuffer);
+};
+
 struct FOpenGLRenderState{
-	BYTE                  CullMode; // ECullMode
-	BYTE                  FillMode; // EFillMode
+	BYTE                      CullMode; // ECullMode
+	BYTE                      FillMode; // EFillMode
 
-	bool                  bZWrite;
-	bool                  bZTest;
-	bool                  bStencilTest;
+	bool                      bZWrite;
+	bool                      bZTest;
+	bool                      bStencilTest;
 
-	BYTE                  StencilCompare; // ECompareFunction
-	BYTE                  StencilRef;
-	BYTE                  StencilMask;
-	BYTE                  StencilFailOp;  // EStencilOp
-	BYTE                  StencilZFailOp; // EStencilOp
-	BYTE                  StencilPassOp;  // EStencilOp
-	BYTE                  StencilWriteMask;
+	BYTE                      StencilCompare; // ECompareFunction
+	BYTE                      StencilRef;
+	BYTE                      StencilMask;
+	BYTE                      StencilFailOp;  // EStencilOp
+	BYTE                      StencilZFailOp; // EStencilOp
+	BYTE                      StencilPassOp;  // EStencilOp
+	BYTE                      StencilWriteMask;
 
-	_WORD                 ZBias;
+	_WORD                     ZBias;
 
-	_WORD                 ViewportX;
-	_WORD                 ViewportY;
-	_WORD                 ViewportWidth;
-	_WORD                 ViewportHeight;
+	_WORD                     ViewportX;
+	_WORD                     ViewportY;
+	_WORD                     ViewportWidth;
+	_WORD                     ViewportHeight;
 
-	unsigned int          SrcBlend; // GLenum
-	unsigned int          DstBlend; // GLenum
+	unsigned int              SrcBlend; // GLenum
+	unsigned int              DstBlend; // GLenum
 
-	FOpenGLIndexBuffer*   IndexBuffer;
-	INT                   NumVertexStreams;
-	FOpenGLVertexStream*  VertexStreams[MAX_VERTEX_STREAMS];
+	FOpenGLVertexArrayObject* VAO;
 
-	INT                   NumTextures;
-	FOpenGLTextureUnit    TextureUnits[MAX_TEXTURES];
+	FOpenGLIndexBuffer*       IndexBuffer;
+	INT                       NumVertexStreams;
+	FOpenGLVertexStream*      VertexStreams[MAX_VERTEX_STREAMS];
+
+	INT                       NumTextures;
+	FOpenGLTextureUnit        TextureUnits[MAX_TEXTURES];
 };
 
 /*
@@ -194,21 +209,20 @@ struct FOpenGLRenderState{
 class FOpenGLRenderInterface : public FRenderInterface{
 public:
 	struct FOpenGLSavedState : FOpenGLGlobalUniforms, FOpenGLRenderState{
-		INT                   UniformRevision;
+		INT                       UniformRevision;
 
-		unsigned int          VAO;
-		INT                   IndexBufferBaseIndex;
+		INT                       IndexBufferBaseIndex;
 
-		FOpenGLTexture*       RenderTarget;
-		bool                  RenderTargetOwnDepthBuffer;
+		FOpenGLTexture*           RenderTarget;
+		bool                      RenderTargetOwnDepthBuffer;
 
 		// Light
 
-		bool                  UseDynamicLighting;
-		bool                  UseStaticLighting;
-		bool                  LightingModulate2X;
-		FBaseTexture*         Lightmap;
-		FSphere               LitSphere;
+		bool                      UseDynamicLighting;
+		bool                      UseStaticLighting;
+		bool                      LightingModulate2X;
+		FBaseTexture*             Lightmap;
+		FSphere                   LitSphere;
 	};
 
 	UOpenGLRenderDevice*      RenDev;
@@ -231,7 +245,7 @@ public:
 	INT                       TextureAnisotropy;
 	unsigned int              Samplers[MAX_TEXTURES];
 
-	TMap<DWORD, unsigned int> VAOsByDeclId;
+	TMap<DWORD, FOpenGLVertexArrayObject> VAOsByDeclId;
 
 	// Fixed function emulation
 
@@ -262,7 +276,6 @@ public:
 	void SetTextureFilter(BYTE Filter);
 	void SetGLRenderTarget(FOpenGLTexture* GLRenderTarget, bool bOwnDepthBuffer);
 	void SetShader(FShaderGLSL* NewShader);
-	unsigned int GetVAO(const FStreamDeclaration* Declarations, INT NumStreams);
 
 	// Overrides
 	virtual void PushState(DWORD Flags = 0);

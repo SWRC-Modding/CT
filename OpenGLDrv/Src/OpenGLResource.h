@@ -49,7 +49,6 @@ public:
 
 	void Cache(FIndexBuffer* IndexBuffer);
 	void Free();
-	void Bind() const;
 
 	GLuint EBO;
 	INT    IndexSize;
@@ -66,7 +65,6 @@ public:
 
 	void Cache(FVertexStream* VertexStream);
 	void Free();
-	void Bind(GLuint BindingIndex) const;
 
 	GLuint VBO;
 	INT    Stride;

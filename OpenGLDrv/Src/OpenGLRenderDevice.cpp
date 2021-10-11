@@ -27,18 +27,19 @@ void UOpenGLRenderDevice::StaticConstructor(){
 	bFirstRun              = 1;
 	ShaderDir              = FStringTemp("OpenGLShaders");
 
-	new(GetClass(), "DistortionEffects",    RF_Public) UBoolProperty(CPP_PROPERTY(CanDoDistortionEffects), "Options", CPF_Config);
-	new(GetClass(), "UseDesktopResolution", RF_Public) UBoolProperty(CPP_PROPERTY(bUseDesktopResolution),  "Options", CPF_Config);
-	new(GetClass(), "KeepAspectRatio",      RF_Public) UBoolProperty(CPP_PROPERTY(bKeepAspectRatio),       "Options", CPF_Config);
-	new(GetClass(), "BilinearFramebuffer",  RF_Public) UBoolProperty(CPP_PROPERTY(bBilinearFramebuffer),   "Options", CPF_Config);
-	new(GetClass(), "AutoReloadShaders",    RF_Public) UBoolProperty(CPP_PROPERTY(bAutoReloadShaders),     "Options", CPF_Config);
-	new(GetClass(), "TextureFilter",        RF_Public) UByteProperty(CPP_PROPERTY(TextureFilter),          "Options", CPF_Config);
-	new(GetClass(), "TextureAnisotropy",    RF_Public) UIntProperty (CPP_PROPERTY(TextureAnisotropy),      "Options", CPF_Config);
-	new(GetClass(), "VSync",                RF_Public) UBoolProperty(CPP_PROPERTY(bVSync),                 "Options", CPF_Config);
-	new(GetClass(), "AdaptiveVSync",        RF_Public) UBoolProperty(CPP_PROPERTY(bAdaptiveVSync),         "Options", CPF_Config);
-	new(GetClass(), "FirstRun",             RF_Public) UBoolProperty(CPP_PROPERTY(bFirstRun),              "",        CPF_Config);
-	new(GetClass(), "DebugOpenGL",          RF_Public) UBoolProperty(CPP_PROPERTY(bDebugOpenGL),           "",        CPF_Config);
-	new(GetClass(), "ShaderDir",            RF_Public) UStrProperty (CPP_PROPERTY(ShaderDir),              "",        CPF_Config);
+	new(GetClass(), "DistortionEffects",      RF_Public) UBoolProperty(CPP_PROPERTY(CanDoDistortionEffects),  "Options", CPF_Config);
+	new(GetClass(), "UseDesktopResolution",   RF_Public) UBoolProperty(CPP_PROPERTY(bUseDesktopResolution),   "Options", CPF_Config);
+	new(GetClass(), "KeepAspectRatio",        RF_Public) UBoolProperty(CPP_PROPERTY(bKeepAspectRatio),        "Options", CPF_Config);
+	new(GetClass(), "BilinearFramebuffer",    RF_Public) UBoolProperty(CPP_PROPERTY(bBilinearFramebuffer),    "Options", CPF_Config);
+	new(GetClass(), "AutoReloadShaders",      RF_Public) UBoolProperty(CPP_PROPERTY(bAutoReloadShaders),      "Options", CPF_Config);
+	new(GetClass(), "TextureFilter",          RF_Public) UByteProperty(CPP_PROPERTY(TextureFilter),           "Options", CPF_Config);
+	new(GetClass(), "TextureAnisotropy",      RF_Public) UIntProperty (CPP_PROPERTY(TextureAnisotropy),       "Options", CPF_Config);
+	new(GetClass(), "VSync",                  RF_Public) UBoolProperty(CPP_PROPERTY(bVSync),                  "Options", CPF_Config);
+	new(GetClass(), "AdaptiveVSync",          RF_Public) UBoolProperty(CPP_PROPERTY(bAdaptiveVSync),          "Options", CPF_Config);
+	new(GetClass(), "FirstRun",               RF_Public) UBoolProperty(CPP_PROPERTY(bFirstRun),               "",        CPF_Config);
+	new(GetClass(), "DebugOpenGL",            RF_Public) UBoolProperty(CPP_PROPERTY(bDebugOpenGL),            "",        CPF_Config);
+	new(GetClass(), "ShowDebugNotifications", RF_Public) UBoolProperty(CPP_PROPERTY(bShowDebugNotifications), "",        CPF_Config);
+	new(GetClass(), "ShaderDir",              RF_Public) UStrProperty (CPP_PROPERTY(ShaderDir),               "",        CPF_Config);
 }
 
 void UOpenGLRenderDevice::MakeCurrent(){
@@ -209,7 +210,86 @@ void GLAPIENTRY OpenGLMessageCallback(GLenum source,
                                       GLsizei length,
                                       const GLchar* message,
                                       const void* userParam){
-	debugf("GL CALLBACK: type = 0x%x, severity = 0x%x, message = %s", type, severity, message);
+	const char* SourceStr;
+
+	switch(source){
+	case GL_DEBUG_SOURCE_API:
+		SourceStr = "API";
+		break;
+	case GL_DEBUG_SOURCE_WINDOW_SYSTEM:
+		SourceStr = "window system";
+		break;
+	case GL_DEBUG_SOURCE_SHADER_COMPILER:
+		SourceStr = "shader compiler";
+		break;
+	case GL_DEBUG_SOURCE_THIRD_PARTY:
+		SourceStr = "third party";
+		break;
+	case GL_DEBUG_SOURCE_APPLICATION:
+		SourceStr = "application";
+		break;
+	case GL_DEBUG_SOURCE_OTHER:
+		SourceStr = "other";
+		break;
+	default:
+		SourceStr = "unknown";
+	}
+
+	const char* TypeStr;
+
+	switch(type){
+	case GL_DEBUG_TYPE_ERROR:
+		TypeStr = "ERROR";
+		break;
+	case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR:
+		TypeStr = "deprecated behavior";
+		break;
+	case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:
+		TypeStr = "undefined behavior";
+		break;
+	case GL_DEBUG_TYPE_PORTABILITY:
+		TypeStr = "portability";
+		break;
+	case GL_DEBUG_TYPE_PERFORMANCE:
+		TypeStr = "performance";
+		break;
+	case GL_DEBUG_TYPE_OTHER:
+		TypeStr = "other";
+		break;
+	case GL_DEBUG_TYPE_MARKER:
+		TypeStr = "marker";
+		break;
+	case GL_DEBUG_TYPE_PUSH_GROUP:
+		TypeStr = "push group";
+		break;
+	case GL_DEBUG_TYPE_POP_GROUP:
+		TypeStr = "pop group";
+		break;
+	default:
+		TypeStr = "unknown";
+	}
+
+	const char* SeverityStr;
+
+	switch(severity){
+	case GL_DEBUG_SEVERITY_NOTIFICATION:
+		SeverityStr = "notification";
+		break;
+	case GL_DEBUG_SEVERITY_HIGH:
+		SeverityStr = "high";
+		break;
+	case GL_DEBUG_SEVERITY_MEDIUM:
+		SeverityStr = "medium";
+		break;
+	case GL_DEBUG_SEVERITY_LOW:
+		SeverityStr = "low";
+		break;
+	default:
+		SeverityStr = "unknown";
+	}
+
+	if(severity != GL_DEBUG_SEVERITY_NOTIFICATION)
+		debugf("GL CALLBACK: source=%s, type=%s, severity=%s - %s", SourceStr, TypeStr, SeverityStr, message);
 
 	if(type == GL_DEBUG_TYPE_ERROR){
 		GLog->Flush();

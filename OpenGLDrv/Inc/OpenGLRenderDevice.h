@@ -103,6 +103,7 @@ private:
 	UBOOL                               bVSync;
 	UBOOL                               bAdaptiveVSync;
 	UBOOL                               bDebugOpenGL;
+	UBOOL                               bShowDebugNotifications;
 	UBOOL                               bIsFullscreen;
 	INT                                 SavedViewportWidth;
 	INT                                 SavedViewportHeight;

@@ -144,11 +144,14 @@ FOpenGLIndexBuffer::FOpenGLIndexBuffer(UOpenGLRenderDevice* InRenDev, QWORD InCa
                                                                                                            IsDynamic(InIsDynamic){}
 
 FOpenGLIndexBuffer::~FOpenGLIndexBuffer(){
-	Free();
+	if(EBO){
+		glDeleteBuffers(1, &EBO);
+		EBO = GL_NONE;
+	}
 }
 
 void FOpenGLIndexBuffer::Cache(FIndexBuffer* IndexBuffer, INT DynamicBufferSize){
-	Free();
+	GLuint OldEBO = EBO;
 	glCreateBuffers(1, &EBO);
 
 	INT IndexBufferSize = IndexBuffer->GetSize();
@@ -172,6 +175,9 @@ void FOpenGLIndexBuffer::Cache(FIndexBuffer* IndexBuffer, INT DynamicBufferSize)
 	Revision = IndexBuffer->GetRevision();
 	IndexSize = IndexBuffer->GetIndexSize();
 	Tail = IndexBufferSize;
+
+	if(OldEBO)
+		glDeleteBuffers(1, &OldEBO);
 }
 
 INT FOpenGLIndexBuffer::AddIndices(FIndexBuffer* IndexBuffer){
@@ -180,7 +186,7 @@ INT FOpenGLIndexBuffer::AddIndices(FIndexBuffer* IndexBuffer){
 	INT AdditionalSize = IndexBuffer->GetSize();
 
 	if(EBO == GL_NONE || AdditionalSize > BufferSize){
-		Cache(IndexBuffer, INITIAL_DYNAMIC_INDEX_BUFFER_SIZE);
+		Cache(IndexBuffer, Max(AdditionalSize * 2, INITIAL_DYNAMIC_INDEX_BUFFER_SIZE));
 
 		return 0;
 	}
@@ -205,13 +211,6 @@ INT FOpenGLIndexBuffer::AddIndices(FIndexBuffer* IndexBuffer){
 	return IndexBufferOffset / IndexSize;
 }
 
-void FOpenGLIndexBuffer::Free(){
-	if(EBO){
-		glDeleteBuffers(1, &EBO);
-		EBO = GL_NONE;
-	}
-}
-
 // FOpenGLVertexStream
 
 #define INITIAL_DYNAMIC_VERTEX_BUFFER_SIZE 131072
@@ -223,11 +222,14 @@ FOpenGLVertexStream::FOpenGLVertexStream(UOpenGLRenderDevice* InRenDev, QWORD In
                                                                                                              IsDynamic(InIsDynamic){}
 
 FOpenGLVertexStream::~FOpenGLVertexStream(){
-	Free();
+	if(VBO){
+		glDeleteBuffers(1, &VBO);
+		VBO = GL_NONE;
+	}
 }
 
 void FOpenGLVertexStream::Cache(FVertexStream* VertexStream, INT DynamicBufferSize){
-	Free();
+	GLuint OldVBO = VBO;
 	glCreateBuffers(1, &VBO);
 
 	INT StreamSize = VertexStream->GetSize();
@@ -258,6 +260,9 @@ void FOpenGLVertexStream::Cache(FVertexStream* VertexStream, INT DynamicBufferSi
 	Revision = VertexStream->GetRevision();
 	Stride = VertexStream->GetStride();
 	Tail = StreamSize;
+
+	if(OldVBO)
+		glDeleteBuffers(1, &OldVBO);
 }
 
 INT FOpenGLVertexStream::AddVertices(FVertexStream* VertexStream){
@@ -266,7 +271,7 @@ INT FOpenGLVertexStream::AddVertices(FVertexStream* VertexStream){
 	INT AdditionalSize = VertexStream->GetSize();
 
 	if(VBO == GL_NONE || AdditionalSize > BufferSize){
-		Cache(VertexStream, INITIAL_DYNAMIC_VERTEX_BUFFER_SIZE);
+		Cache(VertexStream, Max(AdditionalSize * 2, INITIAL_DYNAMIC_VERTEX_BUFFER_SIZE));
 
 		return 0;
 	}
@@ -289,13 +294,6 @@ INT FOpenGLVertexStream::AddVertices(FVertexStream* VertexStream){
 	Tail = VertexBufferOffset + AdditionalSize;
 
 	return VertexBufferOffset / Stride;
-}
-
-void FOpenGLVertexStream::Free(){
-	if(VBO){
-		glDeleteBuffers(1, &VBO);
-		VBO = GL_NONE;
-	}
 }
 
 // FOpenGLTexture

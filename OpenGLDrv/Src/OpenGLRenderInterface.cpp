@@ -166,8 +166,10 @@ void FOpenGLRenderInterface::Init(INT ViewportWidth, INT ViewportHeight){
 
 	// Culling
 
+	glEnable(GL_CULL_FACE);
 	RenderState.CullMode = CM_CW;
-	glCullFace(GL_BACK);
+	LastCullMode = GL_BACK;
+	glCullFace(LastCullMode);
 
 	// Fill mode
 
@@ -183,6 +185,8 @@ void FOpenGLRenderInterface::Init(INT ViewportWidth, INT ViewportHeight){
 	glDepthMask(GL_TRUE);
 
 	// Stencil
+
+	glDisable(GL_STENCIL_TEST);
 
 	bStencilEnabled = false;
 
@@ -242,17 +246,19 @@ void FOpenGLRenderInterface::Flush(){
 	checkSlow(CurrentState == &SavedStates[0]);
 
 	CurrentState->IndexBuffer = NULL;
-	appMemzero(CurrentState->VertexStreams, sizeof(CurrentState->VertexStreams));
 	CurrentState->NumVertexStreams = 0;
+	appMemzero(CurrentState->VertexStreams, sizeof(CurrentState->VertexStreams));
 
 	for(INT i = 0; i < CurrentState->NumTextures; ++i)
 		CurrentState->TextureUnits[i].Texture = NULL;
 
 	CurrentState->NumTextures = 0;
 	CurrentShader = NULL;
+	glUseProgram(GL_NONE);
 
-	VAOsByDeclId.Empty();
 	CurrentState->VAO = NULL;
+	glBindVertexArray(GL_NONE);
+	VAOsByDeclId.Empty();
 }
 
 void FOpenGLRenderInterface::Exit(){
@@ -276,7 +282,10 @@ void FOpenGLRenderInterface::CommitRenderState(){
 			if(RenderState.CullMode == CM_None)
 				glEnable(GL_CULL_FACE);
 
-			glCullFace(NewCullMode);
+			if(NewCullMode != LastCullMode)
+				glCullFace(NewCullMode);
+
+			LastCullMode = NewCullMode;
 		}else{
 			glDisable(GL_CULL_FACE);
 		}
@@ -579,7 +588,7 @@ void FOpenGLRenderInterface::PopState(DWORD Flags){
 }
 
 UBOOL FOpenGLRenderInterface::SetRenderTarget(FRenderTarget* RenderTarget, bool bOwnDepthBuffer){
-	guardFunc;
+	guardFuncSlow;
 
 	checkSlow(RenderTarget);
 
@@ -601,7 +610,7 @@ UBOOL FOpenGLRenderInterface::SetRenderTarget(FRenderTarget* RenderTarget, bool 
 
 	return 1;
 
-	unguard;
+	unguardSlow;
 }
 
 void FOpenGLRenderInterface::SetViewport(INT X, INT Y, INT Width, INT Height){
@@ -793,7 +802,7 @@ void FOpenGLRenderInterface::InitDefaultMaterialStageState(INT StageIndex){
 }
 
 void FOpenGLRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorString, UMaterial** ErrorMaterial, INT* NumPasses){
-	guardFunc;
+	guardFuncSlow;
 
 	// Use default material if precaching geometry
 
@@ -916,7 +925,7 @@ void FOpenGLRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorStri
 		}
 	}
 
-	unguard;
+	unguardSlow;
 }
 
 static GLenum GetBlendFunc(BYTE /* ED3DBLEND */ D3DBlend){
@@ -1134,6 +1143,8 @@ void FOpenGLRenderInterface::GetShaderConstants(FSConstantsInfo* Info, FPlane* C
 }
 
 UBOOL FOpenGLRenderInterface::SetHardwareShaderMaterial(UHardwareShader* Material, FString* ErrorString, UMaterial** ErrorMaterial){
+	guardFuncSlow;
+
 	SetShader(RenDev->GetShader(Material));
 
 	CurrentState->bZTest = Material->ZTest != 0;
@@ -1171,6 +1182,8 @@ UBOOL FOpenGLRenderInterface::SetHardwareShaderMaterial(UHardwareShader* Materia
 	}
 
 	return 1;
+
+	unguardSlow;
 }
 
 void FOpenGLRenderInterface::SetTexture(FBaseTexture* Texture, INT TextureUnit){
@@ -1935,6 +1948,8 @@ void FOpenGLRenderInterface::SetZBias(INT ZBias){
 }
 
 INT FOpenGLRenderInterface::SetVertexStreams(EVertexShader Shader, FVertexStream** Streams, INT NumStreams){
+	guardFuncSlow;
+
 	FStreamDeclaration VertexStreamDeclarations[MAX_VERTEX_STREAMS];
 
 	// NOTE: Stream declarations must be completely zeroed to get consistent hash values when looking up the VAO later
@@ -1977,9 +1992,13 @@ INT FOpenGLRenderInterface::SetVertexStreams(EVertexShader Shader, FVertexStream
 	}
 
 	return Size;
+
+	unguardSlow;
 }
 
 INT FOpenGLRenderInterface::SetDynamicStream(EVertexShader Shader, FVertexStream* Stream){
+	guardFuncSlow;
+
 	FOpenGLVertexStream* OpenGLStream = RenDev->GetDynamicVertexStream();
 
 	CurrentState->NumVertexStreams = 1;
@@ -2006,9 +2025,13 @@ INT FOpenGLRenderInterface::SetDynamicStream(EVertexShader Shader, FVertexStream
 	CurrentState->VertexBufferBase = OpenGLStream->AddVertices(Stream);
 
 	return 0;
+
+	unguardSlow;
 }
 
 INT FOpenGLRenderInterface::SetIndexBuffer(FIndexBuffer* IndexBuffer, INT BaseIndex){
+	guardFuncSlow;
+
 	bool RequiresCaching = false;
 
 	if(IndexBuffer){
@@ -2037,18 +2060,26 @@ INT FOpenGLRenderInterface::SetIndexBuffer(FIndexBuffer* IndexBuffer, INT BaseIn
 	}
 
 	return RequiresCaching ? IndexBuffer->GetSize() : 0;
+
+	unguardSlow;
 }
 
 INT FOpenGLRenderInterface::SetDynamicIndexBuffer(FIndexBuffer* IndexBuffer, INT BaseIndex){
+	guardFuncSlow;
+
 	FOpenGLIndexBuffer* Buffer = RenDev->GetDynamicIndexBuffer(IndexBuffer->GetIndexSize());
 
 	CurrentState->IndexBufferBase = BaseIndex;
 	CurrentState->IndexBuffer = Buffer;
 
 	return Buffer->AddIndices(IndexBuffer);
+
+	unguardSlow;
 }
 
 void FOpenGLRenderInterface::DrawPrimitive(EPrimitiveType PrimitiveType, INT FirstIndex, INT NumPrimitives, INT MinIndex, INT MaxIndex){
+	guardFuncSlow;
+
 	CommitRenderState();
 
 	if(NeedUniformUpdate)
@@ -2094,6 +2125,8 @@ void FOpenGLRenderInterface::DrawPrimitive(EPrimitiveType PrimitiveType, INT Fir
 	}else{
 		glDrawArrays(Mode, CurrentState->VertexBufferBase + FirstIndex, Count);
 	}
+
+	unguardSlow;
 }
 
 void FOpenGLRenderInterface::SetFillMode(EFillMode FillMode){

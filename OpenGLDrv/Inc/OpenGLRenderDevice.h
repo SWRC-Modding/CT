@@ -43,7 +43,7 @@ public:
 
 	void MakeCurrent();
 	bool IsCurrent();
-	void UnSetRes();
+	void UnSetRes(UViewport* Viewport);
 	FOpenGLResource* GetCachedResource(QWORD CacheId);
 	FShaderGLSL* GetShader(UHardwareShader* HardwareShader);
 

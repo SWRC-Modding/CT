@@ -53,11 +53,12 @@ bool UOpenGLRenderDevice::IsCurrent(){
 	return OpenGLContext != NULL && wglGetCurrentContext() == OpenGLContext;
 }
 
-void UOpenGLRenderDevice::UnSetRes(){
+void UOpenGLRenderDevice::UnSetRes(UViewport* Viewport){
 	guardFunc;
 
 	if(OpenGLContext){
 		MakeCurrent();
+		Flush(Viewport);
 		RenderInterface.Exit();
 		wglMakeCurrent(DeviceContext, OpenGLContext);
 		wglDeleteContext(OpenGLContext);
@@ -362,8 +363,7 @@ UBOOL UOpenGLRenderDevice::SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL
 
 	// Create new context if there isn't one already or if the desired color depth has changed.
 	if(!OpenGLContext || Was16Bit != Use16bit){
-		Flush(Viewport);
-		UnSetRes();
+		UnSetRes(Viewport);
 
 		DeviceContext = GetDC(Window);
 		check(DeviceContext);
@@ -555,12 +555,12 @@ UBOOL UOpenGLRenderDevice::SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL
 }
 
 void UOpenGLRenderDevice::Exit(UViewport* Viewport){
-	Flush(Viewport);
-	UnSetRes();
+	UnSetRes(Viewport);
 	GIsOpenGL = 0;
 }
 
 void UOpenGLRenderDevice::Flush(UViewport* Viewport){
+	checkSlow(IsCurrent());
 	RenderInterface.Flush();
 
 	if(Viewport && Viewport->Actor && Viewport->Actor->FrameFX)

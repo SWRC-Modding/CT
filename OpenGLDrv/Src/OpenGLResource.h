@@ -49,7 +49,6 @@ public:
 
 	void Cache(FIndexBuffer* IndexBuffer, INT DynamicBufferSize = 0);
 	INT AddIndices(FIndexBuffer* IndexBuffer);
-	void Free();
 
 	GLuint EBO;
 	INT    IndexSize;
@@ -67,7 +66,6 @@ public:
 
 	void Cache(FVertexStream* VertexStream, INT DynamicBufferSize = 0);
 	INT AddVertices(FVertexStream* VertexStream);
-	void Free();
 
 	GLuint VBO;
 	INT    Stride;

@@ -235,6 +235,8 @@ public:
 
 	bool                      bStencilEnabled;
 
+	unsigned int              LastCullMode; // GLenum
+
 	EPrecacheMode             PrecacheMode;
 
 	FOpenGLSavedState         SavedStates[MAX_STATESTACKDEPTH];

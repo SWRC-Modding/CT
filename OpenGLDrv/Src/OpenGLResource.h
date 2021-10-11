@@ -47,12 +47,14 @@ public:
 	FOpenGLIndexBuffer(UOpenGLRenderDevice* InRenDev, QWORD InCacheId, bool InIsDynamic = false);
 	virtual ~FOpenGLIndexBuffer();
 
-	void Cache(FIndexBuffer* IndexBuffer);
+	void Cache(FIndexBuffer* IndexBuffer, INT DynamicBufferSize = 0);
+	INT AddIndices(FIndexBuffer* IndexBuffer);
 	void Free();
 
 	GLuint EBO;
 	INT    IndexSize;
 	INT    BufferSize;
+	INT    Tail;
 	bool   IsDynamic;
 };
 
@@ -63,12 +65,14 @@ public:
 	FOpenGLVertexStream(UOpenGLRenderDevice* InRenDev, QWORD InCacheId, bool InIsDynamic = false);
 	virtual ~FOpenGLVertexStream();
 
-	void Cache(FVertexStream* VertexStream);
+	void Cache(FVertexStream* VertexStream, INT DynamicBufferSize = 0);
+	INT AddVertices(FVertexStream* VertexStream);
 	void Free();
 
 	GLuint VBO;
 	INT    Stride;
 	INT    BufferSize;
+	INT    Tail;
 	bool   IsDynamic;
 };
 

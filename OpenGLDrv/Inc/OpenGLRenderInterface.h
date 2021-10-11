@@ -154,17 +154,21 @@ struct FOpenGLTextureUnit{
 	BYTE            ClampV; // ETexClampMode
 };
 
-struct FOpenGLVertexArrayObject{
-	unsigned int VAO;
-	unsigned int VBOs[MAX_VERTEX_STREAMS];
-	unsigned int EBO;
-
+class FOpenGLVertexArrayObject{
+public:
 	~FOpenGLVertexArrayObject();
 
+	bool IsValid() const{ return VAO != 0; }
 	void Init(const FStreamDeclaration* Declarations, INT NumStreams);
 	void Bind();
 	void BindVertexStream(FOpenGLVertexStream* Stream, INT StreamIndex);
 	void BindIndexBuffer(FOpenGLIndexBuffer* IndexBuffer);
+
+private:
+	unsigned int VAO;
+	unsigned int EBO;
+	unsigned int VBOs[MAX_VERTEX_STREAMS];
+	unsigned int Strides[MAX_VERTEX_STREAMS];
 };
 
 struct FOpenGLRenderState{
@@ -211,7 +215,8 @@ public:
 	struct FOpenGLSavedState : FOpenGLGlobalUniforms, FOpenGLRenderState{
 		INT                       UniformRevision;
 
-		INT                       IndexBufferBaseIndex;
+		INT                       IndexBufferBase;
+		INT                       VertexBufferBase;
 
 		FOpenGLTexture*           RenderTarget;
 		bool                      RenderTargetOwnDepthBuffer;
@@ -312,8 +317,6 @@ public:
 	virtual void SetFillMode(EFillMode FillMode);
 
 private:
-	INT SetIndexBuffer(FIndexBuffer* IndexBuffer, INT BaseIndex, bool IsDynamic);
-	INT SetVertexStreams(EVertexShader Shader, FVertexStream** Streams, INT NumStreams, bool IsDynamic);
 	void InitDefaultMaterialStageState(INT StageIndex);
 	void SetTexture(FBaseTexture* Texture, INT TextureUnit);
 	void SetBitmapTexture(UBitmapMaterial* Bitmap, INT TextureUnit);

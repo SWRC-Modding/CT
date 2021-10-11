@@ -64,10 +64,12 @@ void FOpenGLVertexArrayObject::Bind(){
 
 void FOpenGLVertexArrayObject::BindVertexStream(FOpenGLVertexStream* Stream, INT StreamIndex){
 	GLuint VBO = Stream->VBO;
+	GLuint Stride = Stream->Stride;
 
-	if(VBOs[StreamIndex] != VBO){
+	if(VBOs[StreamIndex] != VBO || Strides[StreamIndex] != Stride){
 		VBOs[StreamIndex] = VBO;
-		glVertexArrayVertexBuffer(VAO, StreamIndex, VBO, 0, Stream->Stride);
+		Strides[StreamIndex] = Stride;
+		glVertexArrayVertexBuffer(VAO, StreamIndex, VBO, 0, Stride);
 	}
 }
 
@@ -1932,9 +1934,7 @@ void FOpenGLRenderInterface::SetZBias(INT ZBias){
 	CurrentState->ZBias = ZBias;
 }
 
-INT FOpenGLRenderInterface::SetVertexStreams(EVertexShader Shader, FVertexStream** Streams, INT NumStreams, bool IsDynamic){
-	checkSlow(!IsDynamic || NumStreams == 1);
-
+INT FOpenGLRenderInterface::SetVertexStreams(EVertexShader Shader, FVertexStream** Streams, INT NumStreams){
 	FStreamDeclaration VertexStreamDeclarations[MAX_VERTEX_STREAMS];
 
 	// NOTE: Stream declarations must be completely zeroed to get consistent hash values when looking up the VAO later
@@ -1946,16 +1946,12 @@ INT FOpenGLRenderInterface::SetVertexStreams(EVertexShader Shader, FVertexStream
 		QWORD CacheId = Streams[i]->GetCacheId();
 		FOpenGLVertexStream* Stream;
 
-		if(IsDynamic){
-			Stream = RenDev->GetDynamicVertexStream();
-		}else{
-			Stream = static_cast<FOpenGLVertexStream*>(RenDev->GetCachedResource(CacheId));
+		Stream = static_cast<FOpenGLVertexStream*>(RenDev->GetCachedResource(CacheId));
 
-			if(!Stream)
-				Stream = new FOpenGLVertexStream(RenDev, CacheId);
-		}
+		if(!Stream)
+			Stream = new FOpenGLVertexStream(RenDev, CacheId);
 
-		if(IsDynamic || Stream->Revision != Streams[i]->GetRevision()){
+		if(Stream->Revision != Streams[i]->GetRevision()){
 			Stream->Cache(Streams[i]);
 			Size += Stream->BufferSize;
 		}
@@ -1965,12 +1961,13 @@ INT FOpenGLRenderInterface::SetVertexStreams(EVertexShader Shader, FVertexStream
 	}
 
 	CurrentState->NumVertexStreams = NumStreams;
+	CurrentState->VertexBufferBase = 0;
 
 	// Look up VAO by format
 	// Check if there is an existing VAO for this format by hashing the shader declarations
 	FOpenGLVertexArrayObject& VAO = VAOsByDeclId[appMemCrc(VertexStreamDeclarations, sizeof(FStreamDeclaration) * NumStreams)];
 
-	if(VAO.VAO == GL_NONE)
+	if(!VAO.IsValid())
 		VAO.Init(VertexStreamDeclarations, NumStreams);
 
 	if(&VAO != CurrentState->VAO){
@@ -1979,20 +1976,39 @@ INT FOpenGLRenderInterface::SetVertexStreams(EVertexShader Shader, FVertexStream
 		CurrentState->VAO = &VAO;
 	}
 
-	return 0;
-}
-
-INT FOpenGLRenderInterface::SetVertexStreams(EVertexShader Shader, FVertexStream** Streams, INT NumStreams){
-	return SetVertexStreams(Shader, Streams, NumStreams, false);
+	return Size;
 }
 
 INT FOpenGLRenderInterface::SetDynamicStream(EVertexShader Shader, FVertexStream* Stream){
-	SetVertexStreams(Shader, &Stream, 1, true);
+	FOpenGLVertexStream* OpenGLStream = RenDev->GetDynamicVertexStream();
+
+	CurrentState->NumVertexStreams = 1;
+	CurrentState->VertexStreams[0] = OpenGLStream;
+
+	FStreamDeclaration VertexStreamDeclaration;
+	appMemzero(&VertexStreamDeclaration, sizeof(VertexStreamDeclaration));
+
+	VertexStreamDeclaration.Init(Stream);
+
+	// Look up VAO by format
+	// Check if there is an existing VAO for this format by hashing the shader declarations
+	FOpenGLVertexArrayObject& VAO = VAOsByDeclId[appMemCrc(&VertexStreamDeclaration, sizeof(FStreamDeclaration))];
+
+	if(!VAO.IsValid())
+		VAO.Init(&VertexStreamDeclaration, 1);
+
+	if(&VAO != CurrentState->VAO){
+		RenderState.IndexBuffer = NULL;
+		appMemzero(RenderState.VertexStreams, sizeof(RenderState.VertexStreams));
+		CurrentState->VAO = &VAO;
+	}
+
+	CurrentState->VertexBufferBase = OpenGLStream->AddVertices(Stream);
 
 	return 0;
 }
 
-INT FOpenGLRenderInterface::SetIndexBuffer(FIndexBuffer* IndexBuffer, INT BaseIndex, bool IsDynamic){
+INT FOpenGLRenderInterface::SetIndexBuffer(FIndexBuffer* IndexBuffer, INT BaseIndex){
 	bool RequiresCaching = false;
 
 	if(IndexBuffer){
@@ -2001,40 +2017,35 @@ INT FOpenGLRenderInterface::SetIndexBuffer(FIndexBuffer* IndexBuffer, INT BaseIn
 
 		checkSlow(IndexSize == sizeof(_WORD) || IndexSize == sizeof(DWORD));
 
-		if(IsDynamic){
-			Buffer = RenDev->GetDynamicIndexBuffer(IndexSize);
-		}else{
-			QWORD CacheId = IndexBuffer->GetCacheId();
+		QWORD CacheId = IndexBuffer->GetCacheId();
 
-			Buffer = static_cast<FOpenGLIndexBuffer*>(RenDev->GetCachedResource(CacheId));
+		Buffer = static_cast<FOpenGLIndexBuffer*>(RenDev->GetCachedResource(CacheId));
 
-			if(!Buffer)
-				Buffer = new FOpenGLIndexBuffer(RenDev, CacheId);
-		}
+		if(!Buffer)
+			Buffer = new FOpenGLIndexBuffer(RenDev, CacheId);
 
-		if(IsDynamic || Buffer->Revision != IndexBuffer->GetRevision() || Buffer->IndexSize != IndexSize){
+		if(Buffer->Revision != IndexBuffer->GetRevision() || Buffer->IndexSize != IndexSize){
 			RequiresCaching = true;
 			Buffer->Cache(IndexBuffer);
 		}
 
-		CurrentState->IndexBufferBaseIndex = BaseIndex;
+		CurrentState->IndexBufferBase = BaseIndex;
 		CurrentState->IndexBuffer = Buffer;
 	}else{
+		CurrentState->IndexBufferBase = 0;
 		CurrentState->IndexBuffer = NULL;
-		CurrentState->IndexBufferBaseIndex = 0;
 	}
 
 	return RequiresCaching ? IndexBuffer->GetSize() : 0;
 }
 
-INT FOpenGLRenderInterface::SetIndexBuffer(FIndexBuffer* IndexBuffer, INT BaseIndex){
-	return SetIndexBuffer(IndexBuffer, BaseIndex, false); // Returns the size of the index buffer but only if it was newly created. Unused at the call site.
-}
-
 INT FOpenGLRenderInterface::SetDynamicIndexBuffer(FIndexBuffer* IndexBuffer, INT BaseIndex){
-	SetIndexBuffer(IndexBuffer, BaseIndex, true);
+	FOpenGLIndexBuffer* Buffer = RenDev->GetDynamicIndexBuffer(IndexBuffer->GetIndexSize());
 
-	return 0; // Returns the new base index of the dynamic buffer which is always 0 here
+	CurrentState->IndexBufferBase = BaseIndex;
+	CurrentState->IndexBuffer = Buffer;
+
+	return Buffer->AddIndices(IndexBuffer);
 }
 
 void FOpenGLRenderInterface::DrawPrimitive(EPrimitiveType PrimitiveType, INT FirstIndex, INT NumPrimitives, INT MinIndex, INT MaxIndex){
@@ -2065,19 +2076,23 @@ void FOpenGLRenderInterface::DrawPrimitive(EPrimitiveType PrimitiveType, INT Fir
 	case PT_TriangleFan:
 		Mode = GL_TRIANGLE_FAN;
 		Count += 2;
+		break;
+	default:
+		appErrorf("Invalid primitive type for FOpenGLRenderInterface::DrawPrimitive: %i", PrimitiveType);
 	};
 
 	if(RenderState.IndexBuffer){
 		INT IndexSize = RenderState.IndexBuffer->IndexSize;
 
-		glDrawRangeElements(Mode,
-		                    MinIndex,
-		                    MaxIndex,
-		                    Count,
-		                    IndexSize == sizeof(_WORD) ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT,
-		                    reinterpret_cast<void*>((FirstIndex + CurrentState->IndexBufferBaseIndex) * IndexSize));
+		glDrawRangeElementsBaseVertex(Mode,
+		                              MinIndex,
+		                              MaxIndex,
+		                              Count,
+		                              IndexSize == sizeof(_WORD) ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT,
+		                              reinterpret_cast<void*>((FirstIndex + CurrentState->IndexBufferBase) * IndexSize),
+		                              CurrentState->VertexBufferBase);
 	}else{
-		glDrawArrays(Mode, 0, Count);
+		glDrawArrays(Mode, CurrentState->VertexBufferBase + FirstIndex, Count);
 	}
 }
 

@@ -209,6 +209,7 @@ public:
 	void SetShader(FShaderGLSL* NewShader);
 
 	// Overrides
+
 	virtual void PushState(DWORD Flags = 0);
 	virtual void PopState(DWORD Flags = 0);
 	virtual UBOOL SetRenderTarget(FRenderTarget* RenderTarget, bool bOwnDepthBuffer);

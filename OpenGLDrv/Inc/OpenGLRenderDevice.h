@@ -26,7 +26,7 @@ public:
 	UBOOL          bKeepAspectRatio;
 	UBOOL          bBilinearFramebuffer;
 	UBOOL          bAutoReloadShaders;
-	BYTE           TextureFilter; // ETextureFilter
+	ETextureFilter TextureFilter;
 	INT            TextureAnisotropy;
 
 	// Default shader code
@@ -92,7 +92,6 @@ private:
 	HDC                                 DeviceContext;
 	HGLRC                               OpenGLContext;
 	FOpenGLRenderInterface              RenderInterface;
-	FRenderCaps                         RenderCaps;
 
 	FShaderGLSL                         FixedFunctionShader;
 

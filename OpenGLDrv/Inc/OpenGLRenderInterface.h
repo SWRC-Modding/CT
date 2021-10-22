@@ -24,70 +24,6 @@ struct FStreamDeclaration{
 	void Init(FVertexStream* VertexStream){ NumComponents = VertexStream->GetComponents(Components); }
 };
 
-enum EColorArg{
-	CA_Diffuse,
-	CA_Constant,
-	CA_Previous,
-	CA_Temp1,
-	CA_Temp2,
-	CA_Texture0,
-	CA_Texture1,
-	CA_Texture2,
-	CA_Texture3,
-	CA_Texture4,
-	CA_Texture5,
-	CA_Texture6,
-	CA_Texture7
-};
-
-enum EColorArgModifier{
-	CAM_CubeMap = 1 << 30,
-	CAM_Invert  = 1 << 31
-};
-
-enum EColorOpModifier{
-	COPM_SaveTemp1 = 1 << 30,
-	COPM_SaveTemp2 = 1 << 31
-};
-
-enum EColorOp{
-	COP_Arg1,
-	COP_Arg2,
-	COP_Modulate,
-	COP_Modulate2X,
-	COP_Modulate4X,
-	COP_Add,
-	COP_Subtract,
-	COP_AlphaBlend,
-	COP_AddAlphaModulate
-};
-
-enum EAlphaOp{
-	AOP_Arg1,
-	AOP_Arg2,
-	AOP_Modulate,
-	AOP_Add,
-	AOP_Blend
-};
-
-enum EAlphaOpModifier{
-	AOPM_LightInfluence = 1 << 31
-};
-
-enum EShaderUniforms{
-	SU_NumStages            = 0,  // int
-	SU_StageTexCoordCount   = 1,  // int[8]
-	SU_StageTexCoordSources = 9,  // int[8]
-	SU_StageTexMatrices     = 17, // mat4[8]
-	SU_StageColorArgs       = 25, // int[16]
-	SU_StageColorOps        = 41, // int[8]
-	SU_StageAlphaArgs       = 49, // int[16]
-	SU_StageAlphaOps        = 65, // int[8]
-	SU_ConstantColor        = 73, // vec4
-	SU_LightingEnabled      = 74, // bool
-	SU_LightFactor          = 75  // float
-};
-
 enum EHardwareShaderUniforms{
 	HSU_VSConstants = 0,
 	HSU_PSConstants = MAX_VERTEX_SHADER_CONSTANTS
@@ -213,62 +149,50 @@ struct FOpenGLRenderState{
 class FOpenGLRenderInterface : public FRenderInterface{
 public:
 	struct FOpenGLSavedState : FOpenGLGlobalUniforms, FOpenGLRenderState{
-		INT                       UniformRevision;
+		INT             UniformRevision;
 
-		INT                       IndexBufferBase;
-		INT                       VertexBufferBase;
+		INT             IndexBufferBase;
+		INT             VertexBufferBase;
 
-		FOpenGLTexture*           RenderTarget;
-		bool                      RenderTargetOwnDepthBuffer;
+		FOpenGLTexture* RenderTarget;
+		bool            RenderTargetOwnDepthBuffer;
 
 		// Light
 
-		bool                      UseDynamicLighting;
-		bool                      UseStaticLighting;
-		bool                      LightingModulate2X;
-		FBaseTexture*             Lightmap;
-		FSphere                   LitSphere;
+		bool            UseDynamicLighting;
+		bool            UseStaticLighting;
+		bool            LightingModulate2X;
+		FBaseTexture*   Lightmap;
+		FSphere         LitSphere;
 	};
 
-	UOpenGLRenderDevice*      RenDev;
-	UViewport*                LockedViewport;
+	// Variables
 
-	bool                      bStencilEnabled;
+	UOpenGLRenderDevice*                  RenDev;
+	UViewport*                            LockedViewport;
 
-	unsigned int              LastCullMode; // GLenum
+	bool                                  bStencilEnabled;
 
-	EPrecacheMode             PrecacheMode;
+	unsigned int                          LastCullMode; // GLenum
 
-	FOpenGLSavedState         SavedStates[MAX_STATESTACKDEPTH];
-	FOpenGLSavedState*        CurrentState;
-	FOpenGLRenderState        RenderState;
+	EPrecacheMode                         PrecacheMode;
 
-	FOpenGLShader*            CurrentShader;
+	FOpenGLSavedState                     SavedStates[MAX_STATESTACKDEPTH];
+	FOpenGLSavedState*                    CurrentState;
+	FOpenGLRenderState                    RenderState;
 
-	bool                      NeedUniformUpdate;
-	unsigned int              GlobalUBO;
+	FOpenGLShader*                        CurrentShader;
 
-	BYTE                      TextureFilter; // ETextureFilter
-	INT                       TextureAnisotropy;
-	unsigned int              Samplers[MAX_TEXTURES];
+	bool                                  NeedUniformUpdate;
+	unsigned int                          GlobalUBO;
+
+	BYTE                                  TextureFilter; // ETextureFilter
+	INT                                   TextureAnisotropy;
+	unsigned int                          Samplers[MAX_TEXTURES];
 
 	TMap<DWORD, FOpenGLVertexArrayObject> VAOsByDeclId;
 
-	// Fixed function emulation
-
-	bool                      Unlit;
-	bool                      UsingConstantColor;
-	bool                      ModifyColor;
-	bool                      ModifyFramebufferBlending;
-	INT                       NumStages;
-	INT                       StageTexCoordCount[MAX_SHADER_STAGES];
-	INT                       StageTexCoordSources[MAX_SHADER_STAGES];
-	FMatrix                   StageTexMatrices[MAX_SHADER_STAGES];
-	INT                       StageColorArgs[MAX_SHADER_STAGES][2]; // EColorArg for Arg1 and Arg2
-	INT                       StageColorOps[MAX_SHADER_STAGES];     // EColorOp
-	INT                       StageAlphaArgs[MAX_SHADER_STAGES][2]; // EColorArg for Arg1 and Arg2
-	INT                       StageAlphaOps[MAX_SHADER_STAGES];     // EAlphaOp
-	FPlane                    ConstantColor;
+	// Functions
 
 	FOpenGLRenderInterface(UOpenGLRenderDevice* InRenDev);
 
@@ -319,18 +243,10 @@ public:
 	virtual void SetFillMode(EFillMode FillMode);
 
 private:
-	void InitDefaultMaterialStageState(INT StageIndex);
+	void GetShaderConstants(FSConstantsInfo* Info, FPlane* Constants, INT NumConstants);
 	void SetTexture(FBaseTexture* Texture, INT TextureUnit);
 	void SetBitmapTexture(UBitmapMaterial* Bitmap, INT TextureUnit);
-	void GetShaderConstants(FSConstantsInfo* Info, FPlane* Constants, INT NumConstants);
-	bool SetSimpleMaterial(UMaterial* Material, FString* ErrorString, UMaterial** ErrorMaterial);
-	bool HandleCombinedMaterial(UMaterial* Material, INT& PassesUsed, INT& TexturesUsed, FString* ErrorString, UMaterial** ErrorMaterial);
-	bool SetShaderMaterial(UShader* Shader, FString* ErrorString, UMaterial** ErrorMaterial);
-	bool SetTerrainMaterial(UTerrainMaterial* Terrain, FString* ErrorString, UMaterial** ErrorMaterial);
-	bool SetParticleMaterial(UParticleMaterial* ParticleMaterial, FString* ErrorString, UMaterial** ErrorMaterial);
-	void UseDiffuse();
-	void UseLightmap(INT StageIndex, INT TextureUnit);
-
+#if 0
 	template<typename T>
 	bool CheckMaterial(UMaterial** Material, INT StageIndex, INT TextureIndex = -1){
 		UMaterial* RootMaterial = *Material;
@@ -353,10 +269,6 @@ private:
 			*Material = RootMaterial; // Reset to initial
 
 			return false;
-		}else if(StageIndex < 0){ // StageIndex < 0 means we only want to check the material's type but not apply the modifiers
-			*Material = RootMaterial; // Reset to initial
-
-			return true;
 		}else{ // Collect modifiers
 			INT*     StageTexCoordSrc = &StageTexCoordSources[StageIndex];
 			FMatrix* StageTexMatrix = &StageTexMatrices[StageIndex];
@@ -393,13 +305,11 @@ private:
 					if(Matrix)
 						*StageTexMatrix *= *Matrix;
 
-					if(TextureIndex >= 0){
-						if(TexModifier->UClampMode != TCO_UseTextureMode)
-							CurrentState->TextureUnits[TextureIndex].ClampU = TexModifier->UClampMode - 1;
+					if(TexModifier->UClampMode != TCO_UseTextureMode)
+						CurrentState->TextureUnits[TextureIndex].ClampU = TexModifier->UClampMode - 1;
 
-						if(TexModifier->VClampMode != TCO_UseTextureMode)
-							CurrentState->TextureUnits[TextureIndex].ClampV = TexModifier->VClampMode - 1;
-					}
+					if(TexModifier->VClampMode != TCO_UseTextureMode)
+						CurrentState->TextureUnits[TextureIndex].ClampV = TexModifier->VClampMode - 1;
 				}else if(Modifier->IsA<UFinalBlend>()){
 					UFinalBlend* FinalBlend = static_cast<UFinalBlend*>(Modifier);
 
@@ -433,4 +343,5 @@ private:
 			return true;
 		}
 	}
+#endif
 };

@@ -169,9 +169,10 @@ struct FRenderCaps{
 	INT   PixelShaderVersion;
 	UBOOL HardwareTL;
 
-	FRenderCaps() : MaxSimultaneousTerrainLayers(1),
-	                PixelShaderVersion(0),
-	                HardwareTL(0){}
+	FRenderCaps(INT InMaxSimultaneousTerrainLayers = 1, INT InPixelShaderVersion = 0, INT InHardwareTL = 0)
+	: MaxSimultaneousTerrainLayers(InMaxSimultaneousTerrainLayers),
+	  PixelShaderVersion(InPixelShaderVersion),
+	  HardwareTL(InHardwareTL){}
 };
 
 //

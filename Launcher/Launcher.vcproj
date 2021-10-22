@@ -19,6 +19,7 @@
 			ManagedExtensions="FALSE">
 			<Tool
 				Name="VCCLCompilerTool"
+				AdditionalOptions="/FC"
 				RuntimeLibrary="2"
 				StructMemberAlignment="3"
 				WarningLevel="4"
@@ -58,6 +59,7 @@
 			ManagedExtensions="FALSE">
 			<Tool
 				Name="VCCLCompilerTool"
+				AdditionalOptions="/FC"
 				Optimization="0"
 				PreprocessorDefinitions="DO_CHECK_SLOW=1;DO_GUARD_SLOW=1;DO_CLOCK_SLOW=1"
 				RuntimeLibrary="2"

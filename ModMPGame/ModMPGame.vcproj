@@ -19,6 +19,7 @@
 			ManagedExtensions="FALSE">
 			<Tool
 				Name="VCCLCompilerTool"
+				AdditionalOptions="/FC"
 				PreprocessorDefinitions="MODMPGAME_API=DLL_EXPORT"
 				RuntimeLibrary="2"
 				StructMemberAlignment="3"
@@ -56,6 +57,7 @@
 			ManagedExtensions="FALSE">
 			<Tool
 				Name="VCCLCompilerTool"
+				AdditionalOptions="/FC"
 				Optimization="0"
 				PreprocessorDefinitions="MODMPGAME_API=DLL_EXPORT;DO_CHECK_SLOW=1;DO_GUARD_SLOW=1;DO_CLOCK_SLOW=1"
 				RuntimeLibrary="2"

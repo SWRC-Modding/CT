@@ -244,105 +244,16 @@ public:
 	virtual void SetFillMode(EFillMode FillMode);
 
 private:
+	struct FModifierInfo{
+		FMatrix               TexMatrix;
+		ETexCoordSrc          TexCoordSrc;
+		ETexCoordCount        TexCoordCount;
+		ETexClampModeOverride TexUClamp;
+		ETexClampModeOverride TexVClamp;
+	};
+
+	UMaterial* RemoveModifiers(UModifier* Modifier, FModifierInfo* ModifierInfo = NULL);
 	void GetShaderConstants(FSConstantsInfo* Info, FPlane* Constants, INT NumConstants);
 	void SetTexture(FBaseTexture* Texture, INT TextureUnit);
 	void SetBitmapTexture(UBitmapMaterial* Bitmap, INT TextureUnit);
-#if 0
-	template<typename T>
-	bool CheckMaterial(UMaterial** Material, INT StageIndex, INT TextureIndex = -1){
-		UMaterial* RootMaterial = *Material;
-
-		if(RootMaterial->IsA<T>())
-			return true;
-
-		// Check for modifier chain pointing to a material of type T
-
-		UModifier* Modifier = Cast<UModifier>(RootMaterial);
-
-		*Material = NULL;
-
-		while(Modifier){
-			*Material = Cast<T>(Modifier->Material);
-			Modifier = Cast<UModifier>(Modifier->Material);
-		}
-
-		if(!*Material){
-			*Material = RootMaterial; // Reset to initial
-
-			return false;
-		}else{ // Collect modifiers
-			INT*     StageTexCoordSrc = &StageTexCoordSources[StageIndex];
-			FMatrix* StageTexMatrix = &StageTexMatrices[StageIndex];
-
-			Modifier = static_cast<UModifier*>(RootMaterial);
-
-			// Apply modifiers
-			while(Modifier != *Material){
-				if(Modifier->IsA<UTexModifier>()){
-					UTexModifier* TexModifier = static_cast<UTexModifier*>(Modifier);
-					FMatrix* Matrix = TexModifier->GetMatrix(GEngineTime);
-
-					if(TexModifier->TexCoordSource != TCS_NoChange){
-						*StageTexCoordSrc = TexModifier->TexCoordSource;
-
-						switch(TexModifier->TexCoordSource){
-						case TCS_CameraCoords:
-							*StageTexMatrix *= CurrentState->WorldToCamera.Transpose();
-							break;
-						case TCS_CubeCameraSpaceReflection:
-							{
-								FMatrix Tmp = CurrentState->WorldToCamera;
-								Tmp.M[3][0] = 0.0f;
-								Tmp.M[3][1] = 0.0f;
-								Tmp.M[3][2] = 0.0f;
-								Tmp.M[3][3] = 1.0f;
-								*StageTexMatrix *= Tmp;
-							}
-						}
-
-						StageTexCoordCount[StageIndex] = TexModifier->TexCoordCount + 2;
-					}
-
-					if(Matrix)
-						*StageTexMatrix *= *Matrix;
-
-					if(TexModifier->UClampMode != TCO_UseTextureMode)
-						CurrentState->TextureUnits[TextureIndex].ClampU = TexModifier->UClampMode - 1;
-
-					if(TexModifier->VClampMode != TCO_UseTextureMode)
-						CurrentState->TextureUnits[TextureIndex].ClampV = TexModifier->VClampMode - 1;
-				}else if(Modifier->IsA<UFinalBlend>()){
-					UFinalBlend* FinalBlend = static_cast<UFinalBlend*>(Modifier);
-
-					ModifyFramebufferBlending = true;
-					SetFramebufferBlending(static_cast<EFrameBufferBlending>(FinalBlend->FrameBufferBlending));
-					CurrentState->bZTest = FinalBlend->ZTest != 0;
-					CurrentState->bZWrite = FinalBlend->ZWrite != 0;
-
-					if(FinalBlend->TwoSided)
-						CurrentState->CullMode = CM_None;
-
-					if(FinalBlend->AlphaTest)
-						CurrentState->AlphaRef = FinalBlend->AlphaRef / 255.0f;
-				}else if(Modifier->IsA<UColorModifier>()){
-					UColorModifier* ColorModifier = static_cast<UColorModifier*>(Modifier);
-
-					UsingConstantColor = true;
-					ModifyColor = true;
-					ConstantColor = ColorModifier->Color;
-
-					if(ColorModifier->RenderTwoSided)
-						CurrentState->CullMode = CM_None;
-
-					if(!ModifyFramebufferBlending && ColorModifier->AlphaBlend)
-						SetFramebufferBlending(FB_AlphaBlend);
-				}
-
-				Modifier = static_cast<UModifier*>(Modifier->Material);
-			}
-
-			return true;
-		}
-	}
-#endif
 };

@@ -878,6 +878,42 @@ void FOpenGLRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorStri
 
 	Material->PreSetMaterial(GEngineTime);
 
+	UModifier* Modifier = Cast<UModifier>(Material);
+
+	if(Modifier){
+		Material = RemoveModifiers(Cast<UModifier>(Material), NULL);
+
+		if(!Material){
+			SetShader(&RenDev->ErrorShader);
+
+			if(ErrorString)
+				*ErrorString = "Modifier does not have a material";
+
+			if(ErrorMaterial)
+				*ErrorMaterial = Modifier;
+
+			return;
+		}
+	}
+
+	bool Result = false;
+	bool IsHardwareShader = false;
+
+	if(Material->IsA<UHardwareShaderWrapper>()){
+		Result = static_cast<UHardwareShaderWrapper*>(Material)->SetupShaderWrapper(this) != 0;
+		IsHardwareShader = true;
+	}else if(Material->IsA<UHardwareShader>()){
+		Result = SetHardwareShaderMaterial(static_cast<UHardwareShader*>(Material), ErrorString, ErrorMaterial) != 0;
+		IsHardwareShader = true;
+	}
+
+	if(!IsHardwareShader || !Result){
+		SetShader(&RenDev->FixedFunctionShader);
+		CurrentState->FillMode = FM_Wireframe;
+	}else{
+		CurrentState->FillMode = FM_Solid;
+	}
+
 #if 0
 	bool Result = false;
 	bool UseFixedFunction = true;
@@ -914,10 +950,91 @@ void FOpenGLRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorStri
 	}
 #endif
 
-	SetShader(&RenDev->FixedFunctionShader);
-	SetFillMode(FM_Wireframe);
-
 	unguardSlow;
+}
+
+UMaterial* FOpenGLRenderInterface::RemoveModifiers(UModifier* Modifier, FModifierInfo* ModifierInfo){
+	UModifier* FirstModifier = Modifier;
+	UMaterial* Material = NULL;
+
+	while(Modifier){
+		Material = Modifier->Material;
+		Modifier = Cast<UModifier>(Material);
+	}
+
+	// Collect modifiers
+
+	if(Material && ModifierInfo){
+		Modifier = FirstModifier;
+
+		// Apply modifiers
+		while(Modifier != Material){
+			if(Modifier->IsA<UTexModifier>()){
+				UTexModifier* TexModifier = static_cast<UTexModifier*>(Modifier);
+				FMatrix* Matrix = TexModifier->GetMatrix(GEngineTime);
+
+				if(TexModifier->TexCoordSource != TCS_NoChange){
+					ModifierInfo->TexCoordSrc = static_cast<ETexCoordSrc>(TexModifier->TexCoordSource);
+
+					switch(TexModifier->TexCoordSource){
+					case TCS_CameraCoords:
+						ModifierInfo->TexMatrix *= CurrentState->WorldToCamera.Transpose();
+						break;
+					case TCS_CubeCameraSpaceReflection:
+						{
+							FMatrix Tmp = CurrentState->WorldToCamera;
+							Tmp.M[3][0] = 0.0f;
+							Tmp.M[3][1] = 0.0f;
+							Tmp.M[3][2] = 0.0f;
+							Tmp.M[3][3] = 1.0f;
+							ModifierInfo->TexMatrix *= Tmp;
+						}
+					}
+
+					ModifierInfo->TexCoordCount = static_cast<ETexCoordCount>(TexModifier->TexCoordCount);
+				}
+
+				if(Matrix)
+					ModifierInfo->TexMatrix *= *Matrix;
+
+				ModifierInfo->TexUClamp = static_cast<ETexClampModeOverride>(TexModifier->UClampMode);
+				ModifierInfo->TexVClamp = static_cast<ETexClampModeOverride>(TexModifier->VClampMode);
+			}else if(Modifier->IsA<UFinalBlend>()){
+#if 0
+				UFinalBlend* FinalBlend = static_cast<UFinalBlend*>(Modifier);
+
+				ModifyFramebufferBlending = true;
+				SetFramebufferBlending(static_cast<EFrameBufferBlending>(FinalBlend->FrameBufferBlending));
+				CurrentState->bZTest = FinalBlend->ZTest != 0;
+				CurrentState->bZWrite = FinalBlend->ZWrite != 0;
+
+				if(FinalBlend->TwoSided)
+					CurrentState->CullMode = CM_None;
+
+				if(FinalBlend->AlphaTest)
+					CurrentState->AlphaRef = FinalBlend->AlphaRef / 255.0f;
+#endif
+			}else if(Modifier->IsA<UColorModifier>()){
+#if 0
+				UColorModifier* ColorModifier = static_cast<UColorModifier*>(Modifier);
+
+				UsingConstantColor = true;
+				ModifyColor = true;
+				ConstantColor = ColorModifier->Color;
+
+				if(ColorModifier->RenderTwoSided)
+					CurrentState->CullMode = CM_None;
+
+				if(!ModifyFramebufferBlending && ColorModifier->AlphaBlend)
+					SetFramebufferBlending(FB_AlphaBlend);
+#endif
+			}
+
+			Modifier = static_cast<UModifier*>(Modifier->Material);
+		}
+	}
+
+	return Material;
 }
 
 void FOpenGLRenderInterface::GetShaderConstants(FSConstantsInfo* Info, FPlane* Constants, INT NumConstants){

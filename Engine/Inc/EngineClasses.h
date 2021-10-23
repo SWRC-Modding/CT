@@ -5519,7 +5519,7 @@ enum ETexCoordCount{
 	TCN_MAX
 };
 
-enum ETexClampModeOverried{
+enum ETexClampModeOverride{
 	TCO_UseTextureMode,
 	TCO_Wrap,
 	TCO_Clamp,

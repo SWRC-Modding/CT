@@ -1171,12 +1171,21 @@ void FOpenGLRenderInterface::GetShaderConstants(FSConstantsInfo* Info, FPlane* C
 			continue;
 		case EVC_Flicker:
 			{
-				FLOAT X     = Info[i].Value.X;
-				FLOAT Y     = Info[i].Value.Y;
-				FLOAT YInv  = 1.0f - Y;
-				FLOAT Rand1 = appRand() * 0.000030518509f;
-				FLOAT Rand2 = appRand() * 0.000030518509f;
-				FLOAT Rand3 = appRand() * 0.000030518509f;
+				static FLOAT LastEngineTime = GEngineTime;
+				static FLOAT Rand1 = 0.5f;
+				static FLOAT Rand2 = 0.5f;
+				static FLOAT Rand3 = 0.5f;
+
+				if(LastEngineTime != GEngineTime){ // Don't update flicker if the game is paused
+					LastEngineTime = GEngineTime;
+					Rand1 = appRand() / (float)RAND_MAX;
+					Rand2 = appRand() / (float)RAND_MAX;
+					Rand3 = appRand() / (float)RAND_MAX;
+				}
+
+				FLOAT X    = Info[i].Value.X;
+				FLOAT Y    = Info[i].Value.Y;
+				FLOAT YInv = 1.0f - Y;
 
 				Constants[i].X = Rand1 <= X ? 1.0f : Y * Rand3 + YInv;
 				Constants[i].Y = Rand2 <= X ? 1.0f : Y * Rand1 + YInv;

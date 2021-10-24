@@ -910,8 +910,14 @@ void FOpenGLRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorStri
 	if(!IsHardwareShader || !Result){
 		SetShader(&RenDev->FixedFunctionShader);
 		CurrentState->FillMode = FM_Wireframe;
+		// Diffuse and Specular are expected to be 1.0 by default for fixed function lighting calculations
+		glVertexAttrib4f(FVF_Diffuse,   1.0f, 1.0f, 1.0f, 1.0f);
+		glVertexAttrib4f(FVF_Specular,  1.0f, 1.0f, 1.0f, 1.0f);
 	}else{
 		CurrentState->FillMode = FM_Solid;
+		// Diffuse and Specular are expected to be zero by default for hardware shaders
+		glVertexAttrib4f(FVF_Diffuse,   0.0f, 0.0f, 0.0f, 0.0f);
+		glVertexAttrib4f(FVF_Specular,  0.0f, 0.0f, 0.0f, 0.0f);
 	}
 
 #if 0
@@ -1395,7 +1401,7 @@ INT FOpenGLRenderInterface::SetVertexStreams(EVertexShader Shader, FVertexStream
 
 	// Look up VAO by format
 	// Check if there is an existing VAO for this format by hashing the shader declarations
-	FOpenGLVertexArrayObject& VAO = VAOsByDeclId[appMemCrc(VertexStreamDeclarations, sizeof(FStreamDeclaration) * NumStreams)];
+	FOpenGLVertexArrayObject& VAO = VAOsByDeclId[appMemhash(VertexStreamDeclarations, sizeof(FStreamDeclaration) * NumStreams)];
 
 	if(!VAO.IsValid())
 		VAO.Init(VertexStreamDeclarations, NumStreams);
@@ -1426,7 +1432,7 @@ INT FOpenGLRenderInterface::SetDynamicStream(EVertexShader Shader, FVertexStream
 
 	// Look up VAO by format
 	// Check if there is an existing VAO for this format by hashing the shader declarations
-	FOpenGLVertexArrayObject& VAO = VAOsByDeclId[appMemCrc(&VertexStreamDeclaration, sizeof(FStreamDeclaration))];
+	FOpenGLVertexArrayObject& VAO = VAOsByDeclId[appMemhash(&VertexStreamDeclaration, sizeof(FStreamDeclaration))];
 
 	if(!VAO.IsValid())
 		VAO.Init(&VertexStreamDeclaration, 1);

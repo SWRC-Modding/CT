@@ -356,6 +356,20 @@ inline DWORD appStrihash(const TCHAR* Data){
 	return Hash;
 }
 
+//
+// Memory hash function
+//
+inline DWORD appMemhash(const void* Data, DWORD Size){
+	DWORD Hash = 0;
+
+	while(Size){
+		BYTE B = ((BYTE*)Data)[--Size];
+		Hash   = ((Hash >> 8) & 0x00FFFFFF) ^ GCRCTable[(Hash ^ B) & 0x000000FF];
+	}
+
+	return Hash;
+}
+
 /*-----------------------------------------------------------------------------
 	Parsing functions.
 -----------------------------------------------------------------------------*/

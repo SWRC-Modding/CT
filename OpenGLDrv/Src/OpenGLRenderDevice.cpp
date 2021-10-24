@@ -498,7 +498,7 @@ UBOOL UOpenGLRenderDevice::SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL
 
 		glVertexAttrib4f(FVF_Position,  0.0f, 0.0f, 0.0f, 1.0f);
 		glVertexAttrib4f(FVF_Normal,    0.0f, 0.0f, 1.0f, 0.0f);
-		glVertexAttrib4f(FVF_Diffuse,   0.0f, 0.0f, 0.0f, 1.0f);
+		glVertexAttrib4f(FVF_Diffuse,   1.0f, 1.0f, 1.0f, 1.0f);
 		glVertexAttrib4f(FVF_Specular,  1.0f, 1.0f, 1.0f, 1.0f);
 		glVertexAttrib4f(FVF_TexCoord0, 0.0f, 0.0f, 1.0f, 1.0f);
 		glVertexAttrib4f(FVF_TexCoord1, 0.0f, 0.0f, 1.0f, 1.0f);

@@ -704,7 +704,7 @@ void FOpenGLRenderInterface::EnableLighting(UBOOL UseDynamic, UBOOL UseStatic, U
 }
 
 void FOpenGLRenderInterface::SetLight(INT LightIndex, FDynamicLight* Light, FLOAT Scale){
-	checkSlow(LightIndex <= MAX_LIGHTS);
+	checkSlow(LightIndex <= MAX_SHADER_LIGHTS);
 
 	if(Light){
 		FOpenGLSavedState::Light* ShaderLight = &CurrentState->Lights[LightIndex];
@@ -747,6 +747,8 @@ void FOpenGLRenderInterface::SetLight(INT LightIndex, FDynamicLight* Light, FLOA
 		if(LightIndex < CurrentState->NumLights)
 			CurrentState->NumLights = LightIndex;
 	}
+
+	CurrentState->ShaderLights[LightIndex] = Light;
 
 	++CurrentState->UniformRevision;
 	NeedUniformUpdate = true;
@@ -1045,6 +1047,7 @@ UMaterial* FOpenGLRenderInterface::RemoveModifiers(UModifier* Modifier, FModifie
 
 void FOpenGLRenderInterface::GetShaderConstants(FSConstantsInfo* Info, FPlane* Constants, INT NumConstants){
 	FMatrix Matrix;
+
 	for(INT i = 0; i < NumConstants; ++i){
 		switch(Info[i].Type){
 		case EVC_Unused:
@@ -1203,9 +1206,16 @@ void FOpenGLRenderInterface::GetShaderConstants(FSConstantsInfo* Info, FPlane* C
 			Constants[i].W = CurrentState->Lights[0].CosCone; // TODO: Implement spotlights
 			continue;
 		case EVC_DrawScale3D:
-			Constants[i].X = CurrentState->LocalToWorld.M[0][0];
-			Constants[i].Y = CurrentState->LocalToWorld.M[1][1];
-			Constants[i].Z = CurrentState->LocalToWorld.M[2][2];
+			if(GCubemapManager && GCubemapManager->Actor){
+				Constants[i].X = GCubemapManager->Actor->DrawScale3D.X;
+				Constants[i].Y = GCubemapManager->Actor->DrawScale3D.Y;
+				Constants[i].Z = GCubemapManager->Actor->DrawScale3D.Z;
+			}else{
+				Constants[i].X = CurrentState->LocalToWorld.M[0][0];
+				Constants[i].Y = CurrentState->LocalToWorld.M[1][1];
+				Constants[i].Z = CurrentState->LocalToWorld.M[2][2];
+			}
+
 			Constants[i].W = 1.0f;
 			continue;
 		case EVC_Fog:
@@ -1222,10 +1232,15 @@ void FOpenGLRenderInterface::GetShaderConstants(FSConstantsInfo* Info, FPlane* C
 			                                                                 CurrentState->CameraToWorld.M[3][3]));
 			continue;
 		case EVC_2DRotator:
-			Constants[i].X = appCos(CurrentState->Time);
-			Constants[i].Y = -appSin(CurrentState->Time);
+			Constants[i].X = CurrentState->CosTime;
+			Constants[i].Y = -CurrentState->SinTime;
 			Constants[i].Z = 0.0f;
-			Constants[i].W = 1.0f;
+			Constants[i].W = 0.0f;
+			++i;
+			Constants[i].X = CurrentState->SinTime;
+			Constants[i].Y = CurrentState->CosTime;
+			Constants[i].Z = 0.0f;
+			Constants[i].W = 0.0f;
 			continue;
 		}
 	}

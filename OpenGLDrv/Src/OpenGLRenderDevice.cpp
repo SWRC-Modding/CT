@@ -135,6 +135,8 @@ FShaderGLSL* UOpenGLRenderDevice::GetShader(UHardwareShader* HardwareShader){
 
 				if(IsMatrixShaderConstant(HardwareShader->VSConstants[i].Type))
 					HardwareShader->NumVSConstants += 3;
+				else if(HardwareShader->VSConstants[i].Type == EVC_2DRotator)
+					++HardwareShader->NumVSConstants;
 
 				break;
 			}
@@ -146,6 +148,8 @@ FShaderGLSL* UOpenGLRenderDevice::GetShader(UHardwareShader* HardwareShader){
 
 				if(IsMatrixShaderConstant(HardwareShader->PSConstants[i].Type))
 					HardwareShader->NumPSConstants += 3;
+				else if(HardwareShader->PSConstants[i].Type == EVC_2DRotator)
+					++HardwareShader->NumPSConstants;
 
 				break;
 			}

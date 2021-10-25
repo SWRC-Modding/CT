@@ -13,7 +13,7 @@ class FOpenGLShader;
 #define MAX_VERTEX_STREAMS MAX_VERTEX_COMPONENTS
 #define MAX_TEXTURES 8
 #define MAX_SHADER_STAGES 8
-#define MAX_LIGHTS 8
+#define MAX_SHADER_LIGHTS 4
 #define MAX_VERTEX_SHADER_CONSTANTS 96
 #define MAX_PIXEL_SHADER_CONSTANTS 8
 
@@ -67,7 +67,7 @@ enum EHardwareShaderUniforms{
 		UNIFORM_STRUCT_MEMBER(float, InvRadius) \
 		UNIFORM_STRUCT_MEMBER(float, CosCone) \
 		UNIFORM_STRUCT_MEMBER(int, Type) \
-	}, Lights[MAX_LIGHTS]) \
+	}, Lights[MAX_SHADER_LIGHTS]) \
 	UNIFORM_BLOCK_MEMBER(int, NumLights)
 
 #pragma warning(push)
@@ -164,6 +164,7 @@ public:
 		bool            LightingModulate2X;
 		FBaseTexture*   Lightmap;
 		FSphere         LitSphere;
+		FDynamicLight*  ShaderLights[MAX_SHADER_LIGHTS];
 	};
 
 	// Variables

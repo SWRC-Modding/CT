@@ -44,23 +44,23 @@ int __cdecl main(int argc, char** argv){
 		UObject::SetLanguage("int");
 
 		if(argc > 1){
-			// Initializing global state
+			// Initialize global state
 			GIsUCC = GIsClient = GIsServer = GIsEditor = GIsScriptable = GLazyLoad = 1;
 
 			FString ClassName = argv[1];
 			TArray<FRegistryObjectInfo> List;
 
-			UObject::GetRegistryObjects(List, UClass::StaticClass(), UCommandlet::StaticClass(), 0); // Loading list of commandlets declared in .int files
+			UObject::GetRegistryObjects(List, UClass::StaticClass(), UCommandlet::StaticClass(), 0); // Load list of commandlets declared in .int files
 
-			for(int i = 0; i < List.Num(); ++i){ // Looking Token up in list and autocompleting class name if found
+			for(int i = 0; i < List.Num(); ++i){ // Look Token up in list and autocomplete class name if found
 				FString FullName = List[i].Object;
 				FString ShortName = FullName;
 
-				while(ShortName.InStr(".") >= 0) // Removing package name so that only class name remains
+				while(ShortName.InStr(".") >= 0) // Remove package name so that only class name remains
 					ShortName = ShortName.Mid(ShortName.InStr(".") + 1);
 
-				if(ClassName == FullName || ClassName + "Commandlet" == FullName ||  // Checking against "PackageName.ClassName (+ Commandlet)"
-				   ClassName == ShortName || ClassName + "Commandlet" == ShortName){ // Checking against "ClassName (+ Commandlet)"
+				if(ClassName == FullName || ClassName + "Commandlet" == FullName ||  // Check against "PackageName.ClassName (+ Commandlet)"
+				   ClassName == ShortName || ClassName + "Commandlet" == ShortName){ // Check against "ClassName (+ Commandlet)"
 					ClassName = List[i].Object;
 
 					break;
@@ -70,15 +70,20 @@ int __cdecl main(int argc, char** argv){
 			DWORD LoadFlags = LOAD_NoWarn | LOAD_Quiet;
 
 			if(ClassName == "Editor.MakeCommandlet"){
-				// Loading default packages to avoid 'Superclass not found' errors
+				LoadFlags |= LOAD_DisallowFiles;
+
+				// Load default packages to avoid 'Superclass not found' errors
 				UObject::LoadPackage(NULL, "Core", LOAD_NoFail);
 				UObject::LoadPackage(NULL, "Engine", LOAD_NoFail);
-				LoadFlags |= LOAD_DisallowFiles;
+
+				// Print full path of source files in error messages
+				if(ParseParam(appCmdLine(), "FullSourcePath") && GSys->SourcePath.Len() > 1 && GSys->SourcePath[1] != ':')
+					GSys->SourcePath = FStringTemp(appBaseDir()) * GSys->SourcePath;
 			}
 
 			UClass* Class = LoadClass<UCommandlet>(NULL, *ClassName, NULL, LoadFlags, NULL);
 
-			if(!Class) // If class failed to load appending "Commandlet" and trying again
+			if(!Class) // If class failed to load append "Commandlet" and try again
 				Class = LoadClass<UCommandlet>(NULL, *(ClassName + "Commandlet"), NULL, LoadFlags, NULL);
 
 			if(Class){
@@ -105,7 +110,7 @@ int __cdecl main(int argc, char** argv){
 				Commandlet->InitExecution();
 				Commandlet->ParseParms(*CommandletCmdLine);
 
-				if(Default->LogToStdout){ // Redirecting commandlet output to console
+				if(Default->LogToStdout){ // Redirect commandlet output to console
 					Warn.AuxOut = GLog;
 					GLog = &Warn;
 				}
@@ -119,6 +124,9 @@ int __cdecl main(int argc, char** argv){
 					Warn.Log("");
 					Warn.Logf("%s - %i error(s), %i warning(s)", Warn.ErrorCount == 0 ? "Success" : "Failure", Warn.ErrorCount, Warn.WarningCount);
 				}
+
+				if(Warn.ErrorCount > 0 || Warn.WarningCount > 0)
+					ExitCode = EXIT_FAILURE;
 
 				if(Default->LogToStdout){
 					Warn.AuxOut = NULL;

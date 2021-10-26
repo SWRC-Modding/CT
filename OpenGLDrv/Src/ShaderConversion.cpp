@@ -330,20 +330,23 @@ FStringTemp UOpenGLRenderDevice::GLSLVertexShaderFromD3DVertexShader(UHardwareSh
 		appErrorf("Vertex shader conversion failed (%s)", Shader->GetPathName()); // TODO: Fall back to default implementation
 
 	GLSLShaderText += ConvertedShaderText;
+	GLSLShaderText += "\tif(FogEnabled){\n";
 
 	if(UsesFog){
 		// The shader assigns a value to the fog register, so we use that
-		GLSLShaderText += "\tFog = calculate_fog(oFog);\n"
-		                  "}\n";
+		GLSLShaderText += "\t\tFog = calculate_fog(oFog);\n";
 	}else{
 		// The base shader doesn't write to oFog but a macro might. If it does, MACRO_FOG is defined and we can use oFog
-		GLSLShaderText += "#ifdef MACRO_FOG\n"
-		                      "\tFog = calculate_fog(oFog);\n"
-	                      "#else\n"
-		                      "\tFog = calculate_fog((LocalToCamera * vec4(InPosition.xyz, 1.0)).z);\n"
+		GLSLShaderText += "#ifndef MACRO_FOG\n"
+		                          "\t\toFog = (LocalToCamera * vec4(InPosition.xyz, 1.0)).z;\n"
 	                      "#endif\n"
-	                      "}\n";
+		                          "\t\tFog = calculate_fog(oFog);\n";
 	}
+
+	GLSLShaderText +=     "\t}else{\n"
+	                          "\t\tFog = 1.0;\n"
+	                      "\t}\n"
+	                  "}\n";
 
 	return GLSLShaderText;
 }
@@ -375,9 +378,7 @@ FStringTemp UOpenGLRenderDevice::GLSLFragmentShaderFromD3DPixelShader(UHardwareS
 	GLSLShaderText += ConvertedShaderText +
 	                      "\n"
 	                      "\talpha_test(r0);\n"
-	                      "\tFragColor = r0;\n\n"
-						  "\tif(FogEnabled)\n"
-							"\t\tFragColor = apply_fog(FragColor);\n"
+	                      "\tFragColor = vec4(apply_fog(r0.rgb), r0.a);\n"
 		              "}\n";
 
 	return GLSLShaderText;

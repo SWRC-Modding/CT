@@ -695,8 +695,8 @@ void FOpenGLRenderInterface::SetCullMode(ECullMode CullMode){
 }
 
 void FOpenGLRenderInterface::SetAmbientLight(FColor Color){
-	++CurrentState->UniformRevision;
 	CurrentState->AmbientLightColor = Color;
+	++CurrentState->UniformRevision;
 }
 
 void FOpenGLRenderInterface::EnableLighting(UBOOL UseDynamic, UBOOL UseStatic, UBOOL Modulate2X, FBaseTexture* Lightmap, UBOOL LightingOnly, const FSphere& LitSphere, int){

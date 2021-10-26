@@ -948,7 +948,7 @@ FString UOpenGLRenderDevice::VertexShaderVarsText(
 	"out vec3 Tangent;\n"
 	"out vec3 Binormal;\n"
 	"out float Fog;\n\n"
-	"float calculate_fog(float Dist){ return 1 - saturate((FogEnd - Dist) / (FogEnd - FogStart)); }\n\n");
+	"float calculate_fog(float Dist){ return saturate((FogEnd - Dist) / (FogEnd - FogStart)); }\n\n");
 
 FString UOpenGLRenderDevice::FragmentShaderVarsText(
 	SHADER_HEADER
@@ -1007,7 +1007,7 @@ FString UOpenGLRenderDevice::FragmentShaderVarsText(
 	"in float Fog;\n"
 	"out vec4 FragColor;\n\n"
 	"void alpha_test(vec4  c){ if(c.a <= AlphaRef) discard; }\n"
-	"vec4 apply_fog(vec4 BaseColor){ return vec4(mix(BaseColor.rgb, FogColor.rgb, Fog * BaseColor.a), BaseColor.a); }\n\n");
+	"vec3 apply_fog(vec3 BaseColor){ return mix(FogColor.rgb, BaseColor, Fog); }\n\n");
 
 FString UOpenGLRenderDevice::FixedFunctionVertexShaderText(
 	"void main(void){\n"
@@ -1021,7 +1021,7 @@ FString UOpenGLRenderDevice::FixedFunctionVertexShaderText(
 
 FString UOpenGLRenderDevice::FixedFunctionFragmentShaderText(
 	"void main(void){\n"
-		"\tFragColor = vec4(1.0, 1.0, 1.0, 1.0);\n"
+		"\tFragColor = AmbientLightColor * Specular + Diffuse;\n"
 	"}\n");
 
 #undef UNIFORM_STRUCT_MEMBER

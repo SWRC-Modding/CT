@@ -440,6 +440,15 @@ void FOpenGLRenderInterface::CommitRenderState(){
 		CurrentState->VAO->Bind();
 		RenderState.VAO = CurrentState->VAO;
 	}
+
+	if(LastUniformRevision != CurrentState->UniformRevision){
+		if(MatricesChanged)
+			UpdateMatrices();
+
+		glNamedBufferSubData(GlobalUBO, 0, sizeof(FOpenGLGlobalUniforms), static_cast<FOpenGLGlobalUniforms*>(CurrentState));
+
+		LastUniformRevision = CurrentState->UniformRevision;
+	}
 }
 
 void FOpenGLRenderInterface::Locked(UViewport* Viewport){
@@ -488,17 +497,13 @@ void FOpenGLRenderInterface::Unlocked(){
 	LockedViewport = NULL;
 }
 
-void FOpenGLRenderInterface::UpdateGlobalShaderUniforms(){
-	// Matrices
+void FOpenGLRenderInterface::UpdateMatrices(){
 	CurrentState->LocalToCamera = CurrentState->LocalToWorld * CurrentState->WorldToCamera;
 	CurrentState->LocalToScreen = CurrentState->LocalToCamera * CurrentState->CameraToScreen;
 	CurrentState->WorldToLocal = CurrentState->LocalToWorld.Inverse();
 	CurrentState->WorldToScreen = CurrentState->WorldToCamera * CurrentState->CameraToScreen;
 	CurrentState->CameraToWorld = CurrentState->WorldToCamera.Inverse();
-
-	glNamedBufferSubData(GlobalUBO, 0, sizeof(FOpenGLGlobalUniforms), static_cast<FOpenGLGlobalUniforms*>(CurrentState));
-
-	NeedUniformUpdate = 0;
+	MatricesChanged = false;
 }
 
 void FOpenGLRenderInterface::SetFramebufferBlending(EFrameBufferBlending Mode){
@@ -616,7 +621,7 @@ void FOpenGLRenderInterface::PopState(DWORD Flags){
 		SetGLRenderTarget(CurrentState->RenderTarget, CurrentState->RenderTargetOwnDepthBuffer);
 	}
 
-	NeedUniformUpdate = CurrentState->UniformRevision != PoppedState->UniformRevision;
+	CurrentState->UniformRevision = PoppedState->UniformRevision;
 }
 
 UBOOL FOpenGLRenderInterface::SetRenderTarget(FRenderTarget* RenderTarget, bool bOwnDepthBuffer){
@@ -690,7 +695,6 @@ void FOpenGLRenderInterface::SetCullMode(ECullMode CullMode){
 }
 
 void FOpenGLRenderInterface::SetAmbientLight(FColor Color){
-	NeedUniformUpdate = true;
 	++CurrentState->UniformRevision;
 	CurrentState->AmbientLightColor = Color;
 }
@@ -749,9 +753,7 @@ void FOpenGLRenderInterface::SetLight(INT LightIndex, FDynamicLight* Light, FLOA
 	}
 
 	CurrentState->ShaderLights[LightIndex] = Light;
-
 	++CurrentState->UniformRevision;
-	NeedUniformUpdate = true;
 }
 
 void FOpenGLRenderInterface::SetDistanceFog(UBOOL Enable, FLOAT FogStart, FLOAT FogEnd, FColor Color){
@@ -760,13 +762,11 @@ void FOpenGLRenderInterface::SetDistanceFog(UBOOL Enable, FLOAT FogStart, FLOAT 
 	CurrentState->FogEnd = FogEnd;
 	CurrentState->FogColor = Color;
 	++CurrentState->UniformRevision;
-	NeedUniformUpdate = true;
 }
 
 UBOOL FOpenGLRenderInterface::EnableFog(UBOOL Enable){
 	CurrentState->FogEnabled = Enable != 0;
 	++CurrentState->UniformRevision;
-	NeedUniformUpdate = true;
 
 	return Enable;
 }
@@ -776,9 +776,8 @@ UBOOL FOpenGLRenderInterface::IsFogEnabled(){
 }
 
 void FOpenGLRenderInterface::SetGlobalColor(FColor Color){
-	++CurrentState->UniformRevision;
-	NeedUniformUpdate = true;
 	CurrentState->GlobalColor = Color;
+	++CurrentState->UniformRevision;
 }
 
 void FOpenGLRenderInterface::SetTransform(ETransformType Type, const FMatrix& Matrix){
@@ -805,8 +804,8 @@ void FOpenGLRenderInterface::SetTransform(ETransformType Type, const FMatrix& Ma
 		CurrentState->CameraToScreen = Matrix;
 	}
 
+	MatricesChanged = true;
 	++CurrentState->UniformRevision;
-	NeedUniformUpdate = true;
 }
 
 FMatrix FOpenGLRenderInterface::GetTransform(ETransformType Type) const{
@@ -868,8 +867,6 @@ void FOpenGLRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorStri
 		*NumPasses = 1;
 
 	// Restore default material state
-
-	NeedUniformUpdate = true;
 
 	CurrentState->bZTest = true;
 	CurrentState->bZWrite = true;
@@ -1046,6 +1043,9 @@ UMaterial* FOpenGLRenderInterface::RemoveModifiers(UModifier* Modifier, FModifie
 }
 
 void FOpenGLRenderInterface::GetShaderConstants(FSConstantsInfo* Info, FPlane* Constants, INT NumConstants){
+	if(MatricesChanged)
+		UpdateMatrices();
+
 	FMatrix Matrix;
 
 	for(INT i = 0; i < NumConstants; ++i){
@@ -1116,61 +1116,105 @@ void FOpenGLRenderInterface::GetShaderConstants(FSConstantsInfo* Info, FPlane* C
 			Constants[i].W = CurrentState->CameraToWorld.M[3][3];
 			continue;
 		case EVC_XYCircle:
-			Constants[i].X = appCos(CurrentState->Time) * 500.0f;
-			Constants[i].Y = appSin(CurrentState->Time) * 500.0f;
+			Constants[i].X = CurrentState->CosTime * 500.0f;
+			Constants[i].Y = CurrentState->SinTime * 500.0f;
 			Constants[i].Z = 0.0f;
 			Constants[i].W = 1.0f;
 			continue;
 		case EVC_LightPos1:
-			Constants[i] = CurrentState->Lights[0].Position;
-			continue;
 		case EVC_LightColor1:
-			Constants[i] = CurrentState->Lights[0].Color;
-			continue;
 		case EVC_LightInvRadius1:
-			Constants[i].X = CurrentState->Lights[0].InvRadius;
-			Constants[i].Y = Constants[i].X;
-			Constants[i].Z = Constants[i].X;
-			Constants[i].W = Constants[i].X;
-			continue;
 		case EVC_LightPos2:
-			Constants[i] = CurrentState->Lights[1].Position;
-			continue;
 		case EVC_LightColor2:
-			Constants[i] = CurrentState->Lights[1].Color;
-			continue;
 		case EVC_LightInvRadius2:
-			Constants[i].X = CurrentState->Lights[1].InvRadius;
-			Constants[i].Y = Constants[i].X;
-			Constants[i].Z = Constants[i].X;
-			Constants[i].W = Constants[i].X;
-			continue;
 		case EVC_LightPos3:
-			Constants[i] = CurrentState->Lights[2].Position;
-			continue;
 		case EVC_LightColor3:
-			Constants[i] = CurrentState->Lights[2].Color;
-			continue;
 		case EVC_LightInvRadius3:
-			Constants[i].X = CurrentState->Lights[2].InvRadius;
-			Constants[i].Y = Constants[i].X;
-			Constants[i].Z = Constants[i].X;
-			Constants[i].W = Constants[i].X;
-			continue;
 		case EVC_LightPos4:
-			Constants[i] = CurrentState->Lights[3].Position;
-			continue;
 		case EVC_LightColor4:
-			Constants[i] = CurrentState->Lights[3].Color;
-			continue;
 		case EVC_LightInvRadius4:
-			Constants[i].X = CurrentState->Lights[3].InvRadius;
-			Constants[i].Y = Constants[i].X;
-			Constants[i].Z = Constants[i].X;
-			Constants[i].W = Constants[i].X;
-			continue;
+		case EVC_SpotlightDirection:
+		case EVC_SpotlightCosCone:
+			{
+				FDynamicLight** ShaderLights = CurrentState->ShaderLights;
+				FDynamicLight* Spotlight = ShaderLights[0];
+				BYTE ConstantType = Info[i].Type;
+
+				if(ConstantType == EVC_SpotlightDirection){
+					if(Spotlight && Spotlight->Actor->LightCone > 0){
+						Constants[i].X = Spotlight->Direction.X;
+						Constants[i].Y = Spotlight->Direction.Y;
+						Constants[i].Z = Spotlight->Direction.Z;
+						Constants[i].W = 1.0f;
+					}else{
+						Constants[i].X = 1.0f;
+						Constants[i].Y = 0.0f;
+						Constants[i].Z = 0.0f;
+						Constants[i].W = 1.0f;
+					}
+
+					continue;
+				}else if(ConstantType == EVC_SpotlightCosCone){
+					if(Spotlight && Spotlight->Actor->LightCone > 0){
+						FLOAT CosCone = Spotlight->Actor->LightCone * 0.00097659999f;
+
+						Constants[i].X = Square(1.0f - CosCone) * 1.075f;
+						Constants[i].Y = Constants[i].X * 0.1;
+						Constants[i].Z = 1.0f / Constants[i].Y;
+						Constants[i].W = 1.0f;
+					}else{
+						Constants[i].X = 0.0f;
+						Constants[i].Y = 0.0f;
+						Constants[i].Z = 0.0f;
+						Constants[i].W = 1.0f;
+					}
+
+					continue;
+				}else{
+					FDynamicLight* Light = ShaderLights[(ConstantType - EVC_LightPos1) / 3];
+					BYTE LightConstant = (ConstantType - EVC_LightPos1) % 3; // 0 = Position, 1 = Color, 2 = InvRadius
+
+					switch(LightConstant){
+					case 0: // Position
+						if(Light){
+							// Transform light from world to object space
+							Constants[i] = CurrentState->WorldToLocal.TransformFPlane(FPlane(Light->Position, 1.0f));
+						}else{
+							Constants[i].X = 10000000.0f;
+							Constants[i].Y = 10000000.0f;
+							Constants[i].Z = 10000000.0f;
+							Constants[i].W = 0.0f;
+						}
+
+						continue;
+					case 1: // Color
+						if(Light)
+							Constants[i] = Light->Color;
+						else
+							Constants[i] = FPlane(0.0f, 0.0f, 0.0f, 0.0f);
+
+						continue;
+					case 2: // InvRadius
+						if(Light){
+							Constants[i].X = 1.0f / Light->Actor->LightRadius;
+							Constants[i].Y = Constants[i].X;
+							Constants[i].Z = Constants[i].X;
+							Constants[i].W = Constants[i].X;
+						}else{
+							Constants[i].X = 10000000.0f;
+							Constants[i].Y = 10000000.0f;
+							Constants[i].Z = 10000000.0f;
+							Constants[i].W = 0.0f;
+						}
+
+						continue;
+					}
+				}
+
+				appErrorf("Shader light constant problem"); // This should never be reached
+			}
 		case EVC_AmbientLightColor:
-			Constants[i] = CurrentState->AmbientLightColor;
+			Constants[i] = CurrentState->AmbientLightColor * 2;
 			continue;
 		case EVC_Flicker:
 			{
@@ -1195,15 +1239,6 @@ void FOpenGLRenderInterface::GetShaderConstants(FSConstantsInfo* Info, FPlane* C
 				Constants[i].Z = Rand3 <= X ? 1.0f : Y * Rand2 + YInv;
 				Constants[i].W = 1.0f;
 			}
-			continue;
-		case EVC_SpotlightDirection:
-			Constants[i] = CurrentState->Lights[0].Direction; // TODO: Implement spotlights
-			continue;
-		case EVC_SpotlightCosCone:
-			Constants[i].X = CurrentState->Lights[0].CosCone; // TODO: Implement spotlights
-			Constants[i].Y = CurrentState->Lights[0].CosCone; // TODO: Implement spotlights
-			Constants[i].Z = CurrentState->Lights[0].CosCone; // TODO: Implement spotlights
-			Constants[i].W = CurrentState->Lights[0].CosCone; // TODO: Implement spotlights
 			continue;
 		case EVC_DrawScale3D:
 			if(GCubemapManager && GCubemapManager->Actor){
@@ -1242,47 +1277,74 @@ void FOpenGLRenderInterface::GetShaderConstants(FSConstantsInfo* Info, FPlane* C
 			Constants[i].Z = 0.0f;
 			Constants[i].W = 0.0f;
 			continue;
+		default:
+			appErrorf("Invalid shader constant (%i)", Info[i].Type);
 		}
 	}
 }
 
-UBOOL FOpenGLRenderInterface::SetHardwareShaderMaterial(UHardwareShader* Material, FString* ErrorString, UMaterial** ErrorMaterial){
+static INT GetShaderConstantNumSlots(BYTE ConstantType){
+	if((ConstantType >= EVC_WorldToScreenMatrix && ConstantType <= EVC_WorldToObjectMatrix) || ConstantType == EVC_ObjectToCameraMatrix)
+		return 4;
+
+	if(ConstantType == EVC_2DRotator)
+		return 2;
+
+	return 1;
+}
+
+UBOOL FOpenGLRenderInterface::SetHardwareShaderMaterial(UHardwareShader* HardwareShader, FString* ErrorString, UMaterial** ErrorMaterial){
 	guardFuncSlow;
 
-	SetShader(RenDev->GetShader(Material));
+	SetShader(RenDev->GetShader(HardwareShader));
 
-	CurrentState->bZTest = Material->ZTest != 0;
-	CurrentState->bZWrite = Material->ZWrite != 0;
+	CurrentState->bZTest = HardwareShader->ZTest != 0;
+	CurrentState->bZWrite = HardwareShader->ZWrite != 0;
 
-	if(Material->AlphaTest)
-		CurrentState->AlphaRef = Material->AlphaRef / 255.0f;
+	if(HardwareShader->AlphaTest)
+		CurrentState->AlphaRef = HardwareShader->AlphaRef / 255.0f;
 
-	if(Material->AlphaBlending){
-		CurrentState->SrcBlend = GetBlendFunc(Material->SrcBlend);
-		CurrentState->DstBlend = GetBlendFunc(Material->DestBlend);
+	if(HardwareShader->AlphaBlending){
+		CurrentState->SrcBlend = GetBlendFunc(HardwareShader->SrcBlend);
+		CurrentState->DstBlend = GetBlendFunc(HardwareShader->DestBlend);
 	}
 
 	for(INT i = 0; i < MAX_TEXTURES; ++i){
-		if(Material->Textures[i]){
-			SetBitmapTexture(Material->Textures[i], i);
-			CurrentState->TextureInfos[i].BumpSize = Material->BumpSettings[i].BumpSize;
+		if(HardwareShader->Textures[i]){
+			SetBitmapTexture(HardwareShader->Textures[i], i, HardwareShader->BumpSettings[i].BumpSize);
+			CurrentState->NumTextures = i + 1;
 		}
-
-		++CurrentState->NumTextures;
 	}
 
-	for(INT i = MAX_TEXTURES - 1; i >= 0 && Material->Textures[i] == NULL; --i)
-		--CurrentState->NumTextures;
-
-	UpdateGlobalShaderUniforms();
-
-	static FPlane Constants[MAX_VERTEX_SHADER_CONSTANTS];
-
 	if(!CurrentShader->IsErrorShader){
-		GetShaderConstants(Material->VSConstants, Constants, Material->NumVSConstants);
-		glProgramUniform4fv(CurrentShader->Program, HSU_VSConstants, Material->NumVSConstants, (GLfloat*)Constants);
-		GetShaderConstants(Material->PSConstants, Constants, Material->NumPSConstants);
-		glProgramUniform4fv(CurrentShader->Program, HSU_PSConstants, Material->NumPSConstants, (GLfloat*)Constants);
+		// Cache number of vertex and pixel shader constants
+
+		if(HardwareShader->NumVSConstants <= 0){
+			for(INT i = MAX_VERTEX_SHADER_CONSTANTS - 1; i >= 0; --i){
+				if(HardwareShader->VSConstants[i].Type != EVC_Unused){
+					HardwareShader->NumVSConstants = i + GetShaderConstantNumSlots(HardwareShader->VSConstants[i].Type);
+
+					break;
+				}
+			}
+		}
+
+		if(HardwareShader->NumPSConstants <= 0){
+			for(INT i = MAX_PIXEL_SHADER_CONSTANTS - 1; i >= 0; --i){
+				if(HardwareShader->PSConstants[i].Type != EVC_Unused){
+					HardwareShader->NumPSConstants = i + GetShaderConstantNumSlots(HardwareShader->PSConstants[i].Type);
+
+					break;
+				}
+			}
+		}
+
+		static FPlane Constants[MAX_VERTEX_SHADER_CONSTANTS];
+
+		GetShaderConstants(HardwareShader->VSConstants, Constants, HardwareShader->NumVSConstants);
+		glProgramUniform4fv(CurrentShader->Program, HSU_VSConstants, HardwareShader->NumVSConstants, (GLfloat*)Constants);
+		GetShaderConstants(HardwareShader->PSConstants, Constants, HardwareShader->NumPSConstants);
+		glProgramUniform4fv(CurrentShader->Program, HSU_PSConstants, HardwareShader->NumPSConstants, (GLfloat*)Constants);
 	}
 
 	return 1;
@@ -1290,7 +1352,7 @@ UBOOL FOpenGLRenderInterface::SetHardwareShaderMaterial(UHardwareShader* Materia
 	unguardSlow;
 }
 
-void FOpenGLRenderInterface::SetTexture(FBaseTexture* Texture, INT TextureUnit){
+void FOpenGLRenderInterface::SetTexture(FBaseTexture* Texture, INT TextureIndex, FLOAT BumpSize){
 	checkSlow(Texture);
 
 	QWORD CacheId = Texture->GetCacheId();
@@ -1302,31 +1364,43 @@ void FOpenGLRenderInterface::SetTexture(FBaseTexture* Texture, INT TextureUnit){
 	if(GLTexture->Revision != Texture->GetRevision())
 		GLTexture->Cache(Texture);
 
-	CurrentState->TextureUnits[TextureUnit].Texture = GLTexture;
+	FOpenGLTextureUnit& TextureUnit = CurrentState->TextureUnits[TextureIndex];
+	FOpenGLGlobalUniforms::TextureInfo& TextureInfo = CurrentState->TextureInfos[TextureIndex];
+
+	TextureUnit.Texture = GLTexture;
+
+	UBOOL WasCubemap = TextureInfo.IsCubemap;
 
 	if(GLTexture->IsCubemap){
-		CurrentState->TextureInfos[TextureUnit].IsCubemap = 1;
-		CurrentState->TextureUnits[TextureUnit].ClampU = TC_Clamp;
-		CurrentState->TextureUnits[TextureUnit].ClampV = TC_Clamp;
+		TextureInfo.IsCubemap = 1;
+		TextureUnit.ClampU = TC_Clamp;
+		TextureUnit.ClampV = TC_Clamp;
 	}else{
-		CurrentState->TextureInfos[TextureUnit].IsCubemap = 0;
+		TextureInfo.IsCubemap = 0;
 
 		if(GLTexture->FBO == GL_NONE){
-			CurrentState->TextureUnits[TextureUnit].ClampU = Texture->GetUClamp();
-			CurrentState->TextureUnits[TextureUnit].ClampV = Texture->GetVClamp();
+			TextureUnit.ClampU = Texture->GetUClamp();
+			TextureUnit.ClampV = Texture->GetVClamp();
 		}else{
 			 // Render targets should use TC_Clamp to avoid artifacts at the edges of the screen
-			CurrentState->TextureUnits[TextureUnit].ClampU = TC_Clamp;
-			CurrentState->TextureUnits[TextureUnit].ClampV = TC_Clamp;
+			TextureUnit.ClampU = TC_Clamp;
+			TextureUnit.ClampV = TC_Clamp;
 		}
 	}
 
-	CurrentState->TextureInfos[TextureUnit].IsBumpmap = IsBumpmap(Texture->GetFormat());
+	UBOOL WasBumpmap = TextureInfo.IsBumpmap;
+	FLOAT OldBumpSize = TextureInfo.BumpSize;
+
+	TextureInfo.IsBumpmap = IsBumpmap(Texture->GetFormat());
+	TextureInfo.BumpSize = BumpSize;
+
+	if(WasCubemap != TextureInfo.IsCubemap || WasBumpmap != TextureInfo.IsBumpmap || OldBumpSize != TextureInfo.BumpSize)
+		++CurrentState->UniformRevision;
 }
 
-void FOpenGLRenderInterface::SetBitmapTexture(UBitmapMaterial* Bitmap, INT TextureUnit){
+void FOpenGLRenderInterface::SetBitmapTexture(UBitmapMaterial* Bitmap, INT TextureIndex, FLOAT BumpSize){
 	FBaseTexture* Texture = Bitmap->Get(LockedViewport->CurrentTime, LockedViewport)->GetRenderInterface();
-	SetTexture(Texture, TextureUnit);
+	SetTexture(Texture, TextureIndex, BumpSize);
 }
 
 void FOpenGLRenderInterface::SetGLRenderTarget(FOpenGLTexture* GLRenderTarget, bool bOwnDepthBuffer){
@@ -1526,9 +1600,6 @@ void FOpenGLRenderInterface::DrawPrimitive(EPrimitiveType PrimitiveType, INT Fir
 	guardFuncSlow;
 
 	CommitRenderState();
-
-	if(NeedUniformUpdate)
-		UpdateGlobalShaderUniforms();
 
 	GLenum Mode  = 0;
 	INT    Count = NumPrimitives;

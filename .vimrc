@@ -1,3 +1,4 @@
+let g:ctrlp_custom_ignore='.obj\|.exp\|.pdb\|.idb\|.lib'
 set errorformat=%f(%l):\ %m,%f(%l)\ :\ %m,%f\ :\ error\ %m
 
 map <F3> :wa <bar> let &makeprg='..\GameData\System\UCC.exe' <bar> make make "ini=../../Code/UCC/UCC.ini" -noprompt -fullsourcepath <bar> :cwindow <CR><CR>

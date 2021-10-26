@@ -42,15 +42,15 @@ void UOpenGLRenderDevice::StaticConstructor(){
 	new(GetClass(), "ShaderDir",              RF_Public) UStrProperty (CPP_PROPERTY(ShaderDir),               "",        CPF_Config);
 }
 
+bool UOpenGLRenderDevice::IsCurrent(){
+	return OpenGLContext != NULL && wglGetCurrentContext() == OpenGLContext;
+}
+
 void UOpenGLRenderDevice::MakeCurrent(){
 	checkSlow(OpenGLContext);
 
 	if(!IsCurrent())
 		wglMakeCurrent(DeviceContext, OpenGLContext);
-}
-
-bool UOpenGLRenderDevice::IsCurrent(){
-	return OpenGLContext != NULL && wglGetCurrentContext() == OpenGLContext;
 }
 
 void UOpenGLRenderDevice::UnSetRes(UViewport* Viewport){
@@ -109,16 +109,6 @@ FOpenGLResource* UOpenGLRenderDevice::GetCachedResource(QWORD CacheId){
 	return NULL;
 }
 
-static bool IsMatrixShaderConstant(BYTE ConstantType){
-	return ConstantType == EVC_WorldToScreenMatrix ||
-	       ConstantType == EVC_ObjectToScreenMatrix ||
-	       ConstantType == EVC_ObjectToWorldMatrix ||
-	       ConstantType == EVC_CameraToWorldMatrix ||
-	       ConstantType == EVC_WorldToCameraMatrix ||
-	       ConstantType == EVC_WorldToObjectMatrix ||
-	       ConstantType == EVC_ObjectToCameraMatrix;
-}
-
 FShaderGLSL* UOpenGLRenderDevice::GetShader(UHardwareShader* HardwareShader){
 	FShaderGLSL* Shader = GLShaderByHardwareShader.Find(HardwareShader);
 
@@ -126,34 +116,6 @@ FShaderGLSL* UOpenGLRenderDevice::GetShader(UHardwareShader* HardwareShader){
 		Shader = &GLShaderByHardwareShader[HardwareShader];
 		// Explicitly create object because TMap does not call the constructor!!!
 		*Shader = FShaderGLSL(FStringTemp(HardwareShader->GetPathName()).Substitute(".", "\\").Substitute(".", "\\"));
-
-		// Cache number of vertex and pixel shader constants
-
-		for(INT i = MAX_VERTEX_SHADER_CONSTANTS - 1; i >= 0; --i){
-			if(HardwareShader->VSConstants[i].Type != EVC_Unused){
-				HardwareShader->NumVSConstants = i + 1;
-
-				if(IsMatrixShaderConstant(HardwareShader->VSConstants[i].Type))
-					HardwareShader->NumVSConstants += 3;
-				else if(HardwareShader->VSConstants[i].Type == EVC_2DRotator)
-					++HardwareShader->NumVSConstants;
-
-				break;
-			}
-		}
-
-		for(INT i = MAX_PIXEL_SHADER_CONSTANTS - 1; i >= 0; --i){
-			if(HardwareShader->PSConstants[i].Type != EVC_Unused){
-				HardwareShader->NumPSConstants = i + 1;
-
-				if(IsMatrixShaderConstant(HardwareShader->PSConstants[i].Type))
-					HardwareShader->NumPSConstants += 3;
-				else if(HardwareShader->PSConstants[i].Type == EVC_2DRotator)
-					++HardwareShader->NumPSConstants;
-
-				break;
-			}
-		}
 
 		if(!HardwareShader->IsIn(UObject::GetTransientPackage())){
 			// Convert d3d shader assembly to glsl or load existing shader from disk
@@ -177,17 +139,10 @@ FShaderGLSL* UOpenGLRenderDevice::GetShader(UHardwareShader* HardwareShader){
 }
 
 FOpenGLIndexBuffer* UOpenGLRenderDevice::GetDynamicIndexBuffer(INT IndexSize){
-	if(IndexSize == sizeof(DWORD)){
-		if(!DynamicIndexBuffer32)
-			DynamicIndexBuffer32 = new FOpenGLIndexBuffer(this, MakeCacheID(CID_RenderIndices), true);
+	if(!DynamicIndexBuffer)
+		DynamicIndexBuffer = new FOpenGLIndexBuffer(this, MakeCacheID(CID_RenderIndices), true);
 
-		return DynamicIndexBuffer32;
-	}else{
-		if(!DynamicIndexBuffer16)
-			DynamicIndexBuffer16 = new FOpenGLIndexBuffer(this, MakeCacheID(CID_RenderIndices), true);
-
-		return DynamicIndexBuffer16;
-	}
+	return DynamicIndexBuffer;
 }
 
 FOpenGLVertexStream* UOpenGLRenderDevice::GetDynamicVertexStream(){
@@ -583,9 +538,8 @@ void UOpenGLRenderDevice::Flush(UViewport* Viewport){
 	appMemzero(ResourceHash, sizeof(ResourceHash));
 	GLShaderByHardwareShader.Empty();
 
-	DynamicIndexBuffer32 = NULL;
-	DynamicIndexBuffer16 = NULL;
-	DynamicVertexStream  = NULL;
+	DynamicIndexBuffer  = NULL;
+	DynamicVertexStream = NULL;
 }
 
 void UOpenGLRenderDevice::FlushResource(QWORD CacheId){

@@ -41,8 +41,8 @@ public:
 	UOpenGLRenderDevice();
 	void StaticConstructor();
 
-	void MakeCurrent();
 	bool IsCurrent();
+	void MakeCurrent();
 	void UnSetRes(UViewport* Viewport);
 	FOpenGLResource* GetCachedResource(QWORD CacheId);
 	FShaderGLSL* GetShader(UHardwareShader* HardwareShader);
@@ -107,8 +107,7 @@ private:
 	INT                                 SavedViewportWidth;
 	INT                                 SavedViewportHeight;
 
-	FOpenGLIndexBuffer*                 DynamicIndexBuffer16;
-	FOpenGLIndexBuffer*                 DynamicIndexBuffer32;
+	FOpenGLIndexBuffer*                 DynamicIndexBuffer;
 	FOpenGLVertexStream*                DynamicVertexStream;
 
 	TArray<BYTE>                        Scratch;

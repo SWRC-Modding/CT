@@ -184,7 +184,8 @@ public:
 
 	FOpenGLShader*                        CurrentShader;
 
-	bool                                  NeedUniformUpdate;
+	bool                                  MatricesChanged;
+	INT                                   LastUniformRevision;
 	unsigned int                          GlobalUBO;
 
 	BYTE                                  TextureFilter; // ETextureFilter
@@ -203,7 +204,7 @@ public:
 	void CommitRenderState();
 	void Locked(UViewport* Viewport);
 	void Unlocked();
-	void UpdateGlobalShaderUniforms();
+	void UpdateMatrices();
 	void SetFramebufferBlending(EFrameBufferBlending Mode);
 	void SetTextureFilter(BYTE Filter);
 	void SetGLRenderTarget(FOpenGLTexture* GLRenderTarget, bool bOwnDepthBuffer);
@@ -255,6 +256,6 @@ private:
 
 	UMaterial* RemoveModifiers(UModifier* Modifier, FModifierInfo* ModifierInfo = NULL);
 	void GetShaderConstants(FSConstantsInfo* Info, FPlane* Constants, INT NumConstants);
-	void SetTexture(FBaseTexture* Texture, INT TextureUnit);
-	void SetBitmapTexture(UBitmapMaterial* Bitmap, INT TextureUnit);
+	void SetTexture(FBaseTexture* Texture, INT TextureIndex, FLOAT BumpSize = 0.0f);
+	void SetBitmapTexture(UBitmapMaterial* Bitmap, INT TextureIndex, FLOAT BumpSize = 0.0f);
 };

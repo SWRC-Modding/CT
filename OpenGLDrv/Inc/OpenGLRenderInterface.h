@@ -29,6 +29,12 @@ enum EHardwareShaderUniforms{
 	HSU_PSConstants = MAX_VERTEX_SHADER_CONSTANTS
 };
 
+enum EShaderLightType{
+	SL_Directional,
+	SL_Point,
+	SL_Spot
+};
+
 // NOTE: There seems to be a compiler bug that produces incorrect alignment if both the struct and variable have the same name
 #define GLSL_STRUCT(x) GLSL_struct x
 #define STRUCT(x) struct
@@ -43,6 +49,7 @@ enum EHardwareShaderUniforms{
 	UNIFORM_BLOCK_MEMBER(mat4, WorldToLocal) \
 	UNIFORM_BLOCK_MEMBER(mat4, WorldToScreen) \
 	UNIFORM_BLOCK_MEMBER(mat4, CameraToWorld) \
+	UNIFORM_BLOCK_MEMBER(float, DiffuseFactor) \
 	UNIFORM_BLOCK_MEMBER(float, EmissiveFactor) \
 	UNIFORM_BLOCK_MEMBER(float, AlphaRef) \
 	UNIFORM_BLOCK_MEMBER(float, Time) \
@@ -64,12 +71,14 @@ enum EHardwareShaderUniforms{
 		UNIFORM_STRUCT_MEMBER(vec4, Color) \
 		UNIFORM_STRUCT_MEMBER(vec4, Position) \
 		UNIFORM_STRUCT_MEMBER(vec4, Direction) \
-		UNIFORM_STRUCT_MEMBER(float, Radius) \
-		UNIFORM_STRUCT_MEMBER(float, InvRadius) \
-		UNIFORM_STRUCT_MEMBER(float, CosCone) \
+		UNIFORM_STRUCT_MEMBER(float, Constant) \
+		UNIFORM_STRUCT_MEMBER(float, Linear) \
+		UNIFORM_STRUCT_MEMBER(float, Quadratic) \
+		UNIFORM_STRUCT_MEMBER(float, Cone) \
 		UNIFORM_STRUCT_MEMBER(int, Type) \
 	}, Lights[MAX_SHADER_LIGHTS]) \
-	UNIFORM_BLOCK_MEMBER(int, NumLights)
+	UNIFORM_BLOCK_MEMBER(int, NumLights) \
+	UNIFORM_BLOCK_MEMBER(bool, UseDynamicLighting)
 
 #pragma warning(push)
 #pragma warning(disable : 4324) // structure was padded due to __declspec(align())
@@ -110,7 +119,6 @@ private:
 
 struct FOpenGLRenderState{
 	BYTE                      CullMode; // ECullMode
-	BYTE                      FillMode; // EFillMode
 
 	bool                      bZWrite;
 	bool                      bZTest;
@@ -160,12 +168,11 @@ public:
 
 		// Light
 
-		bool            UseDynamicLighting;
 		bool            UseStaticLighting;
 		bool            LightingModulate2X;
 		FBaseTexture*   Lightmap;
 		FSphere         LitSphere;
-		FDynamicLight*  ShaderLights[MAX_SHADER_LIGHTS];
+		FDynamicLight*  HardwareShaderLights[MAX_SHADER_LIGHTS];
 	};
 
 	// Variables
@@ -174,6 +181,9 @@ public:
 	UViewport*                            LockedViewport;
 
 	bool                                  bStencilEnabled;
+
+	BYTE                                  CurrentFillMode; // EFillMode
+	BYTE                                  LastFillMode;    // EFillMode
 
 	unsigned int                          LastCullMode; // GLenum
 

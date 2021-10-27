@@ -204,17 +204,18 @@ void FOpenGLRenderInterface::Init(INT ViewportWidth, INT ViewportHeight){
 	RenderState.ViewportHeight = ViewportHeight;
 	glViewport(0, 0, ViewportWidth, ViewportHeight);
 
+	// Fill mode
+
+	CurrentFillMode = FM_Solid;
+	LastFillMode = CurrentFillMode;
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
 	// Culling
 
 	glEnable(GL_CULL_FACE);
 	RenderState.CullMode = CM_CW;
 	LastCullMode = GL_BACK;
 	glCullFace(LastCullMode);
-
-	// Fill mode
-
-	RenderState.FillMode = FM_Solid;
-	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 	// ZTest
 
@@ -304,6 +305,11 @@ void FOpenGLRenderInterface::Exit(){
 }
 
 void FOpenGLRenderInterface::CommitRenderState(){
+	if(CurrentFillMode != LastFillMode){
+		glPolygonMode(GL_FRONT_AND_BACK, CurrentFillMode == FM_Wireframe ? GL_LINE : GL_FILL);
+		LastFillMode = CurrentFillMode;
+	}
+
 	if(RenderState.CullMode != CurrentState->CullMode){
 		if(CurrentState->CullMode != CM_None){
 			GLenum NewCullMode;
@@ -325,11 +331,6 @@ void FOpenGLRenderInterface::CommitRenderState(){
 		}
 
 		RenderState.CullMode = CurrentState->CullMode;
-	}
-
-	if(RenderState.FillMode != CurrentState->FillMode){
-		glPolygonMode(GL_FRONT_AND_BACK, CurrentState->FillMode == FM_Wireframe ? GL_LINE : GL_FILL);
-		RenderState.FillMode = CurrentState->FillMode;
 	}
 
 	if(RenderState.bZTest != CurrentState->bZTest){
@@ -702,6 +703,7 @@ void FOpenGLRenderInterface::SetAmbientLight(FColor Color){
 }
 
 void FOpenGLRenderInterface::EnableLighting(UBOOL UseDynamic, UBOOL UseStatic, UBOOL Modulate2X, FBaseTexture* Lightmap, UBOOL LightingOnly, const FSphere& LitSphere, int){
+	CurrentState->DiffuseFactor = UseStatic || UseDynamic ? 1.0f : 0.0f;
 	CurrentState->EmissiveFactor = UseStatic ? 1.0f : 0.0f;
 	CurrentState->UseDynamicLighting = UseDynamic != 0;
 	CurrentState->UseStaticLighting = UseStatic != 0;
@@ -710,52 +712,96 @@ void FOpenGLRenderInterface::EnableLighting(UBOOL UseDynamic, UBOOL UseStatic, U
 	CurrentState->Lightmap = Lightmap;
 }
 
-void FOpenGLRenderInterface::SetLight(INT LightIndex, FDynamicLight* Light, FLOAT Scale){
-	checkSlow(LightIndex <= MAX_SHADER_LIGHTS);
+static FLOAT UnrealAttenuation(FLOAT Distance,FLOAT Radius){
+	if(Distance <= Radius){
+		FLOAT A = Distance / Radius;
+		FLOAT B = (2 * A * A * A - 3 * A * A + 1);
 
-	if(Light){
-		FOpenGLSavedState::Light* ShaderLight = &CurrentState->Lights[LightIndex];
-
-		if(Light->Actor && Light->Actor->LightEffect == LE_Sunlight){
-			ShaderLight->Type = 0; // Directional light
-			ShaderLight->Direction = -Light->Direction;
-			ShaderLight->Color.X = Light->Color.X * 1.75f * Light->Alpha * Scale;
-			ShaderLight->Color.Y = Light->Color.Y * 1.75f * Light->Alpha * Scale;
-			ShaderLight->Color.Z = Light->Color.Z * 1.75f * Light->Alpha * Scale;
-		}else if((Light->Actor && Light->Actor->LightEffect == LE_QuadraticNonIncidence) || CurrentState->LitSphere.W == -1.0f){
-			ShaderLight->Type = 1; // Point light
-			ShaderLight->Position = Light->Position;
-			ShaderLight->Radius = Light->Radius;
-			ShaderLight->InvRadius = 1.0f / Light->Radius;
-			ShaderLight->Color.X = Light->Color.X * Light->Alpha * Scale;
-			ShaderLight->Color.Y = Light->Color.Y * Light->Alpha * Scale;
-			ShaderLight->Color.Z = Light->Color.Z * Light->Alpha * Scale;
-		}else{
-			ShaderLight->Position = Light->Position;
-			ShaderLight->Color.X = Light->Color.X * Light->Alpha * Scale;
-			ShaderLight->Color.Y = Light->Color.Y * Light->Alpha * Scale;
-			ShaderLight->Color.Z = Light->Color.Z * Light->Alpha * Scale;
-
-			if(Light->Actor && Light->Actor->LightCone != 0){
-				ShaderLight->Type = 1; // Spotlight
-				ShaderLight->Direction = -Light->Direction;
-			}else{
-				ShaderLight->Type = 1; // Point light
-				ShaderLight->Radius = Light->Radius;
-				ShaderLight->InvRadius = 1.0f / Light->Radius;
-			}
-		}
-
-		ShaderLight->Color.W = 1.0f;
-
-		if(LightIndex >= CurrentState->NumLights)
-			CurrentState->NumLights = LightIndex + 1;
-	}else{
-		if(LightIndex < CurrentState->NumLights)
-			CurrentState->NumLights = LightIndex;
+		return B / A * A * 2.0f;
 	}
 
-	CurrentState->ShaderLights[LightIndex] = Light;
+	return 0.0f;
+}
+
+void FOpenGLRenderInterface::SetLight(INT LightIndex, FDynamicLight* Light, FLOAT Scale){
+	checkSlow(LightIndex < MAX_SHADER_LIGHTS);
+
+	CurrentState->HardwareShaderLights[LightIndex] = Light;
+
+	FOpenGLGlobalUniforms::Light* ShaderLight = &CurrentState->Lights[LightIndex];
+
+	if(Light){
+		if(Light->Actor && Light->Actor->LightEffect == LE_Sunlight){
+			ShaderLight->Type = SL_Directional;
+			ShaderLight->Direction = Light->Direction;
+			ShaderLight->Color = Light->Color * 1.75f * Light->Alpha * Scale;
+		}else if((Light->Actor && Light->Actor->LightEffect == LE_QuadraticNonIncidence) || CurrentState->LitSphere.W == -1.0f ){
+			ShaderLight->Type = SL_Point;
+			ShaderLight->Position = Light->Position;
+			ShaderLight->Constant = 0.0f;
+			ShaderLight->Linear = 0.0f;
+			ShaderLight->Quadratic = 8.0f / Square(Light->Radius);
+			ShaderLight->Color = Light->Color * Light->Alpha * Scale;
+			ShaderLight->Color.W = 1.0f;
+		}else{
+			ShaderLight->Position = Light->Position;
+
+			// Spotlights.
+			if(Light->Actor && Light->Actor->LightCone > 0){
+				ShaderLight->Type = SL_Spot;
+				ShaderLight->Direction = Light->Direction;
+				ShaderLight->Cone = appCos(Light->Actor->LightCone / 256.0f * (float)HALF_PI);
+
+				FLOAT CenterDistance = Max(0.1f, (CurrentState->LitSphere - Light->Position).Size());
+				FLOAT MaxDistance = Clamp(CenterDistance + CurrentState->LitSphere.W, Light->Radius * 0.05f, Light->Radius * 0.9f);
+				FLOAT MinDistance = Clamp(CenterDistance - CurrentState->LitSphere.W, Light->Radius * 0.1f, Light->Radius * 0.95f);
+				FLOAT MinAttenuation = 1.0f / UnrealAttenuation(MinDistance, Light->Radius);
+				FLOAT MaxAttenuation = 1.0f / UnrealAttenuation(MaxDistance, Light->Radius);
+
+				if(Abs(MinAttenuation - MaxAttenuation) < SMALL_NUMBER){
+					ShaderLight->Constant = MinAttenuation;
+					ShaderLight->Linear = 0.0f;
+				}else{
+					ShaderLight->Constant = Max(0.01f, MinAttenuation - (MaxAttenuation - MinAttenuation) / (MaxDistance - MinDistance) * MinDistance);
+					ShaderLight->Linear = Max(0.0f, (MinAttenuation - ShaderLight->Constant) / MinDistance);
+				}
+
+				ShaderLight->Quadratic = 0.0f;
+			}else{ // Point lights.
+				ShaderLight->Type = SL_Point;
+
+				FLOAT CenterDistance = Max(0.1f, (CurrentState->LitSphere - Light->Position).Size());
+				FLOAT MaxDistance = Clamp(CenterDistance + CurrentState->LitSphere.W, Light->Radius * 0.05f, Light->Radius * 0.9f);
+				FLOAT MinDistance = Clamp(CenterDistance - CurrentState->LitSphere.W, Light->Radius * 0.1f, Light->Radius * 0.95f);
+				FLOAT MinAttenuation = 1.0f / UnrealAttenuation(MinDistance, Light->Radius);
+				FLOAT MaxAttenuation = 1.0f / UnrealAttenuation(MaxDistance, Light->Radius);
+
+				if(Abs(MinAttenuation - MaxAttenuation) < SMALL_NUMBER){
+					ShaderLight->Constant = MinAttenuation;
+					ShaderLight->Linear = 0.0f;
+				}else{
+					ShaderLight->Constant= Max(0.01f, MinAttenuation - (MaxAttenuation - MinAttenuation) / (MaxDistance - MinDistance) * MinDistance);
+					ShaderLight->Linear= Max(0.0f, (MinAttenuation - ShaderLight->Constant) / MinDistance);
+				}
+
+				ShaderLight->Quadratic = 0.0f;
+			}
+
+			ShaderLight->Color = Light->Color * Light->Alpha * Scale;
+			ShaderLight->Color.W = 1.0f;
+		}
+
+		ShaderLight->Constant = Max(0.0f, ShaderLight->Constant);
+		ShaderLight->Linear = Max(0.0f, ShaderLight->Linear);
+		ShaderLight->Quadratic = Max(0.0f, ShaderLight->Quadratic);
+
+		//if(CurrentState->LightingModulate2X)
+		//	ShaderLight->Color *= 0.5f;
+	}else{
+		appMemzero(ShaderLight, sizeof(*ShaderLight));
+		ShaderLight->Position = FVector(10000000.0f);
+	}
+
 	++CurrentState->UniformRevision;
 }
 
@@ -911,12 +957,10 @@ void FOpenGLRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorStri
 
 	if(!IsHardwareShader || !Result){
 		SetShader(&RenDev->FixedFunctionShader);
-		CurrentState->FillMode = FM_Wireframe;
 		// Diffuse and Specular are expected to be 1.0 by default for fixed function lighting calculations
 		glVertexAttrib4f(FVF_Diffuse,   1.0f, 1.0f, 1.0f, 1.0f);
 		glVertexAttrib4f(FVF_Specular,  1.0f, 1.0f, 1.0f, 1.0f);
 	}else{
-		CurrentState->FillMode = FM_Solid;
 		// Diffuse and Specular are expected to be zero by default for hardware shaders
 		glVertexAttrib4f(FVF_Diffuse,   0.0f, 0.0f, 0.0f, 0.0f);
 		glVertexAttrib4f(FVF_Specular,  0.0f, 0.0f, 0.0f, 0.0f);
@@ -1139,7 +1183,7 @@ void FOpenGLRenderInterface::GetShaderConstants(FSConstantsInfo* Info, FPlane* C
 		case EVC_SpotlightDirection:
 		case EVC_SpotlightCosCone:
 			{
-				FDynamicLight** ShaderLights = CurrentState->ShaderLights;
+				FDynamicLight** ShaderLights = CurrentState->HardwareShaderLights;
 				FDynamicLight* Spotlight = ShaderLights[0];
 				BYTE ConstantType = Info[i].Type;
 
@@ -1649,5 +1693,5 @@ void FOpenGLRenderInterface::DrawPrimitive(EPrimitiveType PrimitiveType, INT Fir
 }
 
 void FOpenGLRenderInterface::SetFillMode(EFillMode FillMode){
-	CurrentState->FillMode = FillMode;
+	CurrentFillMode = FillMode;
 }

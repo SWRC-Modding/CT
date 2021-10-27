@@ -69,7 +69,7 @@ public:
 	bool operator==(const FName& Other) const{ return Entry == Other.Entry; }
 	bool operator!=(const FName& Other) const{ return Entry != Other.Entry; }
 	bool operator<(const FName& Other) const{ return Entry < Other.Entry; }
-	operator FString(){ return FString(*(*this), true); }
+	operator FString(){ return FString(**this); }
 
 	// Constructors
 	FName(){}

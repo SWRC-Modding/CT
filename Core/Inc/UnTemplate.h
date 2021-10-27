@@ -885,7 +885,7 @@ public:
 };
 
 inline FStringTemp operator+(const TCHAR* CStr, const FString& Str){
-	return FString(CStr, true) + Str;
+	return FStringTemp(CStr) + Str;
 }
 
 struct CORE_API FStringNoInit : public FString{

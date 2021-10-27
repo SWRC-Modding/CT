@@ -627,7 +627,7 @@ inline void* PatchDllClassVTable(const TCHAR* DllName, const TCHAR* ClassName, c
 		return NULL;
 	}
 
-	FString DllExportName = (FStringTemp("??_7") + ClassName + "@@6B" + (VTableName ? FString(VTableName, true) + "@@@" : "@"));
+	FString DllExportName = (FStringTemp("??_7") + ClassName + "@@6B" + (VTableName ? FString(VTableName) + "@@@" : "@"));
 	void** VTable = static_cast<void**>(appGetDllExport(Handle, *DllExportName));
 
 	if(!VTable){

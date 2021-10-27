@@ -18,6 +18,7 @@ void FOpenGLVertexArrayObject::Init(const FStreamDeclaration* Declarations, INT 
 
 	glCreateVertexArrays(1, &VAO);
 
+
 	for(INT StreamIndex = 0; StreamIndex < NumStreams; ++StreamIndex){
 		const FStreamDeclaration& Decl = Declarations[StreamIndex];
 		GLuint Offset = 0;
@@ -28,6 +29,7 @@ void FOpenGLVertexArrayObject::Init(const FStreamDeclaration* Declarations, INT 
 
 			checkSlow(Function < FVF_MAX);
 			checkSlow(Type < CT_MAX);
+
 
 			switch(Type){
 			case CT_Float4:
@@ -700,6 +702,7 @@ void FOpenGLRenderInterface::SetAmbientLight(FColor Color){
 }
 
 void FOpenGLRenderInterface::EnableLighting(UBOOL UseDynamic, UBOOL UseStatic, UBOOL Modulate2X, FBaseTexture* Lightmap, UBOOL LightingOnly, const FSphere& LitSphere, int){
+	CurrentState->EmissiveFactor = UseStatic ? 1.0f : 0.0f;
 	CurrentState->UseDynamicLighting = UseDynamic != 0;
 	CurrentState->UseStaticLighting = UseStatic != 0;
 	CurrentState->LightingModulate2X = Modulate2X != 0;

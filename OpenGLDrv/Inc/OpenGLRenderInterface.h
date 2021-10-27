@@ -43,6 +43,7 @@ enum EHardwareShaderUniforms{
 	UNIFORM_BLOCK_MEMBER(mat4, WorldToLocal) \
 	UNIFORM_BLOCK_MEMBER(mat4, WorldToScreen) \
 	UNIFORM_BLOCK_MEMBER(mat4, CameraToWorld) \
+	UNIFORM_BLOCK_MEMBER(float, EmissiveFactor) \
 	UNIFORM_BLOCK_MEMBER(float, AlphaRef) \
 	UNIFORM_BLOCK_MEMBER(float, Time) \
 	UNIFORM_BLOCK_MEMBER(float, CosTime) \

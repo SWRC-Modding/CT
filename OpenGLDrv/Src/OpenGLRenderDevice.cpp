@@ -1021,7 +1021,7 @@ FString UOpenGLRenderDevice::FixedFunctionVertexShaderText(
 
 FString UOpenGLRenderDevice::FixedFunctionFragmentShaderText(
 	"void main(void){\n"
-		"\tFragColor = AmbientLightColor * Specular + Diffuse;\n"
+		"\tFragColor = AmbientLightColor * Specular + Diffuse * EmissiveFactor;\n"
 	"}\n");
 
 #undef UNIFORM_STRUCT_MEMBER

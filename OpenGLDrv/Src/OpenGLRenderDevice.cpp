@@ -457,7 +457,7 @@ UBOOL UOpenGLRenderDevice::SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL
 
 		glVertexAttrib4f(FVF_Position,  0.0f, 0.0f, 0.0f, 1.0f);
 		glVertexAttrib4f(FVF_Normal,    0.0f, 0.0f, 1.0f, 0.0f);
-		glVertexAttrib4f(FVF_Diffuse,   1.0f, 1.0f, 1.0f, 1.0f);
+		glVertexAttrib4f(FVF_Diffuse,   0.0f, 0.0f, 0.0f, 0.0f);
 		glVertexAttrib4f(FVF_Specular,  1.0f, 1.0f, 1.0f, 1.0f);
 		glVertexAttrib4f(FVF_TexCoord0, 0.0f, 0.0f, 1.0f, 1.0f);
 		glVertexAttrib4f(FVF_TexCoord1, 0.0f, 0.0f, 1.0f, 1.0f);
@@ -1014,6 +1014,8 @@ SHADER_HEADER
 "vec3 apply_fog(vec3 BaseColor){ return mix(FogColor.rgb, BaseColor, Fog); }\n\n");
 
 FString UOpenGLRenderDevice::FixedFunctionVertexShaderText(
+"out vec3 AmbientFactor;\n"
+"\n"
 "void main(void){\n"
 "\tPosition = (LocalToWorld * vec4(InPosition.xyz, 1.0)).xyz;\n"
 "\tNormal = (LocalToWorld * vec4(InNormal.xyz, 0.0)).xyz;\n"
@@ -1021,11 +1023,14 @@ FString UOpenGLRenderDevice::FixedFunctionVertexShaderText(
 "\tSpecular = InSpecular;\n"
 "\tFog = calculate_fog((LocalToCamera * vec4(InPosition.xyz, 1.0)).z);\n"
 "\tgl_Position = LocalToScreen * vec4(InPosition.xyz, 1.0);\n"
+"\tAmbientFactor = UseStaticLighting ? Specular.rgb : vec3(1.0);\n"
 "}\n");
 
 FString UOpenGLRenderDevice::FixedFunctionFragmentShaderText(
-"vec4 light_color(void){\n"
-"\tvec4 LightColor = AmbientLightColor * Specular + Diffuse * EmissiveFactor;\n"
+"in vec3 AmbientFactor;\n"
+"\n"
+"vec3 light_color(void){\n"
+"\tvec3 DiffuseLight = Diffuse.rgb;\n"
 "\tvec3 NormalizedNormal = normalize(Normal);\n"
 "\n"
 "\tfor(int i = 0; i < 4; ++i){\n"
@@ -1047,17 +1052,19 @@ FString UOpenGLRenderDevice::FixedFunctionFragmentShaderText(
 "\t\t\tLightFactor *= 1.0 / (Lights[i].Constant + Lights[i].Linear * Dist + Lights[i].Quadratic * (Dist * Dist));\n"
 "\t\t}\n"
 "\n"
-"\t\tLightColor += Lights[i].Color * LightFactor;\n"
+"\t\tDiffuseLight += Lights[i].Color.rgb * LightFactor;\n"
 "\t}\n"
 "\n"
-"\treturn LightColor;\n"
+"\treturn AmbientLightColor.rgb * AmbientFactor + DiffuseLight;\n"
 "}\n"
 "\n"
 "void main(void){\n"
-"\tFragColor = Diffuse * DiffuseFactor;\n"
+"\tFragColor = vec4(1);\n"
 "\n"
 "\tif(UseDynamicLighting)\n"
-"\t\tFragColor *= light_color();\n"
+"\t\tFragColor.rgb *= light_color();\n"
+"\telse if(UseStaticLighting)\n"
+"\t\tFragColor.rgb *= Diffuse.rgb;\n"
 "}\n");
 
 #undef UNIFORM_STRUCT_MEMBER

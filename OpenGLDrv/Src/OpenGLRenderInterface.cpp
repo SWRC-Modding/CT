@@ -702,8 +702,6 @@ void FOpenGLRenderInterface::SetAmbientLight(FColor Color){
 }
 
 void FOpenGLRenderInterface::EnableLighting(UBOOL UseDynamic, UBOOL UseStatic, UBOOL Modulate2X, FBaseTexture* Lightmap, UBOOL LightingOnly, const FSphere& LitSphere, int){
-	CurrentState->DiffuseFactor = UseStatic || UseDynamic ? 1.0f : 0.0f;
-	CurrentState->EmissiveFactor = UseStatic ? 1.0f : 0.0f;
 	CurrentState->UseDynamicLighting = UseDynamic != 0;
 	CurrentState->UseStaticLighting = UseStatic != 0;
 	CurrentState->LightingModulate2X = Modulate2X != 0;
@@ -956,12 +954,10 @@ void FOpenGLRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorStri
 
 	if(!IsHardwareShader || !Result){
 		SetShader(&RenDev->FixedFunctionShader);
-		// Diffuse and Specular are expected to be 1.0 by default for fixed function lighting calculations
-		glVertexAttrib4f(FVF_Diffuse,   1.0f, 1.0f, 1.0f, 1.0f);
+		// Specular is expected to be 1.0 by default for fixed function lighting calculations
 		glVertexAttrib4f(FVF_Specular,  1.0f, 1.0f, 1.0f, 1.0f);
 	}else{
-		// Diffuse and Specular are expected to be zero by default for hardware shaders
-		glVertexAttrib4f(FVF_Diffuse,   0.0f, 0.0f, 0.0f, 0.0f);
+		// Specular is expected to be zero by default for hardware shaders
 		glVertexAttrib4f(FVF_Specular,  0.0f, 0.0f, 0.0f, 0.0f);
 	}
 

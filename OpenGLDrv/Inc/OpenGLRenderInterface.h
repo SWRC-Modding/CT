@@ -49,8 +49,6 @@ enum EShaderLightType{
 	UNIFORM_BLOCK_MEMBER(mat4, WorldToLocal) \
 	UNIFORM_BLOCK_MEMBER(mat4, WorldToScreen) \
 	UNIFORM_BLOCK_MEMBER(mat4, CameraToWorld) \
-	UNIFORM_BLOCK_MEMBER(float, DiffuseFactor) \
-	UNIFORM_BLOCK_MEMBER(float, EmissiveFactor) \
 	UNIFORM_BLOCK_MEMBER(float, AlphaRef) \
 	UNIFORM_BLOCK_MEMBER(float, Time) \
 	UNIFORM_BLOCK_MEMBER(float, CosTime) \
@@ -77,8 +75,8 @@ enum EShaderLightType{
 		UNIFORM_STRUCT_MEMBER(float, Cone) \
 		UNIFORM_STRUCT_MEMBER(int, Type) \
 	}, Lights[MAX_SHADER_LIGHTS]) \
-	UNIFORM_BLOCK_MEMBER(int, NumLights) \
-	UNIFORM_BLOCK_MEMBER(bool, UseDynamicLighting)
+	UNIFORM_BLOCK_MEMBER(bool, UseDynamicLighting) \
+	UNIFORM_BLOCK_MEMBER(bool, UseStaticLighting)
 
 #pragma warning(push)
 #pragma warning(disable : 4324) // structure was padded due to __declspec(align())
@@ -170,7 +168,6 @@ public:
 
 		// Light
 
-		bool            UseStaticLighting;
 		bool            LightingModulate2X;
 		FBaseTexture*   Lightmap;
 		FSphere         LitSphere;

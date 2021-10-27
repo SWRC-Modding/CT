@@ -118,6 +118,8 @@ private:
 };
 
 struct FOpenGLRenderState{
+	BYTE                      FillMode; // EFillMode
+
 	BYTE                      CullMode; // ECullMode
 
 	bool                      bZWrite;
@@ -181,9 +183,6 @@ public:
 	UViewport*                            LockedViewport;
 
 	bool                                  bStencilEnabled;
-
-	BYTE                                  CurrentFillMode; // EFillMode
-	BYTE                                  LastFillMode;    // EFillMode
 
 	unsigned int                          LastCullMode; // GLenum
 

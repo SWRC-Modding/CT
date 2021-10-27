@@ -206,8 +206,7 @@ void FOpenGLRenderInterface::Init(INT ViewportWidth, INT ViewportHeight){
 
 	// Fill mode
 
-	CurrentFillMode = FM_Solid;
-	LastFillMode = CurrentFillMode;
+	RenderState.FillMode = FM_Solid;
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 	// Culling
@@ -305,9 +304,9 @@ void FOpenGLRenderInterface::Exit(){
 }
 
 void FOpenGLRenderInterface::CommitRenderState(){
-	if(CurrentFillMode != LastFillMode){
-		glPolygonMode(GL_FRONT_AND_BACK, CurrentFillMode == FM_Wireframe ? GL_LINE : GL_FILL);
-		LastFillMode = CurrentFillMode;
+	if(CurrentState->FillMode != RenderState.FillMode){
+		glPolygonMode(GL_FRONT_AND_BACK, CurrentState->FillMode == FM_Wireframe ? GL_LINE : GL_FILL);
+		RenderState.FillMode = CurrentState->FillMode;
 	}
 
 	if(RenderState.CullMode != CurrentState->CullMode){
@@ -1693,5 +1692,5 @@ void FOpenGLRenderInterface::DrawPrimitive(EPrimitiveType PrimitiveType, INT Fir
 }
 
 void FOpenGLRenderInterface::SetFillMode(EFillMode FillMode){
-	CurrentFillMode = FillMode;
+	CurrentState->FillMode = FillMode;
 }

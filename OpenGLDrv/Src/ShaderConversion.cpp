@@ -96,7 +96,7 @@ void UOpenGLRenderDevice::SetHardwareShaderMacros(UHardwareShaderMacros* Macros)
 
 	// Extract leading comments into special macro so that they are included in the generated file
 	{
-		FStringTemp Comments("", true);
+		FStringTemp Comments("");
 		SkipWhitespaceAndComments(&Pos, &Comments);
 
 		if(Comments.Len() > 0){
@@ -112,9 +112,7 @@ void UOpenGLRenderDevice::SetHardwareShaderMacros(UHardwareShaderMacros* Macros)
 	}
 
 	while(*Pos){
-		if(*Pos == ';' || *Pos == '/'){
-			SkipWhitespaceAndComments(&Pos);
-		}else if(*Pos == '{'){
+		if(*Pos == '{'){
 			const TCHAR* First = Pos + 1;
 
 			while(*Pos && *Pos != '}')
@@ -1222,7 +1220,7 @@ static bool WriteShaderInstruction(FShaderInstruction& Instruction, FString* Out
 }
 
 bool UOpenGLRenderDevice::ConvertD3DAssemblyToGLSL(const TCHAR* Text, FString* Out, bool* UsesFog){
-	SkipWhitespaceAndComments(&Text);
+	SkipWhitespaceAndComments(&Text, Out);
 
 	// Skip shader type and version. We don't care and just assume the highest supported versions are vs.1.1 and ps.1.4
 	if((*Text == 'v' || *Text == 'p') && Text[1] == 's'){

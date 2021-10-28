@@ -1046,7 +1046,7 @@ FString UOpenGLRenderDevice::FixedFunctionFragmentShaderText(
 "\t\t\tLightFactor = saturate(dot(NormalizedDir, NormalizedNormal));\n"
 "\n"
 "\t\t\tif(Lights[i].Type == SL_Spot)\n"
-"\t\t\t\tLightFactor *= saturate((dot(NormalizedDir, normalize(-Lights[i].Direction.xyz)) - Lights[i].Cone) / 0.005);\n"
+"\t\t\t\tLightFactor *= saturate((dot(NormalizedDir, normalize(-Lights[i].Direction.xyz)) - Lights[i].Cone * 0.9) / 0.03); // Values hand-tuned to match d3d\n"
 "\n"
 "\t\t\t// Attenuation\n"
 "\t\t\tLightFactor *= 1.0 / (Lights[i].Constant + Lights[i].Linear * Dist + Lights[i].Quadratic * (Dist * Dist));\n"

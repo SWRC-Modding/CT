@@ -1231,17 +1231,29 @@ void FOpenGLRenderInterface::GetShaderConstants(FSConstantsInfo* Info, FPlane* C
 						continue;
 					case 1: // Color
 						if(Light)
-							Constants[i] = Light->Color;
+							Constants[i] = Light->Color * 2.0f;
 						else
 							Constants[i] = FPlane(0.0f, 0.0f, 0.0f, 0.0f);
 
 						continue;
 					case 2: // InvRadius
 						if(Light){
-							Constants[i].X = 1.0f / Light->Actor->LightRadius;
+#if 0
+							// NOTE: This version of the inv radius constants should be correct as it produces the same values the d3d renderer does.
+							//       However, for an unknown reason it causes some objects to be very bright so until the problem is known, there's a
+							//       workaround which produces incorrect but acceptable results.
+							FLOAT InnerRadius = Light->Radius * (Light->Actor->LightRadiusInner / 256.0f);
+
+							Constants[i].X = 1.0f / (Light->Radius - InnerRadius);
 							Constants[i].Y = Constants[i].X;
-							Constants[i].Z = Constants[i].X;
-							Constants[i].W = Constants[i].X;
+							Constants[i].Z = InnerRadius;
+							Constants[i].W = 1.0f;
+#else
+							Constants[i].X = 1.0f / Light->Radius;
+							Constants[i].Y = Constants[i].X;
+							Constants[i].Z = 0.0f;
+							Constants[i].W = 1.0f;
+#endif
 						}else{
 							Constants[i].X = 10000000.0f;
 							Constants[i].Y = 10000000.0f;

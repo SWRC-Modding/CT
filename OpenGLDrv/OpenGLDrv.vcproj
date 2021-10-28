@@ -121,6 +121,9 @@
 				RelativePath=".\Src\OpenGLRenderInterface.cpp">
 			</File>
 			<File
+				RelativePath=".\Src\OpenGLMaterial.cpp">
+			</File>
+			<File
 				RelativePath=".\Src\OpenGLResource.h">
 			</File>
 			<File

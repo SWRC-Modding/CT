@@ -35,6 +35,7 @@
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
 				GenerateDebugInformation="TRUE"
+				LargeAddressAware="2"
 				TargetMachine="1"/>
 			<Tool
 				Name="VCMIDLTool"/>
@@ -71,6 +72,7 @@
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
 				GenerateDebugInformation="TRUE"
+				LargeAddressAware="2"
 				TargetMachine="1"/>
 			<Tool
 				Name="VCMIDLTool"/>

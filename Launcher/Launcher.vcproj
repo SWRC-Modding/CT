@@ -41,7 +41,8 @@
 			<Tool
 				Name="VCMIDLTool"/>
 			<Tool
-				Name="VCPostBuildEventTool"/>
+				Name="VCPostBuildEventTool"
+				CommandLine="del &quot;$(OutDir)\$(TargetName).lib&quot; &quot;$(OutDir)\$(TargetName).exp&quot;"/>
 			<Tool
 				Name="VCPreBuildEventTool"/>
 			<Tool
@@ -80,7 +81,8 @@
 			<Tool
 				Name="VCMIDLTool"/>
 			<Tool
-				Name="VCPostBuildEventTool"/>
+				Name="VCPostBuildEventTool"
+				CommandLine="del &quot;$(OutDir)\$(TargetName).lib&quot; &quot;$(OutDir)\$(TargetName).exp&quot;"/>
 			<Tool
 				Name="VCPreBuildEventTool"/>
 			<Tool

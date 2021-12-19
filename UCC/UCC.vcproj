@@ -4,8 +4,7 @@
 	Version="7.10"
 	Name="UCC"
 	ProjectGUID="{D7878929-5402-468A-811D-1591523609F3}"
-	RootNamespace="UCC"
-	Keyword="ManagedCProj">
+	RootNamespace="UCC">
 	<Platforms>
 		<Platform
 			Name="Win32"/>
@@ -36,6 +35,7 @@
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
 				GenerateDebugInformation="TRUE"
+				LargeAddressAware="2"
 				TargetMachine="1"/>
 			<Tool
 				Name="VCMIDLTool"/>
@@ -73,6 +73,7 @@
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
 				GenerateDebugInformation="TRUE"
+				LargeAddressAware="2"
 				TargetMachine="1"/>
 			<Tool
 				Name="VCMIDLTool"/>

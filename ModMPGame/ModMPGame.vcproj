@@ -4,8 +4,7 @@
 	Version="7.10"
 	Name="ModMPGame"
 	ProjectGUID="{3A82AC95-BDB6-47A5-B768-5EAD0B0B5BCC}"
-	RootNamespace="ModMPGame"
-	Keyword="ManagedCProj">
+	RootNamespace="ModMPGame">
 	<Platforms>
 		<Platform
 			Name="Win32"/>

@@ -4,8 +4,7 @@
 	Version="7.10"
 	Name="Launcher"
 	ProjectGUID="{D7878929-5402-468A-811D-1591523609F3}"
-	RootNamespace="Launcher"
-	Keyword="ManagedCProj">
+	RootNamespace="Launcher">
 	<Platforms>
 		<Platform
 			Name="Win32"/>

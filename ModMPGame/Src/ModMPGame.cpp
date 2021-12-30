@@ -440,7 +440,7 @@ void ABotSupport::ExportPaths(){
 
 	TArray<FNavPtInfo> NavPts;
 
-	for(TActorIterator<ANavigationPoint> It(XLevel); It; ++It){
+	foreach(StaticActors, ANavigationPoint, It, XLevel){
 		if(It->IsA(APlayerStart::StaticClass()) || It->IsA(AInventorySpot::StaticClass()))
 			continue;
 
@@ -522,8 +522,8 @@ void ABotSupport::Spawned(){
 	if(!GIsEditor){
 		DrawType = DT_None;  // Don't draw the Actor sprite during gameplay
 
-		// Spawning inventory spots for each pickup in the level
-		for(TActorIterator<APickup> It(XLevel, IT_DynamicActors); It; ++It){
+		// Spawn inventory spots for each pickup in the level
+		foreach(DynamicActors, APickup, It, XLevel){
 			SpawnNavigationPoint(AInventorySpot::StaticClass(),
 			                     It->Location + FVector(0, 0, AScout::StaticClass()->GetDefaultActor()->CollisionHeight));
 		}
@@ -605,7 +605,7 @@ void ABotSupport::PostRender(class FLevelSceneNode* SceneNode, class FRenderInte
 		LineBatcher.DrawBox(FBox(NavPtFailLocations[i] - BoxSize, NavPtFailLocations[i] + BoxSize), FColor(255, 0, 0));
 
 	// All navigation points in the level are drawn as a colored box
-	for(TActorIterator<ANavigationPoint> It(XLevel, IT_StaticActors); It; ++It){
+	foreach(StaticActors, ANavigationPoint, It, XLevel){
 		if(It->bDeleteMe)
 			continue;
 
@@ -702,7 +702,7 @@ bool ABotSupport::ExecCmd(const char* Cmd, class APlayerController* PC){
 
 		GIsEditor = 1;
 
-		for(TActorIterator<ANavigationPoint> It(XLevel, IT_StaticActors); It; ++It){
+		foreach(StaticActors, ANavigationPoint, It, XLevel){
 			if(!It->IsA(APlayerStart::StaticClass()) &&
 			   ((PC->Pawn ? PC->Pawn->Location : PC->Location) - It->Location).SizeSquared() <= 40 * 40){
 				XLevel->DestroyActor(*It);
@@ -722,7 +722,7 @@ bool ABotSupport::ExecCmd(const char* Cmd, class APlayerController* PC){
 
 		GIsEditor = 1;
 
-		for(TActorIterator<ANavigationPoint> It(XLevel, IT_StaticActors); It; ++It){
+		foreach(StaticActors, ANavigationPoint, It, XLevel){
 			if(It->IsA(ANavigationPoint::StaticClass()) && !It->IsA(APlayerStart::StaticClass()))
 				XLevel->DestroyActor(*It);
 

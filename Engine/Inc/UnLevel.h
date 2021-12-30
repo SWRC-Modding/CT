@@ -299,6 +299,9 @@ private:
 	INT Max;
 };
 
+#define foreach(it, type, var, level) \
+	for(TActorIterator<type> var(level, IT_ ## it); var; ++var)
+
 //
 // Iterate through all static brushes in a level.
 //

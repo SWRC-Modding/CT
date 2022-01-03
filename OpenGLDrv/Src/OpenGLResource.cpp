@@ -25,8 +25,12 @@ FOpenGLShader::~FOpenGLShader(){
 }
 
 void FOpenGLShader::Cache(FShaderGLSL* Shader){
-	GLuint VertexShader = CompileShader(Shader, GL_VERTEX_SHADER);
-	GLuint FragmentShader = CompileShader(Shader, GL_FRAGMENT_SHADER);
+	FString ShaderCode = Shader->GetShaderCode();
+
+	RenDev->ExpandShaderMacros(&ShaderCode);
+
+	GLuint VertexShader = CompileShader(GL_VERTEX_SHADER, ShaderCode, Shader->GetName() + SHADER_FILE_EXTENSION + " - vertex shader");
+	GLuint FragmentShader = CompileShader(GL_FRAGMENT_SHADER, ShaderCode, Shader->GetName() + SHADER_FILE_EXTENSION + " - fragment shader");
 
 	// Set revision even if compilation is unsuccessful to avoid recompiling the invalid shader each time it is set
 	Revision = Shader->GetRevision();
@@ -88,25 +92,16 @@ void FOpenGLShader::Bind(){
 	glUseProgram(Program);
 }
 
-GLuint FOpenGLShader::CompileShader(FShaderGLSL* Shader, GLenum Type){
+GLuint FOpenGLShader::CompileShader(GLenum Type, const FString& ShaderCode, const FString& ShaderName){
 	GLuint Handle = glCreateShader(Type);
-	const TCHAR* FileExt = NULL;
 	const TCHAR* ShaderVars = NULL;
-	FString ShaderCode;
 
-	if(Type == GL_VERTEX_SHADER){
+	if(Type == GL_VERTEX_SHADER)
 		ShaderVars = *RenDev->VertexShaderVarsText;
-		ShaderCode = Shader->GetVertexShaderText();
-		FileExt = VERTEX_SHADER_FILE_EXTENSION;
-	}else if(Type == GL_FRAGMENT_SHADER){
+	else if(Type == GL_FRAGMENT_SHADER)
 		ShaderVars = *RenDev->FragmentShaderVarsText;
-		ShaderCode = Shader->GetFragmentShaderText();
-		FileExt = FRAGMENT_SHADER_FILE_EXTENSION;
-	}else{
+	else
 		appErrorf("Unsupported shader type (%i)", Type);
-	}
-
-	RenDev->ExpandShaderMacros(&ShaderCode);
 
 	const TCHAR* ShaderText[] = {
 		ShaderVars,
@@ -125,7 +120,7 @@ GLuint FOpenGLShader::CompileShader(FShaderGLSL* Shader, GLenum Type){
 		GLchar Buffer[512];
 
 		glGetShaderInfoLog(Handle, ARRAY_COUNT(Buffer), NULL, Buffer);
-		debugf("Shader compilation failed for %s%s: %s", Shader->GetName(), FileExt, Buffer);
+		debugf("Shader compilation failed for %s: %s", *ShaderName, Buffer);
 		glDeleteShader(Handle);
 		Handle = GL_NONE;
 	}

@@ -10,8 +10,17 @@
 IMPLEMENT_CLASS(UOpenGLRenderDevice)
 
 FShaderGLSL UOpenGLRenderDevice::ErrorShader(FStringTemp("ERRORSHADER"),
-                                             FStringTemp("void main(void){ gl_Position = LocalToScreen * vec4(InPosition.xyz, 1.0); }\n"),
-                                             FStringTemp("void main(void){ FragColor = vec4(1.0, 0.0, 1.0, 1.0); }\n"));
+                                             FStringTemp("#ifdef VERTEX_SHADER\n"
+                                                         "void main(void){\n"
+                                                         "\tgl_Position = LocalToScreen * vec4(InPosition.xyz, 1.0);\n"
+                                                         "}\n"
+                                                         "#elif defined(FRAGMENT_SHADER)\n"
+                                                         "void main(void){\n"
+                                                         "\tFragColor = vec4(1.0, 0.0, 1.0, 1.0);\n"
+                                                         "}\n"
+                                                         "#else\n"
+                                                         "#error Shader type not implemented\n"
+                                                         "#endif\n"));
 
 UOpenGLRenderDevice::UOpenGLRenderDevice() : RenderInterface(this),
                                              FixedFunctionShader(FStringTemp("FixedFunction")),
@@ -120,18 +129,12 @@ FShaderGLSL* UOpenGLRenderDevice::GetShader(UHardwareShader* HardwareShader){
 		if(!HardwareShader->IsIn(UObject::GetTransientPackage())){
 			// Convert d3d shader assembly to glsl or load existing shader from disk
 
-			if(!LoadVertexShader(Shader)){
-				Shader->SetVertexShaderText(GLSLVertexShaderFromD3DVertexShader(HardwareShader));
-				SaveVertexShader(Shader);
-			}
-
-			if(!LoadFragmentShader(Shader)){
-				Shader->SetFragmentShaderText(GLSLFragmentShaderFromD3DPixelShader(HardwareShader));
-				SaveFragmentShader(Shader);
+			if(!LoadShader(Shader)){
+				Shader->SetShaderCode(GLSLShaderFromD3DHardwareShader(HardwareShader));
+				SaveShader(Shader);
 			}
 		}else{
-			Shader->SetVertexShaderText(GLSLVertexShaderFromD3DVertexShader(HardwareShader));
-			Shader->SetFragmentShaderText(GLSLFragmentShaderFromD3DPixelShader(HardwareShader));
+			Shader->SetShaderCode(GLSLShaderFromD3DHardwareShader(HardwareShader));
 		}
 	}
 
@@ -274,10 +277,7 @@ UBOOL UOpenGLRenderDevice::Init(){
 	GIsOpenGL = 0;
 
 	SetHardwareShaderMacros(CastChecked<UHardwareShaderMacros>(GEngine->HBumpShaderMacros));
-
-	FixedFunctionShader.SetVertexShaderText(FixedFunctionVertexShaderText);
-	FixedFunctionShader.SetFragmentShaderText(FixedFunctionFragmentShaderText);
-
+	FixedFunctionShader.SetShaderCode(FixedFunctionShaderText);
 	LoadShaders();
 
 	return 1;
@@ -704,19 +704,13 @@ void UOpenGLRenderDevice::TakeScreenshot(const TCHAR* Name, UViewport* Viewport,
 }
 
 void UOpenGLRenderDevice::LoadShaders(){
-	if(!LoadVertexShader(&FixedFunctionShader))
-		SaveVertexShader(&FixedFunctionShader);
-
-	if(!LoadFragmentShader(&FixedFunctionShader))
-		SaveFragmentShader(&FixedFunctionShader);
+	if(!LoadShader(&FixedFunctionShader))
+		SaveShader(&FixedFunctionShader);
 
 	for(TMap<UHardwareShader*, FShaderGLSL>::TIterator It(GLShaderByHardwareShader); It; ++It){
 		if(!It.Key()->IsIn(UObject::GetTransientPackage())){
-			if(!LoadVertexShader(&It.Value()))
-				SaveVertexShader(&It.Value());
-
-			if(!LoadFragmentShader(&It.Value()))
-				SaveFragmentShader(&It.Value());
+			if(!LoadShader(&It.Value()))
+				SaveShader(&It.Value());
 		}
 	}
 
@@ -735,15 +729,15 @@ bool UOpenGLRenderDevice::ShaderFileNeedsReload(const char* Filename){
 	return CurrentFileTime == 0 || CurrentFileTime != PreviousFileTime;
 }
 
-bool UOpenGLRenderDevice::LoadVertexShader(FShaderGLSL* Shader){
+bool UOpenGLRenderDevice::LoadShader(FShaderGLSL* Shader){
 	FStringTemp ShaderText(0);
-	FFilename Filename = MakeShaderFilename(Shader->GetName(), VERTEX_SHADER_FILE_EXTENSION);
+	FFilename Filename = MakeShaderFilename(Shader->GetName(), SHADER_FILE_EXTENSION);
 
-	if(*Shader->GetVertexShaderText() && !ShaderFileNeedsReload(*Filename))
+	if(Shader->GetShaderCode().Len() > 0 && !ShaderFileNeedsReload(*Filename))
 		return true;
 
 	if(LoadShaderText(Filename, &ShaderText)){
-		Shader->SetVertexShaderText(ShaderText);
+		Shader->SetShaderCode(ShaderText);
 
 		return true;
 	}
@@ -751,30 +745,8 @@ bool UOpenGLRenderDevice::LoadVertexShader(FShaderGLSL* Shader){
 	return false;
 }
 
-bool UOpenGLRenderDevice::LoadFragmentShader(FShaderGLSL* Shader){
-	FStringTemp ShaderText(0);
-	FFilename Filename = MakeShaderFilename(Shader->GetName(), FRAGMENT_SHADER_FILE_EXTENSION);
-
-	if(*Shader->GetFragmentShaderText() && !ShaderFileNeedsReload(*Filename))
-		return true;
-
-	if(LoadShaderText(Filename, &ShaderText)){
-		Shader->SetFragmentShaderText(ShaderText);
-
-		return true;
-	}
-
-	return false;
-}
-
-bool UOpenGLRenderDevice::LoadShaderText(const FFilename& Filename, FString* Out){
-	if(GFileManager->FileSize(*Filename) > 0 && appLoadFileToString(*Out, *Filename)){
-		ShaderFileTimes[*Filename] = GFileManager->GetGlobalTime(*Filename);
-
-		return true;
-	}
-
-	return false;
+void UOpenGLRenderDevice::SaveShader(FShaderGLSL* Shader){
+	SaveShaderText(MakeShaderFilename(Shader->GetName(), SHADER_FILE_EXTENSION), Shader->GetShaderCode());
 }
 
 bool UOpenGLRenderDevice::LoadShaderMacroText(){
@@ -800,21 +772,6 @@ bool UOpenGLRenderDevice::LoadShaderMacroText(){
 	return false;
 }
 
-void UOpenGLRenderDevice::SaveShaderText(const FFilename& Filename, const FString& Text){
-	GFileManager->MakeDirectory(*(Filename.GetPath() + "\\"), 1);
-
-	if(appSaveStringToFile(Text, *Filename, GFileManager))
-		ShaderFileTimes[*Filename] = GFileManager->GetGlobalTime(*Filename);
-}
-
-void UOpenGLRenderDevice::SaveVertexShader(FShaderGLSL* Shader){
-	SaveShaderText(MakeShaderFilename(Shader->GetName(), VERTEX_SHADER_FILE_EXTENSION), FString(Shader->GetVertexShaderText(), true));
-}
-
-void UOpenGLRenderDevice::SaveFragmentShader(FShaderGLSL* Shader){
-	SaveShaderText(MakeShaderFilename(Shader->GetName(), FRAGMENT_SHADER_FILE_EXTENSION), FString(Shader->GetFragmentShaderText(), true));
-}
-
 void UOpenGLRenderDevice::SaveShaderMacroText(){
 	FString Macros;
 
@@ -822,6 +779,23 @@ void UOpenGLRenderDevice::SaveShaderMacroText(){
 		Macros += "@" + It.Key() + "\n" + It.Value() + "\n";
 
 	SaveShaderText(MakeShaderFilename("Macros", SHADER_MACROS_FILE_EXTENSION), Macros);
+}
+
+bool UOpenGLRenderDevice::LoadShaderText(const FFilename& Filename, FString* Out){
+	if(GFileManager->FileSize(*Filename) > 0 && appLoadFileToString(*Out, *Filename)){
+		ShaderFileTimes[*Filename] = GFileManager->GetGlobalTime(*Filename);
+
+		return true;
+	}
+
+	return false;
+}
+
+void UOpenGLRenderDevice::SaveShaderText(const FFilename& Filename, const FString& Text){
+	GFileManager->MakeDirectory(*(Filename.GetPath() + "\\"), 1);
+
+	if(appSaveStringToFile(Text, *Filename, GFileManager))
+		ShaderFileTimes[*Filename] = GFileManager->GetGlobalTime(*Filename);
 }
 
 /*
@@ -921,6 +895,7 @@ void UOpenGLRenderDevice::HandleMovieWindow(UViewport* Viewport){
 
 FString UOpenGLRenderDevice::VertexShaderVarsText(
 SHADER_HEADER
+"#define VERTEX_SHADER\n\n"
 "// Vertex attributes\n\n"
 "layout(location = 0)  in vec4 InPosition;\n"
 "layout(location = 1)  in vec4 InNormal;\n"
@@ -956,6 +931,7 @@ SHADER_HEADER
 
 FString UOpenGLRenderDevice::FragmentShaderVarsText(
 SHADER_HEADER
+"#define FRAGMENT_SHADER\n\n"
 "// Textures\n\n"
 "layout(binding = 0) uniform sampler2D Texture0;\n"
 "layout(binding = 1) uniform sampler2D Texture1;\n"
@@ -1013,7 +989,8 @@ SHADER_HEADER
 "void alpha_test(vec4  c){ if(c.a <= AlphaRef) discard; }\n"
 "vec3 apply_fog(vec3 BaseColor){ return mix(FogColor.rgb, BaseColor, Fog); }\n\n");
 
-FString UOpenGLRenderDevice::FixedFunctionVertexShaderText(
+FString UOpenGLRenderDevice::FixedFunctionShaderText(
+"#ifdef VERTEX_SHADER\n"
 "out vec3 AmbientFactor;\n"
 "\n"
 "void main(void){\n"
@@ -1024,9 +1001,8 @@ FString UOpenGLRenderDevice::FixedFunctionVertexShaderText(
 "\tFog = calculate_fog((LocalToCamera * vec4(InPosition.xyz, 1.0)).z);\n"
 "\tgl_Position = LocalToScreen * vec4(InPosition.xyz, 1.0);\n"
 "\tAmbientFactor = UseStaticLighting ? Specular.rgb : vec3(1.0);\n"
-"}\n");
-
-FString UOpenGLRenderDevice::FixedFunctionFragmentShaderText(
+"}\n"
+"#elif defined(FRAGMENT_SHADER)\n"
 "in vec3 AmbientFactor;\n"
 "\n"
 "vec3 light_color(void){\n"
@@ -1065,7 +1041,11 @@ FString UOpenGLRenderDevice::FixedFunctionFragmentShaderText(
 "\t\tFragColor.rgb *= light_color();\n"
 "\telse if(UseStaticLighting)\n"
 "\t\tFragColor.rgb *= Diffuse.rgb;\n"
-"}\n");
+"}\n"
+"#else\n"
+"#error Shader type not implemented\n"
+"#endif\n"
+);
 
 #undef UNIFORM_STRUCT_MEMBER
 #undef UNIFORM_BLOCK_MEMBER

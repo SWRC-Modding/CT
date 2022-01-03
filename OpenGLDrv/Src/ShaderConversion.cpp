@@ -227,17 +227,18 @@ void UOpenGLRenderDevice::ParseGLSLMacros(const FString& Text){
 }
 
 static FStringTemp GetShaderHeaderComment(UHardwareShader* Shader, const char* ShaderType){
-	return FString::Printf("/*\n"
+	return FString::Printf("/*================================================================================================================================\n"
 	                       " * %s - %s\n"
-	                       " */\n\n",
+	                       " *================================================================================================================================*/\n\n",
 						   Shader->GetPathName(),
 	                       ShaderType);
 }
 
-FStringTemp UOpenGLRenderDevice::GLSLVertexShaderFromD3DVertexShader(UHardwareShader* Shader){
-	debugf("Converting D3D shader assembly to GLSL for '%s.VertexShader'", Shader->GetPathName());
+FStringTemp UOpenGLRenderDevice::GLSLShaderFromD3DHardwareShader(UHardwareShader* Shader){
+	debugf("Converting D3D shader assembly to GLSL for '%s'", Shader->GetPathName());
 
-	FString D3DShaderText = Shader->VertexShaderText;
+	// Vertex shader
+
 	FString VertexAttributes;
 
 	for(INT i = 0; i < Shader->StreamMapping.Num(); ++i){
@@ -289,7 +290,8 @@ FStringTemp UOpenGLRenderDevice::GLSLVertexShaderFromD3DVertexShader(UHardwareSh
 	if(VertexAttributes.Len() == 0)
 		VertexAttributes += "#define v0 Position\n";
 
-	FStringTemp GLSLShaderText = GetShaderHeaderComment(Shader, "vertex shader") +
+	FStringTemp GLSLShaderText = "#ifdef VERTEX_SHADER\n" +
+		GetShaderHeaderComment(Shader, "vertex shader") +
 		FString::Printf("layout(location = %i) uniform vec4 VSConstants[%i];\n\n", HSU_VSConstants, MAX_VERTEX_SHADER_CONSTANTS) +
 		                "#define c VSConstants\n" +
 		                VertexAttributes +
@@ -321,13 +323,11 @@ FStringTemp UOpenGLRenderDevice::GLSLVertexShaderFromD3DVertexShader(UHardwareSh
 		                "vec4 r11;\n\n"
 		                "void main(void){\n";
 
-	FString ConvertedShaderText;
 	bool UsesFog = false;
 
-	if(!ConvertD3DAssemblyToGLSL(*D3DShaderText, &ConvertedShaderText, &UsesFog))
+	if(!ConvertD3DAssemblyToGLSL(*Shader->VertexShaderText, &GLSLShaderText, &UsesFog))
 		appErrorf("Vertex shader conversion failed (%s)", Shader->GetPathName()); // TODO: Fall back to default implementation
 
-	GLSLShaderText += ConvertedShaderText;
 	GLSLShaderText += "\tif(FogEnabled){\n";
 
 	if(UsesFog){
@@ -344,17 +344,12 @@ FStringTemp UOpenGLRenderDevice::GLSLVertexShaderFromD3DVertexShader(UHardwareSh
 	GLSLShaderText +=     "\t}else{\n"
 	                          "\t\tFog = 1.0;\n"
 	                      "\t}\n"
-	                  "}\n";
+	                  "}\n\n";
 
-	return GLSLShaderText;
-}
+	// Pixel shader
 
-FStringTemp UOpenGLRenderDevice::GLSLFragmentShaderFromD3DPixelShader(UHardwareShader* Shader){
-	debugf("Converting D3D shader assembly to GLSL for '%s.PixelShader'", Shader->GetPathName());
-
-	FString D3DShaderText = Shader->PixelShaderText;
-
-	FStringTemp GLSLShaderText = GetShaderHeaderComment(Shader, "pixel shader") +
+	GLSLShaderText += "#elif defined(FRAGMENT_SHADER)\n" +
+		GetShaderHeaderComment(Shader, "pixel shader") +
 		FString::Printf("layout(location = %i) uniform vec4 PSConstants[%i];\n\n", HSU_PSConstants, MAX_PIXEL_SHADER_CONSTANTS) +
 		                "#define c PSConstants\n"
 		                "#define v0 Diffuse\n"
@@ -368,16 +363,17 @@ FStringTemp UOpenGLRenderDevice::GLSLFragmentShaderFromD3DPixelShader(UHardwareS
 		                "vec4 r5;\n\n"
 		                "void main(void){\n";
 
-	FString ConvertedShaderText;
 
-	if(!ConvertD3DAssemblyToGLSL(*D3DShaderText, &ConvertedShaderText, NULL))
+	if(!ConvertD3DAssemblyToGLSL(*Shader->PixelShaderText, &GLSLShaderText, NULL))
 		appErrorf("Pixel shader conversion failed (%s)", Shader->GetPathName()); // TODO: Fall back to default implementation
 
-	GLSLShaderText += ConvertedShaderText +
-	                      "\n"
+	GLSLShaderText +=     "\n"
 	                      "\talpha_test(r0);\n"
 	                      "\tFragColor = vec4(apply_fog(r0.rgb), r0.a);\n"
-		              "}\n";
+		              "}\n"
+	                  "#else\n"
+	                  "#error Shader type not implemented\n"
+					  "#endif\n";
 
 	return GLSLShaderText;
 }

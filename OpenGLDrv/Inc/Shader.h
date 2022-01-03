@@ -18,29 +18,20 @@ typedef ALIGN(16) FMatrix GLSL_mat4;
 class OPENGLDRV_API FShaderGLSL : public FRenderResource{
 public:
 	FShaderGLSL(const FString& InName,
-	            const FString& InVertexShaderText = FString(),
-	            const FString& InFragmentShaderText = FString()) : Name(InName),
-	                                                               VertexShaderText(InVertexShaderText),
-	                                                               FragmentShaderText(InFragmentShaderText){
+	            const FString& InShaderCode = FString()) : Name(InName),
+	                                                       ShaderCode(InShaderCode){
 		CacheId = MakeCacheID(CID_RenderShader);
 	}
 
-	void SetVertexShaderText(const FString& InVertexShaderText){
-		VertexShaderText = InVertexShaderText;
+	void SetShaderCode(const FString& InShaderCode){
+		ShaderCode = InShaderCode;
 		++Revision;
 	}
 
-	void SetFragmentShaderText(const FString& InFragmentShaderText){
-		FragmentShaderText = InFragmentShaderText;
-		++Revision;
-	}
-
-	const TCHAR* GetName() const{ return *Name; }
-	const TCHAR* GetVertexShaderText() const{ return *VertexShaderText; }
-	const TCHAR* GetFragmentShaderText() const{ return *FragmentShaderText; }
+	const FString& GetName() const{ return Name; }
+	const FString& GetShaderCode() const{ return ShaderCode; }
 
 private:
 	FString Name;
-	FString VertexShaderText;
-	FString FragmentShaderText;
+	FString ShaderCode;
 };

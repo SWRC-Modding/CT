@@ -6,9 +6,8 @@
 
 class FOpenGLResource;
 
-#define FRAGMENT_SHADER_FILE_EXTENSION ".fs"
-#define VERTEX_SHADER_FILE_EXTENSION ".vs"
-#define SHADER_MACROS_FILE_EXTENSION ".glsl"
+#define SHADER_FILE_EXTENSION ".glsl"
+#define SHADER_MACROS_FILE_EXTENSION ".glslmacros"
 
 enum ETextureFilter{
 	TF_Nearest,
@@ -32,8 +31,7 @@ public:
 	// Default shader code
 	static FString VertexShaderVarsText;
 	static FString FragmentShaderVarsText;
-	static FString FixedFunctionVertexShaderText;
-	static FString FixedFunctionFragmentShaderText;
+	static FString FixedFunctionShaderText;
 
 	// Error shader
 	static FShaderGLSL ErrorShader;
@@ -124,15 +122,13 @@ private:
 	FOpenGLIndexBuffer* GetDynamicIndexBuffer(INT IndexSize);
 	FOpenGLVertexStream* GetDynamicVertexStream();
 
+	FStringTemp MakeShaderFilename(const FString& ShaderName, const TCHAR* Extension);
 	bool ShaderFileNeedsReload(const char* Filename);
-	bool LoadVertexShader(FShaderGLSL* Shader);
-	bool LoadFragmentShader(FShaderGLSL* Shader);
+	bool LoadShader(FShaderGLSL* Shader);
+	void SaveShader(FShaderGLSL* Shader);
 	bool LoadShaderMacroText();
-	void SaveVertexShader(FShaderGLSL* Shader);
-	void SaveFragmentShader(FShaderGLSL* Shader);
 	void SaveShaderMacroText();
 
-	FStringTemp MakeShaderFilename(const FString& ShaderName, const TCHAR* Extension);
 	bool LoadShaderText(const FFilename& Filename, FString* Out);
 	void SaveShaderText(const FFilename& Filename, const FString& Text);
 
@@ -143,8 +139,7 @@ private:
 	static TArray<FString>        ExpandedMacros; // Used to check for circular references in macros
 
 	static void ParseGLSLMacros(const FString& Text);
-	static FStringTemp GLSLVertexShaderFromD3DVertexShader(UHardwareShader* Shader);
-	static FStringTemp GLSLFragmentShaderFromD3DPixelShader(UHardwareShader* Shader);
+	static FStringTemp GLSLShaderFromD3DHardwareShader(UHardwareShader* Shader);
 	static bool ConvertD3DAssemblyToGLSL(const TCHAR* Text, FString* Out, bool* UsesFog);
 
 	// Movie playback

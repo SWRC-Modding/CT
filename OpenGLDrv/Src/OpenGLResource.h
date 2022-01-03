@@ -36,7 +36,7 @@ public:
 	UBOOL  IsErrorShader;
 
 private:
-	GLuint CompileShader(FShaderGLSL* Shader, GLenum Type);
+	GLuint CompileShader(GLenum Type, const FString& ShaderCode, const FString& ShaderName);
 };
 
 // FOpenGLIndexBuffer

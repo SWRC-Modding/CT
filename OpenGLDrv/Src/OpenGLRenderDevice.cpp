@@ -469,6 +469,12 @@ UBOOL UOpenGLRenderDevice::SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL
 		glVertexAttrib4f(FVF_TexCoord7, 0.0f, 0.0f, 1.0f, 1.0f);
 		glVertexAttrib4f(FVF_Tangent,   0.0f, 0.0f, 1.0f, 0.0f);
 		glVertexAttrib4f(FVF_Binormal,  0.0f, 0.0f, 1.0f, 0.0f);
+
+		/*
+		 * Mirror image since the FrameFx render targets expect d3d coordinates
+		 * This means that glBlitNamedFramebuffer needs to be called with y and height exchanged in UOpenGLRenderDevice::Present
+		 */
+		glClipControl(GL_UPPER_LEFT, GL_NEGATIVE_ONE_TO_ONE);
 	}else{
 		MakeCurrent();
 		glDeleteRenderbuffers(1, &BackbufferDepthStencil);
@@ -645,7 +651,7 @@ void UOpenGLRenderDevice::Present(UViewport* Viewport){
 	if(BackbufferTexture){
 		glBlitNamedFramebuffer(BackbufferTexture->FBO, GL_NONE,
 		                       0, 0, BackbufferTexture->Width, BackbufferTexture->Height,
-		                       ViewportX, ViewportY, ViewportWidth, ViewportHeight,
+		                       ViewportX, ViewportHeight, ViewportWidth, ViewportY,
 		                       GL_COLOR_BUFFER_BIT,
 		                       bBilinearFramebuffer ? GL_LINEAR : GL_NEAREST);
 

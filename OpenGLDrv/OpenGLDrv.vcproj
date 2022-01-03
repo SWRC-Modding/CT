@@ -12,7 +12,7 @@
 	<Configurations>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="$(SolutionDir)../GameData/System"
+			OutputDirectory="$(SolutionDir)..\GameData\System"
 			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="2"
 			CharacterSet="2"
@@ -35,7 +35,7 @@
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
 				GenerateDebugInformation="TRUE"
-				ImportLibrary="$(ProjectDir)/Lib/$(TargetName).lib"
+				ImportLibrary="$(ProjectDir)Lib\$(TargetName).lib"
 				TargetMachine="1"/>
 			<Tool
 				Name="VCMIDLTool"/>
@@ -50,7 +50,7 @@
 		</Configuration>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="$(SolutionDir)../GameData/System"
+			OutputDirectory="$(SolutionDir)..\GameData\System"
 			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="2"
 			CharacterSet="2"
@@ -73,7 +73,7 @@
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
 				GenerateDebugInformation="TRUE"
-				ImportLibrary="$(ProjectDir)/Lib/$(TargetName).lib"
+				ImportLibrary="$(ProjectDir)Lib\$(TargetName).lib"
 				TargetMachine="1"/>
 			<Tool
 				Name="VCMIDLTool"/>

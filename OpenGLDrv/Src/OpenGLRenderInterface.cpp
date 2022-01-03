@@ -1071,11 +1071,6 @@ UBOOL FOpenGLRenderInterface::SetHardwareShaderMaterial(UHardwareShader* Hardwar
 void FOpenGLRenderInterface::SetGLRenderTarget(FOpenGLTexture* GLRenderTarget, bool bOwnDepthBuffer){
 	checkSlow(GLRenderTarget);
 
-	if(bOwnDepthBuffer) // If the depth is shared with the backbuffer, we need to flip the image
-		glClipControl(GL_LOWER_LEFT, GL_NEGATIVE_ONE_TO_ONE);
-	else
-		glClipControl(GL_UPPER_LEFT, GL_ZERO_TO_ONE);
-
 	GLRenderTarget->BindRenderTarget();
 	SetViewport(0, 0, GLRenderTarget->Width, GLRenderTarget->Height);
 

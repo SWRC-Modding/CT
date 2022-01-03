@@ -645,7 +645,7 @@ void UOpenGLRenderDevice::Present(UViewport* Viewport){
 	if(BackbufferTexture){
 		glBlitNamedFramebuffer(BackbufferTexture->FBO, GL_NONE,
 		                       0, 0, BackbufferTexture->Width, BackbufferTexture->Height,
-		                       ViewportX, ViewportHeight, ViewportX + ViewportWidth, ViewportY,
+		                       ViewportX, ViewportY, ViewportWidth, ViewportHeight,
 		                       GL_COLOR_BUFFER_BIT,
 		                       bBilinearFramebuffer ? GL_LINEAR : GL_NEAREST);
 

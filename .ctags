@@ -17,6 +17,7 @@
 --exclude=.\Window\Window.c
 --exclude=.\XGame\XGame.c
 --exclude=.\XInterface\XInterface.c
+--c++-kinds=+pf
 --langdef=unrealscript
 --langmap=unrealscript:.uc
 --regex-unrealscript=/^[ \t]*[cC]lass[ \t]*([a-zA-Z0-9_]+)/\1/c,class/

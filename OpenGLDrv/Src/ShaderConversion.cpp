@@ -328,7 +328,7 @@ FStringTemp UOpenGLRenderDevice::GLSLShaderFromD3DHardwareShader(UHardwareShader
 	if(!ConvertD3DAssemblyToGLSL(*Shader->VertexShaderText, &GLSLShaderText, &UsesFog))
 		appErrorf("Vertex shader conversion failed (%s)", Shader->GetPathName()); // TODO: Fall back to default implementation
 
-	GLSLShaderText += "\tif(FogEnabled){\n";
+	GLSLShaderText += "\n\tif(FogEnabled){\n";
 
 	if(UsesFog){
 		// The shader assigns a value to the fog register, so we use that

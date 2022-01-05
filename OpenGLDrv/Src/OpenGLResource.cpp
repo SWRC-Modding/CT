@@ -1,6 +1,7 @@
 #include "OpenGLResource.h"
 
 #include "../Inc/OpenGLRenderDevice.h"
+#include "../Inc/opengl.h"
 
 FOpenGLResource::FOpenGLResource(UOpenGLRenderDevice* InRenDev, QWORD InCacheId) : RenDev(InRenDev),
                                                                                    CacheId(InCacheId),
@@ -13,6 +14,7 @@ FOpenGLResource::FOpenGLResource(UOpenGLRenderDevice* InRenDev, QWORD InCacheId)
 FOpenGLResource::~FOpenGLResource(){
 	RenDev->RemoveResource(this);
 }
+
 // FOpenGLShader
 
 FOpenGLShader::FOpenGLShader(UOpenGLRenderDevice* InRenDev, QWORD InCacheId) : FOpenGLResource(InRenDev, InCacheId),
@@ -21,7 +23,7 @@ FOpenGLShader::FOpenGLShader(UOpenGLRenderDevice* InRenDev, QWORD InCacheId) : F
 
 FOpenGLShader::~FOpenGLShader(){
 	if(Program)
-		glDeleteProgram(Program);
+		RenDev->glDeleteProgram(Program);
 }
 
 void FOpenGLShader::Cache(FShaderGLSL* Shader){
@@ -37,45 +39,45 @@ void FOpenGLShader::Cache(FShaderGLSL* Shader){
 
 	if(!VertexShader || !FragmentShader){
 		if(VertexShader)
-			glDeleteShader(VertexShader);
+			RenDev->glDeleteShader(VertexShader);
 
 		if(FragmentShader)
-			glDeleteShader(FragmentShader);
+			RenDev->glDeleteShader(FragmentShader);
 
 		if(Program){
-			glDeleteProgram(Program);
+			RenDev->glDeleteProgram(Program);
 			Program = GL_NONE;
 		}
 
 		return;
 	}
 
-	GLuint NewProgram = glCreateProgram();
+	GLuint NewProgram = RenDev->glCreateProgram();
 
-	glAttachShader(NewProgram, VertexShader);
-	glAttachShader(NewProgram, FragmentShader);
-	glLinkProgram(NewProgram);
-	glDetachShader(NewProgram, VertexShader);
-	glDetachShader(NewProgram, FragmentShader);
-	glDeleteShader(VertexShader);
-	glDeleteShader(FragmentShader);
+	RenDev->glAttachShader(NewProgram, VertexShader);
+	RenDev->glAttachShader(NewProgram, FragmentShader);
+	RenDev->glLinkProgram(NewProgram);
+	RenDev->glDetachShader(NewProgram, VertexShader);
+	RenDev->glDetachShader(NewProgram, FragmentShader);
+	RenDev->glDeleteShader(VertexShader);
+	RenDev->glDeleteShader(FragmentShader);
 
 	GLint Status;
 
-	glGetProgramiv(NewProgram, GL_LINK_STATUS, &Status);
+	RenDev->glGetProgramiv(NewProgram, GL_LINK_STATUS, &Status);
 
 	if(Status){
 		if(Program)
-			glDeleteProgram(Program);
+			RenDev->glDeleteProgram(Program);
 
 		Program = NewProgram;
 		IsErrorShader = 0;
 	}else{
 		GLchar Buffer[512];
 
-		glGetProgramInfoLog(NewProgram, ARRAY_COUNT(Buffer), NULL, Buffer);
+		RenDev->glGetProgramInfoLog(NewProgram, ARRAY_COUNT(Buffer), NULL, Buffer);
 		debugf("Shader program linking failed for %s: %s", Shader->GetName(), Buffer);
-		glDeleteProgram(NewProgram);
+		RenDev->glDeleteProgram(NewProgram);
 	}
 }
 
@@ -89,11 +91,11 @@ void FOpenGLShader::Bind(){
 	}
 
 	checkSlow(Program);
-	glUseProgram(Program);
+	RenDev->glUseProgram(Program);
 }
 
 GLuint FOpenGLShader::CompileShader(GLenum Type, const FString& ShaderCode, const FString& ShaderName){
-	GLuint Handle = glCreateShader(Type);
+	GLuint Handle = RenDev->glCreateShader(Type);
 	const TCHAR* ShaderVars = NULL;
 
 	if(Type == GL_VERTEX_SHADER)
@@ -109,19 +111,19 @@ GLuint FOpenGLShader::CompileShader(GLenum Type, const FString& ShaderCode, cons
 		*ShaderCode
 	};
 
-	glShaderSource(Handle, ARRAY_COUNT(ShaderText), ShaderText, NULL);
-	glCompileShader(Handle);
+	RenDev->glShaderSource(Handle, ARRAY_COUNT(ShaderText), ShaderText, NULL);
+	RenDev->glCompileShader(Handle);
 
 	GLint Status;
 
-	glGetShaderiv(Handle, GL_COMPILE_STATUS, &Status);
+	RenDev->glGetShaderiv(Handle, GL_COMPILE_STATUS, &Status);
 
 	if(!Status){
 		GLchar Buffer[512];
 
-		glGetShaderInfoLog(Handle, ARRAY_COUNT(Buffer), NULL, Buffer);
+		RenDev->glGetShaderInfoLog(Handle, ARRAY_COUNT(Buffer), NULL, Buffer);
 		debugf("Shader compilation failed for %s: %s", *ShaderName, Buffer);
-		glDeleteShader(Handle);
+		RenDev->glDeleteShader(Handle);
 		Handle = GL_NONE;
 	}
 
@@ -140,14 +142,14 @@ FOpenGLIndexBuffer::FOpenGLIndexBuffer(UOpenGLRenderDevice* InRenDev, QWORD InCa
 
 FOpenGLIndexBuffer::~FOpenGLIndexBuffer(){
 	if(EBO){
-		glDeleteBuffers(1, &EBO);
+		RenDev->glDeleteBuffers(1, &EBO);
 		EBO = GL_NONE;
 	}
 }
 
 void FOpenGLIndexBuffer::Cache(FIndexBuffer* IndexBuffer, INT DynamicBufferSize){
 	GLuint OldEBO = EBO;
-	glCreateBuffers(1, &EBO);
+	RenDev->glCreateBuffers(1, &EBO);
 
 	INT IndexBufferSize = IndexBuffer->GetSize();
 	void* Data = RenDev->GetScratchBuffer(IndexBufferSize);
@@ -160,11 +162,11 @@ void FOpenGLIndexBuffer::Cache(FIndexBuffer* IndexBuffer, INT DynamicBufferSize)
 		if(DynamicBufferSize > 0)
 			debugf("Allocating %ikb byte dynamic index buffer", BufferSize / 1024);
 
-		glNamedBufferStorage(EBO, BufferSize, NULL, GL_MAP_WRITE_BIT | GL_DYNAMIC_STORAGE_BIT);
-		glNamedBufferSubData(EBO, 0, IndexBufferSize, Data);
+		RenDev->glNamedBufferStorage(EBO, BufferSize, NULL, GL_MAP_WRITE_BIT | GL_DYNAMIC_STORAGE_BIT);
+		RenDev->glNamedBufferSubData(EBO, 0, IndexBufferSize, Data);
 	}else{
 		BufferSize = IndexBufferSize;
-		glNamedBufferStorage(EBO, IndexBufferSize, Data, 0);
+		RenDev->glNamedBufferStorage(EBO, IndexBufferSize, Data, 0);
 	}
 
 	Revision = IndexBuffer->GetRevision();
@@ -172,7 +174,7 @@ void FOpenGLIndexBuffer::Cache(FIndexBuffer* IndexBuffer, INT DynamicBufferSize)
 	Tail = IndexBufferSize;
 
 	if(OldEBO)
-		glDeleteBuffers(1, &OldEBO);
+		RenDev->glDeleteBuffers(1, &OldEBO);
 }
 
 INT FOpenGLIndexBuffer::AddIndices(FIndexBuffer* IndexBuffer){
@@ -196,10 +198,10 @@ INT FOpenGLIndexBuffer::AddIndices(FIndexBuffer* IndexBuffer){
 		MapFlags |= GL_MAP_INVALIDATE_BUFFER_BIT;
 	}
 
-	void* Data = glMapNamedBufferRange(EBO, IndexBufferOffset, AdditionalSize, MapFlags);
+	void* Data = RenDev->glMapNamedBufferRange(EBO, IndexBufferOffset, AdditionalSize, MapFlags);
 
 	IndexBuffer->GetContents(Data);
-	glUnmapNamedBuffer(EBO);
+	RenDev->glUnmapNamedBuffer(EBO);
 
 	Tail = IndexBufferOffset + AdditionalSize;
 
@@ -218,14 +220,14 @@ FOpenGLVertexStream::FOpenGLVertexStream(UOpenGLRenderDevice* InRenDev, QWORD In
 
 FOpenGLVertexStream::~FOpenGLVertexStream(){
 	if(VBO){
-		glDeleteBuffers(1, &VBO);
+		RenDev->glDeleteBuffers(1, &VBO);
 		VBO = GL_NONE;
 	}
 }
 
 void FOpenGLVertexStream::Cache(FVertexStream* VertexStream, INT DynamicBufferSize){
 	GLuint OldVBO = VBO;
-	glCreateBuffers(1, &VBO);
+	RenDev->glCreateBuffers(1, &VBO);
 
 	INT StreamSize = VertexStream->GetSize();
 	void* Data = NULL;
@@ -245,11 +247,11 @@ void FOpenGLVertexStream::Cache(FVertexStream* VertexStream, INT DynamicBufferSi
 		if(DynamicBufferSize > 0)
 			debugf("Allocating %ikb dynamic vertex buffer", BufferSize / 1024);
 
-		glNamedBufferStorage(VBO, BufferSize, NULL, GL_MAP_WRITE_BIT | GL_DYNAMIC_STORAGE_BIT);
-		glNamedBufferSubData(VBO, 0, StreamSize, Data);
+		RenDev->glNamedBufferStorage(VBO, BufferSize, NULL, GL_MAP_WRITE_BIT | GL_DYNAMIC_STORAGE_BIT);
+		RenDev->glNamedBufferSubData(VBO, 0, StreamSize, Data);
 	}else{
 		BufferSize = StreamSize;
-		glNamedBufferStorage(VBO, BufferSize, Data, 0);
+		RenDev->glNamedBufferStorage(VBO, BufferSize, Data, 0);
 	}
 
 	Revision = VertexStream->GetRevision();
@@ -257,7 +259,7 @@ void FOpenGLVertexStream::Cache(FVertexStream* VertexStream, INT DynamicBufferSi
 	Tail = StreamSize;
 
 	if(OldVBO)
-		glDeleteBuffers(1, &OldVBO);
+		RenDev->glDeleteBuffers(1, &OldVBO);
 }
 
 INT FOpenGLVertexStream::AddVertices(FVertexStream* VertexStream){
@@ -281,10 +283,10 @@ INT FOpenGLVertexStream::AddVertices(FVertexStream* VertexStream){
 		MapFlags |= GL_MAP_INVALIDATE_BUFFER_BIT;
 	}
 
-	void* Data = glMapNamedBufferRange(VBO, VertexBufferOffset, AdditionalSize, MapFlags);
+	void* Data = RenDev->glMapNamedBufferRange(VBO, VertexBufferOffset, AdditionalSize, MapFlags);
 
 	VertexStream->GetStreamData(Data);
-	glUnmapNamedBuffer(VBO);
+	RenDev->glUnmapNamedBuffer(VBO);
 
 	Tail = VertexBufferOffset + AdditionalSize;
 
@@ -345,8 +347,8 @@ void FOpenGLTexture::Cache(FBaseTexture* BaseTexture, bool bOwnDepthBuffer){
 			if(IsMipTarget){
 				DepthStencilAttachment = GL_NONE; // The FrameFX mip targets don't need a depth or stencil buffer
 			}else{
-				glCreateRenderbuffers(1, &DepthStencilAttachment);
-				glNamedRenderbufferStorage(DepthStencilAttachment, GL_DEPTH24_STENCIL8, Width, Height);
+				RenDev->glCreateRenderbuffers(1, &DepthStencilAttachment);
+				RenDev->glNamedRenderbufferStorage(DepthStencilAttachment, GL_DEPTH24_STENCIL8, Width, Height);
 				HasSharedDepthStencil = false;
 			}
 		}else{
@@ -362,15 +364,15 @@ void FOpenGLTexture::Cache(FBaseTexture* BaseTexture, bool bOwnDepthBuffer){
 		else
 			Format = RenDev->Use16bit ? GL_RGBA4 : GL_RGBA8;
 
-		glCreateFramebuffers(1, &FBO);
-		glCreateTextures(GL_TEXTURE_2D, 1, &TextureHandle);
-		glTextureStorage2D(TextureHandle, 1, Format, Width, Height);
-		glNamedFramebufferTexture(FBO, GL_COLOR_ATTACHMENT0, TextureHandle, 0);
+		RenDev->glCreateFramebuffers(1, &FBO);
+		RenDev->glCreateTextures(GL_TEXTURE_2D, 1, &TextureHandle);
+		RenDev->glTextureStorage2D(TextureHandle, 1, Format, Width, Height);
+		RenDev->glNamedFramebufferTexture(FBO, GL_COLOR_ATTACHMENT0, TextureHandle, 0);
 
 		if(DepthStencilAttachment)
-			glNamedFramebufferRenderbuffer(FBO, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, DepthStencilAttachment);
+			RenDev->glNamedFramebufferRenderbuffer(FBO, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, DepthStencilAttachment);
 
-		checkSlow(glCheckNamedFramebufferStatus(FBO, GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE);
+		checkSlow(RenDev->glCheckNamedFramebufferStatus(FBO, GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE);
 	}else if(Cubemap){
 		IsCubemap = true;
 
@@ -390,7 +392,7 @@ void FOpenGLTexture::Cache(FBaseTexture* BaseTexture, bool bOwnDepthBuffer){
 				CubemapFace->UnloadRawTextureData(i);
 		}
 
-		glGenerateTextureMipmap(TextureHandle);
+		RenDev->glGenerateTextureMipmap(TextureHandle);
 	}else if(CompositeTexture){
 		check(DestFormat == SrcFormat);
 
@@ -419,7 +421,7 @@ void FOpenGLTexture::Cache(FBaseTexture* BaseTexture, bool bOwnDepthBuffer){
 		void* Data = ConvertTextureData(Texture, DestFormat, MipWidth, MipHeight, MipIndex);
 
 		UploadTextureData(GL_TEXTURE_2D, DestFormat, Data, MipWidth, MipHeight, Texture->GetNumMips() - MipIndex);
-		glGenerateTextureMipmap(TextureHandle);
+		RenDev->glGenerateTextureMipmap(TextureHandle);
 
 		for(INT i = 0; i < Texture->GetNumMips(); ++i)
 			Texture->UnloadRawTextureData(i);
@@ -433,27 +435,27 @@ void FOpenGLTexture::Free(){
 	Height = 0;
 
 	if(TextureHandle){
-		glDeleteTextures(1, &TextureHandle);
+		RenDev->glDeleteTextures(1, &TextureHandle);
 		TextureHandle = GL_NONE;
 	}
 
 	if(FBO){
-		glDeleteFramebuffers(1, &FBO);
+		RenDev->glDeleteFramebuffers(1, &FBO);
 		FBO = GL_NONE;
 	}
 
 	if(DepthStencilAttachment && !HasSharedDepthStencil){
-		glDeleteRenderbuffers(1, &DepthStencilAttachment);
+		RenDev->glDeleteRenderbuffers(1, &DepthStencilAttachment);
 		DepthStencilAttachment = GL_NONE;
 	}
 }
 
 void FOpenGLTexture::BindTexture(GLuint TextureUnit){
-	glBindTextureUnit(TextureUnit, TextureHandle);
+	RenDev->glBindTextureUnit(TextureUnit, TextureHandle);
 }
 
 void FOpenGLTexture::BindRenderTarget(){
-	glBindFramebuffer(GL_FRAMEBUFFER, FBO);
+	RenDev->glBindFramebuffer(GL_FRAMEBUFFER, FBO);
 }
 
 void FOpenGLTexture::UploadTextureData(GLenum Target, ETextureFormat Format, void* Data, INT Width, INT Height, INT NumMips, INT CubemapFace){
@@ -479,15 +481,15 @@ void FOpenGLTexture::UploadTextureData(GLenum Target, ETextureFormat Format, voi
 			checkSlow(CubemapFace >= 0 && CubemapFace < 6);
 
 			if(!TextureHandle)
-				glCreateTextures(GL_TEXTURE_CUBE_MAP, 1, &TextureHandle);
+				RenDev->glCreateTextures(GL_TEXTURE_CUBE_MAP, 1, &TextureHandle);
 
 			Target = GL_TEXTURE_CUBE_MAP_POSITIVE_X + CubemapFace;
 		}else{
 			checkSlow(!TextureHandle);
-			glCreateTextures(GL_TEXTURE_2D, 1, &TextureHandle);
+			RenDev->glCreateTextures(GL_TEXTURE_2D, 1, &TextureHandle);
 		}
 
-		glCompressedTextureImage2DEXT(TextureHandle, Target, 0, GLFormat, Width, Height, 0, GetBytesPerPixel(Format, Width * Height), Data);
+		RenDev->glCompressedTextureImage2DEXT(TextureHandle, Target, 0, GLFormat, Width, Height, 0, GetBytesPerPixel(Format, Width * Height), Data);
 	}else{
 		GLenum GLFormat = GL_NONE;
 		GLenum GLType = GL_NONE;
@@ -501,16 +503,16 @@ void FOpenGLTexture::UploadTextureData(GLenum Target, ETextureFormat Format, voi
 
 		if(Target == GL_TEXTURE_2D){
 			checkSlow(!TextureHandle);
-			glCreateTextures(GL_TEXTURE_2D, 1, &TextureHandle);
-			glTextureStorage2D(TextureHandle, NumMips, RenDev->Use16bitTextures ? GL_RGBA4 : GL_RGBA8, Width, Height);
-			glTextureSubImage2D(TextureHandle, 0, 0, 0, Width, Height, GLFormat, GLType, Data);
+			RenDev->glCreateTextures(GL_TEXTURE_2D, 1, &TextureHandle);
+			RenDev->glTextureStorage2D(TextureHandle, NumMips, RenDev->Use16bitTextures ? GL_RGBA4 : GL_RGBA8, Width, Height);
+			RenDev->glTextureSubImage2D(TextureHandle, 0, 0, 0, Width, Height, GLFormat, GLType, Data);
 		}else if(Target == GL_TEXTURE_CUBE_MAP){
 			if(!TextureHandle){
-				glCreateTextures(GL_TEXTURE_CUBE_MAP, 1, &TextureHandle);
-				glTextureStorage2D(TextureHandle, NumMips, RenDev->Use16bitTextures ? GL_RGB4 : GL_RGBA8, Width, Height);
+				RenDev->glCreateTextures(GL_TEXTURE_CUBE_MAP, 1, &TextureHandle);
+				RenDev->glTextureStorage2D(TextureHandle, NumMips, RenDev->Use16bitTextures ? GL_RGBA4 : GL_RGBA8, Width, Height);
 			}
 
-			glTextureSubImage3D(TextureHandle, 0, 0, 0, CubemapFace, Width, Height, 1, GLFormat, GLType, Data);
+			RenDev->glTextureSubImage3D(TextureHandle, 0, 0, 0, CubemapFace, Width, Height, 1, GLFormat, GLType, Data);
 		}else{
 			appErrorf("Invalid texture target '%x'", Target);
 		}

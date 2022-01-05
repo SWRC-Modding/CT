@@ -103,16 +103,17 @@ public:
 	~FOpenGLVertexArrayObject();
 
 	bool IsValid() const{ return VAO != 0; }
-	void Init(const FStreamDeclaration* Declarations, INT NumStreams);
+	void Init(UOpenGLRenderDevice* InRenDev, const FStreamDeclaration* Declarations, INT NumStreams);
 	void Bind();
 	void BindVertexStream(FOpenGLVertexStream* Stream, INT StreamIndex);
 	void BindIndexBuffer(FOpenGLIndexBuffer* IndexBuffer);
 
 private:
-	unsigned int VAO;
-	unsigned int EBO;
-	unsigned int VBOs[MAX_VERTEX_STREAMS];
-	unsigned int Strides[MAX_VERTEX_STREAMS];
+	UOpenGLRenderDevice* RenDev;
+	unsigned int         VAO;
+	unsigned int         EBO;
+	unsigned int         VBOs[MAX_VERTEX_STREAMS];
+	unsigned int         Strides[MAX_VERTEX_STREAMS];
 };
 
 struct FOpenGLRenderState{

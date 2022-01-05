@@ -1,7 +1,5 @@
 #include "../Inc/OpenGLRenderDevice.h"
 
-#include "GL/glew.h"
-#include "GL/wglew.h"
 #include "OpenGLResource.h"
 
 #define MIN_OPENGL_MAJOR_VERSION 4
@@ -166,16 +164,10 @@ UBOOL UOpenGLRenderDevice::Exec(const TCHAR* Cmd, FOutputDevice& Ar){
 	return 0;
 }
 
-void GLAPIENTRY OpenGLMessageCallback(GLenum source,
-                                      GLenum type,
-                                      GLuint id,
-                                      GLenum severity,
-                                      GLsizei length,
-                                      const GLchar* message,
-                                      const void* userParam){
+static OPENGL_MESSAGE_CALLBACK(OpenGLMessageCallback){
 	const char* SourceStr;
 
-	switch(source){
+	switch(Source){
 	case GL_DEBUG_SOURCE_API:
 		SourceStr = "API";
 		break;
@@ -200,7 +192,7 @@ void GLAPIENTRY OpenGLMessageCallback(GLenum source,
 
 	const char* TypeStr;
 
-	switch(type){
+	switch(Type){
 	case GL_DEBUG_TYPE_ERROR:
 		TypeStr = "ERROR";
 		break;
@@ -234,7 +226,7 @@ void GLAPIENTRY OpenGLMessageCallback(GLenum source,
 
 	const char* SeverityStr;
 
-	switch(severity){
+	switch(Severity){
 	case GL_DEBUG_SEVERITY_NOTIFICATION:
 		SeverityStr = "notification";
 		break;
@@ -251,10 +243,10 @@ void GLAPIENTRY OpenGLMessageCallback(GLenum source,
 		SeverityStr = "unknown";
 	}
 
-	if(severity != GL_DEBUG_SEVERITY_NOTIFICATION)
-		debugf("GL CALLBACK: source=%s, type=%s, severity=%s - %s", SourceStr, TypeStr, SeverityStr, message);
+	if(Severity != GL_DEBUG_SEVERITY_NOTIFICATION)
+		debugf("GL CALLBACK: source=%s, type=%s, severity=%s - %s", SourceStr, TypeStr, SeverityStr, Message);
 
-	if(type == GL_DEBUG_TYPE_ERROR){
+	if(Type == GL_DEBUG_TYPE_ERROR){
 		GLog->Flush();
 
 		if(appIsDebuggerPresent())
@@ -264,10 +256,10 @@ void GLAPIENTRY OpenGLMessageCallback(GLenum source,
 
 UBOOL UOpenGLRenderDevice::Init(){
 	// Init SWRCFix if it exists. Hacky but RenderDevice is always loaded at startup...
-	void* ModDLL = appGetDllHandle("Mod.dll");
+	HMODULE ModDLL = LoadLibraryA("Mod.dll");
 
 	if(ModDLL){
-		void(CDECL*InitSWRCFix)(void) = static_cast<void(CDECL*)(void)>(appGetDllExport(ModDLL, "InitSWRCFix"));
+		void(CDECL*InitSWRCFix)(void) = reinterpret_cast<void(CDECL*)(void)>(GetProcAddress(ModDLL, "InitSWRCFix"));
 
 		if(InitSWRCFix)
 			InitSWRCFix();
@@ -275,6 +267,30 @@ UBOOL UOpenGLRenderDevice::Init(){
 
 	// NOTE: This must be set to 0 in order to avoid inconsistencies with RGBA and BGRA colors.
 	GIsOpenGL = 0;
+
+	// Load wgl and basic opengl functions
+	checkSlow(!OpenGL32Dll);
+
+	OpenGL32Dll = LoadLibraryA("opengl32.dll");
+
+	if(!OpenGL32Dll)
+		appErrorf("Unable to load opengl32.dll");
+
+#define WGL_FUNC(name, ret, args) \
+	wgl ## name = reinterpret_cast<ret(OPENGL_CALL*)args>(GetProcAddress(OpenGL32Dll, "wgl" #name)); \
+	if(!wgl ## name) \
+		appErrorf("Unable to load function '%s' from opengl32.dll", "wgl" #name);
+	WGL_BASE_FUNCS
+#undef WGL_FUNC
+
+#define GL_FUNC(name, ret, args) \
+	gl ## name = reinterpret_cast<ret(OPENGL_CALL*)args>(GetProcAddress(OpenGL32Dll, "gl" #name)); \
+	if(!gl ## name) \
+		appErrorf("Unable to load function '%s' from opengl32.dll", "gl" #name);
+	GL_BASE_FUNCS
+#undef GL_FUNC
+
+	// Initialize shader code
 
 	SetHardwareShaderMacros(CastChecked<UHardwareShaderMacros>(GEngine->HBumpShaderMacros));
 	FixedFunctionShader.SetShaderCode(FixedFunctionShaderText);
@@ -366,16 +382,11 @@ UBOOL UOpenGLRenderDevice::SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL
 		if(!TempContext)
 			appErrorf("Failed to create OpenGL context");
 
-		wglMakeCurrent(DeviceContext, TempContext);
+		verify(wglMakeCurrent(DeviceContext, TempContext));
 
-		glewExperimental = GL_TRUE;
+		LoadWGLFuncs();
 
-		GLenum GlewStatus = glewInit();
-
-		if(GlewStatus != GLEW_OK)
-			appErrorf("GLEW failed to initialize: %s", glewGetErrorString(GlewStatus));
-
-		if(WGLEW_ARB_create_context){
+		if(wglCreateContextAttribsARB){
 			int Attribs[16];
 			int NumAttribs = 0;
 
@@ -399,12 +410,6 @@ UBOOL UOpenGLRenderDevice::SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL
 
 			if(OpenGLContext){
 				wglMakeCurrent(DeviceContext, OpenGLContext);
-
-				GlewStatus = glewInit();
-
-				if(GlewStatus != GLEW_OK)
-					appErrorf("GLEW failed to initialize: %s", glewGetErrorString(GlewStatus));
-
 				wglDeleteContext(TempContext);
 			}else{
 				debugf(NAME_Warning, "wglCreateContextAttribsARB failed");
@@ -415,6 +420,8 @@ UBOOL UOpenGLRenderDevice::SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL
 			debugf("WGL_ARB_create_context not supported");
 			OpenGLContext = TempContext;
 		}
+
+		LoadGLFuncs();
 
 		debugf(NAME_Init, "GL_VENDOR      : %s", glGetString(GL_VENDOR));
 		debugf(NAME_Init, "GL_RENDERER    : %s", glGetString(GL_RENDERER));
@@ -437,18 +444,29 @@ UBOOL UOpenGLRenderDevice::SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL
 			glDebugMessageCallback(OpenGLMessageCallback, NULL);
 		}
 
-		// Check for required extensions
+		// Check for extensions
 
-		#define CHECK_EXT(ext) \
-			if(!GLEW_ ## ext) \
-				appErrorf("Required OpenGL extension '%s' is not supported", #ext);
+		if(wglGetExtensionsStringARB){
+			const char* WGLExtensions = wglGetExtensionsStringARB(DeviceContext);
 
-		CHECK_EXT(ARB_direct_state_access);
-		CHECK_EXT(ARB_vertex_array_bgra);
-		CHECK_EXT(ARB_texture_compression);
-		CHECK_EXT(EXT_texture_compression_s3tc);
+			if(WGLExtensions)
+				SupportsWGLSwapIntervalTear = appStrstr(reinterpret_cast<const TCHAR*>(WGLExtensions), "WGL_EXT_swap_control_tear") != NULL;
+		}
 
-		#undef CHECK_EXT
+		GLint NumExtensions = 0;
+
+		glGetIntegerv(GL_NUM_EXTENSIONS, &NumExtensions);
+
+		for(GLint i = 0; i < NumExtensions; ++i){
+			const TCHAR* Extension = reinterpret_cast<const TCHAR*>(glGetStringi(GL_EXTENSIONS, i));
+
+			if(appStrcmp(Extension, "GL_ARB_texture_filter_anisotropic") == 0 || appStrcmp(Extension, "GL_EXT_texture_filter_anisotropic") == 0){
+				SupportsEXTFilterAnisotropic = 1;
+				break;
+			}
+		}
+
+		// Initialize render interface
 
 		RenderInterface.Init(NewX, NewY);
 		EnableVSync(bVSync != 0);
@@ -522,6 +540,10 @@ UBOOL UOpenGLRenderDevice::SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL
 void UOpenGLRenderDevice::Exit(UViewport* Viewport){
 	UnSetRes(Viewport);
 	GIsOpenGL = 0;
+
+	checkSlow(OpenGL32Dll);
+	FreeLibrary(OpenGL32Dll);
+	OpenGL32Dll = NULL;
 }
 
 void UOpenGLRenderDevice::Flush(UViewport* Viewport){
@@ -560,13 +582,13 @@ UBOOL UOpenGLRenderDevice::ResourceCached(QWORD CacheId){
 }
 
 void UOpenGLRenderDevice::EnableVSync(bool bEnable){
-	if(WGL_EXT_swap_control){
+	if(wglSwapIntervalEXT){
 		bVSync = bEnable;
 
 		INT Interval;
 
 		if(bEnable)
-			Interval = bAdaptiveVSync && WGL_EXT_swap_control_tear ? -1 : 1;
+			Interval = bAdaptiveVSync && SupportsWGLSwapIntervalTear ? -1 : 1;
 		else
 			Interval = 0;
 
@@ -878,6 +900,22 @@ void UOpenGLRenderDevice::HandleMovieWindow(UViewport* Viewport){
 	}else{
 		CurrentMovieWindow = NULL;
 	}
+}
+
+void UOpenGLRenderDevice::LoadWGLFuncs(){
+#define WGL_FUNC(name, ret, args) \
+	wgl ## name = reinterpret_cast<ret(OPENGL_CALL*)args>(wglGetProcAddress("wgl" #name));
+	WGL_FUNCS
+#undef WGL_FUNC
+}
+
+void UOpenGLRenderDevice::LoadGLFuncs(){
+#define GL_FUNC(name, ret, args) \
+	gl ## name = reinterpret_cast<ret(OPENGL_CALL*)args>(wglGetProcAddress("gl" #name)); \
+	if(!gl ## name) \
+		appErrorf("Unable to load required opengl function '%s'", "gl" # name);
+	GL_FUNCS
+#undef GL_FUNC
 }
 
 // Default shader code

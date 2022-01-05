@@ -131,19 +131,6 @@
 			<File
 				RelativePath=".\Src\ShaderConversion.cpp">
 			</File>
-			<Filter
-				Name="GL"
-				Filter="">
-				<File
-					RelativePath=".\Src\Gl\glew.c">
-				</File>
-				<File
-					RelativePath=".\Src\Gl\glew.h">
-				</File>
-				<File
-					RelativePath=".\Src\Gl\wglew.h">
-				</File>
-			</Filter>
 		</Filter>
 	</Files>
 	<Globals>

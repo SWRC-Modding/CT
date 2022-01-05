@@ -3,6 +3,7 @@
 #include "OpenGLDrv.h"
 #include "OpenGLRenderInterface.h"
 #include "Shader.h"
+#include "opengl.h"
 
 class FOpenGLResource;
 
@@ -147,4 +148,24 @@ private:
 	HWND CurrentMovieWindow;
 
 	void HandleMovieWindow(UViewport* Viewport);
+
+	// Opengl functions
+
+	UBOOL SupportsWGLSwapIntervalTear;
+	UBOOL SupportsEXTFilterAnisotropic;
+
+	void LoadWGLFuncs();
+	void LoadGLFuncs();
+
+	HMODULE OpenGL32Dll;
+
+public:
+#define WGL_FUNC(name, ret, args) ret(OPENGL_CALL*wgl ## name)args;
+	WGL_BASE_FUNCS
+	WGL_FUNCS
+#undef WGL_FUNC
+#define GL_FUNC(name, ret, args) ret(OPENGL_CALL*gl ## name)args;
+	GL_BASE_FUNCS
+	GL_FUNCS
+#undef GL_FUNC
 };

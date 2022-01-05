@@ -1,7 +1,7 @@
 #include "../Inc/OpenGLRenderInterface.h"
 #include "../Inc/OpenGLRenderDevice.h"
+#include "../Inc/opengl.h"
 #include "OpenGLResource.h"
-#include "GL/glew.h"
 
 /*
  * FOpenGLVertexArrayObject
@@ -9,14 +9,15 @@
 
 FOpenGLVertexArrayObject::~FOpenGLVertexArrayObject(){
 	checkSlow(VAO);
-	glDeleteVertexArrays(1, &VAO);
+	RenDev->glDeleteVertexArrays(1, &VAO);
 }
 
-void FOpenGLVertexArrayObject::Init(const FStreamDeclaration* Declarations, INT NumStreams){
+void FOpenGLVertexArrayObject::Init(UOpenGLRenderDevice* InRenDev, const FStreamDeclaration* Declarations, INT NumStreams){
 	checkSlow(VAO == GL_NONE);
+	checkSlow(!RenDev || RenDev == InRenDev);
 
-	glCreateVertexArrays(1, &VAO);
-
+	RenDev = InRenDev;
+	RenDev->glCreateVertexArrays(1, &VAO);
 
 	for(INT StreamIndex = 0; StreamIndex < NumStreams; ++StreamIndex){
 		const FStreamDeclaration& Decl = Declarations[StreamIndex];
@@ -32,38 +33,38 @@ void FOpenGLVertexArrayObject::Init(const FStreamDeclaration* Declarations, INT 
 
 			switch(Type){
 			case CT_Float4:
-				glVertexArrayAttribFormat(VAO, Function, 4, GL_FLOAT, GL_FALSE, Offset);
+				RenDev->glVertexArrayAttribFormat(VAO, Function, 4, GL_FLOAT, GL_FALSE, Offset);
 				Offset += sizeof(FLOAT) * 4;
 				break;
 			case CT_Float3:
-				glVertexArrayAttribFormat(VAO, Function, 3, GL_FLOAT, GL_FALSE, Offset);
+				RenDev->glVertexArrayAttribFormat(VAO, Function, 3, GL_FLOAT, GL_FALSE, Offset);
 				Offset += sizeof(FLOAT) * 3;
 				break;
 			case CT_Float2:
-				glVertexArrayAttribFormat(VAO, Function, 2, GL_FLOAT, GL_FALSE, Offset);
+				RenDev->glVertexArrayAttribFormat(VAO, Function, 2, GL_FLOAT, GL_FALSE, Offset);
 				Offset += sizeof(FLOAT) * 2;
 				break;
 			case CT_Float1:
-				glVertexArrayAttribFormat(VAO, Function, 1, GL_FLOAT, GL_FALSE, Offset);
+				RenDev->glVertexArrayAttribFormat(VAO, Function, 1, GL_FLOAT, GL_FALSE, Offset);
 				Offset += sizeof(FLOAT);
 				break;
 			case CT_Color:
-				glVertexArrayAttribFormat(VAO, Function, GL_BGRA, GL_UNSIGNED_BYTE, GL_TRUE, Offset);
+				RenDev->glVertexArrayAttribFormat(VAO, Function, GL_BGRA, GL_UNSIGNED_BYTE, GL_TRUE, Offset);
 				Offset += sizeof(FColor);
 				break;
 			default:
 				appErrorf("Invalid vertex component type: %i", Type);
 			}
 
-			glEnableVertexArrayAttrib(VAO, Function);
-			glVertexArrayAttribBinding(VAO, Function, StreamIndex);
+			RenDev->glEnableVertexArrayAttrib(VAO, Function);
+			RenDev->glVertexArrayAttribBinding(VAO, Function, StreamIndex);
 		}
 	}
 }
 
 void FOpenGLVertexArrayObject::Bind(){
 	checkSlow(VAO);
-	glBindVertexArray(VAO);
+	RenDev->glBindVertexArray(VAO);
 }
 
 void FOpenGLVertexArrayObject::BindVertexStream(FOpenGLVertexStream* Stream, INT StreamIndex){
@@ -73,14 +74,14 @@ void FOpenGLVertexArrayObject::BindVertexStream(FOpenGLVertexStream* Stream, INT
 	if(VBOs[StreamIndex] != VBO || Strides[StreamIndex] != Stride){
 		VBOs[StreamIndex] = VBO;
 		Strides[StreamIndex] = Stride;
-		glVertexArrayVertexBuffer(VAO, StreamIndex, VBO, 0, Stride);
+		RenDev->glVertexArrayVertexBuffer(VAO, StreamIndex, VBO, 0, Stride);
 	}
 }
 
 void FOpenGLVertexArrayObject::BindIndexBuffer(FOpenGLIndexBuffer* IndexBuffer){
 	if(EBO != IndexBuffer->EBO){
 		EBO = IndexBuffer->EBO;
-		glVertexArrayElementBuffer(VAO, EBO);
+		RenDev->glVertexArrayElementBuffer(VAO, EBO);
 	}
 }
 
@@ -161,7 +162,8 @@ static GLenum GetBlendFunc(/*ED3DBLEND*/BYTE D3DBlend){
 	case SRCALPHASAT:
 		return GL_SRC_ALPHA_SATURATE;
 	case BOTHSRCALPHA:
-		return GL_BLEND_SRC_ALPHA;
+		check(!"Blend func not implemented"); // GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA
+		return 0;
 	case BOTHINVSRCALPHA:
 		return GL_ONE_MINUS_SRC_ALPHA;
 	}
@@ -189,11 +191,11 @@ void FOpenGLRenderInterface::Init(INT ViewportWidth, INT ViewportHeight){
 
 	// Setup initial state
 
-	glEnable(GL_BLEND);
-	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_POLYGON_OFFSET_POINT);
-	glEnable(GL_POLYGON_OFFSET_LINE);
-	glEnable(GL_POLYGON_OFFSET_FILL);
+	RenDev->glEnable(GL_BLEND);
+	RenDev->glEnable(GL_DEPTH_TEST);
+	RenDev->glEnable(GL_POLYGON_OFFSET_POINT);
+	RenDev->glEnable(GL_POLYGON_OFFSET_LINE);
+	RenDev->glEnable(GL_POLYGON_OFFSET_FILL);
 
 	// Viewport
 
@@ -201,31 +203,31 @@ void FOpenGLRenderInterface::Init(INT ViewportWidth, INT ViewportHeight){
 	RenderState.ViewportY = 0;
 	RenderState.ViewportWidth = ViewportWidth;
 	RenderState.ViewportHeight = ViewportHeight;
-	glViewport(0, 0, ViewportWidth, ViewportHeight);
+	RenDev->glViewport(0, 0, ViewportWidth, ViewportHeight);
 
 	// Fill mode
 
 	RenderState.FillMode = FM_Solid;
-	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	RenDev->glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 	// Culling
 
-	glEnable(GL_CULL_FACE);
+	RenDev->glEnable(GL_CULL_FACE);
 	RenderState.CullMode = CM_CW;
 	LastCullMode = GL_BACK;
-	glCullFace(LastCullMode);
+	RenDev->glCullFace(LastCullMode);
 
 	// ZTest
 
 	RenderState.bZTest = true;
-	glDepthFunc(GL_LEQUAL);
+	RenDev->glDepthFunc(GL_LEQUAL);
 
 	RenderState.bZWrite = true;
-	glDepthMask(GL_TRUE);
+	RenDev->glDepthMask(GL_TRUE);
 
 	// Stencil
 
-	glDisable(GL_STENCIL_TEST);
+	RenDev->glDisable(GL_STENCIL_TEST);
 
 	bStencilEnabled = false;
 
@@ -238,22 +240,22 @@ void FOpenGLRenderInterface::Init(INT ViewportWidth, INT ViewportHeight){
 	RenderState.StencilPassOp = SO_Keep;
 	RenderState.StencilWriteMask = 0xFF;
 
-	glStencilOp(GetStencilOp(RenderState.StencilFailOp), GetStencilOp(RenderState.StencilZFailOp), GetStencilOp(RenderState.StencilPassOp));
-	glStencilFunc(GetStencilFunc(RenderState.StencilCompare), RenderState.StencilRef, RenderState.StencilMask);
-	glStencilMask(RenderState.StencilWriteMask);
+	RenDev->glStencilOp(GetStencilOp(RenderState.StencilFailOp), GetStencilOp(RenderState.StencilZFailOp), GetStencilOp(RenderState.StencilPassOp));
+	RenDev->glStencilFunc(GetStencilFunc(RenderState.StencilCompare), RenderState.StencilRef, RenderState.StencilMask);
+	RenDev->glStencilMask(RenderState.StencilWriteMask);
 
 	// Texture samplers
 
-	glCreateSamplers(MAX_TEXTURES, Samplers);
-	glBindSamplers(0, MAX_TEXTURES, Samplers);            // 2D texture samplers
-	glBindSamplers(MAX_TEXTURES, MAX_TEXTURES, Samplers); // Cubemap samplers
+	RenDev->glCreateSamplers(MAX_TEXTURES, Samplers);
+	RenDev->glBindSamplers(0, MAX_TEXTURES, Samplers);            // 2D texture samplers
+	RenDev->glBindSamplers(MAX_TEXTURES, MAX_TEXTURES, Samplers); // Cubemap samplers
 
 	SetTextureFilter(RenDev->TextureFilter);
 
 	for(int i = 0; i < MAX_TEXTURES; ++i){
-		glSamplerParameteri(Samplers[i], GL_TEXTURE_WRAP_S, GL_REPEAT);
-		glSamplerParameteri(Samplers[i], GL_TEXTURE_WRAP_T, GL_REPEAT);
-		glSamplerParameteri(Samplers[i], GL_TEXTURE_WRAP_R, GL_REPEAT);
+		RenDev->glSamplerParameteri(Samplers[i], GL_TEXTURE_WRAP_S, GL_REPEAT);
+		RenDev->glSamplerParameteri(Samplers[i], GL_TEXTURE_WRAP_T, GL_REPEAT);
+		RenDev->glSamplerParameteri(Samplers[i], GL_TEXTURE_WRAP_R, GL_REPEAT);
 		RenderState.TextureUnits[i].ClampU = TC_Wrap;
 		RenderState.TextureUnits[i].ClampV = TC_Wrap;
 	}
@@ -270,9 +272,9 @@ void FOpenGLRenderInterface::Init(INT ViewportWidth, INT ViewportHeight){
 	CurrentState->AlphaRef = -1.0f;
 
 	// Create uniform buffer
-	glCreateBuffers(1, &GlobalUBO);
-	glNamedBufferStorage(GlobalUBO, sizeof(FOpenGLGlobalUniforms), static_cast<FOpenGLGlobalUniforms*>(CurrentState), GL_DYNAMIC_STORAGE_BIT);
-	glBindBufferBase(GL_UNIFORM_BUFFER, 0, GlobalUBO); // Binding index 0 is reserved for the global uniform block
+	RenDev->glCreateBuffers(1, &GlobalUBO);
+	RenDev->glNamedBufferStorage(GlobalUBO, sizeof(FOpenGLGlobalUniforms), static_cast<FOpenGLGlobalUniforms*>(CurrentState), GL_DYNAMIC_STORAGE_BIT);
+	RenDev->glBindBufferBase(GL_UNIFORM_BUFFER, 0, GlobalUBO); // Binding index 0 is reserved for the global uniform block
 }
 
 void FOpenGLRenderInterface::Flush(){
@@ -287,24 +289,24 @@ void FOpenGLRenderInterface::Flush(){
 
 	CurrentState->NumTextures = 0;
 	CurrentShader = NULL;
-	glUseProgram(GL_NONE);
+	RenDev->glUseProgram(GL_NONE);
 
 	CurrentState->VAO = NULL;
-	glBindVertexArray(GL_NONE);
+	RenDev->glBindVertexArray(GL_NONE);
 	VAOsByDeclId.Empty();
 }
 
 void FOpenGLRenderInterface::Exit(){
 	VAOsByDeclId.Empty();
-	glDeleteBuffers(1, &GlobalUBO);
+	RenDev->glDeleteBuffers(1, &GlobalUBO);
 	GlobalUBO = GL_NONE;
-	glDeleteSamplers(MAX_TEXTURES, Samplers);
+	RenDev->glDeleteSamplers(MAX_TEXTURES, Samplers);
 	appMemzero(Samplers, sizeof(Samplers));
 }
 
 void FOpenGLRenderInterface::CommitRenderState(){
 	if(CurrentState->FillMode != RenderState.FillMode){
-		glPolygonMode(GL_FRONT_AND_BACK, CurrentState->FillMode == FM_Wireframe ? GL_LINE : GL_FILL);
+		RenDev->glPolygonMode(GL_FRONT_AND_BACK, CurrentState->FillMode == FM_Wireframe ? GL_LINE : GL_FILL);
 		RenderState.FillMode = CurrentState->FillMode;
 	}
 
@@ -318,26 +320,26 @@ void FOpenGLRenderInterface::CommitRenderState(){
 				NewCullMode = GL_BACK;
 
 			if(RenderState.CullMode == CM_None)
-				glEnable(GL_CULL_FACE);
+				RenDev->glEnable(GL_CULL_FACE);
 
 			if(NewCullMode != LastCullMode)
-				glCullFace(NewCullMode);
+				RenDev->glCullFace(NewCullMode);
 
 			LastCullMode = NewCullMode;
 		}else{
-			glDisable(GL_CULL_FACE);
+			RenDev->glDisable(GL_CULL_FACE);
 		}
 
 		RenderState.CullMode = CurrentState->CullMode;
 	}
 
 	if(RenderState.bZTest != CurrentState->bZTest){
-		glDepthFunc(CurrentState->bZTest ? GL_LEQUAL : GL_ALWAYS);
+		RenDev->glDepthFunc(CurrentState->bZTest ? GL_LEQUAL : GL_ALWAYS);
 		RenderState.bZTest = CurrentState->bZTest;
 	}
 
 	if(RenderState.bZWrite != CurrentState->bZWrite){
-		glDepthMask(CurrentState->bZWrite ? GL_TRUE : GL_FALSE);
+		RenDev->glDepthMask(CurrentState->bZWrite ? GL_TRUE : GL_FALSE);
 		RenderState.bZWrite = CurrentState->bZWrite;
 	}
 
@@ -359,7 +361,7 @@ void FOpenGLRenderInterface::CommitRenderState(){
 		if(RenderState.StencilFailOp != CurrentState->StencilFailOp ||
 		   RenderState.StencilZFailOp != CurrentState->StencilZFailOp ||
 		   RenderState.StencilPassOp != CurrentState->StencilPassOp){
-			glStencilOp(GetStencilOp(CurrentState->StencilFailOp), GetStencilOp(CurrentState->StencilZFailOp), GetStencilOp(CurrentState->StencilPassOp));
+			RenDev->glStencilOp(GetStencilOp(CurrentState->StencilFailOp), GetStencilOp(CurrentState->StencilZFailOp), GetStencilOp(CurrentState->StencilPassOp));
 			RenderState.StencilFailOp = CurrentState->StencilFailOp;
 			RenderState.StencilZFailOp = CurrentState->StencilZFailOp;
 			RenderState.StencilPassOp = CurrentState->StencilPassOp;
@@ -368,20 +370,20 @@ void FOpenGLRenderInterface::CommitRenderState(){
 		if(RenderState.StencilCompare != CurrentState->StencilCompare ||
 		   RenderState.StencilRef != CurrentState->StencilRef ||
 		   RenderState.StencilMask != CurrentState->StencilMask){
-			glStencilFunc(GetStencilFunc(CurrentState->StencilCompare), CurrentState->StencilRef, CurrentState->StencilMask);
+			RenDev->glStencilFunc(GetStencilFunc(CurrentState->StencilCompare), CurrentState->StencilRef, CurrentState->StencilMask);
 			RenderState.StencilCompare = CurrentState->StencilCompare;
 			RenderState.StencilRef = CurrentState->StencilRef;
 			RenderState.StencilMask = CurrentState->StencilMask;
 		}
 
 		if(RenderState.StencilWriteMask != CurrentState->StencilWriteMask){
-			glStencilMask(CurrentState->StencilWriteMask);
+			RenDev->glStencilMask(CurrentState->StencilWriteMask);
 			RenderState.StencilWriteMask = CurrentState->StencilWriteMask;
 		}
 	}
 
 	if(RenderState.ZBias != CurrentState->ZBias){
-		glPolygonOffset(-CurrentState->ZBias, -CurrentState->ZBias);
+		RenDev->glPolygonOffset(-CurrentState->ZBias, -CurrentState->ZBias);
 		RenderState.ZBias = CurrentState->ZBias;
 	}
 
@@ -389,7 +391,7 @@ void FOpenGLRenderInterface::CommitRenderState(){
 	   RenderState.ViewportY != CurrentState->ViewportY ||
 	   RenderState.ViewportWidth != CurrentState->ViewportWidth ||
 	   RenderState.ViewportHeight != CurrentState->ViewportHeight){
-		glViewport(CurrentState->ViewportX, CurrentState->ViewportY, CurrentState->ViewportWidth, CurrentState->ViewportHeight);
+		RenDev->glViewport(CurrentState->ViewportX, CurrentState->ViewportY, CurrentState->ViewportWidth, CurrentState->ViewportHeight);
 
 		RenderState.ViewportX = CurrentState->ViewportX;
 		RenderState.ViewportY = CurrentState->ViewportY;
@@ -398,7 +400,7 @@ void FOpenGLRenderInterface::CommitRenderState(){
 	}
 
 	if(RenderState.SrcBlend != CurrentState->SrcBlend || RenderState.DstBlend != CurrentState->DstBlend){
-		glBlendFunc(CurrentState->SrcBlend, CurrentState->DstBlend);
+		RenDev->glBlendFunc(CurrentState->SrcBlend, CurrentState->DstBlend);
 		RenderState.SrcBlend = CurrentState->SrcBlend;
 		RenderState.DstBlend = CurrentState->DstBlend;
 	}
@@ -426,12 +428,12 @@ void FOpenGLRenderInterface::CommitRenderState(){
 		}
 
 		if(RenderState.TextureUnits[i].ClampU != CurrentState->TextureUnits[i].ClampU){
-			glSamplerParameteri(Samplers[i], GL_TEXTURE_WRAP_S, GetTextureWrapMode(CurrentState->TextureUnits[i].ClampU));
+			RenDev->glSamplerParameteri(Samplers[i], GL_TEXTURE_WRAP_S, GetTextureWrapMode(CurrentState->TextureUnits[i].ClampU));
 			RenderState.TextureUnits[i].ClampU = CurrentState->TextureUnits[i].ClampU;
 		}
 
 		if(RenderState.TextureUnits[i].ClampV != CurrentState->TextureUnits[i].ClampV){
-			glSamplerParameteri(Samplers[i], GL_TEXTURE_WRAP_T, GetTextureWrapMode(CurrentState->TextureUnits[i].ClampV));
+			RenDev->glSamplerParameteri(Samplers[i], GL_TEXTURE_WRAP_T, GetTextureWrapMode(CurrentState->TextureUnits[i].ClampV));
 			RenderState.TextureUnits[i].ClampV = CurrentState->TextureUnits[i].ClampV;
 		}
 	}
@@ -446,7 +448,7 @@ void FOpenGLRenderInterface::CommitRenderState(){
 		if(MatricesChanged)
 			UpdateMatrices();
 
-		glNamedBufferSubData(GlobalUBO, 0, sizeof(FOpenGLGlobalUniforms), static_cast<FOpenGLGlobalUniforms*>(CurrentState));
+		RenDev->glNamedBufferSubData(GlobalUBO, 0, sizeof(FOpenGLGlobalUniforms), static_cast<FOpenGLGlobalUniforms*>(CurrentState));
 
 		LastUniformRevision = CurrentState->UniformRevision;
 	}
@@ -467,18 +469,18 @@ void FOpenGLRenderInterface::Locked(UViewport* Viewport){
 	if(TextureAnisotropy != RenDev->TextureAnisotropy){
 		TextureAnisotropy = RenDev->TextureAnisotropy;
 
-		if(GLEW_EXT_texture_filter_anisotropic){
+		if(RenDev->SupportsEXTFilterAnisotropic){
 			for(INT i = 0; i < MAX_TEXTURES; ++i)
-				glSamplerParameterf(Samplers[i], GL_TEXTURE_MAX_ANISOTROPY, Clamp<FLOAT>(TextureAnisotropy, 1, 16));
+				RenDev->glSamplerParameterf(Samplers[i], GL_TEXTURE_MAX_ANISOTROPY, Clamp<FLOAT>(TextureAnisotropy, 1, 16));
 		}
 	}
 
 	if(bStencilEnabled != !!RenDev->UseStencil){
 		if(RenDev->UseStencil){
-			glEnable(GL_STENCIL_TEST);
+			RenDev->glEnable(GL_STENCIL_TEST);
 			bStencilEnabled = true;
 		}else{
-			glDisable(GL_STENCIL_TEST);
+			RenDev->glDisable(GL_STENCIL_TEST);
 			bStencilEnabled = false;
 		}
 	}
@@ -574,8 +576,8 @@ void FOpenGLRenderInterface::SetTextureFilter(BYTE Filter){
 	}
 
 	for(INT i = 0; i < MAX_TEXTURES; ++i){
-		glSamplerParameteri(Samplers[i], GL_TEXTURE_MIN_FILTER, MinFilter);
-		glSamplerParameteri(Samplers[i], GL_TEXTURE_MAG_FILTER, MagFilter);
+		RenDev->glSamplerParameteri(Samplers[i], GL_TEXTURE_MIN_FILTER, MinFilter);
+		RenDev->glSamplerParameteri(Samplers[i], GL_TEXTURE_MAG_FILTER, MagFilter);
 	}
 
 	TextureFilter = Filter;
@@ -589,7 +591,7 @@ void FOpenGLRenderInterface::SetShader(FShaderGLSL* NewShader){
 		Shader = new FOpenGLShader(RenDev, CacheId);
 
 	if(Shader->Revision != NewShader->GetRevision()){
-		glUseProgram(GL_NONE);
+		RenDev->glUseProgram(GL_NONE);
 		Shader->Cache(NewShader);
 		Shader->Bind();
 	}else if(Shader != CurrentShader){
@@ -662,33 +664,33 @@ void FOpenGLRenderInterface::Clear(UBOOL UseColor, FColor Color, UBOOL UseDepth,
 	GLbitfield Flags = 0;
 
 	if(UseColor){
-		glClearColor(Color.R / 255.0f, Color.G / 255.0f, Color.B / 255.0f, Color.A / 255.0f);
+		RenDev->glClearColor(Color.R / 255.0f, Color.G / 255.0f, Color.B / 255.0f, Color.A / 255.0f);
 		Flags |= GL_COLOR_BUFFER_BIT;
 	}
 
 	if(UseDepth){
 		// If ZWrite is disabled, we need to enable it or clearing will have no effect
 		if(!RenderState.bZWrite){
-			glDepthMask(GL_TRUE);
+			RenDev->glDepthMask(GL_TRUE);
 			RenderState.bZWrite = true;
 		}
 
-		glClearDepth(Depth);
+		RenDev->glClearDepth(Depth);
 		Flags |= GL_DEPTH_BUFFER_BIT;
 	}
 
 	if(UseStencil && bStencilEnabled){
 		// Same thing as with depth
 		if((RenderState.StencilWriteMask) != 0xFF){
-			glStencilMask(0xFF);
+			RenDev->glStencilMask(0xFF);
 			RenderState.StencilWriteMask = 0xFF;
 		}
 
-		glClearStencil(Stencil);
+		RenDev->glClearStencil(Stencil);
 		Flags |= GL_STENCIL_BUFFER_BIT;
 	}
 
-	glClear(Flags);
+	RenDev->glClear(Flags);
 }
 
 void FOpenGLRenderInterface::SetCullMode(ECullMode CullMode){
@@ -954,10 +956,10 @@ void FOpenGLRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorStri
 	if(!IsHardwareShader || !Result){
 		SetShader(&RenDev->FixedFunctionShader);
 		// Specular is expected to be 1.0 by default for fixed function lighting calculations
-		glVertexAttrib4f(FVF_Specular,  1.0f, 1.0f, 1.0f, 1.0f);
+		RenDev->glVertexAttrib4f(FVF_Specular,  1.0f, 1.0f, 1.0f, 1.0f);
 	}else{
 		// Specular is expected to be zero by default for hardware shaders
-		glVertexAttrib4f(FVF_Specular,  0.0f, 0.0f, 0.0f, 0.0f);
+		RenDev->glVertexAttrib4f(FVF_Specular,  0.0f, 0.0f, 0.0f, 0.0f);
 	}
 
 #if 0
@@ -1058,9 +1060,9 @@ UBOOL FOpenGLRenderInterface::SetHardwareShaderMaterial(UHardwareShader* Hardwar
 		static FPlane Constants[MAX_VERTEX_SHADER_CONSTANTS];
 
 		GetShaderConstants(HardwareShader->VSConstants, Constants, HardwareShader->NumVSConstants);
-		glProgramUniform4fv(CurrentShader->Program, HSU_VSConstants, HardwareShader->NumVSConstants, (GLfloat*)Constants);
+		RenDev->glProgramUniform4fv(CurrentShader->Program, HSU_VSConstants, HardwareShader->NumVSConstants, (GLfloat*)Constants);
 		GetShaderConstants(HardwareShader->PSConstants, Constants, HardwareShader->NumPSConstants);
-		glProgramUniform4fv(CurrentShader->Program, HSU_PSConstants, HardwareShader->NumPSConstants, (GLfloat*)Constants);
+		RenDev->glProgramUniform4fv(CurrentShader->Program, HSU_PSConstants, HardwareShader->NumPSConstants, (GLfloat*)Constants);
 	}
 
 	return 1;
@@ -1090,12 +1092,12 @@ void FOpenGLRenderInterface::CopyBackBufferToTarget(FAuxRenderTarget* Target){
 	if(GLTarget->DepthStencilAttachment && Backbuffer->DepthStencilAttachment)
 		Flags |= GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT;
 
-	glBlitNamedFramebuffer(Backbuffer->FBO,
-	                       GLTarget->FBO,
-	                       0, 0, Backbuffer->Width, Backbuffer->Height,
-	                       0, 0, GLTarget->Width, GLTarget->Height,
-	                       Flags,
-	                       GL_NEAREST);
+	RenDev->glBlitNamedFramebuffer(Backbuffer->FBO,
+	                               GLTarget->FBO,
+	                               0, 0, Backbuffer->Width, Backbuffer->Height,
+	                               0, 0, GLTarget->Width, GLTarget->Height,
+	                               Flags,
+	                               GL_NEAREST);
 }
 
 void FOpenGLRenderInterface::SetStencilOp(ECompareFunction Test, DWORD Ref, DWORD Mask, EStencilOp FailOp, EStencilOp ZFailOp, EStencilOp PassOp, DWORD WriteMask){
@@ -1162,7 +1164,7 @@ INT FOpenGLRenderInterface::SetVertexStreams(EVertexShader Shader, FVertexStream
 	FOpenGLVertexArrayObject& VAO = VAOsByDeclId[appMemhash(VertexStreamDeclarations, sizeof(FStreamDeclaration) * NumStreams)];
 
 	if(!VAO.IsValid())
-		VAO.Init(VertexStreamDeclarations, NumStreams);
+		VAO.Init(RenDev, VertexStreamDeclarations, NumStreams);
 
 	if(&VAO != CurrentState->VAO){
 		RenderState.IndexBuffer = NULL;
@@ -1193,7 +1195,7 @@ INT FOpenGLRenderInterface::SetDynamicStream(EVertexShader Shader, FVertexStream
 	FOpenGLVertexArrayObject& VAO = VAOsByDeclId[appMemhash(&VertexStreamDeclaration, sizeof(FStreamDeclaration))];
 
 	if(!VAO.IsValid())
-		VAO.Init(&VertexStreamDeclaration, 1);
+		VAO.Init(RenDev, &VertexStreamDeclaration, 1);
 
 	if(&VAO != CurrentState->VAO){
 		RenderState.IndexBuffer = NULL;
@@ -1291,15 +1293,15 @@ void FOpenGLRenderInterface::DrawPrimitive(EPrimitiveType PrimitiveType, INT Fir
 	if(RenderState.IndexBuffer){
 		INT IndexSize = RenderState.IndexBuffer->IndexSize;
 
-		glDrawRangeElementsBaseVertex(Mode,
-		                              MinIndex,
-		                              MaxIndex,
-		                              Count,
-		                              IndexSize == sizeof(_WORD) ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT,
-		                              reinterpret_cast<void*>((FirstIndex + CurrentState->IndexBufferBase) * IndexSize),
-		                              CurrentState->VertexBufferBase);
+		RenDev->glDrawRangeElementsBaseVertex(Mode,
+		                                      MinIndex,
+		                                      MaxIndex,
+		                                      Count,
+		                                      IndexSize == sizeof(_WORD) ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT,
+		                                      reinterpret_cast<void*>((FirstIndex + CurrentState->IndexBufferBase) * IndexSize),
+		                                      CurrentState->VertexBufferBase);
 	}else{
-		glDrawArrays(Mode, CurrentState->VertexBufferBase + FirstIndex, Count);
+		RenDev->glDrawArrays(Mode, CurrentState->VertexBufferBase + FirstIndex, Count);
 	}
 
 	unguardSlow;

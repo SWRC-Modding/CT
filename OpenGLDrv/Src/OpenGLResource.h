@@ -2,7 +2,7 @@
 
 #include "../Inc/OpenGLDrv.h"
 #include "../Inc/Shader.h"
-#include "GL/glew.h"
+#include "../Inc/opengl.h"
 
 inline INT GetResourceHashIndex(QWORD CacheId){
 	return ((DWORD)CacheId & 0xfff) ^ (((DWORD)CacheId & 0xff00) >> 4) + (((DWORD)CacheId & 0xf0000) >> 16);

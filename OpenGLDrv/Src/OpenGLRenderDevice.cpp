@@ -384,7 +384,7 @@ UBOOL UOpenGLRenderDevice::SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL
 
 		verify(wglMakeCurrent(DeviceContext, TempContext));
 
-		LoadWGLFuncs();
+		LoadWGLExtFuncs();
 
 		if(wglCreateContextAttribsARB){
 			int Attribs[16];
@@ -411,6 +411,7 @@ UBOOL UOpenGLRenderDevice::SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL
 			if(OpenGLContext){
 				wglMakeCurrent(DeviceContext, OpenGLContext);
 				wglDeleteContext(TempContext);
+				LoadWGLExtFuncs();
 			}else{
 				debugf(NAME_Warning, "wglCreateContextAttribsARB failed");
 				// Use the temp context as a fallback. It might still work if it supports the required OpenGL version.
@@ -454,17 +455,25 @@ UBOOL UOpenGLRenderDevice::SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL
 		}
 
 		GLint NumExtensions = 0;
+		UBOOL SupportsDXTCompression = 0;
 
 		glGetIntegerv(GL_NUM_EXTENSIONS, &NumExtensions);
 
 		for(GLint i = 0; i < NumExtensions; ++i){
 			const TCHAR* Extension = reinterpret_cast<const TCHAR*>(glGetStringi(GL_EXTENSIONS, i));
 
-			if(appStrcmp(Extension, "GL_ARB_texture_filter_anisotropic") == 0 || appStrcmp(Extension, "GL_EXT_texture_filter_anisotropic") == 0){
+			if(!SupportsEXTFilterAnisotropic &&
+			   (appStrcmp(Extension, "GL_ARB_texture_filter_anisotropic") == 0 || appStrcmp(Extension, "GL_EXT_texture_filter_anisotropic") == 0)){
 				SupportsEXTFilterAnisotropic = 1;
-				break;
+			}else if(!SupportsDXTCompression && appStrcmp(Extension, "sGL_EXT_texture_compression_s3tc") == 0){
+				SupportsDXTCompression = 1;
 			}
 		}
+
+		if(!SupportsDXTCompression)
+			appErrorf("OpenGL driver does not support required extension for DXT compression: GL_EXT_texture_compression_s3tc");
+
+		LoadGLExtFuncs();
 
 		// Initialize render interface
 
@@ -902,10 +911,10 @@ void UOpenGLRenderDevice::HandleMovieWindow(UViewport* Viewport){
 	}
 }
 
-void UOpenGLRenderDevice::LoadWGLFuncs(){
+void UOpenGLRenderDevice::LoadWGLExtFuncs(){
 #define WGL_FUNC(name, ret, args) \
 	wgl ## name = reinterpret_cast<ret(OPENGL_CALL*)args>(wglGetProcAddress("wgl" #name));
-	WGL_FUNCS
+	WGL_EXT_FUNCS
 #undef WGL_FUNC
 }
 
@@ -915,6 +924,15 @@ void UOpenGLRenderDevice::LoadGLFuncs(){
 	if(!gl ## name) \
 		appErrorf("Unable to load required opengl function '%s'", "gl" # name);
 	GL_FUNCS
+#undef GL_FUNC
+}
+
+void UOpenGLRenderDevice::LoadGLExtFuncs(){
+#define GL_FUNC(name, ret, args) \
+	gl ## name = reinterpret_cast<ret(OPENGL_CALL*)args>(wglGetProcAddress("gl" #name)); \
+	if(!gl ## name) \
+		appErrorf("Unable to load required opengl extension function '%s'", "gl" # name);
+	GL_EXT_FUNCS
 #undef GL_FUNC
 }
 

@@ -154,18 +154,20 @@ private:
 	UBOOL SupportsWGLSwapIntervalTear;
 	UBOOL SupportsEXTFilterAnisotropic;
 
-	void LoadWGLFuncs();
+	void LoadWGLExtFuncs();
 	void LoadGLFuncs();
+	void LoadGLExtFuncs();
 
 	HMODULE OpenGL32Dll;
 
 public:
 #define WGL_FUNC(name, ret, args) ret(OPENGL_CALL*wgl ## name)args;
 	WGL_BASE_FUNCS
-	WGL_FUNCS
+	WGL_EXT_FUNCS
 #undef WGL_FUNC
 #define GL_FUNC(name, ret, args) ret(OPENGL_CALL*gl ## name)args;
 	GL_BASE_FUNCS
 	GL_FUNCS
+	GL_EXT_FUNCS
 #undef GL_FUNC
 };

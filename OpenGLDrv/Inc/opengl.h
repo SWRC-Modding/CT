@@ -223,7 +223,7 @@ typedef OPENGL_MESSAGE_CALLBACK(opengl_message_callback);
 	WGL_FUNC(GetCurrentContext, HGLRC, (void)) \
 	WGL_FUNC(GetProcAddress, PROC, (const char* ProcName))
 
-#define WGL_FUNCS \
+#define WGL_EXT_FUNCS \
 	WGL_FUNC(GetExtensionsStringARB, const char*, (HDC DeviceContext)) \
 	WGL_FUNC(CreateContextAttribsARB, HGLRC, (HDC DeviceContext, HGLRC ShareContext, const int* AttribList)) \
 	WGL_FUNC(GetSwapIntervalEXT, int, (void)) \
@@ -289,7 +289,6 @@ typedef OPENGL_MESSAGE_CALLBACK(opengl_message_callback);
 	GL_FUNC(DeleteTextures, void, (GLsizei Num, const GLuint* Textures)) \
 	GL_FUNC(BindTextureUnit, void, (GLuint Unit, GLuint Texture)) \
 	GL_FUNC(TextureStorage2D, void, (GLuint Texture, GLsizei Levels, GLenum InternalFormat, GLsizei Width, GLsizei Height)) \
-	GL_FUNC(CompressedTextureImage2DEXT, void, (GLuint Texture, GLenum Target, GLint Level, GLenum InternalFormat, GLsizei Width, GLsizei Height, GLint Border, GLsizei ImageSize, const void* Data)) \
 	GL_FUNC(TextureSubImage2D, void, (GLuint Texture, GLint Level, GLint XOffset, GLint YOffset, GLsizei Width, GLsizei Height, GLenum Format, GLenum Type, const void* Pixels)) \
 	GL_FUNC(TextureSubImage3D, void, (GLuint Texture, GLint Level, GLint XOffset, GLint YOffset, GLint ZOffset, GLsizei Width, GLsizei Height, GLsizei Depth, GLenum Format, GLenum Type, const void* Pixels)) \
 	GL_FUNC(GenerateTextureMipmap, void, (GLuint Texture)) \
@@ -320,3 +319,6 @@ typedef OPENGL_MESSAGE_CALLBACK(opengl_message_callback);
 	GL_FUNC(DrawElementsInstanced, void, (GLenum Mode, GLsizei Count, GLenum Type, const void* Indices, GLsizei PrimCount)) \
 	GL_FUNC(DrawRangeElements, void, (GLenum Mode, GLuint Start, GLuint End, GLsizei Count, GLenum Type, const void* Indices)) \
 	GL_FUNC(DrawRangeElementsBaseVertex, void, (GLenum Mode, GLuint Start, GLuint End, GLsizei Count, GLenum Type, const void* Indices, GLint BaseVertex))
+
+#define GL_EXT_FUNCS \
+	GL_FUNC(CompressedTextureImage2DEXT, void, (GLuint Texture, GLenum Target, GLint Level, GLenum InternalFormat, GLsizei Width, GLsizei Height, GLint Border, GLsizei ImageSize, const void* Data))

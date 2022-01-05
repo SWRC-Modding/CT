@@ -14,7 +14,7 @@ FOpenGLVertexArrayObject::~FOpenGLVertexArrayObject(){
 
 void FOpenGLVertexArrayObject::Init(UOpenGLRenderDevice* InRenDev, const FStreamDeclaration* Declarations, INT NumStreams){
 	checkSlow(VAO == GL_NONE);
-	checkSlow(!RenDev || RenDev == InRenDev);
+	checkSlow(!RenDev);
 
 	RenDev = InRenDev;
 	RenDev->glCreateVertexArrays(1, &VAO);

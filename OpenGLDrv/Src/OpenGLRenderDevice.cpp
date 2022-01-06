@@ -465,7 +465,7 @@ UBOOL UOpenGLRenderDevice::SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL
 			if(!SupportsEXTFilterAnisotropic &&
 			   (appStrcmp(Extension, "GL_ARB_texture_filter_anisotropic") == 0 || appStrcmp(Extension, "GL_EXT_texture_filter_anisotropic") == 0)){
 				SupportsEXTFilterAnisotropic = 1;
-			}else if(!SupportsDXTCompression && appStrcmp(Extension, "sGL_EXT_texture_compression_s3tc") == 0){
+			}else if(!SupportsDXTCompression && appStrcmp(Extension, "GL_EXT_texture_compression_s3tc") == 0){
 				SupportsDXTCompression = 1;
 			}
 		}
@@ -929,9 +929,7 @@ void UOpenGLRenderDevice::LoadGLFuncs(){
 
 void UOpenGLRenderDevice::LoadGLExtFuncs(){
 #define GL_FUNC(name, ret, args) \
-	gl ## name = reinterpret_cast<ret(OPENGL_CALL*)args>(wglGetProcAddress("gl" #name)); \
-	if(!gl ## name) \
-		appErrorf("Unable to load required opengl extension function '%s'", "gl" # name);
+	gl ## name = reinterpret_cast<ret(OPENGL_CALL*)args>(wglGetProcAddress("gl" #name));
 	GL_EXT_FUNCS
 #undef GL_FUNC
 }

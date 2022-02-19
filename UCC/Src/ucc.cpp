@@ -79,6 +79,19 @@ int __cdecl main(int argc, char** argv){
 				// Print full path of source files in error messages
 				if(ParseParam(appCmdLine(), "FullSourcePath") && GSys->SourcePath.Len() > 1 && GSys->SourcePath[1] != ':')
 					GSys->SourcePath = FStringTemp(appBaseDir()) * GSys->SourcePath;
+
+				if(ParseParam(appCmdLine(), "Clean")){
+					FConfigSection* ConfigSection = GConfig->GetSectionPrivate("Editor.EditorEngine", 0, 0);
+
+					if(ConfigSection){
+						TArray<FConfigString> Packages;
+
+						ConfigSection->MultiFind("EditPackages", Packages);
+
+						for(TArray<FConfigString>::TIterator It(Packages); It; ++It)
+							GFileManager->Delete(*(FStringTemp(appBaseDir()) * *It + ".u"), 1);
+					}
+				}
 			}
 
 			UClass* Class = LoadClass<UCommandlet>(NULL, *ClassName, NULL, LoadFlags, NULL);

@@ -26,8 +26,10 @@ static void ShowBanner(FOutputDevice& Out){
 
 static void ShowCommandletHelp(UCommandlet* Commandlet, FOutputDevice& Out){
 	Commandlet->LoadLocalized();
+	Out.Log(Commandlet->HelpOneLiner);
 
 	if(Commandlet->HelpUsage.Len() > 0){
+		Out.Log("");
 		Out.Log("Usage:");
 		Out.Logf("    ucc %s", *Commandlet->HelpUsage);
 	}

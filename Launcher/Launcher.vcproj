@@ -22,6 +22,7 @@
 				AdditionalOptions="/FC"
 				RuntimeLibrary="2"
 				StructMemberAlignment="3"
+				ForceConformanceInForLoopScope="TRUE"
 				WarningLevel="4"
 				WarnAsError="TRUE"
 				DebugInformationFormat="3"
@@ -64,6 +65,7 @@
 				PreprocessorDefinitions="DO_CHECK_SLOW=1;DO_GUARD_SLOW=1;DO_CLOCK_SLOW=1"
 				RuntimeLibrary="2"
 				StructMemberAlignment="3"
+				ForceConformanceInForLoopScope="TRUE"
 				WarningLevel="4"
 				DebugInformationFormat="3"
 				CallingConvention="1"/>

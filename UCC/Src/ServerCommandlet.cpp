@@ -29,7 +29,7 @@ DWORD WINAPI UpdateServerConsoleInput(PVOID){
 }
 
 // Replacement for UServerCommandlet::Main since the one from Engine.dll crashes because it doesn't assign a value to GEngine
-void UServerCommandletMain(){
+INT UServerCommandletMain(){
 	FString Language;
 
 	if(GConfig->GetFString("Engine.Engine", "Language", Language, "System.ini"))
@@ -94,4 +94,6 @@ void UServerCommandletMain(){
 	}
 
 	GIsRunning = 0;
+
+	return 0;
 }

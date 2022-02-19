@@ -24,7 +24,34 @@ static void ShowBanner(FOutputDevice& Out){
 	Out.Log("");
 }
 
-static FString ResolveCommandletClassName(FString ClassName, const TArray<FRegistryObjectInfo>& List){
+static void ShowCommandletHelp(UCommandlet* Commandlet, FOutputDevice& Out){
+	Commandlet->LoadLocalized();
+
+	if(Commandlet->HelpUsage.Len() > 0){
+		Out.Log("Usage:");
+		Out.Logf("    ucc %s", *Commandlet->HelpUsage);
+	}
+
+	if(Commandlet->HelpParm[0].Len() > 0){
+		Out.Log("");
+		Out.Log("Parameters:");
+
+		for(INT i = 0; i < ARRAY_COUNT(Commandlet->HelpParm); ++i){
+			if(Commandlet->HelpParm[i].Len() > 0 || Commandlet->HelpDesc[i].Len() > 0)
+				Out.Logf("    %-20s %s", *Commandlet->HelpParm[i], *Commandlet->HelpDesc[i]);
+			else
+				break;
+		}
+	}
+
+	if(Commandlet->HelpWebLink.Len() > 0){
+		Out.Log("");
+		Out.Log("For more info, see");
+		Out.Logf("    %s", *Commandlet->HelpWebLink);
+	}
+}
+
+static FString ResolveCommandletClassName(const FString& ClassName, const TArray<FRegistryObjectInfo>& List){
 	for(int i = 0; i < List.Num(); ++i){ // Look Token up in list and autocomplete class name if found
 		FString FullName = List[i].Object;
 		FString ShortName = FullName;
@@ -34,9 +61,7 @@ static FString ResolveCommandletClassName(FString ClassName, const TArray<FRegis
 
 		if(ClassName == FullName || ClassName + "Commandlet" == FullName ||  // Check against "PackageName.ClassName (+ Commandlet)"
 		   ClassName == ShortName || ClassName + "Commandlet" == ShortName){ // Check against "ClassName (+ Commandlet)"
-			ClassName = List[i].Object;
-
-			break;
+			return List[i].Object;
 		}
 	}
 
@@ -63,7 +88,6 @@ int __cdecl main(int argc, char** argv){
 		UObject::SetLanguage("int");
 		// Initialize global state
 		GIsUCC = GIsClient = GIsServer = GIsEditor = GIsScriptable = GLazyLoad = 1;
-		GLazyLoad = 0;
 
 		if(argc > 1){
 			bool ShowHelp = appStricmp(argv[1], "help") == 0;
@@ -95,32 +119,7 @@ int __cdecl main(int argc, char** argv){
 							UClass* Class = LoadClass<UCommandlet>(NULL, *It->Object, NULL, LoadFlags, NULL);
 
 							if(Class){
-								UCommandlet* Default = Cast<UCommandlet>(Class->GetDefaultObject());
-								Default->LoadLocalized();
-
-								if(Default->HelpUsage.Len() > 0){
-									Warn.Log("Usage:");
-									Warn.Logf("    ucc %s", *Default->HelpUsage);
-								}
-
-								if(Default->HelpParm[0].Len() > 0){
-									Warn.Log("");
-									Warn.Log("Parameters:");
-
-									for(INT i = 0; i < ARRAY_COUNT(Default->HelpParm); ++i){
-										if(Default->HelpParm[i].Len() > 0 || Default->HelpDesc[i].Len() > 0)
-											Warn.Logf("    %-16s %s", *Default->HelpParm[i], *Default->HelpDesc[i]);
-										else
-											break;
-									}
-								}
-
-								if(Default->HelpWebLink.Len() > 0){
-									Warn.Log("");
-									Warn.Log("For more info, see");
-									Warn.Logf("    %s", *Default->HelpWebLink);
-								}
-
+								ShowCommandletHelp(static_cast<UCommandlet*>(Class->GetDefaultObject()), Warn);
 								FoundSpecializedHelp = true;
 							}
 
@@ -137,10 +136,20 @@ int __cdecl main(int argc, char** argv){
 					}
 				}
 
-				if(!ShowSpecializedHelp)
+				if(!ShowSpecializedHelp){
 					Warn.Log("    help <command>       Get help on a command");
-				else if(!FoundSpecializedHelp)
-					Warn.Logf("    Unable to show help: Commandlet %s not found", *ClassName);
+				}else if(!FoundSpecializedHelp){
+					// Allow showing help for a commandlet that is not in the registry objects list
+					UClass* Class = LoadClass<UCommandlet>(NULL, *ClassName, NULL, LoadFlags, NULL);
+
+					if(!Class)
+						Class = LoadClass<UCommandlet>(NULL, *(ClassName + "Commandlet"), NULL, LoadFlags, NULL);
+
+					if(Class)
+						ShowCommandletHelp(static_cast<UCommandlet*>(Class->GetDefaultObject()), Warn);
+					else
+						Warn.Logf("    Unable to show help: Commandlet %s not found", *ClassName);
+				}
 			}else{
 				ClassName = ResolveCommandletClassName(ClassName, List);
 

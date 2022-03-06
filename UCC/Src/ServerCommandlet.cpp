@@ -1,29 +1,51 @@
-#include <stdio.h>
-#include <conio.h>
 #include "../../Engine/Inc/Engine.h"
 
 // Variables for ServerCommandlet
 
-FString CurrentCmd; // Contains the next command that is to be passed to UEngine::Exec and is gathered by the input thread
-					// the command is then executed by the main thread to avoid issues
+static const TCHAR* CurrentConsoleCommand;
 
 /*
  * Allows user input in the console while running a server.
  * This function runs in a separate thread in order to not having
  * to pause the main loop while waiting for input.
  */
-DWORD WINAPI UpdateServerConsoleInput(PVOID){
-	TCHAR Cmd[1024];
+static DWORD WINAPI UpdateServerConsoleInput(PVOID){
+	HANDLE InputHandle = CreateFileA("CONIN$", GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ, 0, OPEN_EXISTING, 0, 0);
+
+	if(!InputHandle)
+		return 1;
 
 	while(GIsRunning && !GIsRequestingExit){
-		if(_kbhit() && fgets(Cmd, sizeof(Cmd), stdin)){
-			Cmd[appStrlen(Cmd) - 1] = '\0'; // Removing newline added by fgets
-			CurrentCmd = Cmd; // Updating CurrentCmd so that it can be executed by the main thread
-		}
+		TCHAR ConsoleCommandBuffer[512];
 
-		if(!_kbhit())
-			appSleep(0.1f); // To keep the cpu usage down if there's no input
+		if(!CurrentConsoleCommand){
+			DWORD InputLen;
+			ReadConsoleA(InputHandle, ConsoleCommandBuffer, ARRAY_COUNT(ConsoleCommandBuffer) - 1, &InputLen, NULL);
+
+			if(InputLen > 0){
+				TCHAR* Cmd = ConsoleCommandBuffer;
+
+				// Trim spaces from command
+
+				while(InputLen > 0 && appIsSpace(Cmd[InputLen - 1]))
+					--InputLen;
+
+				Cmd[InputLen] = '\0';
+
+				while(InputLen > 0 && appIsSpace(*Cmd)){
+					++Cmd;
+					--InputLen;
+				}
+
+				if(InputLen > 0)
+					CurrentConsoleCommand = Cmd;
+			}
+		}else{
+			Sleep(100);
+		}
 	}
+
+	CloseHandle(InputHandle);
 
 	return 0;
 }
@@ -37,14 +59,11 @@ INT UServerCommandletMain(){
 
 	UClass* EngineClass = LoadClass<UEngine>(NULL, "ini:Engine.Engine.GameEngine", NULL, LOAD_NoFail, NULL);
 
-	// Literally the only reason for this function to be rewritten
-	// The original one doesn't assign a value to GEngine which leads to a gpf...
 	GEngine = ConstructObject<UEngine>(EngineClass);
-
 	GEngine->Init();
 
-	// Creating input thread
-	CreateThread(NULL, 0, UpdateServerConsoleInput, NULL, 0, NULL);
+	// Create input thread
+	HANDLE InputThread = CreateThread(NULL, 0, UpdateServerConsoleInput, NULL, 0, NULL);
 
 	DOUBLE OldTime = appSeconds();
 	DOUBLE SecondStartTime = OldTime;
@@ -56,14 +75,13 @@ INT UServerCommandletMain(){
 	while(GIsRunning && !GIsRequestingExit){
 		DOUBLE NewTime = appSeconds();
 
-		// Executing console commands that are gathered by UpdateServerConsoleInput in a different thread
-		if(CurrentCmd.Len() > 0){
-			if(CurrentCmd == "CLS") // In case user wants to clear screen. Can be useful for testing.
+		if(CurrentConsoleCommand){
+			if(appStricmp(CurrentConsoleCommand, "CLS") == 0) // In case user wants to clear screen. Can be useful for testing.
 				system("cls"); // Hate using system but it's ok here
-			else if(!GEngine->Exec(*CurrentCmd, *GWarn))
+			else if(!GEngine->Exec(CurrentConsoleCommand, *GWarn))
 				GWarn->Log(LocalizeError("Exec", "Core"));
 
-			CurrentCmd.Empty();
+			CurrentConsoleCommand = NULL;
 		}
 
 		// Update the world
@@ -94,6 +112,9 @@ INT UServerCommandletMain(){
 	}
 
 	GIsRunning = 0;
+
+	WaitForSingleObject(InputThread, INFINITE);
+	CloseHandle(InputThread);
 
 	return 0;
 }

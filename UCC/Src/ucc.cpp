@@ -141,7 +141,7 @@ int __cdecl main(int argc, char** argv){
 				if(!ShowSpecializedHelp){
 					Warn.Log("    help <command>       Get help on a command");
 				}else if(!FoundSpecializedHelp){
-					// Allow showing help for a commandlet that is not in the registry objects list
+					// Show help for a commandlet that is not in the registry objects list
 					UClass* Class = LoadClass<UCommandlet>(NULL, *ClassName, NULL, LoadFlags, NULL);
 
 					if(!Class)
@@ -155,7 +155,7 @@ int __cdecl main(int argc, char** argv){
 			}else{
 				ClassName = ResolveCommandletClassName(ClassName, List);
 
-				if(ClassName == "Editor.MakeCommandlet")
+				if(ClassName == "Editor.Make" || ClassName == "Editor.MakeCommandlet")
 					LoadFlags |= LOAD_DisallowFiles;
 
 				UClass* Class = LoadClass<UCommandlet>(NULL, *ClassName, NULL, LoadFlags, NULL);

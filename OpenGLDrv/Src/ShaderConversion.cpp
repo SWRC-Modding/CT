@@ -243,47 +243,25 @@ FStringTemp UOpenGLRenderDevice::GLSLShaderFromD3DHardwareShader(UHardwareShader
 
 	for(INT i = 0; i < Shader->StreamMapping.Num(); ++i){
 		switch(Shader->StreamMapping[i]){
-		case FVF_Position:
-			VertexAttributes += FString::Printf("#define v%i InPosition\n", i);
-			break;
-		case FVF_Normal:
-			VertexAttributes += FString::Printf("#define v%i InNormal\n", i);
-			break;
-		case FVF_Diffuse:
-			VertexAttributes += FString::Printf("#define v%i InDiffuse\n", i);
-			break;
-		case FVF_Specular:
-			VertexAttributes += FString::Printf("#define v%i InSpecular\n", i);
-			break;
-		case FVF_TexCoord0:
-			VertexAttributes += FString::Printf("#define v%i InTexCoord0\n", i);
-			break;
-		case FVF_TexCoord1:
-			VertexAttributes += FString::Printf("#define v%i InTexCoord1\n", i);
-			break;
-		case FVF_TexCoord2:
-			VertexAttributes += FString::Printf("#define v%i InTexCoord2\n", i);
-			break;
-		case FVF_TexCoord3:
-			VertexAttributes += FString::Printf("#define v%i InTexCoord3\n", i);
-			break;
-		case FVF_TexCoord4:
-			VertexAttributes += FString::Printf("#define v%i InTexCoord4\n", i);
-			break;
-		case FVF_TexCoord5:
-			VertexAttributes += FString::Printf("#define v%i InTexCoord5\n", i);
-			break;
-		case FVF_TexCoord6:
-			VertexAttributes += FString::Printf("#define v%i InTexCoord6\n", i);
-			break;
-		case FVF_TexCoord7:
-			VertexAttributes += FString::Printf("#define v%i InTexCoord7\n", i);
-			break;
-		case FVF_Tangent:
-			VertexAttributes += FString::Printf("#define v%i InTangent\n", i);
-			break;
-		case FVF_Binormal:
-			VertexAttributes += FString::Printf("#define v%i InBinormal\n", i);
+#define VERTEX_ATTRIB(name) \
+	case FVF_ ## name: \
+		VertexAttributes += FString::Printf("#define v%i In" #name "\n", i); \
+		break;
+		VERTEX_ATTRIB(Position);
+		VERTEX_ATTRIB(Normal);
+		VERTEX_ATTRIB(Diffuse);
+		VERTEX_ATTRIB(Specular);
+		VERTEX_ATTRIB(TexCoord0);
+		VERTEX_ATTRIB(TexCoord1);
+		VERTEX_ATTRIB(TexCoord2);
+		VERTEX_ATTRIB(TexCoord3);
+		VERTEX_ATTRIB(TexCoord4);
+		VERTEX_ATTRIB(TexCoord5);
+		VERTEX_ATTRIB(TexCoord6);
+		VERTEX_ATTRIB(TexCoord7);
+		VERTEX_ATTRIB(Tangent);
+		VERTEX_ATTRIB(Binormal);
+#undef VERTEX_ATTRIB
 		}
 	}
 

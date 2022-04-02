@@ -202,6 +202,8 @@ public:
 
 	TMap<DWORD, FOpenGLVertexArrayObject> VAOsByDeclId;
 
+	FPlane                                ShaderConstants[MAX_VERTEX_SHADER_CONSTANTS];
+
 	// Functions
 
 	FOpenGLRenderInterface(UOpenGLRenderDevice* InRenDev);
@@ -266,4 +268,6 @@ private:
 	void GetShaderConstants(FSConstantsInfo* Info, FPlane* Constants, INT NumConstants);
 	void SetTexture(FBaseTexture* Texture, INT TextureIndex, FLOAT BumpSize = 0.0f);
 	void SetBitmapTexture(UBitmapMaterial* Bitmap, INT TextureIndex, FLOAT BumpSize = 0.0f);
+
+	bool SetParticleMaterial(UParticleMaterial* Material, const FModifierInfo& Modifiers);
 };

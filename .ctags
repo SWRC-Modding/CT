@@ -25,3 +25,4 @@
 --regex-unrealscript=/^[ \t]*[sS]imulated[ \t]*(.*)[ \t]+([a-zA-Z0-9_]+)\(/\2/i,simulated/
 --regex-unrealscript=/^[ \t]*[eE]vent[ \t]*[^ \t]*[ \t]+([a-zA-Z0-9_]+)\(/\1/e,event/
 --regex-unrealscript=/^[ \t]*[fF]unction[ \t]*(.*)[ \t]+([a-zA-Z0-9_]+)\(/\2/f,function/
+-I

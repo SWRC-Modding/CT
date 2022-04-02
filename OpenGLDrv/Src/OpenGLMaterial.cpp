@@ -185,7 +185,7 @@ void FOpenGLRenderInterface::GetShaderConstants(FSConstantsInfo* Info, FPlane* C
 				BYTE ConstantType = Info[i].Type;
 
 				if(ConstantType == EVC_SpotlightDirection){
-					if(Spotlight && Spotlight->Actor->LightCone > 0){
+					if(Spotlight && Spotlight->Actor && Spotlight->Actor->LightCone > 0){
 						Constants[i].X = Spotlight->Direction.X;
 						Constants[i].Y = Spotlight->Direction.Y;
 						Constants[i].Z = Spotlight->Direction.Z;
@@ -199,7 +199,7 @@ void FOpenGLRenderInterface::GetShaderConstants(FSConstantsInfo* Info, FPlane* C
 
 					continue;
 				}else if(ConstantType == EVC_SpotlightCosCone){
-					if(Spotlight && Spotlight->Actor->LightCone > 0){
+					if(Spotlight && Spotlight->Actor && Spotlight->Actor->LightCone > 0){
 						FLOAT CosCone = Spotlight->Actor->LightCone * 0.00097659999f;
 
 						Constants[i].X = Square(1.0f - CosCone) * 1.075f;
@@ -390,3 +390,6 @@ void FOpenGLRenderInterface::SetBitmapTexture(UBitmapMaterial* Bitmap, INT Textu
 	SetTexture(Texture, TextureIndex, BumpSize);
 }
 
+bool FOpenGLRenderInterface::SetParticleMaterial(UParticleMaterial* Material, const FModifierInfo& Modifiers){
+	return false;
+}

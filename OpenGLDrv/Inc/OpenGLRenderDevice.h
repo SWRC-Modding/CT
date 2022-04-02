@@ -26,6 +26,7 @@ public:
 	UBOOL          bKeepAspectRatio;
 	UBOOL          bBilinearFramebuffer;
 	UBOOL          bAutoReloadShaders;
+	UBOOL          bShowDebugNotifications;
 	ETextureFilter TextureFilter;
 	INT            TextureAnisotropy;
 
@@ -101,7 +102,6 @@ private:
 	UBOOL                               bVSync;
 	UBOOL                               bAdaptiveVSync;
 	UBOOL                               bDebugOpenGL;
-	UBOOL                               bShowDebugNotifications;
 	UBOOL                               bIsFullscreen;
 	INT                                 SavedViewportWidth;
 	INT                                 SavedViewportHeight;

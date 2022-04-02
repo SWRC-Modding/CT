@@ -243,7 +243,7 @@ static OPENGL_MESSAGE_CALLBACK(OpenGLMessageCallback){
 		SeverityStr = "unknown";
 	}
 
-	if(Severity != GL_DEBUG_SEVERITY_NOTIFICATION)
+	if(Severity != GL_DEBUG_SEVERITY_NOTIFICATION || ((UOpenGLRenderDevice*)UserParam)->bShowDebugNotifications)
 		debugf("GL CALLBACK: source=%s, type=%s, severity=%s - %s", SourceStr, TypeStr, SeverityStr, Message);
 
 	if(Type == GL_DEBUG_TYPE_ERROR){
@@ -442,7 +442,7 @@ UBOOL UOpenGLRenderDevice::SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL
 		if(bDebugOpenGL){
 			glEnable(GL_DEBUG_OUTPUT);
 			glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
-			glDebugMessageCallback(OpenGLMessageCallback, NULL);
+			glDebugMessageCallback(OpenGLMessageCallback, this);
 		}
 
 		// Check for extensions

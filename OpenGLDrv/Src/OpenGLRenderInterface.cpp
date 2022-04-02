@@ -30,7 +30,6 @@ void FOpenGLVertexArrayObject::Init(UOpenGLRenderDevice* InRenDev, const FStream
 			checkSlow(Function < FVF_MAX);
 			checkSlow(Type < CT_MAX);
 
-
 			switch(Type){
 			case CT_Float4:
 				RenDev->glVertexArrayAttribFormat(VAO, Function, 4, GL_FLOAT, GL_FALSE, Offset);
@@ -925,9 +924,10 @@ void FOpenGLRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorStri
 	Material->PreSetMaterial(GEngineTime);
 
 	UModifier* Modifier = Cast<UModifier>(Material);
+	FModifierInfo ModifierInfo;
 
 	if(Modifier){
-		Material = RemoveModifiers(Cast<UModifier>(Material), NULL);
+		Material = RemoveModifiers(Cast<UModifier>(Material), &ModifierInfo);
 
 		if(!Material){
 			SetShader(&RenDev->ErrorShader);
@@ -942,7 +942,7 @@ void FOpenGLRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorStri
 		}
 	}
 
-	bool Result = false;
+	bool Result = true; // FIXME: Make false by default
 	bool IsHardwareShader = false;
 
 	if(Material->IsA<UHardwareShaderWrapper>()){
@@ -951,15 +951,21 @@ void FOpenGLRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorStri
 	}else if(Material->IsA<UHardwareShader>()){
 		Result = SetHardwareShaderMaterial(static_cast<UHardwareShader*>(Material), ErrorString, ErrorMaterial) != 0;
 		IsHardwareShader = true;
+	}else if(Material->IsA<UParticleMaterial>()){
+		Result = SetParticleMaterial(static_cast<UParticleMaterial*>(Material), ModifierInfo);
 	}
 
-	if(!IsHardwareShader || !Result){
-		SetShader(&RenDev->FixedFunctionShader);
-		// Specular is expected to be 1.0 by default for fixed function lighting calculations
-		RenDev->glVertexAttrib4f(FVF_Specular,  1.0f, 1.0f, 1.0f, 1.0f);
+	if(Result){
+		if(IsHardwareShader){
+			// Specular is expected to be zero by default for hardware shaders
+			RenDev->glVertexAttrib4f(FVF_Specular,  0.0f, 0.0f, 0.0f, 0.0f);
+		}else{
+			SetShader(&RenDev->FixedFunctionShader);
+			// Specular is expected to be 1.0 by default for fixed function lighting calculations
+			RenDev->glVertexAttrib4f(FVF_Specular,  1.0f, 1.0f, 1.0f, 1.0f);
+		}
 	}else{
-		// Specular is expected to be zero by default for hardware shaders
-		RenDev->glVertexAttrib4f(FVF_Specular,  0.0f, 0.0f, 0.0f, 0.0f);
+		SetShader(&RenDev->ErrorShader);
 	}
 
 #if 0
@@ -1016,32 +1022,31 @@ UBOOL FOpenGLRenderInterface::SetHardwareShaderMaterial(UHardwareShader* Hardwar
 
 	SetShader(RenDev->GetShader(HardwareShader));
 
-	CurrentState->bZTest = HardwareShader->ZTest != 0;
-	CurrentState->bZWrite = HardwareShader->ZWrite != 0;
-
-	if(HardwareShader->AlphaTest)
-		CurrentState->AlphaRef = HardwareShader->AlphaRef / 255.0f;
-
-	if(HardwareShader->AlphaBlending){
-		CurrentState->SrcBlend = GetBlendFunc(HardwareShader->SrcBlend);
-		CurrentState->DstBlend = GetBlendFunc(HardwareShader->DestBlend);
-	}
-
-	for(INT i = 0; i < MAX_TEXTURES; ++i){
-		if(HardwareShader->Textures[i]){
-			SetBitmapTexture(HardwareShader->Textures[i], i, HardwareShader->BumpSettings[i].BumpSize);
-			CurrentState->NumTextures = i + 1;
-		}
-	}
-
 	if(!CurrentShader->IsErrorShader){
+		CurrentState->bZTest = HardwareShader->ZTest != 0;
+		CurrentState->bZWrite = HardwareShader->ZWrite != 0;
+
+		if(HardwareShader->AlphaTest)
+			CurrentState->AlphaRef = HardwareShader->AlphaRef / 255.0f;
+
+		if(HardwareShader->AlphaBlending){
+			CurrentState->SrcBlend = GetBlendFunc(HardwareShader->SrcBlend);
+			CurrentState->DstBlend = GetBlendFunc(HardwareShader->DestBlend);
+		}
+
+		for(INT i = 0; i < MAX_TEXTURES; ++i){
+			if(HardwareShader->Textures[i]){
+				SetBitmapTexture(HardwareShader->Textures[i], i, HardwareShader->BumpSettings[i].BumpSize);
+				CurrentState->NumTextures = i + 1;
+			}
+		}
+
 		// Cache number of vertex and pixel shader constants
 
 		if(HardwareShader->NumVSConstants <= 0){
 			for(INT i = MAX_VERTEX_SHADER_CONSTANTS - 1; i >= 0; --i){
 				if(HardwareShader->VSConstants[i].Type != EVC_Unused){
 					HardwareShader->NumVSConstants = i + GetShaderConstantNumSlots(HardwareShader->VSConstants[i].Type);
-
 					break;
 				}
 			}
@@ -1051,18 +1056,15 @@ UBOOL FOpenGLRenderInterface::SetHardwareShaderMaterial(UHardwareShader* Hardwar
 			for(INT i = MAX_PIXEL_SHADER_CONSTANTS - 1; i >= 0; --i){
 				if(HardwareShader->PSConstants[i].Type != EVC_Unused){
 					HardwareShader->NumPSConstants = i + GetShaderConstantNumSlots(HardwareShader->PSConstants[i].Type);
-
 					break;
 				}
 			}
 		}
 
-		static FPlane Constants[MAX_VERTEX_SHADER_CONSTANTS];
-
-		GetShaderConstants(HardwareShader->VSConstants, Constants, HardwareShader->NumVSConstants);
-		RenDev->glProgramUniform4fv(CurrentShader->Program, HSU_VSConstants, HardwareShader->NumVSConstants, (GLfloat*)Constants);
-		GetShaderConstants(HardwareShader->PSConstants, Constants, HardwareShader->NumPSConstants);
-		RenDev->glProgramUniform4fv(CurrentShader->Program, HSU_PSConstants, HardwareShader->NumPSConstants, (GLfloat*)Constants);
+		GetShaderConstants(HardwareShader->VSConstants, ShaderConstants, HardwareShader->NumVSConstants);
+		RenDev->glProgramUniform4fv(CurrentShader->Program, HSU_VSConstants, HardwareShader->NumVSConstants, (GLfloat*)ShaderConstants);
+		GetShaderConstants(HardwareShader->PSConstants, ShaderConstants, HardwareShader->NumPSConstants);
+		RenDev->glProgramUniform4fv(CurrentShader->Program, HSU_PSConstants, HardwareShader->NumPSConstants, (GLfloat*)ShaderConstants);
 	}
 
 	return 1;

@@ -41,7 +41,8 @@
 			<Tool
 				Name="VCMIDLTool"/>
 			<Tool
-				Name="VCPostBuildEventTool"/>
+				Name="VCPostBuildEventTool"
+				CommandLine="copy &quot;$(ProjectDir)\Mod.int&quot; &quot;$(OutDir)\Mod.int&quot;"/>
 			<Tool
 				Name="VCPreBuildEventTool"/>
 			<Tool
@@ -80,7 +81,8 @@
 			<Tool
 				Name="VCMIDLTool"/>
 			<Tool
-				Name="VCPostBuildEventTool"/>
+				Name="VCPostBuildEventTool"
+				CommandLine="copy &quot;$(ProjectDir)\Mod.int&quot; &quot;$(OutDir)\Mod.int&quot;"/>
 			<Tool
 				Name="VCPreBuildEventTool"/>
 			<Tool

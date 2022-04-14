@@ -252,8 +252,4 @@ defaultproperties
 	ShowKillerHealthAndShields=true
 	ShowMOTD=true
 	MOTDInterval=60.0
-	ServiceClasses(0)="ModMPGame.AdminAuthentication"
-	ServiceClasses(1)="ModMPGame.AdminCommands"
-	ServiceClasses(2)="ModMPGame.BotSupport"
-	ServiceClasses(3)="ModMPGame.SkinChanger"
 }

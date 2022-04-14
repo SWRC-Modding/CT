@@ -38,7 +38,12 @@ private:
 IMPLEMENT_CLASS(UExportBumpMapsCommandlet)
 
 void UExportBumpMapsCommandlet::StaticConstructor(){
-	IsEditor = 1;
+	LogToStdout     = 0;
+	IsClient        = 1;
+	IsEditor        = 1;
+	IsServer        = 1;
+	LazyLoad        = 1;
+	ShowErrorCount  = 0;
 }
 
 INT UExportBumpMapsCommandlet::Main(const TCHAR* Parms){

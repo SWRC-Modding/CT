@@ -25,6 +25,7 @@ public:
 	UBOOL          bUseDesktopResolution;
 	UBOOL          bKeepAspectRatio;
 	UBOOL          bBilinearFramebuffer;
+	UBOOL          bSaveShadersToDisk;
 	UBOOL          bAutoReloadShaders;
 	UBOOL          bShowDebugNotifications;
 	ETextureFilter TextureFilter;

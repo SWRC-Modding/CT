@@ -38,6 +38,7 @@ void UOpenGLRenderDevice::StaticConstructor(){
 	new(GetClass(), "UseDesktopResolution",   RF_Public) UBoolProperty(CPP_PROPERTY(bUseDesktopResolution),   "Options", CPF_Config);
 	new(GetClass(), "KeepAspectRatio",        RF_Public) UBoolProperty(CPP_PROPERTY(bKeepAspectRatio),        "Options", CPF_Config);
 	new(GetClass(), "BilinearFramebuffer",    RF_Public) UBoolProperty(CPP_PROPERTY(bBilinearFramebuffer),    "Options", CPF_Config);
+	new(GetClass(), "SaveShadersToDisk",      RF_Public) UBoolProperty(CPP_PROPERTY(bSaveShadersToDisk),      "Options", CPF_Config);
 	new(GetClass(), "AutoReloadShaders",      RF_Public) UBoolProperty(CPP_PROPERTY(bAutoReloadShaders),      "Options", CPF_Config);
 	new(GetClass(), "TextureFilter",          RF_Public) UByteProperty(CPP_PROPERTY(TextureFilter),           "Options", CPF_Config);
 	new(GetClass(), "TextureAnisotropy",      RF_Public) UIntProperty (CPP_PROPERTY(TextureAnisotropy),       "Options", CPF_Config);
@@ -129,7 +130,9 @@ FShaderGLSL* UOpenGLRenderDevice::GetShader(UHardwareShader* HardwareShader){
 
 			if(!LoadShader(Shader)){
 				Shader->SetShaderCode(GLSLShaderFromD3DHardwareShader(HardwareShader));
-				SaveShader(Shader);
+
+				if(bSaveShadersToDisk)
+					SaveShader(Shader);
 			}
 		}else{
 			Shader->SetShaderCode(GLSLShaderFromD3DHardwareShader(HardwareShader));
@@ -741,17 +744,17 @@ void UOpenGLRenderDevice::TakeScreenshot(const TCHAR* Name, UViewport* Viewport,
 }
 
 void UOpenGLRenderDevice::LoadShaders(){
-	if(!LoadShader(&FixedFunctionShader))
+	if(!LoadShader(&FixedFunctionShader) && bSaveShadersToDisk)
 		SaveShader(&FixedFunctionShader);
 
 	for(TMap<UHardwareShader*, FShaderGLSL>::TIterator It(GLShaderByHardwareShader); It; ++It){
 		if(!It.Key()->IsIn(UObject::GetTransientPackage())){
-			if(!LoadShader(&It.Value()))
+			if(!LoadShader(&It.Value()) && bSaveShadersToDisk)
 				SaveShader(&It.Value());
 		}
 	}
 
-	if(!LoadShaderMacroText())
+	if(!LoadShaderMacroText() && bSaveShadersToDisk)
 		SaveShaderMacroText();
 }
 

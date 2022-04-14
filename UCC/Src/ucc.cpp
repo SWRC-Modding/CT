@@ -26,8 +26,10 @@ static void ShowBanner(FOutputDevice& Out){
 
 static void ShowCommandletHelp(UCommandlet* Commandlet, FOutputDevice& Out){
 	Commandlet->LoadLocalized();
+	Out.Log(Commandlet->HelpOneLiner);
 
 	if(Commandlet->HelpUsage.Len() > 0){
+		Out.Log("");
 		Out.Log("Usage:");
 		Out.Logf("    ucc %s", *Commandlet->HelpUsage);
 	}
@@ -139,7 +141,7 @@ int __cdecl main(int argc, char** argv){
 				if(!ShowSpecializedHelp){
 					Warn.Log("    help <command>       Get help on a command");
 				}else if(!FoundSpecializedHelp){
-					// Allow showing help for a commandlet that is not in the registry objects list
+					// Show help for a commandlet that is not in the registry objects list
 					UClass* Class = LoadClass<UCommandlet>(NULL, *ClassName, NULL, LoadFlags, NULL);
 
 					if(!Class)
@@ -153,7 +155,7 @@ int __cdecl main(int argc, char** argv){
 			}else{
 				ClassName = ResolveCommandletClassName(ClassName, List);
 
-				if(ClassName == "Editor.MakeCommandlet")
+				if(ClassName == "Editor.Make" || ClassName == "Editor.MakeCommandlet")
 					LoadFlags |= LOAD_DisallowFiles;
 
 				UClass* Class = LoadClass<UCommandlet>(NULL, *ClassName, NULL, LoadFlags, NULL);
@@ -174,6 +176,20 @@ int __cdecl main(int argc, char** argv){
 					GIsEditor = Default->IsEditor;
 					GIsServer = Default->IsServer;
 					GLazyLoad = Default->LazyLoad;
+
+					if(GIsEditor){
+						List.Empty();
+						UObject::GetRegistryObjects(List, UClass::StaticClass(), UExporter::StaticClass(), 0);
+
+						for(INT i = 0; i < List.Num(); i++)
+							UObject::StaticLoadClass(UExporter::StaticClass(), NULL, *List[i].Object, NULL, LoadFlags, NULL);
+
+						List.Empty();
+						UObject::GetRegistryObjects(List, UClass::StaticClass(), UFactory::StaticClass(), 0);
+
+						for(INT i = 0; i < List.Num(); i++)
+							UObject::StaticLoadClass(UFactory::StaticClass(), NULL, *List[i].Object, NULL, LoadFlags, NULL);
+					}
 
 					// Contains only the command-line options that are passed to the commandlet
 					FString CommandletCmdLine;

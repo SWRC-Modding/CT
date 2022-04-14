@@ -177,6 +177,20 @@ int __cdecl main(int argc, char** argv){
 					GIsServer = Default->IsServer;
 					GLazyLoad = Default->LazyLoad;
 
+					if(GIsEditor){
+						List.Empty();
+						UObject::GetRegistryObjects(List, UClass::StaticClass(), UExporter::StaticClass(), 0);
+
+						for(INT i = 0; i < List.Num(); i++)
+							UObject::StaticLoadClass(UExporter::StaticClass(), NULL, *List[i].Object, NULL, LoadFlags, NULL);
+
+						List.Empty();
+						UObject::GetRegistryObjects(List, UClass::StaticClass(), UFactory::StaticClass(), 0);
+
+						for(INT i = 0; i < List.Num(); i++)
+							UObject::StaticLoadClass(UFactory::StaticClass(), NULL, *List[i].Object, NULL, LoadFlags, NULL);
+					}
+
 					// Contains only the command-line options that are passed to the commandlet
 					FString CommandletCmdLine;
 
@@ -216,6 +230,9 @@ int __cdecl main(int argc, char** argv){
 							}
 						}
 					}
+
+					TArray<FRegistryObjectInfo> TestList;
+					UObject::GetRegistryObjects(TestList, UClass::StaticClass(), UExporter::StaticClass(), 0);
 
 					if(ClassName == "Engine.Server" || ClassName == "Engine.ServerCommandlet")
 						ExitCode = UServerCommandletMain(); // The ServerCommandlet has a special Main function

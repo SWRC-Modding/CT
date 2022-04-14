@@ -456,52 +456,49 @@ inline BYTE Map8BitSignedTo8BitUnsigned(SBYTE S8){
 
 // V8U8
 
-inline void ConvertV8U8ToRGBA8(const void* In, void* Out, INT Width, INT Height){
-	for(INT Y = 0; Y < Height; ++Y){
-		for(INT X = 0; X < Width; ++X){
-			INT Index = Y * Width + X;
-			const FV8U8Pixel* P1 = static_cast<const FV8U8Pixel*>(In) + Index;
-			FColor* P2 = static_cast<FColor*>(Out) + Index;
+inline void ConvertV8U8ToBGRA8(const void* In, void* Out, INT Width, INT Height){
+	INT NumPixels = Width * Height;
 
-			P2->R = Map8BitSignedTo8BitUnsigned(P1->U);
-			P2->G = Map8BitSignedTo8BitUnsigned(P1->V);
-			P2->B = 0xFF;
-			P2->A = 0xFF;
-		}
+	for(INT i = 0; i < NumPixels; ++i){
+		const FV8U8Pixel* P1 = static_cast<const FV8U8Pixel*>(In) + i;
+		BYTE* P2 = static_cast<BYTE*>(Out) + i * 4;
+
+		P2[0] = 0xFF;
+		P2[1] = Map8BitSignedTo8BitUnsigned(P1->V);
+		P2[2] = Map8BitSignedTo8BitUnsigned(P1->U);
+		P2[3] = 0xFF;
 	}
 }
 
 // L6V5U5
 
-inline void ConvertL6V5U5ToRGBA8(const void* In, void* Out, INT Width, INT Height){
-	for(INT Y = 0; Y < Height; ++Y){
-		for(INT X = 0; X < Width; ++X){
-			INT Index = Y * Width + X;
-			const FL6V5U5Pixel* P1 = static_cast<const FL6V5U5Pixel*>(In) + Index;
-			FColor* P2 = static_cast<FColor*>(Out) + Index;
+inline void ConvertL6V5U5ToBGRA8(const void* In, void* Out, INT Width, INT Height){
+	INT NumPixels = Width * Height;
 
-			P2->R = Map8BitSignedTo8BitUnsigned(Map5BitSignedTo8BitSigned(P1->U));
-			P2->G = Map8BitSignedTo8BitUnsigned(Map5BitSignedTo8BitSigned(P1->V));
-			P2->B = Map6BitUnsignedTo8BitUnsigned(P1->L);
-			P2->A = P2->B;
-		}
+	for(INT i = 0; i < NumPixels; ++i){
+		const FL6V5U5Pixel* P1 = static_cast<const FL6V5U5Pixel*>(In) + i;
+		BYTE* P2 = static_cast<BYTE*>(Out) + i * 4;
+
+		P2[0] = Map6BitUnsignedTo8BitUnsigned(P1->L);
+		P2[1] = Map8BitSignedTo8BitUnsigned(Map5BitSignedTo8BitSigned(P1->V));
+		P2[2] = Map8BitSignedTo8BitUnsigned(Map5BitSignedTo8BitSigned(P1->U));
+		P2[3] = P2[0];
 	}
 }
 
 // X8L8V8U8
 
-inline void ConvertX8L8V8U8ToRGB8(const void* In, void* Out, INT Width, INT Height){
-	for(INT Y = 0; Y < Height; ++Y){
-		for(INT X = 0; X < Width; ++X){
-			INT Index = Y * Width + X;
-			const FX8L8V8U8Pixel* P1 = static_cast<const FX8L8V8U8Pixel*>(In) + Index;
-			FColor* P2 = static_cast<FColor*>(Out) + Index;
+inline void ConvertX8L8V8U8ToBGRA8(const void* In, void* Out, INT Width, INT Height){
+	INT NumPixels = Width * Height;
 
-			P2->R = Map8BitSignedTo8BitUnsigned(P1->U);
-			P2->G = Map8BitSignedTo8BitUnsigned(P1->V);
-			P2->B = P1->X;
-			P2->A = P1->L;
-		}
+	for(INT i = 0; i < NumPixels; ++i){
+		const FX8L8V8U8Pixel* P1 = static_cast<const FX8L8V8U8Pixel*>(In) + i;
+		BYTE* P2 = static_cast<BYTE*>(Out) + i * 4;
+
+		P2[0] = P1->L;
+		P2[1] = Map8BitSignedTo8BitUnsigned(P1->V);
+		P2[2] = Map8BitSignedTo8BitUnsigned(P1->U);
+		P2[3] = P1->X;
 	}
 }
 

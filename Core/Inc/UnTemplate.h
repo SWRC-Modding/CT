@@ -1051,6 +1051,32 @@ public:
 	}
 };
 
+/*
+ * Buffer archiver.
+ */
+class FBufferArchive : public FArchive, public TArray<BYTE>{
+public:
+	FBufferArchive() : Pos(0){
+		ArIsSaving = true;
+	}
+
+	void Serialize(void* InData, INT Length){
+		if(Pos + Length > Num())
+			Add(Pos + Length - Num());
+
+		appMemcpy(GetData() + Pos, InData, Length);
+		Pos += Length;
+	}
+
+	INT Tell(){ return Pos; }
+	void Seek( INT InPos ){ Pos = InPos; }
+	INT TotalSize(){ return Num(); }
+
+private:
+	INT Pos;
+};
+
+
 /*----------------------------------------------------------------------------
 	TMap.
 ----------------------------------------------------------------------------*/

@@ -124,6 +124,9 @@
 			<File
 				RelativePath=".\Src\SWRCFix.cpp">
 			</File>
+			<File
+				RelativePath=".\Src\BumpmapExport.cpp">
+			</File>
 		</Filter>
 	</Files>
 	<Globals>

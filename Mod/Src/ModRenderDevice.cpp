@@ -163,19 +163,19 @@ static HRESULT __stdcall D3DTextureUnlockRectOverride(IDirect3DTexture8* D3DText
 
 	if(SUCCEEDED(Result)){
 		if(CurrentTextureSourceFormat == D3DFMT_V8U8){
-			ConvertV8U8ToRGBA8(CurrentMipLevelPixels, LockedRect.pBits, CurrentMipLevelWidth, CurrentMipLevelHeight);
+			ConvertV8U8ToBGRA8(CurrentMipLevelPixels, LockedRect.pBits, CurrentMipLevelWidth, CurrentMipLevelHeight);
 		}else if(CurrentTextureSourceFormat == D3DFMT_L6V5U5){
 			if(CurrentTextureTargetFormat == D3DFMT_V8U8)
 				ConvertL6V5U5ToV8U8(CurrentMipLevelPixels, LockedRect.pBits, CurrentMipLevelWidth, CurrentMipLevelHeight);
 			else if(CurrentTextureTargetFormat == D3DFMT_X8L8V8U8)
 				ConvertL6V5U5ToX8L8V8U8(CurrentMipLevelPixels, LockedRect.pBits, CurrentMipLevelWidth, CurrentMipLevelHeight);
 			else if(CurrentTextureTargetFormat == D3DFMT_A8R8G8B8)
-				ConvertL6V5U5ToRGBA8(CurrentMipLevelPixels, LockedRect.pBits, CurrentMipLevelWidth, CurrentMipLevelHeight);
+				ConvertL6V5U5ToBGRA8(CurrentMipLevelPixels, LockedRect.pBits, CurrentMipLevelWidth, CurrentMipLevelHeight);
 		}else if(CurrentTextureSourceFormat == D3DFMT_X8L8V8U8){
 			if(CurrentTextureTargetFormat == D3DFMT_V8U8)
 				ConvertX8L8V8U8ToV8U8(CurrentMipLevelPixels, LockedRect.pBits, CurrentMipLevelWidth, CurrentMipLevelHeight);
 			else if(CurrentTextureTargetFormat == D3DFMT_A8R8G8B8)
-				ConvertX8L8V8U8ToRGB8(CurrentMipLevelPixels, LockedRect.pBits, CurrentMipLevelWidth, CurrentMipLevelHeight);
+				ConvertX8L8V8U8ToBGRA8(CurrentMipLevelPixels, LockedRect.pBits, CurrentMipLevelWidth, CurrentMipLevelHeight);
 		}
 
 		Result = D3DTextureUnlockRect(D3DTexture, Level);

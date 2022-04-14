@@ -231,9 +231,6 @@ int __cdecl main(int argc, char** argv){
 						}
 					}
 
-					TArray<FRegistryObjectInfo> TestList;
-					UObject::GetRegistryObjects(TestList, UClass::StaticClass(), UExporter::StaticClass(), 0);
-
 					if(ClassName == "Engine.Server" || ClassName == "Engine.ServerCommandlet")
 						ExitCode = UServerCommandletMain(); // The ServerCommandlet has a special Main function
 					else

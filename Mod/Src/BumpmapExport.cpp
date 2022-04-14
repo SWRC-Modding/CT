@@ -28,6 +28,7 @@ struct FTGAHeader{
 class UExportBumpMapsCommandlet : public UCommandlet{
 	DECLARE_CLASS(UExportBumpMapsCommandlet,UCommandlet,0,Mod)
 public:
+	void StaticConstructor();
 	virtual INT Main(const TCHAR* Parms);
 
 private:
@@ -36,11 +37,15 @@ private:
 
 IMPLEMENT_CLASS(UExportBumpMapsCommandlet)
 
+void UExportBumpMapsCommandlet::StaticConstructor(){
+	IsEditor = 1;
+}
+
 INT UExportBumpMapsCommandlet::Main(const TCHAR* Parms){
 	FString PackageName;
 
 	if(!ParseToken(Parms, PackageName, 0)){
-		GWarn->Log(TEXT("Package file not specified"));
+		GWarn->Log("Package file not specified");
 
 		return 1;
 	}
@@ -50,7 +55,7 @@ INT UExportBumpMapsCommandlet::Main(const TCHAR* Parms){
 	if(!ParseToken(Parms, OutPath, 0))
 		OutPath = "..\\Out";
 
-	UObject* Package = LoadPackage(NULL, *PackageName, LOAD_NoFail | LOAD_NoWarn | LOAD_Quiet);
+	UObject* Package = LoadPackage(NULL, *PackageName, LOAD_NoFail);
 	INT Result = 0;
 
 	if(Package){
@@ -96,18 +101,18 @@ void UExportBumpMapsCommandlet::ExportTga(FTexture* Texture, const FString& File
 	Archive.Serialize(&Header, sizeof(Header));
 	Archive.Add(Width * Height * 4, false);
 
-	void* Src = Texture->GetRawTextureData(0);
 	BYTE* Dest = Archive.GetData() + Archive.Tell();
+	void* Src = Texture->GetRawTextureData(0);
 
 	switch(Format){
 	case TEXF_V8U8:
-		ConvertV8U8ToBGRA8(Src, Dest, Width, Height);
+		ConvertV8U8ToBGRA8(Dest, Src, Width, Height);
 		break;
 	case TEXF_L6V5U5:
-		ConvertL6V5U5ToBGRA8(Src, Dest, Width, Height);
+		ConvertL6V5U5ToBGRA8(Dest, Src, Width, Height);
 		break;
 	case TEXF_X8L8V8U8:
-		ConvertX8L8V8U8ToBGRA8(Src, Dest, Width, Height);
+		ConvertX8L8V8U8ToBGRA8(Dest, Src, Width, Height);
 	}
 
 	// X and Y are flipped on import in UnrealEd, so it needs to be reverted to prevent incorrect results when reimporting the texture

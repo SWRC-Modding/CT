@@ -52,32 +52,30 @@ static void*              CurrentMipLevelPixels;
  * L6V5U5 format conversion
  */
 
-static void ConvertL6V5U5ToX8L8V8U8(const void* In, void* Out, INT Width, INT Height){
-	for(INT Y = 0; Y < Height; ++Y){
-		for(INT X = 0; X < Width; ++X){
-			INT Index = Y * Width + X;
-			const FL6V5U5Pixel* P1 = static_cast<const FL6V5U5Pixel*>(In) + Index;
-			FX8L8V8U8Pixel* P2 = static_cast<FX8L8V8U8Pixel*>(Out) + Index;
+static void ConvertL6V5U5ToX8L8V8U8(void* Dest, const void* Src, INT Width, INT Height){
+	INT NumPixels = Width * Height;
 
-			P2->V = Map5BitSignedTo8BitSigned(P1->V);
-			P2->U = Map5BitSignedTo8BitSigned(P1->U);
-			P2->L = Map6BitUnsignedTo8BitUnsigned(P1->L);
-			P2->X = P2->L; // L6V5U5 only has one luminance value so we can just reuse it
-		}
+	for(INT i = 0; i < NumPixels; ++i){
+		const FL6V5U5Pixel* P1 = static_cast<const FL6V5U5Pixel*>(Src) + i;
+		FX8L8V8U8Pixel* P2 = static_cast<FX8L8V8U8Pixel*>(Dest) + i;
+
+		P2->V = Map5BitSignedTo8BitSigned(P1->V);
+		P2->U = Map5BitSignedTo8BitSigned(P1->U);
+		P2->L = Map6BitUnsignedTo8BitUnsigned(P1->L);
+		P2->X = P2->L; // L6V5U5 only has one luminance value so we can just reuse it
 	}
 }
 
-static void ConvertL6V5U5ToV8U8(const void* In, void* Out, INT Width, INT Height){
-	for(INT Y = 0; Y < Height; ++Y){
-		for(INT X = 0; X < Width; ++X){
-			INT Index = Y * Width + X;
-			const FL6V5U5Pixel* P1 = static_cast<const FL6V5U5Pixel*>(In) + Index;
-			FV8U8Pixel* P2 = static_cast<FV8U8Pixel*>(Out) + Index;
+static void ConvertL6V5U5ToV8U8(void* Dest, const void* Src, INT Width, INT Height){
+	INT NumPixels = Width * Height;
 
-			P2->V = Map5BitSignedTo8BitSigned(P1->V);
-			P2->U = Map5BitSignedTo8BitSigned(P1->U);
-			// No luminance
-		}
+	for(INT i = 0; i < NumPixels; ++i){
+		const FL6V5U5Pixel* P1 = static_cast<const FL6V5U5Pixel*>(Src) + i;
+		FV8U8Pixel* P2 = static_cast<FV8U8Pixel*>(Dest) + i;
+
+		P2->V = Map5BitSignedTo8BitSigned(P1->V);
+		P2->U = Map5BitSignedTo8BitSigned(P1->U);
+		// No luminance
 	}
 }
 
@@ -85,17 +83,16 @@ static void ConvertL6V5U5ToV8U8(const void* In, void* Out, INT Width, INT Height
  * X8L8V8U8 format conversion
  */
 
-static void ConvertX8L8V8U8ToV8U8(const void* In, void* Out, INT Width, INT Height){
-	for(INT Y = 0; Y < Height; ++Y){
-		for(INT X = 0; X < Width; ++X){
-			INT Index = Y * Width + X;
-			const FX8L8V8U8Pixel* P1 = static_cast<const FX8L8V8U8Pixel*>(In) + Index;
-			FV8U8Pixel* P2 = static_cast<FV8U8Pixel*>(Out) + Index;
+static void ConvertX8L8V8U8ToV8U8(void* Dest, const void* Src, INT Width, INT Height){
+	INT NumPixels = Width * Height;
 
-			P2->V = Map5BitSignedTo8BitSigned(P1->V);
-			P2->U = Map5BitSignedTo8BitSigned(P1->U);
-			// No luminance
-		}
+	for(INT i = 0; i < NumPixels; ++i){
+		const FX8L8V8U8Pixel* P1 = static_cast<const FX8L8V8U8Pixel*>(Src) + i;
+		FV8U8Pixel* P2 = static_cast<FV8U8Pixel*>(Dest) + i;
+
+		P2->V = Map5BitSignedTo8BitSigned(P1->V);
+		P2->U = Map5BitSignedTo8BitSigned(P1->U);
+		// No luminance
 	}
 }
 
@@ -163,19 +160,19 @@ static HRESULT __stdcall D3DTextureUnlockRectOverride(IDirect3DTexture8* D3DText
 
 	if(SUCCEEDED(Result)){
 		if(CurrentTextureSourceFormat == D3DFMT_V8U8){
-			ConvertV8U8ToBGRA8(CurrentMipLevelPixels, LockedRect.pBits, CurrentMipLevelWidth, CurrentMipLevelHeight);
+			ConvertV8U8ToBGRA8(LockedRect.pBits, CurrentMipLevelPixels, CurrentMipLevelWidth, CurrentMipLevelHeight);
 		}else if(CurrentTextureSourceFormat == D3DFMT_L6V5U5){
 			if(CurrentTextureTargetFormat == D3DFMT_V8U8)
-				ConvertL6V5U5ToV8U8(CurrentMipLevelPixels, LockedRect.pBits, CurrentMipLevelWidth, CurrentMipLevelHeight);
+				ConvertL6V5U5ToV8U8(LockedRect.pBits, CurrentMipLevelPixels, CurrentMipLevelWidth, CurrentMipLevelHeight);
 			else if(CurrentTextureTargetFormat == D3DFMT_X8L8V8U8)
-				ConvertL6V5U5ToX8L8V8U8(CurrentMipLevelPixels, LockedRect.pBits, CurrentMipLevelWidth, CurrentMipLevelHeight);
+				ConvertL6V5U5ToX8L8V8U8(LockedRect.pBits, CurrentMipLevelPixels, CurrentMipLevelWidth, CurrentMipLevelHeight);
 			else if(CurrentTextureTargetFormat == D3DFMT_A8R8G8B8)
-				ConvertL6V5U5ToBGRA8(CurrentMipLevelPixels, LockedRect.pBits, CurrentMipLevelWidth, CurrentMipLevelHeight);
+				ConvertL6V5U5ToBGRA8(LockedRect.pBits, CurrentMipLevelPixels, CurrentMipLevelWidth, CurrentMipLevelHeight);
 		}else if(CurrentTextureSourceFormat == D3DFMT_X8L8V8U8){
 			if(CurrentTextureTargetFormat == D3DFMT_V8U8)
-				ConvertX8L8V8U8ToV8U8(CurrentMipLevelPixels, LockedRect.pBits, CurrentMipLevelWidth, CurrentMipLevelHeight);
+				ConvertX8L8V8U8ToV8U8(LockedRect.pBits, CurrentMipLevelPixels, CurrentMipLevelWidth, CurrentMipLevelHeight);
 			else if(CurrentTextureTargetFormat == D3DFMT_A8R8G8B8)
-				ConvertX8L8V8U8ToBGRA8(CurrentMipLevelPixels, LockedRect.pBits, CurrentMipLevelWidth, CurrentMipLevelHeight);
+				ConvertX8L8V8U8ToBGRA8(LockedRect.pBits, CurrentMipLevelPixels, CurrentMipLevelWidth, CurrentMipLevelHeight);
 		}
 
 		Result = D3DTextureUnlockRect(D3DTexture, Level);

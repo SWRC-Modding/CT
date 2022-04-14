@@ -565,11 +565,11 @@ void* FOpenGLTexture::ConvertTextureData(FTexture* Texture, ETextureFormat DestF
 				static_cast<FColor*>(Result)[i] = FColor(Intensity, Intensity, Intensity);
 			}
 		}else if(SrcFormat == TEXF_V8U8){
-			ConvertV8U8ToBGRA8(TextureData, Result, Width, Height);
+			ConvertV8U8ToBGRA8(Result, TextureData, Width, Height);
 		}else if(SrcFormat == TEXF_L6V5U5){
-			ConvertL6V5U5ToBGRA8(TextureData, Result, Width, Height);
+			ConvertL6V5U5ToBGRA8(Result, TextureData, Width, Height);
 		}else if(SrcFormat == TEXF_X8L8V8U8){
-			ConvertX8L8V8U8ToBGRA8(TextureData, Result, Width, Height);
+			ConvertX8L8V8U8ToBGRA8(Result, TextureData, Width, Height);
 		}else{
 			Result = NULL;
 		}

@@ -456,12 +456,12 @@ inline BYTE Map8BitSignedTo8BitUnsigned(SBYTE S8){
 
 // V8U8
 
-inline void ConvertV8U8ToBGRA8(const void* In, void* Out, INT Width, INT Height){
+inline void ConvertV8U8ToBGRA8(void* Dest, const void* Src, INT Width, INT Height){
 	INT NumPixels = Width * Height;
 
 	for(INT i = 0; i < NumPixels; ++i){
-		const FV8U8Pixel* P1 = static_cast<const FV8U8Pixel*>(In) + i;
-		BYTE* P2 = static_cast<BYTE*>(Out) + i * 4;
+		const FV8U8Pixel* P1 = static_cast<const FV8U8Pixel*>(Src) + i;
+		BYTE* P2 = static_cast<BYTE*>(Dest) + i * 4;
 
 		P2[0] = 0xFF;
 		P2[1] = Map8BitSignedTo8BitUnsigned(P1->V);
@@ -472,12 +472,12 @@ inline void ConvertV8U8ToBGRA8(const void* In, void* Out, INT Width, INT Height)
 
 // L6V5U5
 
-inline void ConvertL6V5U5ToBGRA8(const void* In, void* Out, INT Width, INT Height){
+inline void ConvertL6V5U5ToBGRA8(void* Dest, const void* Src, INT Width, INT Height){
 	INT NumPixels = Width * Height;
 
 	for(INT i = 0; i < NumPixels; ++i){
-		const FL6V5U5Pixel* P1 = static_cast<const FL6V5U5Pixel*>(In) + i;
-		BYTE* P2 = static_cast<BYTE*>(Out) + i * 4;
+		const FL6V5U5Pixel* P1 = static_cast<const FL6V5U5Pixel*>(Src) + i;
+		BYTE* P2 = static_cast<BYTE*>(Dest) + i * 4;
 
 		P2[0] = Map6BitUnsignedTo8BitUnsigned(P1->L);
 		P2[1] = Map8BitSignedTo8BitUnsigned(Map5BitSignedTo8BitSigned(P1->V));
@@ -488,12 +488,12 @@ inline void ConvertL6V5U5ToBGRA8(const void* In, void* Out, INT Width, INT Heigh
 
 // X8L8V8U8
 
-inline void ConvertX8L8V8U8ToBGRA8(const void* In, void* Out, INT Width, INT Height){
+inline void ConvertX8L8V8U8ToBGRA8(void* Dest, const void* Src, INT Width, INT Height){
 	INT NumPixels = Width * Height;
 
 	for(INT i = 0; i < NumPixels; ++i){
-		const FX8L8V8U8Pixel* P1 = static_cast<const FX8L8V8U8Pixel*>(In) + i;
-		BYTE* P2 = static_cast<BYTE*>(Out) + i * 4;
+		const FX8L8V8U8Pixel* P1 = static_cast<const FX8L8V8U8Pixel*>(Src) + i;
+		BYTE* P2 = static_cast<BYTE*>(Dest) + i * 4;
 
 		P2[0] = P1->L;
 		P2[1] = Map8BitSignedTo8BitUnsigned(P1->V);

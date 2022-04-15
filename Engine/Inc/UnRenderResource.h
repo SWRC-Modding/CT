@@ -429,7 +429,7 @@ struct FX8L8V8U8Pixel{
 };
 
 /*
- * Bumpmap format to RGBA8 conversion.
+ * Bumpmap format to BGRA8 conversion.
  */
 
 // Integer range mapping

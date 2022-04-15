@@ -27,11 +27,8 @@ struct FTGAHeader{
 
 class UExportBumpMapsCommandlet : public UCommandlet{
 	DECLARE_CLASS(UExportBumpMapsCommandlet,UCommandlet,0,Mod)
-public:
 	void StaticConstructor();
 	virtual INT Main(const TCHAR* Parms);
-
-private:
 	void ExportTga(FTexture* Texture, const FString& Filename);
 };
 
@@ -120,12 +117,14 @@ void UExportBumpMapsCommandlet::ExportTga(FTexture* Texture, const FString& File
 		ConvertX8L8V8U8ToBGRA8(Dest, Src, Width, Height);
 	}
 
-	// X and Y are flipped on import in UnrealEd, so it needs to be reverted to prevent incorrect results when reimporting the texture
+	// Convert bumpmap to original normal map by setting Z to 1 and exchanging X and Y
 
 	INT NumPixels = Width * Height;
 
-	for(INT i = 0; i < NumPixels; ++i)
+	for(INT i = 0; i < NumPixels; ++i){
+		Dest[i * 4] = 0xFF;
 		Exchange(Dest[i * 4 + 1], Dest[i * 4 + 2]);
+	}
 
 	appSaveArrayToFile(Archive, *Filename);
 }

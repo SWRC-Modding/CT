@@ -1,0 +1,11 @@
+[Public]
+Object+=(Name=Mod.ExportBumpMapsCommandlet,Class=Class,MetaClass=Core.Commandlet)
+
+[ExportBumpMapsCommandlet]
+HelpCmd=exportbumpmaps
+HelpOneLiner=Export bumpmaps in tga format
+HelpUsage=exportbumpmaps package.ext
+HelpParm[0]=package.ext
+HelpDesc[0]=Package whose bump maps you wish to export
+HelpParm[1]=path
+HelpDesc[1]=Optional path to export files to. GameData\Out by default

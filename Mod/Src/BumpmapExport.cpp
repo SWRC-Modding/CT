@@ -27,11 +27,8 @@ struct FTGAHeader{
 
 class UExportBumpMapsCommandlet : public UCommandlet{
 	DECLARE_CLASS(UExportBumpMapsCommandlet,UCommandlet,0,Mod)
-public:
 	void StaticConstructor();
 	virtual INT Main(const TCHAR* Parms);
-
-private:
 	void ExportTga(FTexture* Texture, const FString& Filename);
 };
 
@@ -61,29 +58,27 @@ INT UExportBumpMapsCommandlet::Main(const TCHAR* Parms){
 		OutPath = "..\\Out";
 
 	UObject* Package = LoadPackage(NULL, *PackageName, LOAD_NoFail);
-	INT Result = 0;
 
-	if(Package){
-		if(GFileManager->MakeDirectory(*OutPath, 1)){
-			for(TObjectIterator<UTexture> It; It; ++It){
-				FBaseTexture* BaseTexture = It->GetRenderInterface();
-				FTexture* Texture = BaseTexture ? BaseTexture->GetTextureInterface() : NULL;
+	if(!GFileManager->MakeDirectory(*OutPath, 1)){
+		GWarn->Log("Failed to create output directory");
 
-				if(Texture && It->IsIn(Package) && IsBumpmap(Texture->GetFormat())){
-					GWarn->Logf("Exporting bump map: %s", It->GetName());
-					ExportTga(Texture, OutPath * It->GetName() + ".TGA");
-				}
-			}
-		}else{
-			GWarn->Logf("Failed to make directory %s", *OutPath);
-			Result = 1;
-		}
-	}else{
-		GWarn->Logf("Failed to load package %s", *PackageName);
-		Result = 1;
+		return 1;
 	}
 
-	return Result;
+	for(TObjectIterator<UTexture> It; It; ++It){
+		FBaseTexture* BaseTexture = It->GetRenderInterface();
+		FTexture* Texture = BaseTexture ? BaseTexture->GetTextureInterface() : NULL;
+
+		if(Texture && It->IsIn(Package) && IsBumpmap(Texture->GetFormat())){
+			FFilename Filename = OutPath * FStringTemp(It->GetPathName()).Substitute(".", "\\").Substitute(".", "\\") + ".TGA";
+
+			GWarn->Logf("Exporting bump map: %s", It->GetPathName());
+			GFileManager->MakeDirectory(*Filename.GetPath(), 1);
+			ExportTga(Texture, Filename);
+		}
+	}
+
+	return 0;
 }
 
 void UExportBumpMapsCommandlet::ExportTga(FTexture* Texture, const FString& Filename){
@@ -120,12 +115,14 @@ void UExportBumpMapsCommandlet::ExportTga(FTexture* Texture, const FString& File
 		ConvertX8L8V8U8ToBGRA8(Dest, Src, Width, Height);
 	}
 
-	// X and Y are flipped on import in UnrealEd, so it needs to be reverted to prevent incorrect results when reimporting the texture
+	// Convert bumpmap to original normal map by setting Z to 1 and exchanging X and Y
 
 	INT NumPixels = Width * Height;
 
-	for(INT i = 0; i < NumPixels; ++i)
+	for(INT i = 0; i < NumPixels; ++i){
+		Dest[i * 4] = 0xFF;
 		Exchange(Dest[i * 4 + 1], Dest[i * 4 + 2]);
+	}
 
 	appSaveArrayToFile(Archive, *Filename);
 }

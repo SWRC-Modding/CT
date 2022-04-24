@@ -117,25 +117,26 @@ FOpenGLResource* UOpenGLRenderDevice::GetCachedResource(QWORD CacheId){
 	return NULL;
 }
 
-FShaderGLSL* UOpenGLRenderDevice::GetShader(UHardwareShader* HardwareShader){
-	FShaderGLSL* Shader = GLShaderByHardwareShader.Find(HardwareShader);
+FShaderGLSL* UOpenGLRenderDevice::GetShaderForMaterial(UMaterial* Material){
+	checkSlow(Material);
+	FShaderGLSL* Shader = GLShadersByMaterial.Find(Material);
 
 	if(!Shader){
-		Shader = &GLShaderByHardwareShader[HardwareShader];
-		// Explicitly create object because TMap does not call the constructor!!!
-		*Shader = FShaderGLSL(FStringTemp(HardwareShader->GetPathName()).Substitute(".", "\\").Substitute(".", "\\"));
+		FShaderGLSL TempShader(FStringTemp(Material->GetPathName()).Substitute(".", "\\").Substitute(".", "\\"));
+		UHardwareShader* HardwareShader = Cast<UHardwareShader>(Material);
 
-		if(!HardwareShader->IsIn(UObject::GetTransientPackage())){
-			// Convert d3d shader assembly to glsl or load existing shader from disk
+		// Try loading shader from disk. If this fails, check if the material is a hardware shader and convert from d3d assembly if that is the case
+		if(LoadShader(&TempShader)){
+			Shader = &GLShadersByMaterial[Material];
+			appMemswap(Shader, &TempShader, sizeof(FShaderGLSL));
+		}else if(HardwareShader){
+			TempShader.SetShaderCode(GLSLShaderFromD3DHardwareShader(HardwareShader));
 
-			if(!LoadShader(Shader)){
-				Shader->SetShaderCode(GLSLShaderFromD3DHardwareShader(HardwareShader));
+			if(bSaveShadersToDisk && !HardwareShader->IsIn(UObject::GetTransientPackage()))
+				SaveShader(&TempShader);
 
-				if(bSaveShadersToDisk)
-					SaveShader(Shader);
-			}
-		}else{
-			Shader->SetShaderCode(GLSLShaderFromD3DHardwareShader(HardwareShader));
+			Shader = &GLShadersByMaterial[Material];
+			appMemswap(Shader, &TempShader, sizeof(FShaderGLSL));
 		}
 	}
 
@@ -576,10 +577,12 @@ void UOpenGLRenderDevice::Flush(UViewport* Viewport){
 	}
 
 	appMemzero(ResourceHash, sizeof(ResourceHash));
-	GLShaderByHardwareShader.Empty();
+	GLShadersByMaterial.Empty();
 
 	DynamicIndexBuffer  = NULL;
 	DynamicVertexStream = NULL;
+
+	UMaterial::ClearFallbacks();
 }
 
 void UOpenGLRenderDevice::FlushResource(QWORD CacheId){
@@ -747,7 +750,7 @@ void UOpenGLRenderDevice::LoadShaders(){
 	if(!LoadShader(&FixedFunctionShader) && bSaveShadersToDisk)
 		SaveShader(&FixedFunctionShader);
 
-	for(TMap<UHardwareShader*, FShaderGLSL>::TIterator It(GLShaderByHardwareShader); It; ++It){
+	for(TMap<UMaterial*, FShaderGLSL>::TIterator It(GLShadersByMaterial); It; ++It){
 		if(!It.Key()->IsIn(UObject::GetTransientPackage())){
 			if(!LoadShader(&It.Value()) && bSaveShadersToDisk)
 				SaveShader(&It.Value());
@@ -801,7 +804,7 @@ bool UOpenGLRenderDevice::LoadShaderMacroText(){
 		ParseGLSLMacros(Macros);
 
 		// Increment revision of all shaders since they might use the macros and need to be updated
-		for(TMap<UHardwareShader*, FShaderGLSL>::TIterator It(GLShaderByHardwareShader); It; ++It)
+		for(TMap<UMaterial*, FShaderGLSL>::TIterator It(GLShadersByMaterial); It; ++It)
 			++It.Value().Revision;
 
 		++FixedFunctionShader.Revision;
@@ -1109,7 +1112,3 @@ FString UOpenGLRenderDevice::FixedFunctionShaderText(
 "#error Shader type not implemented\n"
 "#endif\n"
 );
-
-#undef UNIFORM_STRUCT_MEMBER
-#undef UNIFORM_BLOCK_MEMBER
-#undef SHADER_HEADER

@@ -887,10 +887,11 @@ void FOpenGLRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorStri
 	                (FrameFX->VisionMode && Material == FrameFX->VisionMode->VisionShader)))){
 		// Remove offset by truncating float to int.
 		// This works because the x/y values will only ever be -1 or 1 (plus fractional offset) for fullscreen quads or 0 for FFrameGrid
-		CurrentState->CameraToScreen.M[3][0] = (INT)CurrentState->CameraToScreen.M[3][0];
-		CurrentState->CameraToScreen.M[3][1] = (INT)CurrentState->CameraToScreen.M[3][1];
+		CurrentState->CameraToScreen.M[3][0] = static_cast<INT>(CurrentState->CameraToScreen.M[3][0]);
+		CurrentState->CameraToScreen.M[3][1] = static_cast<INT>(CurrentState->CameraToScreen.M[3][1]);
 	}
 
+#if 0
 	// Check for circular references
 
 	if(GIsEditor){
@@ -911,6 +912,7 @@ void FOpenGLRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorStri
 
 	if(NumPasses)
 		*NumPasses = 1;
+#endif
 
 	// Restore default material state
 
@@ -951,8 +953,15 @@ void FOpenGLRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorStri
 	}else if(Material->IsA<UHardwareShader>()){
 		Result = SetHardwareShaderMaterial(static_cast<UHardwareShader*>(Material), ErrorString, ErrorMaterial) != 0;
 		IsHardwareShader = true;
-	}else if(Material->IsA<UParticleMaterial>()){
-		Result = SetParticleMaterial(static_cast<UParticleMaterial*>(Material), ModifierInfo);
+	}else{
+		FShaderGLSL* Shader = RenDev->GetShaderForMaterial(Material);
+
+		if(Shader){
+			SetShader(Shader);
+			IsHardwareShader = true;
+		}else if(Material->IsA<UParticleMaterial>()){
+			Result = SetParticleMaterial(static_cast<UParticleMaterial*>(Material), ModifierInfo);
+		}
 	}
 
 	if(Result){
@@ -1020,7 +1029,7 @@ static INT GetShaderConstantNumSlots(BYTE ConstantType){
 UBOOL FOpenGLRenderInterface::SetHardwareShaderMaterial(UHardwareShader* HardwareShader, FString* ErrorString, UMaterial** ErrorMaterial){
 	guardFuncSlow;
 
-	SetShader(RenDev->GetShader(HardwareShader));
+	SetShader(RenDev->GetShaderForMaterial(HardwareShader));
 
 	if(!CurrentShader->IsErrorShader){
 		CurrentState->bZTest = HardwareShader->ZTest != 0;

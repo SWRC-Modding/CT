@@ -35,7 +35,7 @@ public:
 	UMaterial* FallbackMaterial;
 	UMaterial* DefaultMaterial;
 	BYTE NumPassesCached;
-	INT CachedMaterialPasses[8];
+	void* CachedMaterialPasses[8];
 	INT MaterialCacheFlags;
 	INT CachedType;
 	BYTE TypeOfMaterial;

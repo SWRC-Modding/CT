@@ -46,7 +46,7 @@ public:
 	void MakeCurrent();
 	void UnSetRes(UViewport* Viewport);
 	FOpenGLResource* GetCachedResource(QWORD CacheId);
-	FShaderGLSL* GetShader(UHardwareShader* HardwareShader);
+	FShaderGLSL* GetShaderForMaterial(UMaterial* Material);
 
 	static void SetHardwareShaderMacros(UHardwareShaderMacros* Macros);
 	static void ExpandShaderMacros(FString* Text);
@@ -116,7 +116,7 @@ private:
 	FStringNoInit                       ShaderDir;
 
 	TMap<FString, SQWORD>               ShaderFileTimes;
-	TMap<UHardwareShader*, FShaderGLSL> GLShaderByHardwareShader;
+	TMap<UMaterial*, FShaderGLSL>       GLShadersByMaterial;
 
 	void AddResource(FOpenGLResource* Resource);
 	void RemoveResource(FOpenGLResource* Resource);

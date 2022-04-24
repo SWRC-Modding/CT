@@ -391,5 +391,31 @@ void FOpenGLRenderInterface::SetBitmapTexture(UBitmapMaterial* Bitmap, INT Textu
 }
 
 bool FOpenGLRenderInterface::SetParticleMaterial(UParticleMaterial* Material, const FModifierInfo& Modifiers){
+	switch(Material->ParticleBlending){
+	case PTDS_Regular:
+		SetFramebufferBlending(FB_Overwrite);
+		break;
+	case PTDS_AlphaBlend:
+		SetFramebufferBlending(FB_AlphaBlend);
+		break;
+	case PTDS_Modulated:
+		SetFramebufferBlending(FB_Modulate);
+		break;
+	case PTDS_Translucent:
+		SetFramebufferBlending(FB_Translucent);
+		break;
+	case PTDS_AlphaModulate_MightNotFogCorrectly:
+		SetFramebufferBlending(FB_AlphaModulate_MightNotFogCorrectly);
+		break;
+	case PTDS_Darken:
+		SetFramebufferBlending(FB_Darken);
+		break;
+	case PTDS_Brighten:
+		SetFramebufferBlending(FB_Brighten);
+	}
+
+	if(Material->RenderTwoSided)
+		CurrentState->CullMode = CM_None;
+
 	return false;
 }

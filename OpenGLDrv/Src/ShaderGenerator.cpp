@@ -12,9 +12,11 @@ FOpenGLShader* FShaderGenerator::CreateShader(UOpenGLRenderDevice* RenDev, bool 
 	for(INT i = 0; i < NumTextures; ++i){
 		BYTE TexCoordIndex;
 		BYTE TexCoordSrcIndex = Textures[i].TexCoordSrc;
+		bool HaveTexCoord = false;
 
 		if(TexCoordsBySrc[TexCoordSrcIndex] && Textures[i].Matrix < 0){
 			TexCoordIndex = TexCoordsBySrc[TexCoordSrcIndex] - 1;
+			HaveTexCoord = true;
 		}else{
 			TexCoordIndex = NumTexCoords;
 
@@ -24,58 +26,61 @@ FOpenGLShader* FShaderGenerator::CreateShader(UOpenGLRenderDevice* RenDev, bool 
 				++NumTexCoords;
 		}
 
-		VertexShaderText += FString::Printf("\tTexCoord%i = ", TexCoordIndex);
+		if(!HaveTexCoord){
+			VertexShaderText += FString::Printf("\tTexCoord%i = ", TexCoordIndex);
 
-		FString TexCoord;
+			FString TexCoord;
 
-		switch(Textures[i].TexCoordSrc){
-		case TCS_Stream0:
-		case TCS_Stream1:
-		case TCS_Stream2:
-		case TCS_Stream3:
-		case TCS_Stream4:
-		case TCS_Stream5:
-		case TCS_Stream6:
-		case TCS_Stream7:
-			TexCoord = FString::Printf("InTexCoord%i", Textures[i].TexCoordSrc);
-			break;
-		case TCS_WorldCoords:
-		case TCS_CameraCoords:
-			VertexShaderText += "vec4(Position, 1.0)";
-			break;
-		case TCS_CubeWorldSpaceReflection:
-		case TCS_CubeCameraSpaceReflection:
-			TexCoord = "vec4(reflect(normalize(Position - CameraToWorld[3].xyz), normalize(Normal)), 1.0)";
-			break;
-		case TCS_ProjectorCoords:
-			TexCoord = "vec4(Normal, 1.0)";
-			break;
-		case TCS_NoChange:
-		case TCS_SphereWorldSpaceReflection:
-		case TCS_SphereCameraSpaceReflection:
-		case TCS_CubeWorldSpaceNormal:
-		case TCS_CubeCameraSpaceNormal:
-		case TCS_SphereWorldSpaceNormal:
-		case TCS_SphereCameraSpaceNormal:
-		case TCS_BumpSphereCameraSpaceNormal:
-		case TCS_BumpSphereCameraSpaceReflection:
-			TexCoord = "vec4(0.0, 0.0, 1.0, 1.0)";
-		}
-
-		if(Textures[i].Matrix >= 0){
-			switch(Textures[i].TexCoordCount){
-			case TCN_2DCoords:
-				TexCoord = "vec4(" + TexCoord + ".xy" + ", 1.0, 1.0)";
+			switch(Textures[i].TexCoordSrc){
+			case TCS_Stream0:
+			case TCS_Stream1:
+			case TCS_Stream2:
+			case TCS_Stream3:
+			case TCS_Stream4:
+			case TCS_Stream5:
+			case TCS_Stream6:
+			case TCS_Stream7:
+				TexCoord = FString::Printf("InTexCoord%i", Textures[i].TexCoordSrc);
 				break;
-			case TCN_3DCoords:
-				TexCoord = "vec4(" + TexCoord + ".xyz" + ", 1.0)";
+			case TCS_WorldCoords:
+			case TCS_CameraCoords:
+				VertexShaderText += "vec4(Position, 1.0)";
+				break;
+			case TCS_CubeWorldSpaceReflection:
+			case TCS_CubeCameraSpaceReflection:
+				TexCoord = "vec4(reflect(normalize(Position - CameraToWorld[3].xyz), normalize(Normal)), 1.0)";
+				break;
+			case TCS_ProjectorCoords:
+				TexCoord = "vec4(Normal, 1.0)";
+				break;
+			case TCS_NoChange:
+			case TCS_SphereWorldSpaceReflection:
+			case TCS_SphereCameraSpaceReflection:
+			case TCS_CubeWorldSpaceNormal:
+			case TCS_CubeCameraSpaceNormal:
+			case TCS_SphereWorldSpaceNormal:
+			case TCS_SphereCameraSpaceNormal:
+			case TCS_BumpSphereCameraSpaceNormal:
+			case TCS_BumpSphereCameraSpaceReflection:
+				TexCoord = "vec4(0.0, 0.0, 1.0, 1.0)";
 			}
 
-			TexCoord += FString::Printf(" * TexMatrices[%i]", Textures[i].Matrix);
-			NumTexMatrices = Max(NumTexMatrices, Textures[i].Matrix + 1);
+			if(Textures[i].Matrix >= 0){
+				switch(Textures[i].TexCoordCount){
+				case TCN_2DCoords:
+					TexCoord = "vec4(" + TexCoord + ".xy" + ", 1.0, 1.0)";
+					break;
+				case TCN_3DCoords:
+					TexCoord = "vec4(" + TexCoord + ".xyz" + ", 1.0)";
+				}
+
+				TexCoord += FString::Printf(" * TexMatrices[%i]", Textures[i].Matrix);
+				NumTexMatrices = Max(NumTexMatrices, Textures[i].Matrix + 1);
+			}
+
+			VertexShaderText += TexCoord + ";\n";
 		}
 
-		VertexShaderText += TexCoord + ";\n";
 		FragmentShaderText += FString::Printf("\tconst vec4 t%i = sample_texture%i(TexCoord%i);\n", i, Textures[i].Index, TexCoordIndex);
 	}
 

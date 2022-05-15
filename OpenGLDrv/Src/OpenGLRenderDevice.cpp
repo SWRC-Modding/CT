@@ -145,14 +145,14 @@ FShaderGLSL* UOpenGLRenderDevice::GetShaderForMaterial(UMaterial* Material){
 
 FOpenGLIndexBuffer* UOpenGLRenderDevice::GetDynamicIndexBuffer(INT IndexSize){
 	if(!DynamicIndexBuffer)
-		DynamicIndexBuffer = new FOpenGLIndexBuffer(this, MakeCacheID(CID_RenderIndices), true);
+		DynamicIndexBuffer = new FOpenGLIndexBuffer(this, MakeCacheID(CID_RenderIndices), 0, true);
 
 	return DynamicIndexBuffer;
 }
 
 FOpenGLVertexStream* UOpenGLRenderDevice::GetDynamicVertexStream(){
 	if(!DynamicVertexStream)
-		DynamicVertexStream = new FOpenGLVertexStream(this, MakeCacheID(CID_RenderVertices), true);
+		DynamicVertexStream = new FOpenGLVertexStream(this, MakeCacheID(CID_RenderVertices), 0, true);
 
 	return DynamicVertexStream;
 }
@@ -1053,11 +1053,10 @@ SHADER_HEADER
 "in float Fog;\n"
 "out vec4 FragColor;\n\n"
 "void alpha_test(vec4  c){ if(c.a <= AlphaRef) discard; }\n"
-"vec3 apply_fog(vec3 BaseColor){ return mix(FogColor.rgb, BaseColor, Fog); }\n\n");
+"vec4 apply_fog(vec4 BaseColor){ return vec4(mix(FogColor.rgb, BaseColor.rgb, Fog), BaseColor.a); }\n\n");
 
 FString UOpenGLRenderDevice::FixedFunctionShaderText(
 "#ifdef VERTEX_SHADER\n"
-"out vec3 AmbientFactor;\n"
 "\n"
 "void main(void){\n"
 "\tPosition = (LocalToWorld * vec4(InPosition.xyz, 1.0)).xyz;\n"
@@ -1066,10 +1065,8 @@ FString UOpenGLRenderDevice::FixedFunctionShaderText(
 "\tSpecular = InSpecular;\n"
 "\tFog = calculate_fog((LocalToCamera * vec4(InPosition.xyz, 1.0)).z);\n"
 "\tgl_Position = LocalToScreen * vec4(InPosition.xyz, 1.0);\n"
-"\tAmbientFactor = UseStaticLighting ? Specular.rgb : vec3(1.0);\n"
 "}\n"
 "#elif defined(FRAGMENT_SHADER)\n"
-"in vec3 AmbientFactor;\n"
 "\n"
 "vec3 light_color(void){\n"
 "\tvec3 DiffuseLight = Diffuse.rgb;\n"
@@ -1097,7 +1094,7 @@ FString UOpenGLRenderDevice::FixedFunctionShaderText(
 "\t\tDiffuseLight += Lights[i].Color.rgb * LightFactor;\n"
 "\t}\n"
 "\n"
-"\treturn AmbientLightColor.rgb * AmbientFactor + DiffuseLight;\n"
+"\treturn AmbientLightColor.rgb * Specular.rgb + DiffuseLight;\n"
 "}\n"
 "\n"
 "void main(void){\n"
@@ -1105,8 +1102,7 @@ FString UOpenGLRenderDevice::FixedFunctionShaderText(
 "\n"
 "\tif(UseDynamicLighting)\n"
 "\t\tFragColor.rgb *= light_color();\n"
-"\telse if(UseStaticLighting)\n"
-"\t\tFragColor.rgb *= Diffuse.rgb;\n"
+"\tFragColor.rgb *= Diffuse.rgb;\n"
 "}\n"
 "#else\n"
 "#error Shader type not implemented\n"

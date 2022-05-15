@@ -267,6 +267,7 @@ void FOpenGLRenderInterface::Init(INT ViewportWidth, INT ViewportHeight){
 	CurrentState->WorldToCamera = FMatrix::Identity;
 	CurrentState->CameraToScreen = FMatrix::Identity;
 	CurrentState->GlobalColor = FPlane(1.0, 1.0, 1.0, 1.0);
+	CurrentState->ColorFactor = FPlane(1.0, 1.0, 1.0, 1.0);
 
 	CurrentState->AlphaRef = -1.0f;
 
@@ -293,6 +294,10 @@ void FOpenGLRenderInterface::Flush(){
 	CurrentState->VAO = NULL;
 	RenDev->glBindVertexArray(GL_NONE);
 	VAOsByDeclId.Empty();
+
+	// TODO: Make those persistent and only delete them on Exit. (It is not necessary to regenerate the exact same shaders on each level load)
+	appMemzero(MaterialShaders, sizeof(MaterialShaders));
+	ShadersById.Empty();
 }
 
 void FOpenGLRenderInterface::Exit(){
@@ -444,7 +449,7 @@ void FOpenGLRenderInterface::CommitRenderState(){
 	}
 
 	if(LastUniformRevision != CurrentState->UniformRevision){
-		if(MatricesChanged)
+		if(CurrentState->MatricesChanged)
 			UpdateMatrices();
 
 		RenDev->glNamedBufferSubData(GlobalUBO, 0, sizeof(FOpenGLGlobalUniforms), static_cast<FOpenGLGlobalUniforms*>(CurrentState));
@@ -505,7 +510,7 @@ void FOpenGLRenderInterface::UpdateMatrices(){
 	CurrentState->WorldToLocal = CurrentState->LocalToWorld.Inverse();
 	CurrentState->WorldToScreen = CurrentState->WorldToCamera * CurrentState->CameraToScreen;
 	CurrentState->CameraToWorld = CurrentState->WorldToCamera.Inverse();
-	MatricesChanged = false;
+	CurrentState->MatricesChanged = false;
 }
 
 void FOpenGLRenderInterface::SetFramebufferBlending(EFrameBufferBlending Mode){
@@ -600,6 +605,13 @@ void FOpenGLRenderInterface::SetShader(FShaderGLSL* NewShader){
 	CurrentShader = Shader;
 }
 
+void FOpenGLRenderInterface::SetGLShader(FOpenGLShader* Shader){
+	if(CurrentShader != Shader){
+		Shader->Bind();
+		CurrentShader = Shader;
+	}
+}
+
 void FOpenGLRenderInterface::PushState(DWORD Flags){
 	++CurrentState;
 
@@ -623,7 +635,7 @@ void FOpenGLRenderInterface::PopState(DWORD Flags){
 		SetGLRenderTarget(CurrentState->RenderTarget, CurrentState->RenderTargetOwnDepthBuffer);
 	}
 
-	CurrentState->UniformRevision = PoppedState->UniformRevision;
+	CurrentState->UniformRevision = PoppedState->UniformRevision + 1;
 }
 
 UBOOL FOpenGLRenderInterface::SetRenderTarget(FRenderTarget* RenderTarget, bool bOwnDepthBuffer){
@@ -704,9 +716,11 @@ void FOpenGLRenderInterface::SetAmbientLight(FColor Color){
 void FOpenGLRenderInterface::EnableLighting(UBOOL UseDynamic, UBOOL UseStatic, UBOOL Modulate2X, FBaseTexture* Lightmap, UBOOL LightingOnly, const FSphere& LitSphere, int){
 	CurrentState->UseDynamicLighting = UseDynamic != 0;
 	CurrentState->UseStaticLighting = UseStatic != 0;
-	CurrentState->LightingModulate2X = Modulate2X != 0;
+	CurrentState->LightFactor = Modulate2X ? 2.0f : 1.0f;
+	CurrentState->LightingModulate2x = Modulate2X != 0;
 	CurrentState->LitSphere = LitSphere;
 	CurrentState->Lightmap = Lightmap;
+	++CurrentState->UniformRevision;
 }
 
 static FLOAT UnrealAttenuation(FLOAT Distance,FLOAT Radius){
@@ -806,7 +820,12 @@ void FOpenGLRenderInterface::SetDistanceFog(UBOOL Enable, FLOAT FogStart, FLOAT 
 	CurrentState->FogEnabled = Enable;
 	CurrentState->FogStart = FogStart;
 	CurrentState->FogEnd = FogEnd;
-	CurrentState->FogColor = Color;
+
+	if(CurrentState->OverrideFogColor)
+		CurrentState->SavedFogColor = Color;
+	else
+		CurrentState->FogColor = Color;
+
 	++CurrentState->UniformRevision;
 }
 
@@ -850,7 +869,7 @@ void FOpenGLRenderInterface::SetTransform(ETransformType Type, const FMatrix& Ma
 		CurrentState->CameraToScreen = Matrix;
 	}
 
-	MatricesChanged = true;
+	CurrentState->MatricesChanged = true;
 	++CurrentState->UniformRevision;
 }
 
@@ -920,8 +939,23 @@ void FOpenGLRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorStri
 	CurrentState->bZWrite = true;
 	CurrentState->SrcBlend = GL_ONE;
 	CurrentState->DstBlend = GL_ZERO;
-	CurrentState->AlphaRef = -1.0f;
 	CurrentState->NumTextures = 0;
+
+	if(CurrentState->AlphaRef >= 0.0f || CurrentState->ModifyColor){
+		CurrentState->AlphaRef = -1.0f;
+		CurrentState->ModifyColor = 0;
+		CurrentState->ColorFactor = FPlane(1.0f, 1.0f, 1.0f, 1.0f);
+		++CurrentState->UniformRevision;
+	}
+
+	if(CurrentState->OverrideFogColor){
+		CurrentState->FogColor = CurrentState->SavedFogColor;
+		CurrentState->OverrideFogColor = false;
+		++CurrentState->UniformRevision;
+	}
+
+	ModifyFramebufferBlending = 0;
+	NumTexMatrices = 0;
 
 	Material->PreSetMaterial(GEngineTime);
 
@@ -944,7 +978,7 @@ void FOpenGLRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorStri
 		}
 	}
 
-	bool Result = true; // FIXME: Make false by default
+	bool Result = false;
 	bool IsHardwareShader = false;
 
 	if(Material->IsA<UHardwareShaderWrapper>()){
@@ -959,8 +993,20 @@ void FOpenGLRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorStri
 		if(Shader){
 			SetShader(Shader);
 			IsHardwareShader = true;
-		}else if(Material->IsA<UParticleMaterial>()){
-			Result = SetParticleMaterial(static_cast<UParticleMaterial*>(Material), ModifierInfo);
+		}else{
+			if(Material->IsA<UBitmapMaterial>()){
+				Result = SetBitmapMaterial(static_cast<UBitmapMaterial*>(Material), ModifierInfo);
+			}else if(Material->IsA<UShader>()){
+				Result = SetShaderMaterial(static_cast<UShader*>(Material), ModifierInfo);
+			}else if(Material->IsA<UCombiner>()){
+				Result = SetCombinerMaterial(static_cast<UCombiner*>(Material));
+			}else if(Material->IsA<UParticleMaterial>()){
+				checkSlow(Modifier == NULL);
+				Result = SetParticleMaterial(static_cast<UParticleMaterial*>(Material));
+			}else if(Material->IsA<UProjectorMaterial>()){
+				checkSlow(Modifier == NULL);
+				Result = SetProjectorMaterial(static_cast<UProjectorMaterial*>(Material));
+			}
 		}
 	}
 
@@ -969,12 +1015,12 @@ void FOpenGLRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorStri
 			// Specular is expected to be zero by default for hardware shaders
 			RenDev->glVertexAttrib4f(FVF_Specular,  0.0f, 0.0f, 0.0f, 0.0f);
 		}else{
-			SetShader(&RenDev->FixedFunctionShader);
 			// Specular is expected to be 1.0 by default for fixed function lighting calculations
 			RenDev->glVertexAttrib4f(FVF_Specular,  1.0f, 1.0f, 1.0f, 1.0f);
 		}
 	}else{
-		SetShader(&RenDev->ErrorShader);
+		SetShader(&RenDev->FixedFunctionShader);
+		//SetShader(&RenDev->ErrorShader);
 	}
 
 #if 0

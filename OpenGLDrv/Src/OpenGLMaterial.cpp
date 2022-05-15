@@ -20,7 +20,6 @@ UMaterial* FOpenGLRenderInterface::RemoveModifiers(UModifier* Modifier, FModifie
 		while(Modifier != Material){
 			if(Modifier->IsA<UTexModifier>()){
 				UTexModifier* TexModifier = static_cast<UTexModifier*>(Modifier);
-				FMatrix* Matrix = TexModifier->GetMatrix(GEngineTime);
 
 				if(TexModifier->TexCoordSource != TCS_NoChange){
 					ModifierInfo->TexCoordSrc = static_cast<ETexCoordSrc>(TexModifier->TexCoordSource);
@@ -28,6 +27,7 @@ UMaterial* FOpenGLRenderInterface::RemoveModifiers(UModifier* Modifier, FModifie
 					switch(TexModifier->TexCoordSource){
 					case TCS_CameraCoords:
 						ModifierInfo->TexMatrix *= CurrentState->WorldToCamera.Transpose();
+						ModifierInfo->bUseTexMatrix = 1;
 						break;
 					case TCS_CubeCameraSpaceReflection:
 						{
@@ -37,46 +37,51 @@ UMaterial* FOpenGLRenderInterface::RemoveModifiers(UModifier* Modifier, FModifie
 							Tmp.M[3][2] = 0.0f;
 							Tmp.M[3][3] = 1.0f;
 							ModifierInfo->TexMatrix *= Tmp;
+							ModifierInfo->bUseTexMatrix = 1;
 						}
 					}
 
 					ModifierInfo->TexCoordCount = static_cast<ETexCoordCount>(TexModifier->TexCoordCount);
 				}
 
-				if(Matrix)
+				FMatrix* Matrix = TexModifier->GetMatrix(GEngineTime);
+
+				if(Matrix){
 					ModifierInfo->TexMatrix *= *Matrix;
+					ModifierInfo->bUseTexMatrix = 1;
+				}
 
 				ModifierInfo->TexUClamp = static_cast<ETexClampModeOverride>(TexModifier->UClampMode);
 				ModifierInfo->TexVClamp = static_cast<ETexClampModeOverride>(TexModifier->VClampMode);
 			}else if(Modifier->IsA<UFinalBlend>()){
-#if 0
 				UFinalBlend* FinalBlend = static_cast<UFinalBlend*>(Modifier);
 
-				ModifyFramebufferBlending = true;
-				SetFramebufferBlending(static_cast<EFrameBufferBlending>(FinalBlend->FrameBufferBlending));
-				CurrentState->bZTest = FinalBlend->ZTest != 0;
-				CurrentState->bZWrite = FinalBlend->ZWrite != 0;
+				if(!ModifyFramebufferBlending){
+					ModifyFramebufferBlending = true;
+					SetFramebufferBlending(static_cast<EFrameBufferBlending>(FinalBlend->FrameBufferBlending));
+					CurrentState->bZTest = FinalBlend->ZTest != 0;
+					CurrentState->bZWrite = FinalBlend->ZWrite != 0;
+				}
 
 				if(FinalBlend->TwoSided)
 					CurrentState->CullMode = CM_None;
 
-				if(FinalBlend->AlphaTest)
+				if(FinalBlend->AlphaTest){
 					CurrentState->AlphaRef = FinalBlend->AlphaRef / 255.0f;
-#endif
+					++CurrentState->UniformRevision;
+				}
 			}else if(Modifier->IsA<UColorModifier>()){
-#if 0
 				UColorModifier* ColorModifier = static_cast<UColorModifier*>(Modifier);
 
-				UsingConstantColor = true;
-				ModifyColor = true;
-				ConstantColor = ColorModifier->Color;
+				CurrentState->ModifyColor = 1;
+				CurrentState->ColorFactor = ColorModifier->Color;
+				++CurrentState->UniformRevision;
 
 				if(ColorModifier->RenderTwoSided)
 					CurrentState->CullMode = CM_None;
 
 				if(!ModifyFramebufferBlending && ColorModifier->AlphaBlend)
 					SetFramebufferBlending(FB_AlphaBlend);
-#endif
 			}
 
 			Modifier = static_cast<UModifier*>(Modifier->Material);
@@ -87,7 +92,7 @@ UMaterial* FOpenGLRenderInterface::RemoveModifiers(UModifier* Modifier, FModifie
 }
 
 void FOpenGLRenderInterface::GetShaderConstants(FSConstantsInfo* Info, FPlane* Constants, INT NumConstants){
-	if(MatricesChanged)
+	if(CurrentState->MatricesChanged)
 		UpdateMatrices();
 
 	FMatrix Matrix;
@@ -341,6 +346,7 @@ void FOpenGLRenderInterface::GetShaderConstants(FSConstantsInfo* Info, FPlane* C
 
 void FOpenGLRenderInterface::SetTexture(FBaseTexture* Texture, INT TextureIndex, FLOAT BumpSize){
 	checkSlow(Texture);
+	checkSlow(TextureIndex < MAX_TEXTURES);
 
 	QWORD CacheId = Texture->GetCacheId();
 	FOpenGLTexture* GLTexture = static_cast<FOpenGLTexture*>(RenDev->GetCachedResource(CacheId));
@@ -355,6 +361,7 @@ void FOpenGLRenderInterface::SetTexture(FBaseTexture* Texture, INT TextureIndex,
 	FOpenGLGlobalUniforms::TextureInfo& TextureInfo = CurrentState->TextureInfos[TextureIndex];
 
 	TextureUnit.Texture = GLTexture;
+	CurrentState->NumTextures = Max(CurrentState->NumTextures, TextureIndex + 1);
 
 	UBOOL WasCubemap = TextureInfo.IsCubemap;
 
@@ -390,7 +397,387 @@ void FOpenGLRenderInterface::SetBitmapTexture(UBitmapMaterial* Bitmap, INT Textu
 	SetTexture(Texture, TextureIndex, BumpSize);
 }
 
-bool FOpenGLRenderInterface::SetParticleMaterial(UParticleMaterial* Material, const FModifierInfo& Modifiers){
+void FOpenGLRenderInterface::SetGeneratedShader(FShaderGenerator& ShaderGenerator){
+	FOpenGLShader** Shader = &ShadersById[ShaderGenerator.GetShaderId(CurrentState->UseStaticLighting)];
+
+	if(!*Shader)
+		*Shader = ShaderGenerator.CreateShader(RenDev, CurrentState->UseStaticLighting);
+
+	if(NumTexMatrices > 0)
+		RenDev->glProgramUniformMatrix4fv((*Shader)->Program, 0, NumTexMatrices, GL_TRUE, reinterpret_cast<GLfloat*>(TexMatrices));
+
+	SetGLShader(*Shader);
+}
+
+bool FOpenGLRenderInterface::SetBitmapMaterial(UBitmapMaterial* Material, const FModifierInfo& ModifierInfo){
+	// If the material is a simple texture, use it to get the blending options
+	if(!ModifyFramebufferBlending && Material->IsA<UTexture>()){
+		UTexture* Texture = static_cast<UTexture*>(Material);
+
+		if(Texture->bMasked){
+			ModifyFramebufferBlending = true;
+			CurrentState->UniformRevision += CurrentState->AlphaRef != 0.5f;
+			CurrentState->AlphaRef = 0.5f;
+			SetFramebufferBlending(FB_Overwrite);
+		}else if(Texture->bAlphaTexture){
+			ModifyFramebufferBlending = true;
+			CurrentState->UniformRevision += CurrentState->AlphaRef != 0.0f;
+			CurrentState->AlphaRef = 0.0f;
+			SetFramebufferBlending(FB_AlphaBlend);
+		}
+
+		if(Texture->bTwoSided)
+			CurrentState->CullMode = CM_None;
+	}
+
+	SetBitmapTexture(Material, 0);
+	FOpenGLShader* Shader;
+	SBYTE Matrix = ModifierInfo.bUseTexMatrix ? 0 : -1;
+
+	if(!CurrentState->Lightmap){
+		FOpenGLShader** TmpShader = &MaterialShaders[(Matrix < 0 ? FMS_Bitmap : FMS_BitmapTexMatrix) + CurrentState->UseStaticLighting];
+
+		if(!*TmpShader){
+			FShaderGenerator ShaderGenerator;
+
+			ShaderGenerator.AddTexture(0, TCS_Stream0, TCN_2DCoords, Matrix);
+			ShaderGenerator.AddColorOp(CA_T0, CA_R0, COP_Assign, CC_RGBA, CR_0);
+			*TmpShader = ShaderGenerator.CreateShader(RenDev, CurrentState->UseStaticLighting);
+		}
+
+		Shader = *TmpShader;
+	}else{
+		SetTexture(CurrentState->Lightmap, 1);
+
+		if(CurrentState->UseStaticLighting || !CurrentState->LightingModulate2x){
+			FOpenGLShader** TmpShader = &MaterialShaders[(Matrix < 0 ? FMS_BitmapLightmap : FMS_BitmapLightmapTexMatrix) + CurrentState->UseStaticLighting];
+
+			if(!*TmpShader){
+				FShaderGenerator ShaderGenerator;
+
+				ShaderGenerator.AddTexture(0, TCS_Stream0, TCN_2DCoords, Matrix);
+				ShaderGenerator.AddTexture(1, TCS_Stream1);
+				ShaderGenerator.AddColorOp(CA_T0, CA_T1, COP_Modulate, CC_RGBA, CR_0);
+				*TmpShader = ShaderGenerator.CreateShader(RenDev, CurrentState->UseStaticLighting);
+			}
+
+			Shader = *TmpShader;
+		}else{
+			FOpenGLShader** TmpShader = &MaterialShaders[(Matrix < 0 ? FMS_BitmapLightmap2x : FMS_BitmapLightmap2xTexMatrix) + CurrentState->UseStaticLighting];
+
+			if(!*TmpShader){
+				FShaderGenerator ShaderGenerator;
+
+				ShaderGenerator.AddTexture(0, TCS_Stream0, TCN_2DCoords, Matrix);
+				ShaderGenerator.AddTexture(1, TCS_Stream1);
+				ShaderGenerator.AddColorOp(CA_T0, CA_T1, COP_Modulate2x, CC_RGBA, CR_0);
+				*TmpShader = ShaderGenerator.CreateShader(RenDev, CurrentState->UseStaticLighting);
+			}
+
+			Shader = *TmpShader;
+		}
+
+	}
+
+	if(Matrix == 0)
+		RenDev->glProgramUniformMatrix4fv(Shader->Program, 0, 1, GL_TRUE, reinterpret_cast<const GLfloat*>(&ModifierInfo.TexMatrix));
+
+	SetGLShader(Shader);
+
+	return true;
+}
+
+bool FOpenGLRenderInterface::SetShaderMaterial(UShader* Shader, const FModifierInfo& ModifierInfo){
+	try{
+		FShaderGenerator ShaderGenerator;
+		bool HaveDiffuse = Shader->Diffuse != NULL && (!Shader->SelfIllumination || Shader->SelfIlluminationMask);
+
+		if(HaveDiffuse){
+			HandleSimpleMaterial(Shader->Diffuse, ShaderGenerator, &ModifierInfo);
+
+			if(CurrentState->Lightmap)
+				UseLightmap(ShaderGenerator);
+
+			ShaderGenerator.AddColorOp(CA_R0, CA_R0, COP_Assign, CC_RGBA, ShaderGenerator.PushTempRegister());
+		}
+
+		bool HaveSelfIllumination = Shader->SelfIllumination != NULL;
+
+		if(HaveSelfIllumination){
+			if(Shader->SelfIlluminationMask){
+				bool HaveUniqueSelfIllumination = false;
+
+				if(HaveDiffuse && Shader->SelfIllumination != Shader->Diffuse){
+					HandleSimpleMaterial(Shader->SelfIllumination, ShaderGenerator, &ModifierInfo);
+					ShaderGenerator.AddColorOp(CA_R0, CA_R0, COP_Assign, CC_RGBA, ShaderGenerator.PushTempRegister());
+					HaveUniqueSelfIllumination = true;
+				}
+
+				EColorArg SelfIlluminationMaskArg = CA_Diffuse;
+
+				if(Shader->SelfIlluminationMask != Shader->SelfIllumination && Shader->SelfIlluminationMask != Shader->Diffuse){
+					HandleSimpleMaterial(Shader->SelfIlluminationMask, ShaderGenerator, &ModifierInfo);
+					ShaderGenerator.AddColorOp(CA_R0, CA_R0, COP_Assign, CC_RGBA, CR_1);
+					SelfIlluminationMaskArg = CA_R1;
+				}
+
+				EColorArg SelfIlluminationArg = CA_Diffuse;
+
+				if(HaveUniqueSelfIllumination)
+					SelfIlluminationArg = ShaderGenerator.PopTempRegister();
+
+				EColorArg DiffuseArg = HaveDiffuse ? ShaderGenerator.PopTempRegister() : CA_Diffuse;
+
+				if(Shader->SelfIllumination == Shader->Diffuse)
+					SelfIlluminationArg = DiffuseArg;
+
+				if(Shader->SelfIlluminationMask == Shader->SelfIllumination)
+					SelfIlluminationMaskArg = SelfIlluminationArg;
+				else if(Shader->SelfIlluminationMask == Shader->Diffuse)
+					SelfIlluminationMaskArg = DiffuseArg;
+
+				ShaderGenerator.AddColorOp(DiffuseArg, DiffuseArg, COP_Assign, CC_A, ShaderGenerator.PushTempRegister()); // Save diffuse alpha
+				ShaderGenerator.AddColorOp(SelfIlluminationArg, SelfIlluminationArg, COP_Assign, CC_RGB, CR_1);
+
+				if(SelfIlluminationMaskArg != CA_R1)
+					ShaderGenerator.AddColorOp(SelfIlluminationMaskArg, SelfIlluminationMaskArg, COP_Assign, CC_A, CR_1);
+
+				ShaderGenerator.AddColorOp(DiffuseArg, CA_R1, COP_AlphaBlendInverted, CC_RGB, CR_0);
+				ShaderGenerator.AddColorOp(ShaderGenerator.PopTempRegister(), CA_R0, COP_Assign, CC_A, CR_0); // Restore saved alpha
+				ShaderGenerator.AddColorOp(CA_R1, CA_R1, COP_Assign, CC_RGBA, CR_LightMixFactor);
+			}else{
+				HandleSimpleMaterial(Shader->SelfIllumination, ShaderGenerator, &ModifierInfo);
+				// TODO: Maybe just disable dynamic lighting here
+				ShaderGenerator.AddColorOp(CA_Const1, CA_Const1, COP_Assign, CC_RGBA, CR_LightMixFactor);
+			}
+		}
+
+		if(Shader->Opacity){
+			if((HaveDiffuse && Shader->Opacity != Shader->Diffuse) || (HaveSelfIllumination && Shader->Opacity != Shader->SelfIllumination)){
+				ShaderGenerator.AddColorOp(CA_R0, CA_R0, COP_Assign, CC_RGB, ShaderGenerator.PushTempRegister());
+				HandleSimpleMaterial(Shader->Opacity, ShaderGenerator, &ModifierInfo);
+				ShaderGenerator.AddColorOp(ShaderGenerator.PopTempRegister(), CA_R0, COP_Assign, CC_RGB, CR_0);
+			}
+		}
+
+		if(!ModifyFramebufferBlending){
+			CurrentState->bZTest = true;
+			CurrentState->bZWrite = true;
+
+			if(Shader->TwoSided)
+				CurrentState->CullMode = CM_None;
+
+			if(Shader->Wireframe)
+				CurrentState->FillMode = FM_Wireframe;
+
+			switch(Shader->OutputBlending){
+			case OB_Normal:
+				if(Shader->Opacity){
+					CurrentState->AlphaRef = 0.0f;
+					++CurrentState->UniformRevision;
+					SetFramebufferBlending(FB_AlphaBlend);
+					CurrentState->bZWrite = false;
+				}
+
+				break;
+			case OB_Masked:
+				CurrentState->AlphaRef = 0.5f;
+				++CurrentState->UniformRevision;
+				SetFramebufferBlending(FB_Overwrite);
+				break;
+			case OB_Modulate:
+				SetFramebufferBlending(FB_Modulate);
+				break;
+			case OB_Translucent:
+				SetFramebufferBlending(FB_Translucent);
+				break;
+			case OB_Invisible:
+				SetFramebufferBlending(FB_Invisible);
+				break;
+			case OB_Brighten:
+				SetFramebufferBlending(FB_Brighten);
+				break;
+			case OB_Darken:
+				SetFramebufferBlending(FB_Darken);
+			}
+		}
+
+		SetGeneratedShader(ShaderGenerator);
+
+		return true;
+	}catch(TCHAR* Error){
+		debugf("Error setting shader material '%s': %s", Shader->GetName(), Error);
+		return false;
+	}
+}
+
+void FOpenGLRenderInterface::HandleSimpleMaterial(UMaterial* Material, FShaderGenerator& ShaderGenerator, const FModifierInfo* InModifierInfo){
+	FModifierInfo ModifierInfo = InModifierInfo ? *InModifierInfo : FModifierInfo();
+
+	if(Material->IsA<UModifier>())
+		Material = RemoveModifiers(static_cast<UModifier*>(Material), &ModifierInfo);
+
+	if(Material->IsA<UBitmapMaterial>()){
+		INT Index = CurrentState->NumTextures++;
+
+		if(Index >= MAX_TEXTURES)
+			appThrowf("Material uses too many textures");
+
+
+		SetBitmapTexture(static_cast<UBitmapMaterial*>(Material), Index);
+
+		SBYTE Matrix = INDEX_NONE;
+
+		if(ModifierInfo.bUseTexMatrix){
+			Matrix = static_cast<SBYTE>(NumTexMatrices++);
+			TexMatrices[Matrix] = ModifierInfo.TexMatrix;
+		}
+
+		EColorArg TextureArg = ShaderGenerator.AddTexture(Index, ModifierInfo.TexCoordSrc, ModifierInfo.TexCoordCount, Matrix);
+
+		ShaderGenerator.AddColorOp(TextureArg, TextureArg, COP_Assign, CC_RGBA, CR_0);
+	}else if(Material->IsA<UCombiner>()){
+		HandleCombinerMaterial(static_cast<UCombiner*>(Material), ShaderGenerator, false);
+	}else if(Material->IsA<UConstantMaterial>()){
+		CurrentState->GlobalColor = static_cast<UConstantMaterial*>(Material)->GetColor(GEngineTime);
+		++CurrentState->UniformRevision;
+		ShaderGenerator.AddColorOp(CA_GlobalColor, CA_GlobalColor, COP_Assign, CC_RGBA, CR_0);
+	}else if(Material->IsA<UVertexColor>()){
+		ShaderGenerator.AddColorOp(CA_Diffuse, CA_Diffuse, COP_Assign, CC_RGBA, CR_0);
+	}else{
+		appThrowf("Material of type %s is not a simple material", Material->GetClass()->GetName());
+	}
+}
+
+void FOpenGLRenderInterface::HandleCombinerMaterial(UCombiner* Combiner, FShaderGenerator& ShaderGenerator, bool IsRootMaterial){
+	UMaterial* Material1 = Combiner->Material1;
+
+	if(!Material1)
+		appThrowf("Combiner Material1 is not set for %s", Combiner->GetPathName());
+
+	HandleSimpleMaterial(Material1, ShaderGenerator);
+
+	if(CurrentState->Lightmap)
+		UseLightmap(ShaderGenerator);
+
+	EColorRegister Material1Register = ShaderGenerator.PushTempRegister();
+
+	ShaderGenerator.AddColorOp(CA_R0, CA_R0, COP_Assign, CC_RGBA, Material1Register);
+
+	UMaterial* Material2 = Combiner->Material2;
+	bool HaveUniqueMaterial2 = false;
+
+	if(Material2 && Material2 != Material1){
+		HandleSimpleMaterial(Material2, ShaderGenerator);
+		ShaderGenerator.AddColorOp(CA_R0, CA_R0, COP_Assign, CC_RGBA, ShaderGenerator.PushTempRegister());
+		HaveUniqueMaterial2 = true;
+	}
+
+	UMaterial* Mask = Combiner->Mask;
+	EColorArg MaskArg = CA_Diffuse;
+
+	// Incorrectly configured combiners use Material1 as the mask
+	if(!Mask && (Combiner->CombineOperation >= CO_AlphaBlend_With_Mask || Combiner->AlphaOperation == AO_Use_Mask || Combiner->AlphaOperation == AO_AlphaBlend_With_Mask))
+		Mask = Material1;
+
+	if(Mask && Mask != Material1 && Mask != Material2 && !Mask->IsA<UVertexColor>()){
+		HandleSimpleMaterial(Mask, ShaderGenerator);
+		ShaderGenerator.AddColorOp(CA_R0, CA_R0, COP_Assign, CC_RGBA, CR_1);
+		MaskArg = CA_R1;
+	}
+
+	EColorArg Material2Arg = CA_Diffuse;
+
+	if(HaveUniqueMaterial2)
+		Material2Arg = ShaderGenerator.PopTempRegister();
+
+	EColorArg Material1Arg = ShaderGenerator.PopTempRegister();
+
+	if(Material2 == Material1)
+		Material2Arg = Material1Arg;
+
+	if(Mask == Material1)
+		MaskArg = Material1Arg;
+	else if(Mask == Material2)
+		MaskArg = Material2Arg;
+
+	if(Mask && IsRootMaterial && !Combiner->LightBothMaterials)
+		ShaderGenerator.AddColorOp(MaskArg, MaskArg, COP_Assign, CC_RGBA, CR_LightMixFactor);
+
+	switch(Combiner->CombineOperation){
+	case CO_Use_Color_From_Material1:
+		ShaderGenerator.AddColorOp(Material1Arg, Material1Arg, COP_Assign, CC_RGB, CR_0);
+		break;
+	case CO_Use_Color_From_Material2:
+		ShaderGenerator.AddColorOp(Material2Arg, Material2Arg, COP_Assign, CC_RGB, CR_0);
+		break;
+	case CO_Multiply:
+		ShaderGenerator.AddColorOp(Material1Arg, Material2Arg, Combiner->Modulate4X ? COP_Modulate4x : Combiner->Modulate2X ? COP_Modulate2x : COP_Modulate, CC_RGB, CR_0);
+		break;
+	case CO_Add:
+		ShaderGenerator.AddColorOp(Material1Arg, Material2Arg, COP_Add, CC_RGB, CR_0);
+		break;
+	case CO_Subtract:
+		ShaderGenerator.AddColorOp(Material1Arg, Material2Arg, COP_Subtract, CC_RGB, CR_0);
+		break;
+	case CO_AlphaBlend_With_Mask:
+		ShaderGenerator.AddColorOp(MaskArg, MaskArg, COP_Assign, CC_A, Material1Register);
+		ShaderGenerator.AddColorOp(Material1Arg, Material2Arg, Combiner->InvertMask ? COP_AlphaBlendInverted : COP_AlphaBlend, CC_RGB, CR_0);
+		break;
+	case CO_Add_With_Mask_Modulation:
+		ShaderGenerator.AddColorOp(Material1Arg, Material2Arg, COP_AddAlphaModulate, CC_RGB, CR_0);
+		break;
+	case CO_Use_Color_From_Mask:
+		ShaderGenerator.AddColorOp(MaskArg, MaskArg, COP_Assign, CC_RGB, CR_0);
+	}
+
+	switch(Combiner->AlphaOperation){
+	case AO_Use_Mask:
+		ShaderGenerator.AddColorOp(MaskArg, MaskArg, COP_Assign, CC_A, CR_0);
+		break;
+	case AO_Multiply:
+		ShaderGenerator.AddColorOp(Material1Arg, Material2Arg, COP_Modulate, CC_A, CR_0);
+		break;
+	case AO_Add:
+		ShaderGenerator.AddColorOp(Material1Arg, Material2Arg, COP_Add, CC_A, CR_0);
+		break;
+	case AO_Use_Alpha_From_Material1:
+		ShaderGenerator.AddColorOp(Material1Arg, Material1Arg, COP_Assign, CC_A, CR_0);
+		break;
+	case AO_Use_Alpha_From_Material2:
+		ShaderGenerator.AddColorOp(Material2Arg, Material2Arg, COP_Assign, CC_A, CR_0);
+		break;
+	case AO_AlphaBlend_With_Mask:
+		ShaderGenerator.AddColorOp(MaskArg, MaskArg, COP_Assign, CC_A, Material1Register);
+		ShaderGenerator.AddColorOp(Material1Arg, Material2Arg, COP_AlphaBlend, CC_A, CR_0);
+	}
+}
+
+void FOpenGLRenderInterface::UseLightmap(FShaderGenerator& ShaderGenerator){
+	checkSlow(CurrentState->Lightmap);
+	INT Index = CurrentState->NumTextures++;
+	SetTexture(CurrentState->Lightmap, Index);
+	EColorArg TextureArg = ShaderGenerator.AddTexture(Index, TCS_Stream1);
+	ShaderGenerator.AddColorOp(CA_R0, TextureArg, CurrentState->LightingModulate2x ? COP_Modulate2x : COP_Modulate, CC_RGB, CR_0);
+}
+
+bool FOpenGLRenderInterface::SetCombinerMaterial(UCombiner* Combiner){
+	try{
+		FShaderGenerator ShaderGenerator;
+
+		HandleCombinerMaterial(Combiner, ShaderGenerator, true);
+		SetGeneratedShader(ShaderGenerator);
+
+		return true;
+	}catch(const TCHAR* Error){
+		debugf("Error setting combiner material '%s': %s", Combiner->GetName(), Error);
+		return false;
+	}
+}
+
+bool FOpenGLRenderInterface::SetParticleMaterial(UParticleMaterial* Material){
+	bool UseSpecialBlend = false;
+
 	switch(Material->ParticleBlending){
 	case PTDS_Regular:
 		SetFramebufferBlending(FB_Overwrite);
@@ -400,22 +787,115 @@ bool FOpenGLRenderInterface::SetParticleMaterial(UParticleMaterial* Material, co
 		break;
 	case PTDS_Modulated:
 		SetFramebufferBlending(FB_Modulate);
+		CurrentState->FogColor = FPlane(0.5f, 0.5f, 0.5f, 0.0f);
+		CurrentState->OverrideFogColor = true;
+		UseSpecialBlend = true;
 		break;
 	case PTDS_Translucent:
 		SetFramebufferBlending(FB_Translucent);
+		CurrentState->FogColor = FPlane(0.0f, 0.0f, 0.0f, 0.0f);
+		CurrentState->OverrideFogColor = true;
 		break;
 	case PTDS_AlphaModulate_MightNotFogCorrectly:
 		SetFramebufferBlending(FB_AlphaModulate_MightNotFogCorrectly);
+		CurrentState->FogColor = FPlane(0.0f, 0.0f, 0.0f, 0.0f);
+		CurrentState->OverrideFogColor = true;
 		break;
 	case PTDS_Darken:
 		SetFramebufferBlending(FB_Darken);
+		CurrentState->FogColor = FPlane(0.0f, 0.0f, 0.0f, 0.0f);
+		CurrentState->OverrideFogColor = true;
 		break;
 	case PTDS_Brighten:
+		CurrentState->FogColor = FPlane(0.0f, 0.0f, 0.0f, 0.0f);
+		CurrentState->OverrideFogColor = true;
 		SetFramebufferBlending(FB_Brighten);
 	}
+
+	CurrentState->UniformRevision += CurrentState->OverrideFogColor;
 
 	if(Material->RenderTwoSided)
 		CurrentState->CullMode = CM_None;
 
+	if(Material->BitmapMaterial)
+		SetBitmapTexture(Material->BitmapMaterial, CurrentState->NumTextures++);
+
+	if(Material->AlphaTest){
+		CurrentState->AlphaRef = Material->AlphaRef / 255.0f;
+		++CurrentState->UniformRevision;
+	}
+
+	CurrentState->bZTest = Material->ZTest != 0;
+	CurrentState->bZWrite = Material->ZWrite != 0;
+	CurrentState->FillMode = Material->Wireframe ? FM_Wireframe : FM_Solid;
+
+	FOpenGLShader* Shader;
+
+	if(!Material->BlendBetweenSubdivisions){
+		EColorOp ColorOp;
+		EColorArg ColorArg;
+		FOpenGLShader** TmpShader;
+
+		if(UseSpecialBlend){
+			ColorOp = COP_BlendDiffuseAlpha;
+
+			if(Material->UseTFactor){
+				ColorArg = CA_GlobalColor;
+				TmpShader = &MaterialShaders[FMS_ParticleSpecialBlendTFactor];
+			}else{
+				ColorArg = CA_Diffuse;
+				TmpShader = &MaterialShaders[FMS_ParticleSpecialBlend];
+			}
+		}else{
+			ColorOp = COP_Modulate;
+
+			if(Material->UseTFactor){
+				ColorArg = CA_GlobalColor;
+				TmpShader = &MaterialShaders[FMS_ParticleTFactor];
+			}else{
+				ColorArg = CA_Diffuse;
+				TmpShader = &MaterialShaders[FMS_Particle];
+			}
+		}
+
+		if(!*TmpShader){
+			FShaderGenerator ShaderGenerator;
+
+			ShaderGenerator.AddTexture(0, TCS_Stream0);
+			ShaderGenerator.AddColorOp(CA_T0,
+			                           ColorArg,
+			                           ColorOp,
+			                           CC_RGBA,
+			                           CR_0);
+			*TmpShader = ShaderGenerator.CreateShader(RenDev, false);
+		}
+
+		Shader = *TmpShader;
+	}else{
+		if(!MaterialShaders[FMS_ParticleBlendSubdivisions]){
+			FShaderGenerator ShaderGenerator;
+
+			ShaderGenerator.AddTexture(0, TCS_Stream0);
+			ShaderGenerator.AddTexture(0, TCS_Stream1);
+			ShaderGenerator.AddColorOp(CA_T0, CA_T1, COP_BlendDiffuseAlpha, CC_RGBA, CR_0);
+			ShaderGenerator.AddColorOp(CA_R0, CA_Diffuse, COP_Modulate, CC_RGB, CR_0);
+			MaterialShaders[FMS_ParticleBlendSubdivisions] = ShaderGenerator.CreateShader(RenDev, false);
+		}
+
+		Shader = MaterialShaders[FMS_ParticleBlendSubdivisions];
+	}
+
+	/*
+	 * Some testing showed that there are apparently no particle materials in the game where NumProjectors > 0.
+	 * This is a good thing and means we don't need to implement that here unless one shows up at some point.
+	 */
+	checkSlow(Material->NumProjectors == 0);
+
+	SetGLShader(Shader);
+
+	return true;
+}
+
+bool FOpenGLRenderInterface::SetProjectorMaterial(UProjectorMaterial* Material){
 	return false;
 }

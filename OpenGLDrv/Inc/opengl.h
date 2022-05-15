@@ -309,6 +309,7 @@ typedef OPENGL_MESSAGE_CALLBACK(opengl_message_callback);
 	GL_FUNC(CreateProgram, GLuint, (void)) \
 	GL_FUNC(DeleteProgram, void, (GLuint Program)) \
 	GL_FUNC(ProgramUniform4fv, void, (GLuint Program, GLint Location, GLsizei Count, const GLfloat* Value)) \
+	GL_FUNC(ProgramUniformMatrix4fv, void, (GLuint Program, GLint Location, GLsizei Count, GLboolean Transpose, const GLfloat* Value)) \
 	GL_FUNC(UseProgram, void, (GLuint Program)) \
 	GL_FUNC(AttachShader, void, (GLuint Program, GLuint Shader)) \
 	GL_FUNC(DetachShader, void, (GLuint Program, GLuint Shader)) \

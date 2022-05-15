@@ -2,6 +2,7 @@
 
 #include "OpenGLDrv.h"
 #include "Shader.h"
+#include "ShaderGenerator.h"
 
 class UOpenGLRenderDevice;
 class FOpenGLTexture;
@@ -49,15 +50,17 @@ enum EShaderLightType{
 	UNIFORM_BLOCK_MEMBER(mat4, WorldToLocal) \
 	UNIFORM_BLOCK_MEMBER(mat4, WorldToScreen) \
 	UNIFORM_BLOCK_MEMBER(mat4, CameraToWorld) \
+	UNIFORM_BLOCK_MEMBER(vec4, GlobalColor) \
+	UNIFORM_BLOCK_MEMBER(vec4, ColorFactor) \
+	UNIFORM_BLOCK_MEMBER(vec4, AmbientLightColor) \
+	UNIFORM_BLOCK_MEMBER(vec4, FogColor) \
+	UNIFORM_BLOCK_MEMBER(bool, FogEnabled) \
+	UNIFORM_BLOCK_MEMBER(float, LightFactor) \
 	UNIFORM_BLOCK_MEMBER(float, AlphaRef) \
 	UNIFORM_BLOCK_MEMBER(float, Time) \
 	UNIFORM_BLOCK_MEMBER(float, CosTime) \
 	UNIFORM_BLOCK_MEMBER(float, SinTime) \
 	UNIFORM_BLOCK_MEMBER(float, TanTime) \
-	UNIFORM_BLOCK_MEMBER(vec4, GlobalColor) \
-	UNIFORM_BLOCK_MEMBER(vec4, AmbientLightColor) \
-	UNIFORM_BLOCK_MEMBER(vec4, FogColor) \
-	UNIFORM_BLOCK_MEMBER(bool, FogEnabled) \
 	UNIFORM_BLOCK_MEMBER(float, FogStart) \
 	UNIFORM_BLOCK_MEMBER(float, FogEnd) \
 	UNIFORM_BLOCK_MEMBER(STRUCT(TextureInfo){ \
@@ -75,8 +78,7 @@ enum EShaderLightType{
 		UNIFORM_STRUCT_MEMBER(float, Cone) \
 		UNIFORM_STRUCT_MEMBER(int, Type) \
 	}, Lights[MAX_SHADER_LIGHTS]) \
-	UNIFORM_BLOCK_MEMBER(bool, UseDynamicLighting) \
-	UNIFORM_BLOCK_MEMBER(bool, UseStaticLighting)
+	UNIFORM_BLOCK_MEMBER(bool, UseDynamicLighting)
 
 #pragma warning(push)
 #pragma warning(disable : 4324) // structure was padded due to __declspec(align())
@@ -153,12 +155,24 @@ struct FOpenGLRenderState{
 	FOpenGLTextureUnit        TextureUnits[MAX_TEXTURES];
 };
 
+enum EFixedFunctionShader{
+	FFS_BitmapMaterial,
+	FFS_BitmapMaterialLightmap,
+	FFS_BitmapMaterialLightmap2x,
+	FFS_ParticleMaterial,
+	FFS_ParticleMaterialTFactor,
+	FFS_ParticleMaterialBlend,
+	FFS_ParticleMaterialTFactorBlend,
+	FFS_MAX
+};
+
 /*
  * OpenGL RenderInterface
  */
 class FOpenGLRenderInterface : public FRenderInterface{
 public:
 	struct FOpenGLSavedState : FOpenGLGlobalUniforms, FOpenGLRenderState{
+		bool            MatricesChanged;
 		INT             UniformRevision;
 
 		INT             IndexBufferBase;
@@ -167,12 +181,19 @@ public:
 		FOpenGLTexture* RenderTarget;
 		bool            RenderTargetOwnDepthBuffer;
 
-		// Light
+		bool            ModifyColor;
 
-		bool            LightingModulate2X;
+		// Lighting
+
+		bool            UseStaticLighting;
+		bool            LightingModulate2x;
 		FBaseTexture*   Lightmap;
 		FSphere         LitSphere;
 		FDynamicLight*  HardwareShaderLights[MAX_SHADER_LIGHTS];
+
+		// Fog
+		bool            OverrideFogColor;
+		FPlane          SavedFogColor;
 	};
 
 	// Variables
@@ -192,7 +213,6 @@ public:
 
 	FOpenGLShader*                        CurrentShader;
 
-	bool                                  MatricesChanged;
 	INT                                   LastUniformRevision;
 	unsigned int                          GlobalUBO;
 
@@ -219,6 +239,7 @@ public:
 	void SetTextureFilter(BYTE Filter);
 	void SetGLRenderTarget(FOpenGLTexture* GLRenderTarget, bool bOwnDepthBuffer);
 	void SetShader(FShaderGLSL* NewShader);
+	void SetGLShader(FOpenGLShader* Shader);
 
 	// Overrides
 
@@ -258,10 +279,16 @@ public:
 private:
 	struct FModifierInfo{
 		FMatrix               TexMatrix;
+		UBOOL                 bUseTexMatrix;
 		ETexCoordSrc          TexCoordSrc;
 		ETexCoordCount        TexCoordCount;
 		ETexClampModeOverride TexUClamp;
 		ETexClampModeOverride TexVClamp;
+
+		FModifierInfo() : TexMatrix(FMatrix::Identity),
+		                  bUseTexMatrix(0),
+		                  TexCoordSrc(TCS_Stream0),
+		                  TexCoordCount(TCN_2DCoords){}
 	};
 
 	UMaterial* RemoveModifiers(UModifier* Modifier, FModifierInfo* ModifierInfo = NULL);
@@ -269,5 +296,41 @@ private:
 	void SetTexture(FBaseTexture* Texture, INT TextureIndex, FLOAT BumpSize = 0.0f);
 	void SetBitmapTexture(UBitmapMaterial* Bitmap, INT TextureIndex, FLOAT BumpSize = 0.0f);
 
-	bool SetParticleMaterial(UParticleMaterial* Material, const FModifierInfo& Modifiers);
+	// NOTE: The order of those is important
+	enum EFixedMaterialShader{
+		FMS_Bitmap,
+		FMS_BitmapStaticLighting,
+		FMS_BitmapTexMatrix,
+		FMS_BitmapTexMatrixStaticLighting,
+		FMS_BitmapLightmap,
+		FMS_BitmapLightmapTexMatrix,
+		FMS_BitmapLightmap2x,
+		FMS_BitmapLightmap2xStaticLighting,
+		FMS_BitmapLightmap2xTexMatrix,
+		FMS_BitmapLightmap2xTexMatrixStaticLighting,
+		FMS_Particle,
+		FMS_ParticleTFactor,
+		FMS_ParticleSpecialBlend,
+		FMS_ParticleSpecialBlendTFactor,
+		FMS_ParticleBlendSubdivisions,
+		FMS_MAX
+	};
+
+	FOpenGLShader*              MaterialShaders[FMS_MAX];
+	TMap<DWORD, FOpenGLShader*> ShadersById;
+	UBOOL                       ModifyFramebufferBlending;
+	INT                         NumTexMatrices;
+	FMatrix                     TexMatrices[MAX_TEXTURES];
+
+	void SetGeneratedShader(FShaderGenerator& ShaderGenerator);
+
+	bool SetBitmapMaterial(UBitmapMaterial* Material, const FModifierInfo& ModifierInfo);
+	bool SetShaderMaterial(UShader* Shader, const FModifierInfo& ModifierInfo);
+	bool SetCombinerMaterial(UCombiner* Combiner);
+	bool SetParticleMaterial(UParticleMaterial* Material);
+	bool SetProjectorMaterial(UProjectorMaterial* Material);
+
+	void HandleSimpleMaterial(UMaterial* Material, FShaderGenerator& ShaderGenerator, const FModifierInfo* InModifierInfo = NULL);
+	void HandleCombinerMaterial(UCombiner* Combiner, FShaderGenerator& ShaderGenerator, bool IsRootMaterial);
+	void UseLightmap(FShaderGenerator& ShaderGenerator);
 };

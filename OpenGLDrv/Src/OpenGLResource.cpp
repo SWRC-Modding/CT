@@ -3,23 +3,26 @@
 #include "../Inc/OpenGLRenderDevice.h"
 #include "../Inc/opengl.h"
 
-FOpenGLResource::FOpenGLResource(UOpenGLRenderDevice* InRenDev, QWORD InCacheId) : RenDev(InRenDev),
-                                                                                   CacheId(InCacheId),
-                                                                                   Revision(-1),
-                                                                                   HashIndex(INDEX_NONE),
-                                                                                   HashNext(NULL){
-	RenDev->AddResource(this);
+FOpenGLResource::FOpenGLResource(UOpenGLRenderDevice* InRenDev, QWORD InCacheId, DWORD InFlags) : RenDev(InRenDev),
+                                                                                                  HashNext(NULL),
+                                                                                                  CacheId(InCacheId),
+                                                                                                  Revision(-1),
+                                                                                                  HashIndex(INDEX_NONE),
+                                                                                                  Flags(InFlags){
+	if((Flags & OGLRF_NotInHash) == 0)
+		RenDev->AddResource(this);
 }
 
 FOpenGLResource::~FOpenGLResource(){
-	RenDev->RemoveResource(this);
+	if((Flags & OGLRF_NotInHash) == 0)
+		RenDev->RemoveResource(this);
 }
 
 // FOpenGLShader
 
-FOpenGLShader::FOpenGLShader(UOpenGLRenderDevice* InRenDev, QWORD InCacheId) : FOpenGLResource(InRenDev, InCacheId),
-                                                                                               Program(GL_NONE),
-                                                                                               IsErrorShader(0){}
+FOpenGLShader::FOpenGLShader(UOpenGLRenderDevice* InRenDev, QWORD InCacheId, DWORD InFlags) : FOpenGLResource(InRenDev, InCacheId, InFlags),
+                                                                                              Program(GL_NONE),
+                                                                                              IsErrorShader(0){}
 
 FOpenGLShader::~FOpenGLShader(){
 	if(Program)
@@ -134,11 +137,11 @@ GLuint FOpenGLShader::CompileShader(GLenum Type, const FString& ShaderCode, cons
 
 #define INITIAL_DYNAMIC_INDEX_BUFFER_SIZE 32768
 
-FOpenGLIndexBuffer::FOpenGLIndexBuffer(UOpenGLRenderDevice* InRenDev, QWORD InCacheId, bool InIsDynamic) : FOpenGLResource(InRenDev, InCacheId),
-                                                                                                           EBO(GL_NONE),
-                                                                                                           IndexSize(0),
-                                                                                                           BufferSize(0),
-                                                                                                           IsDynamic(InIsDynamic){}
+FOpenGLIndexBuffer::FOpenGLIndexBuffer(UOpenGLRenderDevice* InRenDev, QWORD InCacheId, DWORD InFlags, bool InIsDynamic) : FOpenGLResource(InRenDev, InCacheId, InFlags),
+                                                                                                                          EBO(GL_NONE),
+                                                                                                                          IndexSize(0),
+                                                                                                                          BufferSize(0),
+                                                                                                                          IsDynamic(InIsDynamic){}
 
 FOpenGLIndexBuffer::~FOpenGLIndexBuffer(){
 	if(EBO){
@@ -212,11 +215,11 @@ INT FOpenGLIndexBuffer::AddIndices(FIndexBuffer* IndexBuffer){
 
 #define INITIAL_DYNAMIC_VERTEX_BUFFER_SIZE 131072
 
-FOpenGLVertexStream::FOpenGLVertexStream(UOpenGLRenderDevice* InRenDev, QWORD InCacheId, bool InIsDynamic) : FOpenGLResource(InRenDev, InCacheId),
-                                                                                                             VBO(GL_NONE),
-                                                                                                             Stride(0),
-                                                                                                             BufferSize(0),
-                                                                                                             IsDynamic(InIsDynamic){}
+FOpenGLVertexStream::FOpenGLVertexStream(UOpenGLRenderDevice* InRenDev, QWORD InCacheId, DWORD InFlags, bool InIsDynamic) : FOpenGLResource(InRenDev, InCacheId, InFlags),
+                                                                                                                            VBO(GL_NONE),
+                                                                                                                            Stride(0),
+                                                                                                                            BufferSize(0),
+                                                                                                                            IsDynamic(InIsDynamic){}
 
 FOpenGLVertexStream::~FOpenGLVertexStream(){
 	if(VBO){
@@ -297,14 +300,14 @@ INT FOpenGLVertexStream::AddVertices(FVertexStream* VertexStream){
 
 FSolidColorTexture FOpenGLTexture::ErrorTexture(FColor(255, 0, 255));
 
-FOpenGLTexture::FOpenGLTexture(UOpenGLRenderDevice* InRenDev, QWORD InCacheId) : FOpenGLResource(InRenDev, InCacheId),
-                                                                                 Width(0),
-                                                                                 Height(0),
-                                                                                 TextureHandle(GL_NONE),
-                                                                                 FBO(GL_NONE),
-                                                                                 DepthStencilAttachment(GL_NONE),
-                                                                                 IsCubemap(false),
-                                                                                 HasSharedDepthStencil(false){}
+FOpenGLTexture::FOpenGLTexture(UOpenGLRenderDevice* InRenDev, QWORD InCacheId, DWORD InFlags) : FOpenGLResource(InRenDev, InCacheId, InFlags),
+                                                                                                Width(0),
+                                                                                                Height(0),
+                                                                                                TextureHandle(GL_NONE),
+                                                                                                FBO(GL_NONE),
+                                                                                                DepthStencilAttachment(GL_NONE),
+                                                                                                IsCubemap(false),
+                                                                                                HasSharedDepthStencil(false){}
 
 FOpenGLTexture::~FOpenGLTexture(){
 	Free();
@@ -327,12 +330,6 @@ void FOpenGLTexture::Cache(FBaseTexture* BaseTexture, bool bOwnDepthBuffer){
 	if(RenderTarget){
 		if(Width == 0 || Height == 0)
 			return;
-
-		// NOTE: bOwnDepthBuffer is also used here to determine whether to use the same format for the target as the backbuffer.
-		//       While not technically correct, it works the way it is supposed to.
-
-		if(Width != RenDev->Backbuffer.GetWidth() || Height != RenDev->Backbuffer.GetHeight())
-			bOwnDepthBuffer = true;
 
 		if(bOwnDepthBuffer){
 			bool IsMipTarget = false;
@@ -357,16 +354,9 @@ void FOpenGLTexture::Cache(FBaseTexture* BaseTexture, bool bOwnDepthBuffer){
 			HasSharedDepthStencil = true;
 		}
 
-		GLenum Format;
-
-		if(bOwnDepthBuffer)
-			Format = RenDev->Use16bit ? GL_RGB565 : GL_RGB8;
-		else
-			Format = RenDev->Use16bit ? GL_RGBA4 : GL_RGBA8;
-
 		RenDev->glCreateFramebuffers(1, &FBO);
 		RenDev->glCreateTextures(GL_TEXTURE_2D, 1, &TextureHandle);
-		RenDev->glTextureStorage2D(TextureHandle, 1, Format, Width, Height);
+		RenDev->glTextureStorage2D(TextureHandle, 1, RenDev->Use16bit ? GL_RGBA4 : GL_RGBA8, Width, Height);
 		RenDev->glNamedFramebufferTexture(FBO, GL_COLOR_ATTACHMENT0, TextureHandle, 0);
 
 		if(DepthStencilAttachment)

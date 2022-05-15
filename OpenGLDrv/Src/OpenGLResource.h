@@ -10,15 +10,20 @@ inline INT GetResourceHashIndex(QWORD CacheId){
 
 class UOpenGLRenderDevice;
 
+enum EOpenGLResourceFlags{
+	OGLRF_NotInHash = 0x1
+};
+
 class FOpenGLResource{
 public:
 	UOpenGLRenderDevice* RenDev;
+	FOpenGLResource*     HashNext;
 	QWORD                CacheId;
 	INT                  Revision;
 	INT                  HashIndex;
-	FOpenGLResource*     HashNext;
+	DWORD                Flags;
 
-	FOpenGLResource(UOpenGLRenderDevice* InRenDev, QWORD InCacheId);
+	FOpenGLResource(UOpenGLRenderDevice* InRenDev, QWORD InCacheId, DWORD InFlags = 0);
 	virtual ~FOpenGLResource();
 };
 
@@ -26,7 +31,7 @@ public:
 
 class FOpenGLShader : public FOpenGLResource{
 public:
-	FOpenGLShader(UOpenGLRenderDevice* InRenDev, QWORD InCacheId);
+	FOpenGLShader(UOpenGLRenderDevice* InRenDev, QWORD InCacheId, DWORD InFlags = 0);
 	virtual ~FOpenGLShader();
 
 	void Cache(FShaderGLSL* Shader);
@@ -43,7 +48,7 @@ private:
 
 class FOpenGLIndexBuffer : public FOpenGLResource{
 public:
-	FOpenGLIndexBuffer(UOpenGLRenderDevice* InRenDev, QWORD InCacheId, bool InIsDynamic = false);
+	FOpenGLIndexBuffer(UOpenGLRenderDevice* InRenDev, QWORD InCacheId, DWORD InFlags = 0, bool InIsDynamic = false);
 	virtual ~FOpenGLIndexBuffer();
 
 	void Cache(FIndexBuffer* IndexBuffer, INT DynamicBufferSize = 0);
@@ -60,7 +65,7 @@ public:
 
 class FOpenGLVertexStream : public FOpenGLResource{
 public:
-	FOpenGLVertexStream(UOpenGLRenderDevice* InRenDev, QWORD InCacheId, bool InIsDynamic = false);
+	FOpenGLVertexStream(UOpenGLRenderDevice* InRenDev, QWORD InCacheId, DWORD InFlags = 0, bool InIsDynamic = false);
 	virtual ~FOpenGLVertexStream();
 
 	void Cache(FVertexStream* VertexStream, INT DynamicBufferSize = 0);
@@ -77,7 +82,7 @@ public:
 
 class FOpenGLTexture : public FOpenGLResource{
 public:
-	FOpenGLTexture(UOpenGLRenderDevice* InRenDev, QWORD InCacheId);
+	FOpenGLTexture(UOpenGLRenderDevice* InRenDev, QWORD InCacheId, DWORD InFlags = 0);
 	virtual ~FOpenGLTexture();
 
 	void Cache(FBaseTexture* BaseTexture, bool RenderTargetMatchBackbuffer = false);

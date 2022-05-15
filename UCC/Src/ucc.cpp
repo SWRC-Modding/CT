@@ -212,7 +212,7 @@ int __cdecl main(int argc, char** argv){
 						UObject::LoadPackage(NULL, "Engine", LOAD_NoFail);
 
 						// Print full path of source files in error messages
-						if(ParseParam(appCmdLine(), "FullSourcePath") && GSys->SourcePath.Len() > 1 && GSys->SourcePath[1] != ':')
+						if(ParseParam(appCmdLine(), "FullSourcePath") && (GSys->SourcePath.Len() < 2 || GSys->SourcePath[1] != ':'))
 							GSys->SourcePath = FStringTemp(appBaseDir()) * GSys->SourcePath;
 
 						if(ParseParam(appCmdLine(), "All")){

@@ -146,6 +146,10 @@ void UOpenGLRenderDevice::SetHardwareShaderMacros(UHardwareShaderMacros* Macros)
 	}
 }
 
+void UOpenGLRenderDevice::SetShaderMacro(const FString& Name, const FString& Text){
+	ShaderMacros[*Name] = Text;
+}
+
 void UOpenGLRenderDevice::ExpandShaderMacros(FString* Text){
 	const TCHAR* Pos = **Text;
 
@@ -347,7 +351,7 @@ FStringTemp UOpenGLRenderDevice::GLSLShaderFromD3DHardwareShader(UHardwareShader
 
 	GLSLShaderText +=     "\n"
 	                      "\talpha_test(r0);\n"
-	                      "\tFragColor = vec4(apply_fog(r0.rgb), r0.a);\n"
+	                      "\tFragColor = apply_fog(r0);\n"
 		              "}\n"
 	                  "#else\n"
 	                  "#error Shader type not implemented\n"

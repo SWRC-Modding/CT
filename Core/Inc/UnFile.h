@@ -359,8 +359,8 @@ inline DWORD appStrihash(const TCHAR* Data){
 //
 // Memory hash function
 //
-inline DWORD appMemhash(const void* Data, DWORD Size){
-	DWORD Hash = 0;
+inline DWORD appMemhash(const void* Data, DWORD Size, DWORD HashBase = 0){
+	DWORD Hash = HashBase;
 
 	while(Size){
 		BYTE B = ((BYTE*)Data)[--Size];
@@ -468,6 +468,16 @@ inline void __cdecl operator delete[](void* Ptr){
 	guardSlow(delete);
 	appFree(Ptr);
 	unguardSlow;
+}
+
+// Placement-new
+
+inline void* __cdecl operator new(size_t, void* Ptr){
+	return Ptr;
+}
+
+inline void* __cdecl operator new[](size_t, void* Ptr){
+	return Ptr;
 }
 
 /*-----------------------------------------------------------------------------

@@ -107,6 +107,9 @@
 			<File
 				RelativePath=".\Inc\Shader.h">
 			</File>
+			<File
+				RelativePath=".\Inc\ShaderGenerator.h">
+			</File>
 		</Filter>
 		<Filter
 			Name="Src"
@@ -132,6 +135,9 @@
 			</File>
 			<File
 				RelativePath=".\Src\ShaderConversion.cpp">
+			</File>
+			<File
+				RelativePath=".\Src\ShaderGenerator.cpp">
 			</File>
 		</Filter>
 	</Files>

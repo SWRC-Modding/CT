@@ -329,6 +329,7 @@ private:
 	bool SetCombinerMaterial(UCombiner* Combiner);
 	bool SetParticleMaterial(UParticleMaterial* Material);
 	bool SetProjectorMaterial(UProjectorMaterial* Material);
+	bool SetSimpleMaterial(UMaterial* Material, const FModifierInfo& ModifierInfo);
 
 	void HandleSimpleMaterial(UMaterial* Material, FShaderGenerator& ShaderGenerator, const FModifierInfo* InModifierInfo = NULL);
 	void HandleCombinerMaterial(UCombiner* Combiner, FShaderGenerator& ShaderGenerator, bool IsRootMaterial);

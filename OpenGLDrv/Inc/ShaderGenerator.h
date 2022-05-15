@@ -4,7 +4,7 @@ class FOpenGLShader;
 class UOpenGLRenderDevice;
 
 #define MAX_SHADER_TEXTURE_REGISTERS 8
-#define MAX_SHADER_COLOR_OPERATIONS 16
+#define MAX_SHADER_COLOR_OPERATIONS 32
 #define MAX_TEMP_REGISTERS 4
 
 enum EColorArg{
@@ -23,6 +23,7 @@ enum EColorArg{
 	CA_R4,
 	CA_R5,
 	CA_Diffuse,
+	CA_Specular,
 	CA_GlobalColor,
 	CA_Const1
 };

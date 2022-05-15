@@ -988,26 +988,37 @@ void FOpenGLRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorStri
 		Result = SetHardwareShaderMaterial(static_cast<UHardwareShader*>(Material), ErrorString, ErrorMaterial) != 0;
 		IsHardwareShader = true;
 	}else{
-		FShaderGLSL* Shader = RenDev->GetShaderForMaterial(Material);
+		FShaderGLSL* Shader;
 
-		if(Shader){
-			SetShader(Shader);
-			IsHardwareShader = true;
+		// UMaterial::DefaultMaterial is unused so we can store a specific shader override there
+		if(Material->Validated){
+			Shader = reinterpret_cast<FShaderGLSL*>(Material->DefaultMaterial);
 		}else{
-			if(Material->IsA<UBitmapMaterial>()){
-				Result = SetBitmapMaterial(static_cast<UBitmapMaterial*>(Material), ModifierInfo);
-			}else if(Material->IsA<UShader>()){
-				Result = SetShaderMaterial(static_cast<UShader*>(Material), ModifierInfo);
-			}else if(Material->IsA<UCombiner>()){
-				Result = SetCombinerMaterial(static_cast<UCombiner*>(Material));
-			}else if(Material->IsA<UParticleMaterial>()){
-				checkSlow(Modifier == NULL);
-				Result = SetParticleMaterial(static_cast<UParticleMaterial*>(Material));
-			}else if(Material->IsA<UProjectorMaterial>()){
-				checkSlow(Modifier == NULL);
-				Result = SetProjectorMaterial(static_cast<UProjectorMaterial*>(Material));
-			}
+			Shader = RenDev->GetShaderForMaterial(Material);
+			Material->DefaultMaterial = reinterpret_cast<UMaterial*>(Shader);
+			Material->Validated = !RenDev->bAutoReloadShaders;
 		}
+
+		if(Material->IsA<UBitmapMaterial>()){
+			Result = SetBitmapMaterial(static_cast<UBitmapMaterial*>(Material), ModifierInfo);
+		}else if(Material->IsA<UShader>()){
+			Result = SetShaderMaterial(static_cast<UShader*>(Material), ModifierInfo);
+		}else if(Material->IsA<UCombiner>()){
+			Result = SetCombinerMaterial(static_cast<UCombiner*>(Material));
+		}else if(Material->IsA<UParticleMaterial>()){
+			checkSlow(Modifier == NULL);
+			Result = SetParticleMaterial(static_cast<UParticleMaterial*>(Material));
+		}else if(Material->IsA<UProjectorMaterial>()){
+			checkSlow(Modifier == NULL);
+			Result = SetProjectorMaterial(static_cast<UProjectorMaterial*>(Material));
+		}else if(Material->IsA<UTerrainMaterial>()){
+			Result = false;
+		}else{
+			Result = SetSimpleMaterial(Material, ModifierInfo);
+		}
+
+		if(Shader)
+			SetShader(Shader);
 	}
 
 	if(Result){
@@ -1022,42 +1033,6 @@ void FOpenGLRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorStri
 		SetShader(&RenDev->FixedFunctionShader);
 		//SetShader(&RenDev->ErrorShader);
 	}
-
-#if 0
-	bool Result = false;
-	bool UseFixedFunction = true;
-
-	if(CheckMaterial<UShader>(&Material, 0)){
-		Result = SetShaderMaterial(static_cast<UShader*>(Material), ErrorString, ErrorMaterial);
-	}else if(CheckMaterial<UCombiner>(&Material, -1)){
-		Result = SetSimpleMaterial(Material, ErrorString, ErrorMaterial);
-	}else if(CheckMaterial<UConstantMaterial>(&Material, -1)){
-		Result = SetSimpleMaterial(Material, ErrorString, ErrorMaterial);
-	}else if(CheckMaterial<UBitmapMaterial>(&Material, -1)){
-		Result = SetSimpleMaterial(Material, ErrorString, ErrorMaterial);
-	}else if(CheckMaterial<UTerrainMaterial>(&Material, 0)){
-		Result = SetTerrainMaterial(static_cast<UTerrainMaterial*>(Material), ErrorString, ErrorMaterial);
-	}else if(CheckMaterial<UParticleMaterial>(&Material, 0)){
-		Result = SetParticleMaterial(static_cast<UParticleMaterial*>(Material), ErrorString, ErrorMaterial);
-	}else if(CheckMaterial<UProjectorMultiMaterial>(&Material, 0)){
-		UProjectorMultiMaterial* ProjectorMultiMaterial = static_cast<UProjectorMultiMaterial*>(Material);
-		CurrentState->AlphaRef = 0.5f;
-		SetFramebufferBlending(FB_Modulate);
-		Result = SetSimpleMaterial(ProjectorMultiMaterial->BaseMaterial, ErrorString, ErrorMaterial);
-		CurrentState->bZWrite = false;
-	}else if(CheckMaterial<UProjectorMaterial>(&Material, 0)){
-		CurrentState->AlphaRef = 0.5f;
-		SetFramebufferBlending(FB_Modulate);
-		Result = SetSimpleMaterial(static_cast<UProjectorMaterial*>(Material)->Projected, ErrorString, ErrorMaterial);
-		CurrentState->bZWrite = false;
-	}else if(CheckMaterial<UHardwareShaderWrapper>(&Material, 0)){
-		Result = static_cast<UHardwareShaderWrapper*>(Material)->SetupShaderWrapper(this) != 0;
-		UseFixedFunction = !Result;
-	}else if(CheckMaterial<UHardwareShader>(&Material, 0)){
-		Result = SetHardwareShaderMaterial(static_cast<UHardwareShader*>(Material), ErrorString, ErrorMaterial) != 0;
-		UseFixedFunction = !Result;
-	}
-#endif
 
 	unguardSlow;
 }

@@ -182,7 +182,6 @@ FOpenGLShader* FShaderGenerator::CreateShader(UOpenGLRenderDevice* RenDev, bool 
 		"#error Unsupported shader type\n"
 		"#endif\n";
 
-	debugf(*ShaderText);
 	FOpenGLShader* Shader = new FOpenGLShader(RenDev, MakeCacheID(CID_RenderShader));
 	Shader->Cache(&FShaderGLSL(FStringTemp("<generated>"), ShaderText));
 
@@ -198,6 +197,9 @@ FStringTemp FShaderGenerator::GetArgString(BYTE Arg){
 
 	if(Arg == CA_Diffuse)
 		return "Diffuse";
+
+	if(Arg == CA_Specular)
+		return "Specular";
 
 	if(Arg == CA_GlobalColor)
 		return "GlobalColor";

@@ -542,7 +542,7 @@ bool FOpenGLRenderInterface::SetShaderMaterial(UShader* Shader, const FModifierI
 				if(SelfIlluminationMaskArg != CA_R1)
 					ShaderGenerator.AddColorOp(SelfIlluminationMaskArg, SelfIlluminationMaskArg, COP_Assign, CC_A, CR_1);
 
-				ShaderGenerator.AddColorOp(DiffuseArg, CA_R1, COP_AlphaBlendInverted, CC_RGB, CR_0);
+				ShaderGenerator.AddColorOp(DiffuseArg, CA_R1, COP_AlphaBlend, CC_RGB, CR_0);
 				ShaderGenerator.AddColorOp(ShaderGenerator.PopTempRegister(), CA_R0, COP_Assign, CC_A, CR_0); // Restore saved alpha
 				ShaderGenerator.AddColorOp(CA_R1, CA_R1, COP_Assign, CC_RGBA, CR_LightMixFactor);
 			}else{
@@ -606,7 +606,7 @@ bool FOpenGLRenderInterface::SetShaderMaterial(UShader* Shader, const FModifierI
 
 		return true;
 	}catch(TCHAR* Error){
-		debugf("Error setting shader material '%s': %s", Shader->GetName(), Error);
+		debugf("Error setting shader material '%s': %s", Shader->GetPathName(), Error);
 		return false;
 	}
 }
@@ -643,9 +643,9 @@ void FOpenGLRenderInterface::HandleSimpleMaterial(UMaterial* Material, FShaderGe
 		++CurrentState->UniformRevision;
 		ShaderGenerator.AddColorOp(CA_GlobalColor, CA_GlobalColor, COP_Assign, CC_RGBA, CR_0);
 	}else if(Material->IsA<UVertexColor>()){
-		ShaderGenerator.AddColorOp(CA_Diffuse, CA_Diffuse, COP_Assign, CC_RGBA, CR_0);
+		ShaderGenerator.AddColorOp(CA_Diffuse, CA_Specular, COP_Assign, CC_RGBA, CR_0);
 	}else{
-		appThrowf("Material of type %s is not a simple material", Material->GetClass()->GetName());
+		appThrowf("Material of type %s is not a simple material", Material->GetClass()->GetPathName());
 	}
 }
 
@@ -674,7 +674,7 @@ void FOpenGLRenderInterface::HandleCombinerMaterial(UCombiner* Combiner, FShader
 	}
 
 	UMaterial* Mask = Combiner->Mask;
-	EColorArg MaskArg = CA_Diffuse;
+	EColorArg MaskArg = CA_Specular;
 
 	// Incorrectly configured combiners use Material1 as the mask
 	if(!Mask && (Combiner->CombineOperation >= CO_AlphaBlend_With_Mask || Combiner->AlphaOperation == AO_Use_Mask || Combiner->AlphaOperation == AO_AlphaBlend_With_Mask))
@@ -770,7 +770,7 @@ bool FOpenGLRenderInterface::SetCombinerMaterial(UCombiner* Combiner){
 
 		return true;
 	}catch(const TCHAR* Error){
-		debugf("Error setting combiner material '%s': %s", Combiner->GetName(), Error);
+		debugf("Error setting combiner material '%s': %s", Combiner->GetPathName(), Error);
 		return false;
 	}
 }
@@ -898,4 +898,18 @@ bool FOpenGLRenderInterface::SetParticleMaterial(UParticleMaterial* Material){
 
 bool FOpenGLRenderInterface::SetProjectorMaterial(UProjectorMaterial* Material){
 	return false;
+}
+
+bool FOpenGLRenderInterface::SetSimpleMaterial(UMaterial* Material, const FModifierInfo& ModifierInfo){
+	try{
+		FShaderGenerator ShaderGenerator;
+
+		HandleSimpleMaterial(Material, ShaderGenerator, &ModifierInfo);
+		SetGeneratedShader(ShaderGenerator);
+
+		return true;
+	}catch(const TCHAR* Error){
+		debugf("Error setting simple material '%s': %s", Material->GetPathName(), Error);
+		return false;
+	}
 }

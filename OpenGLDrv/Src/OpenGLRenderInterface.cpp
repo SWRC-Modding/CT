@@ -284,7 +284,7 @@ void FOpenGLRenderInterface::Flush(){
 	CurrentState->NumVertexStreams = 0;
 	appMemzero(CurrentState->VertexStreams, sizeof(CurrentState->VertexStreams));
 
-	for(INT i = 0; i < CurrentState->NumTextures; ++i)
+	for(INT i = 0; i < MAX_TEXTURES; ++i)
 		CurrentState->TextureUnits[i].Texture = NULL;
 
 	CurrentState->NumTextures = 0;

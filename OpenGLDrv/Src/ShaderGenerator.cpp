@@ -14,13 +14,13 @@ FOpenGLShader* FShaderGenerator::CreateShader(UOpenGLRenderDevice* RenDev, bool 
 		BYTE TexCoordSrcIndex = Textures[i].TexCoordSrc;
 		bool HaveTexCoord = false;
 
-		if(TexCoordsBySrc[TexCoordSrcIndex] && Textures[i].Matrix < 0){
+		if(TexCoordsBySrc[TexCoordSrcIndex] && Textures[i].Matrix < 0 && !Textures[i].IsBumpEnv){
 			TexCoordIndex = TexCoordsBySrc[TexCoordSrcIndex] - 1;
 			HaveTexCoord = true;
 		}else{
 			TexCoordIndex = NumTexCoords;
 
-			if(Textures[i].Matrix < 0)
+			if(Textures[i].Matrix < 0 && !Textures[i].IsBumpEnv)
 				TexCoordsBySrc[TexCoordSrcIndex] = ++NumTexCoords;
 			else
 				++NumTexCoords;
@@ -31,38 +31,42 @@ FOpenGLShader* FShaderGenerator::CreateShader(UOpenGLRenderDevice* RenDev, bool 
 
 			FString TexCoord;
 
-			switch(Textures[i].TexCoordSrc){
-			case TCS_Stream0:
-			case TCS_Stream1:
-			case TCS_Stream2:
-			case TCS_Stream3:
-			case TCS_Stream4:
-			case TCS_Stream5:
-			case TCS_Stream6:
-			case TCS_Stream7:
-				TexCoord = FString::Printf("InTexCoord%i", Textures[i].TexCoordSrc);
-				break;
-			case TCS_WorldCoords:
-			case TCS_CameraCoords:
-				TexCoord += "vec4(Position, 1.0)";
-				break;
-			case TCS_CubeWorldSpaceReflection:
-			case TCS_CubeCameraSpaceReflection:
-				TexCoord = "vec4(reflect(normalize(Position - CameraToWorld[3].xyz), normalize(Normal)), 1.0)";
-				break;
-			case TCS_ProjectorCoords:
-				TexCoord = "vec4(Normal, 1.0)";
-				break;
-			case TCS_NoChange:
-			case TCS_SphereWorldSpaceReflection:
-			case TCS_SphereCameraSpaceReflection:
-			case TCS_CubeWorldSpaceNormal:
-			case TCS_CubeCameraSpaceNormal:
-			case TCS_SphereWorldSpaceNormal:
-			case TCS_SphereCameraSpaceNormal:
-			case TCS_BumpSphereCameraSpaceNormal:
-			case TCS_BumpSphereCameraSpaceReflection:
-				TexCoord = "vec4(0.0, 0.0, 1.0, 1.0)";
+			if(!Textures[i].IsBumpEnv){
+				switch(Textures[i].TexCoordSrc){
+				case TCS_Stream0:
+				case TCS_Stream1:
+				case TCS_Stream2:
+				case TCS_Stream3:
+				case TCS_Stream4:
+				case TCS_Stream5:
+				case TCS_Stream6:
+				case TCS_Stream7:
+					TexCoord = FString::Printf("InTexCoord%i", Textures[i].TexCoordSrc);
+					break;
+				case TCS_WorldCoords:
+				case TCS_CameraCoords:
+					TexCoord += "vec4(Position, 1.0)";
+					break;
+				case TCS_CubeWorldSpaceReflection:
+				case TCS_CubeCameraSpaceReflection:
+					TexCoord = "vec4(reflect(normalize(Position - CameraToWorld[3].xyz), normalize(Normal)), 1.0)";
+					break;
+				case TCS_ProjectorCoords:
+					TexCoord = "vec4(Normal, 1.0)";
+					break;
+				case TCS_NoChange:
+				case TCS_SphereWorldSpaceReflection:
+				case TCS_SphereCameraSpaceReflection:
+				case TCS_CubeWorldSpaceNormal:
+				case TCS_CubeCameraSpaceNormal:
+				case TCS_SphereWorldSpaceNormal:
+				case TCS_SphereCameraSpaceNormal:
+				case TCS_BumpSphereCameraSpaceNormal:
+				case TCS_BumpSphereCameraSpaceReflection:
+					TexCoord = "vec4(0.0, 0.0, 1.0, 1.0)";
+				}
+			}else{
+				TexCoord = "normalize(LocalToCamera * vec4(Normal, 0.0) * 0.5 + vec4(0.5))";
 			}
 
 			if(Textures[i].Matrix >= 0){
@@ -81,7 +85,10 @@ FOpenGLShader* FShaderGenerator::CreateShader(UOpenGLRenderDevice* RenDev, bool 
 			VertexShaderText += TexCoord + ";\n";
 		}
 
-		FragmentShaderText += FString::Printf("\tconst vec4 t%i = sample_texture%i(TexCoord%i);\n", i, Textures[i].Index, TexCoordIndex);
+		if(Textures[i].IsBumpEnv)
+			FragmentShaderText += FString::Printf("\tconst vec4 t%i = sample_texture%i(TexCoord%i + t%i);\n", i, Textures[i].Index, TexCoordIndex, Textures[i].Index - 1);
+		else
+			FragmentShaderText += FString::Printf("\tconst vec4 t%i = sample_texture%i(TexCoord%i);\n", i, Textures[i].Index, TexCoordIndex);
 	}
 
 	for(INT i = 0; i < NumColorOps; ++i){
@@ -179,10 +186,10 @@ FOpenGLShader* FShaderGenerator::CreateShader(UOpenGLRenderDevice* RenDev, bool 
 		"\tvec4 r5;\n"
 		"\tvec4 r6 = vec4(0.0); // LightMixFactor\n" +
 			FragmentShaderText +
+		"\tr0.rgb *= ColorFactor.rgb;\n"
 		"\tif(UseDynamicLighting)\n"
 		"\t\tr0.rgb = mix(r0.rgb * light_color() * LightFactor, r0.rgb, r6.a);\n" +
 		(UseStaticLighting ? "\telse\n\t\tr0 = mix(r0 * Diffuse, r0, r6.a);\n" : "") +
-		"\tr0 *= ColorFactor;\n"
 		"\talpha_test(r0);\n"
 		"\tFragColor = FogEnabled ? apply_fog(r0) : r0;\n"
 		"}\n"

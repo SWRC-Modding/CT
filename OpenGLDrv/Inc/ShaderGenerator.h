@@ -75,8 +75,9 @@ public:
 		NumColorOps = 0;
 	}
 
-	EColorArg AddTexture(INT Index, ETexCoordSrc TexCoordSrc, ETexCoordCount TexCoordCount = TCN_2DCoords, SBYTE Matrix = INDEX_NONE){
+	EColorArg AddTexture(INT Index, ETexCoordSrc TexCoordSrc, ETexCoordCount TexCoordCount = TCN_2DCoords, SBYTE Matrix = INDEX_NONE, bool IsBumpEnv = false){
 		checkSlow(Index < 8);
+		checkSlow(!IsBumpEnv || NumTextures > 0);
 
 		if(NumTextures >= MAX_SHADER_TEXTURE_REGISTERS)
 			appThrowf("Exceeded maximum amount of shader texture registers (%i)", MAX_SHADER_TEXTURE_REGISTERS);
@@ -85,6 +86,7 @@ public:
 		Textures[NumTextures].TexCoordSrc = static_cast<BYTE>(TexCoordSrc);
 		Textures[NumTextures].TexCoordCount = static_cast<BYTE>(TexCoordCount);
 		Textures[NumTextures].Matrix = Matrix;
+		Textures[NumTextures].IsBumpEnv = IsBumpEnv;
 
 		return static_cast<EColorArg>(NumTextures++);
 	}
@@ -125,6 +127,7 @@ private:
 		BYTE  TexCoordSrc;
 		BYTE  TexCoordCount;
 		SBYTE Matrix;
+		bool  IsBumpEnv;
 	};
 
 	struct FColorOp{

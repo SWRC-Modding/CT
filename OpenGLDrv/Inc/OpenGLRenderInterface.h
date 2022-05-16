@@ -313,6 +313,10 @@ private:
 		FMS_ParticleSpecialBlend,
 		FMS_ParticleSpecialBlendTFactor,
 		FMS_ParticleBlendSubdivisions,
+		FMS_TerrainAlphaMapBitmap,
+		FMS_TerrainAlphaMapBitmapLighting,
+		FMS_TerrainCombinedWeightMap3,
+		FMS_TerrainCombinedWeightMap4,
 		FMS_MAX
 	};
 
@@ -329,9 +333,11 @@ private:
 	bool SetCombinerMaterial(UCombiner* Combiner);
 	bool SetParticleMaterial(UParticleMaterial* Material);
 	bool SetProjectorMaterial(UProjectorMaterial* Material);
+	bool SetTerrainMaterial(UTerrainMaterial* Material);
 	bool SetSimpleMaterial(UMaterial* Material, const FModifierInfo& ModifierInfo);
 
 	void HandleSimpleMaterial(UMaterial* Material, FShaderGenerator& ShaderGenerator, const FModifierInfo* InModifierInfo = NULL);
 	void HandleCombinerMaterial(UCombiner* Combiner, FShaderGenerator& ShaderGenerator, bool IsRootMaterial);
+	void HandleShaderMaterial(UShader* Shader, FShaderGenerator& ShaderGenerator, const FModifierInfo& ModifierInfo);
 	void UseLightmap(FShaderGenerator& ShaderGenerator);
 };

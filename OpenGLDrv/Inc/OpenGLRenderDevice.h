@@ -34,7 +34,6 @@ public:
 	// Default shader code
 	static FString VertexShaderVarsText;
 	static FString FragmentShaderVarsText;
-	static FString FixedFunctionShaderText;
 
 	// Error shader
 	static FShaderGLSL ErrorShader;
@@ -94,8 +93,6 @@ private:
 	HDC                                 DeviceContext;
 	HGLRC                               OpenGLContext;
 	FOpenGLRenderInterface              RenderInterface;
-
-	FShaderGLSL                         FixedFunctionShader;
 
 	FAuxRenderTarget                    Backbuffer;
 	unsigned int                        BackbufferDepthStencil; // Shared with UFrameFX::WorkingTarget

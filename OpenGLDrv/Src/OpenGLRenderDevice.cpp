@@ -21,7 +21,6 @@ FShaderGLSL UOpenGLRenderDevice::ErrorShader(FStringTemp("ERRORSHADER"),
                                                          "#endif\n"));
 
 UOpenGLRenderDevice::UOpenGLRenderDevice() : RenderInterface(this),
-                                             FixedFunctionShader(FStringTemp("FixedFunction")),
                                              Backbuffer(0, 0, TEXF_RGBA8, false, false){}
 
 void UOpenGLRenderDevice::StaticConstructor(){
@@ -297,7 +296,6 @@ UBOOL UOpenGLRenderDevice::Init(){
 	// Initialize shader code
 
 	SetHardwareShaderMacros(CastChecked<UHardwareShaderMacros>(GEngine->HBumpShaderMacros));
-	FixedFunctionShader.SetShaderCode(FixedFunctionShaderText);
 	LoadShaders();
 
 	return 1;
@@ -708,7 +706,7 @@ void UOpenGLRenderDevice::ReadPixels(UViewport* Viewport, FColor* Pixels){
 }
 
 FRenderCaps* UOpenGLRenderDevice::GetRenderCaps(){
-	static FRenderCaps RenderCaps(3, 14, 1);
+	static FRenderCaps RenderCaps(4, 14, 1);
 
 	return &RenderCaps;
 }
@@ -747,9 +745,6 @@ void UOpenGLRenderDevice::TakeScreenshot(const TCHAR* Name, UViewport* Viewport,
 }
 
 void UOpenGLRenderDevice::LoadShaders(){
-	if(!LoadShader(&FixedFunctionShader) && bSaveShadersToDisk)
-		SaveShader(&FixedFunctionShader);
-
 	for(TMap<UMaterial*, FShaderGLSL>::TIterator It(GLShadersByMaterial); It; ++It){
 		if(!It.Key()->IsIn(UObject::GetTransientPackage())){
 			if(!LoadShader(&It.Value()) && bSaveShadersToDisk)
@@ -806,8 +801,6 @@ bool UOpenGLRenderDevice::LoadShaderMacroText(){
 		// Increment revision of all shaders since they might use the macros and need to be updated
 		for(TMap<UMaterial*, FShaderGLSL>::TIterator It(GLShadersByMaterial); It; ++It)
 			++It.Value().Revision;
-
-		++FixedFunctionShader.Revision;
 
 		return true;
 	}
@@ -1054,57 +1047,3 @@ SHADER_HEADER
 "out vec4 FragColor;\n\n"
 "void alpha_test(vec4  c){ if(c.a <= AlphaRef) discard; }\n"
 "vec4 apply_fog(vec4 BaseColor){ return vec4(mix(FogColor.rgb, BaseColor.rgb, Fog), BaseColor.a); }\n\n");
-
-FString UOpenGLRenderDevice::FixedFunctionShaderText(
-"#ifdef VERTEX_SHADER\n"
-"\n"
-"void main(void){\n"
-"\tPosition = (LocalToWorld * vec4(InPosition.xyz, 1.0)).xyz;\n"
-"\tNormal = (LocalToWorld * vec4(InNormal.xyz, 0.0)).xyz;\n"
-"\tDiffuse = InDiffuse;\n"
-"\tSpecular = InSpecular;\n"
-"\tFog = calculate_fog((LocalToCamera * vec4(InPosition.xyz, 1.0)).z);\n"
-"\tgl_Position = LocalToScreen * vec4(InPosition.xyz, 1.0);\n"
-"}\n"
-"#elif defined(FRAGMENT_SHADER)\n"
-"\n"
-"vec3 light_color(void){\n"
-"\tvec3 DiffuseLight = Diffuse.rgb;\n"
-"\tvec3 NormalizedNormal = normalize(Normal);\n"
-"\n"
-"\tfor(int i = 0; i < 4; ++i){\n"
-"\t\tfloat LightFactor;\n"
-"\n"
-"\t\tif(Lights[i].Type == SL_Directional){\n"
-"\t\t\tLightFactor = saturate(dot(-Lights[i].Direction.xyz, NormalizedNormal));\n"
-"\t\t}else{\n"
-"\t\t\tvec3 Dir = Lights[i].Position.xyz - Position;\n"
-"\t\t\tvec3 NormalizedDir = normalize(Dir);\n"
-"\t\t\tfloat Dist = length(Dir);\n"
-"\t\t\t\n"
-"\t\t\tLightFactor = saturate(dot(NormalizedDir, NormalizedNormal));\n"
-"\n"
-"\t\t\tif(Lights[i].Type == SL_Spot)\n"
-"\t\t\t\tLightFactor *= saturate((dot(NormalizedDir, normalize(-Lights[i].Direction.xyz)) - Lights[i].Cone * 0.9) / 0.03); // Values hand-tuned to match d3d\n"
-"\n"
-"\t\t\t// Attenuation\n"
-"\t\t\tLightFactor *= 1.0 / (Lights[i].Constant + Lights[i].Linear * Dist + Lights[i].Quadratic * (Dist * Dist));\n"
-"\t\t}\n"
-"\n"
-"\t\tDiffuseLight += Lights[i].Color.rgb * LightFactor;\n"
-"\t}\n"
-"\n"
-"\treturn AmbientLightColor.rgb * Specular.rgb + DiffuseLight;\n"
-"}\n"
-"\n"
-"void main(void){\n"
-"\tFragColor = vec4(1);\n"
-"\n"
-"\tif(UseDynamicLighting)\n"
-"\t\tFragColor.rgb *= light_color();\n"
-"\tFragColor.rgb *= Diffuse.rgb;\n"
-"}\n"
-"#else\n"
-"#error Shader type not implemented\n"
-"#endif\n"
-);

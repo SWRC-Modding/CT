@@ -999,23 +999,20 @@ void FOpenGLRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorStri
 			Material->Validated = !RenDev->bAutoReloadShaders;
 		}
 
-		if(Material->IsA<UBitmapMaterial>()){
+		if(Material->IsA<UBitmapMaterial>())
 			Result = SetBitmapMaterial(static_cast<UBitmapMaterial*>(Material), ModifierInfo);
-		}else if(Material->IsA<UShader>()){
+		else if(Material->IsA<UShader>())
 			Result = SetShaderMaterial(static_cast<UShader*>(Material), ModifierInfo);
-		}else if(Material->IsA<UCombiner>()){
+		else if(Material->IsA<UCombiner>())
 			Result = SetCombinerMaterial(static_cast<UCombiner*>(Material));
-		}else if(Material->IsA<UParticleMaterial>()){
-			checkSlow(Modifier == NULL);
+		else if(Material->IsA<UParticleMaterial>())
 			Result = SetParticleMaterial(static_cast<UParticleMaterial*>(Material));
-		}else if(Material->IsA<UProjectorMaterial>()){
-			checkSlow(Modifier == NULL);
+		else if(Material->IsA<UProjectorMaterial>())
 			Result = SetProjectorMaterial(static_cast<UProjectorMaterial*>(Material));
-		}else if(Material->IsA<UTerrainMaterial>()){
-			Result = false;
-		}else{
+		else if(Material->IsA<UTerrainMaterial>())
+			Result = SetTerrainMaterial(static_cast<UTerrainMaterial*>(Material));
+		else
 			Result = SetSimpleMaterial(Material, ModifierInfo);
-		}
 
 		if(Shader)
 			SetShader(Shader);
@@ -1030,8 +1027,7 @@ void FOpenGLRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorStri
 			RenDev->glVertexAttrib4f(FVF_Specular,  1.0f, 1.0f, 1.0f, 1.0f);
 		}
 	}else{
-		SetShader(&RenDev->FixedFunctionShader);
-		//SetShader(&RenDev->ErrorShader);
+		SetShader(&RenDev->ErrorShader);
 	}
 
 	unguardSlow;

@@ -44,7 +44,7 @@ FOpenGLShader* FShaderGenerator::CreateShader(UOpenGLRenderDevice* RenDev, bool 
 				break;
 			case TCS_WorldCoords:
 			case TCS_CameraCoords:
-				VertexShaderText += "vec4(Position, 1.0)";
+				TexCoord += "vec4(Position, 1.0)";
 				break;
 			case TCS_CubeWorldSpaceReflection:
 			case TCS_CubeCameraSpaceReflection:
@@ -117,6 +117,9 @@ FOpenGLShader* FShaderGenerator::CreateShader(UOpenGLRenderDevice* RenDev, bool 
 		case COP_Modulate4x:
 			FragmentShaderText += Arg1 + " * " + Arg2 + " * 4";
 			break;
+		case COP_ModulateAddDest:
+			FragmentShaderText += Arg1 + " * " + Arg2 + FString::Printf(" + r%i%s", ColorOps[i].Dest, Swizzle);
+			break;
 		case COP_AlphaBlend:
 			FragmentShaderText += "mix(" + Arg1 + ", " + Arg2 + ", " + Arg1RGBA + ".a)";
 			break;
@@ -187,6 +190,7 @@ FOpenGLShader* FShaderGenerator::CreateShader(UOpenGLRenderDevice* RenDev, bool 
 		"#error Unsupported shader type\n"
 		"#endif\n";
 
+	//debugf(*ShaderText);
 	FOpenGLShader* Shader = new FOpenGLShader(RenDev, MakeCacheID(CID_RenderShader));
 	Shader->Cache(&FShaderGLSL(FStringTemp("<generated>"), ShaderText));
 
@@ -196,6 +200,9 @@ FOpenGLShader* FShaderGenerator::CreateShader(UOpenGLRenderDevice* RenDev, bool 
 FStringTemp FShaderGenerator::GetArgString(BYTE Arg){
 	if(Arg <= CA_T7)
 		return FString::Printf("t%i", Arg);
+
+	if(Arg >= CA_T0R && Arg <= CA_T0A)
+		return FString::Printf("t0.%c", "rgba"[Arg - CA_T0R]);
 
 	if(Arg >= CA_R0 && Arg <= CA_R5)
 		return FString::Printf("r%i", Arg - CA_R0);

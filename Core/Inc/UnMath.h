@@ -2645,7 +2645,7 @@ public:
 	}
 
 	//Transpose.
-	FMatrix Transpose(){
+	FMatrix Transpose() const{
 		FMatrix	Result;
 
 		Result.M[0][0] = M[0][0];

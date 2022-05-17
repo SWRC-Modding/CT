@@ -988,19 +988,24 @@ void FOpenGLRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorStri
 		Result = SetHardwareShaderMaterial(static_cast<UHardwareShader*>(Material), ErrorString, ErrorMaterial) != 0;
 		IsHardwareShader = true;
 	}else{
-		FShaderGLSL* Shader;
+		FShaderGLSL* Shader = NULL;
 
 		// UMaterial::DefaultMaterial is unused so we can store a specific shader override there
 		if(Material->Validated){
 			Shader = reinterpret_cast<FShaderGLSL*>(Material->DefaultMaterial);
 		}else{
-			Shader = RenDev->GetShaderForMaterial(Material);
+			if(Modifier)
+				Shader = RenDev->GetShaderForMaterial(Modifier);
+
+			if(!Shader)
+				Shader = RenDev->GetShaderForMaterial(Material);
+
 			Material->DefaultMaterial = reinterpret_cast<UMaterial*>(Shader);
 			Material->Validated = !RenDev->bAutoReloadShaders;
 		}
 
 		if(Material->IsA<UBitmapMaterial>())
-			Result = SetBitmapMaterial(static_cast<UBitmapMaterial*>(Material), ModifierInfo);
+			Result = Modifier ? SetSimpleMaterial(Material, ModifierInfo) : SetBitmapMaterial(static_cast<UBitmapMaterial*>(Material), ModifierInfo);
 		else if(Material->IsA<UShader>())
 			Result = SetShaderMaterial(static_cast<UShader*>(Material), ModifierInfo);
 		else if(Material->IsA<UCombiner>())

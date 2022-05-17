@@ -23,30 +23,12 @@ UMaterial* FOpenGLRenderInterface::RemoveModifiers(UModifier* Modifier, FModifie
 
 				if(TexModifier->TexCoordSource != TCS_NoChange){
 					ModifierInfo->TexCoordSrc = static_cast<ETexCoordSrc>(TexModifier->TexCoordSource);
-
-					switch(TexModifier->TexCoordSource){
-					case TCS_CameraCoords:
-						ModifierInfo->TexMatrix *= CurrentState->WorldToCamera.Transpose();
-						ModifierInfo->bUseTexMatrix = 1;
-						break;
-					case TCS_CubeCameraSpaceReflection:
-						{
-							FMatrix Tmp = CurrentState->WorldToCamera;
-							Tmp.M[3][0] = 0.0f;
-							Tmp.M[3][1] = 0.0f;
-							Tmp.M[3][2] = 0.0f;
-							Tmp.M[3][3] = 1.0f;
-							ModifierInfo->TexMatrix *= Tmp;
-							ModifierInfo->bUseTexMatrix = 1;
-						}
-					}
-
 					ModifierInfo->TexCoordCount = static_cast<ETexCoordCount>(TexModifier->TexCoordCount);
 				}
 
 				FMatrix* Matrix = TexModifier->GetMatrix(GEngineTime);
 
-				if(Matrix){
+				if(Matrix && *Matrix != FMatrix::Identity){
 					ModifierInfo->TexMatrix *= *Matrix;
 					ModifierInfo->bUseTexMatrix = 1;
 				}
@@ -432,15 +414,14 @@ bool FOpenGLRenderInterface::SetBitmapMaterial(UBitmapMaterial* Material, const 
 
 	SetBitmapTexture(Material, 0);
 	FOpenGLShader* Shader;
-	SBYTE Matrix = ModifierInfo.bUseTexMatrix ? 0 : -1;
 
 	if(!CurrentState->Lightmap){
-		FOpenGLShader** TmpShader = &MaterialShaders[(Matrix < 0 ? FMS_Bitmap : FMS_BitmapTexMatrix) + CurrentState->UseStaticLighting];
+		FOpenGLShader** TmpShader = &MaterialShaders[FMS_Bitmap + CurrentState->UseStaticLighting];
 
 		if(!*TmpShader){
 			FShaderGenerator ShaderGenerator;
 
-			ShaderGenerator.AddTexture(0, TCS_Stream0, TCN_2DCoords, Matrix);
+			ShaderGenerator.AddTexture(0, TCS_Stream0);
 			ShaderGenerator.AddColorOp(CA_T0, CA_R0, COP_Assign, CC_RGBA, CR_0);
 			*TmpShader = ShaderGenerator.CreateShader(RenDev, CurrentState->UseStaticLighting);
 		}
@@ -450,12 +431,12 @@ bool FOpenGLRenderInterface::SetBitmapMaterial(UBitmapMaterial* Material, const 
 		SetTexture(CurrentState->Lightmap, 1);
 
 		if(CurrentState->UseStaticLighting || !CurrentState->LightingModulate2x){
-			FOpenGLShader** TmpShader = &MaterialShaders[(Matrix < 0 ? FMS_BitmapLightmap : FMS_BitmapLightmapTexMatrix) + CurrentState->UseStaticLighting];
+			FOpenGLShader** TmpShader = &MaterialShaders[FMS_BitmapLightmap + CurrentState->UseStaticLighting];
 
 			if(!*TmpShader){
 				FShaderGenerator ShaderGenerator;
 
-				ShaderGenerator.AddTexture(0, TCS_Stream0, TCN_2DCoords, Matrix);
+				ShaderGenerator.AddTexture(0, TCS_Stream0);
 				ShaderGenerator.AddTexture(1, TCS_Stream1);
 				ShaderGenerator.AddColorOp(CA_T0, CA_T1, COP_Modulate, CC_RGBA, CR_0);
 				*TmpShader = ShaderGenerator.CreateShader(RenDev, CurrentState->UseStaticLighting);
@@ -463,12 +444,12 @@ bool FOpenGLRenderInterface::SetBitmapMaterial(UBitmapMaterial* Material, const 
 
 			Shader = *TmpShader;
 		}else{
-			FOpenGLShader** TmpShader = &MaterialShaders[(Matrix < 0 ? FMS_BitmapLightmap2x : FMS_BitmapLightmap2xTexMatrix) + CurrentState->UseStaticLighting];
+			FOpenGLShader** TmpShader = &MaterialShaders[FMS_BitmapLightmap2x + CurrentState->UseStaticLighting];
 
 			if(!*TmpShader){
 				FShaderGenerator ShaderGenerator;
 
-				ShaderGenerator.AddTexture(0, TCS_Stream0, TCN_2DCoords, Matrix);
+				ShaderGenerator.AddTexture(0, TCS_Stream0);
 				ShaderGenerator.AddTexture(1, TCS_Stream1);
 				ShaderGenerator.AddColorOp(CA_T0, CA_T1, COP_Modulate2x, CC_RGBA, CR_0);
 				*TmpShader = ShaderGenerator.CreateShader(RenDev, CurrentState->UseStaticLighting);
@@ -478,9 +459,6 @@ bool FOpenGLRenderInterface::SetBitmapMaterial(UBitmapMaterial* Material, const 
 		}
 
 	}
-
-	if(Matrix == 0)
-		RenDev->glProgramUniformMatrix4fv(Shader->Program, 0, 1, GL_TRUE, reinterpret_cast<const GLfloat*>(&ModifierInfo.TexMatrix));
 
 	SetGLShader(Shader);
 
@@ -555,7 +533,6 @@ void FOpenGLRenderInterface::HandleSimpleMaterial(UMaterial* Material, FShaderGe
 
 		if(Index >= MAX_TEXTURES)
 			appThrowf("Material uses too many textures");
-
 
 		SetBitmapTexture(static_cast<UBitmapMaterial*>(Material), Index);
 
@@ -780,7 +757,7 @@ void FOpenGLRenderInterface::HandleShaderMaterial(UShader* Shader, FShaderGenera
 			SetBitmapTexture(static_cast<UBitmapMaterial*>(Shader->Bumpmap), BumpmapIndex);
 			SetBitmapTexture(static_cast<UBitmapMaterial*>(EnvMap), EnvMapIndex);
 			ShaderGenerator.AddTexture(BumpmapIndex, TCS_Stream0);
-			ShaderGenerator.AddTexture(EnvMapIndex, TCS_Stream0, TCN_2DCoords, INDEX_NONE, true);
+			ShaderGenerator.AddTexture(EnvMapIndex, TCS_BumpSphereCameraSpaceNormal, TCN_2DCoords, INDEX_NONE, BumpmapIndex);
 
 			EColorOp ColorOp = Shader->BumpMapType == BMT_Static_Specular || Shader->BumpMapType == BMT_Specular ? COP_Add : COP_Modulate2x;
 			ShaderGenerator.AddColorOp(CA_R0, static_cast<EColorArg>(CA_T0 + EnvMapIndex), ColorOp, CC_RGBA, CR_0);

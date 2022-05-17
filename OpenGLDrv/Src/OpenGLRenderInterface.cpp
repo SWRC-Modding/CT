@@ -954,7 +954,8 @@ void FOpenGLRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorStri
 		++CurrentState->UniformRevision;
 	}
 
-	ModifyFramebufferBlending = 0;
+	ModifyFramebufferBlending = false;
+	UsingLightmap = false;
 	NumTexMatrices = 0;
 
 	Material->PreSetMaterial(GEngineTime);
@@ -1005,7 +1006,7 @@ void FOpenGLRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorStri
 		}
 
 		if(Material->IsA<UBitmapMaterial>())
-			Result = Modifier ? SetSimpleMaterial(Material, ModifierInfo) : SetBitmapMaterial(static_cast<UBitmapMaterial*>(Material), ModifierInfo);
+			Result = (Modifier && Modifier->IsA<UTexModifier>()) ? SetSimpleMaterial(Material, ModifierInfo) : SetBitmapMaterial(static_cast<UBitmapMaterial*>(Material));
 		else if(Material->IsA<UShader>())
 			Result = SetShaderMaterial(static_cast<UShader*>(Material), ModifierInfo);
 		else if(Material->IsA<UCombiner>())

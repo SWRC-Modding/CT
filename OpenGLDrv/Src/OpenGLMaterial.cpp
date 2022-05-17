@@ -391,7 +391,7 @@ void FOpenGLRenderInterface::SetGeneratedShader(FShaderGenerator& ShaderGenerato
 	SetGLShader(*Shader);
 }
 
-bool FOpenGLRenderInterface::SetBitmapMaterial(UBitmapMaterial* Material, const FModifierInfo& ModifierInfo){
+bool FOpenGLRenderInterface::SetBitmapMaterial(UBitmapMaterial* Material){
 	// If the material is a simple texture, use it to get the blending options
 	if(!ModifyFramebufferBlending && Material->IsA<UTexture>()){
 		UTexture* Texture = static_cast<UTexture*>(Material);
@@ -444,7 +444,7 @@ bool FOpenGLRenderInterface::SetBitmapMaterial(UBitmapMaterial* Material, const 
 
 			Shader = *TmpShader;
 		}else{
-			FOpenGLShader** TmpShader = &MaterialShaders[FMS_BitmapLightmap2x + CurrentState->UseStaticLighting];
+			FOpenGLShader** TmpShader = &MaterialShaders[FMS_BitmapLightmap2x];
 
 			if(!*TmpShader){
 				FShaderGenerator ShaderGenerator;
@@ -452,7 +452,7 @@ bool FOpenGLRenderInterface::SetBitmapMaterial(UBitmapMaterial* Material, const 
 				ShaderGenerator.AddTexture(0, TCS_Stream0);
 				ShaderGenerator.AddTexture(1, TCS_Stream1);
 				ShaderGenerator.AddColorOp(CA_T0, CA_T1, COP_Modulate2x, CC_RGBA, CR_0);
-				*TmpShader = ShaderGenerator.CreateShader(RenDev, CurrentState->UseStaticLighting);
+				*TmpShader = ShaderGenerator.CreateShader(RenDev, false);
 			}
 
 			Shader = *TmpShader;
@@ -568,7 +568,7 @@ void FOpenGLRenderInterface::HandleCombinerMaterial(UCombiner* Combiner, FShader
 
 	HandleSimpleMaterial(Material1, ShaderGenerator);
 
-	if(CurrentState->Lightmap)
+	if(CurrentState->Lightmap && !UsingLightmap)
 		UseLightmap(ShaderGenerator);
 
 	EColorRegister Material1Register = ShaderGenerator.PushTempRegister();
@@ -670,7 +670,7 @@ void FOpenGLRenderInterface::HandleShaderMaterial(UShader* Shader, FShaderGenera
 	if(HaveDiffuse){
 		HandleSimpleMaterial(Shader->Diffuse, ShaderGenerator, &ModifierInfo);
 
-		if(CurrentState->Lightmap)
+		if(CurrentState->Lightmap && UsingLightmap)
 			UseLightmap(ShaderGenerator);
 
 		ShaderGenerator.AddColorOp(CA_R0, CA_R0, COP_Assign, CC_RGBA, ShaderGenerator.PushTempRegister());
@@ -744,13 +744,13 @@ void FOpenGLRenderInterface::HandleShaderMaterial(UShader* Shader, FShaderGenera
 
 			bool UseMatrix = false;
 			FMatrix* Matrix = NULL;
-			UMaterial* EnvMap = GCubemapManager->GetEnvLightmap(static_cast<EBumpMapType>(Shader->BumpMapType), Shader, &Matrix, UseMatrix);
+			UMaterial* EnvMap = Shader->DiffuseEnvMap;
 
 			if(!EnvMap)
-				EnvMap = Shader->DiffuseEnvMap;
+				EnvMap = GCubemapManager->GetEnvLightmap(static_cast<EBumpMapType>(Shader->BumpMapType), Shader, &Matrix, UseMatrix);
 
 			if(!EnvMap)
-				return;
+				EnvMap = GCubemapManager->StaticDiffuse;
 
 			checkSlow(EnvMap->IsA<UBitmapMaterial>());
 
@@ -771,6 +771,7 @@ void FOpenGLRenderInterface::UseLightmap(FShaderGenerator& ShaderGenerator){
 	SetTexture(CurrentState->Lightmap, Index);
 	EColorArg TextureArg = ShaderGenerator.AddTexture(Index, TCS_Stream1);
 	ShaderGenerator.AddColorOp(CA_R0, TextureArg, CurrentState->LightingModulate2x ? COP_Modulate2x : COP_Modulate, CC_RGB, CR_0);
+	UsingLightmap = true;
 }
 
 bool FOpenGLRenderInterface::SetCombinerMaterial(UCombiner* Combiner){
@@ -1099,6 +1100,10 @@ bool FOpenGLRenderInterface::SetSimpleMaterial(UMaterial* Material, const FModif
 		FShaderGenerator ShaderGenerator;
 
 		HandleSimpleMaterial(Material, ShaderGenerator, &ModifierInfo);
+
+		if(CurrentState->Lightmap && !UsingLightmap)
+			UseLightmap(ShaderGenerator);
+
 		SetGeneratedShader(ShaderGenerator);
 
 		return true;

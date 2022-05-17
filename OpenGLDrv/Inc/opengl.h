@@ -102,6 +102,7 @@ typedef long GLsizeiptr;
 #define GL_TEXTURE_WRAP_R                            0x8072
 #define GL_BGRA                                      0x80E1
 #define GL_CLAMP_TO_EDGE                             0x812F
+#define GL_TEXTURE_MAX_LEVEL                         0x813D
 #define GL_DEPTH_STENCIL_ATTACHMENT                  0x821A
 #define GL_MAJOR_VERSION                             0x821B
 #define GL_MINOR_VERSION                             0x821C
@@ -128,6 +129,7 @@ typedef long GLsizeiptr;
 #define GL_COMPRESSED_RGBA_S3TC_DXT3_EXT             0x83F2
 #define GL_COMPRESSED_RGBA_S3TC_DXT5_EXT             0x83F3
 #define GL_TEXTURE_MAX_ANISOTROPY                    0x84FE
+#define GL_TEXTURE_LOD_BIAS                          0x8501
 #define GL_INCR_WRAP                                 0x8507
 #define GL_DECR_WRAP                                 0x8508
 #define GL_TEXTURE_CUBE_MAP                          0x8513
@@ -288,6 +290,7 @@ typedef OPENGL_MESSAGE_CALLBACK(opengl_message_callback);
 	GL_FUNC(CreateTextures, void, (GLenum Target, GLsizei Num, GLuint* Textures)) \
 	GL_FUNC(DeleteTextures, void, (GLsizei Num, const GLuint* Textures)) \
 	GL_FUNC(BindTextureUnit, void, (GLuint Unit, GLuint Texture)) \
+	GL_FUNC(TextureParameteri, void, (GLuint Texture, GLenum Name, GLint Param)) \
 	GL_FUNC(TextureStorage2D, void, (GLuint Texture, GLsizei Levels, GLenum InternalFormat, GLsizei Width, GLsizei Height)) \
 	GL_FUNC(TextureSubImage2D, void, (GLuint Texture, GLint Level, GLint XOffset, GLint YOffset, GLsizei Width, GLsizei Height, GLenum Format, GLenum Type, const void* Pixels)) \
 	GL_FUNC(TextureSubImage3D, void, (GLuint Texture, GLint Level, GLint XOffset, GLint YOffset, GLint ZOffset, GLsizei Width, GLsizei Height, GLsizei Depth, GLenum Format, GLenum Type, const void* Pixels)) \

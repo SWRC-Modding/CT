@@ -301,8 +301,8 @@ private:
 		FMS_Bitmap,
 		FMS_BitmapStaticLighting,
 		FMS_BitmapLightmap,
+		FMS_BitmapLightmapStaticLighting,
 		FMS_BitmapLightmap2x,
-		FMS_BitmapLightmap2xStaticLighting,
 		FMS_Particle,
 		FMS_ParticleTFactor,
 		FMS_ParticleSpecialBlend,
@@ -315,15 +315,16 @@ private:
 		FMS_MAX
 	};
 
+	bool                        ModifyFramebufferBlending;
+	bool                        UsingLightmap;
 	FOpenGLShader*              MaterialShaders[FMS_MAX];
 	TMap<DWORD, FOpenGLShader*> ShadersById;
-	UBOOL                       ModifyFramebufferBlending;
 	INT                         NumTexMatrices;
 	FMatrix                     TexMatrices[MAX_TEXTURES];
 
 	void SetGeneratedShader(FShaderGenerator& ShaderGenerator);
 
-	bool SetBitmapMaterial(UBitmapMaterial* Material, const FModifierInfo& ModifierInfo);
+	bool SetBitmapMaterial(UBitmapMaterial* Material);
 	bool SetShaderMaterial(UShader* Shader, const FModifierInfo& ModifierInfo);
 	bool SetCombinerMaterial(UCombiner* Combiner);
 	bool SetParticleMaterial(UParticleMaterial* Material);

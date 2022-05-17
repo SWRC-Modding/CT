@@ -25,8 +25,7 @@ FOpenGLShader::FOpenGLShader(UOpenGLRenderDevice* InRenDev, QWORD InCacheId, DWO
                                                                                               IsErrorShader(0){}
 
 FOpenGLShader::~FOpenGLShader(){
-	if(Program)
-		RenDev->glDeleteProgram(Program);
+	Free();
 }
 
 void FOpenGLShader::Cache(FShaderGLSL* Shader){
@@ -95,6 +94,13 @@ void FOpenGLShader::Bind(){
 
 	checkSlow(Program);
 	RenDev->glUseProgram(Program);
+}
+
+void FOpenGLShader::Free(){
+	if(Program){
+		RenDev->glDeleteProgram(Program);
+		Program = GL_NONE;
+	}
 }
 
 GLuint FOpenGLShader::CompileShader(GLenum Type, const FString& ShaderCode, const FString& ShaderName){
@@ -298,8 +304,6 @@ INT FOpenGLVertexStream::AddVertices(FVertexStream* VertexStream){
 
 // FOpenGLTexture
 
-FSolidColorTexture FOpenGLTexture::ErrorTexture(FColor(255, 0, 255));
-
 FOpenGLTexture::FOpenGLTexture(UOpenGLRenderDevice* InRenDev, QWORD InCacheId, DWORD InFlags) : FOpenGLResource(InRenDev, InCacheId, InFlags),
                                                                                                 Width(0),
                                                                                                 Height(0),
@@ -358,6 +362,7 @@ void FOpenGLTexture::Cache(FBaseTexture* BaseTexture, bool bOwnDepthBuffer){
 		RenDev->glCreateTextures(GL_TEXTURE_2D, 1, &TextureHandle);
 		RenDev->glTextureStorage2D(TextureHandle, 1, RenDev->Use16bit ? GL_RGBA4 : GL_RGBA8, Width, Height);
 		RenDev->glNamedFramebufferTexture(FBO, GL_COLOR_ATTACHMENT0, TextureHandle, 0);
+		RenDev->glTextureParameteri(TextureHandle, GL_TEXTURE_MAX_LEVEL, 0);
 
 		if(DepthStencilAttachment)
 			RenDev->glNamedFramebufferRenderbuffer(FBO, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, DepthStencilAttachment);
@@ -366,29 +371,55 @@ void FOpenGLTexture::Cache(FBaseTexture* BaseTexture, bool bOwnDepthBuffer){
 	}else if(Cubemap){
 		IsCubemap = true;
 
-		for(INT FaceIndex = 0; FaceIndex < 6; ++FaceIndex){
-			FTexture* CubemapFace = Cubemap->GetFace(FaceIndex);
+		INT CubemapNumMips = Cubemap->GetNumMips() - Cubemap->GetFirstMip();
 
-			check(CubemapFace);
+		if(CubemapNumMips > 0){
+			RenDev->glCreateTextures(GL_TEXTURE_CUBE_MAP, 1, &TextureHandle);
 
-			INT MipIndex = CubemapFace->GetFirstMip();
-			INT MipWidth = Width >> MipIndex;
-			INT MipHeight = Height >> MipIndex;
-			void* Data = ConvertTextureData(CubemapFace, DestFormat, MipWidth, MipHeight, MipIndex);
+			if(!IsDXTC(DestFormat))
+				RenDev->glTextureStorage2D(TextureHandle, CubemapNumMips, RenDev->Use16bitTextures ? GL_RGBA4 : GL_RGBA8, Width, Height);
 
-			UploadTextureData(GL_TEXTURE_CUBE_MAP, DestFormat, Data, MipWidth, MipHeight, CubemapFace->GetNumMips() - MipIndex, FaceIndex);
+			INT MaxLevel = -1;
 
-			for(INT i = 0; i < CubemapFace->GetNumMips(); ++i)
-				CubemapFace->UnloadRawTextureData(i);
+			for(INT FaceIndex = 0; FaceIndex < 6; ++FaceIndex){
+				FTexture* CubemapFace = Cubemap->GetFace(FaceIndex);
+
+				check(CubemapFace);
+
+				INT FirstMip = CubemapFace->GetFirstMip();
+				INT MipWidth = Width >> FirstMip;
+				INT MipHeight = Height >> FirstMip;
+				INT NumMips = CubemapFace->GetNumMips() - FirstMip;
+				check(NumMips == CubemapNumMips);
+
+				for(INT MipIndex = 0; MipIndex < NumMips; ++MipIndex){
+					void* Data = ConvertTextureData(CubemapFace, MipWidth, MipHeight, MipIndex, DestFormat);
+					UploadTextureData(DestFormat, Data, MipWidth, MipHeight, MipIndex, FaceIndex);
+					CubemapFace->UnloadRawTextureData(MipIndex);
+					MipWidth >>= 1;
+					MipHeight >>= 1;
+					MaxLevel += FaceIndex == 0;
+
+					if(MipWidth < 4 || MipHeight < 4)
+						break;
+				}
+			}
+
+			RenDev->glTextureParameteri(TextureHandle, GL_TEXTURE_MAX_LEVEL, MaxLevel);
 		}
-
-		RenDev->glGenerateTextureMipmap(TextureHandle);
 	}else if(CompositeTexture){
 		check(DestFormat == SrcFormat);
+		checkSlow(CompositeTexture->GetNumMips() == 1);
+		checkSlow(Width > 0 && Height > 0);
 
 		INT NumChildren = CompositeTexture->GetNumChildren();
 		INT Pitch = GetBytesPerPixel(DestFormat, Width);
 		void* Data = RenDev->GetScratchBuffer(GetBytesPerPixel(DestFormat, Width * Height));
+
+		RenDev->glCreateTextures(GL_TEXTURE_2D, 1, &TextureHandle);
+
+		if(!IsDXTC(DestFormat))
+			RenDev->glTextureStorage2D(TextureHandle, 1, RenDev->Use16bitTextures ? GL_RGBA4 : GL_RGBA8, Width, Height);
 
 		for(INT ChildIndex = 0; ChildIndex < NumChildren; ++ChildIndex){
 			INT ChildX = 0;
@@ -401,20 +432,42 @@ void FOpenGLTexture::Cache(FBaseTexture* BaseTexture, bool bOwnDepthBuffer){
 			                      DestFormat,
 			                      0,
 			                      1);
+			Child->UnloadRawTextureData(0);
 		}
 
-		UploadTextureData(GL_TEXTURE_2D, DestFormat, Data, Width, Height, 1);
+		UploadTextureData(DestFormat, Data, Width, Height, 0);
+		RenDev->glTextureParameteri(TextureHandle, GL_TEXTURE_MAX_LEVEL, 0);
 	}else if(Texture){
-		INT MipIndex = Texture->GetFirstMip();
-		INT MipWidth = Width >> MipIndex;
-		INT MipHeight = Height >> MipIndex;
-		void* Data = ConvertTextureData(Texture, DestFormat, MipWidth, MipHeight, MipIndex);
+		INT FirstMip = Texture->GetFirstMip();
+		INT MipWidth = Width >> FirstMip;
+		INT MipHeight = Height >> FirstMip;
+		INT NumMips = Texture->GetNumMips() - FirstMip;
 
-		UploadTextureData(GL_TEXTURE_2D, DestFormat, Data, MipWidth, MipHeight, Texture->GetNumMips() - MipIndex);
-		RenDev->glGenerateTextureMipmap(TextureHandle);
+		if(NumMips > 0){
+			checkSlow(Width > 0 && Height > 0);
+			RenDev->glCreateTextures(GL_TEXTURE_2D, 1, &TextureHandle);
 
-		for(INT i = 0; i < Texture->GetNumMips(); ++i)
-			Texture->UnloadRawTextureData(i);
+			if(!IsDXTC(DestFormat))
+				RenDev->glTextureStorage2D(TextureHandle, NumMips, RenDev->Use16bitTextures ? GL_RGBA4 : GL_RGBA8, MipWidth, MipHeight);
+
+			INT MaxLevel = -1;
+
+			for(INT MipIndex = 0; MipIndex < NumMips; ++MipIndex){
+				void* Data = ConvertTextureData(Texture, MipWidth, MipHeight, MipIndex, DestFormat);
+				UploadTextureData(DestFormat, Data, MipWidth, MipHeight, MipIndex);
+				Texture->UnloadRawTextureData(MipIndex);
+				MipWidth >>= 1;
+				MipHeight >>= 1;
+				++MaxLevel;
+
+				if(MipWidth < 4 || MipHeight < 4)
+					break;
+			}
+
+			RenDev->glTextureParameteri(TextureHandle, GL_TEXTURE_MAX_LEVEL, MaxLevel);
+		}else{
+			checkSlow(Width == 0 && Height == 0);
+		}
 	}
 
 	Revision = BaseTexture->GetRevision();
@@ -448,14 +501,10 @@ void FOpenGLTexture::BindRenderTarget(){
 	RenDev->glBindFramebuffer(GL_FRAMEBUFFER, FBO);
 }
 
-void FOpenGLTexture::UploadTextureData(GLenum Target, ETextureFormat Format, void* Data, INT Width, INT Height, INT NumMips, INT CubemapFace){
-	if(!Data || Width == 0 || Height == 0){
-		Format = TEXF_RGBA8;
-		Data = ErrorTexture.GetRawTextureData(0);
-		Width = ErrorTexture.GetWidth();
-		Height = ErrorTexture.GetHeight();
-		NumMips = 1;
-	}
+void FOpenGLTexture::UploadTextureData(ETextureFormat Format, void* Data, INT MipWidth, INT MipHeight, INT MipIndex, INT CubemapFace){
+	checkSlow(Data);
+	checkSlow(MipWidth > 0);
+	checkSlow(MipHeight > 0);
 
 	if(IsDXTC(Format)){
 		GLenum GLFormat;
@@ -467,19 +516,14 @@ void FOpenGLTexture::UploadTextureData(GLenum Target, ETextureFormat Format, voi
 		else
 			GLFormat = GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
 
-		if(Target == GL_TEXTURE_CUBE_MAP){
-			checkSlow(CubemapFace >= 0 && CubemapFace < 6);
+		GLenum Target = GL_TEXTURE_2D;
 
-			if(!TextureHandle)
-				RenDev->glCreateTextures(GL_TEXTURE_CUBE_MAP, 1, &TextureHandle);
-
+		if(CubemapFace >= 0){
+			checkSlow(CubemapFace < 6);
 			Target = GL_TEXTURE_CUBE_MAP_POSITIVE_X + CubemapFace;
-		}else{
-			checkSlow(!TextureHandle);
-			RenDev->glCreateTextures(GL_TEXTURE_2D, 1, &TextureHandle);
 		}
 
-		RenDev->glCompressedTextureImage2DEXT(TextureHandle, Target, 0, GLFormat, Width, Height, 0, GetBytesPerPixel(Format, Width * Height), Data);
+		RenDev->glCompressedTextureImage2DEXT(TextureHandle, Target, MipIndex, GLFormat, MipWidth, MipHeight, 0, GetBytesPerPixel(Format, MipWidth * MipHeight), Data);
 	}else{
 		GLenum GLFormat = GL_NONE;
 		GLenum GLType = GL_NONE;
@@ -491,28 +535,17 @@ void FOpenGLTexture::UploadTextureData(GLenum Target, ETextureFormat Format, voi
 			appErrorf("Invalid texture format '%i'", Format);
 		}
 
-		if(Target == GL_TEXTURE_2D){
-			checkSlow(!TextureHandle);
-			RenDev->glCreateTextures(GL_TEXTURE_2D, 1, &TextureHandle);
-			RenDev->glTextureStorage2D(TextureHandle, NumMips, RenDev->Use16bitTextures ? GL_RGBA4 : GL_RGBA8, Width, Height);
-			RenDev->glTextureSubImage2D(TextureHandle, 0, 0, 0, Width, Height, GLFormat, GLType, Data);
-		}else if(Target == GL_TEXTURE_CUBE_MAP){
-			if(!TextureHandle){
-				RenDev->glCreateTextures(GL_TEXTURE_CUBE_MAP, 1, &TextureHandle);
-				RenDev->glTextureStorage2D(TextureHandle, NumMips, RenDev->Use16bitTextures ? GL_RGBA4 : GL_RGBA8, Width, Height);
-			}
-
-			RenDev->glTextureSubImage3D(TextureHandle, 0, 0, 0, CubemapFace, Width, Height, 1, GLFormat, GLType, Data);
-		}else{
-			appErrorf("Invalid texture target '%x'", Target);
-		}
+		if(CubemapFace < 0)
+			RenDev->glTextureSubImage2D(TextureHandle, MipIndex, 0, 0, MipWidth, MipHeight, GLFormat, GLType, Data);
+		else
+			RenDev->glTextureSubImage3D(TextureHandle, MipIndex, 0, 0, CubemapFace, MipWidth, MipHeight, 1, GLFormat, GLType, Data);
 	}
 }
 
-void* FOpenGLTexture::ConvertTextureData(FTexture* Texture, ETextureFormat DestFormat, INT Width, INT Height, INT MipIndex){
+void* FOpenGLTexture::ConvertTextureData(FTexture* Texture, INT MipWidth, INT MipHeight, INT MipIndex, ETextureFormat DestFormat){
 	void* Result;
 	ETextureFormat SrcFormat = Texture->GetFormat();
-	INT NumPixels = Width * Height;
+	INT NumPixels = MipWidth * MipHeight;
 	INT SrcBufferSize = GetBytesPerPixel(SrcFormat, NumPixels);
 	INT DestBufferSize = GetBytesPerPixel(DestFormat, NumPixels);
 	void* TextureData = Texture->GetRawTextureData(MipIndex);
@@ -552,11 +585,11 @@ void* FOpenGLTexture::ConvertTextureData(FTexture* Texture, ETextureFormat DestF
 				static_cast<FColor*>(Result)[i] = FColor(Intensity, Intensity, Intensity);
 			}
 		}else if(SrcFormat == TEXF_V8U8){
-			ConvertV8U8ToBGRA8(Result, TextureData, Width, Height);
+			ConvertV8U8ToBGRA8(Result, TextureData, MipWidth, MipHeight);
 		}else if(SrcFormat == TEXF_L6V5U5){
-			ConvertL6V5U5ToBGRA8(Result, TextureData, Width, Height);
+			ConvertL6V5U5ToBGRA8(Result, TextureData, MipWidth, MipHeight);
 		}else if(SrcFormat == TEXF_X8L8V8U8){
-			ConvertX8L8V8U8ToBGRA8(Result, TextureData, Width, Height);
+			ConvertX8L8V8U8ToBGRA8(Result, TextureData, MipWidth, MipHeight);
 		}else{
 			Result = NULL;
 		}

@@ -7,28 +7,16 @@
 
 IMPLEMENT_CLASS(UOpenGLRenderDevice)
 
-FShaderGLSL UOpenGLRenderDevice::ErrorShader(FStringTemp("ERRORSHADER"),
-                                             FStringTemp("#ifdef VERTEX_SHADER\n"
-                                                         "void main(void){\n"
-                                                         "\tgl_Position = LocalToScreen * vec4(InPosition.xyz, 1.0);\n"
-                                                         "}\n"
-                                                         "#elif defined(FRAGMENT_SHADER)\n"
-                                                         "void main(void){\n"
-                                                         "\tFragColor = vec4(1.0, 0.0, 1.0, 1.0);\n"
-                                                         "}\n"
-                                                         "#else\n"
-                                                         "#error Shader type not implemented\n"
-                                                         "#endif\n"));
-
 UOpenGLRenderDevice::UOpenGLRenderDevice() : RenderInterface(this),
-                                             Backbuffer(0, 0, TEXF_RGBA8, false, false){}
+                                             Backbuffer(0, 0, TEXF_RGBA8, false, false),
+                                             ErrorShader(this, "ERRORSHADER"){}
 
 void UOpenGLRenderDevice::StaticConstructor(){
 	SupportsCubemaps       = 1;
 	SupportsZBIAS          = 1;
 	CanDoDistortionEffects = 1;
 	bBilinearFramebuffer   = 1;
-	TextureFilter          = TF_Bilinear;
+	TextureFilter          = TF_Trilinear;
 	TextureAnisotropy      = 8;
 	bFirstRun              = 1;
 	ShaderDir              = FStringTemp("OpenGLShaders");
@@ -116,27 +104,44 @@ FOpenGLResource* UOpenGLRenderDevice::GetCachedResource(QWORD CacheId){
 	return NULL;
 }
 
-FShaderGLSL* UOpenGLRenderDevice::GetShaderForMaterial(UMaterial* Material){
-	checkSlow(Material);
-	FShaderGLSL* Shader = GLShadersByMaterial.Find(Material);
+FOpenGLShader* UOpenGLRenderDevice::GetShaderForMaterial(UMaterial* Material){
+	if(Material->IsIn(UObject::GetTransientPackage())) // Only unique names, no Transient.InGameTempName
+		return NULL;
 
-	if(!Shader){
-		FShaderGLSL TempShader(FStringTemp(Material->GetPathName()).Substitute(".", "\\").Substitute(".", "\\"));
+	FOpenGLShader* Shader = ShadersByMaterial.Find(Material->GetPathName());
+
+	if(!Material->Validated || Shader && !Shader->IsValid()){
+		FStringTemp ShaderPath = FStringTemp(Material->GetPathName()).Substitute(".", "\\").Substitute(".", "\\");
+		FString ShaderText;
+		bool LoadedShader = !Material->IsIn(UObject::GetTransientPackage()) && LoadShaderIfChanged(ShaderPath, ShaderText);
+		bool LoadedEmpty = LoadedShader && ShaderText.Len() == 0;
 		UHardwareShader* HardwareShader = Cast<UHardwareShader>(Material);
 
-		// Try loading shader from disk. If this fails, check if the material is a hardware shader and convert from d3d assembly if that is the case
-		if(LoadShader(&TempShader)){
-			Shader = &GLShadersByMaterial[Material];
-			appMemswap(Shader, &TempShader, sizeof(FShaderGLSL));
-		}else if(HardwareShader){
-			TempShader.SetShaderCode(GLSLShaderFromD3DHardwareShader(HardwareShader));
+		if(!LoadedShader && Shader && Shader->IsValid())
+			Material->UseFallback = 1;
 
-			if(bSaveShadersToDisk && !HardwareShader->IsIn(UObject::GetTransientPackage()))
-				SaveShader(&TempShader);
+		if(HardwareShader && (!LoadedShader && !Material->UseFallback || LoadedEmpty)){
+			ShaderText = GLSLShaderFromD3DHardwareShader(HardwareShader);
+			check(ShaderText.Len() > 0);
 
-			Shader = &GLShadersByMaterial[Material];
-			appMemswap(Shader, &TempShader, sizeof(FShaderGLSL));
+			if(!LoadedShader && bSaveShadersToDisk && !HardwareShader->IsIn(UObject::GetTransientPackage()))
+				SaveShader(ShaderPath, ShaderText);
 		}
+
+		if(ShaderText.Len() > 0){
+			if(!Shader)
+				Shader = &ShadersByMaterial[Material->GetPathName()];
+
+			Shader->RenDev = this;
+			Shader->Name = ShaderPath;
+			Shader->Compile(ShaderText);
+			Material->UseFallback = 1;
+		}else if(!HardwareShader && LoadedEmpty){ // Reset shader if text is empty
+			ShadersByMaterial.Remove(Material->GetPathName());
+			Shader = NULL;
+		}
+
+		Material->Validated = !bAutoReloadShaders;
 	}
 
 	return Shader;
@@ -144,14 +149,14 @@ FShaderGLSL* UOpenGLRenderDevice::GetShaderForMaterial(UMaterial* Material){
 
 FOpenGLIndexBuffer* UOpenGLRenderDevice::GetDynamicIndexBuffer(INT IndexSize){
 	if(!DynamicIndexBuffer)
-		DynamicIndexBuffer = new FOpenGLIndexBuffer(this, MakeCacheID(CID_RenderIndices), 0, true);
+		DynamicIndexBuffer = new FOpenGLIndexBuffer(this, MakeCacheID(CID_RenderIndices), true);
 
 	return DynamicIndexBuffer;
 }
 
 FOpenGLVertexStream* UOpenGLRenderDevice::GetDynamicVertexStream(){
 	if(!DynamicVertexStream)
-		DynamicVertexStream = new FOpenGLVertexStream(this, MakeCacheID(CID_RenderVertices), 0, true);
+		DynamicVertexStream = new FOpenGLVertexStream(this, MakeCacheID(CID_RenderVertices), true);
 
 	return DynamicVertexStream;
 }
@@ -159,7 +164,11 @@ FOpenGLVertexStream* UOpenGLRenderDevice::GetDynamicVertexStream(){
 UBOOL UOpenGLRenderDevice::Exec(const TCHAR* Cmd, FOutputDevice& Ar){
 	if(ParseCommand(&Cmd, "RELOADSHADERS")){
 		Ar.Log("Reloading shaders from disk");
-		LoadShaders();
+
+		if(LoadShaderMacroText()) // Load the macros here. the shaders themselves are loaded on demand.
+			ShaderFileTimes.Empty(); // Macros may have changed, so force reload all shaders
+
+		UMaterial::ClearFallbacks();
 
 		return 1;
 	}
@@ -293,10 +302,13 @@ UBOOL UOpenGLRenderDevice::Init(){
 	GL_BASE_FUNCS
 #undef GL_FUNC
 
-	// Initialize shader code
+	// Initialize hardware shader macros
 
 	SetHardwareShaderMacros(CastChecked<UHardwareShaderMacros>(GEngine->HBumpShaderMacros));
-	LoadShaders();
+	LoadShaderMacroText();
+
+	if(bSaveShadersToDisk)
+		SaveShaderMacroText();
 
 	return 1;
 }
@@ -499,6 +511,21 @@ UBOOL UOpenGLRenderDevice::SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL
 		glVertexAttrib4f(FVF_Tangent,   0.0f, 0.0f, 1.0f, 0.0f);
 		glVertexAttrib4f(FVF_Binormal,  0.0f, 0.0f, 1.0f, 0.0f);
 
+		// Initialize shaders
+
+		ErrorShader.Compile("#ifdef VERTEX_SHADER\n"
+                            "void main(void){\n"
+                            "\tgl_Position = LocalToScreen * vec4(InPosition.xyz, 1.0);\n"
+                            "}\n"
+                            "#elif defined(FRAGMENT_SHADER)\n"
+                            "void main(void){\n"
+                            "\tFragColor = vec4(1.0, 0.0, 1.0, 1.0);\n"
+                            "}\n"
+                            "#else\n"
+                            "#error Shader type not implemented\n"
+                            "#endif\n");
+		check(ErrorShader.Program);
+
 		/*
 		 * Mirror image since the FrameFx render targets expect d3d coordinates
 		 * This means that glBlitNamedFramebuffer needs to be called with y and height exchanged in UOpenGLRenderDevice::Present
@@ -575,7 +602,6 @@ void UOpenGLRenderDevice::Flush(UViewport* Viewport){
 	}
 
 	appMemzero(ResourceHash, sizeof(ResourceHash));
-	GLShadersByMaterial.Empty();
 
 	DynamicIndexBuffer  = NULL;
 	DynamicVertexStream = NULL;
@@ -616,8 +642,10 @@ FRenderInterface* UOpenGLRenderDevice::Lock(UViewport* Viewport, BYTE* HitData, 
 	RenderInterface.Locked(Viewport);
 	RenderInterface.SetRenderTarget(&Backbuffer, false);
 
-	if(bAutoReloadShaders)
-		LoadShaders();
+	if(bAutoReloadShaders && LoadShaderMacroText()){
+		ShaderFileTimes.Empty(); // Macros may have changed, so force reload all shaders
+		UMaterial::ClearFallbacks();
+	}
 
 	return &RenderInterface;
 }
@@ -744,63 +772,51 @@ void UOpenGLRenderDevice::TakeScreenshot(const TCHAR* Name, UViewport* Viewport,
 	URenderDevice::TakeScreenshot(Name, Viewport, Width, Height);
 }
 
-void UOpenGLRenderDevice::LoadShaders(){
-	for(TMap<UMaterial*, FShaderGLSL>::TIterator It(GLShadersByMaterial); It; ++It){
-		if(!It.Key()->IsIn(UObject::GetTransientPackage())){
-			if(!LoadShader(&It.Value()) && bSaveShadersToDisk)
-				SaveShader(&It.Value());
-		}
-	}
-
-	if(!LoadShaderMacroText() && bSaveShadersToDisk)
-		SaveShaderMacroText();
-}
-
 FStringTemp UOpenGLRenderDevice::MakeShaderFilename(const FString& ShaderName, const TCHAR* Extension){
-	return ShaderDir * ShaderName + Extension;
+	return FStringTemp(appBaseDir()) * ShaderDir * ShaderName + Extension;
 }
 
 bool UOpenGLRenderDevice::ShaderFileNeedsReload(const char* Filename){
 	SQWORD CurrentFileTime = GFileManager->GetGlobalTime(Filename);
 	SQWORD PreviousFileTime = ShaderFileTimes[Filename];
 
-	return CurrentFileTime == 0 || CurrentFileTime != PreviousFileTime;
+	return CurrentFileTime != PreviousFileTime;
 }
 
-bool UOpenGLRenderDevice::LoadShader(FShaderGLSL* Shader){
-	FStringTemp ShaderText(0);
-	FFilename Filename = MakeShaderFilename(Shader->GetName(), SHADER_FILE_EXTENSION);
+bool UOpenGLRenderDevice::LoadShaderIfChanged(const FString& Name, FString& Out){
+	FFilename Filename = MakeShaderFilename(Name, SHADER_FILE_EXTENSION);
 
-	if(Shader->GetShaderCode().Len() > 0 && !ShaderFileNeedsReload(*Filename))
-		return true;
-
-	if(LoadShaderText(Filename, &ShaderText)){
-		Shader->SetShaderCode(ShaderText);
-
-		return true;
-	}
+	// If macros have updated the shader code needs to be reloaded even if the file wasn't updated since it might use some macros
+	if(ShaderFileNeedsReload(*Filename))
+		return LoadShaderText(Filename, &Out);
 
 	return false;
 }
 
-void UOpenGLRenderDevice::SaveShader(FShaderGLSL* Shader){
-	SaveShaderText(MakeShaderFilename(Shader->GetName(), SHADER_FILE_EXTENSION), Shader->GetShaderCode());
+void UOpenGLRenderDevice::SaveShader(const FString& Name, const FString& Text){
+	SaveShaderText(MakeShaderFilename(Name, SHADER_FILE_EXTENSION), Text);
 }
 
 bool UOpenGLRenderDevice::LoadShaderMacroText(){
 	FFilename Filename = MakeShaderFilename("Macros", SHADER_MACROS_FILE_EXTENSION);
+	SQWORD CurrentFileTime = GFileManager->GetGlobalTime(*Filename);
 
-	if(!ShaderFileNeedsReload(*Filename))
-		return true;
+	if(CurrentFileTime == ShaderMacroFileTime)
+		return false;
 
 	FString Macros;
 
-	if(LoadShaderText(Filename, &Macros)){
+	if(appLoadFileToString(Macros, *Filename)){
+		ShaderMacroFileTime = CurrentFileTime;
+		debugf("Loaded %s", *Filename.GetCleanFilename());
 		ParseGLSLMacros(Macros);
 
-		// Increment revision of all shaders since they might use the macros and need to be updated
-		for(TMap<UMaterial*, FShaderGLSL>::TIterator It(GLShadersByMaterial); It; ++It)
-			++It.Value().Revision;
+		return true;
+	}
+
+	// Reset file time in case the file was deleted
+	if(GFileManager->FileSize(*Filename) < 0){
+		ShaderMacroFileTime = 0;
 
 		return true;
 	}
@@ -818,8 +834,16 @@ void UOpenGLRenderDevice::SaveShaderMacroText(){
 }
 
 bool UOpenGLRenderDevice::LoadShaderText(const FFilename& Filename, FString* Out){
-	if(GFileManager->FileSize(*Filename) > 0 && appLoadFileToString(*Out, *Filename)){
+	if(appLoadFileToString(*Out, *Filename)){
 		ShaderFileTimes[*Filename] = GFileManager->GetGlobalTime(*Filename);
+		debugf("Loaded %s", *Filename.GetCleanFilename());
+
+		return true;
+	}
+
+	// Reset file time in case the file was deleted
+	if(GFileManager->FileSize(*Filename) < 0){
+		ShaderFileTimes[*Filename] = 0;
 
 		return true;
 	}

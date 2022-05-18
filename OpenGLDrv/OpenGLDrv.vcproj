@@ -134,6 +134,9 @@
 				RelativePath=".\Src\OpenGLResource.cpp">
 			</File>
 			<File
+				RelativePath=".\Src\Shader.cpp">
+			</File>
+			<File
 				RelativePath=".\Src\ShaderConversion.cpp">
 			</File>
 			<File

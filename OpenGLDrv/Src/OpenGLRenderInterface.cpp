@@ -183,7 +183,21 @@ static GLint GetTextureWrapMode(/*ETexClampMode*/BYTE Mode){
 
 FOpenGLRenderInterface::FOpenGLRenderInterface(UOpenGLRenderDevice* InRenDev) : RenDev(InRenDev),
                                                                                 PrecacheMode(PRECACHE_All),
-																				CurrentState(&SavedStates[0]){}
+																				CurrentState(&SavedStates[0]),
+                                                                                BitmapShader(InRenDev, "Bitmap"),
+                                                                                BitmapShaderStaticLighting(InRenDev, "BitmapStaticLighting"),
+                                                                                BitmapShaderLightmap(InRenDev, "BitmapLightmap"),
+                                                                                BitmapShaderLightmapStaticLighting(InRenDev, "BitmapLightmapStaticLighting"),
+                                                                                BitmapShaderLightmap2x(InRenDev, "BitmapLightmap2x"),
+                                                                                ParticleShader(InRenDev, "Particle"),
+                                                                                ParticleShaderTFactor(InRenDev, "ParticleTFactor"),
+                                                                                ParticleShaderSpecialBlend(InRenDev, "ParticleSpecialBlend"),
+                                                                                ParticleShaderSpecialBlendTFactor(InRenDev, "ParticleSpecialBlendTFactor"),
+                                                                                ParticleShaderBlendSubdivisions(InRenDev, "ParticleBlendSubdivisions"),
+                                                                                TerrainShaderAlphaMapBitmap(InRenDev, "TerrainAlphaMapBitmap"),
+                                                                                TerrainShaderAlphaMapBitmapLighting(InRenDev, "TerrainAlphaMapBitmapLighting"),
+                                                                                TerrainShaderCombinedWeightMap3(InRenDev, "TerrainCombinedWeightMap3"),
+                                                                                TerrainShaderCombinedWeightMap4(InRenDev, "TerrainCombinedWeightMap4"){}
 
 void FOpenGLRenderInterface::Init(INT ViewportWidth, INT ViewportHeight){
 	checkSlow(RenDev->IsCurrent());
@@ -275,6 +289,51 @@ void FOpenGLRenderInterface::Init(INT ViewportWidth, INT ViewportHeight){
 	RenDev->glCreateBuffers(1, &GlobalUBO);
 	RenDev->glNamedBufferStorage(GlobalUBO, sizeof(FOpenGLGlobalUniforms), static_cast<FOpenGLGlobalUniforms*>(CurrentState), GL_DYNAMIC_STORAGE_BIT);
 	RenDev->glBindBufferBase(GL_UNIFORM_BUFFER, 0, GlobalUBO); // Binding index 0 is reserved for the global uniform block
+
+	// Initialize default shaders
+
+	FShaderGenerator ShaderGenerator;
+
+	// Bitmap
+	ShaderGenerator.AddTexture(0, TCS_Stream0);
+	ShaderGenerator.AddColorOp(CA_T0, CA_R0, COP_Assign, CC_RGBA, CR_0);
+	BitmapShader.Compile(ShaderGenerator.GetShaderText(false));
+	BitmapShaderStaticLighting.Compile(ShaderGenerator.GetShaderText(true));
+	ShaderGenerator.Reset();
+	ShaderGenerator.AddTexture(0, TCS_Stream0);
+	ShaderGenerator.AddTexture(1, TCS_Stream1);
+	ShaderGenerator.AddColorOp(CA_T0, CA_T1, COP_Modulate, CC_RGBA, CR_0);
+	BitmapShaderLightmap.Compile(ShaderGenerator.GetShaderText(false));
+	BitmapShaderLightmapStaticLighting.Compile(ShaderGenerator.GetShaderText(true));
+	ShaderGenerator.Reset();
+	ShaderGenerator.AddTexture(0, TCS_Stream0);
+	ShaderGenerator.AddTexture(1, TCS_Stream1);
+	ShaderGenerator.AddColorOp(CA_T0, CA_T1, COP_Modulate2x, CC_RGBA, CR_0);
+	BitmapShaderLightmap2x.Compile(ShaderGenerator.GetShaderText(false));
+	ShaderGenerator.Reset();
+	// Particle
+	ShaderGenerator.AddTexture(0, TCS_Stream0);
+	ShaderGenerator.AddColorOp(CA_T0, CA_Diffuse, COP_Modulate, CC_RGBA, CR_0);
+	ParticleShader.Compile(ShaderGenerator.GetShaderText(false));
+	ShaderGenerator.Reset();
+	ShaderGenerator.AddTexture(0, TCS_Stream0);
+	ShaderGenerator.AddColorOp(CA_T0, CA_GlobalColor, COP_Modulate, CC_RGBA, CR_0);
+	ParticleShaderTFactor.Compile(ShaderGenerator.GetShaderText(false));
+	ShaderGenerator.Reset();
+	ShaderGenerator.AddTexture(0, TCS_Stream0);
+	ShaderGenerator.AddColorOp(CA_T0, CA_Diffuse, COP_BlendDiffuseAlpha, CC_RGBA, CR_0);
+	ParticleShaderSpecialBlend.Compile(ShaderGenerator.GetShaderText(false));
+	ShaderGenerator.Reset();
+	ShaderGenerator.AddTexture(0, TCS_Stream0);
+	ShaderGenerator.AddColorOp(CA_T0, CA_GlobalColor, COP_BlendDiffuseAlpha, CC_RGBA, CR_0);
+	ParticleShaderSpecialBlendTFactor.Compile(ShaderGenerator.GetShaderText(false));
+	ShaderGenerator.Reset();
+	ShaderGenerator.AddTexture(0, TCS_Stream0);
+	ShaderGenerator.AddTexture(0, TCS_Stream1);
+	ShaderGenerator.AddColorOp(CA_T0, CA_T1, COP_BlendDiffuseAlpha, CC_RGBA, CR_0);
+	ShaderGenerator.AddColorOp(CA_R0, CA_Diffuse, COP_Modulate, CC_RGB, CR_0);
+	ParticleShaderBlendSubdivisions.Compile(ShaderGenerator.GetShaderText(false));
+	// TODO: Initialize terrain shaders here
 }
 
 void FOpenGLRenderInterface::Flush(){
@@ -294,10 +353,6 @@ void FOpenGLRenderInterface::Flush(){
 	CurrentState->VAO = NULL;
 	RenDev->glBindVertexArray(GL_NONE);
 	VAOsByDeclId.Empty();
-
-	// TODO: Make those persistent and only delete them on Exit. (It is not necessary to regenerate the exact same shaders on each level load)
-	appMemzero(MaterialShaders, sizeof(MaterialShaders));
-	ShadersById.Empty();
 }
 
 void FOpenGLRenderInterface::Exit(){
@@ -306,6 +361,21 @@ void FOpenGLRenderInterface::Exit(){
 	GlobalUBO = GL_NONE;
 	RenDev->glDeleteSamplers(MAX_TEXTURES, Samplers);
 	appMemzero(Samplers, sizeof(Samplers));
+	ShadersById.Empty();
+	BitmapShader.Free();
+	BitmapShaderStaticLighting.Free();
+	BitmapShaderLightmap.Free();
+	BitmapShaderLightmapStaticLighting.Free();
+	BitmapShaderLightmap2x.Free();
+	ParticleShader.Free();
+	ParticleShaderTFactor.Free();
+	ParticleShaderSpecialBlend.Free();
+	ParticleShaderSpecialBlendTFactor.Free();
+	ParticleShaderBlendSubdivisions.Free();
+	TerrainShaderAlphaMapBitmap.Free();
+	TerrainShaderAlphaMapBitmapLighting.Free();
+	TerrainShaderCombinedWeightMap3.Free();
+	TerrainShaderCombinedWeightMap4.Free();
 }
 
 void FOpenGLRenderInterface::CommitRenderState(){
@@ -587,28 +657,10 @@ void FOpenGLRenderInterface::SetTextureFilter(BYTE Filter){
 	TextureFilter = Filter;
 }
 
-void FOpenGLRenderInterface::SetShader(FShaderGLSL* NewShader){
-	QWORD CacheId = NewShader->GetCacheId();
-	FOpenGLShader* Shader = static_cast<FOpenGLShader*>(RenDev->GetCachedResource(CacheId));
-
-	if(!Shader)
-		Shader = new FOpenGLShader(RenDev, CacheId);
-
-	if(Shader->Revision != NewShader->GetRevision()){
-		RenDev->glUseProgram(GL_NONE);
-		Shader->Cache(NewShader);
-		Shader->Bind();
-	}else if(Shader != CurrentShader){
-		Shader->Bind();
-	}
-
-	CurrentShader = Shader;
-}
-
-void FOpenGLRenderInterface::SetGLShader(FOpenGLShader* Shader){
-	if(CurrentShader != Shader){
-		Shader->Bind();
-		CurrentShader = Shader;
+void FOpenGLRenderInterface::SetShader(const FOpenGLShader& Shader){
+	if(CurrentShader != &Shader){
+		Shader.Bind();
+		CurrentShader = &Shader;
 	}
 }
 
@@ -967,7 +1019,7 @@ void FOpenGLRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorStri
 		Material = RemoveModifiers(Cast<UModifier>(Material), &ModifierInfo);
 
 		if(!Material){
-			SetShader(&RenDev->ErrorShader);
+			SetShader(RenDev->ErrorShader);
 
 			if(ErrorString)
 				*ErrorString = "Modifier does not have a material";
@@ -989,21 +1041,13 @@ void FOpenGLRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorStri
 		Result = SetHardwareShaderMaterial(static_cast<UHardwareShader*>(Material), ErrorString, ErrorMaterial) != 0;
 		IsHardwareShader = true;
 	}else{
-		FShaderGLSL* Shader = NULL;
+		FOpenGLShader* Shader = NULL;
 
-		// UMaterial::DefaultMaterial is unused so we can store a specific shader override there
-		if(Material->Validated){
-			Shader = reinterpret_cast<FShaderGLSL*>(Material->DefaultMaterial);
-		}else{
-			if(Modifier)
-				Shader = RenDev->GetShaderForMaterial(Modifier);
+		if(Modifier)
+			Shader = RenDev->GetShaderForMaterial(Modifier);
 
-			if(!Shader)
-				Shader = RenDev->GetShaderForMaterial(Material);
-
-			Material->DefaultMaterial = reinterpret_cast<UMaterial*>(Shader);
-			Material->Validated = !RenDev->bAutoReloadShaders;
-		}
+		if(!Shader)
+			Shader = RenDev->GetShaderForMaterial(Material);
 
 		if(Material->IsA<UBitmapMaterial>())
 			Result = (Modifier && Modifier->IsA<UTexModifier>()) ? SetSimpleMaterial(Material, ModifierInfo) : SetBitmapMaterial(static_cast<UBitmapMaterial*>(Material));
@@ -1021,7 +1065,7 @@ void FOpenGLRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorStri
 			Result = SetSimpleMaterial(Material, ModifierInfo);
 
 		if(Shader)
-			SetShader(Shader);
+			SetShader(*Shader);
 	}
 
 	if(Result){
@@ -1033,7 +1077,7 @@ void FOpenGLRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorStri
 			RenDev->glVertexAttrib4f(FVF_Specular,  1.0f, 1.0f, 1.0f, 1.0f);
 		}
 	}else{
-		SetShader(&RenDev->ErrorShader);
+		SetShader(RenDev->ErrorShader);
 	}
 
 	unguardSlow;
@@ -1052,9 +1096,13 @@ static INT GetShaderConstantNumSlots(BYTE ConstantType){
 UBOOL FOpenGLRenderInterface::SetHardwareShaderMaterial(UHardwareShader* HardwareShader, FString* ErrorString, UMaterial** ErrorMaterial){
 	guardFuncSlow;
 
-	SetShader(RenDev->GetShaderForMaterial(HardwareShader));
+	FOpenGLShader* Shader = RenDev->GetShaderForMaterial(HardwareShader);
 
-	if(!CurrentShader->IsErrorShader){
+	check(Shader);
+
+	if(Shader->IsValid()){
+		SetShader(*Shader);
+
 		CurrentState->bZTest = HardwareShader->ZTest != 0;
 		CurrentState->bZWrite = HardwareShader->ZWrite != 0;
 
@@ -1097,9 +1145,11 @@ UBOOL FOpenGLRenderInterface::SetHardwareShaderMaterial(UHardwareShader* Hardwar
 		RenDev->glProgramUniform4fv(CurrentShader->Program, HSU_VSConstants, HardwareShader->NumVSConstants, (GLfloat*)ShaderConstants);
 		GetShaderConstants(HardwareShader->PSConstants, ShaderConstants, HardwareShader->NumPSConstants);
 		RenDev->glProgramUniform4fv(CurrentShader->Program, HSU_PSConstants, HardwareShader->NumPSConstants, (GLfloat*)ShaderConstants);
+
+		return 1;
 	}
 
-	return 1;
+	return 0;
 
 	unguardSlow;
 }

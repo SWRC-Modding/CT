@@ -36,7 +36,7 @@ public:
 	static FString FragmentShaderVarsText;
 
 	// Error shader
-	static FShaderGLSL ErrorShader;
+	FOpenGLShader ErrorShader;
 
 	UOpenGLRenderDevice();
 	void StaticConstructor();
@@ -45,7 +45,7 @@ public:
 	void MakeCurrent();
 	void UnSetRes(UViewport* Viewport);
 	FOpenGLResource* GetCachedResource(QWORD CacheId);
-	FShaderGLSL* GetShaderForMaterial(UMaterial* Material);
+	FOpenGLShader* GetShaderForMaterial(UMaterial* Material);
 
 	static void SetHardwareShaderMacros(UHardwareShaderMacros* Macros);
 	static void SetShaderMacro(const FString& Name, const FString& Text);
@@ -87,8 +87,6 @@ public:
 		return Scratch.GetData();
 	}
 
-	void LoadShaders();
-
 private:
 	HDC                                 DeviceContext;
 	HGLRC                               OpenGLContext;
@@ -112,9 +110,9 @@ private:
 	FOpenGLResource*                    ResourceHash[4096];
 
 	FStringNoInit                       ShaderDir;
-
+	SQWORD                              ShaderMacroFileTime;
 	TMap<FString, SQWORD>               ShaderFileTimes;
-	TMap<UMaterial*, FShaderGLSL>       GLShadersByMaterial;
+	TMap<FString, FOpenGLShader>        ShadersByMaterial;
 
 	void AddResource(FOpenGLResource* Resource);
 	void RemoveResource(FOpenGLResource* Resource);
@@ -124,8 +122,8 @@ private:
 
 	FStringTemp MakeShaderFilename(const FString& ShaderName, const TCHAR* Extension);
 	bool ShaderFileNeedsReload(const char* Filename);
-	bool LoadShader(FShaderGLSL* Shader);
-	void SaveShader(FShaderGLSL* Shader);
+	bool LoadShaderIfChanged(const FString& Name, FString& Out);
+	void SaveShader(const FString& Name, const FString& Text);
 	bool LoadShaderMacroText();
 	void SaveShaderMacroText();
 

@@ -1,7 +1,6 @@
 #pragma once
 
 #include "../Inc/OpenGLDrv.h"
-#include "../Inc/Shader.h"
 #include "../Inc/opengl.h"
 
 inline INT GetResourceHashIndex(QWORD CacheId){
@@ -10,10 +9,6 @@ inline INT GetResourceHashIndex(QWORD CacheId){
 
 class UOpenGLRenderDevice;
 
-enum EOpenGLResourceFlags{
-	OGLRF_NotInHash = 0x1
-};
-
 class FOpenGLResource{
 public:
 	UOpenGLRenderDevice* RenDev;
@@ -21,35 +16,16 @@ public:
 	QWORD                CacheId;
 	INT                  Revision;
 	INT                  HashIndex;
-	DWORD                Flags;
 
-	FOpenGLResource(UOpenGLRenderDevice* InRenDev, QWORD InCacheId, DWORD InFlags = 0);
+	FOpenGLResource(UOpenGLRenderDevice* InRenDev, QWORD InCacheId);
 	virtual ~FOpenGLResource();
-};
-
-// FOpenGLShader
-
-class FOpenGLShader : public FOpenGLResource{
-public:
-	FOpenGLShader(UOpenGLRenderDevice* InRenDev, QWORD InCacheId, DWORD InFlags = 0);
-	virtual ~FOpenGLShader();
-
-	void Cache(FShaderGLSL* Shader);
-	void Bind();
-	void Free();
-
-	GLuint Program;
-	UBOOL  IsErrorShader;
-
-private:
-	GLuint CompileShader(GLenum Type, const FString& ShaderCode, const FString& ShaderName);
 };
 
 // FOpenGLIndexBuffer
 
 class FOpenGLIndexBuffer : public FOpenGLResource{
 public:
-	FOpenGLIndexBuffer(UOpenGLRenderDevice* InRenDev, QWORD InCacheId, DWORD InFlags = 0, bool InIsDynamic = false);
+	FOpenGLIndexBuffer(UOpenGLRenderDevice* InRenDev, QWORD InCacheId, bool InIsDynamic = false);
 	virtual ~FOpenGLIndexBuffer();
 
 	void Cache(FIndexBuffer* IndexBuffer, INT DynamicBufferSize = 0);
@@ -66,7 +42,7 @@ public:
 
 class FOpenGLVertexStream : public FOpenGLResource{
 public:
-	FOpenGLVertexStream(UOpenGLRenderDevice* InRenDev, QWORD InCacheId, DWORD InFlags = 0, bool InIsDynamic = false);
+	FOpenGLVertexStream(UOpenGLRenderDevice* InRenDev, QWORD InCacheId, bool InIsDynamic = false);
 	virtual ~FOpenGLVertexStream();
 
 	void Cache(FVertexStream* VertexStream, INT DynamicBufferSize = 0);
@@ -83,7 +59,7 @@ public:
 
 class FOpenGLTexture : public FOpenGLResource{
 public:
-	FOpenGLTexture(UOpenGLRenderDevice* InRenDev, QWORD InCacheId, DWORD InFlags = 0);
+	FOpenGLTexture(UOpenGLRenderDevice* InRenDev, QWORD InCacheId);
 	virtual ~FOpenGLTexture();
 
 	void Cache(FBaseTexture* BaseTexture, bool RenderTargetMatchBackbuffer = false);

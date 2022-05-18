@@ -2,7 +2,7 @@
 #include "../Inc/ShaderGenerator.h"
 #include "../Inc/OpenGLRenderDevice.h"
 
-FOpenGLShader* FShaderGenerator::CreateShader(UOpenGLRenderDevice* RenDev, bool UseStaticLighting){
+FStringTemp FShaderGenerator::GetShaderText(bool UseStaticLighting){
 	BYTE TexCoordsBySrc[TCS_MAX] = {0};
 	INT NumTexMatrices = 0;
 	BYTE NumTexCoords = 0;
@@ -214,11 +214,7 @@ FOpenGLShader* FShaderGenerator::CreateShader(UOpenGLRenderDevice* RenDev, bool 
 		"#error Unsupported shader type\n"
 		"#endif\n";
 
-	//debugf(*ShaderText);
-	FOpenGLShader* Shader = new FOpenGLShader(RenDev, MakeCacheID(CID_RenderShader));
-	Shader->Cache(&FShaderGLSL(FStringTemp("<generated>"), ShaderText));
-
-	return Shader;
+	return ShaderText;
 }
 
 FStringTemp FShaderGenerator::GetArgString(BYTE Arg){

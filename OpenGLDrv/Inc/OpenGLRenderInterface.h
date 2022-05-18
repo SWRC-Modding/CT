@@ -211,7 +211,7 @@ public:
 	FOpenGLSavedState*                    CurrentState;
 	FOpenGLRenderState                    RenderState;
 
-	FOpenGLShader*                        CurrentShader;
+	const FOpenGLShader*                  CurrentShader;
 
 	INT                                   LastUniformRevision;
 	unsigned int                          GlobalUBO;
@@ -238,8 +238,7 @@ public:
 	void SetFramebufferBlending(EFrameBufferBlending Mode);
 	void SetTextureFilter(BYTE Filter);
 	void SetGLRenderTarget(FOpenGLTexture* GLRenderTarget, bool bOwnDepthBuffer);
-	void SetShader(FShaderGLSL* NewShader);
-	void SetGLShader(FOpenGLShader* Shader);
+	void SetShader(const FOpenGLShader& Shader);
 
 	// Overrides
 
@@ -296,29 +295,25 @@ private:
 	void SetTexture(FBaseTexture* Texture, INT TextureIndex, FLOAT BumpSize = 0.0f);
 	void SetBitmapTexture(UBitmapMaterial* Bitmap, INT TextureIndex, FLOAT BumpSize = 0.0f);
 
-	// NOTE: The order of those is important
-	enum EFixedMaterialShader{
-		FMS_Bitmap,
-		FMS_BitmapStaticLighting,
-		FMS_BitmapLightmap,
-		FMS_BitmapLightmapStaticLighting,
-		FMS_BitmapLightmap2x,
-		FMS_Particle,
-		FMS_ParticleTFactor,
-		FMS_ParticleSpecialBlend,
-		FMS_ParticleSpecialBlendTFactor,
-		FMS_ParticleBlendSubdivisions,
-		FMS_TerrainAlphaMapBitmap,
-		FMS_TerrainAlphaMapBitmapLighting,
-		FMS_TerrainCombinedWeightMap3,
-		FMS_TerrainCombinedWeightMap4,
-		FMS_MAX
-	};
+
+	FOpenGLShader               BitmapShader;
+	FOpenGLShader               BitmapShaderStaticLighting;
+	FOpenGLShader               BitmapShaderLightmap;
+	FOpenGLShader               BitmapShaderLightmapStaticLighting;
+	FOpenGLShader               BitmapShaderLightmap2x;
+	FOpenGLShader               ParticleShader;
+	FOpenGLShader               ParticleShaderTFactor;
+	FOpenGLShader               ParticleShaderSpecialBlend;
+	FOpenGLShader               ParticleShaderSpecialBlendTFactor;
+	FOpenGLShader               ParticleShaderBlendSubdivisions;
+	FOpenGLShader               TerrainShaderAlphaMapBitmap;
+	FOpenGLShader               TerrainShaderAlphaMapBitmapLighting;
+	FOpenGLShader               TerrainShaderCombinedWeightMap3;
+	FOpenGLShader               TerrainShaderCombinedWeightMap4;
 
 	bool                        ModifyFramebufferBlending;
 	bool                        UsingLightmap;
-	FOpenGLShader*              MaterialShaders[FMS_MAX];
-	TMap<DWORD, FOpenGLShader*> ShadersById;
+	TMap<DWORD, FOpenGLShader>  ShadersById;
 	INT                         NumTexMatrices;
 	FMatrix                     TexMatrices[MAX_TEXTURES];
 

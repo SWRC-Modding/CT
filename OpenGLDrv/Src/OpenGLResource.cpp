@@ -3,151 +3,27 @@
 #include "../Inc/OpenGLRenderDevice.h"
 #include "../Inc/opengl.h"
 
-FOpenGLResource::FOpenGLResource(UOpenGLRenderDevice* InRenDev, QWORD InCacheId, DWORD InFlags) : RenDev(InRenDev),
-                                                                                                  HashNext(NULL),
-                                                                                                  CacheId(InCacheId),
-                                                                                                  Revision(-1),
-                                                                                                  HashIndex(INDEX_NONE),
-                                                                                                  Flags(InFlags){
-	if((Flags & OGLRF_NotInHash) == 0)
-		RenDev->AddResource(this);
+FOpenGLResource::FOpenGLResource(UOpenGLRenderDevice* InRenDev, QWORD InCacheId) : RenDev(InRenDev),
+                                                                                   HashNext(NULL),
+                                                                                   CacheId(InCacheId),
+                                                                                   Revision(-1),
+                                                                                   HashIndex(INDEX_NONE){
+	RenDev->AddResource(this);
 }
 
 FOpenGLResource::~FOpenGLResource(){
-	if((Flags & OGLRF_NotInHash) == 0)
-		RenDev->RemoveResource(this);
-}
-
-// FOpenGLShader
-
-FOpenGLShader::FOpenGLShader(UOpenGLRenderDevice* InRenDev, QWORD InCacheId, DWORD InFlags) : FOpenGLResource(InRenDev, InCacheId, InFlags),
-                                                                                              Program(GL_NONE),
-                                                                                              IsErrorShader(0){}
-
-FOpenGLShader::~FOpenGLShader(){
-	Free();
-}
-
-void FOpenGLShader::Cache(FShaderGLSL* Shader){
-	FString ShaderCode = Shader->GetShaderCode();
-
-	RenDev->ExpandShaderMacros(&ShaderCode);
-
-	GLuint VertexShader = CompileShader(GL_VERTEX_SHADER, ShaderCode, Shader->GetName() + SHADER_FILE_EXTENSION + " - vertex shader");
-	GLuint FragmentShader = CompileShader(GL_FRAGMENT_SHADER, ShaderCode, Shader->GetName() + SHADER_FILE_EXTENSION + " - fragment shader");
-
-	// Set revision even if compilation is unsuccessful to avoid recompiling the invalid shader each time it is set
-	Revision = Shader->GetRevision();
-
-	if(!VertexShader || !FragmentShader){
-		if(VertexShader)
-			RenDev->glDeleteShader(VertexShader);
-
-		if(FragmentShader)
-			RenDev->glDeleteShader(FragmentShader);
-
-		if(Program){
-			RenDev->glDeleteProgram(Program);
-			Program = GL_NONE;
-		}
-
-		return;
-	}
-
-	GLuint NewProgram = RenDev->glCreateProgram();
-
-	RenDev->glAttachShader(NewProgram, VertexShader);
-	RenDev->glAttachShader(NewProgram, FragmentShader);
-	RenDev->glLinkProgram(NewProgram);
-	RenDev->glDetachShader(NewProgram, VertexShader);
-	RenDev->glDetachShader(NewProgram, FragmentShader);
-	RenDev->glDeleteShader(VertexShader);
-	RenDev->glDeleteShader(FragmentShader);
-
-	GLint Status;
-
-	RenDev->glGetProgramiv(NewProgram, GL_LINK_STATUS, &Status);
-
-	if(Status){
-		if(Program)
-			RenDev->glDeleteProgram(Program);
-
-		Program = NewProgram;
-		IsErrorShader = 0;
-	}else{
-		GLchar Buffer[512];
-
-		RenDev->glGetProgramInfoLog(NewProgram, ARRAY_COUNT(Buffer), NULL, Buffer);
-		debugf("Shader program linking failed for %s: %s", Shader->GetName(), Buffer);
-		RenDev->glDeleteProgram(NewProgram);
-	}
-}
-
-void FOpenGLShader::Bind(){
-	if(!Program){
-		INT ErrorRevision = Revision;
-
-		Cache(&UOpenGLRenderDevice::ErrorShader);
-		IsErrorShader = 1;
-		Revision = ErrorRevision;
-	}
-
-	checkSlow(Program);
-	RenDev->glUseProgram(Program);
-}
-
-void FOpenGLShader::Free(){
-	if(Program){
-		RenDev->glDeleteProgram(Program);
-		Program = GL_NONE;
-	}
-}
-
-GLuint FOpenGLShader::CompileShader(GLenum Type, const FString& ShaderCode, const FString& ShaderName){
-	GLuint Handle = RenDev->glCreateShader(Type);
-	const TCHAR* ShaderVars = NULL;
-
-	if(Type == GL_VERTEX_SHADER)
-		ShaderVars = *RenDev->VertexShaderVarsText;
-	else if(Type == GL_FRAGMENT_SHADER)
-		ShaderVars = *RenDev->FragmentShaderVarsText;
-	else
-		appErrorf("Unsupported shader type (%i)", Type);
-
-	const TCHAR* ShaderText[] = {
-		ShaderVars,
-		"#line 1\n",
-		*ShaderCode
-	};
-
-	RenDev->glShaderSource(Handle, ARRAY_COUNT(ShaderText), ShaderText, NULL);
-	RenDev->glCompileShader(Handle);
-
-	GLint Status;
-
-	RenDev->glGetShaderiv(Handle, GL_COMPILE_STATUS, &Status);
-
-	if(!Status){
-		GLchar Buffer[512];
-
-		RenDev->glGetShaderInfoLog(Handle, ARRAY_COUNT(Buffer), NULL, Buffer);
-		debugf("Shader compilation failed for %s: %s", *ShaderName, Buffer);
-		RenDev->glDeleteShader(Handle);
-		Handle = GL_NONE;
-	}
-
-	return Handle;
+	RenDev->RemoveResource(this);
 }
 
 // FOpenGLIndexBuffer
 
 #define INITIAL_DYNAMIC_INDEX_BUFFER_SIZE 32768
 
-FOpenGLIndexBuffer::FOpenGLIndexBuffer(UOpenGLRenderDevice* InRenDev, QWORD InCacheId, DWORD InFlags, bool InIsDynamic) : FOpenGLResource(InRenDev, InCacheId, InFlags),
-                                                                                                                          EBO(GL_NONE),
-                                                                                                                          IndexSize(0),
-                                                                                                                          BufferSize(0),
-                                                                                                                          IsDynamic(InIsDynamic){}
+FOpenGLIndexBuffer::FOpenGLIndexBuffer(UOpenGLRenderDevice* InRenDev, QWORD InCacheId, bool InIsDynamic) : FOpenGLResource(InRenDev, InCacheId),
+                                                                                                           EBO(GL_NONE),
+                                                                                                           IndexSize(0),
+                                                                                                           BufferSize(0),
+                                                                                                           IsDynamic(InIsDynamic){}
 
 FOpenGLIndexBuffer::~FOpenGLIndexBuffer(){
 	if(EBO){
@@ -221,11 +97,11 @@ INT FOpenGLIndexBuffer::AddIndices(FIndexBuffer* IndexBuffer){
 
 #define INITIAL_DYNAMIC_VERTEX_BUFFER_SIZE 131072
 
-FOpenGLVertexStream::FOpenGLVertexStream(UOpenGLRenderDevice* InRenDev, QWORD InCacheId, DWORD InFlags, bool InIsDynamic) : FOpenGLResource(InRenDev, InCacheId, InFlags),
-                                                                                                                            VBO(GL_NONE),
-                                                                                                                            Stride(0),
-                                                                                                                            BufferSize(0),
-                                                                                                                            IsDynamic(InIsDynamic){}
+FOpenGLVertexStream::FOpenGLVertexStream(UOpenGLRenderDevice* InRenDev, QWORD InCacheId, bool InIsDynamic) : FOpenGLResource(InRenDev, InCacheId),
+                                                                                                             VBO(GL_NONE),
+                                                                                                             Stride(0),
+                                                                                                             BufferSize(0),
+                                                                                                             IsDynamic(InIsDynamic){}
 
 FOpenGLVertexStream::~FOpenGLVertexStream(){
 	if(VBO){
@@ -304,14 +180,14 @@ INT FOpenGLVertexStream::AddVertices(FVertexStream* VertexStream){
 
 // FOpenGLTexture
 
-FOpenGLTexture::FOpenGLTexture(UOpenGLRenderDevice* InRenDev, QWORD InCacheId, DWORD InFlags) : FOpenGLResource(InRenDev, InCacheId, InFlags),
-                                                                                                Width(0),
-                                                                                                Height(0),
-                                                                                                TextureHandle(GL_NONE),
-                                                                                                FBO(GL_NONE),
-                                                                                                DepthStencilAttachment(GL_NONE),
-                                                                                                IsCubemap(false),
-                                                                                                HasSharedDepthStencil(false){}
+FOpenGLTexture::FOpenGLTexture(UOpenGLRenderDevice* InRenDev, QWORD InCacheId) : FOpenGLResource(InRenDev, InCacheId),
+                                                                                 Width(0),
+                                                                                 Height(0),
+                                                                                 TextureHandle(GL_NONE),
+                                                                                 FBO(GL_NONE),
+                                                                                 DepthStencilAttachment(GL_NONE),
+                                                                                 IsCubemap(false),
+                                                                                 HasSharedDepthStencil(false){}
 
 FOpenGLTexture::~FOpenGLTexture(){
 	Free();

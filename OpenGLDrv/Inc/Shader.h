@@ -13,25 +13,22 @@ typedef ALIGN(16) FMatrix GLSL_mat4;
 
 #define GLSL_struct struct ALIGN(16)
 
-// GLSL shader resource
+// FOpenGLShader
 
-class OPENGLDRV_API FShaderGLSL : public FRenderResource{
+class FOpenGLShader{
 public:
-	FShaderGLSL(const FString& InName,
-	            const FString& InShaderCode = FString()) : Name(InName),
-	                                                       ShaderCode(InShaderCode){
-		CacheId = MakeCacheID(CID_RenderShader);
-	}
+	FOpenGLShader(UOpenGLRenderDevice* InRenDev, const FString& InName);
+	~FOpenGLShader();
 
-	void SetShaderCode(const FString& InShaderCode){
-		ShaderCode = InShaderCode;
-		++Revision;
-	}
+	void Compile(const FString& InShaderCode);
+	void Bind() const;
+	void Free();
+	bool IsValid() const{ return !!Program; }
 
-	const FString& GetName() const{ return Name; }
-	const FString& GetShaderCode() const{ return ShaderCode; }
+	UOpenGLRenderDevice* RenDev;
+	FString              Name;
+	GLuint               Program;
 
 private:
-	FString Name;
-	FString ShaderCode;
+	GLuint CompileShader(GLenum Type, const FString& ShaderCode, const FString& ShaderName);
 };

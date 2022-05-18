@@ -119,7 +119,7 @@ public:
 		return appMemhash(ColorOps, NumColorOps * sizeof(ColorOps[0]), appMemhash(Textures, NumTextures * sizeof(Textures[0]), UseStaticLighting));
 	}
 
-	FOpenGLShader* CreateShader(UOpenGLRenderDevice* RenDev, bool UseStaticLighting);
+	FStringTemp GetShaderText(bool UseStaticLighting);
 
 private:
 	struct FTextureRegister{

@@ -1,5 +1,5 @@
-#include "../Inc/Shader.h"
-#include "../Inc/OpenGLRenderDevice.h"
+#include "Shader.h"
+#include "OpenGLRenderDevice.h"
 
 // FOpenGLShader
 

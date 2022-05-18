@@ -1,6 +1,6 @@
-#include "../Inc/OpenGLRenderInterface.h"
-#include "../Inc/OpenGLRenderDevice.h"
-#include "../Inc/opengl.h"
+#include "OpenGLRenderInterface.h"
+#include "OpenGLRenderDevice.h"
+#include "opengl.h"
 #include "OpenGLResource.h"
 
 /*

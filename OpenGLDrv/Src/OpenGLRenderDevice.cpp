@@ -1,5 +1,4 @@
-#include "../Inc/OpenGLRenderDevice.h"
-
+#include "OpenGLRenderDevice.h"
 #include "OpenGLResource.h"
 
 #define MIN_OPENGL_MAJOR_VERSION 4

@@ -1,5 +1,5 @@
-#include "../Inc/OpenGLRenderInterface.h"
-#include "../Inc/OpenGLRenderDevice.h"
+#include "OpenGLRenderInterface.h"
+#include "OpenGLRenderDevice.h"
 #include "OpenGLResource.h"
 
 UMaterial* FOpenGLRenderInterface::RemoveModifiers(UModifier* Modifier, FModifierInfo* ModifierInfo){

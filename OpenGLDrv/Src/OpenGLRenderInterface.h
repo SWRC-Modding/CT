@@ -1,5 +1,6 @@
 #pragma once
 
+#include "opengl.h"
 #include "OpenGLDrv.h"
 #include "Shader.h"
 #include "ShaderGenerator.h"
@@ -112,10 +113,10 @@ public:
 
 private:
 	UOpenGLRenderDevice* RenDev;
-	unsigned int         VAO;
-	unsigned int         EBO;
-	unsigned int         VBOs[MAX_VERTEX_STREAMS];
-	unsigned int         Strides[MAX_VERTEX_STREAMS];
+	GLuint               VAO;
+	GLuint               EBO;
+	GLuint               VBOs[MAX_VERTEX_STREAMS];
+	GLuint               Strides[MAX_VERTEX_STREAMS];
 };
 
 struct FOpenGLRenderState{
@@ -142,8 +143,8 @@ struct FOpenGLRenderState{
 	_WORD                     ViewportWidth;
 	_WORD                     ViewportHeight;
 
-	unsigned int              SrcBlend; // GLenum
-	unsigned int              DstBlend; // GLenum
+	GLenum                    SrcBlend;
+	GLenum                    DstBlend;
 
 	FOpenGLVertexArrayObject* VAO;
 
@@ -203,7 +204,7 @@ public:
 
 	bool                                  bStencilEnabled;
 
-	unsigned int                          LastCullMode; // GLenum
+	GLenum                                LastCullMode; // GLenum
 
 	EPrecacheMode                         PrecacheMode;
 
@@ -214,11 +215,11 @@ public:
 	const FOpenGLShader*                  CurrentShader;
 
 	INT                                   LastUniformRevision;
-	unsigned int                          GlobalUBO;
+	GLuint                                GlobalUBO;
 
 	BYTE                                  TextureFilter; // ETextureFilter
 	INT                                   TextureAnisotropy;
-	unsigned int                          Samplers[MAX_TEXTURES];
+	GLuint                                Samplers[MAX_TEXTURES];
 
 	TMap<DWORD, FOpenGLVertexArrayObject> VAOsByDeclId;
 

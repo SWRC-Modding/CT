@@ -95,34 +95,28 @@
 		<Filter
 			Name="Inc"
 			Filter="h;hpp;hxx;hm;inl;inc;xsd">
-			<File
-				RelativePath=".\Inc\OpenGLDrv.h">
-			</File>
-			<File
-				RelativePath=".\Inc\OpenGLRenderDevice.h">
-			</File>
-			<File
-				RelativePath=".\Inc\OpenGLRenderInterface.h">
-			</File>
-			<File
-				RelativePath=".\Inc\Shader.h">
-			</File>
-			<File
-				RelativePath=".\Inc\ShaderGenerator.h">
-			</File>
 		</Filter>
 		<Filter
 			Name="Src"
 			Filter="cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx"
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}">
 			<File
+				RelativePath=".\Src\OpenGLDrv.h">
+			</File>
+			<File
 				RelativePath=".\Src\OpenGLDrv.cpp">
 			</File>
 			<File
-				RelativePath=".\Src\OpenGLRenderDevice.cpp">
+				RelativePath=".\Src\OpenGLRenderInterface.h">
 			</File>
 			<File
 				RelativePath=".\Src\OpenGLRenderInterface.cpp">
+			</File>
+			<File
+				RelativePath=".\Src\OpenGLRenderDevice.h">
+			</File>
+			<File
+				RelativePath=".\Src\OpenGLRenderDevice.cpp">
 			</File>
 			<File
 				RelativePath=".\Src\OpenGLMaterial.cpp">
@@ -134,10 +128,16 @@
 				RelativePath=".\Src\OpenGLResource.cpp">
 			</File>
 			<File
+				RelativePath=".\Src\Shader.h">
+			</File>
+			<File
 				RelativePath=".\Src\Shader.cpp">
 			</File>
 			<File
 				RelativePath=".\Src\ShaderConversion.cpp">
+			</File>
+			<File
+				RelativePath=".\Src\ShaderGenerator.h">
 			</File>
 			<File
 				RelativePath=".\Src\ShaderGenerator.cpp">

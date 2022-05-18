@@ -1,4 +1,4 @@
-#include "../Inc/OpenGLRenderDevice.h"
+#include "OpenGLRenderDevice.h"
 
 UHardwareShaderMacros* UOpenGLRenderDevice::HardwareShaderMacros = NULL;
 TMap<FString, FString> UOpenGLRenderDevice::ShaderMacros;

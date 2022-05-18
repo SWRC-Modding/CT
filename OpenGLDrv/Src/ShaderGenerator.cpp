@@ -1,6 +1,6 @@
 #include "OpenGLResource.h"
-#include "../Inc/ShaderGenerator.h"
-#include "../Inc/OpenGLRenderDevice.h"
+#include "ShaderGenerator.h"
+#include "OpenGLRenderDevice.h"
 
 FStringTemp FShaderGenerator::GetShaderText(bool UseStaticLighting){
 	BYTE TexCoordsBySrc[TCS_MAX] = {0};

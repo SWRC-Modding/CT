@@ -412,6 +412,27 @@ private:
 	~FFileStream(){}
 };
 
+//
+// Stats.
+//
+
+struct FStatRecord;
+
+class CORE_API FStats{
+public:
+	FStats();
+
+	void Clear();
+	FStatRecord& DWORDStats(FStatRecord& StatRecord);
+	void SaveContextData(FArchive& Ar, const FString&);
+	void SaveContextHeader(FArchive& Ar);
+	void SaveHistoryToFile(const FString&, const FString&);
+	void SaveStatData(FArchive& Ar);
+	void SaveStatHeader(FArchive& Ar);
+	void SaveStatsToFile(const FString&, const FString&, const FString&);
+	void Tick();
+};
+
 class FEdLoadError;
 
 /*----------------------------------------------------------------------------
@@ -497,6 +518,7 @@ CORE_API extern FString                 GGlobalSettingsSaveName;
 CORE_API extern FLOAT                   NEAR_CLIPPING_PLANE;
 CORE_API extern FLOAT                   FAR_CLIPPING_PLANE;
 CORE_API extern ERunningOS              GRunningOS;
+CORE_API extern FStats                  GStats;
 
 // Per module globals.
 extern "C" DLL_EXPORT TCHAR GPackage[];

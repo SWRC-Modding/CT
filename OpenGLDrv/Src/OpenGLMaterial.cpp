@@ -326,7 +326,7 @@ void FOpenGLRenderInterface::GetShaderConstants(FSConstantsInfo* Info, FPlane* C
 	}
 }
 
-void FOpenGLRenderInterface::SetTexture(FBaseTexture* Texture, INT TextureIndex, FLOAT BumpSize){
+void FOpenGLRenderInterface::SetTexture(FBaseTexture* Texture, INT TextureIndex, FLOAT UVScale, FLOAT BumpSize){
 	checkSlow(Texture);
 	checkSlow(TextureIndex < MAX_TEXTURES);
 
@@ -365,18 +365,20 @@ void FOpenGLRenderInterface::SetTexture(FBaseTexture* Texture, INT TextureIndex,
 	}
 
 	UBOOL WasBumpmap = TextureInfo.IsBumpmap;
+	FLOAT OldUVScale = TextureInfo.UVScale;
 	FLOAT OldBumpSize = TextureInfo.BumpSize;
 
 	TextureInfo.IsBumpmap = IsBumpmap(Texture->GetFormat());
+	TextureInfo.UVScale = UVScale;
 	TextureInfo.BumpSize = BumpSize;
 
-	if(WasCubemap != TextureInfo.IsCubemap || WasBumpmap != TextureInfo.IsBumpmap || OldBumpSize != TextureInfo.BumpSize)
+	if(WasCubemap != TextureInfo.IsCubemap || WasBumpmap != TextureInfo.IsBumpmap || OldUVScale != UVScale || OldBumpSize != TextureInfo.BumpSize)
 		++CurrentState->UniformRevision;
 }
 
-void FOpenGLRenderInterface::SetBitmapTexture(UBitmapMaterial* Bitmap, INT TextureIndex, FLOAT BumpSize){
+void FOpenGLRenderInterface::SetBitmapTexture(UBitmapMaterial* Bitmap, INT TextureIndex, FLOAT UVScale, FLOAT BumpSize){
 	FBaseTexture* Texture = Bitmap->Get(LockedViewport->CurrentTime, LockedViewport)->GetRenderInterface();
-	SetTexture(Texture, TextureIndex, BumpSize);
+	SetTexture(Texture, TextureIndex, UVScale, BumpSize);
 }
 
 void FOpenGLRenderInterface::SetGeneratedShader(FShaderGenerator& ShaderGenerator){
@@ -394,38 +396,72 @@ void FOpenGLRenderInterface::SetGeneratedShader(FShaderGenerator& ShaderGenerato
 }
 
 bool FOpenGLRenderInterface::SetBitmapMaterial(UBitmapMaterial* Material){
-	// If the material is a simple texture, use it to get the blending options
-	if(!ModifyFramebufferBlending && Material->IsA<UTexture>()){
-		UTexture* Texture = static_cast<UTexture*>(Material);
+	UBitmapMaterial* Detail = NULL;
 
-		if(Texture->bMasked){
-			ModifyFramebufferBlending = true;
-			CurrentState->UniformRevision += CurrentState->AlphaRef != 0.5f;
-			CurrentState->AlphaRef = 0.5f;
-			SetFramebufferBlending(FB_Overwrite);
-		}else if(Texture->bAlphaTexture){
-			ModifyFramebufferBlending = true;
-			CurrentState->UniformRevision += CurrentState->AlphaRef != 0.0f;
-			CurrentState->AlphaRef = 0.0f;
-			SetFramebufferBlending(FB_AlphaBlend);
+	if(Material->IsA<UTexture>()){
+		Detail = Cast<UBitmapMaterial>(static_cast<UTexture*>(Material)->Detail);
+
+		// If the material is a simple texture, use it to get the blending options
+		if(!ModifyFramebufferBlending){
+			UTexture* Texture = static_cast<UTexture*>(Material);
+
+			if(Texture->bMasked){
+				ModifyFramebufferBlending = true;
+				CurrentState->UniformRevision += CurrentState->AlphaRef != 0.5f;
+				CurrentState->AlphaRef = 0.5f;
+				SetFramebufferBlending(FB_Overwrite);
+			}else if(Texture->bAlphaTexture){
+				ModifyFramebufferBlending = true;
+				CurrentState->UniformRevision += CurrentState->AlphaRef != 0.0f;
+				CurrentState->AlphaRef = 0.0f;
+				SetFramebufferBlending(FB_AlphaBlend);
+			}
+
+			if(Texture->bTwoSided)
+				CurrentState->CullMode = CM_None;
 		}
-
-		if(Texture->bTwoSided)
-			CurrentState->CullMode = CM_None;
 	}
 
 	SetBitmapTexture(Material, 0);
+
+	if(Detail)
+		SetBitmapTexture(Detail, 2, static_cast<UTexture*>(Material)->DetailScale);
+
 	FOpenGLShader* Shader;
 
 	if(!CurrentState->Lightmap){
-		Shader = CurrentState->UseStaticLighting ? &BitmapShaderStaticLighting : &BitmapShader;
+		if(CurrentState->UseStaticLighting){
+			if(Detail)
+				Shader = &BitmapShaderStaticLightingDetail;
+			else
+				Shader = &BitmapShaderStaticLighting;
+		}else{
+			if(Detail)
+				Shader = &BitmapShaderDetail;
+			else
+				Shader = &BitmapShader;
+		}
 	}else{
 		SetTexture(CurrentState->Lightmap, 1);
 
-		if(CurrentState->UseStaticLighting || !CurrentState->LightingModulate2x)
-			Shader = CurrentState->UseStaticLighting ? &BitmapShaderLightmapStaticLighting : &BitmapShaderLightmap;
-		else
-			Shader = &BitmapShaderLightmap2x;
+		if(CurrentState->UseStaticLighting || !CurrentState->LightingModulate2X){
+			if(CurrentState->UseStaticLighting){
+				if(Detail)
+					Shader = &BitmapShaderLightmapStaticLightingDetail;
+				else
+					Shader = &BitmapShaderLightmapStaticLighting;
+			}else{
+				if(Detail)
+					Shader = &BitmapShaderLightmapDetail;
+				else
+					Shader = &BitmapShaderLightmap;
+			}
+		}else{
+			if(Detail)
+				Shader = &BitmapShaderLightmap2XDetail;
+			else
+				Shader = &BitmapShaderLightmap2X;
+		}
 
 	}
 
@@ -501,9 +537,6 @@ void FOpenGLRenderInterface::HandleSimpleMaterial(UMaterial* Material, FShaderGe
 	if(Material->IsA<UBitmapMaterial>()){
 		INT Index = CurrentState->NumTextures++;
 
-		if(Index >= MAX_TEXTURES)
-			appThrowf("Material uses too many textures");
-
 		SetBitmapTexture(static_cast<UBitmapMaterial*>(Material), Index);
 
 		SBYTE Matrix = INDEX_NONE;
@@ -516,6 +549,15 @@ void FOpenGLRenderInterface::HandleSimpleMaterial(UMaterial* Material, FShaderGe
 		EColorArg TextureArg = ShaderGenerator.AddTexture(Index, ModifierInfo.TexCoordSrc, ModifierInfo.TexCoordCount, Matrix);
 
 		ShaderGenerator.AddColorOp(TextureArg, TextureArg, COP_Assign, CC_RGBA, CR_0);
+
+		UTexture* Texture = Cast<UTexture>(Material);
+
+		if(Texture && Texture->Detail && Texture->Detail->IsA<UBitmapMaterial>()){
+			Index = CurrentState->NumTextures++;
+			SetBitmapTexture(static_cast<UBitmapMaterial*>(Texture->Detail), Index, Texture->DetailScale);
+			EColorArg DetailArg = ShaderGenerator.AddTexture(Index, TCS_Stream0);
+			ShaderGenerator.AddColorOp(DetailArg, TextureArg, COP_Modulate2X, CC_RGB, CR_0);
+		}
 	}else if(Material->IsA<UCombiner>()){
 		HandleCombinerMaterial(static_cast<UCombiner*>(Material), ShaderGenerator, false);
 	}else if(Material->IsA<UConstantMaterial>()){
@@ -593,7 +635,7 @@ void FOpenGLRenderInterface::HandleCombinerMaterial(UCombiner* Combiner, FShader
 		ShaderGenerator.AddColorOp(Material2Arg, Material2Arg, COP_Assign, CC_RGB, CR_0);
 		break;
 	case CO_Multiply:
-		ShaderGenerator.AddColorOp(Material1Arg, Material2Arg, Combiner->Modulate4X ? COP_Modulate4x : Combiner->Modulate2X ? COP_Modulate2x : COP_Modulate, CC_RGB, CR_0);
+		ShaderGenerator.AddColorOp(Material1Arg, Material2Arg, Combiner->Modulate4X ? COP_Modulate4X : Combiner->Modulate2X ? COP_Modulate2X : COP_Modulate, CC_RGB, CR_0);
 		break;
 	case CO_Add:
 		ShaderGenerator.AddColorOp(Material1Arg, Material2Arg, COP_Add, CC_RGB, CR_0);
@@ -711,6 +753,13 @@ void FOpenGLRenderInterface::HandleShaderMaterial(UShader* Shader, FShaderGenera
 		}
 	}
 
+	if(Shader->Detail && Shader->Detail->IsA<UBitmapMaterial>()){
+		INT Index = CurrentState->NumTextures++;
+		SetBitmapTexture(static_cast<UBitmapMaterial*>(Shader->Detail), Index, Shader->DetailScale);
+		EColorArg DetailArg = ShaderGenerator.AddTexture(Index, TCS_Stream0);
+		ShaderGenerator.AddColorOp(DetailArg, CA_R0, COP_Modulate2X, CC_RGB, CR_0);
+	}
+
 	if(GCubemapManager && GCubemapManager->bEnabled){
 		if(Shader->Bumpmap){
 			checkSlow(Shader->Bumpmap->IsA<UBitmapMaterial>());
@@ -730,12 +779,12 @@ void FOpenGLRenderInterface::HandleShaderMaterial(UShader* Shader, FShaderGenera
 
 			checkSlow(EnvMap->IsA<UBitmapMaterial>());
 
-			SetBitmapTexture(static_cast<UBitmapMaterial*>(Shader->Bumpmap), BumpmapIndex);
+			SetBitmapTexture(static_cast<UBitmapMaterial*>(Shader->Bumpmap), BumpmapIndex, Shader->BumpUVScale, Shader->BumpSize);
 			SetBitmapTexture(static_cast<UBitmapMaterial*>(EnvMap), EnvMapIndex);
 			ShaderGenerator.AddTexture(BumpmapIndex, TCS_Stream0);
 			ShaderGenerator.AddTexture(EnvMapIndex, TCS_BumpSphereCameraSpaceNormal, TCN_2DCoords, INDEX_NONE, BumpmapIndex);
 
-			EColorOp ColorOp = Shader->BumpMapType == BMT_Static_Specular || Shader->BumpMapType == BMT_Specular ? COP_Add : COP_Modulate2x;
+			EColorOp ColorOp = Shader->BumpMapType == BMT_Static_Specular || Shader->BumpMapType == BMT_Specular ? COP_Add : COP_Modulate2X;
 			ShaderGenerator.AddColorOp(CA_R0, static_cast<EColorArg>(CA_T0 + EnvMapIndex), ColorOp, CC_RGBA, CR_0);
 		}
 	}
@@ -746,7 +795,7 @@ void FOpenGLRenderInterface::UseLightmap(FShaderGenerator& ShaderGenerator){
 	INT Index = CurrentState->NumTextures++;
 	SetTexture(CurrentState->Lightmap, Index);
 	EColorArg TextureArg = ShaderGenerator.AddTexture(Index, TCS_Stream1);
-	ShaderGenerator.AddColorOp(CA_R0, TextureArg, CurrentState->LightingModulate2x ? COP_Modulate2x : COP_Modulate, CC_RGB, CR_0);
+	ShaderGenerator.AddColorOp(CA_R0, TextureArg, CurrentState->LightingModulate2X ? COP_Modulate2X : COP_Modulate, CC_RGB, CR_0);
 	UsingLightmap = true;
 }
 
@@ -881,7 +930,7 @@ bool FOpenGLRenderInterface::SetTerrainMaterial(UTerrainMaterial* Material){
 				ShaderGenerator.AddColorOp(CA_T0, CA_T0, COP_Assign, CC_RGBA, CR_0);
 
 				if(UseLighting)
-					ShaderGenerator.AddColorOp(CA_R0, CA_Diffuse, COP_Modulate2x, CC_RGB, CR_0);
+					ShaderGenerator.AddColorOp(CA_R0, CA_Diffuse, COP_Modulate2X, CC_RGB, CR_0);
 
 				ShaderGenerator.AddColorOp(CA_T1, CA_T1, COP_Assign, CC_A, CR_0);
 
@@ -1004,7 +1053,7 @@ bool FOpenGLRenderInterface::SetTerrainMaterial(UTerrainMaterial* Material){
 
 			ShaderGenerator.AddTexture(0, TCS_WorldCoords, TCN_2DCoords, 0);
 			ShaderGenerator.AddTexture(1, TCS_Stream0);
-			ShaderGenerator.AddColorOp(CA_Specular, CA_T0, COP_Modulate2x, CC_RGBA, CR_0);
+			ShaderGenerator.AddColorOp(CA_Specular, CA_T0, COP_Modulate2X, CC_RGBA, CR_0);
 			ShaderGenerator.AddColorOp(CA_R0, CA_T1, COP_Modulate, CC_RGBA, Layers.Num() == 1 ? CR_0 : CR_1);
 
 			for(INT i = 1; i < Layers.Num(); ++i){
@@ -1019,7 +1068,7 @@ bool FOpenGLRenderInterface::SetTerrainMaterial(UTerrainMaterial* Material){
 
 				ShaderGenerator.AddTexture(TextureIndex, TCS_WorldCoords, TCN_2DCoords, i);
 				ShaderGenerator.AddTexture(AlphaWeightIndex, TCS_Stream0);
-				ShaderGenerator.AddColorOp(static_cast<EColorArg>(CA_T0 + TextureIndex), CA_Specular, COP_Modulate2x, CC_RGBA, CR_0);
+				ShaderGenerator.AddColorOp(static_cast<EColorArg>(CA_T0 + TextureIndex), CA_Specular, COP_Modulate2X, CC_RGBA, CR_0);
 				ShaderGenerator.AddColorOp(static_cast<EColorArg>(CA_T0 + AlphaWeightIndex), CA_R0, COP_ModulateAddDest, CC_RGBA, CR_1);
 
 				if(i == Layers.Num() - 1)

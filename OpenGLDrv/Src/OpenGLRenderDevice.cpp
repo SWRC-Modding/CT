@@ -16,7 +16,7 @@ void UOpenGLRenderDevice::StaticConstructor(){
 	CanDoDistortionEffects = 1;
 	bBilinearFramebuffer   = 1;
 	TextureFilter          = TF_Trilinear;
-	TextureAnisotropy      = 8;
+	TextureAnisotropy      = 16;
 	bFirstRun              = 1;
 	ShaderDir              = FStringTemp("OpenGLShaders");
 
@@ -26,6 +26,7 @@ void UOpenGLRenderDevice::StaticConstructor(){
 	new(GetClass(), "BilinearFramebuffer",    RF_Public) UBoolProperty(CPP_PROPERTY(bBilinearFramebuffer),    "Options", CPF_Config);
 	new(GetClass(), "SaveShadersToDisk",      RF_Public) UBoolProperty(CPP_PROPERTY(bSaveShadersToDisk),      "Options", CPF_Config);
 	new(GetClass(), "AutoReloadShaders",      RF_Public) UBoolProperty(CPP_PROPERTY(bAutoReloadShaders),      "Options", CPF_Config);
+	new(GetClass(), "UseTrilinear",           RF_Public) UBoolProperty(CPP_PROPERTY(bUseTrilinear),           "Options", CPF_Config);
 	new(GetClass(), "TextureFilter",          RF_Public) UByteProperty(CPP_PROPERTY(TextureFilter),           "Options", CPF_Config);
 	new(GetClass(), "TextureAnisotropy",      RF_Public) UIntProperty (CPP_PROPERTY(TextureAnisotropy),       "Options", CPF_Config);
 	new(GetClass(), "VSync",                  RF_Public) UBoolProperty(CPP_PROPERTY(bVSync),                  "Options", CPF_Config);
@@ -104,44 +105,45 @@ FOpenGLResource* UOpenGLRenderDevice::GetCachedResource(QWORD CacheId){
 }
 
 FOpenGLShader* UOpenGLRenderDevice::GetShaderForMaterial(UMaterial* Material){
+	if(Material->Validated)
+		return reinterpret_cast<FOpenGLShader*>(Material->CachedType);
+
 	if(Material->IsIn(UObject::GetTransientPackage())) // Only unique names, no Transient.InGameTempName
 		return NULL;
 
 	FOpenGLShader* Shader = ShadersByMaterial.Find(Material->GetPathName());
+	FStringTemp ShaderPath = FStringTemp(Material->GetPathName()).Substitute(".", "\\").Substitute(".", "\\");
+	FString ShaderText;
+	bool LoadedShader = LoadShaderIfChanged(ShaderPath, ShaderText);
+	bool LoadedEmpty = LoadedShader && ShaderText.Len() == 0;
+	UHardwareShader* HardwareShader = Cast<UHardwareShader>(Material);
 
-	if(!Material->Validated || Shader && !Shader->IsValid()){
-		FStringTemp ShaderPath = FStringTemp(Material->GetPathName()).Substitute(".", "\\").Substitute(".", "\\");
-		FString ShaderText;
-		bool LoadedShader = !Material->IsIn(UObject::GetTransientPackage()) && LoadShaderIfChanged(ShaderPath, ShaderText);
-		bool LoadedEmpty = LoadedShader && ShaderText.Len() == 0;
-		UHardwareShader* HardwareShader = Cast<UHardwareShader>(Material);
+	if(!LoadedShader && Shader && Shader->IsValid())
+		Material->UseFallback = 1; // Set UseFallback when a custom shader is used so we don't convert the d3d assembly shader
 
-		if(!LoadedShader && Shader && Shader->IsValid())
-			Material->UseFallback = 1;
+	if(HardwareShader && (!LoadedShader && !Material->UseFallback || LoadedEmpty)){
+		ShaderText = GLSLShaderFromD3DHardwareShader(HardwareShader);
+		check(ShaderText.Len() > 0);
 
-		if(HardwareShader && (!LoadedShader && !Material->UseFallback || LoadedEmpty)){
-			ShaderText = GLSLShaderFromD3DHardwareShader(HardwareShader);
-			check(ShaderText.Len() > 0);
-
-			if(!LoadedShader && bSaveShadersToDisk && !HardwareShader->IsIn(UObject::GetTransientPackage()))
-				SaveShader(ShaderPath, ShaderText);
-		}
-
-		if(ShaderText.Len() > 0){
-			if(!Shader)
-				Shader = &ShadersByMaterial[Material->GetPathName()];
-
-			Shader->RenDev = this;
-			Shader->Name = ShaderPath;
-			Shader->Compile(ShaderText);
-			Material->UseFallback = 1;
-		}else if(!HardwareShader && LoadedEmpty){ // Reset shader if text is empty
-			ShadersByMaterial.Remove(Material->GetPathName());
-			Shader = NULL;
-		}
-
-		Material->Validated = !bAutoReloadShaders;
+		if(!LoadedShader && bSaveShadersToDisk)
+			SaveShader(ShaderPath, ShaderText);
 	}
+
+	if(ShaderText.Len() > 0){
+		if(!Shader)
+			Shader = &ShadersByMaterial[Material->GetPathName()];
+
+		Shader->RenDev = this;
+		Shader->Name = ShaderPath;
+		Shader->Compile(ShaderText);
+		Material->UseFallback = 1;
+	}else if(!HardwareShader && LoadedEmpty){ // Reset shader if file is empty or deleted
+		ShadersByMaterial.Remove(Material->GetPathName());
+		Shader = NULL;
+	}
+
+	Material->CachedType = reinterpret_cast<INT>(Shader);
+	Material->Validated = !bAutoReloadShaders;
 
 	return Shader;
 }
@@ -161,15 +163,28 @@ FOpenGLVertexStream* UOpenGLRenderDevice::GetDynamicVertexStream(){
 }
 
 UBOOL UOpenGLRenderDevice::Exec(const TCHAR* Cmd, FOutputDevice& Ar){
-	if(ParseCommand(&Cmd, "RELOADSHADERS")){
-		Ar.Log("Reloading shaders from disk");
+	if(ParseCommand(&Cmd, "OPENGL")){
+		if(ParseCommand(&Cmd, "RELOADSHADERS")){
+			Ar.Log("Reloading shaders from disk");
 
-		if(LoadShaderMacroText()) // Load the macros here. the shaders themselves are loaded on demand.
-			ShaderFileTimes.Empty(); // Macros may have changed, so force reload all shaders
+			if(LoadShaderMacroText()) // Load the macros here. the shaders themselves are loaded on demand.
+				ShaderFileTimes.Empty(); // Macros may have changed, so force reload all shaders
 
-		UMaterial::ClearFallbacks();
+			UMaterial::ClearFallbacks();
 
-		return 1;
+			return 1;
+		}else if(ParseCommand(&Cmd, "AUTORELOADSHADERS")){
+			bAutoReloadShaders = !bAutoReloadShaders;
+
+			if(bAutoReloadShaders){
+				Ar.Log("Automatic shader reloading enabled");
+				UMaterial::ClearFallbacks();
+			}else{
+				Ar.Log("Automatic shader reloading disabled");
+			}
+
+			return 1;
+		}
 	}
 
 	return 0;
@@ -308,6 +323,9 @@ UBOOL UOpenGLRenderDevice::Init(){
 
 	if(bSaveShadersToDisk)
 		SaveShaderMacroText();
+
+	if(bUseTrilinear)
+		TextureFilter = TF_Trilinear;
 
 	return 1;
 }
@@ -1036,11 +1054,11 @@ SHADER_HEADER
 "\tvec4 sample_texture ## n(vec4 Coords){ \\\n"
 "\t\tvec4 Result; \\\n"
 "\t\tif(!TextureInfos[n].IsCubemap) \\\n"
-"\t\t\tResult = texture(Texture ## n, Coords.xy); \\\n"
+"\t\t\tResult = texture(Texture ## n, Coords.xy * TextureInfos[n].UVScale); \\\n"
 "\t\telse \\\n"
-"\t\t\tResult = texture(Cubemap ## n, Coords.xyz); \\\n"
+"\t\t\tResult = texture(Cubemap ## n, Coords.xyz * TextureInfos[n].UVScale); \\\n"
 "\t\tif(TextureInfos[n].IsBumpmap) \\\n"
-"\t\t\tResult.rg = (Result.rg - 0.5) * 2; \\\n"
+"\t\t\tResult.rg = (Result.rg - 0.5) * 2 * TextureInfos[n].BumpSize; \\\n"
 "\t\treturn Result; \\\n"
 "\t}\n\n"
 "SAMPLE_TEX_FUNC(0)\n"

@@ -134,6 +134,7 @@ static struct FExecHook : public FExec, FNotifyHook{
 
 					UViewport* Viewport = GEngine->Client->Viewports[0];
 					Viewport->TryRenderDevice(*RenderDeviceClass, Viewport->SizeX, Viewport->SizeY, Viewport->IsFullscreen());
+					GStats.Clear();
 				}
 			}else{
 				Ar.Logf("Unable to find render device class '%s'", *RenderDeviceClass);

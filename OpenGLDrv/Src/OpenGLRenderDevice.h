@@ -96,6 +96,7 @@ private:
 	unsigned int                        BackbufferDepthStencil; // Shared with UFrameFX::WorkingTarget
 
 	UBOOL                               bFirstRun;
+	UBOOL                               bUseTrilinear;
 	UBOOL                               bVSync;
 	UBOOL                               bAdaptiveVSync;
 	UBOOL                               bDebugOpenGL;

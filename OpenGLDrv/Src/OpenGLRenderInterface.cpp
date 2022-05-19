@@ -184,11 +184,20 @@ static GLint GetTextureWrapMode(/*ETexClampMode*/BYTE Mode){
 FOpenGLRenderInterface::FOpenGLRenderInterface(UOpenGLRenderDevice* InRenDev) : RenDev(InRenDev),
                                                                                 PrecacheMode(PRECACHE_All),
 																				CurrentState(&SavedStates[0]),
+                                                                                LightingOnlyShader(InRenDev, "LightingOnly"),
+                                                                                LightingOnlyShader2X(InRenDev, "LightingOnly2X"),
+                                                                                LightingOnlyShaderLightmap(InRenDev, "LightingOnlyLightmap"),
+                                                                                LightingOnlyShaderLightmap2X(InRenDev, "LightingOnlyLightmap2X"),
                                                                                 BitmapShader(InRenDev, "Bitmap"),
+                                                                                BitmapShaderDetail(InRenDev, "BitmapDetail"),
                                                                                 BitmapShaderStaticLighting(InRenDev, "BitmapStaticLighting"),
+                                                                                BitmapShaderStaticLightingDetail(InRenDev, "BitmapStaticLightingDetail"),
                                                                                 BitmapShaderLightmap(InRenDev, "BitmapLightmap"),
+                                                                                BitmapShaderLightmapDetail(InRenDev, "BitmapLightmapDetail"),
                                                                                 BitmapShaderLightmapStaticLighting(InRenDev, "BitmapLightmapStaticLighting"),
-                                                                                BitmapShaderLightmap2x(InRenDev, "BitmapLightmap2x"),
+                                                                                BitmapShaderLightmapStaticLightingDetail(InRenDev, "BitmapLightmapStaticLightingDetail"),
+                                                                                BitmapShaderLightmap2X(InRenDev, "BitmapLightmap2x"),
+                                                                                BitmapShaderLightmap2XDetail(InRenDev, "BitmapLightmap2XDetail"),
                                                                                 ParticleShader(InRenDev, "Particle"),
                                                                                 ParticleShaderTFactor(InRenDev, "ParticleTFactor"),
                                                                                 ParticleShaderSpecialBlend(InRenDev, "ParticleSpecialBlend"),
@@ -294,22 +303,47 @@ void FOpenGLRenderInterface::Init(INT ViewportWidth, INT ViewportHeight){
 
 	FShaderGenerator ShaderGenerator;
 
+	// LightingOnly
+	ShaderGenerator.AddColorOp(CA_Diffuse, CA_Diffuse, COP_Assign, CC_RGBA, CR_0);
+	LightingOnlyShader.Compile(ShaderGenerator.GetShaderText(false));
+	ShaderGenerator.Reset();
+	ShaderGenerator.AddTexture(0, TCS_Stream1);
+	ShaderGenerator.AddColorOp(CA_Diffuse, CA_T0, COP_Modulate, CC_RGBA, CR_0);
+	LightingOnlyShaderLightmap.Compile(ShaderGenerator.GetShaderText(false));
+	ShaderGenerator.Reset();
+	ShaderGenerator.AddColorOp(CA_Diffuse, CA_Diffuse, COP_Assign, CC_RGBA, CR_0);
+	LightingOnlyShader2X.Compile(ShaderGenerator.GetShaderText(false));
+	ShaderGenerator.AddTexture(0, TCS_Stream1);
+	ShaderGenerator.AddColorOp(CA_R0, CA_T0, COP_Modulate2X, CC_RGB, CR_0);
+	LightingOnlyShaderLightmap2X.Compile(ShaderGenerator.GetShaderText(false));
+	ShaderGenerator.Reset();
 	// Bitmap
 	ShaderGenerator.AddTexture(0, TCS_Stream0);
 	ShaderGenerator.AddColorOp(CA_T0, CA_R0, COP_Assign, CC_RGBA, CR_0);
 	BitmapShader.Compile(ShaderGenerator.GetShaderText(false));
 	BitmapShaderStaticLighting.Compile(ShaderGenerator.GetShaderText(true));
+	ShaderGenerator.AddTexture(2, TCS_Stream0);
+	ShaderGenerator.AddColorOp(CA_T1, CA_R0, COP_Modulate2X, CC_RGB, CR_0);
+	BitmapShaderDetail.Compile(ShaderGenerator.GetShaderText(false));
+	BitmapShaderStaticLightingDetail.Compile(ShaderGenerator.GetShaderText(true));
 	ShaderGenerator.Reset();
 	ShaderGenerator.AddTexture(0, TCS_Stream0);
 	ShaderGenerator.AddTexture(1, TCS_Stream1);
 	ShaderGenerator.AddColorOp(CA_T0, CA_T1, COP_Modulate, CC_RGBA, CR_0);
 	BitmapShaderLightmap.Compile(ShaderGenerator.GetShaderText(false));
 	BitmapShaderLightmapStaticLighting.Compile(ShaderGenerator.GetShaderText(true));
+	ShaderGenerator.AddTexture(2, TCS_Stream0);
+	ShaderGenerator.AddColorOp(CA_T2, CA_R0, COP_Modulate2X, CC_RGB, CR_0);
+	BitmapShaderLightmapDetail.Compile(ShaderGenerator.GetShaderText(false));
+	BitmapShaderLightmapStaticLightingDetail.Compile(ShaderGenerator.GetShaderText(true));
 	ShaderGenerator.Reset();
 	ShaderGenerator.AddTexture(0, TCS_Stream0);
 	ShaderGenerator.AddTexture(1, TCS_Stream1);
-	ShaderGenerator.AddColorOp(CA_T0, CA_T1, COP_Modulate2x, CC_RGBA, CR_0);
-	BitmapShaderLightmap2x.Compile(ShaderGenerator.GetShaderText(false));
+	ShaderGenerator.AddColorOp(CA_T0, CA_T1, COP_Modulate2X, CC_RGBA, CR_0);
+	BitmapShaderLightmap2X.Compile(ShaderGenerator.GetShaderText(false));
+	ShaderGenerator.AddTexture(2, TCS_Stream0);
+	ShaderGenerator.AddColorOp(CA_T2, CA_R0, COP_Modulate2X, CC_RGB, CR_0);
+	BitmapShaderLightmap2XDetail.Compile(ShaderGenerator.GetShaderText(false));
 	ShaderGenerator.Reset();
 	// Particle
 	ShaderGenerator.AddTexture(0, TCS_Stream0);
@@ -361,12 +395,17 @@ void FOpenGLRenderInterface::Exit(){
 	GlobalUBO = GL_NONE;
 	RenDev->glDeleteSamplers(MAX_TEXTURES, Samplers);
 	appMemzero(Samplers, sizeof(Samplers));
+	// Free shaders (just for completeness' sake. Deleting the opengl context also frees those)
 	ShadersById.Empty();
+	LightingOnlyShader.Free();
+	LightingOnlyShader2X.Free();
+	LightingOnlyShaderLightmap.Free();
+	LightingOnlyShaderLightmap2X.Free();
 	BitmapShader.Free();
 	BitmapShaderStaticLighting.Free();
 	BitmapShaderLightmap.Free();
 	BitmapShaderLightmapStaticLighting.Free();
-	BitmapShaderLightmap2x.Free();
+	BitmapShaderLightmap2X.Free();
 	ParticleShader.Free();
 	ParticleShaderTFactor.Free();
 	ParticleShaderSpecialBlend.Free();
@@ -769,7 +808,8 @@ void FOpenGLRenderInterface::EnableLighting(UBOOL UseDynamic, UBOOL UseStatic, U
 	CurrentState->UseDynamicLighting = UseDynamic != 0;
 	CurrentState->UseStaticLighting = UseStatic != 0;
 	CurrentState->LightFactor = Modulate2X ? 2.0f : 1.0f;
-	CurrentState->LightingModulate2x = Modulate2X != 0;
+	CurrentState->LightingModulate2X = Modulate2X != 0;
+	CurrentState->LightingOnly = LightingOnly != 0;
 	CurrentState->LitSphere = LitSphere;
 	CurrentState->Lightmap = Lightmap;
 	++CurrentState->UniformRevision;
@@ -858,8 +898,8 @@ void FOpenGLRenderInterface::SetLight(INT LightIndex, FDynamicLight* Light, FLOA
 		ShaderLight->Linear = Max(0.0f, ShaderLight->Linear);
 		ShaderLight->Quadratic = Max(0.0f, ShaderLight->Quadratic);
 
-		//if(CurrentState->LightingModulate2X)
-		//	ShaderLight->Color *= 0.5f;
+		if(CurrentState->LightingModulate2X)
+			ShaderLight->Color *= 0.5f;
 	}else{
 		appMemzero(ShaderLight, sizeof(*ShaderLight));
 		ShaderLight->Position = FVector(10000000.0f);
@@ -1031,6 +1071,28 @@ void FOpenGLRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorStri
 		}
 	}
 
+	if(CurrentState->LightingOnly){
+		FOpenGLShader* Shader;
+
+		if(CurrentState->Lightmap){
+			SetTexture(CurrentState->Lightmap, 0);
+
+			if(CurrentState->LightingModulate2X)
+				Shader = &LightingOnlyShaderLightmap2X;
+			else
+				Shader = &LightingOnlyShaderLightmap;
+		}else{
+			if(CurrentState->LightingModulate2X)
+				Shader = &LightingOnlyShader2X;
+			else
+				Shader = &LightingOnlyShader;
+		}
+
+		SetShader(*Shader);
+
+		return;
+	}
+
 	bool Result = false;
 	bool IsHardwareShader = false;
 
@@ -1116,7 +1178,7 @@ UBOOL FOpenGLRenderInterface::SetHardwareShaderMaterial(UHardwareShader* Hardwar
 
 		for(INT i = 0; i < MAX_TEXTURES; ++i){
 			if(HardwareShader->Textures[i]){
-				SetBitmapTexture(HardwareShader->Textures[i], i, HardwareShader->BumpSettings[i].BumpSize);
+				SetBitmapTexture(HardwareShader->Textures[i], i, 1.0f, HardwareShader->BumpSettings[i].BumpSize);
 				CurrentState->NumTextures = i + 1;
 			}
 		}

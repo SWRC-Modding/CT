@@ -67,6 +67,7 @@ enum EShaderLightType{
 	UNIFORM_BLOCK_MEMBER(STRUCT(TextureInfo){ \
 		UNIFORM_STRUCT_MEMBER(bool, IsCubemap) \
 		UNIFORM_STRUCT_MEMBER(bool, IsBumpmap) \
+		UNIFORM_STRUCT_MEMBER(float, UVScale) \
 		UNIFORM_STRUCT_MEMBER(float, BumpSize) \
 	}, TextureInfos[MAX_TEXTURES]) \
 	UNIFORM_BLOCK_MEMBER(STRUCT(Light){ \
@@ -159,7 +160,7 @@ struct FOpenGLRenderState{
 enum EFixedFunctionShader{
 	FFS_BitmapMaterial,
 	FFS_BitmapMaterialLightmap,
-	FFS_BitmapMaterialLightmap2x,
+	FFS_BitmapMaterialLightmap2X,
 	FFS_ParticleMaterial,
 	FFS_ParticleMaterialTFactor,
 	FFS_ParticleMaterialBlend,
@@ -186,8 +187,9 @@ public:
 
 		// Lighting
 
+		bool            LightingOnly;
 		bool            UseStaticLighting;
-		bool            LightingModulate2x;
+		bool            LightingModulate2X;
 		FBaseTexture*   Lightmap;
 		FSphere         LitSphere;
 		FDynamicLight*  HardwareShaderLights[MAX_SHADER_LIGHTS];
@@ -293,15 +295,24 @@ private:
 
 	UMaterial* RemoveModifiers(UModifier* Modifier, FModifierInfo* ModifierInfo = NULL);
 	void GetShaderConstants(FSConstantsInfo* Info, FPlane* Constants, INT NumConstants);
-	void SetTexture(FBaseTexture* Texture, INT TextureIndex, FLOAT BumpSize = 0.0f);
-	void SetBitmapTexture(UBitmapMaterial* Bitmap, INT TextureIndex, FLOAT BumpSize = 0.0f);
+	void SetTexture(FBaseTexture* Texture, INT TextureIndex, FLOAT UVScale = 1.0f, FLOAT BumpSize = 1.0f);
+	void SetBitmapTexture(UBitmapMaterial* Bitmap, INT TextureIndex, FLOAT UVScale = 1.0f, FLOAT BumpSize = 1.0f);
 
 
+	FOpenGLShader               LightingOnlyShader;
+	FOpenGLShader               LightingOnlyShader2X;
+	FOpenGLShader               LightingOnlyShaderLightmap;
+	FOpenGLShader               LightingOnlyShaderLightmap2X;
 	FOpenGLShader               BitmapShader;
+	FOpenGLShader               BitmapShaderDetail;
 	FOpenGLShader               BitmapShaderStaticLighting;
+	FOpenGLShader               BitmapShaderStaticLightingDetail;
 	FOpenGLShader               BitmapShaderLightmap;
+	FOpenGLShader               BitmapShaderLightmapDetail;
 	FOpenGLShader               BitmapShaderLightmapStaticLighting;
-	FOpenGLShader               BitmapShaderLightmap2x;
+	FOpenGLShader               BitmapShaderLightmapStaticLightingDetail;
+	FOpenGLShader               BitmapShaderLightmap2X;
+	FOpenGLShader               BitmapShaderLightmap2XDetail;
 	FOpenGLShader               ParticleShader;
 	FOpenGLShader               ParticleShaderTFactor;
 	FOpenGLShader               ParticleShaderSpecialBlend;

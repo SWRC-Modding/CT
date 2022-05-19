@@ -135,10 +135,10 @@ FStringTemp FShaderGenerator::GetShaderText(bool UseStaticLighting){
 		case COP_Modulate:
 			FragmentShaderText += Arg1 + " * " + Arg2;
 			break;
-		case COP_Modulate2x:
+		case COP_Modulate2X:
 			FragmentShaderText += Arg1 + " * " + Arg2 + " * 2";
 			break;
-		case COP_Modulate4x:
+		case COP_Modulate4X:
 			FragmentShaderText += Arg1 + " * " + Arg2 + " * 4";
 			break;
 		case COP_ModulateAddDest:

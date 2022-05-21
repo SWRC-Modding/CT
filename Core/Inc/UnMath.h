@@ -252,8 +252,8 @@ public:
 		return *this;
 	}
     FLOAT& operator[](INT i){
-		check(i>-1);
-		check(i<3);
+		checkSlow(i>-1);
+		checkSlow(i<3);
 		if(i == 0)		return X;
 		else if(i == 1)	return Y;
 		else				return Z;
@@ -533,6 +533,22 @@ public:
 		FLOAT RV = 1.0f/V;
 		X *= RV; Y *= RV; Z *= RV; W *= RV;
 		return *this;
+	}
+	FLOAT& operator[](INT i){
+		checkSlow(i < 4);
+		checkSlow(i >= 0);
+		switch(i){
+		case 0:
+			return X;
+		case 1:
+			return Y;
+		case 2:
+			return Z;
+		case 3:
+			return W;
+		default:
+			return X;
+		}
 	}
 
 	//Serializer.
@@ -2482,6 +2498,10 @@ public:
 		M[1][0] = 0; M[1][1] = 1;  M[1][2] = 0;  M[1][3] = 0;
 		M[2][0] = 0; M[2][1] = 0;  M[2][2] = 1;  M[2][3] = 0;
 		M[3][0] = 0; M[3][1] = 0;  M[3][2] = 0;  M[3][3] = 1;
+	}
+
+	FPlane* Rows(){
+		return reinterpret_cast<FPlane*>(M);
 	}
 
 	//Concatenation operator.

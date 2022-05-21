@@ -29,6 +29,7 @@ enum EColorArg{
 	CA_Diffuse,
 	CA_Specular,
 	CA_GlobalColor,
+	CA_DiffuseAlpha,
 	CA_Const1
 };
 
@@ -75,7 +76,7 @@ public:
 		NumColorOps = 0;
 	}
 
-	EColorArg AddTexture(INT Index, ETexCoordSrc TexCoordSrc, ETexCoordCount TexCoordCount = TCN_2DCoords, SBYTE Matrix = INDEX_NONE, INT Bumpmap = 0){
+	EColorArg AddTexture(INT Index, ETexCoordSrc TexCoordSrc, ETexCoordCount TexCoordCount = TCN_2DCoords, SBYTE Matrix = INDEX_NONE, bool bTexCoordProjected = false, INT Bumpmap = 0){
 		checkSlow(Index < 8);
 		checkSlow(!Bumpmap || Bumpmap < Index);
 
@@ -86,6 +87,7 @@ public:
 		Textures[NumTextures].TexCoordSrc = static_cast<BYTE>(TexCoordSrc);
 		Textures[NumTextures].TexCoordCount = static_cast<BYTE>(TexCoordCount);
 		Textures[NumTextures].Matrix = Matrix;
+		Textures[NumTextures].bTexCoordProjected = bTexCoordProjected;
 		Textures[NumTextures].Bumpmap = static_cast<BYTE>(Bumpmap);
 
 		return static_cast<EColorArg>(NumTextures++);
@@ -127,6 +129,7 @@ private:
 		BYTE  TexCoordSrc;
 		BYTE  TexCoordCount;
 		SBYTE Matrix;
+		bool  bTexCoordProjected;
 		BYTE  Bumpmap;
 	};
 

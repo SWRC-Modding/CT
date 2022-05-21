@@ -347,7 +347,7 @@ void FOpenGLRenderInterface::Init(INT ViewportWidth, INT ViewportHeight){
 	ShaderGenerator.Reset();
 	// Particle
 	ShaderGenerator.AddTexture(0, TCS_Stream0);
-	ShaderGenerator.AddColorOp(CA_T0, CA_Diffuse, COP_Modulate, CC_RGBA, CR_0);
+	ShaderGenerator.AddColorOp(CA_T0, CA_Specular, COP_Modulate, CC_RGBA, CR_0);
 	ParticleShader.Compile(ShaderGenerator.GetShaderText(false));
 	ShaderGenerator.Reset();
 	ShaderGenerator.AddTexture(0, TCS_Stream0);
@@ -355,7 +355,7 @@ void FOpenGLRenderInterface::Init(INT ViewportWidth, INT ViewportHeight){
 	ParticleShaderTFactor.Compile(ShaderGenerator.GetShaderText(false));
 	ShaderGenerator.Reset();
 	ShaderGenerator.AddTexture(0, TCS_Stream0);
-	ShaderGenerator.AddColorOp(CA_T0, CA_Diffuse, COP_BlendDiffuseAlpha, CC_RGBA, CR_0);
+	ShaderGenerator.AddColorOp(CA_T0, CA_Specular, COP_BlendDiffuseAlpha, CC_RGBA, CR_0);
 	ParticleShaderSpecialBlend.Compile(ShaderGenerator.GetShaderText(false));
 	ShaderGenerator.Reset();
 	ShaderGenerator.AddTexture(0, TCS_Stream0);
@@ -365,7 +365,7 @@ void FOpenGLRenderInterface::Init(INT ViewportWidth, INT ViewportHeight){
 	ShaderGenerator.AddTexture(0, TCS_Stream0);
 	ShaderGenerator.AddTexture(0, TCS_Stream1);
 	ShaderGenerator.AddColorOp(CA_T0, CA_T1, COP_BlendDiffuseAlpha, CC_RGBA, CR_0);
-	ShaderGenerator.AddColorOp(CA_R0, CA_Diffuse, COP_Modulate, CC_RGB, CR_0);
+	ShaderGenerator.AddColorOp(CA_R0, CA_Specular, COP_Modulate, CC_RGB, CR_0);
 	ParticleShaderBlendSubdivisions.Compile(ShaderGenerator.GetShaderText(false));
 	// TODO: Initialize terrain shaders here
 }
@@ -1102,6 +1102,9 @@ void FOpenGLRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorStri
 	}else if(Material->IsA<UHardwareShader>()){
 		Result = SetHardwareShaderMaterial(static_cast<UHardwareShader*>(Material), ErrorString, ErrorMaterial) != 0;
 		IsHardwareShader = true;
+	}else if(Material->IsA<UProjectorMultiMaterial>()){
+		Result = SetProjectorMultiMaterial(static_cast<UProjectorMultiMaterial*>(Material));
+		IsHardwareShader = true;
 	}else{
 		FOpenGLShader* Shader = NULL;
 
@@ -1235,7 +1238,7 @@ void FOpenGLRenderInterface::CopyBackBufferToTarget(FAuxRenderTarget* Target){
 
 	GLbitfield Flags = GL_COLOR_BUFFER_BIT;
 
-	if(GLTarget->DepthStencilAttachment && Backbuffer->DepthStencilAttachment)
+	if(GLTarget->DepthStencilAttachment && !GLTarget->HasSharedDepthStencil)
 		Flags |= GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT;
 
 	RenDev->glBlitNamedFramebuffer(Backbuffer->FBO,

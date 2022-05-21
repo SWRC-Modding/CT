@@ -1074,6 +1074,7 @@ static bool WriteShaderInstructionRhs(FString* Out, FShaderInstruction& Instruct
 		*ResultExpr = EXPR_Float4;
 		*Out += FString::Printf("sample_texture%c(TexCoord%c + ", Instruction.Destination[1], Instruction.Destination[1]);
 		WriteShaderInstructionArg(Args[0], EXPR_Float4, Out);
+		check(Args[0].Register == 't');
 		*Out += FString::Printf(" * TextureInfos[%c].BumpSize)", Instruction.Destination[1]);
 		break;
 	case INS_texbeml:

@@ -100,10 +100,20 @@ FStringTemp FShaderGenerator::GetShaderText(bool UseStaticLighting){
 			}
 
 			VertexShaderText += TexCoord + ";\n";
+
+			if(Textures[i].bTexCoordProjected){
+				switch(Textures[i].TexCoordCount){
+				case TCN_3DCoords:
+					VertexShaderText += FString::Printf("\tTexCoord%i.xy /= TexCoord%i.z;\n", TexCoordIndex, TexCoordIndex);
+					break;
+				case TCN_4DCoords:
+					VertexShaderText += FString::Printf("\tTexCoord%i.xyz /= TexCoord%i.w;\n", TexCoordIndex, TexCoordIndex);
+				}
+			}
 		}
 
 		if(Textures[i].Bumpmap)
-			FragmentShaderText += FString::Printf("\tconst vec4 t%i = sample_texture%i(TexCoord%i + t%i);\n", i, Textures[i].Index, TexCoordIndex, Textures[i].Bumpmap);
+			FragmentShaderText += FString::Printf("\tconst vec4 t%i = sample_texture%i(TexCoord%i + t%i * TextureInfos[%i].BumpSize);\n", i, Textures[i].Index, TexCoordIndex, Textures[i].Bumpmap, Textures[i].Bumpmap);
 		else
 			FragmentShaderText += FString::Printf("\tconst vec4 t%i = sample_texture%i(TexCoord%i);\n", i, Textures[i].Index, TexCoordIndex);
 	}
@@ -174,7 +184,7 @@ FStringTemp FShaderGenerator::GetShaderText(bool UseStaticLighting){
 		"}\n"
 		"#elif defined(FRAGMENT_SHADER)\n"
 		"vec3 light_color(void){\n"
-		"\tvec3 DiffuseLight = Diffuse.rgb;\n"
+		"\tvec3 DiffuseLight = " + (UseStaticLighting ? "Diffuse.rgb" : "vec3(0)") + ";\n"
 		"\tvec3 NormalizedNormal = normalize(Normal);\n"
 		"\tfor(int i = 0; i < 4; ++i){\n"
 		"\t\tfloat DiffuseFactor;\n"
@@ -227,14 +237,18 @@ FStringTemp FShaderGenerator::GetArgString(BYTE Arg){
 	if(Arg >= CA_R0 && Arg <= CA_R5)
 		return FString::Printf("r%i", Arg - CA_R0);
 
+	// Diffuse is specular and specular is diffuse... TODO: Rename them to something like color1 and color2 so this makes more sense
 	if(Arg == CA_Diffuse)
-		return "Diffuse";
+		return "Specular";
 
 	if(Arg == CA_Specular)
-		return "Specular";
+		return "Diffuse";
 
 	if(Arg == CA_GlobalColor)
 		return "GlobalColor";
+
+	if(Arg == CA_DiffuseAlpha)
+		return "vec4(Specular.a)";
 
 	if(Arg == CA_Const1)
 		return "vec4(1)";

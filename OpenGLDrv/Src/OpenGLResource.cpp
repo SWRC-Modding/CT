@@ -210,16 +210,16 @@ void FOpenGLTexture::Cache(FBaseTexture* BaseTexture, bool bOwnDepthBuffer){
 		if(Width == 0 || Height == 0)
 			return;
 
-		if(bOwnDepthBuffer){
-			bool IsMipTarget = false;
+		bool IsMipTarget = false;
 
-			for(INT i = 0; i < UFrameFX::MaxMips; ++i){
-				if(RenderTarget == UFrameFX::MipTargets[i]){
-					IsMipTarget = true;
-					break;
-				}
+		for(INT i = 0; i < UFrameFX::MaxMips; ++i){
+			if(RenderTarget == UFrameFX::MipTargets[i]){
+				IsMipTarget = true;
+				break;
 			}
+		}
 
+		if(bOwnDepthBuffer || IsMipTarget){
 			if(IsMipTarget){
 				DepthStencilAttachment = GL_NONE; // The FrameFX mip targets don't need a depth or stencil buffer
 			}else{

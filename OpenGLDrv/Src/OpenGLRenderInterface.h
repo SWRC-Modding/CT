@@ -281,7 +281,8 @@ public:
 private:
 	struct FModifierInfo{
 		FMatrix               TexMatrix;
-		UBOOL                 bUseTexMatrix;
+		bool                  bUseTexMatrix;
+		bool                  bTexCoordProjected;
 		ETexCoordSrc          TexCoordSrc;
 		ETexCoordCount        TexCoordCount;
 		ETexClampModeOverride TexUClamp;
@@ -289,15 +290,15 @@ private:
 
 		FModifierInfo() : TexMatrix(FMatrix::Identity),
 		                  bUseTexMatrix(0),
+		                  bTexCoordProjected(0),
 		                  TexCoordSrc(TCS_Stream0),
 		                  TexCoordCount(TCN_2DCoords){}
 	};
 
-	UMaterial* RemoveModifiers(UModifier* Modifier, FModifierInfo* ModifierInfo = NULL);
+	UMaterial* RemoveModifiers(UMaterial* InMaterial, FModifierInfo* ModifierInfo = NULL);
 	void GetShaderConstants(FSConstantsInfo* Info, FPlane* Constants, INT NumConstants);
 	void SetTexture(FBaseTexture* Texture, INT TextureIndex, FLOAT UVScale = 1.0f, FLOAT BumpSize = 1.0f);
 	void SetBitmapTexture(UBitmapMaterial* Bitmap, INT TextureIndex, FLOAT UVScale = 1.0f, FLOAT BumpSize = 1.0f);
-
 
 	FOpenGLShader               LightingOnlyShader;
 	FOpenGLShader               LightingOnlyShader2X;
@@ -329,15 +330,16 @@ private:
 	INT                         NumTexMatrices;
 	FMatrix                     TexMatrices[MAX_TEXTURES];
 
-	void SetGeneratedShader(FShaderGenerator& ShaderGenerator);
+	void SetGeneratedShader(FShaderGenerator& ShaderGenerator, bool UseStaticLighting);
 
 	bool SetBitmapMaterial(UBitmapMaterial* Material);
+	bool SetSimpleMaterial(UMaterial* Material, const FModifierInfo& ModifierInfo);
 	bool SetShaderMaterial(UShader* Shader, const FModifierInfo& ModifierInfo);
 	bool SetCombinerMaterial(UCombiner* Combiner);
-	bool SetParticleMaterial(UParticleMaterial* Material);
-	bool SetProjectorMaterial(UProjectorMaterial* Material);
-	bool SetTerrainMaterial(UTerrainMaterial* Material);
-	bool SetSimpleMaterial(UMaterial* Material, const FModifierInfo& ModifierInfo);
+	bool SetParticleMaterial(UParticleMaterial* ParticleMaterial);
+	bool SetProjectorMaterial(UProjectorMaterial* ProjectorMaterial);
+	bool SetProjectorMultiMaterial(UProjectorMultiMaterial* ProjectorMaterial);
+	bool SetTerrainMaterial(UTerrainMaterial* TerrainMaterial);
 
 	void HandleSimpleMaterial(UMaterial* Material, FShaderGenerator& ShaderGenerator, const FModifierInfo* InModifierInfo = NULL);
 	void HandleCombinerMaterial(UCombiner* Combiner, FShaderGenerator& ShaderGenerator, bool IsRootMaterial);

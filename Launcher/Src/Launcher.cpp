@@ -135,7 +135,11 @@ static struct FExecHook : public FExec, FNotifyHook{
 					UViewport* Viewport = GEngine->Client->Viewports[0];
 					Viewport->TryRenderDevice(*RenderDeviceClass, Viewport->SizeX, Viewport->SizeY, Viewport->IsFullscreen());
 					GStats.Clear();
-					GConfig->SetString("Engine.Engine", "RenderDevice", *RenderDeviceClass);
+
+					if(GEngine->GRenDev && GEngine->GRenDev->GetClass() == Class)
+						GConfig->SetString("Engine.Engine", "RenderDevice", *RenderDeviceClass);
+					else
+						Ar.Logf("Failed to set render device with class %s", *RenderDeviceClass);
 				}
 			}else{
 				Ar.Logf("Unable to find render device class '%s'", *RenderDeviceClass);
@@ -251,8 +255,16 @@ static void MainLoop(){
 		guard(EnforceTickRate);
 		FLOAT MaxTickRate = GEngine->GetMaxTickRate();
 		if(MaxTickRate > 0.0f){
-			FLOAT Delta = (1.0f / MaxTickRate) - (appSeconds() - OldTime);
-			appSleep(Max(0.0f, Delta));
+			DOUBLE DesiredFrameTime = 1.0 / MaxTickRate;
+			DOUBLE Delta = DesiredFrameTime - (appSeconds() - OldTime);
+
+			while(Delta > KINDA_SMALL_NUMBER){
+				// NOTE: When using OpenALSoft the fps limit doesn't work properly and will be at around 60 at all times.
+				// This is due to sleep taking longer than expected due to some timer changes that I don't know of.
+				// So we just use Sleep(0) in a loop to at least give up the current time slice. This works fine with or without OpenALSoft.
+				Sleep(0);
+				Delta = DesiredFrameTime - (appSeconds() - OldTime);
+			}
 		}
 		unguard;
 

@@ -69,6 +69,8 @@ enum EShaderLightType{
 		UNIFORM_STRUCT_MEMBER(bool, IsBumpmap) \
 		UNIFORM_STRUCT_MEMBER(float, UVScale) \
 		UNIFORM_STRUCT_MEMBER(float, BumpSize) \
+		UNIFORM_STRUCT_MEMBER(float, BumpLumaScale) \
+		UNIFORM_STRUCT_MEMBER(float, BumpLumaOffset) \
 	}, TextureInfos[MAX_TEXTURES]) \
 	UNIFORM_BLOCK_MEMBER(STRUCT(Light){ \
 		UNIFORM_STRUCT_MEMBER(vec4, Color) \
@@ -297,8 +299,8 @@ private:
 
 	UMaterial* RemoveModifiers(UMaterial* InMaterial, FModifierInfo* ModifierInfo = NULL);
 	void GetShaderConstants(FSConstantsInfo* Info, FPlane* Constants, INT NumConstants);
-	void SetTexture(FBaseTexture* Texture, INT TextureIndex, FLOAT UVScale = 1.0f, FLOAT BumpSize = 1.0f);
-	void SetBitmapTexture(UBitmapMaterial* Bitmap, INT TextureIndex, FLOAT UVScale = 1.0f, FLOAT BumpSize = 1.0f);
+	void SetTexture(FBaseTexture* Texture, INT TextureIndex, FLOAT UVScale = 1.0f, FLOAT BumpSize = 1.0f, FLOAT BumpLumaScale = 1.0f, FLOAT BumpLumaOffset = 0.0f);
+	void SetBitmapTexture(UBitmapMaterial* Bitmap, INT TextureIndex, FLOAT UVScale = 1.0f, FLOAT BumpSize = 1.0f, FLOAT BumpLumaScale = 1.0f, FLOAT BumpLumaOffset = 0.0f);
 
 	FOpenGLShader               LightingOnlyShader;
 	FOpenGLShader               LightingOnlyShader2X;

@@ -304,14 +304,14 @@ void FOpenGLRenderInterface::Init(INT ViewportWidth, INT ViewportHeight){
 	FShaderGenerator ShaderGenerator;
 
 	// LightingOnly
-	ShaderGenerator.AddColorOp(CA_Diffuse, CA_Diffuse, COP_Assign, CC_RGBA, CR_0);
+	ShaderGenerator.AddColorOp(CA_Diffuse, CA_Diffuse, COP_Arg1, CC_RGBA, CR_0);
 	LightingOnlyShader.Compile(ShaderGenerator.GetShaderText(false));
 	ShaderGenerator.Reset();
 	ShaderGenerator.AddTexture(0, TCS_Stream1);
 	ShaderGenerator.AddColorOp(CA_Diffuse, CA_T0, COP_Modulate, CC_RGBA, CR_0);
 	LightingOnlyShaderLightmap.Compile(ShaderGenerator.GetShaderText(false));
 	ShaderGenerator.Reset();
-	ShaderGenerator.AddColorOp(CA_Diffuse, CA_Diffuse, COP_Assign, CC_RGBA, CR_0);
+	ShaderGenerator.AddColorOp(CA_Diffuse, CA_Diffuse, COP_Arg1, CC_RGBA, CR_0);
 	LightingOnlyShader2X.Compile(ShaderGenerator.GetShaderText(false));
 	ShaderGenerator.AddTexture(0, TCS_Stream1);
 	ShaderGenerator.AddColorOp(CA_R0, CA_T0, COP_Modulate2X, CC_RGB, CR_0);
@@ -319,7 +319,7 @@ void FOpenGLRenderInterface::Init(INT ViewportWidth, INT ViewportHeight){
 	ShaderGenerator.Reset();
 	// Bitmap
 	ShaderGenerator.AddTexture(0, TCS_Stream0);
-	ShaderGenerator.AddColorOp(CA_T0, CA_R0, COP_Assign, CC_RGBA, CR_0);
+	ShaderGenerator.AddColorOp(CA_T0, CA_R0, COP_Arg1, CC_RGBA, CR_0);
 	BitmapShader.Compile(ShaderGenerator.GetShaderText(false));
 	BitmapShaderStaticLighting.Compile(ShaderGenerator.GetShaderText(true));
 	ShaderGenerator.AddTexture(2, TCS_Stream0);

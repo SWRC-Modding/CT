@@ -112,29 +112,59 @@ FStringTemp FShaderGenerator::GetShaderText(bool UseStaticLighting){
 			}
 		}
 
-		if(Textures[i].Bumpmap)
-			FragmentShaderText += FString::Printf("\tconst vec4 t%i = sample_texture%i(TexCoord%i + t%i * TextureInfos[%i].BumpSize);\n", i, Textures[i].Index, TexCoordIndex, Textures[i].Bumpmap, Textures[i].Bumpmap);
-		else
+		if(Textures[i].Bumpmap > 0){
+			INT BumpIndex = INDEX_NONE;
+
+			for(INT b = 0; b < i; ++b){
+				if(Textures[b].Index == Textures[i].Bumpmap){
+					BumpIndex = b;
+					break;
+				}
+			}
+
+			INT TexIndex = Textures[i].Index;
+
+			check(BumpIndex >= 0 && BumpIndex < i);
+
+			FragmentShaderText += FString::Printf("\tconst vec4 t%i = sample_texture%i(TexCoord%i + t%i * TextureInfos[%i].BumpSize) * vec4(vec3(saturate(t%i.a * TextureInfos[%i].BumpLumaScale + TextureInfos[%i].BumpLumaOffset)), 1.0);\n", i, TexIndex, TexCoordIndex, BumpIndex, TexIndex, BumpIndex, TexIndex, TexIndex);
+		}else{
 			FragmentShaderText += FString::Printf("\tconst vec4 t%i = sample_texture%i(TexCoord%i);\n", i, Textures[i].Index, TexCoordIndex);
+		}
 	}
 
 	for(INT i = 0; i < NumColorOps; ++i){
-		const char* Swizzle = "";
+		const char* SrcSwizzle = "";
+		const char* DestSwizzle = "";
 
-		if(ColorOps[i].Channel == CC_RGB)
-			Swizzle = ".rgb";
-		else if(ColorOps[i].Channel == CC_A)
-			Swizzle = ".a";
+		switch(ColorOps[i].Channel){
+		case CC_RGB:
+			SrcSwizzle = ".rgb";
+			DestSwizzle = ".rgb";
+			break;
+		case CC_A:
+			SrcSwizzle = ".a";
+			DestSwizzle = ".a";
+			break;
+		case CC_A_TO_RGB:
+			SrcSwizzle = ".a";
+			DestSwizzle = ".rgb";
+		}
 
-		FragmentShaderText += FString::Printf("\tr%i%s = ", ColorOps[i].Dest, Swizzle);
+		FragmentShaderText += FString::Printf("\tr%i%s = ", ColorOps[i].Dest, DestSwizzle);
 
 		FString Arg1RGBA = GetArgString(ColorOps[i].Arg1);
-		FString Arg1 = Arg1RGBA + Swizzle;
-		FString Arg2 = GetArgString(ColorOps[i].Arg2) + Swizzle;
+		FString Arg1 = Arg1RGBA + SrcSwizzle;
+		FString Arg2 = GetArgString(ColorOps[i].Arg2) + SrcSwizzle;
+
+		if(ColorOps[i].Channel == CC_A_TO_RGB || ColorOps[i].Channel == CC_A_TO_RGBA)
+			FragmentShaderText += "(";
 
 		switch(ColorOps[i].Op){
-		case COP_Assign:
+		case COP_Arg1:
 			FragmentShaderText += Arg1;
+			break;
+		case COP_Arg2:
+			FragmentShaderText += Arg2;
 			break;
 		case COP_Add:
 			FragmentShaderText += Arg1 + " + " + Arg2;
@@ -152,7 +182,7 @@ FStringTemp FShaderGenerator::GetShaderText(bool UseStaticLighting){
 			FragmentShaderText += Arg1 + " * " + Arg2 + " * 4";
 			break;
 		case COP_ModulateAddDest:
-			FragmentShaderText += Arg1 + " * " + Arg2 + FString::Printf(" + r%i%s", ColorOps[i].Dest, Swizzle);
+			FragmentShaderText += Arg1 + " * " + Arg2 + FString::Printf(" + r%i%s", ColorOps[i].Dest, SrcSwizzle);
 			break;
 		case COP_AlphaBlend:
 			FragmentShaderText += "mix(" + Arg1 + ", " + Arg2 + ", " + Arg1RGBA + ".a)";
@@ -166,6 +196,11 @@ FStringTemp FShaderGenerator::GetShaderText(bool UseStaticLighting){
 		case COP_BlendDiffuseAlpha:
 			FragmentShaderText += Arg1 + " * Diffuse.a + " + Arg2 + " * (1 - Diffuse.a)";
 		}
+
+		if(ColorOps[i].Channel == CC_A_TO_RGB)
+			FragmentShaderText += ").aaa";
+		else if(ColorOps[i].Channel == CC_A_TO_RGBA)
+			FragmentShaderText += ").aaaa";
 
 		FragmentShaderText += ";\n";
 	}
@@ -215,8 +250,8 @@ FStringTemp FShaderGenerator::GetShaderText(bool UseStaticLighting){
 			FragmentShaderText +
 		"\tr0.rgb *= ColorFactor.rgb;\n"
 		"\tif(UseDynamicLighting)\n"
-		"\t\tr0.rgb = mix(r0.rgb * light_color() * LightFactor, r0.rgb, r6.a);\n" +
-		(UseStaticLighting ? "\telse\n\t\tr0 = mix(r0 * Diffuse, r0, r6.a);\n" : "") +
+		"\t\tr0.rgb = mix(r0.rgb * light_color() * LightFactor, r0.rgb, r6.rgb);\n" +
+		(UseStaticLighting ? "\telse\n\t\tr0 = mix(r0 * Diffuse, r0, r6);\n" : "") +
 		"\talpha_test(r0);\n"
 		"\tFragColor = FogEnabled ? apply_fog(r0) : r0;\n"
 		"}\n"

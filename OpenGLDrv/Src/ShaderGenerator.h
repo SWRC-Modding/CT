@@ -34,7 +34,8 @@ enum EColorArg{
 };
 
 enum EColorOp{
-	COP_Assign, // Ignores arg2
+	COP_Arg1,
+	COP_Arg2,
 	COP_Add,
 	COP_Subtract,
 	COP_Modulate,
@@ -50,7 +51,9 @@ enum EColorOp{
 enum EColorChannel{
 	CC_RGBA,
 	CC_RGB,
-	CC_A
+	CC_A,
+	CC_A_TO_RGB,
+	CC_A_TO_RGBA
 };
 
 enum EColorRegister{
@@ -76,9 +79,9 @@ public:
 		NumColorOps = 0;
 	}
 
-	EColorArg AddTexture(INT Index, ETexCoordSrc TexCoordSrc, ETexCoordCount TexCoordCount = TCN_2DCoords, SBYTE Matrix = INDEX_NONE, bool bTexCoordProjected = false, INT Bumpmap = 0){
+	EColorArg AddTexture(INT Index, ETexCoordSrc TexCoordSrc, ETexCoordCount TexCoordCount = TCN_2DCoords, SBYTE Matrix = INDEX_NONE, bool bTexCoordProjected = false, INT Bumpmap = INDEX_NONE){
 		checkSlow(Index < 8);
-		checkSlow(!Bumpmap || Bumpmap < Index);
+		checkSlow(Bumpmap < Index);
 
 		if(NumTextures >= MAX_SHADER_TEXTURE_REGISTERS)
 			appThrowf("Exceeded maximum amount of shader texture registers (%i)", MAX_SHADER_TEXTURE_REGISTERS);
@@ -88,7 +91,7 @@ public:
 		Textures[NumTextures].TexCoordCount = static_cast<BYTE>(TexCoordCount);
 		Textures[NumTextures].Matrix = Matrix;
 		Textures[NumTextures].bTexCoordProjected = bTexCoordProjected;
-		Textures[NumTextures].Bumpmap = static_cast<BYTE>(Bumpmap);
+		Textures[NumTextures].Bumpmap = static_cast<SBYTE>(Bumpmap);
 
 		return static_cast<EColorArg>(NumTextures++);
 	}
@@ -130,7 +133,7 @@ private:
 		BYTE  TexCoordCount;
 		SBYTE Matrix;
 		bool  bTexCoordProjected;
-		BYTE  Bumpmap;
+		SBYTE Bumpmap;
 	};
 
 	struct FColorOp{

@@ -1106,7 +1106,7 @@ void FOpenGLRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorStri
 		Result = SetProjectorMultiMaterial(static_cast<UProjectorMultiMaterial*>(Material));
 		IsHardwareShader = true;
 	}else{
-		FOpenGLShader* Shader = NULL;
+		const FOpenGLShader* Shader = NULL;
 
 		if(Modifier)
 			Shader = RenDev->GetShaderForMaterial(Modifier);
@@ -1161,11 +1161,11 @@ static INT GetShaderConstantNumSlots(BYTE ConstantType){
 UBOOL FOpenGLRenderInterface::SetHardwareShaderMaterial(UHardwareShader* HardwareShader, FString* ErrorString, UMaterial** ErrorMaterial){
 	guardFuncSlow;
 
-	FOpenGLShader* Shader = RenDev->GetShaderForMaterial(HardwareShader);
+	const FOpenGLShader* Shader = RenDev->GetShaderForMaterial(HardwareShader);
 
-	check(Shader);
+	checkSlow(Shader);
 
-	if(Shader->IsValid()){
+	if(Shader && Shader->IsValid()){
 		SetShader(*Shader);
 
 		CurrentState->bZTest = HardwareShader->ZTest != 0;

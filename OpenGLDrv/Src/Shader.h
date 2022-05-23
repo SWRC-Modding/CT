@@ -32,3 +32,10 @@ public:
 private:
 	GLuint CompileShader(GLenum Type, const FString& ShaderCode, const FString& ShaderName);
 };
+
+class FOpenGLCachedShader : public FOpenGLShader{
+public:
+	FOpenGLCachedShader(UOpenGLRenderDevice* InRenDev, const FString& InName) : FOpenGLShader(InRenDev, InName){}
+
+	INT Index;
+};

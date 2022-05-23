@@ -104,14 +104,18 @@ FOpenGLResource* UOpenGLRenderDevice::GetCachedResource(QWORD CacheId){
 	return NULL;
 }
 
-FOpenGLShader* UOpenGLRenderDevice::GetShaderForMaterial(UMaterial* Material){
-	if(Material->Validated)
-		return reinterpret_cast<FOpenGLShader*>(Material->CachedType);
+const FOpenGLShader* UOpenGLRenderDevice::GetShaderForMaterial(UMaterial* Material){
+	// HACK:
+	// Use the 30 bit padding space after UMaterial::UseFallback and UMaterial::Validated to store an index to quickly retrieve the shader for that material.
+	if(Material->Validated){
+		INT Index = reinterpret_cast<INT*>(Material)[24] >> 2;
+		return Index ? &ShadersByMaterial.GetPairs()[Index - 1].Value : NULL;
+	}
 
 	if(Material->IsIn(UObject::GetTransientPackage())) // Only unique names, no Transient.InGameTempName
 		return NULL;
 
-	FOpenGLShader* Shader = ShadersByMaterial.Find(Material->GetPathName());
+	FOpenGLCachedShader* Shader = ShadersByMaterial.Find(Material->GetPathName());
 	FStringTemp ShaderPath = FStringTemp(Material->GetPathName()).Substitute(".", "\\").Substitute(".", "\\");
 	FString ShaderText;
 	bool LoadedShader = LoadShaderIfChanged(ShaderPath, ShaderText);
@@ -130,19 +134,24 @@ FOpenGLShader* UOpenGLRenderDevice::GetShaderForMaterial(UMaterial* Material){
 	}
 
 	if(ShaderText.Len() > 0){
-		if(!Shader)
+		if(!Shader){
 			Shader = &ShadersByMaterial[Material->GetPathName()];
+			Shader->Index = ShadersByMaterial.Num();
+		}
 
 		Shader->RenDev = this;
 		Shader->Name = ShaderPath;
 		Shader->Compile(ShaderText);
 		Material->UseFallback = 1;
+
+		INT Index = (reinterpret_cast<INT*>(Material)[24] & 0x3) | (Shader->Index << 2);
+
+		reinterpret_cast<INT*>(Material)[24] = Index;
 	}else if(!HardwareShader && LoadedEmpty){ // Reset shader if file is empty or deleted
 		ShadersByMaterial.Remove(Material->GetPathName());
 		Shader = NULL;
 	}
 
-	Material->CachedType = reinterpret_cast<INT>(Shader);
 	Material->Validated = !bAutoReloadShaders;
 
 	return Shader;
@@ -326,6 +335,8 @@ UBOOL UOpenGLRenderDevice::Init(){
 
 	if(bUseTrilinear)
 		TextureFilter = TF_Trilinear;
+
+	UMaterial::ClearFallbacks();
 
 	return 1;
 }

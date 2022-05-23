@@ -1172,6 +1172,14 @@ public:
 		return *this;
 	}
 
+	int Num() const{
+		return Pairs.Num();
+	}
+
+	const TArray<TPair>& GetPairs() const{
+		return Pairs;
+	}
+
 	void Empty(){
 		Pairs.Empty(0);
 		HashCount = 8;
@@ -1295,10 +1303,6 @@ public:
 		TMapBase<TK,TI>::operator=(Other);
 
 		return *this;
-	}
-
-	int Num() const{
-		return Pairs.Num();
 	}
 };
 

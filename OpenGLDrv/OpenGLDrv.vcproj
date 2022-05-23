@@ -101,12 +101,6 @@
 			Filter="cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx"
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}">
 			<File
-				RelativePath=".\Src\OpenGLDrv.h">
-			</File>
-			<File
-				RelativePath=".\Src\OpenGLDrv.cpp">
-			</File>
-			<File
 				RelativePath=".\Src\OpenGLRenderInterface.h">
 			</File>
 			<File

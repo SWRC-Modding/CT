@@ -4,6 +4,7 @@
 #define MIN_OPENGL_MAJOR_VERSION 4
 #define MIN_OPENGL_MINOR_VERSION 5
 
+IMPLEMENT_PACKAGE(OpenGLDrv)
 IMPLEMENT_CLASS(UOpenGLRenderDevice)
 
 UOpenGLRenderDevice::UOpenGLRenderDevice() : RenderInterface(this),

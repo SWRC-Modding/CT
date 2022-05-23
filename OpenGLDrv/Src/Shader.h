@@ -1,6 +1,9 @@
 #pragma once
 
-#include "OpenGLDrv.h"
+#include "../../Core/Inc/Core.h"
+#include "opengl.h"
+
+class UOpenGLRenderDevice;
 
 // GLSL equivalent types with proper alignment
 

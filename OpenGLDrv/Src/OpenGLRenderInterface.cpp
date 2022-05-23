@@ -1094,17 +1094,13 @@ void FOpenGLRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorStri
 	}
 
 	bool Result = false;
-	bool IsHardwareShader = false;
 
 	if(Material->IsA<UHardwareShaderWrapper>()){
 		Result = static_cast<UHardwareShaderWrapper*>(Material)->SetupShaderWrapper(this) != 0;
-		IsHardwareShader = true;
 	}else if(Material->IsA<UHardwareShader>()){
 		Result = SetHardwareShaderMaterial(static_cast<UHardwareShader*>(Material), ErrorString, ErrorMaterial) != 0;
-		IsHardwareShader = true;
 	}else if(Material->IsA<UProjectorMultiMaterial>()){
 		Result = SetProjectorMultiMaterial(static_cast<UProjectorMultiMaterial*>(Material));
-		IsHardwareShader = true;
 	}else{
 		const FOpenGLShader* Shader = NULL;
 

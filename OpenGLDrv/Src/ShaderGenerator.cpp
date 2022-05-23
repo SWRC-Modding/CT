@@ -1,5 +1,5 @@
-#include "OpenGLResource.h"
 #include "ShaderGenerator.h"
+#include "OpenGLResource.h"
 #include "OpenGLRenderDevice.h"
 
 FStringTemp FShaderGenerator::GetShaderText(bool UseStaticLighting){

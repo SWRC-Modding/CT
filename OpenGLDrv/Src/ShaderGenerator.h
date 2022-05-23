@@ -1,5 +1,7 @@
 #pragma once
 
+#include "../../Engine/Inc/Engine.h"
+
 class FOpenGLShader;
 class UOpenGLRenderDevice;
 
@@ -88,9 +90,7 @@ public:
 	EColorArg AddTexture(INT Index, ETexCoordSrc TexCoordSrc, ETexCoordCount TexCoordCount = TCN_2DCoords, SBYTE Matrix = INDEX_NONE, bool bTexCoordProjected = false, INT Bumpmap = INDEX_NONE){
 		checkSlow(Index < 8);
 		checkSlow(Bumpmap < Index);
-
-		if(NumTextures >= MAX_SHADER_TEXTURE_REGISTERS)
-			appThrowf("Exceeded maximum amount of shader texture registers (%i)", MAX_SHADER_TEXTURE_REGISTERS);
+		checkSlow(NumTextures < MAX_SHADER_TEXTURE_REGISTERS)
 
 		Textures[NumTextures].Index = static_cast<BYTE>(Index);
 		Textures[NumTextures].TexCoordSrc = static_cast<BYTE>(TexCoordSrc);
@@ -103,8 +103,7 @@ public:
 	}
 
 	void AddColorOp(EColorArg Arg1, EColorArg Arg2, EColorOp Op, EColorChannel Channel, EColorRegister Dest, EColorOpModifier Modifier = COPM_None){
-		if(NumColorOps >= MAX_SHADER_COLOR_OPERATIONS)
-			appThrowf("Exceeded maximum amount of shader color operations (%i)", MAX_SHADER_COLOR_OPERATIONS);
+		checkSlow(NumColorOps < MAX_SHADER_COLOR_OPERATIONS);
 
 		ColorOps[NumColorOps].Dest = static_cast<BYTE>(Dest);
 		ColorOps[NumColorOps].Arg1 = static_cast<BYTE>(Arg1);
@@ -116,9 +115,7 @@ public:
 	}
 
 	EColorRegister PushTempRegister(){
-		if(TempRegister >= MAX_TEMP_REGISTERS)
-			appThrowf("Used more than available temporary shader registers");
-
+		checkSlow(TempRegister < MAX_TEMP_REGISTERS);
 		return static_cast<EColorRegister>(CR_2 + TempRegister++);
 	}
 

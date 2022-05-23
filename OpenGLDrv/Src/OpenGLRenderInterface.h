@@ -343,8 +343,8 @@ private:
 	bool SetProjectorMultiMaterial(UProjectorMultiMaterial* ProjectorMaterial);
 	bool SetTerrainMaterial(UTerrainMaterial* TerrainMaterial);
 
-	void HandleSimpleMaterial(UMaterial* Material, FShaderGenerator& ShaderGenerator, const FModifierInfo* InModifierInfo = NULL);
-	void HandleCombinerMaterial(UCombiner* Combiner, FShaderGenerator& ShaderGenerator, bool IsRootMaterial);
-	void HandleShaderMaterial(UShader* Shader, FShaderGenerator& ShaderGenerator, const FModifierInfo& ModifierInfo);
+	bool HandleSimpleMaterial(UMaterial* Material, FShaderGenerator& ShaderGenerator, const FModifierInfo* InModifierInfo = NULL);
+	bool HandleCombinerMaterial(UCombiner* Combiner, FShaderGenerator& ShaderGenerator, bool IsRootMaterial);
+	bool HandleShaderMaterial(UShader* Shader, FShaderGenerator& ShaderGenerator, const FModifierInfo& ModifierInfo);
 	void UseLightmap(FShaderGenerator& ShaderGenerator);
 };

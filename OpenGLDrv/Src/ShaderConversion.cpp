@@ -146,10 +146,6 @@ void UOpenGLRenderDevice::SetHardwareShaderMacros(UHardwareShaderMacros* Macros)
 	}
 }
 
-void UOpenGLRenderDevice::SetShaderMacro(const FString& Name, const FString& Text){
-	ShaderMacros[*Name] = Text;
-}
-
 void UOpenGLRenderDevice::ExpandShaderMacros(FString* Text){
 	const TCHAR* Pos = **Text;
 

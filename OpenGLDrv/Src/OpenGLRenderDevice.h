@@ -48,7 +48,6 @@ public:
 	const FOpenGLShader* GetShaderForMaterial(UMaterial* Material);
 
 	static void SetHardwareShaderMacros(UHardwareShaderMacros* Macros);
-	static void SetShaderMacro(const FString& Name, const FString& Text);
 	static void ExpandShaderMacros(FString* Text);
 
 	// Overrides

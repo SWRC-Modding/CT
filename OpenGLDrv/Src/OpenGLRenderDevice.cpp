@@ -855,8 +855,30 @@ bool UOpenGLRenderDevice::LoadShaderMacroText(){
 void UOpenGLRenderDevice::SaveShaderMacroText(){
 	FString Macros;
 
-	for(TMap<FString, FString>::TIterator It(ShaderMacros); It; ++It)
-		Macros += "@" + It.Key() + "\n" + It.Value() + "\n";
+	for(TMap<FString, FString>::TIterator It(ShaderMacros); It; ++It){
+		FString MacroText = It.Value();
+
+		// Trim leading empty lines
+		for(INT i = 0; i < MacroText.Len(); ++i){
+			if(!appIsSpace(MacroText[i])){
+				while(i > 0 && MacroText[i - 1] != '\n') // Preserve leading whitespace on first line
+					--i;
+
+				MacroText = MacroText.Right(MacroText.Len() - i);
+				break;
+			}
+		}
+
+		// Trim trailing empty lines
+		for(INT i = MacroText.Len() - 1; i >= 0; --i){
+			if(!appIsSpace(MacroText[i])){
+				MacroText = MacroText.Left(i + 1);
+				break;
+			}
+		}
+
+		Macros += "@" + It.Key() + "\n" + MacroText + "\n\n";
+	}
 
 	SaveShaderText(MakeShaderFilename("Macros", SHADER_MACROS_FILE_EXTENSION), Macros);
 }

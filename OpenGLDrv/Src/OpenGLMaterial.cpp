@@ -706,9 +706,6 @@ void FOpenGLRenderInterface::HandleCombinerMaterial(UCombiner* Combiner, FShader
 }
 
 void FOpenGLRenderInterface::HandleShaderMaterial(UShader* Shader, FShaderGenerator& ShaderGenerator, const FModifierInfo& ModifierInfo){
-	if(Shader->GetFName() == FName("HudArmsBaby_Shader"))
-		appDebugBreak();
-
 	bool HaveDiffuse = Shader->Diffuse != NULL && (!Shader->SelfIllumination || Shader->SelfIlluminationMask);
 
 	if(HaveDiffuse){

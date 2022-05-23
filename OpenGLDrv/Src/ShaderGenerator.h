@@ -26,6 +26,7 @@ enum EColorArg{
 	CA_R3,
 	CA_R4,
 	CA_R5,
+	CA_EmissionFactor,
 	CA_Diffuse,
 	CA_Specular,
 	CA_GlobalColor,
@@ -48,6 +49,11 @@ enum EColorOp{
 	COP_BlendDiffuseAlpha
 };
 
+enum EColorOpModifier{
+	COPM_None,
+	COPM_Saturate
+};
+
 enum EColorChannel{
 	CC_RGBA,
 	CC_RGB,
@@ -64,7 +70,7 @@ enum EColorRegister{
 	CR_3,
 	CR_4,
 	CR_5,
-	CR_LightMixFactor
+	CR_EmissionFactor
 };
 
 class FShaderGenerator{
@@ -96,7 +102,7 @@ public:
 		return static_cast<EColorArg>(NumTextures++);
 	}
 
-	void AddColorOp(EColorArg Arg1, EColorArg Arg2, EColorOp Op, EColorChannel Channel, EColorRegister Dest){
+	void AddColorOp(EColorArg Arg1, EColorArg Arg2, EColorOp Op, EColorChannel Channel, EColorRegister Dest, EColorOpModifier Modifier = COPM_None){
 		if(NumColorOps >= MAX_SHADER_COLOR_OPERATIONS)
 			appThrowf("Exceeded maximum amount of shader color operations (%i)", MAX_SHADER_COLOR_OPERATIONS);
 
@@ -105,6 +111,7 @@ public:
 		ColorOps[NumColorOps].Arg2 = static_cast<BYTE>(Arg2);
 		ColorOps[NumColorOps].Op = static_cast<BYTE>(Op);
 		ColorOps[NumColorOps].Channel = static_cast<BYTE>(Channel);
+		ColorOps[NumColorOps].Modifier = static_cast<BYTE>(Modifier);
 		++NumColorOps;
 	}
 
@@ -142,6 +149,7 @@ private:
 		BYTE Arg2;
 		BYTE Op;
 		BYTE Channel;
+		BYTE Modifier;
 	};
 
 	INT                  TempRegister;

@@ -156,6 +156,9 @@ FStringTemp FShaderGenerator::GetShaderText(bool UseStaticLighting){
 		FString Arg1 = Arg1RGBA + SrcSwizzle;
 		FString Arg2 = GetArgString(ColorOps[i].Arg2) + SrcSwizzle;
 
+		if(ColorOps[i].Modifier == COPM_Saturate)
+			FragmentShaderText += "saturate(";
+
 		if(ColorOps[i].Channel == CC_A_TO_RGB || ColorOps[i].Channel == CC_A_TO_RGBA)
 			FragmentShaderText += "(";
 
@@ -202,6 +205,9 @@ FStringTemp FShaderGenerator::GetShaderText(bool UseStaticLighting){
 		else if(ColorOps[i].Channel == CC_A_TO_RGBA)
 			FragmentShaderText += ").aaaa";
 
+		if(ColorOps[i].Modifier == COPM_Saturate)
+			FragmentShaderText += ")";
+
 		FragmentShaderText += ";\n";
 	}
 
@@ -246,7 +252,7 @@ FStringTemp FShaderGenerator::GetShaderText(bool UseStaticLighting){
 		"\tvec4 r3;\n"
 		"\tvec4 r4;\n"
 		"\tvec4 r5;\n"
-		"\tvec4 r6 = vec4(0.0); // LightMixFactor\n" +
+		"\tvec4 r6 = vec4(0.0); // EmissionFactor\n" +
 			FragmentShaderText +
 		"\tr0.rgb *= ColorFactor.rgb;\n"
 		"\tif(UseDynamicLighting)\n"
@@ -269,7 +275,7 @@ FStringTemp FShaderGenerator::GetArgString(BYTE Arg){
 	if(Arg >= CA_T0R && Arg <= CA_T0A)
 		return FString::Printf("t0.%c", "rgba"[Arg - CA_T0R]);
 
-	if(Arg >= CA_R0 && Arg <= CA_R5)
+	if(Arg >= CA_R0 && Arg <= CA_EmissionFactor)
 		return FString::Printf("r%i", Arg - CA_R0);
 
 	// Diffuse is specular and specular is diffuse... TODO: Rename them to something like color1 and color2 so this makes more sense

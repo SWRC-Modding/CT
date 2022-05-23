@@ -654,7 +654,7 @@ void FOpenGLRenderInterface::HandleCombinerMaterial(UCombiner* Combiner, FShader
 		MaskArg = Material2Arg;
 
 	if(Mask && IsRootMaterial && !Combiner->LightBothMaterials)
-		ShaderGenerator.AddColorOp(MaskArg, MaskArg, COP_Arg1, CC_A_TO_RGBA, CR_LightMixFactor);
+		ShaderGenerator.AddColorOp(MaskArg, MaskArg, COP_Arg1, CC_A_TO_RGBA, CR_EmissionFactor);
 
 	switch(Combiner->CombineOperation){
 	case CO_Use_Color_From_Material1:
@@ -706,6 +706,9 @@ void FOpenGLRenderInterface::HandleCombinerMaterial(UCombiner* Combiner, FShader
 }
 
 void FOpenGLRenderInterface::HandleShaderMaterial(UShader* Shader, FShaderGenerator& ShaderGenerator, const FModifierInfo& ModifierInfo){
+	if(Shader->GetFName() == FName("HudArmsBaby_Shader"))
+		appDebugBreak();
+
 	bool HaveDiffuse = Shader->Diffuse != NULL && (!Shader->SelfIllumination || Shader->SelfIlluminationMask);
 
 	if(HaveDiffuse){
@@ -713,88 +716,20 @@ void FOpenGLRenderInterface::HandleShaderMaterial(UShader* Shader, FShaderGenera
 
 		if(CurrentState->Lightmap && !UsingLightmap)
 			UseLightmap(ShaderGenerator);
-
-		ShaderGenerator.AddColorOp(CA_R0, CA_R0, COP_Arg1, CC_RGBA, ShaderGenerator.PushTempRegister());
 	}
 
-	bool HaveSelfIllumination = Shader->SelfIllumination != NULL;
+	bool HaveEnv = false;
+	EColorOp EnvColorOp = COP_Arg1;
 
-	if(HaveSelfIllumination){
-		if(Shader->SelfIlluminationMask){
-			bool HaveUniqueSelfIllumination = false;
+	if(GCubemapManager && GCubemapManager->bEnabled){
+		INT BumpmapIndex = INDEX_NONE;
 
-			if(HaveDiffuse && Shader->SelfIllumination != Shader->Diffuse){
-				HandleSimpleMaterial(Shader->SelfIllumination, ShaderGenerator, &ModifierInfo);
-				ShaderGenerator.AddColorOp(CA_R0, CA_R0, COP_Arg1, CC_RGBA, ShaderGenerator.PushTempRegister());
-				HaveUniqueSelfIllumination = true;
-			}
-
-			EColorArg SelfIlluminationMaskArg = CA_Diffuse;
-
-			if(Shader->SelfIlluminationMask != Shader->SelfIllumination && Shader->SelfIlluminationMask != Shader->Diffuse){
-				HandleSimpleMaterial(Shader->SelfIlluminationMask, ShaderGenerator, &ModifierInfo);
-				ShaderGenerator.AddColorOp(CA_R0, CA_R0, COP_Arg1, CC_RGBA, CR_1);
-				SelfIlluminationMaskArg = CA_R1;
-			}
-
-			EColorArg SelfIlluminationArg = CA_Diffuse;
-
-			if(HaveUniqueSelfIllumination)
-				SelfIlluminationArg = ShaderGenerator.PopTempRegister();
-
-			EColorArg DiffuseArg = HaveDiffuse ? ShaderGenerator.PopTempRegister() : CA_Diffuse;
-
-			if(Shader->SelfIllumination == Shader->Diffuse)
-				SelfIlluminationArg = DiffuseArg;
-
-			if(Shader->SelfIlluminationMask == Shader->SelfIllumination)
-				SelfIlluminationMaskArg = SelfIlluminationArg;
-			else if(Shader->SelfIlluminationMask == Shader->Diffuse)
-				SelfIlluminationMaskArg = DiffuseArg;
-
-			ShaderGenerator.AddColorOp(DiffuseArg, DiffuseArg, COP_Arg1, CC_A, ShaderGenerator.PushTempRegister()); // Save diffuse alpha
-			ShaderGenerator.AddColorOp(SelfIlluminationArg, SelfIlluminationArg, COP_Arg1, CC_RGB, CR_1);
-
-			if(SelfIlluminationMaskArg != CA_R1)
-				ShaderGenerator.AddColorOp(SelfIlluminationMaskArg, SelfIlluminationMaskArg, COP_Arg1, CC_A, CR_1);
-
-			ShaderGenerator.AddColorOp(DiffuseArg, CA_R1, COP_AlphaBlend, CC_RGB, CR_0);
-			ShaderGenerator.AddColorOp(ShaderGenerator.PopTempRegister(), CA_R0, COP_Arg1, CC_A, CR_0); // Restore saved alpha
-			ShaderGenerator.AddColorOp(CA_R1, CA_R1, COP_Arg1, CC_A_TO_RGBA, CR_LightMixFactor);
-		}else{
-			HandleSimpleMaterial(Shader->SelfIllumination, ShaderGenerator, &ModifierInfo);
-			// TODO: Maybe just disable dynamic lighting here
-			ShaderGenerator.AddColorOp(CA_Const1, CA_Const1, COP_Arg1, CC_RGBA, CR_LightMixFactor);
+		if(Shader->Bumpmap){
+			checkSlow(Shader->Bumpmap->IsA<UBitmapMaterial>());
+			BumpmapIndex = CurrentState->NumTextures++;
+			SetBitmapTexture(static_cast<UBitmapMaterial*>(Shader->Bumpmap), BumpmapIndex, Shader->BumpUVScale);
+			ShaderGenerator.AddTexture(BumpmapIndex, TCS_Stream0);
 		}
-	}
-
-	if(!HaveDiffuse && !HaveSelfIllumination)
-		ShaderGenerator.AddColorOp(CA_Diffuse, CA_Diffuse, COP_Arg1, CC_RGBA, CR_0);
-
-	if(!HaveDiffuse && CurrentState->Lightmap && !UsingLightmap)
-		UseLightmap(ShaderGenerator);
-
-	if(Shader->Opacity){
-		if((HaveDiffuse && Shader->Opacity != Shader->Diffuse) || (HaveSelfIllumination && Shader->Opacity != Shader->SelfIllumination)){
-			ShaderGenerator.AddColorOp(CA_R0, CA_R0, COP_Arg1, CC_RGB, ShaderGenerator.PushTempRegister());
-			HandleSimpleMaterial(Shader->Opacity, ShaderGenerator, &ModifierInfo);
-			ShaderGenerator.AddColorOp(ShaderGenerator.PopTempRegister(), CA_R0, COP_Arg1, CC_RGB, CR_0);
-		}
-	}
-
-	if(Shader->Detail && Shader->Detail->IsA<UBitmapMaterial>()){
-		INT Index = CurrentState->NumTextures++;
-		SetBitmapTexture(static_cast<UBitmapMaterial*>(Shader->Detail), Index, Shader->DetailScale);
-		EColorArg DetailArg = ShaderGenerator.AddTexture(Index, TCS_Stream0);
-		ShaderGenerator.AddColorOp(DetailArg, CA_R0, COP_Modulate2X, CC_RGB, CR_0);
-	}
-
-	if(GCubemapManager && GCubemapManager->bEnabled && Shader->Bumpmap){
-		checkSlow(Shader->Bumpmap->IsA<UBitmapMaterial>());
-		INT BumpmapIndex = CurrentState->NumTextures++;
-
-		SetBitmapTexture(static_cast<UBitmapMaterial*>(Shader->Bumpmap), BumpmapIndex, Shader->BumpUVScale);
-		ShaderGenerator.AddTexture(BumpmapIndex, TCS_Stream0);
 
 		UBitmapMaterial* DiffuseEnvMap = NULL;
 
@@ -825,19 +760,108 @@ void FOpenGLRenderInterface::HandleShaderMaterial(UShader* Shader, FShaderGenera
 		}
 
 		if(SpecularEnvMap){
+			SBYTE MatrixIndex = INDEX_NONE;
+
+			if(UseMatrix){
+				MatrixIndex = static_cast<SBYTE>(NumTexMatrices++);
+				TexMatrices[MatrixIndex] = *Matrix;
+			}
+
 			INT Index = CurrentState->NumTextures++;
-			EColorArg SpecularEnvTex = ShaderGenerator.AddTexture(Index, TCS_BumpSphereCameraSpaceNormal, TCN_2DCoords, INDEX_NONE, false, BumpmapIndex);
+			EColorArg SpecularEnvTex = ShaderGenerator.AddTexture(Index, TCS_BumpSphereCameraSpaceNormal, TCN_2DCoords, MatrixIndex, false, BumpmapIndex);
 			SetBitmapTexture(SpecularEnvMap, Index, 1.0, Shader->BumpSize, Shader->SpecularMaskStrength / 255.0f, Shader->SpecularStrength / 255.0f);
 			ShaderGenerator.AddColorOp(DiffuseEnvTex, SpecularEnvTex, DiffuseEnvMap ? COP_Add : COP_Arg2, CC_RGBA, CR_1);
 
 			if(Shader->SpecularInTheDark)
-				ShaderGenerator.AddColorOp(SpecularEnvTex, SpecularEnvTex, COP_Arg1, CC_RGBA, CR_LightMixFactor);
+				ShaderGenerator.AddColorOp(SpecularEnvTex, SpecularEnvTex, COP_Arg1, CC_RGBA, CR_EmissionFactor);
 		}
 
 		if(DiffuseEnvMap || SpecularEnvMap){
-			EColorOp ColorOp = Shader->BumpMapType == BMT_Static_Specular || Shader->BumpMapType == BMT_Specular ? COP_Add : COP_Modulate2X;
-			ShaderGenerator.AddColorOp(CA_R0, CA_R1, ColorOp, CC_RGB, CR_0);
+			EnvColorOp = Shader->BumpMapType == BMT_Static_Specular || Shader->BumpMapType == BMT_Specular ? COP_Add : COP_Modulate2X;
+			HaveEnv = true;
 		}
+	}
+
+	bool HaveSelfIllumination = Shader->SelfIllumination != NULL;
+
+	if(HaveSelfIllumination){
+		if(Shader->SelfIlluminationMask){
+			EColorRegister DiffuseRegister = ShaderGenerator.PushTempRegister();
+
+			if(HaveDiffuse){
+				ShaderGenerator.AddColorOp(CA_R0, CA_R1, EnvColorOp, CC_RGB, DiffuseRegister);
+				ShaderGenerator.AddColorOp(CA_R0, CA_R0, COP_Arg1, CC_A, DiffuseRegister);
+			}else{
+				ShaderGenerator.AddColorOp(CA_Diffuse, CA_R1, EnvColorOp, CC_RGB, DiffuseRegister);
+				ShaderGenerator.AddColorOp(CA_Diffuse, CA_Diffuse, COP_Arg1, CC_A, DiffuseRegister);
+			}
+
+			bool HaveUniqueSelfIllumination = false;
+
+			if(HaveDiffuse && Shader->SelfIllumination != Shader->Diffuse){
+				HandleSimpleMaterial(Shader->SelfIllumination, ShaderGenerator, &ModifierInfo);
+				ShaderGenerator.AddColorOp(CA_R0, CA_R0, COP_Arg1, CC_RGBA, ShaderGenerator.PushTempRegister());
+				HaveUniqueSelfIllumination = true;
+			}else{
+				ShaderGenerator.AddColorOp(CA_R0, CA_R0, COP_Arg1, CC_RGBA, ShaderGenerator.PushTempRegister());
+			}
+
+			bool HaveUniqueMask = false;
+
+			if(Shader->SelfIlluminationMask != Shader->SelfIllumination && Shader->SelfIlluminationMask != Shader->Diffuse){
+				HandleSimpleMaterial(Shader->SelfIlluminationMask, ShaderGenerator, &ModifierInfo);
+				HaveUniqueMask = true;
+			}
+
+			EColorArg SelfIllumArg = ShaderGenerator.PopTempRegister();
+			EColorArg DiffuseArg = ShaderGenerator.PopTempRegister();
+
+			EColorArg MaskArg;
+
+			if(HaveUniqueMask)
+				MaskArg = CA_R0;
+			else if(HaveUniqueSelfIllumination && Shader->SelfIlluminationMask == Shader->SelfIllumination)
+				MaskArg = SelfIllumArg;
+			else
+				MaskArg = DiffuseArg;
+
+			ShaderGenerator.AddColorOp(SelfIllumArg, SelfIllumArg, COP_Arg1, CC_RGB, CR_1);
+			ShaderGenerator.AddColorOp(MaskArg, MaskArg, COP_Arg1, CC_A, CR_1);
+
+			if(HaveEnv && Shader->SpecularInTheDark){
+				ShaderGenerator.AddColorOp(MaskArg, MaskArg, COP_Arg1, CC_A_TO_RGBA, CR_0);
+				ShaderGenerator.AddColorOp(CA_R0, CA_EmissionFactor, COP_Add, CC_RGBA, CR_EmissionFactor, COPM_Saturate);
+			}else{
+				ShaderGenerator.AddColorOp(MaskArg, MaskArg, COP_Arg1, CC_A_TO_RGBA, CR_EmissionFactor);
+			}
+
+			ShaderGenerator.AddColorOp(DiffuseArg, DiffuseArg, COP_Arg1, CC_RGBA, CR_0);
+			ShaderGenerator.AddColorOp(CA_R1, CA_R0, COP_AlphaBlendInverted, CC_RGB, CR_0);
+		}else{
+			HandleSimpleMaterial(Shader->SelfIllumination, ShaderGenerator, &ModifierInfo);
+			// TODO: Maybe just disable dynamic lighting here
+			ShaderGenerator.AddColorOp(CA_Const1, CA_Const1, COP_Arg1, CC_RGBA, CR_EmissionFactor);
+		}
+	}else{
+		EColorArg DiffuseArg = HaveDiffuse ? CA_R0 : CA_Diffuse;
+
+		ShaderGenerator.AddColorOp(DiffuseArg, CA_R1, EnvColorOp, CC_RGB, CR_0);
+		ShaderGenerator.AddColorOp(DiffuseArg, DiffuseArg, COP_Arg1, CC_A, CR_0);
+	}
+
+	if(Shader->Opacity){
+		if((HaveDiffuse && Shader->Opacity != Shader->Diffuse) || (HaveSelfIllumination && Shader->Opacity != Shader->SelfIllumination)){
+			ShaderGenerator.AddColorOp(CA_R0, CA_R0, COP_Arg1, CC_RGB, ShaderGenerator.PushTempRegister());
+			HandleSimpleMaterial(Shader->Opacity, ShaderGenerator, &ModifierInfo);
+			ShaderGenerator.AddColorOp(ShaderGenerator.PopTempRegister(), CA_R0, COP_Arg1, CC_RGB, CR_0);
+		}
+	}
+
+	if(Shader->Detail && Shader->Detail->IsA<UBitmapMaterial>()){
+		INT Index = CurrentState->NumTextures++;
+		SetBitmapTexture(static_cast<UBitmapMaterial*>(Shader->Detail), Index, Shader->DetailScale);
+		EColorArg DetailArg = ShaderGenerator.AddTexture(Index, TCS_Stream0);
+		ShaderGenerator.AddColorOp(DetailArg, CA_R0, COP_Modulate2X, CC_RGB, CR_0);
 	}
 }
 

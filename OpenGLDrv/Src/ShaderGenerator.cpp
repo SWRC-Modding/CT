@@ -80,6 +80,7 @@ FStringTemp FShaderGenerator::GetShaderText(bool UseStaticLighting){
 				break;
 			case TCS_BumpSphereCameraSpaceNormal:
 			case TCS_BumpSphereCameraSpaceReflection:
+				//TexCoord = "normalize(LocalToWorld * vec4(InNormal.zyz, 0.0) * vec4(-0.5, -0.5, 0.5, 1.0) + vec4(0.5, 0.5, 0.5, 0.0))";
 				TexCoord = "normalize(WorldToCamera * vec4(InNormal.xyz, 0.0) * vec4(0.5, -0.5, 0.5, 1.0) + 0.5)";
 				break;
 			default:

@@ -1175,14 +1175,14 @@ bool FOpenGLRenderInterface::SetTerrainMaterial(UTerrainMaterial* TerrainMateria
 			SetGeneratedShader(ShaderGenerator, CurrentState->UseStaticLighting);
 		}
 	}else{
-		if(!TerrainMaterial->FirstPass){
-			SetFramebufferBlending(FB_Translucent);
-			CurrentState->bZWrite = false;
-			CurrentState->FogColor = FPlane(0.0f, 0.0f, 0.0f, 0.0f);
-			CurrentState->OverrideFogColor = true;
-		}
-
 		if(TerrainMaterial->RenderMethod == RM_CombinedWeightMap){
+			if(!TerrainMaterial->FirstPass){
+				SetFramebufferBlending(FB_Translucent);
+				CurrentState->bZWrite = false;
+				CurrentState->FogColor = FPlane(0.0f, 0.0f, 0.0f, 0.0f);
+				CurrentState->OverrideFogColor = true;
+			}
+
 			const TArray<FTerrainMaterialLayer>& Layers = TerrainMaterial->Layers;
 			checkSlow(Layers.Num() == 3 || Layers.Num() == 4);
 			checkSlow(Layers[0].Texture->IsA<UBitmapMaterial>());
@@ -1267,26 +1267,22 @@ bool FOpenGLRenderInterface::SetTerrainMaterial(UTerrainMaterial* TerrainMateria
 
 			ShaderGenerator.AddTexture(0, TCS_WorldCoords, TCN_2DCoords, 0);
 			ShaderGenerator.AddTexture(1, TCS_Stream0);
-			ShaderGenerator.AddColorOp(CA_Diffuse, CA_T0, COP_Modulate2X, CC_RGBA, CR_0);
-			ShaderGenerator.AddColorOp(CA_R0, CA_T1, COP_Modulate, CC_RGBA, Layers.Num() == 1 ? CR_0 : CR_1);
+			ShaderGenerator.AddColorOp(CA_Diffuse, CA_T0, COP_Modulate, CC_RGBA, CR_0);
+			ShaderGenerator.AddColorOp(CA_R0, CA_T1, COP_Modulate, CC_RGBA, CR_0);
 
 			for(INT i = 1; i < Layers.Num(); ++i){
-				checkSlow(Layers[0].Texture->IsA<UBitmapMaterial>());
+				checkSlow(Layers[i].Texture->IsA<UBitmapMaterial>());
 				INT TextureIndex = i * 2;
 				INT AlphaWeightIndex = TextureIndex + 1;
 
-				SetBitmapTexture(static_cast<UBitmapMaterial*>(Layers[0].Texture), TextureIndex);
-				SetBitmapTexture(static_cast<UBitmapMaterial*>(Layers[0].AlphaWeight), AlphaWeightIndex);
+				SetBitmapTexture(static_cast<UBitmapMaterial*>(Layers[i].Texture), TextureIndex);
+				SetBitmapTexture(static_cast<UBitmapMaterial*>(Layers[i].AlphaWeight), AlphaWeightIndex);
 				TexMatrices[i] = Layers[i].TextureMatrix;
 				++NumTexMatrices;
 
 				ShaderGenerator.AddTexture(TextureIndex, TCS_WorldCoords, TCN_2DCoords, i);
 				ShaderGenerator.AddTexture(AlphaWeightIndex, TCS_Stream0);
-				ShaderGenerator.AddColorOp(static_cast<EColorArg>(CA_T0 + TextureIndex), CA_Diffuse, COP_Modulate2X, CC_RGBA, CR_0);
-				ShaderGenerator.AddColorOp(static_cast<EColorArg>(CA_T0 + AlphaWeightIndex), CA_R0, COP_ModulateAddDest, CC_RGBA, CR_1);
-
-				if(i == Layers.Num() - 1)
-					ShaderGenerator.AddColorOp(CA_R1, CA_R1, COP_Arg1, CC_RGBA, CR_0);
+				ShaderGenerator.AddColorOp(static_cast<EColorArg>(CA_T0 + TextureIndex), static_cast<EColorArg>(CA_T0 + AlphaWeightIndex), COP_ModulateAddDest, CC_RGBA, CR_0);
 			}
 
 			SetGeneratedShader(ShaderGenerator, CurrentState->UseStaticLighting);

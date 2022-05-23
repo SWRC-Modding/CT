@@ -1133,17 +1133,8 @@ void FOpenGLRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorStri
 			SetShader(*Shader);
 	}
 
-	if(Result){
-		if(IsHardwareShader){
-			// Specular is expected to be zero by default for hardware shaders
-			RenDev->glVertexAttrib4f(FVF_Specular,  0.0f, 0.0f, 0.0f, 0.0f);
-		}else{
-			// Specular is expected to be 1.0 by default for fixed function lighting calculations
-			RenDev->glVertexAttrib4f(FVF_Specular,  1.0f, 1.0f, 1.0f, 1.0f);
-		}
-	}else{
+	if(!Result)
 		SetShader(RenDev->ErrorShader);
-	}
 
 	unguardSlow;
 }

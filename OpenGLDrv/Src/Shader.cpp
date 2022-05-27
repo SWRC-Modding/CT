@@ -3,21 +3,20 @@
 
 // FOpenGLShader
 
-FOpenGLShader::FOpenGLShader(UOpenGLRenderDevice* InRenDev, const FString& InName) : RenDev(InRenDev),
-                                                                                     Name(InName),
-                                                                                     Program(GL_NONE){}
+FOpenGLShader::FOpenGLShader(UOpenGLRenderDevice* InRenDev) : RenDev(InRenDev),
+                                                              Program(GL_NONE){}
 
 FOpenGLShader::~FOpenGLShader(){
 	Free();
 }
 
-void FOpenGLShader::Compile(const FString& InShaderCode){
+void FOpenGLShader::Compile(const TCHAR* InShaderCode, const TCHAR* ShaderName){
 	FString ShaderCode = InShaderCode;
 
 	RenDev->ExpandShaderMacros(&ShaderCode);
 
-	GLuint VertexShader = CompileShader(GL_VERTEX_SHADER, ShaderCode, Name + SHADER_FILE_EXTENSION + " - vertex shader");
-	GLuint FragmentShader = CompileShader(GL_FRAGMENT_SHADER, ShaderCode, Name + SHADER_FILE_EXTENSION + " - fragment shader");
+	GLuint VertexShader = CompileShader(GL_VERTEX_SHADER, *ShaderCode, *(FStringTemp(ShaderName) + SHADER_FILE_EXTENSION + " - vertex shader"));
+	GLuint FragmentShader = CompileShader(GL_FRAGMENT_SHADER, *ShaderCode, *(FStringTemp(ShaderName) + SHADER_FILE_EXTENSION + " - fragment shader"));
 
 	if(!VertexShader || !FragmentShader){
 		if(VertexShader)
@@ -57,7 +56,7 @@ void FOpenGLShader::Compile(const FString& InShaderCode){
 		GLchar Buffer[512];
 
 		RenDev->glGetProgramInfoLog(NewProgram, ARRAY_COUNT(Buffer), NULL, Buffer);
-		debugf("Shader program linking failed for %s: %s", *Name, Buffer);
+		debugf("Shader program linking failed for %s: %s", ShaderName, Buffer);
 		RenDev->glDeleteProgram(NewProgram);
 	}
 }
@@ -80,7 +79,7 @@ void FOpenGLShader::Free(){
 	}
 }
 
-GLuint FOpenGLShader::CompileShader(GLenum Type, const FString& ShaderCode, const FString& ShaderName){
+GLuint FOpenGLShader::CompileShader(GLenum Type, const TCHAR* ShaderCode, const TCHAR* ShaderName){
 	GLuint Handle = RenDev->glCreateShader(Type);
 	const TCHAR* ShaderVars = NULL;
 
@@ -94,7 +93,7 @@ GLuint FOpenGLShader::CompileShader(GLenum Type, const FString& ShaderCode, cons
 	const TCHAR* ShaderText[] = {
 		ShaderVars,
 		"#line 1\n",
-		*ShaderCode
+		ShaderCode
 	};
 
 	RenDev->glShaderSource(Handle, ARRAY_COUNT(ShaderText), ShaderText, NULL);
@@ -108,7 +107,7 @@ GLuint FOpenGLShader::CompileShader(GLenum Type, const FString& ShaderCode, cons
 		GLchar Buffer[512];
 
 		RenDev->glGetShaderInfoLog(Handle, ARRAY_COUNT(Buffer), NULL, Buffer);
-		debugf("Shader compilation failed for %s: %s", *ShaderName, Buffer);
+		debugf("Shader compilation failed for %s: %s", ShaderName, Buffer);
 		RenDev->glDeleteShader(Handle);
 		Handle = GL_NONE;
 	}

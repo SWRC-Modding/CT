@@ -20,25 +20,24 @@ typedef ALIGN(16) FMatrix GLSL_mat4;
 
 class FOpenGLShader{
 public:
-	FOpenGLShader(UOpenGLRenderDevice* InRenDev, const FString& InName);
+	FOpenGLShader(UOpenGLRenderDevice* InRenDev);
 	~FOpenGLShader();
 
-	void Compile(const FString& InShaderCode);
+	void Compile(const TCHAR* InShaderCode, const TCHAR* ShaderName); // Shader name is used for error messages only
 	void Bind() const;
 	void Free();
 	bool IsValid() const{ return !!Program; }
 
 	UOpenGLRenderDevice* RenDev;
-	FString              Name;
 	GLuint               Program;
 
 private:
-	GLuint CompileShader(GLenum Type, const FString& ShaderCode, const FString& ShaderName);
+	GLuint CompileShader(GLenum Type, const TCHAR* ShaderCode, const TCHAR* ShaderName);
 };
 
 class FOpenGLCachedShader : public FOpenGLShader{
 public:
-	FOpenGLCachedShader(UOpenGLRenderDevice* InRenDev, const FString& InName) : FOpenGLShader(InRenDev, InName){}
+	FOpenGLCachedShader(UOpenGLRenderDevice* InRenDev) : FOpenGLShader(InRenDev){}
 
 	INT Index;
 };

@@ -43,40 +43,37 @@ FStringTemp FShaderGenerator::GetShaderText(bool UseStaticLighting){
 				TexCoord = FString::Printf("InTexCoord%i", Textures[i].TexCoordSrc);
 				break;
 			case TCS_WorldCoords:
-				TexCoord += "vec4(InPosition.xyz, 1.0)";
+				TexCoord += "vec4(Position, 0.0)";
 				break;
 			case TCS_CameraCoords:
 				TexCoord += "(WorldToCamera * vec4(Position, 1.0))";
 				break;
 			case TCS_CubeWorldSpaceReflection:
-				TexCoord += "vec4(reflect(normalize(Position - CameraToWorld[3].xyz), InNormal.xyz), 0.0)";
+				TexCoord += "vec4(reflect(normalize(Position - CameraToWorld[3].xyz), Normal), 0.0)";
 				break;
 			case TCS_CubeCameraSpaceReflection:
-				TexCoord = "(WorldToCamera * vec4(reflect(normalize(Position - CameraToWorld[3].xyz), InNormal.xyz), 0.0))";
+				TexCoord = "(WorldToCamera * vec4(reflect(normalize(Position - CameraToWorld[3].xyz), Normal), 0.0))";
 				break;
 			case TCS_ProjectorCoords:
-				TexCoord = "vec4(Normal, 1.0)";
-				break;
-			case TCS_NoChange:
-				appErrorf("TCS_NoChange cannot be used as a texture coordinate source");
+				TexCoord = "(WorldToCamera * vec4(Normal, 0.0))";
 				break;
 			case TCS_SphereWorldSpaceReflection:
-				TexCoord = "(vec4(reflect(normalize(Position - CameraToWorld[3].xyz), InNormal.xyz), 0.0) * vec4(0.5, -0.5, 0.5, 1.0) + 0.5)";
+				TexCoord = "vec4(reflect(normalize(Position - CameraToWorld[3].xyz), Normal) * vec3(0.5, -0.5, 0.5) + 0.5, 0.0)";
 				break;
 			case TCS_SphereCameraSpaceReflection:
-				TexCoord = "(WorldToCamera * vec4(reflect(normalize(Position - CameraToWorld[3].xyz), InNormal.xyz), 0.0) * vec4(0.5, -0.5, 0.5, 1.0) + 0.5)";
+				TexCoord = "vec4((WorldToCamera * vec4(reflect(normalize(Position - CameraToWorld[3].xyz), Normal), 0.0)).xyz * vec3(0.5, -0.5, 0.5) + 0.5, 0.0)";
 				break;
 			case TCS_CubeWorldSpaceNormal:
-				TexCoord += "InNormal";
+				TexCoord += "vec4(Normal, 0.0)";
 				break;
 			case TCS_CubeCameraSpaceNormal:
-				TexCoord = "(WorldToCamera * vec4(InNormal.xyz, 0.0))";
+				TexCoord = "(WorldToCamera * vec4(Normal, 0.0))";
 				break;
 			case TCS_SphereWorldSpaceNormal:
-				TexCoord = "(InNormal * vec4(0.5, -0.5, 0.5, 1.0) + 0.5)";
+				TexCoord = "vec4(Normal * vec3(0.5, -0.5, 0.5) + 0.5, 0.0)";
 				break;
 			case TCS_SphereCameraSpaceNormal:
-				TexCoord = "(WorldToCamera * vec4(InNormal.xyz, 0.0) * vec4(0.5, -0.5, 0.5, 1.0) + 0.5)";
+				TexCoord = "vec4((WorldToCamera * vec4(Normal, 0.0)).xyz * vec3(0.5, -0.5, 0.5) + 0.5, 0.0)";
 				break;
 			case TCS_BumpSphereCameraSpaceNormal:
 			case TCS_BumpSphereCameraSpaceReflection:
@@ -247,7 +244,7 @@ FStringTemp FShaderGenerator::GetShaderText(bool UseStaticLighting){
 		"\treturn AmbientLightColor.rgb " + (UseStaticLighting ? " * Specular.rgb" : "") + " + DiffuseLight;\n"
 		"}\n"
 		"void main(void){\n"
-		"\tvec4 r0;\n"
+		"\tvec4 r0 = Specular;\n"
 		"\tvec4 r1;\n"
 		"\tvec4 r2;\n"
 		"\tvec4 r3;\n"

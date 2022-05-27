@@ -320,10 +320,10 @@ private:
 	FOpenGLShader               ParticleShaderSpecialBlend;
 	FOpenGLShader               ParticleShaderSpecialBlendTFactor;
 	FOpenGLShader               ParticleShaderBlendSubdivisions;
-	FOpenGLShader               TerrainShaderAlphaMapBitmap;
-	FOpenGLShader               TerrainShaderAlphaMapBitmapLighting;
-	FOpenGLShader               TerrainShaderCombinedWeightMap3;
-	FOpenGLShader               TerrainShaderCombinedWeightMap4;
+	FOpenGLShader               TerrainShaderAlphaMap;
+	FOpenGLShader               TerrainShaderAlphaMapStaticLighting;
+	FOpenGLShader               TerrainShader3Layers;
+	FOpenGLShader               TerrainShader4Layers;
 
 	bool                        ModifyFramebufferBlending;
 	bool                        UsingLightmap;

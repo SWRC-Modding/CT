@@ -9,7 +9,7 @@ IMPLEMENT_CLASS(UOpenGLRenderDevice)
 
 UOpenGLRenderDevice::UOpenGLRenderDevice() : RenderInterface(this),
                                              Backbuffer(0, 0, TEXF_RGBA8, false, false),
-                                             ErrorShader(this, "ERRORSHADER"){}
+                                             ErrorShader(this){}
 
 void UOpenGLRenderDevice::StaticConstructor(){
 	SupportsCubemaps       = 1;
@@ -108,10 +108,8 @@ FOpenGLResource* UOpenGLRenderDevice::GetCachedResource(QWORD CacheId){
 const FOpenGLShader* UOpenGLRenderDevice::GetShaderForMaterial(UMaterial* Material){
 	// HACK:
 	// Use the 30 bit padding space after UMaterial::UseFallback and UMaterial::Validated to store an index to quickly retrieve the shader for that material.
-	if(Material->Validated){
-		INT Index = reinterpret_cast<INT*>(Material)[24] >> 2;
-		return Index ? &ShadersByMaterial.GetPairs()[Index - 1].Value : NULL;
-	}
+	if(Material->Validated && Material->UseFallback)
+		return &ShadersByMaterial.GetPairs()[reinterpret_cast<INT*>(Material)[24] >> 2].Value;
 
 	if(Material->IsIn(UObject::GetTransientPackage())) // Only unique names, no Transient.InGameTempName
 		return NULL;
@@ -137,19 +135,25 @@ const FOpenGLShader* UOpenGLRenderDevice::GetShaderForMaterial(UMaterial* Materi
 	if(ShaderText.Len() > 0){
 		if(!Shader){
 			Shader = &ShadersByMaterial[Material->GetPathName()];
-			Shader->Index = ShadersByMaterial.Num();
+			Shader->Index = ShadersByMaterial.Num() - 1;
 		}
 
 		Shader->RenDev = this;
-		Shader->Name = ShaderPath;
-		Shader->Compile(ShaderText);
+		Shader->Compile(*ShaderText, *ShaderPath);
 		Material->UseFallback = 1;
 
 		INT Index = (reinterpret_cast<INT*>(Material)[24] & 0x3) | (Shader->Index << 2);
 
 		reinterpret_cast<INT*>(Material)[24] = Index;
 	}else if(!HardwareShader && LoadedEmpty){ // Reset shader if file is empty or deleted
-		ShadersByMaterial.Remove(Material->GetPathName());
+		if(Shader){
+			Shader->Free();
+			Shader = NULL;
+			Material->UseFallback = 0;
+		}
+
+		reinterpret_cast<INT*>(Material)[24] &= 0x3;
+	}else if(!Material->UseFallback){
 		Shader = NULL;
 	}
 
@@ -337,7 +341,11 @@ UBOOL UOpenGLRenderDevice::Init(){
 	if(bUseTrilinear)
 		TextureFilter = TF_Trilinear;
 
-	UMaterial::ClearFallbacks();
+	for(TObjectIterator<UMaterial> It; It; ++It){
+		It->UseFallback = 0;
+		It->Validated = 0;
+		reinterpret_cast<INT*>(*It)[24] &= 0x3;
+	}
 
 	return 1;
 }
@@ -552,8 +560,9 @@ UBOOL UOpenGLRenderDevice::SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL
                             "}\n"
                             "#else\n"
                             "#error Shader type not implemented\n"
-                            "#endif\n");
-		check(ErrorShader.Program);
+                            "#endif\n",
+							"ERRORSHADER");
+		check(ErrorShader.IsValid());
 
 		/*
 		 * Mirror image since the FrameFx render targets expect d3d coordinates

@@ -397,7 +397,7 @@ void FOpenGLRenderInterface::SetGeneratedShader(FShaderGenerator& ShaderGenerato
 
 	if(!Shader->IsValid()){
 		Shader->RenDev = RenDev;
-		Shader->Compile(ShaderGenerator.GetShaderText(UseStaticLighting));
+		Shader->Compile(*ShaderGenerator.GetShaderText(UseStaticLighting), "<generated>");
 	}
 
 	if(NumTexMatrices > 0)
@@ -720,17 +720,16 @@ bool FOpenGLRenderInterface::HandleShaderMaterial(UShader* Shader, FShaderGenera
 
 	bool HaveEnv = false;
 	EColorOp EnvColorOp = COP_Arg1;
+	INT BumpmapIndex = INDEX_NONE;
+
+	if(Shader->Bumpmap){
+		checkSlow(Shader->Bumpmap->IsA<UBitmapMaterial>());
+		BumpmapIndex = CurrentState->NumTextures++;
+		SetBitmapTexture(static_cast<UBitmapMaterial*>(Shader->Bumpmap), BumpmapIndex, Shader->BumpUVScale);
+		ShaderGenerator.AddTexture(BumpmapIndex, TCS_Stream0);
+	}
 
 	if(GCubemapManager && GCubemapManager->bEnabled){
-		INT BumpmapIndex = INDEX_NONE;
-
-		if(Shader->Bumpmap){
-			checkSlow(Shader->Bumpmap->IsA<UBitmapMaterial>());
-			BumpmapIndex = CurrentState->NumTextures++;
-			SetBitmapTexture(static_cast<UBitmapMaterial*>(Shader->Bumpmap), BumpmapIndex, Shader->BumpUVScale);
-			ShaderGenerator.AddTexture(BumpmapIndex, TCS_Stream0);
-		}
-
 		UBitmapMaterial* DiffuseEnvMap = NULL;
 
 		if(Shader->BumpMapType != BMT_Static_Specular && Shader->BumpMapType != BMT_Specular){
@@ -742,10 +741,14 @@ bool FOpenGLRenderInterface::HandleShaderMaterial(UShader* Shader, FShaderGenera
 		}
 
 		EColorArg DiffuseEnvTex = CA_Diffuse;
+		ETexCoordSrc BumpTexCoordSrc = TCS_SphereWorldSpaceNormal;
 
 		if(DiffuseEnvMap){
+			if(GCubemapManager->Actor)
+			CurrentState->Lights[0].Position = GCubemapManager->Actor->Location;
+			++CurrentState->UniformRevision;
 			INT Index = CurrentState->NumTextures++;
-			DiffuseEnvTex = ShaderGenerator.AddTexture(Index, TCS_BumpSphereCameraSpaceNormal, TCN_2DCoords, INDEX_NONE, false, BumpmapIndex);
+			DiffuseEnvTex = ShaderGenerator.AddTexture(Index, BumpTexCoordSrc, TCN_2DCoords, INDEX_NONE, false, BumpmapIndex);
 			SetBitmapTexture(DiffuseEnvMap, Index, 1.0, Shader->BumpSize, Shader->DiffuseMaskStrength / 255.0f, Shader->DiffuseStrength / 255.0f);
 			ShaderGenerator.AddColorOp(DiffuseEnvTex, DiffuseEnvTex, COP_Arg1, CC_RGBA, CR_1);
 		}
@@ -768,7 +771,7 @@ bool FOpenGLRenderInterface::HandleShaderMaterial(UShader* Shader, FShaderGenera
 			}
 
 			INT Index = CurrentState->NumTextures++;
-			EColorArg SpecularEnvTex = ShaderGenerator.AddTexture(Index, TCS_BumpSphereCameraSpaceNormal, TCN_2DCoords, MatrixIndex, false, BumpmapIndex);
+			EColorArg SpecularEnvTex = ShaderGenerator.AddTexture(Index, BumpTexCoordSrc, TCN_2DCoords, MatrixIndex, false, BumpmapIndex);
 			SetBitmapTexture(SpecularEnvMap, Index, 1.0, Shader->BumpSize, Shader->SpecularMaskStrength / 255.0f, Shader->SpecularStrength / 255.0f);
 			ShaderGenerator.AddColorOp(DiffuseEnvTex, SpecularEnvTex, DiffuseEnvMap ? COP_Add : COP_Arg2, CC_RGBA, CR_1);
 
@@ -849,21 +852,7 @@ bool FOpenGLRenderInterface::HandleShaderMaterial(UShader* Shader, FShaderGenera
 			ShaderGenerator.AddColorOp(CA_Const1, CA_Const1, COP_Arg1, CC_RGBA, CR_EmissionFactor);
 		}
 	}else{
-		EColorArg DiffuseArg = HaveDiffuse ? CA_R0 : CA_Diffuse;
-
-		ShaderGenerator.AddColorOp(DiffuseArg, CA_R1, EnvColorOp, CC_RGB, CR_0);
-		ShaderGenerator.AddColorOp(DiffuseArg, DiffuseArg, COP_Arg1, CC_A, CR_0);
-	}
-
-	if(Shader->Opacity){
-		if((HaveDiffuse && Shader->Opacity != Shader->Diffuse) || (HaveSelfIllumination && Shader->Opacity != Shader->SelfIllumination)){
-			ShaderGenerator.AddColorOp(CA_R0, CA_R0, COP_Arg1, CC_RGB, ShaderGenerator.PushTempRegister());
-
-			if(!HandleSimpleMaterial(Shader->Opacity, ShaderGenerator, &ModifierInfo))
-				return false;
-
-			ShaderGenerator.AddColorOp(ShaderGenerator.PopTempRegister(), CA_R0, COP_Arg1, CC_RGB, CR_0);
-		}
+		ShaderGenerator.AddColorOp(CA_R0, CA_R1, EnvColorOp, CC_RGB, CR_0);
 	}
 
 	if(Shader->Detail && Shader->Detail->IsA<UBitmapMaterial>()){
@@ -871,6 +860,44 @@ bool FOpenGLRenderInterface::HandleShaderMaterial(UShader* Shader, FShaderGenera
 		SetBitmapTexture(static_cast<UBitmapMaterial*>(Shader->Detail), Index, Shader->DetailScale);
 		EColorArg DetailArg = ShaderGenerator.AddTexture(Index, TCS_Stream0);
 		ShaderGenerator.AddColorOp(DetailArg, CA_R0, COP_Modulate2X, CC_RGB, CR_0);
+	}
+
+	if(Shader->Specular){
+		ShaderGenerator.AddColorOp(CA_R0, CA_R0, COP_Arg1, CC_RGBA, ShaderGenerator.PushTempRegister());
+
+		FModifierInfo SpecularModifier = ModifierInfo;
+
+		SpecularModifier.TexCoordSrc = TCS_SphereWorldSpaceReflection;
+
+		UMaterial* SpecularMaterial = RemoveModifiers(Shader->Specular, &SpecularModifier);
+
+		if(SpecularMaterial->IsA<UBitmapMaterial>()){
+			INT Index = CurrentState->NumTextures++;
+			SBYTE SpecularMatrix = INDEX_NONE;
+
+			if(SpecularModifier.bUseTexMatrix){
+				SpecularMatrix = static_cast<SBYTE>(NumTexMatrices++);
+				TexMatrices[SpecularMatrix] = SpecularModifier.TexMatrix;
+			}
+
+			SetBitmapTexture(static_cast<UBitmapMaterial*>(SpecularMaterial), Index, 1.0f, Shader->BumpSize);
+			EColorArg SpecTex = ShaderGenerator.AddTexture(Index, SpecularModifier.TexCoordSrc, SpecularModifier.TexCoordCount, SpecularMatrix, false, BumpmapIndex);
+			ShaderGenerator.AddColorOp(SpecTex, SpecTex, COP_Arg1, CC_RGB, CR_0);
+		}else{
+			if(!HandleSimpleMaterial(Shader->Specular, ShaderGenerator, &SpecularModifier))
+				return false;
+		}
+	}
+
+	if(Shader->Opacity){
+		if((HaveDiffuse && Shader->Opacity != Shader->Diffuse) || (HaveSelfIllumination && Shader->Opacity != Shader->SelfIllumination) || !HaveDiffuse && !HaveSelfIllumination){
+			ShaderGenerator.AddColorOp(CA_R0, CA_R0, COP_Arg1, CC_RGB, ShaderGenerator.PushTempRegister());
+
+			if(!HandleSimpleMaterial(Shader->Opacity, ShaderGenerator, &ModifierInfo))
+				return false;
+
+			ShaderGenerator.AddColorOp(ShaderGenerator.PopTempRegister(), CA_R0, COP_Arg1, CC_RGB, CR_0);
+		}
 	}
 
 	return true;
@@ -1142,25 +1169,10 @@ bool FOpenGLRenderInterface::SetTerrainMaterial(UTerrainMaterial* TerrainMateria
 			CurrentState->NumTextures = 2;
 
 			bool UseLighting = CurrentState->UseStaticLighting || CurrentState->UseDynamicLighting;
-			FOpenGLShader* Shader = UseLighting ? &TerrainShaderAlphaMapBitmapLighting : &TerrainShaderAlphaMapBitmap;
+			const FOpenGLShader& Shader = UseLighting ? TerrainShaderAlphaMapStaticLighting : TerrainShaderAlphaMap;
 
-			if(!Shader->IsValid()){
-				FShaderGenerator ShaderGenerator;
-
-				ShaderGenerator.AddTexture(0, TCS_WorldCoords, TCN_2DCoords, 0);
-				ShaderGenerator.AddTexture(1, TCS_Stream0);
-				ShaderGenerator.AddColorOp(CA_T0, CA_T0, COP_Arg1, CC_RGBA, CR_0);
-
-				if(UseLighting)
-					ShaderGenerator.AddColorOp(CA_R0, CA_Diffuse, COP_Modulate2X, CC_RGB, CR_0);
-
-				ShaderGenerator.AddColorOp(CA_T1, CA_T1, COP_Arg1, CC_A, CR_0);
-
-				Shader->Compile(ShaderGenerator.GetShaderText(UseLighting));
-			}
-
-			RenDev->glProgramUniformMatrix4fv(Shader->Program, 0, 1, GL_TRUE, reinterpret_cast<const GLfloat*>(&Layer.TextureMatrix));
-			SetShader(*Shader);
+			RenDev->glProgramUniformMatrix4fv(Shader.Program, 0, 1, GL_TRUE, reinterpret_cast<const GLfloat*>(&Layer.TextureMatrix));
+			SetShader(Shader);
 		}else{
 			UShader* ShaderMaterial = Cast<UShader>(Layer.Texture);
 
@@ -1240,30 +1252,10 @@ bool FOpenGLRenderInterface::SetTerrainMaterial(UTerrainMaterial* TerrainMateria
 				NumTexMatrices = 3;
 			}
 
-			FOpenGLShader* Shader = Layer4 ? &TerrainShaderCombinedWeightMap4 : &TerrainShaderCombinedWeightMap3;
+			const FOpenGLShader& Shader = Layer4 ? TerrainShader4Layers : TerrainShader3Layers;
 
-			if(!Shader->IsValid()){
-				FShaderGenerator ShaderGenerator;
-
-				ShaderGenerator.AddTexture(0, TCS_Stream0);
-				ShaderGenerator.AddTexture(1, TCS_WorldCoords, TCN_2DCoords, 0);
-				ShaderGenerator.AddTexture(2, TCS_WorldCoords, TCN_2DCoords, 1);
-				ShaderGenerator.AddTexture(3, TCS_WorldCoords, TCN_2DCoords, 2);
-				ShaderGenerator.AddColorOp(CA_T1, CA_T0R, COP_Modulate, CC_RGBA, CR_0);
-				ShaderGenerator.AddColorOp(CA_T2, CA_T0G, COP_ModulateAddDest, CC_RGBA, CR_0);
-				ShaderGenerator.AddColorOp(CA_T3, CA_T0B, COP_ModulateAddDest, CC_RGBA, CR_0);
-
-				if(Layer4){
-					ShaderGenerator.AddTexture(4, TCS_WorldCoords, TCN_2DCoords, 3);
-					ShaderGenerator.AddColorOp(CA_T4, CA_T0A, COP_ModulateAddDest, CC_RGBA, CR_0);
-				}
-
-				ShaderGenerator.AddColorOp(CA_R0, CA_Diffuse, COP_Modulate, CC_RGBA, CR_0);
-				Shader->Compile(ShaderGenerator.GetShaderText(true));
-			}
-
-			RenDev->glProgramUniformMatrix4fv(Shader->Program, 0, NumTexMatrices, GL_TRUE, reinterpret_cast<const GLfloat*>(TexMatrices));
-			SetShader(*Shader);
+			RenDev->glProgramUniformMatrix4fv(Shader.Program, 0, NumTexMatrices, GL_TRUE, reinterpret_cast<const GLfloat*>(TexMatrices));
+			SetShader(Shader);
 		}else{
 			FShaderGenerator ShaderGenerator;
 			const TArray<FTerrainMaterialLayer>& Layers = TerrainMaterial->Layers;

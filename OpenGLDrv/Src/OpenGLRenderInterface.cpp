@@ -184,29 +184,29 @@ static GLint GetTextureWrapMode(/*ETexClampMode*/BYTE Mode){
 FOpenGLRenderInterface::FOpenGLRenderInterface(UOpenGLRenderDevice* InRenDev) : RenDev(InRenDev),
                                                                                 PrecacheMode(PRECACHE_All),
 																				CurrentState(&SavedStates[0]),
-                                                                                LightingOnlyShader(InRenDev, "LightingOnly"),
-                                                                                LightingOnlyShader2X(InRenDev, "LightingOnly2X"),
-                                                                                LightingOnlyShaderLightmap(InRenDev, "LightingOnlyLightmap"),
-                                                                                LightingOnlyShaderLightmap2X(InRenDev, "LightingOnlyLightmap2X"),
-                                                                                BitmapShader(InRenDev, "Bitmap"),
-                                                                                BitmapShaderDetail(InRenDev, "BitmapDetail"),
-                                                                                BitmapShaderStaticLighting(InRenDev, "BitmapStaticLighting"),
-                                                                                BitmapShaderStaticLightingDetail(InRenDev, "BitmapStaticLightingDetail"),
-                                                                                BitmapShaderLightmap(InRenDev, "BitmapLightmap"),
-                                                                                BitmapShaderLightmapDetail(InRenDev, "BitmapLightmapDetail"),
-                                                                                BitmapShaderLightmapStaticLighting(InRenDev, "BitmapLightmapStaticLighting"),
-                                                                                BitmapShaderLightmapStaticLightingDetail(InRenDev, "BitmapLightmapStaticLightingDetail"),
-                                                                                BitmapShaderLightmap2X(InRenDev, "BitmapLightmap2x"),
-                                                                                BitmapShaderLightmap2XDetail(InRenDev, "BitmapLightmap2XDetail"),
-                                                                                ParticleShader(InRenDev, "Particle"),
-                                                                                ParticleShaderTFactor(InRenDev, "ParticleTFactor"),
-                                                                                ParticleShaderSpecialBlend(InRenDev, "ParticleSpecialBlend"),
-                                                                                ParticleShaderSpecialBlendTFactor(InRenDev, "ParticleSpecialBlendTFactor"),
-                                                                                ParticleShaderBlendSubdivisions(InRenDev, "ParticleBlendSubdivisions"),
-                                                                                TerrainShaderAlphaMapBitmap(InRenDev, "TerrainAlphaMapBitmap"),
-                                                                                TerrainShaderAlphaMapBitmapLighting(InRenDev, "TerrainAlphaMapBitmapLighting"),
-                                                                                TerrainShaderCombinedWeightMap3(InRenDev, "TerrainCombinedWeightMap3"),
-                                                                                TerrainShaderCombinedWeightMap4(InRenDev, "TerrainCombinedWeightMap4"){}
+                                                                                LightingOnlyShader(InRenDev),
+                                                                                LightingOnlyShader2X(InRenDev),
+                                                                                LightingOnlyShaderLightmap(InRenDev),
+                                                                                LightingOnlyShaderLightmap2X(InRenDev),
+                                                                                BitmapShader(InRenDev),
+                                                                                BitmapShaderDetail(InRenDev),
+                                                                                BitmapShaderStaticLighting(InRenDev),
+                                                                                BitmapShaderStaticLightingDetail(InRenDev),
+                                                                                BitmapShaderLightmap(InRenDev),
+                                                                                BitmapShaderLightmapDetail(InRenDev),
+                                                                                BitmapShaderLightmapStaticLighting(InRenDev),
+                                                                                BitmapShaderLightmapStaticLightingDetail(InRenDev),
+                                                                                BitmapShaderLightmap2X(InRenDev),
+                                                                                BitmapShaderLightmap2XDetail(InRenDev),
+                                                                                ParticleShader(InRenDev),
+                                                                                ParticleShaderTFactor(InRenDev),
+                                                                                ParticleShaderSpecialBlend(InRenDev),
+                                                                                ParticleShaderSpecialBlendTFactor(InRenDev),
+                                                                                ParticleShaderBlendSubdivisions(InRenDev),
+                                                                                TerrainShaderAlphaMap(InRenDev),
+                                                                                TerrainShaderAlphaMapStaticLighting(InRenDev),
+                                                                                TerrainShader3Layers(InRenDev),
+                                                                                TerrainShader4Layers(InRenDev){}
 
 void FOpenGLRenderInterface::Init(INT ViewportWidth, INT ViewportHeight){
 	checkSlow(RenDev->IsCurrent());
@@ -305,69 +305,99 @@ void FOpenGLRenderInterface::Init(INT ViewportWidth, INT ViewportHeight){
 
 	// LightingOnly
 	ShaderGenerator.AddColorOp(CA_Diffuse, CA_Diffuse, COP_Arg1, CC_RGBA, CR_0);
-	LightingOnlyShader.Compile(ShaderGenerator.GetShaderText(false));
+	LightingOnlyShader.Compile(*ShaderGenerator.GetShaderText(false), "LightingOnly");
 	ShaderGenerator.Reset();
 	ShaderGenerator.AddTexture(0, TCS_Stream1);
 	ShaderGenerator.AddColorOp(CA_Diffuse, CA_T0, COP_Modulate, CC_RGBA, CR_0);
-	LightingOnlyShaderLightmap.Compile(ShaderGenerator.GetShaderText(false));
+	LightingOnlyShaderLightmap.Compile(*ShaderGenerator.GetShaderText(false), "LightingOnlyLightmap");
 	ShaderGenerator.Reset();
 	ShaderGenerator.AddColorOp(CA_Diffuse, CA_Diffuse, COP_Arg1, CC_RGBA, CR_0);
-	LightingOnlyShader2X.Compile(ShaderGenerator.GetShaderText(false));
+	LightingOnlyShader2X.Compile(*ShaderGenerator.GetShaderText(false), "LightingOnly2X");
 	ShaderGenerator.AddTexture(0, TCS_Stream1);
 	ShaderGenerator.AddColorOp(CA_R0, CA_T0, COP_Modulate2X, CC_RGB, CR_0);
-	LightingOnlyShaderLightmap2X.Compile(ShaderGenerator.GetShaderText(false));
-	ShaderGenerator.Reset();
+	LightingOnlyShaderLightmap2X.Compile(*ShaderGenerator.GetShaderText(false), "LightingOnlyLightmap2X");
 	// Bitmap
+	ShaderGenerator.Reset();
 	ShaderGenerator.AddTexture(0, TCS_Stream0);
 	ShaderGenerator.AddColorOp(CA_T0, CA_R0, COP_Arg1, CC_RGBA, CR_0);
-	BitmapShader.Compile(ShaderGenerator.GetShaderText(false));
-	BitmapShaderStaticLighting.Compile(ShaderGenerator.GetShaderText(true));
+	BitmapShader.Compile(*ShaderGenerator.GetShaderText(false), "Bitmap");
+	BitmapShaderStaticLighting.Compile(*ShaderGenerator.GetShaderText(true), "BitmapStaticLighting");
 	ShaderGenerator.AddTexture(2, TCS_Stream0);
 	ShaderGenerator.AddColorOp(CA_T1, CA_R0, COP_Modulate2X, CC_RGB, CR_0);
-	BitmapShaderDetail.Compile(ShaderGenerator.GetShaderText(false));
-	BitmapShaderStaticLightingDetail.Compile(ShaderGenerator.GetShaderText(true));
+	BitmapShaderDetail.Compile(*ShaderGenerator.GetShaderText(false), "BitmapDetail");
+	BitmapShaderStaticLightingDetail.Compile(*ShaderGenerator.GetShaderText(true), "BitmapStaticLightingDetail");
 	ShaderGenerator.Reset();
 	ShaderGenerator.AddTexture(0, TCS_Stream0);
 	ShaderGenerator.AddTexture(1, TCS_Stream1);
 	ShaderGenerator.AddColorOp(CA_T0, CA_T1, COP_Modulate, CC_RGBA, CR_0);
-	BitmapShaderLightmap.Compile(ShaderGenerator.GetShaderText(false));
-	BitmapShaderLightmapStaticLighting.Compile(ShaderGenerator.GetShaderText(true));
+	BitmapShaderLightmap.Compile(*ShaderGenerator.GetShaderText(false), "BitmapLightmap");
+	BitmapShaderLightmapStaticLighting.Compile(*ShaderGenerator.GetShaderText(true), "BitmapLightmapStaticLighting");
 	ShaderGenerator.AddTexture(2, TCS_Stream0);
 	ShaderGenerator.AddColorOp(CA_T2, CA_R0, COP_Modulate2X, CC_RGB, CR_0);
-	BitmapShaderLightmapDetail.Compile(ShaderGenerator.GetShaderText(false));
-	BitmapShaderLightmapStaticLightingDetail.Compile(ShaderGenerator.GetShaderText(true));
+	BitmapShaderLightmapDetail.Compile(*ShaderGenerator.GetShaderText(false), "BitmapLightmapDetail");
+	BitmapShaderLightmapStaticLightingDetail.Compile(*ShaderGenerator.GetShaderText(true), "BitmapLightmapStaticLightingDetail");
 	ShaderGenerator.Reset();
 	ShaderGenerator.AddTexture(0, TCS_Stream0);
 	ShaderGenerator.AddTexture(1, TCS_Stream1);
 	ShaderGenerator.AddColorOp(CA_T0, CA_T1, COP_Modulate2X, CC_RGBA, CR_0);
-	BitmapShaderLightmap2X.Compile(ShaderGenerator.GetShaderText(false));
+	BitmapShaderLightmap2X.Compile(*ShaderGenerator.GetShaderText(false), "BitmapLightmap2X");
 	ShaderGenerator.AddTexture(2, TCS_Stream0);
 	ShaderGenerator.AddColorOp(CA_T2, CA_R0, COP_Modulate2X, CC_RGB, CR_0);
-	BitmapShaderLightmap2XDetail.Compile(ShaderGenerator.GetShaderText(false));
-	ShaderGenerator.Reset();
+	BitmapShaderLightmap2XDetail.Compile(*ShaderGenerator.GetShaderText(false), "BitmapLightmap2XDetail");
 	// Particle
+	ShaderGenerator.Reset();
 	ShaderGenerator.AddTexture(0, TCS_Stream0);
 	ShaderGenerator.AddColorOp(CA_T0, CA_Specular, COP_Modulate, CC_RGBA, CR_0);
-	ParticleShader.Compile(ShaderGenerator.GetShaderText(false));
+	ParticleShader.Compile(*ShaderGenerator.GetShaderText(false), "Particle");
 	ShaderGenerator.Reset();
 	ShaderGenerator.AddTexture(0, TCS_Stream0);
 	ShaderGenerator.AddColorOp(CA_T0, CA_GlobalColor, COP_Modulate, CC_RGBA, CR_0);
-	ParticleShaderTFactor.Compile(ShaderGenerator.GetShaderText(false));
+	ParticleShaderTFactor.Compile(*ShaderGenerator.GetShaderText(false), "ParticleTFactor");
 	ShaderGenerator.Reset();
 	ShaderGenerator.AddTexture(0, TCS_Stream0);
 	ShaderGenerator.AddColorOp(CA_T0, CA_Specular, COP_BlendDiffuseAlpha, CC_RGBA, CR_0);
-	ParticleShaderSpecialBlend.Compile(ShaderGenerator.GetShaderText(false));
+	ParticleShaderSpecialBlend.Compile(*ShaderGenerator.GetShaderText(false), "ParticleSpecialBlend");
 	ShaderGenerator.Reset();
 	ShaderGenerator.AddTexture(0, TCS_Stream0);
 	ShaderGenerator.AddColorOp(CA_T0, CA_GlobalColor, COP_BlendDiffuseAlpha, CC_RGBA, CR_0);
-	ParticleShaderSpecialBlendTFactor.Compile(ShaderGenerator.GetShaderText(false));
+	ParticleShaderSpecialBlendTFactor.Compile(*ShaderGenerator.GetShaderText(false), "ParticleSpecialBlendTFactor");
 	ShaderGenerator.Reset();
 	ShaderGenerator.AddTexture(0, TCS_Stream0);
 	ShaderGenerator.AddTexture(0, TCS_Stream1);
 	ShaderGenerator.AddColorOp(CA_T0, CA_T1, COP_BlendDiffuseAlpha, CC_RGBA, CR_0);
 	ShaderGenerator.AddColorOp(CA_R0, CA_Specular, COP_Modulate, CC_RGB, CR_0);
-	ParticleShaderBlendSubdivisions.Compile(ShaderGenerator.GetShaderText(false));
-	// TODO: Initialize terrain shaders here
+	ParticleShaderBlendSubdivisions.Compile(*ShaderGenerator.GetShaderText(false), "ParticleBlendSubdivsions");
+	// Terrain
+	ShaderGenerator.Reset();
+	ShaderGenerator.AddTexture(0, TCS_WorldCoords, TCN_2DCoords, 0);
+	ShaderGenerator.AddTexture(1, TCS_Stream0);
+	ShaderGenerator.AddColorOp(CA_T0, CA_T0, COP_Arg1, CC_RGBA, CR_0);
+	ShaderGenerator.AddColorOp(CA_T1, CA_T1, COP_Arg1, CC_A, CR_0);
+	TerrainShaderAlphaMap.Compile(*ShaderGenerator.GetShaderText(false), "TerrainAlphaMap");
+	ShaderGenerator.AddColorOp(CA_R0, CA_Diffuse, COP_Modulate2X, CC_RGB, CR_0);
+	TerrainShaderAlphaMapStaticLighting.Compile(*ShaderGenerator.GetShaderText(false), "TerrainAlphaMapStaticLighting");
+	ShaderGenerator.Reset();
+	ShaderGenerator.AddTexture(0, TCS_Stream0);
+	ShaderGenerator.AddTexture(1, TCS_WorldCoords, TCN_2DCoords, 0);
+	ShaderGenerator.AddTexture(2, TCS_WorldCoords, TCN_2DCoords, 1);
+	ShaderGenerator.AddTexture(3, TCS_WorldCoords, TCN_2DCoords, 2);
+	ShaderGenerator.AddColorOp(CA_T1, CA_T0R, COP_Modulate, CC_RGBA, CR_0);
+	ShaderGenerator.AddColorOp(CA_T2, CA_T0G, COP_ModulateAddDest, CC_RGBA, CR_0);
+	ShaderGenerator.AddColorOp(CA_T3, CA_T0B, COP_ModulateAddDest, CC_RGBA, CR_0);
+	ShaderGenerator.AddColorOp(CA_R0, CA_Diffuse, COP_Modulate, CC_RGBA, CR_0);
+	TerrainShader3Layers.Compile(*ShaderGenerator.GetShaderText(true), "Terrain3Layers");
+	ShaderGenerator.Reset();
+	ShaderGenerator.AddTexture(0, TCS_Stream0);
+	ShaderGenerator.AddTexture(1, TCS_WorldCoords, TCN_2DCoords, 0);
+	ShaderGenerator.AddTexture(2, TCS_WorldCoords, TCN_2DCoords, 1);
+	ShaderGenerator.AddTexture(3, TCS_WorldCoords, TCN_2DCoords, 2);
+	ShaderGenerator.AddTexture(4, TCS_WorldCoords, TCN_2DCoords, 3);
+	ShaderGenerator.AddColorOp(CA_T1, CA_T0R, COP_Modulate, CC_RGBA, CR_0);
+	ShaderGenerator.AddColorOp(CA_T2, CA_T0G, COP_ModulateAddDest, CC_RGBA, CR_0);
+	ShaderGenerator.AddColorOp(CA_T3, CA_T0B, COP_ModulateAddDest, CC_RGBA, CR_0);
+	ShaderGenerator.AddColorOp(CA_T4, CA_T0A, COP_ModulateAddDest, CC_RGBA, CR_0);
+	ShaderGenerator.AddColorOp(CA_R0, CA_Diffuse, COP_Modulate, CC_RGBA, CR_0);
+	TerrainShader4Layers.Compile(*ShaderGenerator.GetShaderText(true), "Terrain4Layers");
 }
 
 void FOpenGLRenderInterface::Flush(){
@@ -402,19 +432,24 @@ void FOpenGLRenderInterface::Exit(){
 	LightingOnlyShaderLightmap.Free();
 	LightingOnlyShaderLightmap2X.Free();
 	BitmapShader.Free();
+	BitmapShaderDetail.Free();
 	BitmapShaderStaticLighting.Free();
+	BitmapShaderStaticLightingDetail.Free();
 	BitmapShaderLightmap.Free();
+	BitmapShaderLightmapDetail.Free();
 	BitmapShaderLightmapStaticLighting.Free();
+	BitmapShaderLightmapStaticLightingDetail.Free();
 	BitmapShaderLightmap2X.Free();
+	BitmapShaderLightmap2XDetail.Free();
 	ParticleShader.Free();
 	ParticleShaderTFactor.Free();
 	ParticleShaderSpecialBlend.Free();
 	ParticleShaderSpecialBlendTFactor.Free();
 	ParticleShaderBlendSubdivisions.Free();
-	TerrainShaderAlphaMapBitmap.Free();
-	TerrainShaderAlphaMapBitmapLighting.Free();
-	TerrainShaderCombinedWeightMap3.Free();
-	TerrainShaderCombinedWeightMap4.Free();
+	TerrainShaderAlphaMap.Free();
+	TerrainShaderAlphaMapStaticLighting.Free();
+	TerrainShader3Layers.Free();
+	TerrainShader4Layers.Free();
 }
 
 void FOpenGLRenderInterface::CommitRenderState(){

@@ -1223,37 +1223,29 @@ bool FOpenGLRenderInterface::SetTerrainMaterial(UTerrainMaterial* TerrainMateria
 			TexMatrices[1] = Layers[1].TextureMatrix;
 			TexMatrices[2] = Layers[2].TextureMatrix;
 
-			// HACK:
-			// WTF??? Terrain code *sometimes* produces an incorrect matrix causing the textures to be stretched.
-			// M[0][0] == 0.0f is a reliable way to check for that and correct the error.
-			// FIXME: Do the other RenderMethod branches also need this? Haven't seen any visual errors so far...
-			if(TexMatrices[0].M[0][0] == 0.0f){
-				Exchange(TexMatrices[0].M[0][0], TexMatrices[0].M[0][1]);
-				Exchange(TexMatrices[0].M[2][0], TexMatrices[0].M[1][1]);
-				Exchange(TexMatrices[0].M[2][1], TexMatrices[0].M[2][2]);
-			}
-
-			if(TexMatrices[1].M[0][0] == 0.0f){
-				Exchange(TexMatrices[1].M[0][0], TexMatrices[1].M[0][2]);
-				Exchange(TexMatrices[1].M[0][1], TexMatrices[1].M[1][1]);
-				Exchange(TexMatrices[1].M[1][1], TexMatrices[1].M[2][2]);
-			}
-
 			bool Layer4 = Layers.Num() > 3;
 
 			if(Layer4){
 				SetBitmapTexture(static_cast<UBitmapMaterial*>(Layers[3].Texture), 4);
 				TexMatrices[3] = Layers[3].TextureMatrix;
-
-				if(TexMatrices[3].M[0][0] == 0.0f){
-					Exchange(TexMatrices[3].M[0][0], TexMatrices[3].M[0][2]);
-					Exchange(TexMatrices[3].M[0][1], TexMatrices[3].M[1][1]);
-					Exchange(TexMatrices[3].M[1][1], TexMatrices[3].M[2][2]);
-				}
-
 				NumTexMatrices = 4;
 			}else{
 				NumTexMatrices = 3;
+			}
+
+			// HACK:
+			// WTF??? Terrain code _sometimes_ produces a matrix where the first three rows are exchanged (2,3,1 instead of 1,2,3)
+			// M[0][0] == 0.0f is a reliable way to check for that and correct the error.
+			for(INT i = 0; i < NumTexMatrices; ++i){
+				if(TexMatrices[i].M[0][0] == 0.0f){
+					FPlane Row0 = TexMatrices[i].Rows()[0];
+					FPlane Row1 = TexMatrices[i].Rows()[1];
+					FPlane Row2 = TexMatrices[i].Rows()[2];
+
+					TexMatrices[i].Rows()[0] = Row2;
+					TexMatrices[i].Rows()[1] = Row0;
+					TexMatrices[i].Rows()[2] = Row1;
+				}
 			}
 
 			const FOpenGLShader& Shader = Layer4 ? TerrainShader4Layers : TerrainShader3Layers;

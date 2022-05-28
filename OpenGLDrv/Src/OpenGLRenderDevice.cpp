@@ -347,6 +347,9 @@ UBOOL UOpenGLRenderDevice::Init(){
 		reinterpret_cast<INT*>(*It)[24] &= 0x3;
 	}
 
+	checkSlow(UTexture::__Client);
+	appMemcpy(TextureLODSet, UTexture::__Client->TextureLODSet, LODSET_MAX);
+
 	return 1;
 }
 
@@ -683,6 +686,13 @@ FRenderInterface* UOpenGLRenderDevice::Lock(UViewport* Viewport, BYTE* HitData, 
 	if(bAutoReloadShaders && LoadShaderMacroText()){
 		ShaderFileTimes.Empty(); // Macros may have changed, so force reload all shaders
 		UMaterial::ClearFallbacks();
+	}
+
+	BYTE* ClientTextureLODSet = UTexture::__Client->TextureLODSet;
+
+	if(appMemcmp(TextureLODSet, ClientTextureLODSet, LODSET_MAX) != 0){
+		appMemcpy(TextureLODSet, ClientTextureLODSet, LODSET_MAX);
+		Flush(Viewport);
 	}
 
 	return &RenderInterface;

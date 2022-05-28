@@ -270,7 +270,7 @@ void FOpenGLTexture::Cache(FBaseTexture* BaseTexture, bool bOwnDepthBuffer){
 				for(INT MipIndex = 0; MipIndex < NumMips; ++MipIndex){
 					void* Data = ConvertTextureData(CubemapFace, MipWidth, MipHeight, MipIndex + FirstMip, DestFormat);
 					UploadTextureData(DestFormat, Data, MipWidth, MipHeight, MipIndex, FaceIndex);
-					CubemapFace->UnloadRawTextureData(MipIndex + FirstMip);
+					//CubemapFace->UnloadRawTextureData(MipIndex + FirstMip);
 					MipWidth >>= 1;
 					MipHeight >>= 1;
 					MaxLevel += FaceIndex == 0;
@@ -307,7 +307,7 @@ void FOpenGLTexture::Cache(FBaseTexture* BaseTexture, bool bOwnDepthBuffer){
 			                      DestFormat,
 			                      0,
 			                      1);
-			Child->UnloadRawTextureData(0);
+			//Child->UnloadRawTextureData(0);
 		}
 
 		UploadTextureData(DestFormat, Data, Width, Height, 0);
@@ -330,7 +330,7 @@ void FOpenGLTexture::Cache(FBaseTexture* BaseTexture, bool bOwnDepthBuffer){
 			for(INT MipIndex = 0; MipIndex < NumMips; ++MipIndex){
 				void* Data = ConvertTextureData(Texture, MipWidth, MipHeight, MipIndex + FirstMip, DestFormat);
 				UploadTextureData(DestFormat, Data, MipWidth, MipHeight, MipIndex);
-				Texture->UnloadRawTextureData(MipIndex + FirstMip);
+				//Texture->UnloadRawTextureData(MipIndex + FirstMip);
 				MipWidth >>= 1;
 				MipHeight >>= 1;
 				++MaxLevel;

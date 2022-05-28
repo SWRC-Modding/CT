@@ -741,7 +741,7 @@ void FOpenGLRenderInterface::SetShader(const FOpenGLShader& Shader){
 void FOpenGLRenderInterface::PushState(DWORD Flags){
 	++CurrentState;
 
-	check(CurrentState <= &SavedStates[MAX_STATESTACKDEPTH] && "PushState overflow");
+	checkSlow(CurrentState <= &SavedStates[MAX_STATESTACKDEPTH] && "PushState overflow");
 	appMemcpy(CurrentState, CurrentState - 1, sizeof(FOpenGLSavedState));
 }
 
@@ -750,7 +750,7 @@ void FOpenGLRenderInterface::PopState(DWORD Flags){
 
 	--CurrentState;
 
-	check(CurrentState >= &SavedStates[0] && "PopState underflow");
+	checkSlow(CurrentState >= &SavedStates[0] && "PopState underflow");
 
 	if((Flags & DONT_RESTORE_RENDER_TARGET) != 0){
 		CurrentState->RenderTarget = PoppedState->RenderTarget;

@@ -262,7 +262,7 @@ static void MainLoop(){
 				// NOTE: When using OpenALSoft the fps limit doesn't work properly and will be at around 60 at all times.
 				// This is due to sleep taking longer than expected due to some timer changes that I don't know of.
 				// So we just use Sleep(0) in a loop to at least give up the current time slice. This works fine with or without OpenALSoft.
-				Sleep(0);
+				//Sleep(Delta);
 				Delta = DesiredFrameTime - (appSeconds() - OldTime);
 			}
 		}

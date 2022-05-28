@@ -744,9 +744,6 @@ bool FOpenGLRenderInterface::HandleShaderMaterial(UShader* Shader, FShaderGenera
 		ETexCoordSrc BumpTexCoordSrc = TCS_SphereWorldSpaceNormal;
 
 		if(DiffuseEnvMap){
-			if(GCubemapManager->Actor)
-			CurrentState->Lights[0].Position = GCubemapManager->Actor->Location;
-			++CurrentState->UniformRevision;
 			INT Index = CurrentState->NumTextures++;
 			DiffuseEnvTex = ShaderGenerator.AddTexture(Index, BumpTexCoordSrc, TCN_2DCoords, INDEX_NONE, false, BumpmapIndex);
 			SetBitmapTexture(DiffuseEnvMap, Index, 1.0, Shader->BumpSize, Shader->DiffuseMaskStrength / 255.0f, Shader->DiffuseStrength / 255.0f);
@@ -861,7 +858,7 @@ bool FOpenGLRenderInterface::HandleShaderMaterial(UShader* Shader, FShaderGenera
 		EColorArg DetailArg = ShaderGenerator.AddTexture(Index, TCS_Stream0);
 		ShaderGenerator.AddColorOp(DetailArg, CA_R0, COP_Modulate2X, CC_RGB, CR_0);
 	}
-
+#if 0
 	if(Shader->Specular){
 		ShaderGenerator.AddColorOp(CA_R0, CA_R0, COP_Arg1, CC_RGBA, ShaderGenerator.PushTempRegister());
 
@@ -888,7 +885,7 @@ bool FOpenGLRenderInterface::HandleShaderMaterial(UShader* Shader, FShaderGenera
 				return false;
 		}
 	}
-
+#endif
 	if(Shader->Opacity){
 		if((HaveDiffuse && Shader->Opacity != Shader->Diffuse) || (HaveSelfIllumination && Shader->Opacity != Shader->SelfIllumination) || !HaveDiffuse && !HaveSelfIllumination){
 			ShaderGenerator.AddColorOp(CA_R0, CA_R0, COP_Arg1, CC_RGB, ShaderGenerator.PushTempRegister());
@@ -1022,7 +1019,7 @@ bool FOpenGLRenderInterface::SetProjectorMaterial(UProjectorMaterial* ProjectorM
 
 	if(ProjectorMaterial->bStaticProjector){
 		FModifierInfo ModifierInfo;
-		UBitmapMaterial* ProjectedBitmap = Cast<UBitmapMaterial>(RemoveModifiers(ProjectorMaterial->Projected));
+		UBitmapMaterial* ProjectedBitmap = Cast<UBitmapMaterial>(RemoveModifiers(ProjectorMaterial->Projected, &ModifierInfo));
 
 		if(ProjectedBitmap){
 			BYTE BaseMaterialBlending = ProjectorMaterial->BaseMaterialBlending;
@@ -1039,9 +1036,16 @@ bool FOpenGLRenderInterface::SetProjectorMaterial(UProjectorMaterial* ProjectorM
 					return false;
 			}
 
+			SBYTE Matrix = INDEX_NONE;
+
+			if(ModifierInfo.bUseTexMatrix){
+				Matrix = static_cast<SBYTE>(NumTexMatrices++);
+				TexMatrices[Matrix] = ModifierInfo.TexMatrix;
+			}
+
 			INT TextureIndex = CurrentState->NumTextures++;
 			SetBitmapTexture(ProjectedBitmap, TextureIndex);
-			EColorArg TextureArg = ShaderGenerator.AddTexture(TextureIndex, TCS_Stream0, TCN_3DCoords, INDEX_NONE, true);
+			EColorArg TextureArg = ShaderGenerator.AddTexture(TextureIndex, TCS_Stream0, TCN_3DCoords, Matrix, true);
 
 			switch(BaseMaterialBlending){
 			case PB_AlphaBlend:

@@ -91,7 +91,7 @@ private:
 	FOpenGLRenderInterface              RenderInterface;
 
 	FAuxRenderTarget                    Backbuffer;
-	unsigned int                        BackbufferDepthStencil; // Shared with UFrameFX::WorkingTarget
+	GLuint                              BackbufferDepthStencil; // Shared with UFrameFX::WorkingTarget
 
 	UBOOL                               bFirstRun;
 	UBOOL                               bUseTrilinear;

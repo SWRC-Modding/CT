@@ -680,8 +680,6 @@ void UOpenGLRenderDevice::EnableVSync(bool bEnable){
 
 FRenderInterface* UOpenGLRenderDevice::Lock(UViewport* Viewport, BYTE* HitData, INT* HitSize){
 	MakeCurrent();
-	RenderInterface.Locked(Viewport);
-	RenderInterface.SetRenderTarget(&Backbuffer, false);
 
 	if(bAutoReloadShaders && LoadShaderMacroText()){
 		ShaderFileTimes.Empty(); // Macros may have changed, so force reload all shaders
@@ -694,6 +692,9 @@ FRenderInterface* UOpenGLRenderDevice::Lock(UViewport* Viewport, BYTE* HitData, 
 		appMemcpy(TextureLODSet, ClientTextureLODSet, LODSET_MAX);
 		Flush(Viewport);
 	}
+
+	RenderInterface.Locked(Viewport);
+	RenderInterface.SetRenderTarget(&Backbuffer, false);
 
 	return &RenderInterface;
 }

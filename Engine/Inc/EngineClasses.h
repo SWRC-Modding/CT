@@ -5560,6 +5560,31 @@ public:
 };
 
 /*
+ * TexEnvMap
+ */
+
+enum ETexEnvMapType{
+	EM_CubeWorldSpaceReflection,
+	EM_CubeCameraSpaceReflection,
+	EM_SphereWorldSpaceReflection,
+	EM_SphereCameraSpaceReflection,
+	EM_CubeWorldSpaceNormal,
+	EM_CubeCameraSpaceNormal,
+	EM_SphereWorldSpaceNormal,
+	EM_SphereCameraSpaceNormal
+};
+
+class ENGINE_API UTexEnvMap : public UTexModifier{
+public:
+	BYTE EnvMapType;
+
+	DECLARE_CLASS(UTexEnvMap,UTexModifier,0,Engine)
+
+	// UTexModifier interface
+	virtual FMatrix* GetMatrix(FLOAT TimeSeconds);
+};
+
+/*
  * TexMatrix
  */
 

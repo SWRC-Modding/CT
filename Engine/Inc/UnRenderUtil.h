@@ -87,7 +87,7 @@ public:
 	void DrawBox(const FBox& Box, FColor Color);
 
 	// DrawCircle - Buffers a wireframe circle for rendering.
-	void DrawCircle(const FVector& Base, const FVector& X, const FVector& Y, FColor Color, FLOAT Radius, INT NumSides);
+	void DrawCircle(const FVector& Base, const FVector& X, FColor Color, FLOAT Radius, INT NumSides);
 
 	// DrawCylinder - Buffers a wireframe cylinder for rendering.
 	void DrawCylinder(const FVector& Base, const FVector& Dir, FColor Color, FLOAT Radius, FLOAT HalfHeight, INT NumSides);
@@ -101,8 +101,7 @@ public:
 	// FRenderResource interface.
 	virtual QWORD GetCacheId();
 	virtual INT GetRevision();
-
-
+	// FVertexStream interface
 	virtual INT GetSize();
 	virtual INT GetStride();
 	virtual INT GetComponents(FVertexComponent* OutComponents);

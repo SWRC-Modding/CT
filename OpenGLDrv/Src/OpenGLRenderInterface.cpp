@@ -1091,7 +1091,7 @@ void FOpenGLRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorStri
 	FModifierInfo ModifierInfo;
 
 	if(Modifier){
-		Material = RemoveModifiers(Cast<UModifier>(Material), &ModifierInfo);
+		Material = RemoveModifiers(Cast<UModifier>(Material), ModifierInfo);
 
 		if(!Material){
 			SetShader(RenDev->ErrorShader);

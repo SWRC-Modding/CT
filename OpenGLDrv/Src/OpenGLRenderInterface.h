@@ -296,7 +296,7 @@ private:
 		                  TexCoordCount(TCN_2DCoords){}
 	};
 
-	UMaterial* RemoveModifiers(UMaterial* InMaterial, FModifierInfo* ModifierInfo = NULL);
+	UMaterial* RemoveModifiers(UMaterial* InMaterial, FModifierInfo& ModifierInfo);
 	void GetShaderConstants(FSConstantsInfo* Info, FPlane* Constants, INT NumConstants);
 	void SetTexture(FBaseTexture* Texture, INT TextureIndex, FLOAT UVScale = 1.0f, FLOAT BumpSize = 1.0f, FLOAT BumpLumaScale = 1.0f, FLOAT BumpLumaOffset = 0.0f);
 	void SetBitmapTexture(UBitmapMaterial* Bitmap, INT TextureIndex, FLOAT UVScale = 1.0f, FLOAT BumpSize = 1.0f, FLOAT BumpLumaScale = 1.0f, FLOAT BumpLumaOffset = 0.0f);

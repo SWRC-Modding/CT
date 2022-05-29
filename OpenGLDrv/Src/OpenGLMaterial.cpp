@@ -2,7 +2,7 @@
 #include "OpenGLRenderDevice.h"
 #include "OpenGLResource.h"
 
-UMaterial* FOpenGLRenderInterface::RemoveModifiers(UMaterial* InMaterial, FModifierInfo* ModifierInfo){
+UMaterial* FOpenGLRenderInterface::RemoveModifiers(UMaterial* InMaterial, FModifierInfo& ModifierInfo){
 	UModifier* Modifier = Cast<UModifier>(InMaterial);
 
 	if(!Modifier)
@@ -18,7 +18,7 @@ UMaterial* FOpenGLRenderInterface::RemoveModifiers(UMaterial* InMaterial, FModif
 
 	// Collect modifiers
 
-	if(Material && ModifierInfo){
+	if(Material){
 		Modifier = FirstModifier;
 
 		// Apply modifiers
@@ -26,21 +26,21 @@ UMaterial* FOpenGLRenderInterface::RemoveModifiers(UMaterial* InMaterial, FModif
 			if(Modifier->IsA<UTexModifier>()){
 				UTexModifier* TexModifier = static_cast<UTexModifier*>(Modifier);
 
-				if(TexModifier->TexCoordSource != TCS_NoChange){
-					ModifierInfo->bTexCoordProjected = TexModifier->TexCoordProjected;
-					ModifierInfo->TexCoordSrc = static_cast<ETexCoordSrc>(TexModifier->TexCoordSource);
-					ModifierInfo->TexCoordCount = static_cast<ETexCoordCount>(TexModifier->TexCoordCount);
-				}
-
 				FMatrix* Matrix = TexModifier->GetMatrix(GEngineTime);
 
 				if(Matrix && *Matrix != FMatrix::Identity){
-					ModifierInfo->TexMatrix *= *Matrix;
-					ModifierInfo->bUseTexMatrix = 1;
+					ModifierInfo.TexMatrix *= *Matrix;
+					ModifierInfo.bUseTexMatrix = 1;
 				}
 
-				ModifierInfo->TexUClamp = static_cast<ETexClampModeOverride>(TexModifier->UClampMode);
-				ModifierInfo->TexVClamp = static_cast<ETexClampModeOverride>(TexModifier->VClampMode);
+				if(TexModifier->TexCoordSource != TCS_NoChange){
+					ModifierInfo.bTexCoordProjected = TexModifier->TexCoordProjected;
+					ModifierInfo.TexCoordSrc = static_cast<ETexCoordSrc>(TexModifier->TexCoordSource);
+					ModifierInfo.TexCoordCount = static_cast<ETexCoordCount>(TexModifier->TexCoordCount);
+				}
+
+				ModifierInfo.TexUClamp = static_cast<ETexClampModeOverride>(TexModifier->UClampMode);
+				ModifierInfo.TexVClamp = static_cast<ETexClampModeOverride>(TexModifier->VClampMode);
 			}else if(Modifier->IsA<UFinalBlend>()){
 				UFinalBlend* FinalBlend = static_cast<UFinalBlend*>(Modifier);
 
@@ -553,9 +553,29 @@ bool FOpenGLRenderInterface::HandleSimpleMaterial(UMaterial* Material, FShaderGe
 	FModifierInfo ModifierInfo = InModifierInfo ? *InModifierInfo : FModifierInfo();
 
 	if(Material->IsA<UModifier>())
-		Material = RemoveModifiers(static_cast<UModifier*>(Material), &ModifierInfo);
+		Material = RemoveModifiers(static_cast<UModifier*>(Material), ModifierInfo);
 
 	if(Material->IsA<UBitmapMaterial>()){
+		if(!ModifyFramebufferBlending && Material->IsA<UTexture>()){
+			// If the material is a simple texture, use it to get the blending options
+			UTexture* Texture = static_cast<UTexture*>(Material);
+
+			if(Texture->bMasked){
+				ModifyFramebufferBlending = true;
+				CurrentState->UniformRevision += CurrentState->AlphaRef != 0.5f;
+				CurrentState->AlphaRef = 0.5f;
+				SetFramebufferBlending(FB_Overwrite);
+			}else if(Texture->bAlphaTexture){
+				ModifyFramebufferBlending = true;
+				CurrentState->UniformRevision += CurrentState->AlphaRef != 0.0f;
+				CurrentState->AlphaRef = 0.0f;
+				SetFramebufferBlending(FB_AlphaBlend);
+			}
+
+			if(Texture->bTwoSided)
+				CurrentState->CullMode = CM_None;
+		}
+
 		INT Index = CurrentState->NumTextures++;
 
 		SetBitmapTexture(static_cast<UBitmapMaterial*>(Material), Index);
@@ -720,16 +740,19 @@ bool FOpenGLRenderInterface::HandleShaderMaterial(UShader* Shader, FShaderGenera
 
 	bool HaveEnv = false;
 	EColorOp EnvColorOp = COP_Arg1;
-	INT BumpmapIndex = INDEX_NONE;
 
-	if(Shader->Bumpmap){
-		checkSlow(Shader->Bumpmap->IsA<UBitmapMaterial>());
-		BumpmapIndex = CurrentState->NumTextures++;
-		SetBitmapTexture(static_cast<UBitmapMaterial*>(Shader->Bumpmap), BumpmapIndex, Shader->BumpUVScale);
-		ShaderGenerator.AddTexture(BumpmapIndex, TCS_Stream0);
-	}
+	checkSlow(GCubemapManager);
 
-	if(GCubemapManager && GCubemapManager->bEnabled){
+	if(GCubemapManager->bEnabled){
+		INT BumpmapIndex = INDEX_NONE;
+
+		if(Shader->Bumpmap){
+			checkSlow(Shader->Bumpmap->IsA<UBitmapMaterial>());
+			BumpmapIndex = CurrentState->NumTextures++;
+			SetBitmapTexture(static_cast<UBitmapMaterial*>(Shader->Bumpmap), BumpmapIndex, Shader->BumpUVScale);
+			ShaderGenerator.AddTexture(BumpmapIndex, TCS_Stream0);
+		}
+
 		UBitmapMaterial* DiffuseEnvMap = NULL;
 
 		if(Shader->BumpMapType != BMT_Static_Specular && Shader->BumpMapType != BMT_Specular){
@@ -754,10 +777,8 @@ bool FOpenGLRenderInterface::HandleShaderMaterial(UShader* Shader, FShaderGenera
 		FMatrix* Matrix = NULL;
 		UBitmapMaterial* SpecularEnvMap = NULL;
 
-		if(Shader->BumpMapType != BMT_Static_Diffuse && Shader->BumpMapType != BMT_Diffuse){
-			SpecularEnvMap = GCubemapManager->GetEnvLightmap(static_cast<EBumpMapType>(Shader->BumpMapType), Shader, &Matrix, UseMatrix);
-			SpecularEnvMap = GCubemapManager->StaticSpecularPolished;
-		}
+		if(Shader->BumpMapType != BMT_Static_Diffuse && Shader->BumpMapType != BMT_Diffuse)
+			SpecularEnvMap = GCubemapManager->GetEnvLightmap(BMT_Static_Specular, Shader, &Matrix, UseMatrix);
 
 		if(SpecularEnvMap){
 			SBYTE MatrixIndex = INDEX_NONE;
@@ -866,7 +887,7 @@ bool FOpenGLRenderInterface::HandleShaderMaterial(UShader* Shader, FShaderGenera
 
 		SpecularModifier.TexCoordSrc = TCS_SphereWorldSpaceReflection;
 
-		UMaterial* SpecularMaterial = RemoveModifiers(Shader->Specular, &SpecularModifier);
+		UMaterial* SpecularMaterial = RemoveModifiers(Shader->Specular, SpecularModifier);
 
 		if(SpecularMaterial->IsA<UBitmapMaterial>()){
 			INT Index = CurrentState->NumTextures++;
@@ -1019,7 +1040,7 @@ bool FOpenGLRenderInterface::SetProjectorMaterial(UProjectorMaterial* ProjectorM
 
 	if(ProjectorMaterial->bStaticProjector){
 		FModifierInfo ModifierInfo;
-		UBitmapMaterial* ProjectedBitmap = Cast<UBitmapMaterial>(RemoveModifiers(ProjectorMaterial->Projected, &ModifierInfo));
+		UBitmapMaterial* ProjectedBitmap = Cast<UBitmapMaterial>(RemoveModifiers(ProjectorMaterial->Projected, ModifierInfo));
 
 		if(ProjectedBitmap){
 			BYTE BaseMaterialBlending = ProjectorMaterial->BaseMaterialBlending;

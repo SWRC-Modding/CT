@@ -60,7 +60,6 @@ enum EColorChannel{
 	CC_RGBA,
 	CC_RGB,
 	CC_A,
-	CC_A_TO_RGB,
 	CC_A_TO_RGBA
 };
 

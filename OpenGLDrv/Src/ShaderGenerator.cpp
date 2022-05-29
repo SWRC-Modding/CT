@@ -142,10 +142,6 @@ FStringTemp FShaderGenerator::GetShaderText(bool UseStaticLighting){
 		case CC_A:
 			SrcSwizzle = ".a";
 			DestSwizzle = ".a";
-			break;
-		case CC_A_TO_RGB:
-			SrcSwizzle = ".a";
-			DestSwizzle = ".rgb";
 		}
 
 		FragmentShaderText += FString::Printf("\tr%i%s = ", ColorOps[i].Dest, DestSwizzle);
@@ -157,7 +153,7 @@ FStringTemp FShaderGenerator::GetShaderText(bool UseStaticLighting){
 		if(ColorOps[i].Modifier == COPM_Saturate)
 			FragmentShaderText += "saturate(";
 
-		if(ColorOps[i].Channel == CC_A_TO_RGB || ColorOps[i].Channel == CC_A_TO_RGBA)
+		if(ColorOps[i].Channel == CC_A_TO_RGBA)
 			FragmentShaderText += "(";
 
 		switch(ColorOps[i].Op){
@@ -198,9 +194,7 @@ FStringTemp FShaderGenerator::GetShaderText(bool UseStaticLighting){
 			FragmentShaderText += Arg1 + " * Diffuse.a + " + Arg2 + " * (1 - Diffuse.a)";
 		}
 
-		if(ColorOps[i].Channel == CC_A_TO_RGB)
-			FragmentShaderText += ").aaa";
-		else if(ColorOps[i].Channel == CC_A_TO_RGBA)
+		if(ColorOps[i].Channel == CC_A_TO_RGBA)
 			FragmentShaderText += ").aaaa";
 
 		if(ColorOps[i].Modifier == COPM_Saturate)

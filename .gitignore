@@ -1,20 +1,6 @@
-# Prerequisites
-*.d
-
 # Compiled Object files
-*.slo
-*.lo
-*.o
 *.obj
 *.res
-
-# Precompiled Headers
-*.gch
-*.pch
-
-# Fortran module files
-*.mod
-*.smod
 
 # Visual Studio
 /.vs
@@ -36,6 +22,17 @@
 
 # ctags
 tags
+
+# Native script packages
+/CTGame/Classes
+/CTMarkers/Classes
+/Core/Classes
+/Editor/Classes
+/Engine/Classes
+/Gameplay/Classes
+/IpDrv/Classes
+/Window/Classes
+/XInterface/Classes
 
 # Non-native script packages
 /AccessoryProperties
@@ -60,13 +57,12 @@ tags
 /UDebugMenu
 /VoicePacks
 /XGame
-/XInterface
 /XInterfaceCommon
 /XInterfaceCTMenus
 /XInterfaceGamespy
 /XInterfaceLive
 /XInterfaceMP
-# TODO: Remove
+# TODO: Remove once headers are added
 /UWindow
 /UnrealEd
 /WinDrv

@@ -5560,6 +5560,20 @@ public:
 };
 
 /*
+ * TexMatrix
+ */
+
+class ENGINE_API UTexMatrix : public UTexModifier{
+public:
+	FMatrix Matrix;
+
+	DECLARE_CLASS(UTexMatrix,UTexModifier,0,Engine)
+
+	// UTexModifier interface
+	virtual FMatrix* GetMatrix(FLOAT TimeSeconds) { return &Matrix; }
+};
+
+/*
  * TexOscillator
  */
 

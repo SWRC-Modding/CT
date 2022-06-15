@@ -4,9 +4,10 @@
 #include "../../Core/Inc/FFeedbackContextCmd.h"
 #include "../../Core/Inc/FConfigCacheIni.h"
 #include "../../Engine/Inc/Engine.h"
-#include "../../Editor/Inc/Editor.h"
 #include "../../Window/Inc/Window.h"
 #include "../../GameSpyMgr/Inc/GameSpyMgr.h"
+
+#pragma comment(lib, "Winmm.lib") // timeBeginPeriod, timeEndPeriod
 
 static struct FExecHook : public FExec, FNotifyHook{
 	WConfigProperties* Preferences;
@@ -54,14 +55,12 @@ static struct FExecHook : public FExec, FNotifyHook{
 
 			if(GEngine->IsA<UGameEngine>())
 				Level = static_cast<UGameEngine*>(GEngine)->GLevel;
-			else if(GEngine->IsA<UEditorEngine>())
-				Level = static_cast<UEditorEngine*>(GEngine)->Level;
 
 			if(Level){
 				if(ParseObject<UClass>(Cmd, "Class=", Class, ANY_PACKAGE)){
 					FLOAT MinDist = 999999.0f;
 
-					for(TActorIterator<AActor> It(Level); It; ++It){
+					foreach(AllActors, AActor, It, Level){
 						FLOAT Dist = Player ? FDist(It->Location, Player->Pawn ? Player->Pawn->Location : Player->Location) : 0.0f;
 
 						if(!It->bDeleteMe && It->IsA(Class) && Dist < MinDist){
@@ -70,7 +69,7 @@ static struct FExecHook : public FExec, FNotifyHook{
 						}
 					}
 				}else if(Parse(Cmd, "Name=", ActorName)){
-					for(TActorIterator<AActor> It(Level); It; ++It){
+					foreach(AllActors, AActor, It, Level){
 						if(!It->bDeleteMe && It->GetFName() == ActorName){
 							Found = *It;
 
@@ -230,12 +229,35 @@ static void MainLoop(){
 	DOUBLE SecondStartTime = OldTime;
 	DWORD  TickCount = 0;
 
+	LARGE_INTEGER CounterFrequency;
+	LARGE_INTEGER Counter;
+
+	QueryPerformanceFrequency(&CounterFrequency);
+	QueryPerformanceCounter(&Counter);
+
+	QWORD TicksFor2ms = (CounterFrequency.QuadPart + 499) / 500;
+	QWORD PreviousTicks = Counter.QuadPart;
+	QWORD RemainingTicks = 0;
+
 	while(GIsRunning && !GIsRequestingExit){
-		// Update the world.
-		guard(UpdateWorld);
 		DOUBLE NewTime  = appSeconds();
 		FLOAT DeltaTime = NewTime - OldTime;
 
+		// Handle all incoming messages.
+		guard(MessagePump);
+		MSG Msg;
+
+		while(PeekMessageA(&Msg,NULL, 0, 0, PM_REMOVE)){
+			if(Msg.message == WM_QUIT)
+				GIsRequestingExit = 1;
+
+			TranslateMessage(&Msg);
+			DispatchMessageA(&Msg);
+		}
+		unguard;
+
+		// Update the world.
+		guard(UpdateWorld);
 		GEngine->Tick(DeltaTime);
 
 		if(GWindowManager)
@@ -253,31 +275,31 @@ static void MainLoop(){
 
 		// Enforce optional maximum tick rate.
 		guard(EnforceTickRate);
-		FLOAT MaxTickRate = GEngine->GetMaxTickRate();
-		if(MaxTickRate > 0.0f){
-			DOUBLE DesiredFrameTime = 1.0 / MaxTickRate;
-			DOUBLE Delta = DesiredFrameTime - (appSeconds() - OldTime);
+		DWORD MaxTickRate = static_cast<DWORD>(GEngine->GetMaxTickRate());
 
-			while(Delta > KINDA_SMALL_NUMBER){
-				// NOTE: When using OpenALSoft the fps limit doesn't work properly and will be at around 60 at all times.
-				// This is due to sleep taking longer than expected due to some timer changes that I don't know of.
-				// So we just use Sleep(0) in a loop to at least give up the current time slice. This works fine with or without OpenALSoft.
-				//Sleep(Delta);
-				Delta = DesiredFrameTime - (appSeconds() - OldTime);
-			}
-		}
-		unguard;
+		if(MaxTickRate > 0){
+			QWORD Wait = (CounterFrequency.QuadPart + RemainingTicks) / MaxTickRate;
+			RemainingTicks = (CounterFrequency.QuadPart + RemainingTicks) % MaxTickRate;
 
-		// Handle all incoming messages.
-		guard(MessagePump);
-		MSG Msg;
+			timeBeginPeriod(1);
 
-		while(PeekMessageA(&Msg,NULL, 0, 0, PM_REMOVE)){
-			if(Msg.message == WM_QUIT)
-				GIsRequestingExit = 1;
+			QWORD Delta;
 
-			TranslateMessage(&Msg);
-			DispatchMessageA(&Msg);
+			do{
+				QueryPerformanceCounter(&Counter);
+				Delta = Counter.QuadPart - PreviousTicks;
+
+				if(Wait - Delta > TicksFor2ms)
+					Sleep(1);
+			}while(Delta < Wait);
+
+			timeEndPeriod(1);
+
+			PreviousTicks += Wait;
+		}else{
+			QueryPerformanceCounter(&Counter);
+
+			PreviousTicks = Counter.QuadPart;
 		}
 
 		unguard;

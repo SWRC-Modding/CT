@@ -10,4 +10,5 @@ augroup customhighlight
 	autocmd Syntax c,cpp syntax keyword cType BYTE SBYTE _WORD SWORD DWORD INT QWORD SQWORD ANSICHAR UNICHAR TCHAR UBOOL FLOAT DOUBLE SIZE_T BITFIELD
 	autocmd Syntax c,cpp syntax keyword cDefine check checkSlow verify verifySlow debugf appErrorf debugfSlow appErrorfSlow guard guardSlow guardFunc guardFuncSlow unguard unguardSlow unguardf unguardfSlow appMalloc appFree appRealloc
 	autocmd Syntax c,cpp syntax keyword cConstant INDEX_NONE
+	autocmd Syntax c,cpp syntax keyword cRepeat foreach
 augroup end

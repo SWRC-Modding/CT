@@ -258,7 +258,6 @@ void FOpenGLTexture::Cache(FBaseTexture* BaseTexture, bool bOwnDepthBuffer){
 
 			for(INT FaceIndex = 0; FaceIndex < 6; ++FaceIndex){
 				FTexture* CubemapFace = Cubemap->GetFace(FaceIndex);
-
 				check(CubemapFace);
 
 				INT FirstMip = CubemapFace->GetFirstMip();

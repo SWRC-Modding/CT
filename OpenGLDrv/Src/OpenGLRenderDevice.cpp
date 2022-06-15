@@ -770,7 +770,7 @@ void UOpenGLRenderDevice::Present(UViewport* Viewport){
 		SwapBuffers(DeviceContext);
 	}
 
-	check(glGetError() == GL_NO_ERROR);
+	checkSlow(glGetError() == GL_NO_ERROR);
 }
 
 void UOpenGLRenderDevice::ReadPixels(UViewport* Viewport, FColor* Pixels){

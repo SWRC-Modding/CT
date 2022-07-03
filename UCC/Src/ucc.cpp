@@ -215,7 +215,7 @@ int __cdecl main(int argc, char** argv){
 						if(ParseParam(appCmdLine(), "FullSourcePath") && (GSys->SourcePath.Len() < 2 || GSys->SourcePath[1] != ':'))
 							GSys->SourcePath = FStringTemp(appBaseDir()) * GSys->SourcePath;
 
-						if(ParseParam(appCmdLine(), "All")){
+						if(ParseParam(appCmdLine(), "NoIncremental")){
 							Warn.Log("Full rebuild");
 
 							FConfigSection* ConfigSection = GConfig->GetSectionPrivate("Editor.EditorEngine", 0, 0);
@@ -225,8 +225,12 @@ int __cdecl main(int argc, char** argv){
 
 								ConfigSection->MultiFind("EditPackages", Packages);
 
-								for(TArray<FConfigString>::TIterator It(Packages); It; ++It)
-									GFileManager->Delete(*(FStringTemp(appBaseDir()) * *It + ".u"), 1);
+								for(TArray<FConfigString>::TIterator It(Packages); It; ++It){
+									FFilename Filename = *(FStringTemp(appBaseDir()) * *It + ".u");
+
+									GLog->Logf("Deleting %s", *Filename.GetCleanFilename());
+									GFileManager->Delete(*Filename, 1);
+								}
 							}
 						}
 					}

@@ -221,20 +221,20 @@ function AddBot(optional string Name, optional int Team){
 
 		if(Name == ""){
 			if(!GetBotInfo(DisplayName, ChosenSkin)){
+				ChosenSkin = Rand(5);
+
 				if(bUseBotNames)
 					DisplayName = "RC-" $ int(RandRange(1000, 9999));
 				else
 					DisplayName = "Bot" $ Bots.Length;
-
-				if(bBotTag)
-					DisplayName = DisplayName $ "[BOT]";
-
-				ChosenSkin = Rand(5);
 			}
 		}else{
 			DisplayName = Name;
 			ChosenSkin = Rand(5);
 		}
+
+		if(bBotTag)
+			DisplayName = DisplayName $ "[BOT]";
 
 		Bot.PlayerReplicationInfo.PlayerName = DisplayName;
 		Bot.PlayerReplicationInfo.bBot = true;

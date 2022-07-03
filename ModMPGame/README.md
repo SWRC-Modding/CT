@@ -76,6 +76,16 @@ Paths are stored as _&lt;mapname>.ctp_ files in the _GameData\\Maps\\Paths_ dire
 | showpaths                  | draws the navigation points and paths only for the host similar to UnrealEd's _View Paths_ option if on a non-dedicated server. Otherwise it makes the navigation points visible for all clients |
 | hidepaths                  | the opposite of _showpaths_ |
 
+### SkinChanger
+
+This allows players to chose skins that are not available in the base game like Delta 38 or a plain white commando.
+The chosen skin is saved across matches and will also be restored if a player leaves and rejoins.
+
+| command            | description |
+|--------------------|-------------|
+| changeskin <index> | Sets the players skin to the one corresponding to <index> |
+| showskins          | Prints a list of available clone and trando skins. The list might be too long for chat but it can also be found in the console |
+
 ## For Modders
 
 All services inherit from _AdminService_. It contains some convenience functions for command and parameter parsing but also the _ExecCmd_ function. The service implementation can override it to add custom commands that are specific to that service. The commands are automatically dispatched by the _AdminControl_ and _ExecCmd_ is expected to return a bool value specifying whether the entered command was recognized or not.

@@ -1664,8 +1664,9 @@ public:
 class WINDOW_API FObjectsItem : public FPropertyItemBase{
 public:
 	// Variables.
-	UBOOL ByCategory;
-	UBOOL NotifyParent;
+	//UBOOL ByCategory;
+	//UBOOL NotifyParent;
+	char PADDING[12];
 	TArray<UObject*> _Objects;
 
 	// Structors.
@@ -1700,9 +1701,8 @@ class WINDOW_API WObjectProperties : public WProperties{
 	W_DECLARE_CLASS(WObjectProperties,WProperties,CLASS_Transient);
 	DECLARE_WINDOWCLASS(WObjectProperties,WProperties,Window)
 
-	char PADDING[4];
-
 	// Variables.
+	char PADDING[4];
 	FObjectsItem Root;
 
 	// Structors.

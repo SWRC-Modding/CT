@@ -209,6 +209,15 @@ function bool ExecCmd(String Cmd, optional PlayerController PC){
 		}
 
 		return true;
+	}else if(ParseCommand(Cmd, "NEXTMAP")){
+		Level.Game.Broadcast(self, "Switching to next map in rotation");
+		Level.Game.GameRulesModifiers = None;
+		Level.Game.bGameRestarted = false;
+		Level.Game.bChangeLevels = true;
+		Level.Game.bAlreadyChanged = false;
+		Level.Game.RestartGame();
+
+		return true;
 	}else if(ParseCommand(Cmd, "RESTARTMAP")){
 		Level.Game.Broadcast(self, "Restarting map");
 		Level.ServerTravel("?restart", false);

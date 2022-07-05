@@ -15,12 +15,39 @@ static struct FExecHook : public FExec, FNotifyHook{
 	FExecHook() : Preferences(NULL){}
 
 	virtual void NotifyDestroy(void* Src){
-		if(Src == Preferences)
+		if(Src == Preferences){
 			Preferences = NULL;
+		}else{
+			// Set Actor bSelected to false if properties window is closed
+
+			TCHAR SrcWindowClassName[128];
+			TCHAR ObjPropWindowClassName[128];
+
+			static_cast<WWindow*>(Src)->GetWindowClassName(SrcWindowClassName);
+			MakeWindowClassName(ObjPropWindowClassName, "WObjectProperties");
+
+			if(appStricmp(SrcWindowClassName, ObjPropWindowClassName) == 0){
+				WObjectProperties* P = static_cast<WObjectProperties*>(Src);
+
+				for(INT i = 0; i < P->Root._Objects.Num(); ++i){
+					AActor* A = Cast<AActor>(P->Root._Objects[i]);
+
+					if(A)
+						A->bSelected = 0;
+				}
+			}
+		}
 	}
 
 	virtual UBOOL Exec(const TCHAR* Cmd, FOutputDevice& Ar){
 		guard(FExecHook::Exec);
+
+		HWND ParentWindow = NULL;
+
+		if(GEngine->Client && GEngine->Client->Viewports.Num() > 0)
+			ParentWindow = static_cast<HWND>(GEngine->Client->Viewports[0]->GetWindow());
+		else
+			ParentWindow = GLogWindow->hWnd;
 
 		if(ParseCommand(&Cmd, "SHOWLOG")){
 			GLogWindow->Show(1);
@@ -29,20 +56,60 @@ static struct FExecHook : public FExec, FNotifyHook{
 
 			return 1;
 		}else if(ParseCommand(&Cmd, "HIDELOG")){
-			if(GLogWindow)
-				GLogWindow->Show(0);
+			GLogWindow->Show(0);
 
 			return 1;
 		}else if(ParseCommand(&Cmd, "EDITOBJ")){
-			UObject* Obj = FindObject<UObject>(ANY_PACKAGE, Cmd);
+			UClass*          Class;
+			FName            ObjectName;
+			UObject*         Outer;
+			TArray<UObject*> Objects;
 
-			if(Obj){
-				WObjectProperties* P = new WObjectProperties("EditObj", 0, "", NULL, 1);
-				P->OpenWindow(GLogWindow ? GLogWindow->hWnd : NULL);
-				P->Root.SetObjects(&Obj, 1);
-				P->Show(1);
+			if(ParseObject<UClass>(Cmd, "Class=", Class, ANY_PACKAGE)){
+				for(FObjectIterator It; It; ++It){
+					if(It->IsA(Class))
+						Objects.AddItem(*It);
+				}
+			}else if(ParseObject<UObject>(Cmd, "Outer=", Outer, ANY_PACKAGE)){
+				for(FObjectIterator It; It; ++It){
+					if(It->IsIn(Outer))
+						Objects.AddItem(*It);
+				}
 			}else{
-				Ar.Logf("Object \"%s\" not found", Cmd);
+				if(!Parse(Cmd, "Name=", ObjectName))
+					ObjectName = FName(Cmd, FNAME_Find);
+
+				if(ObjectName != NAME_None){
+					for(FObjectIterator It; It; ++It){
+						if(It->GetFName() == ObjectName)
+							Objects.AddItem(*It);
+					}
+				}
+			}
+
+			UBOOL ShowAll = 0;
+			ParseUBOOL(Cmd, "All=", ShowAll);
+
+			if(Objects.Num() > 0){
+				if(ShowAll){
+					for(INT i = 0; i < Objects.Num(); ++i){
+						WObjectProperties* P = new WObjectProperties("EditObj", 0, "", NULL, 1);
+						P->SetNotifyHook(this);
+						P->OpenWindow(ParentWindow);
+						P->Root.SetObjects(&Objects[i], 1);
+						P->Show(1);
+					}
+				}else{
+					static INT Count = 0; // Used to cycle through objects when reentering the same command
+
+					WObjectProperties* P = new WObjectProperties("EditObj", 0, "", NULL, 1);
+					P->SetNotifyHook(this);
+					P->OpenWindow(ParentWindow);
+					P->Root.SetObjects(&Objects[Count++ % Objects.Num()], 1);
+					P->Show(1);
+				}
+			}else{
+				Ar.Logf("No objects found");
 			}
 
 			return 1;
@@ -82,9 +149,15 @@ static struct FExecHook : public FExec, FNotifyHook{
 
 				if(Found){
 					WObjectProperties* P = new WObjectProperties("EditActor", 0, "", NULL, 1);
-					P->OpenWindow(GLogWindow ? GLogWindow->hWnd : NULL);
+					P->SetNotifyHook(this);
+					P->OpenWindow(ParentWindow);
 					P->Root.SetObjects((UObject**)&Found, 1);
 					P->Show(1);
+
+					foreach(AllActors, AActor, It, Level)
+						It->bSelected = 0;
+
+					Found->bSelected = 1;
 				}else{
 					Ar.Logf("Target not found");
 				}
@@ -97,7 +170,7 @@ static struct FExecHook : public FExec, FNotifyHook{
 			if(!Preferences){
 				Preferences = new WConfigProperties("Preferences", LocalizeGeneral("AdvancedOptionsTitle", "Window"));
 				Preferences->SetNotifyHook(this);
-				Preferences->OpenWindow(GLogWindow ? GLogWindow->hWnd : NULL);
+				Preferences->OpenWindow(ParentWindow);
 				Preferences->ForceRefresh();
 			}
 

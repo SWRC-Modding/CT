@@ -15,6 +15,8 @@ native final function SetTrandoSkin(Controller C, int SkinIndex);
 
 function bool ExecCmd(String Cmd, optional PlayerController PC){
 	local int SkinIndex;
+	local bool IsClone;
+	local bool IsTrando;
 
 	if(PC != None){
 		if(ParseCommand(Cmd, "CHANGESKIN")){
@@ -36,15 +38,24 @@ function bool ExecCmd(String Cmd, optional PlayerController PC){
 
 			return true;
 		}else if(ParseCommand(Cmd, "SHOWSKINS")){
-			CommandFeedback(PC, "Clone Skins:");
+			if(PC != None && PC.Pawn != None){
+				IsClone = PC.Pawn.IsA('MPClone');
+				IsTrando = PC.Pawn.IsA('MPTrandoshan');
+			}
 
-			for(SkinIndex = 0; SkinIndex < CloneSkins.Length; ++SkinIndex)
-				CommandFeedback(PC, "- " $ SkinIndex $ ": " $ CloneSkins[SkinIndex].Diffuse.Name);
+			if(IsClone || !IsTrando){
+				CommandFeedback(PC, "Clone Skins:");
 
-			CommandFeedback(PC, "Trando Skins:");
+				for(SkinIndex = 0; SkinIndex < CloneSkins.Length; ++SkinIndex)
+					CommandFeedback(PC, "- " $ SkinIndex $ ": " $ CloneSkins[SkinIndex].Diffuse.Name);
+			}
 
-			for(SkinIndex = 0; SkinIndex < TrandoSkins.Length; ++SkinIndex)
-				CommandFeedback(PC, "- " $ SkinIndex $ ": " $ TrandoSkins[SkinIndex].Diffuse.Name);
+			if(IsTrando || !IsClone){
+				CommandFeedback(PC, "Trando Skins:");
+
+				for(SkinIndex = 0; SkinIndex < TrandoSkins.Length; ++SkinIndex)
+					CommandFeedback(PC, "- " $ SkinIndex $ ": " $ TrandoSkins[SkinIndex].Diffuse.Name);
+			}
 
 			CommandFeedback(PC, "Check console for full list of skins");
 

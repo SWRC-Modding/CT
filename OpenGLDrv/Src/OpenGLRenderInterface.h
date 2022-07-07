@@ -345,5 +345,6 @@ private:
 	bool HandleSimpleMaterial(UMaterial* Material, FShaderGenerator& ShaderGenerator, const FModifierInfo* InModifierInfo = NULL);
 	bool HandleCombinerMaterial(UCombiner* Combiner, FShaderGenerator& ShaderGenerator, bool IsRootMaterial);
 	bool HandleShaderMaterial(UShader* Shader, FShaderGenerator& ShaderGenerator, const FModifierInfo& ModifierInfo);
+	bool HandleSpecular(UMaterial* Specular, UMaterial* SpecularMask, const FModifierInfo& ModifierInfo, FShaderGenerator& ShaderGenerator, INT Bumpmap, FLOAT BumpSize, FLOAT SpecularMaskStrength, FLOAT SpecularStrength);
 	void UseLightmap(FShaderGenerator& ShaderGenerator);
 };

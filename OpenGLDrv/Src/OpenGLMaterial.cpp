@@ -739,6 +739,7 @@ bool FOpenGLRenderInterface::HandleShaderMaterial(UShader* Shader, FShaderGenera
 	}
 
 	bool HaveEnv = false;
+	bool HaveSpecular = false;
 	EColorOp EnvColorOp = COP_Arg1;
 
 	checkSlow(GCubemapManager);
@@ -770,31 +771,46 @@ bool FOpenGLRenderInterface::HandleShaderMaterial(UShader* Shader, FShaderGenera
 			INT Index = CurrentState->NumTextures++;
 			DiffuseEnvTex = ShaderGenerator.AddTexture(Index, BumpTexCoordSrc, TCN_2DCoords, INDEX_NONE, false, BumpmapIndex);
 			SetBitmapTexture(DiffuseEnvMap, Index, 1.0, Shader->BumpSize, Shader->DiffuseMaskStrength / 255.0f, Shader->DiffuseStrength / 255.0f);
-			ShaderGenerator.AddColorOp(DiffuseEnvTex, DiffuseEnvTex, COP_Arg1, CC_RGBA, CR_1);
 		}
 
 		bool UseMatrix = false;
 		FMatrix* Matrix = NULL;
 		UBitmapMaterial* SpecularEnvMap = NULL;
 
-		if(Shader->BumpMapType != BMT_Static_Diffuse && Shader->BumpMapType != BMT_Diffuse)
-			SpecularEnvMap = GCubemapManager->GetEnvLightmap(BMT_Static_Specular, Shader, &Matrix, UseMatrix);
+		if(Shader->BumpMapType != BMT_Static_Diffuse && Shader->BumpMapType != BMT_Diffuse){
+			SpecularEnvMap = Cast<UBitmapMaterial>(Shader->Specular);
+
+			if(!SpecularEnvMap){
+				SpecularEnvMap = GCubemapManager->GetEnvLightmap(BMT_Static_Specular, Shader, &Matrix, UseMatrix);
+				HaveSpecular = true;
+			}
+		}
 
 		if(SpecularEnvMap){
-			SBYTE MatrixIndex = INDEX_NONE;
+			FModifierInfo SpecularModifier = ModifierInfo;
 
 			if(UseMatrix){
-				MatrixIndex = static_cast<SBYTE>(NumTexMatrices++);
-				TexMatrices[MatrixIndex] = *Matrix;
+				SpecularModifier.bUseTexMatrix = true;
+				SpecularModifier.TexMatrix *= *Matrix;
 			}
 
-			INT Index = CurrentState->NumTextures++;
-			EColorArg SpecularEnvTex = ShaderGenerator.AddTexture(Index, BumpTexCoordSrc, TCN_2DCoords, MatrixIndex, false, BumpmapIndex);
-			SetBitmapTexture(SpecularEnvMap, Index, 1.0, Shader->BumpSize, Shader->SpecularMaskStrength / 255.0f, Shader->SpecularStrength / 255.0f);
-			ShaderGenerator.AddColorOp(DiffuseEnvTex, SpecularEnvTex, DiffuseEnvMap ? COP_Add : COP_Arg2, CC_RGBA, CR_1);
+			if(HaveDiffuse)
+				ShaderGenerator.AddColorOp(CA_R0, CA_R0, COP_Arg1, CC_RGBA, ShaderGenerator.PushTempRegister());
+
+			if(!HandleSpecular(SpecularEnvMap, Shader->SpecularityMask, SpecularModifier, ShaderGenerator, BumpmapIndex, Shader->BumpSize, Shader->SpecularMaskStrength / 255.0f, Shader->SpecularStrength / 255.0f))
+				return false;
 
 			if(Shader->SpecularInTheDark)
-				ShaderGenerator.AddColorOp(SpecularEnvTex, SpecularEnvTex, COP_Arg1, CC_RGBA, CR_EmissionFactor);
+				ShaderGenerator.AddColorOp(CA_R0, CA_R0, COP_Arg1, CC_RGBA, CR_EmissionFactor);
+
+			ShaderGenerator.AddColorOp(DiffuseEnvTex, CA_R0, DiffuseEnvMap ? COP_Add : COP_Arg2, CC_RGB, CR_1);
+			ShaderGenerator.AddColorOp(CA_R0, CA_R0, COP_Arg1, CC_A, CR_1);
+
+			if(HaveDiffuse)
+				ShaderGenerator.AddColorOp(ShaderGenerator.PopTempRegister(), CA_R0, COP_Arg1, CC_RGBA, CR_0);
+		}else{
+			ShaderGenerator.AddColorOp(DiffuseEnvTex, DiffuseEnvTex, COP_Arg1, CC_RGBA, CR_1);
+			ShaderGenerator.AddColorOp(CA_Const1, CA_Const1, COP_Arg1, CC_A, CR_1);
 		}
 
 		if(DiffuseEnvMap || SpecularEnvMap){
@@ -810,10 +826,12 @@ bool FOpenGLRenderInterface::HandleShaderMaterial(UShader* Shader, FShaderGenera
 			EColorRegister DiffuseRegister = ShaderGenerator.PushTempRegister();
 
 			if(HaveDiffuse){
-				ShaderGenerator.AddColorOp(CA_R0, CA_R1, EnvColorOp, CC_RGB, DiffuseRegister);
+				ShaderGenerator.AddColorOp(CA_R0, CA_R1, EnvColorOp, CC_RGB, CR_1);
+				ShaderGenerator.AddColorOp(CA_R1, CA_R0, COP_AlphaBlendInverted, CC_RGB, DiffuseRegister);
 				ShaderGenerator.AddColorOp(CA_R0, CA_R0, COP_Arg1, CC_A, DiffuseRegister);
 			}else{
-				ShaderGenerator.AddColorOp(CA_Diffuse, CA_R1, EnvColorOp, CC_RGB, DiffuseRegister);
+				ShaderGenerator.AddColorOp(CA_Diffuse, CA_R1, EnvColorOp, CC_RGB, CR_1);
+				ShaderGenerator.AddColorOp(CA_R1, CA_Diffuse, COP_AlphaBlendInverted, CC_RGB, DiffuseRegister);
 				ShaderGenerator.AddColorOp(CA_Diffuse, CA_Diffuse, COP_Arg1, CC_A, DiffuseRegister);
 			}
 
@@ -870,7 +888,10 @@ bool FOpenGLRenderInterface::HandleShaderMaterial(UShader* Shader, FShaderGenera
 			ShaderGenerator.AddColorOp(CA_Const1, CA_Const1, COP_Arg1, CC_RGBA, CR_EmissionFactor);
 		}
 	}else{
-		ShaderGenerator.AddColorOp(CA_R0, CA_R1, EnvColorOp, CC_RGB, CR_0);
+		if(HaveEnv){
+			ShaderGenerator.AddColorOp(CA_R0, CA_R1, EnvColorOp, CC_RGB, CR_1);
+			ShaderGenerator.AddColorOp(CA_R1, CA_R0, COP_AlphaBlendInverted, CC_RGB, CR_0);
+		}
 	}
 
 	if(Shader->Detail && Shader->Detail->IsA<UBitmapMaterial>()){
@@ -879,34 +900,20 @@ bool FOpenGLRenderInterface::HandleShaderMaterial(UShader* Shader, FShaderGenera
 		EColorArg DetailArg = ShaderGenerator.AddTexture(Index, TCS_Stream0);
 		ShaderGenerator.AddColorOp(DetailArg, CA_R0, COP_Modulate2X, CC_RGB, CR_0);
 	}
-#if 0
-	if(Shader->Specular){
+
+	if(!HaveEnv && Shader->Specular){
 		ShaderGenerator.AddColorOp(CA_R0, CA_R0, COP_Arg1, CC_RGBA, ShaderGenerator.PushTempRegister());
 
-		FModifierInfo SpecularModifier = ModifierInfo;
+		if(!HandleSpecular(Shader->Specular, Shader->SpecularityMask, ModifierInfo, ShaderGenerator, INDEX_NONE, 1.0f, 1.0f, 1.0f))
+			return false;
 
-		SpecularModifier.TexCoordSrc = TCS_SphereWorldSpaceReflection;
+		EColorArg PrevArg = ShaderGenerator.PopTempRegister();
 
-		UMaterial* SpecularMaterial = RemoveModifiers(Shader->Specular, SpecularModifier);
-
-		if(SpecularMaterial->IsA<UBitmapMaterial>()){
-			INT Index = CurrentState->NumTextures++;
-			SBYTE SpecularMatrix = INDEX_NONE;
-
-			if(SpecularModifier.bUseTexMatrix){
-				SpecularMatrix = static_cast<SBYTE>(NumTexMatrices++);
-				TexMatrices[SpecularMatrix] = SpecularModifier.TexMatrix;
-			}
-
-			SetBitmapTexture(static_cast<UBitmapMaterial*>(SpecularMaterial), Index, 1.0f, Shader->BumpSize);
-			EColorArg SpecTex = ShaderGenerator.AddTexture(Index, SpecularModifier.TexCoordSrc, SpecularModifier.TexCoordCount, SpecularMatrix, false, BumpmapIndex);
-			ShaderGenerator.AddColorOp(SpecTex, SpecTex, COP_Arg1, CC_RGB, CR_0);
-		}else{
-			if(!HandleSimpleMaterial(Shader->Specular, ShaderGenerator, &SpecularModifier))
-				return false;
-		}
+		ShaderGenerator.AddColorOp(PrevArg, PrevArg, COP_Arg1, CC_RGBA, CR_1);
+		ShaderGenerator.AddColorOp(CA_R0, CA_R1, COP_AlphaBlendInverted, CC_RGB, CR_0);
+		ShaderGenerator.AddColorOp(PrevArg, PrevArg, COP_Arg1, CC_A, CR_0);
 	}
-#endif
+
 	if(Shader->Opacity){
 		if((HaveDiffuse && Shader->Opacity != Shader->Diffuse) || (HaveSelfIllumination && Shader->Opacity != Shader->SelfIllumination) || !HaveDiffuse && !HaveSelfIllumination){
 			ShaderGenerator.AddColorOp(CA_R0, CA_R0, COP_Arg1, CC_RGB, ShaderGenerator.PushTempRegister());
@@ -916,6 +923,53 @@ bool FOpenGLRenderInterface::HandleShaderMaterial(UShader* Shader, FShaderGenera
 
 			ShaderGenerator.AddColorOp(ShaderGenerator.PopTempRegister(), CA_R0, COP_Arg1, CC_RGB, CR_0);
 		}
+	}
+
+	return true;
+}
+
+bool FOpenGLRenderInterface::HandleSpecular(UMaterial* Specular, UMaterial* SpecularMask, const FModifierInfo& ModifierInfo, FShaderGenerator& ShaderGenerator, INT BumpmapIndex, FLOAT BumpSize, FLOAT SpecularMaskStrength, FLOAT SpecularStrength){
+	checkSlow(Specular);
+
+	ShaderGenerator.AddColorOp(CA_R0, CA_R0, COP_Arg1, CC_RGBA, ShaderGenerator.PushTempRegister());
+
+	FModifierInfo SpecularModifier = ModifierInfo;
+
+	SpecularModifier.TexCoordSrc = TCS_SphereWorldSpaceReflection;
+
+	UMaterial* SpecularMaterial = RemoveModifiers(Specular, SpecularModifier);
+
+	if(SpecularMaterial->IsA<UBitmapMaterial>()){
+		INT Index = CurrentState->NumTextures++;
+		SBYTE SpecularMatrix = INDEX_NONE;
+
+		if(SpecularModifier.bUseTexMatrix){
+			SpecularMatrix = static_cast<SBYTE>(NumTexMatrices++);
+			TexMatrices[SpecularMatrix] = SpecularModifier.TexMatrix;
+		}
+
+		SetBitmapTexture(static_cast<UBitmapMaterial*>(SpecularMaterial), Index, 1.0f, BumpSize);
+		EColorArg SpecTex = ShaderGenerator.AddTexture(Index, SpecularModifier.TexCoordSrc, SpecularModifier.TexCoordCount, SpecularMatrix, false, INDEX_NONE);
+		ShaderGenerator.AddColorOp(SpecTex, SpecTex, COP_Arg1, CC_RGB, CR_0);
+	}else{
+		if(!HandleSimpleMaterial(Specular, ShaderGenerator, &ModifierInfo))
+			return false;
+	}
+
+	if(SpecularMask){
+		if(SpecularMask != Specular){
+			FModifierInfo SpecularMaskModifier = ModifierInfo;
+			UMaterial* SpecularMaskMaterial = RemoveModifiers(SpecularMask, SpecularMaskModifier);
+
+			ShaderGenerator.AddColorOp(CA_R0, CA_R0, COP_Arg1, CC_RGB, ShaderGenerator.PushTempRegister());
+
+			if(!HandleSimpleMaterial(SpecularMaskMaterial, ShaderGenerator, &SpecularMaskModifier))
+				return false;
+
+			ShaderGenerator.AddColorOp(ShaderGenerator.PopTempRegister(), CA_R0, COP_Arg1, CC_RGB, CR_0);
+		}
+	}else{
+		ShaderGenerator.AddColorOp(CA_Const1, CA_Const1, COP_Arg1, CC_A, CR_0);
 	}
 
 	return true;

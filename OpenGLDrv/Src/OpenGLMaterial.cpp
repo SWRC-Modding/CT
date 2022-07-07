@@ -948,8 +948,8 @@ bool FOpenGLRenderInterface::HandleSpecular(UMaterial* Specular, UMaterial* Spec
 			TexMatrices[SpecularMatrix] = SpecularModifier.TexMatrix;
 		}
 
-		SetBitmapTexture(static_cast<UBitmapMaterial*>(SpecularMaterial), Index, 1.0f, BumpSize);
-		EColorArg SpecTex = ShaderGenerator.AddTexture(Index, SpecularModifier.TexCoordSrc, SpecularModifier.TexCoordCount, SpecularMatrix, false, INDEX_NONE);
+		SetBitmapTexture(static_cast<UBitmapMaterial*>(SpecularMaterial), Index, 1.0f, BumpSize, SpecularMaskStrength, SpecularStrength);
+		EColorArg SpecTex = ShaderGenerator.AddTexture(Index, SpecularModifier.TexCoordSrc, SpecularModifier.TexCoordCount, SpecularMatrix, false, BumpmapIndex);
 		ShaderGenerator.AddColorOp(SpecTex, SpecTex, COP_Arg1, CC_RGB, CR_0);
 	}else{
 		if(!HandleSimpleMaterial(Specular, ShaderGenerator, &ModifierInfo))

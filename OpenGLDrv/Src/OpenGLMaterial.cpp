@@ -775,18 +775,18 @@ bool FOpenGLRenderInterface::HandleShaderMaterial(UShader* Shader, FShaderGenera
 
 		bool UseMatrix = false;
 		FMatrix* Matrix = NULL;
-		UBitmapMaterial* SpecularEnvMap = NULL;
+		UMaterial* SpecularEnvMap = NULL;
 
 		if(Shader->BumpMapType != BMT_Static_Diffuse && Shader->BumpMapType != BMT_Diffuse){
-			SpecularEnvMap = Cast<UBitmapMaterial>(Shader->Specular);
+			SpecularEnvMap = Shader->Specular;
 
-			if(!SpecularEnvMap){
+			if(!SpecularEnvMap)
 				SpecularEnvMap = GCubemapManager->GetEnvLightmap(BMT_Static_Specular, Shader, &Matrix, UseMatrix);
-				HaveSpecular = true;
-			}
 		}
 
 		if(SpecularEnvMap){
+			HaveSpecular = true;
+
 			FModifierInfo SpecularModifier = ModifierInfo;
 
 			if(UseMatrix){
@@ -901,7 +901,7 @@ bool FOpenGLRenderInterface::HandleShaderMaterial(UShader* Shader, FShaderGenera
 		ShaderGenerator.AddColorOp(DetailArg, CA_R0, COP_Modulate2X, CC_RGB, CR_0);
 	}
 
-	if(!HaveEnv && Shader->Specular){
+	if(!HaveSpecular && Shader->Specular){
 		ShaderGenerator.AddColorOp(CA_R0, CA_R0, COP_Arg1, CC_RGBA, ShaderGenerator.PushTempRegister());
 
 		if(!HandleSpecular(Shader->Specular, Shader->SpecularityMask, ModifierInfo, ShaderGenerator, INDEX_NONE, 1.0f, 1.0f, 1.0f))

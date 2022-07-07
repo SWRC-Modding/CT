@@ -49,6 +49,7 @@ This service adds support for basic admin commands like kicking/banning players 
 | promote _&lt;player name>_                              | gives a player admin rights |
 | demote _&lt;player name>_                               | removes a player's admin rights |
 | switchmap _&lt;map and options>_                        | switches the server to the specified map with optional parameters |
+| nextmap                                                 | switches the server to the next map in the rotation as configured in the ini |
 | restartmap                                              | restarts the current map with the same game mode |
 
 ### BotSupport

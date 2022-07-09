@@ -714,8 +714,10 @@ bool FOpenGLRenderInterface::HandleCombinerMaterial(UCombiner* Combiner, FShader
 		ShaderGenerator.AddColorOp(Material1Arg, Material2Arg, COP_Add, CC_A, CR_0);
 		break;
 	case AO_Use_Alpha_From_Material1:
-		ShaderGenerator.AddColorOp(Material1Arg, Material1Arg, COP_Arg1, CC_A, CR_0);
-		break;
+		// Due to a limitation (or bug?) in the d3d renderer, this doesn't actually work there and the alpha from Material2 is always used.
+		// Unfortunately this incorrect behavior has to be replicated here since some combiners rely on it to work as intended.
+		//ShaderGenerator.AddColorOp(Material1Arg, Material1Arg, COP_Arg1, CC_A, CR_0);
+		//break;
 	case AO_Use_Alpha_From_Material2:
 		ShaderGenerator.AddColorOp(Material2Arg, Material2Arg, COP_Arg1, CC_A, CR_0);
 		break;
@@ -742,9 +744,7 @@ bool FOpenGLRenderInterface::HandleShaderMaterial(UShader* Shader, FShaderGenera
 	bool HaveSpecular = false;
 	EColorOp EnvColorOp = COP_Arg1;
 
-	checkSlow(GCubemapManager);
-
-	if(GCubemapManager->bEnabled){
+	if(GCubemapManager && GCubemapManager->bEnabled){
 		INT BumpmapIndex = INDEX_NONE;
 
 		if(Shader->Bumpmap){

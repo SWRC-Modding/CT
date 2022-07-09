@@ -178,7 +178,7 @@ static struct FExecHook : public FExec, FNotifyHook{
 			SetFocus(Preferences->hWnd);
 
 			return 1;
-		}else if(GIsClient && ParseCommand(&Cmd, "USERENDEV")){
+		}else if(!GIsEditor && GIsClient && ParseCommand(&Cmd, "USERENDEV")){
 			FString RenderDeviceClass = Cmd;
 
 			if(RenderDeviceClass == "D3D")
@@ -204,9 +204,15 @@ static struct FExecHook : public FExec, FNotifyHook{
 						}
 					}
 
+					// This fixes a crash because the stats still reference the D3D render device.
+					// The workaround does break the statistics reporting but since OpenGL doesn't have it anyway at the moment it should be fine.
+					// FIXME: Make this work properly so that only the no longer relevant FStatRecords are removed
+					FStatRecord* MainStatRecord = &FStatRecord::Main();
+					appMemzero(MainStatRecord, sizeof(FStatRecord));
+					MainStatRecord->Tag = "Frame";
+
 					UViewport* Viewport = GEngine->Client->Viewports[0];
 					Viewport->TryRenderDevice(*RenderDeviceClass, Viewport->SizeX, Viewport->SizeY, Viewport->IsFullscreen());
-					GStats.Clear();
 
 					if(GEngine->GRenDev && GEngine->GRenDev->GetClass() == Class)
 						GConfig->SetString("Engine.Engine", "RenderDevice", *RenderDeviceClass);

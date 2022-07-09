@@ -110,6 +110,7 @@ class FRepLink;
 class FArray;
 class FLazyLoader;
 class FString;
+class FStringTemp;
 class FConfigString;
 class FMalloc;
 struct FFrame;
@@ -416,11 +417,40 @@ private:
 // Stats.
 //
 
-struct FStatRecord;
+struct CORE_API FStatRecord{
+	char         Padding[16];
+	const TCHAR* Tag;
+	char         Padding2[4];
+	FStatRecord* Parent;
+	FStatRecord* Children;
+	FStatRecord* Root;
+
+	FStatRecord(const TCHAR*, const TCHAR*);
+	FStatRecord(const TCHAR* Tag, struct FStatRecord& Parent);
+	~FStatRecord();
+
+	void operator++(INT);
+	void operator--(INT);
+	void operator+=(DWORD);
+	void operator-=(DWORD);
+
+	FStatRecord& ActualStat();
+	void AddChild(FStatRecord* Child);
+	FStatRecord* FindStat(const TCHAR* Tag, bool Create);
+	FStringTemp FullName() const;
+	FStringTemp StatText() const;
+	void Tick();
+	void UpdateAverage(FLOAT);
+	bool bChildrenShown() const;
+
+	static FStatRecord& Ignore();
+	static FStatRecord& Main();
+};
 
 class CORE_API FStats{
 public:
 	FStats();
+	FStats(const FStats& Other);
 
 	void Clear();
 	FStatRecord& DWORDStats(FStatRecord& StatRecord);

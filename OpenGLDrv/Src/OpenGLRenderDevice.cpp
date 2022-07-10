@@ -350,6 +350,9 @@ UBOOL UOpenGLRenderDevice::Init(){
 	checkSlow(UTexture::__Client);
 	appMemcpy(TextureLODSet, UTexture::__Client->TextureLODSet, LODSET_MAX);
 
+	// Disable squad shadows for now since there's an unexplained crash in USkeletalMeshInstance::ApplyAnimation if they're enabled
+	GEngine->Exec("SET WINDOWSCLIENT SHADOWS FALSE", *GWarn);
+
 	return 1;
 }
 

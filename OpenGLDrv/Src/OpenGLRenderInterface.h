@@ -110,7 +110,7 @@ public:
 	bool IsValid() const{ return VAO != 0; }
 	void Init(UOpenGLRenderDevice* InRenDev, const FStreamDeclaration* Declarations, INT NumStreams);
 	void Bind();
-	void BindVertexStream(FOpenGLVertexStream* Stream, INT StreamIndex);
+	void BindVertexStreams(FOpenGLVertexStream** Stream, INT NumStreams);
 	void BindIndexBuffer(FOpenGLIndexBuffer* IndexBuffer);
 
 private:
@@ -148,12 +148,6 @@ struct FOpenGLRenderState{
 	GLenum                    SrcBlend;
 	GLenum                    DstBlend;
 
-	FOpenGLVertexArrayObject* VAO;
-
-	FOpenGLIndexBuffer*       IndexBuffer;
-	INT                       NumVertexStreams;
-	FOpenGLVertexStream*      VertexStreams[MAX_VERTEX_STREAMS];
-
 	INT                       NumTextures;
 	FOpenGLTextureUnit        TextureUnits[MAX_TEXTURES];
 };
@@ -177,9 +171,6 @@ public:
 	struct FOpenGLSavedState : FOpenGLGlobalUniforms, FOpenGLRenderState{
 		bool            MatricesChanged;
 		INT             UniformRevision;
-
-		INT             IndexBufferBase;
-		INT             VertexBufferBase;
 
 		FOpenGLTexture* RenderTarget;
 		bool            RenderTargetOwnDepthBuffer;
@@ -223,6 +214,11 @@ public:
 	BYTE                                  TextureFilter; // ETextureFilter
 	INT                                   TextureAnisotropy;
 	GLuint                                Samplers[MAX_TEXTURES];
+
+	FOpenGLVertexArrayObject*             CurrentVAO;
+	FOpenGLIndexBuffer*                   CurrentIndexBuffer;
+	INT                                   IndexBufferBase;
+	INT                                   VertexBufferBase;
 
 	TMap<DWORD, FOpenGLVertexArrayObject> VAOsByDeclId;
 

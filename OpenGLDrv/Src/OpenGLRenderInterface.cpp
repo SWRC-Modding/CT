@@ -66,14 +66,16 @@ void FOpenGLVertexArrayObject::Bind(){
 	RenDev->glBindVertexArray(VAO);
 }
 
-void FOpenGLVertexArrayObject::BindVertexStream(FOpenGLVertexStream* Stream, INT StreamIndex){
-	GLuint VBO = Stream->VBO;
-	GLuint Stride = Stream->Stride;
+void FOpenGLVertexArrayObject::BindVertexStreams(FOpenGLVertexStream** Streams, INT NumStreams){
+	for(INT i = 0; i < NumStreams; ++i){
+		GLuint VBO = Streams[i]->VBO;
+		GLuint Stride = Streams[i]->Stride;
 
-	if(VBOs[StreamIndex] != VBO || Strides[StreamIndex] != Stride){
-		VBOs[StreamIndex] = VBO;
-		Strides[StreamIndex] = Stride;
-		RenDev->glVertexArrayVertexBuffer(VAO, StreamIndex, VBO, 0, Stride);
+		if(VBOs[i] != VBO || Strides[i] != Stride){
+			VBOs[i] = VBO;
+			Strides[i] = Stride;
+			RenDev->glVertexArrayVertexBuffer(VAO, i, VBO, 0, Stride);
+		}
 	}
 }
 
@@ -403,9 +405,10 @@ void FOpenGLRenderInterface::Init(INT ViewportWidth, INT ViewportHeight){
 void FOpenGLRenderInterface::Flush(){
 	checkSlow(CurrentState == &SavedStates[0]);
 
-	CurrentState->IndexBuffer = NULL;
-	CurrentState->NumVertexStreams = 0;
-	appMemzero(CurrentState->VertexStreams, sizeof(CurrentState->VertexStreams));
+	CurrentVAO = NULL;
+	CurrentIndexBuffer = NULL;
+	RenDev->glBindVertexArray(GL_NONE);
+	VAOsByDeclId.Empty();
 
 	for(INT i = 0; i < MAX_TEXTURES; ++i)
 		CurrentState->TextureUnits[i].Texture = NULL;
@@ -413,10 +416,6 @@ void FOpenGLRenderInterface::Flush(){
 	CurrentState->NumTextures = 0;
 	CurrentShader = NULL;
 	RenDev->glUseProgram(GL_NONE);
-
-	CurrentState->VAO = NULL;
-	RenDev->glBindVertexArray(GL_NONE);
-	VAOsByDeclId.Empty();
 }
 
 void FOpenGLRenderInterface::Exit(){
@@ -453,6 +452,8 @@ void FOpenGLRenderInterface::Exit(){
 }
 
 void FOpenGLRenderInterface::CommitRenderState(){
+	checkSlow(CurrentVAO);
+
 	if(CurrentState->FillMode != RenderState.FillMode){
 		RenDev->glPolygonMode(GL_FRONT_AND_BACK, CurrentState->FillMode == FM_Wireframe ? GL_LINE : GL_FILL);
 		RenderState.FillMode = CurrentState->FillMode;
@@ -553,20 +554,6 @@ void FOpenGLRenderInterface::CommitRenderState(){
 		RenderState.DstBlend = CurrentState->DstBlend;
 	}
 
-	if(RenderState.IndexBuffer != CurrentState->IndexBuffer){
-		if(CurrentState->IndexBuffer)
-			CurrentState->VAO->BindIndexBuffer(CurrentState->IndexBuffer);
-
-		RenderState.IndexBuffer = CurrentState->IndexBuffer;
-	}
-
-	for(INT i = 0; i < CurrentState->NumVertexStreams; ++i){
-		if(RenderState.VertexStreams[i] != CurrentState->VertexStreams[i]){
-			CurrentState->VAO->BindVertexStream(CurrentState->VertexStreams[i], i);
-			RenderState.VertexStreams[i] = CurrentState->VertexStreams[i];
-		}
-	}
-
 	for(INT i = 0; i < CurrentState->NumTextures; ++i){
 		if(RenderState.TextureUnits[i].Texture != CurrentState->TextureUnits[i].Texture){
 			if(CurrentState->TextureUnits[i].Texture) // Texture might not be set if the current material is a hardware shader
@@ -586,11 +573,8 @@ void FOpenGLRenderInterface::CommitRenderState(){
 		}
 	}
 
-	if(RenderState.VAO != CurrentState->VAO){
-		checkSlow(CurrentState->VAO)
-		CurrentState->VAO->Bind();
-		RenderState.VAO = CurrentState->VAO;
-	}
+	if(CurrentIndexBuffer)
+		CurrentVAO->BindIndexBuffer(CurrentIndexBuffer);
 
 	if(LastUniformRevision != CurrentState->UniformRevision){
 		if(CurrentState->MatricesChanged)
@@ -1303,6 +1287,7 @@ INT FOpenGLRenderInterface::SetVertexStreams(EVertexShader Shader, FVertexStream
 	guardFuncSlow;
 
 	FStreamDeclaration VertexStreamDeclarations[MAX_VERTEX_STREAMS];
+	FOpenGLVertexStream* OpenGLStreams[MAX_VERTEX_STREAMS];
 
 	// NOTE: Stream declarations must be completely zeroed to get consistent hash values when looking up the VAO later
 	appMemzero(VertexStreamDeclarations, sizeof(VertexStreamDeclarations));
@@ -1323,25 +1308,25 @@ INT FOpenGLRenderInterface::SetVertexStreams(EVertexShader Shader, FVertexStream
 			Size += Stream->BufferSize;
 		}
 
-		CurrentState->VertexStreams[i] = Stream;
+		OpenGLStreams[i] = Stream;
 		VertexStreamDeclarations[i].Init(Streams[i]);
 	}
 
-	CurrentState->NumVertexStreams = NumStreams;
-	CurrentState->VertexBufferBase = 0;
-
 	// Look up VAO by format
-	// Check if there is an existing VAO for this format by hashing the shader declarations
+	// Check if there is an existing VAO for this format by hashing the stream declarations
 	FOpenGLVertexArrayObject& VAO = VAOsByDeclId[appMemhash(VertexStreamDeclarations, sizeof(FStreamDeclaration) * NumStreams)];
 
 	if(!VAO.IsValid())
 		VAO.Init(RenDev, VertexStreamDeclarations, NumStreams);
 
-	if(&VAO != CurrentState->VAO){
-		RenderState.IndexBuffer = NULL;
-		appMemzero(RenderState.VertexStreams, sizeof(RenderState.VertexStreams));
-		CurrentState->VAO = &VAO;
+	VAO.BindVertexStreams(OpenGLStreams, NumStreams);
+
+	if(&VAO != CurrentVAO){
+		VAO.Bind();
+		CurrentVAO = &VAO;
 	}
+
+	VertexBufferBase = 0;
 
 	return Size;
 
@@ -1353,28 +1338,26 @@ INT FOpenGLRenderInterface::SetDynamicStream(EVertexShader Shader, FVertexStream
 
 	FOpenGLVertexStream* OpenGLStream = RenDev->GetDynamicVertexStream();
 
-	CurrentState->NumVertexStreams = 1;
-	CurrentState->VertexStreams[0] = OpenGLStream;
-
 	FStreamDeclaration VertexStreamDeclaration;
 	appMemzero(&VertexStreamDeclaration, sizeof(VertexStreamDeclaration));
 
 	VertexStreamDeclaration.Init(Stream);
 
 	// Look up VAO by format
-	// Check if there is an existing VAO for this format by hashing the shader declarations
+	// Check if there is an existing VAO for this format by hashing the stream declarations
 	FOpenGLVertexArrayObject& VAO = VAOsByDeclId[appMemhash(&VertexStreamDeclaration, sizeof(FStreamDeclaration))];
 
 	if(!VAO.IsValid())
 		VAO.Init(RenDev, &VertexStreamDeclaration, 1);
 
-	if(&VAO != CurrentState->VAO){
-		RenderState.IndexBuffer = NULL;
-		appMemzero(RenderState.VertexStreams, sizeof(RenderState.VertexStreams));
-		CurrentState->VAO = &VAO;
-	}
+	VertexBufferBase = OpenGLStream->AddVertices(Stream);
 
-	CurrentState->VertexBufferBase = OpenGLStream->AddVertices(Stream);
+	VAO.BindVertexStreams(&OpenGLStream, 1);
+
+	if(&VAO != CurrentVAO){
+		VAO.Bind();
+		CurrentVAO = &VAO;
+	}
 
 	return 0;
 
@@ -1404,11 +1387,11 @@ INT FOpenGLRenderInterface::SetIndexBuffer(FIndexBuffer* IndexBuffer, INT BaseIn
 			Buffer->Cache(IndexBuffer);
 		}
 
-		CurrentState->IndexBufferBase = BaseIndex;
-		CurrentState->IndexBuffer = Buffer;
+		IndexBufferBase = BaseIndex;
+		CurrentIndexBuffer = Buffer;
 	}else{
-		CurrentState->IndexBufferBase = 0;
-		CurrentState->IndexBuffer = NULL;
+		IndexBufferBase = 0;
+		CurrentIndexBuffer = NULL;
 	}
 
 	return RequiresCaching ? IndexBuffer->GetSize() : 0;
@@ -1421,8 +1404,8 @@ INT FOpenGLRenderInterface::SetDynamicIndexBuffer(FIndexBuffer* IndexBuffer, INT
 
 	FOpenGLIndexBuffer* Buffer = RenDev->GetDynamicIndexBuffer(IndexBuffer->GetIndexSize());
 
-	CurrentState->IndexBufferBase = BaseIndex;
-	CurrentState->IndexBuffer = Buffer;
+	IndexBufferBase = BaseIndex;
+	CurrentIndexBuffer = Buffer;
 
 	return Buffer->AddIndices(IndexBuffer);
 
@@ -1461,18 +1444,18 @@ void FOpenGLRenderInterface::DrawPrimitive(EPrimitiveType PrimitiveType, INT Fir
 		appErrorf("Invalid primitive type for FOpenGLRenderInterface::DrawPrimitive: %i", PrimitiveType);
 	};
 
-	if(RenderState.IndexBuffer){
-		INT IndexSize = RenderState.IndexBuffer->IndexSize;
+	if(CurrentIndexBuffer){
+		INT IndexSize = CurrentIndexBuffer->IndexSize;
 
 		RenDev->glDrawRangeElementsBaseVertex(Mode,
 		                                      MinIndex,
 		                                      MaxIndex,
 		                                      Count,
 		                                      IndexSize == sizeof(_WORD) ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT,
-		                                      reinterpret_cast<void*>((FirstIndex + CurrentState->IndexBufferBase) * IndexSize),
-		                                      CurrentState->VertexBufferBase);
+		                                      reinterpret_cast<void*>((FirstIndex + IndexBufferBase) * IndexSize),
+		                                      VertexBufferBase);
 	}else{
-		RenDev->glDrawArrays(Mode, CurrentState->VertexBufferBase + FirstIndex, Count);
+		RenDev->glDrawArrays(Mode, VertexBufferBase + FirstIndex, Count);
 	}
 
 	unguardSlow;

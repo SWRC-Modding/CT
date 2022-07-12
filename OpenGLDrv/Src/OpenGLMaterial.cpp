@@ -502,15 +502,15 @@ bool FOpenGLRenderInterface::SetShaderMaterial(UShader* Shader, const FModifierI
 	if(!HandleShaderMaterial(Shader, ShaderGenerator, ModifierInfo))
 		return false;
 
+	if(Shader->TwoSided)
+		CurrentState->CullMode = CM_None;
+
+	if(Shader->Wireframe)
+		CurrentState->FillMode = FM_Wireframe;
+
 	if(!ModifyFramebufferBlending){
 		CurrentState->bZTest = true;
 		CurrentState->bZWrite = true;
-
-		if(Shader->TwoSided)
-			CurrentState->CullMode = CM_None;
-
-		if(Shader->Wireframe)
-			CurrentState->FillMode = FM_Wireframe;
 
 		switch(Shader->OutputBlending){
 		case OB_Normal:

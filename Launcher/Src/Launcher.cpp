@@ -192,6 +192,12 @@ static struct FExecHook : public FExec, FNotifyHook{
 
 			if(Class){
 				if(GEngine->GRenDev && GEngine->GRenDev->GetClass() != Class){
+					// Apparently the FStatRecord destructor does not clean up properly and there is still a reference to the old stat record stored in the linked list of child records.
+					// So we need to find the records belonging to the old render device and clean them up.
+					// This is only done once the render device has successfully been changed but the pointer to the record needs to be acquired here.
+					// TODO: Also do the same for OpenGL once/if FStatRecord is used there
+					FStatRecord* OldStatRecord = FStatRecord::Main().FindStat("D3D", true);
+
 					// UViewport::TryRenderDevice only works if GEngine->GRenDev is not the same as the current render device
 					GEngine->GRenDev = ConstructObject<URenderDevice>(Class);
 					GEngine->GRenDev->Init();
@@ -204,20 +210,17 @@ static struct FExecHook : public FExec, FNotifyHook{
 						}
 					}
 
-					// This fixes a crash because the stats still reference the D3D render device.
-					// The workaround does break the statistics reporting but since OpenGL doesn't have it anyway at the moment it should be fine.
-					// FIXME: Make this work properly so that only the no longer relevant FStatRecords are removed
-					FStatRecord* MainStatRecord = &FStatRecord::Main();
-					appMemzero(MainStatRecord, sizeof(FStatRecord));
-					MainStatRecord->Tag = "Frame";
-
 					UViewport* Viewport = GEngine->Client->Viewports[0];
 					Viewport->TryRenderDevice(*RenderDeviceClass, Viewport->SizeX, Viewport->SizeY, Viewport->IsFullscreen());
 
-					if(GEngine->GRenDev && GEngine->GRenDev->GetClass() == Class)
+					if(GEngine->GRenDev && GEngine->GRenDev->GetClass() == Class){
 						GConfig->SetString("Engine.Engine", "RenderDevice", *RenderDeviceClass);
-					else
+
+						if(OldStatRecord)
+							RemoveStatRecordFromChildList(*OldStatRecord, FStatRecord::Main());
+					}else{
 						Ar.Logf("Failed to set render device with class %s", *RenderDeviceClass);
+					}
 				}
 			}else{
 				Ar.Logf("Unable to find render device class '%s'", *RenderDeviceClass);

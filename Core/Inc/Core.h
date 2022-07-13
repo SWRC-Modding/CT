@@ -418,14 +418,17 @@ private:
 //
 
 struct CORE_API FStatRecord{
-	char         Padding[16];
+	DWORD        DWORD0;
+	DWORD        Count;
+	char         Padding2[8]; // 8
 	const TCHAR* Tag;
-	char         Padding2[4];
+	DWORD        DWORD20;
 	FStatRecord* Parent;
 	FStatRecord* Children;
-	FStatRecord* Root;
+	FStatRecord* NextChild;
+	bool         ChildrenShown;
 
-	FStatRecord(const TCHAR*, const TCHAR*);
+	FStatRecord(const TCHAR* Tag, const TCHAR* ParentTag);
 	FStatRecord(const TCHAR* Tag, struct FStatRecord& Parent);
 	~FStatRecord();
 
@@ -436,7 +439,7 @@ struct CORE_API FStatRecord{
 
 	FStatRecord& ActualStat();
 	void AddChild(FStatRecord* Child);
-	FStatRecord* FindStat(const TCHAR* Tag, bool Create);
+	FStatRecord* FindStat(const TCHAR* Tag, bool Recursive);
 	FStringTemp FullName() const;
 	FStringTemp StatText() const;
 	void Tick();
@@ -446,6 +449,21 @@ struct CORE_API FStatRecord{
 	static FStatRecord& Ignore();
 	static FStatRecord& Main();
 };
+
+inline void RemoveStatRecordFromChildList(FStatRecord& Record, FStatRecord& Parent){
+	FStatRecord** Child = &Parent.Children;
+
+	while(*Child){
+		if(*Child == &Record || (*Child)->Parent == &Record){
+			*Child = (*Child)->NextChild;
+			continue;
+		}else{
+			RemoveStatRecordFromChildList(Record, **Child);
+		}
+
+		Child = &(*Child)->NextChild;
+	}
+}
 
 class CORE_API FStats{
 public:

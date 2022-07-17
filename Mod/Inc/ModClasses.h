@@ -49,6 +49,7 @@ public:
     BITFIELD LimitHudArmsFOV:1 GCC_PACK(4);
     BITFIELD EnableCustomMenu:1;
     BITFIELD EnableEditorSelectionFix:1;
+    BITFIELD OverrideD3DRenderDevice:1;
     class UFunctionOverride* CTPlayerEndZoomOverride GCC_PACK(4);
     class UFunctionOverride* CTPlayerResetFOVOverride;
     class UFunctionOverride* PlayerControllerShakeViewOverride;

@@ -178,6 +178,13 @@ static struct FExecHook : public FExec, FNotifyHook{
 			SetFocus(Preferences->hWnd);
 
 			return 1;
+		}else if(ParseCommand(&Cmd, "GETRENDEV")){
+			if(GEngine && GEngine->GRenDev)
+				Ar.Log(GEngine->GRenDev->GetClass()->GetPathName());
+			else
+				Ar.Logf("No render device in use");
+
+			return 1;
 		}else if(!GIsEditor && GIsClient && ParseCommand(&Cmd, "USERENDEV")){
 			FString RenderDeviceClass = Cmd;
 
@@ -279,16 +286,6 @@ static void InitEngine(){
 
 	GLogWindow->SetExec(GEngine);
 	GLogWindow->Log(NAME_Title, LocalizeGeneral("Run", "SWRepublicCommando"));
-
-	// Init SWRCFix if it exists
-	void* ModDLL = appGetDllHandle("Mod.dll");
-
-	if(ModDLL){
-		void(CDECL*InitSWRCFix)(void) = static_cast<void(CDECL*)(void)>(appGetDllExport(ModDLL, "InitSWRCFix"));
-
-		if(InitSWRCFix)
-			InitSWRCFix();
-	}
 
 	GEngine->Init();
 
@@ -421,6 +418,16 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		GLogWindow->Log(NAME_Title, LocalizeGeneral("Start", "SWRepublicCommando"));
 
 		GExec = &LauncherExecHook;
+
+		// Init SWRCFix if it exists
+		void* ModDLL = appGetDllHandle("Mod.dll");
+
+		if(ModDLL){
+			void(CDECL*InitSWRCFix)(void) = static_cast<void(CDECL*)(void)>(appGetDllExport(ModDLL, "InitSWRCFix"));
+
+			if(InitSWRCFix)
+				InitSWRCFix();
+		}
 
 		InitEngine();
 

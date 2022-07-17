@@ -58,6 +58,15 @@ void USWRCFix::Init(){
 	guardFunc;
 	debugf("Applying fixes");
 
+	if(OverrideD3DRenderDevice){
+		// Apply the bumpmapping fix by setting the render device in the config. This only works if Init is called before the engine is initialized.
+		// Otherwise, the render device must be set in System.ini.
+		FString RenDevClassName;
+
+		if(GConfig->GetFString("Engine.Engine", "RenderDevice", RenDevClassName) && RenDevClassName == "D3DDrv.D3DRenderDevice")
+			GConfig->SetString("Engine.Engine", "RenderDevice", "Mod.ModRenderDevice");
+	}
+
 	/*
 	 * Fix 1:
 	 * Placing a FluidSurfaceInfo crashes because the constructor for FDynamicActor accesses its 'Skins' array which is empty by default.
@@ -83,7 +92,7 @@ void USWRCFix::Init(){
 	 * However, this is always zero, meaning no limit.
 	 * This fix patches the vtable of UGameEngine so it returns a custom value specified in the config.
 	 */
-	OriginalUEngineGetMaxTickRate = static_cast<FLOAT(__fastcall*)(UEngine*, DWORD)>(PatchVTable(GEngine, 49, EngineGetMaxTickRateOverride));
+	OriginalUEngineGetMaxTickRate = static_cast<FLOAT(__fastcall*)(UEngine*, DWORD)>(PatchDllClassVTable("Engine.dll", "UGameEngine", "UObject", 49, EngineGetMaxTickRateOverride));
 
 	/*
 	 * Fix 4:
@@ -130,11 +139,10 @@ void USWRCFix::Init(){
 	/*
 	 * Fix 6:
 	 * This mods FOV options revealed an issue with how the game draws the weapon's reticles. It basically checks if the current FOV is lower than the default one
-	 * and only then draws the reticle. This way it it hidden when zoomed in. However if you set a very high custom FOV, this check will always fail and the reticle is always drawn.
+	 * and only then draws the reticle. This way it is hidden when zoomed in. However if you set a very high custom FOV, this check will always fail and the reticle is always drawn.
 	 * To fix it, we hook the UEngine::Draw function and set the current weapon's reticle property to NULL if zoomed in which causes it to be hidden.
 	 */
-	if(!GIsEditor)
-		OriginalUEngineDraw = static_cast<void(__fastcall*)(UEngine*, DWORD, UViewport*, UBOOL, BYTE*, INT*)>(PatchVTable(GEngine, 41, EngineDrawOverride));
+	OriginalUEngineDraw = static_cast<void(__fastcall*)(UEngine*, DWORD, UViewport*, UBOOL, BYTE*, INT*)>(PatchDllClassVTable("Engine.dll", "UGameEngine", "UObject", 41, EngineDrawOverride));
 
 	InitScript();
 	unguard;

@@ -8,7 +8,8 @@ var() config float   FOV;
 var() config float   HudArmsFOVFactor;
 var() config bool    LimitHudArmsFOV;
 var() config bool    EnableCustomMenu;
-var() config bool    EnableEditorSelectionFix; // Only here for convenience. The actual fix is in ModRenderDevice
+var() config bool    EnableEditorSelectionFix;
+var() config bool    OverrideD3DRenderDevice;
 
 var FunctionOverride CTPlayerEndZoomOverride;
 var FunctionOverride CTPlayerResetFOVOverride;
@@ -208,7 +209,8 @@ defaultproperties
 	ViewShake=1.0
 	FOV=85.0
 	HUDArmsFOVFactor=1.0
-	LimitHudArmsFOV=true
-	EnableCustomMenu=true
-	EnableEditorSelectionFix=true
+	LimitHudArmsFOV=True
+	EnableCustomMenu=True
+	EnableEditorSelectionFix=True
+	OverrideD3DRenderDevice=True
 }

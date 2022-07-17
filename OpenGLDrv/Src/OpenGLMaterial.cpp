@@ -1092,65 +1092,75 @@ bool FOpenGLRenderInterface::SetProjectorMaterial(UProjectorMaterial* ProjectorM
 		BaseOpacity = BaseShader->Opacity;
 	}
 
-	if(ProjectorMaterial->bStaticProjector){
-		FModifierInfo ModifierInfo;
-		UBitmapMaterial* ProjectedBitmap = Cast<UBitmapMaterial>(RemoveModifiers(ProjectorMaterial->Projected, ModifierInfo));
+	FModifierInfo ModifierInfo;
+	UBitmapMaterial* ProjectedBitmap = Cast<UBitmapMaterial>(RemoveModifiers(ProjectorMaterial->Projected, ModifierInfo));
 
-		if(ProjectedBitmap){
-			BYTE BaseMaterialBlending = ProjectorMaterial->BaseMaterialBlending;
+	if(ProjectedBitmap){
+		BYTE BaseMaterialBlending = ProjectorMaterial->BaseMaterialBlending;
 
-			if(BaseMaterialBlending != PB_None && (BaseDiffuse->IsA<UHardwareShaderWrapper>() || BaseDiffuse->IsA<UHardwareShader>()))
-				BaseMaterialBlending = PB_None;
+		if(BaseMaterialBlending != PB_None && (BaseDiffuse->IsA<UHardwareShaderWrapper>() || BaseDiffuse->IsA<UHardwareShader>()))
+			BaseMaterialBlending = PB_None;
 
-			if(BaseMaterialBlending != PB_None && BaseDiffuse){
-				FModifierInfo BaseModifierInfo;
+		if(BaseMaterialBlending != PB_None && BaseDiffuse){
+			FModifierInfo BaseModifierInfo;
 
-				BaseModifierInfo.TexCoordSrc = TCS_Stream1;
+			BaseModifierInfo.TexCoordSrc = TCS_Stream1;
 
-				if(!HandleSimpleMaterial(BaseDiffuse, ShaderGenerator, &BaseModifierInfo))
-					return false;
-			}
+			if(!HandleSimpleMaterial(BaseDiffuse, ShaderGenerator, &BaseModifierInfo))
+				return false;
+		}
 
-			SBYTE Matrix = INDEX_NONE;
+		SBYTE Matrix = INDEX_NONE;
 
-			if(ModifierInfo.bUseTexMatrix){
+		if(ModifierInfo.bUseTexMatrix){
+			Matrix = static_cast<SBYTE>(NumTexMatrices++);
+			TexMatrices[Matrix] = ModifierInfo.TexMatrix;
+		}
+
+		ETexCoordSrc TexCoordSrc = TCS_Stream0;
+
+		// TODO: This isn't enough to support dynamic projectors but for now it looks fine (no effect visible but also no pink error material).
+		if(!ProjectorMaterial->bStaticProjector){
+			if(Matrix == INDEX_NONE){
 				Matrix = static_cast<SBYTE>(NumTexMatrices++);
-				TexMatrices[Matrix] = ModifierInfo.TexMatrix;
+				TexMatrices[Matrix] = ProjectorMaterial->Matrix;
+			}else{
+				TexMatrices[Matrix] *= ProjectorMaterial->Matrix;
 			}
 
-			INT TextureIndex = CurrentState->NumTextures++;
-			SetBitmapTexture(ProjectedBitmap, TextureIndex);
-			EColorArg TextureArg = ShaderGenerator.AddTexture(TextureIndex, TCS_Stream0, TCN_3DCoords, Matrix, true);
+			TexCoordSrc = TCS_WorldCoords;
+		}
 
-			switch(BaseMaterialBlending){
+		INT TextureIndex = CurrentState->NumTextures++;
+		SetBitmapTexture(ProjectedBitmap, TextureIndex);
+		EColorArg TextureArg = ShaderGenerator.AddTexture(TextureIndex, TexCoordSrc, TCN_3DCoords, Matrix, true);
+
+		switch(BaseMaterialBlending){
+		case PB_AlphaBlend:
+			ShaderGenerator.AddColorOp(TextureArg, CA_R0, COP_AlphaBlend, CC_RGB, CR_0);
+			ShaderGenerator.AddColorOp(TextureArg, TextureArg, COP_Arg1, CC_A, CR_0);
+			break;
+		case PB_Modulate:
+			ShaderGenerator.AddColorOp(TextureArg, CA_R0, COP_Modulate2X, CC_RGB, CR_0);
+			ShaderGenerator.AddColorOp(TextureArg, TextureArg, COP_Arg1, CC_A, CR_0);
+			break;
+		case PB_None:
+		default:
+			switch(ProjectorMaterial->FrameBufferBlending){
+			case PB_Add:
+				ShaderGenerator.AddColorOp(TextureArg, CA_DiffuseAlpha, COP_Modulate, CC_RGB, CR_0);
+				ShaderGenerator.AddColorOp(TextureArg, TextureArg, COP_Arg1, CC_A, CR_0);
+				break;
 			case PB_AlphaBlend:
-				ShaderGenerator.AddColorOp(TextureArg, CA_R0, COP_AlphaBlend, CC_RGB, CR_0);
-				ShaderGenerator.AddColorOp(TextureArg, TextureArg, COP_Arg1, CC_A, CR_0);
-				break;
+				ShaderGenerator.AddColorOp(TextureArg, TextureArg, COP_Arg1, CC_RGB, CR_0);
+				ShaderGenerator.AddColorOp(TextureArg, CA_Diffuse, COP_Modulate, CC_A, CR_0);
 			case PB_Modulate:
-				ShaderGenerator.AddColorOp(TextureArg, CA_R0, COP_Modulate2X, CC_RGB, CR_0);
-				ShaderGenerator.AddColorOp(TextureArg, TextureArg, COP_Arg1, CC_A, CR_0);
-				break;
-			case PB_None:
 			default:
-				switch(ProjectorMaterial->FrameBufferBlending){
-				case PB_Add:
-					ShaderGenerator.AddColorOp(TextureArg, CA_DiffuseAlpha, COP_Modulate, CC_RGB, CR_0);
-					ShaderGenerator.AddColorOp(TextureArg, TextureArg, COP_Arg1, CC_A, CR_0);
-					break;
-				case PB_AlphaBlend:
-					ShaderGenerator.AddColorOp(TextureArg, TextureArg, COP_Arg1, CC_RGB, CR_0);
-					ShaderGenerator.AddColorOp(TextureArg, CA_Diffuse, COP_Modulate, CC_A, CR_0);
-				case PB_Modulate:
-				default:
-					ShaderGenerator.AddColorOp(TextureArg, CA_GlobalColor, COP_BlendDiffuseAlpha, CC_RGB, CR_0);
-					ShaderGenerator.AddColorOp(TextureArg, TextureArg, COP_Arg1, CC_A, CR_0);
-					CurrentState->GlobalColor = FPlane(0.5f, 0.5f, 0.5f, 0.0f);
-					++CurrentState->UniformRevision;
-				}
+				ShaderGenerator.AddColorOp(TextureArg, CA_GlobalColor, COP_BlendDiffuseAlpha, CC_RGB, CR_0);
+				ShaderGenerator.AddColorOp(TextureArg, TextureArg, COP_Arg1, CC_A, CR_0);
+				CurrentState->GlobalColor = FPlane(0.5f, 0.5f, 0.5f, 0.0f);
+				++CurrentState->UniformRevision;
 			}
-		}else{
-			return false; // TODO
 		}
 	}else{
 		return false; // TODO

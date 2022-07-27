@@ -163,27 +163,34 @@ simulated function Refresh()
 
 	Options[9].Current = i;
 
-	// Same procedure for FOV
-	for(i = 0; i < Options[10].Items.Length;  ++i){
-		diff = float(Options[10].Items[i]) - class'SWRCFix'.default.FOV;
+	if(!SWRCFix.AutoFOV){
+		// Same procedure for FOV
+		for(i = 0; i < Options[10].Items.Length;  ++i){
+			diff = float(Options[10].Items[i]) - class'SWRCFix'.default.FOV;
 
-		if(Abs(diff) <= 0.1) // Tolerance to deal with floating point precision
-			break;
+			if(Abs(diff) <= 0.1) // Tolerance to deal with floating point precision
+				break;
 
-		if(diff > 0.0 && prevDiff <= 0.0){
-			Options[10].Items.Insert(i, 1);
-			Options[10].Items[i] = string(class'SWRCFix'.default.FOV);
+			if(diff > 0.0 && prevDiff <= 0.0){
+				Options[10].Items.Insert(i, 1);
+				Options[10].Items[i] = string(class'SWRCFix'.default.FOV);
 
-			break;
+				break;
+			}
+
+			prevDiff = diff;
 		}
 
-		prevDiff = diff;
+		if(i == Options[10].Items.Length){
+			SWRCFix.AutoFOV = true;
+			Options[10].Current = 0;
+		}else{
+			Options[10].Current = i;
+		}
+	}else{
+		Options[10].Current = 0;
 	}
 
-	if(i == Options[10].Items.Length)
-		Options[10].Items[Options[10].Items.Length] = string(class'SWRCFix'.default.FOV);
-
-	Options[10].Current = i;
 	Options[11].Current = SWRCFix.HudArmsFOVFactor * 10;
 	Options[12].Current = SWRCFix.ViewShake * 10;
 
@@ -353,12 +360,16 @@ simulated function ChangeOption( int i, int Delta )
 			break;
 
 		case 10:
-			SWRCFix.SetFov(GetPlayerOwner(), float(Options[10].Items[Options[10].Current]));
+			if(Options[10].Current != 0){
+				SWRCFix.FOV = float(Options[10].Items[Options[10].Current]); // The FOV is automatically set if it changed
+				SWRCFix.AutoFOV = false;
+			}else{
+				SWRCFix.AutoFOV = true;
+			}
 			break;
 
 		case 11:
 			SWRCFix.HudArmsFOVFactor = float(Options[11].Items[Options[11].Current]);
-			SWRCFix.SetFOV(GetPlayerOwner(), SWRCFix.FOV);
 			break;
 
 		case 12:
@@ -456,7 +467,7 @@ defaultproperties
      Options(7)=(Items=("ON","OFF","CYCLE"))
      Options(8)=(Items=("0","1","2","3","4","5","6","7","8","9","10"))
      Options(9)=(Items=("NONE","30","60","75","100","120","144","240","360"));
-     Options(10)=(Items=("85","90","95","100","105","110","115","120","125","130"))
+     Options(10)=(Items=("AUTO","85","90","95","100","105","110","115","120","125","130"))
      Options(11)=(Items=("0.0","0.1","0.2","0.3","0.4","0.5","0.6","0.7","0.8","0.9","1.0"))
      Options(12)=(Items=("0.0","0.1","0.2","0.3","0.4","0.5","0.6","0.7","0.8","0.9","1.0"))
      OptionLeftArrows(0)=(Blurred=(WidgetTexture=Texture'GUIContent.Menu.CT_ArrowLeft',DrawColor=(B=255,G=255,R=255,A=255),DrawPivot=DP_MiddleMiddle,PosX=0.62625,PosY=0.12,ScaleX=0.5,ScaleY=0.5),Focused=(DrawColor=(B=255,G=255,R=255,A=255),ScaleX=0.65,ScaleY=0.65),bIgnoreController=1,OnSelect="OnLeft",Pass=2)

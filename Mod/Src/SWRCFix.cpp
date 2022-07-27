@@ -5,7 +5,7 @@
  * Property window crash fix
  */
 
-bool(__fastcall*OriginalUClassIsDefaultValue)(UObject* Self, DWORD, const FPropertyInstance&) = NULL;
+static bool(__fastcall*OriginalUClassIsDefaultValue)(UObject* Self, DWORD, const FPropertyInstance&) = NULL;
 
 bool __fastcall UClassIsDefaultValueOverride(UObject* Self, DWORD edx, const FPropertyInstance& PropertyInstance){
 	for(INT i = 1; i < PropertyInstance.NestedProperties.Num(); ++i){
@@ -20,7 +20,7 @@ bool __fastcall UClassIsDefaultValueOverride(UObject* Self, DWORD edx, const FPr
  * FPS limit
  */
 
-FLOAT(__fastcall*OriginalUEngineGetMaxTickRate)(UEngine*, DWORD) = NULL;
+static FLOAT(__fastcall*OriginalUEngineGetMaxTickRate)(UEngine*, DWORD) = NULL;
 
 static FLOAT __fastcall EngineGetMaxTickRateOverride(UEngine* Self, DWORD Edx){
 	FLOAT MaxTickRate = OriginalUEngineGetMaxTickRate(Self, Edx);
@@ -30,12 +30,35 @@ static FLOAT __fastcall EngineGetMaxTickRateOverride(UEngine* Self, DWORD Edx){
 }
 
 /*
- * Hide reticle when zoomed in
+ * Hide reticle when zoomed in and update FOV if necessary
  */
 
-void(__fastcall*OriginalUEngineDraw)(UEngine*, DWORD, UViewport*, UBOOL, BYTE*, INT*) = NULL;
+static void(__fastcall*OriginalUEngineDraw)(UEngine*, DWORD, UViewport*, UBOOL, BYTE*, INT*) = NULL;
+static INT   PrevViewportWidth = 0;
+static INT   PrevViewportHeight = 0;
+static INT   PrevAutoFOV = 0;
+static FLOAT PrevFOV = 0.0f;
+static FLOAT PrevHudArmsFOVFactor = 0.0f;
 
 static void __fastcall EngineDrawOverride(UEngine* Self, DWORD Edx, UViewport* Viewport, UBOOL Blit, BYTE* HitData, INT* HitSize){
+	// Update field of view
+	if(USWRCFix::Instance->AutoFOV && ((Viewport->SizeX != PrevViewportWidth || Viewport->SizeY != PrevViewportHeight) || USWRCFix::Instance->AutoFOV != PrevAutoFOV)){
+		PrevViewportWidth = Viewport->SizeX;
+		PrevViewportHeight = Viewport->SizeY;
+		PrevAutoFOV = 1;
+
+		FLOAT FOVScale = static_cast<FLOAT>(Viewport->SizeX) / Viewport->SizeY * 0.75f; // 0.75 is the default 4:3 aspect ratio
+		FLOAT FOV = appCeil(appAtan(appTan(USWRCFix::Instance->GetDefaultFOV() * PI / 360.0f) * FOVScale) * 360.0f / PI);
+
+		USWRCFix::Instance->SetFOV(Viewport->Actor, FOV);
+	}else if(USWRCFix::Instance->FOV != PrevFOV || USWRCFix::Instance->HudArmsFOVFactor != PrevHudArmsFOVFactor){
+		PrevFOV = USWRCFix::Instance->FOV;
+		PrevHudArmsFOVFactor = USWRCFix::Instance->HudArmsFOVFactor;
+		USWRCFix::Instance->SetFOV(Viewport->Actor, USWRCFix::Instance->FOV);
+		PrevAutoFOV = 0;
+	}
+
+	// Hide reticle when zoomed in
 	if(Viewport->Actor && Viewport->Actor->Pawn && Viewport->Actor->Pawn->Weapon){
 		AWeapon* Weapon = Viewport->Actor->Pawn->Weapon;
 
@@ -141,6 +164,7 @@ void USWRCFix::Init(){
 	 * This mods FOV options revealed an issue with how the game draws the weapon's reticles. It basically checks if the current FOV is lower than the default one
 	 * and only then draws the reticle. This way it is hidden when zoomed in. However if you set a very high custom FOV, this check will always fail and the reticle is always drawn.
 	 * To fix it, we hook the UEngine::Draw function and set the current weapon's reticle property to NULL if zoomed in which causes it to be hidden.
+	 * Here we also calculate the current FOV based on the aspect ratio.
 	 */
 	OriginalUEngineDraw = static_cast<void(__fastcall*)(UEngine*, DWORD, UViewport*, UBOOL, BYTE*, INT*)>(PatchDllClassVTable("Engine.dll", "UGameEngine", "UObject", 41, EngineDrawOverride));
 

@@ -43,10 +43,13 @@ class MOD_API USWRCFix : public UObject
 {
 public:
     FLOAT ViewShake;
+    FLOAT BaseFOV;
     FLOAT FpsLimit;
     FLOAT FOV;
     FLOAT HudArmsFOVFactor;
-    BITFIELD LimitHudArmsFOV:1 GCC_PACK(4);
+    BITFIELD OverrideDefaultFOV:1 GCC_PACK(4);
+    BITFIELD LimitHudArmsFOV:1;
+    BITFIELD AutoFOV:1;
     BITFIELD EnableCustomMenu:1;
     BITFIELD EnableEditorSelectionFix:1;
     BITFIELD OverrideD3DRenderDevice:1;
@@ -61,6 +64,27 @@ public:
     {
         DECLARE_NAME(InitScript);
         ProcessEvent(NInitScript, NULL);
+    }
+    FLOAT GetDefaultFOV()
+    {
+        DECLARE_NAME(GetDefaultFOV);
+        struct {
+            FLOAT ReturnValue;
+        } Parms;
+        Parms.ReturnValue=0;
+        ProcessEvent(NGetDefaultFOV, &Parms);
+        return Parms.ReturnValue;
+    }
+    void SetFOV(class APlayerController* Player, FLOAT NewFOV)
+    {
+        DECLARE_NAME(SetFOV);
+        struct {
+            class APlayerController* Player;
+            FLOAT NewFOV;
+        } Parms;
+        Parms.Player=Player;
+        Parms.NewFOV=NewFOV;
+        ProcessEvent(NSetFOV, &Parms);
     }
     DECLARE_CLASS(USWRCFix,UObject,0|CLASS_Transient|CLASS_Config,Mod)
 	void Init();

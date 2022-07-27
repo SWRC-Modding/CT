@@ -3,10 +3,13 @@ class SWRCFix extends Object config native transient;
 #exec OBJ LOAD FILE="Properties.u"
 
 var() config float   ViewShake;
+var() config float   BaseFOV;
 var() config float   FpsLimit;
 var() config float   FOV;
 var() config float   HudArmsFOVFactor;
+var() config bool    OverrideDefaultFOV;
 var() config bool    LimitHudArmsFOV;
+var() config bool    AutoFOV;
 var() config bool    EnableCustomMenu;
 var() config bool    EnableEditorSelectionFix;
 var() config bool    OverrideD3DRenderDevice;
@@ -51,6 +54,13 @@ event InitScript(){
 	class'Properties.BattleDroidBlasterTM'.default.AttachmentClass = class'Properties.BattleDroidBlasterAttachmentTM';
 }
 
+event float GetDefaultFOV(){
+	if(OverrideDefaultFOV)
+		return BaseFOV;
+
+	return class'CTPlayer'.default.FOVAngle;
+}
+
 function CTPlayerEndZoom(){
 	local CTPlayer Player;
 
@@ -79,7 +89,7 @@ function WeaponSetWeapFOV(float NewFOV){
 	local float HudArmsFOV;
 
 	Weapon = Weapon(WeaponSetWeapFOVOverride.CurrentSelf);
-	HudArmsFOV = class'CTPlayer'.default.FOVAngle + HUDArmsFOVFactor * (NewFOV - class'CTPlayer'.default.FOVAngle);
+	HudArmsFOV = GetDefaultFOV() + HUDArmsFOVFactor * (NewFOV - GetDefaultFOV());
 
 	UpdateWeaponZoomFOVs(Weapon);
 
@@ -108,7 +118,7 @@ function WeaponSetWeapFOV(float NewFOV){
 function UpdateWeaponZoomFOVs(Weapon Weapon){
 	local float DefaultFOV;
 
-	DefaultFOV = class'CTPlayer'.default.DefaultFOV;
+	DefaultFOV = GetDefaultFOV();
 
 	Weapon.ZoomFOVs[0] = FOV;
 
@@ -139,7 +149,7 @@ function SetViewFOV(PlayerController Player){
 	Player.FOVAngle = CurrentFOV;
 }
 
-function SetFOV(PlayerController Player, float NewFOV){
+event SetFOV(PlayerController Player, float NewFOV){
 	FOV = NewFOV;
 
 	SaveConfig();
@@ -208,8 +218,10 @@ defaultproperties
 {
 	ViewShake=1.0
 	FOV=85.0
+	BaseFOV=85.0
 	HUDArmsFOVFactor=1.0
 	LimitHudArmsFOV=True
+	AutoFOV=True
 	EnableCustomMenu=True
 	EnableEditorSelectionFix=True
 	OverrideD3DRenderDevice=True

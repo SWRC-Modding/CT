@@ -479,8 +479,6 @@ UBOOL UOpenGLRenderDevice::SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL
 			OpenGLContext = TempContext;
 		}
 
-		LoadGLFuncs();
-
 		debugf(NAME_Init, "GL_VENDOR      : %s", glGetString(GL_VENDOR));
 		debugf(NAME_Init, "GL_RENDERER    : %s", glGetString(GL_RENDERER));
 		debugf(NAME_Init, "GL_VERSION     : %s", glGetString(GL_VERSION));
@@ -495,6 +493,8 @@ UBOOL UOpenGLRenderDevice::SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL
 
 		if(MajorVersion < MIN_OPENGL_MAJOR_VERSION || (MajorVersion == MIN_OPENGL_MAJOR_VERSION && MinorVersion < MIN_OPENGL_MINOR_VERSION))
 			appErrorf("OpenGL %i.%i is required but got %i.%i", MIN_OPENGL_MAJOR_VERSION, MIN_OPENGL_MINOR_VERSION, MajorVersion, MinorVersion);
+
+		LoadGLFuncs();
 
 		if(bDebugOpenGL){
 			glEnable(GL_DEBUG_OUTPUT);
@@ -719,8 +719,6 @@ void UOpenGLRenderDevice::Present(UViewport* Viewport){
 
 	if(bKeepAspectRatio && bIsFullscreen){
 		// Clear black bars.
-		// This shouldn't have to happen every frame but for some reason the old pixels are still visible outside of the draw region
-		// after a resolution change, even if the buffer was cleared in SetRes.
 		FPlane Black(0.0f, 0.0f, 0.0f, 1.0f);
 		glClearNamedFramebufferfv(GL_NONE, GL_COLOR, GL_NONE, reinterpret_cast<GLfloat*>(&Black));
 
@@ -729,25 +727,19 @@ void UOpenGLRenderDevice::Present(UViewport* Viewport){
 		INT ScreenWidth = SavedViewportWidth;
 		INT ScreenHeight = SavedViewportHeight;
 
-		FLOAT XScale = 1.0f;
-		FLOAT YScale = 1.0f;
-		FLOAT ViewportAspectRatio = static_cast<FLOAT>(ScreenWidth) / ScreenHeight;
+		FLOAT ScreenAspectRatio = static_cast<FLOAT>(ScreenWidth) / ScreenHeight;
 		FLOAT FramebufferAspectRatio = static_cast<FLOAT>(FramebufferWidth) / FramebufferHeight;
 
-		if(FramebufferAspectRatio < ViewportAspectRatio){
-			FLOAT Scale = static_cast<FLOAT>(ScreenHeight) / FramebufferHeight;
-
-			XScale = FramebufferWidth * Scale / ScreenWidth;
-		}else{
-			FLOAT Scale = static_cast<FLOAT>(ScreenWidth) / FramebufferWidth;
-
-			YScale = FramebufferHeight * Scale / ScreenHeight;
+		if(FramebufferAspectRatio < ScreenAspectRatio){ // Vertical black bars
+			ViewportWidth = FramebufferWidth * (static_cast<FLOAT>(ScreenHeight) / FramebufferHeight);
+			ViewportHeight = ScreenHeight;
+		}else{ // Horizontal black bars
+			ViewportWidth = ScreenWidth;
+			ViewportHeight = FramebufferHeight * (static_cast<FLOAT>(ScreenWidth) / FramebufferWidth);
 		}
 
-		ViewportWidth = static_cast<INT>(ScreenWidth * XScale);
-		ViewportHeight = static_cast<INT>(ScreenHeight * YScale);
-		ViewportX = ScreenWidth / 2 - ViewportWidth / 2;
-		ViewportY = ScreenHeight / 2 - ViewportHeight / 2;
+		ViewportX = (ScreenWidth - ViewportWidth) / 2;
+		ViewportY = (ScreenHeight - ViewportHeight) / 2;
 	}else{
 		ViewportX = 0;
 		ViewportY = 0;
@@ -766,10 +758,9 @@ void UOpenGLRenderDevice::Present(UViewport* Viewport){
 	if(BackbufferTexture){
 		glBlitNamedFramebuffer(BackbufferTexture->FBO, GL_NONE,
 		                       0, 0, BackbufferTexture->Width, BackbufferTexture->Height,
-		                       ViewportX, ViewportHeight, ViewportWidth, ViewportY,
+		                       ViewportX, ViewportY + ViewportHeight, ViewportX + ViewportWidth, ViewportY,
 		                       GL_COLOR_BUFFER_BIT,
 		                       bBilinearFramebuffer ? GL_LINEAR : GL_NEAREST);
-
 		SwapBuffers(DeviceContext);
 	}
 
@@ -979,10 +970,10 @@ void UOpenGLRenderDevice::HandleMovieWindow(UViewport* Viewport){
 			INT ScreenHeight = SavedViewportHeight;
 			FLOAT XScale = 1.0f;
 			FLOAT YScale = 1.0f;
-			FLOAT ViewportAspectRatio = static_cast<FLOAT>(ScreenWidth) / ScreenHeight;
+			FLOAT ScreenAspectRatio = static_cast<FLOAT>(ScreenWidth) / ScreenHeight;
 			FLOAT FramebufferAspectRatio = static_cast<FLOAT>(FramebufferWidth) / FramebufferHeight;
 
-			if(FramebufferAspectRatio < ViewportAspectRatio){
+			if(FramebufferAspectRatio < ScreenAspectRatio){
 				FLOAT Scale = static_cast<FLOAT>(ScreenHeight) / FramebufferHeight;
 
 				XScale = FramebufferWidth * Scale / ScreenWidth;

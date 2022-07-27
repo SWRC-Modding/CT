@@ -50,6 +50,7 @@ static struct FExecHook : public FExec, FNotifyHook{
 			ParentWindow = GLogWindow->hWnd;
 
 		if(ParseCommand(&Cmd, "SHOWLOG")){
+			GEngine->Client->Viewports[0]->Exec("ENDFULLSCREEN", Ar);
 			GLogWindow->Show(1);
 			SetFocus(*GLogWindow);
 			GLogWindow->Display.ScrollCaret();
@@ -91,6 +92,8 @@ static struct FExecHook : public FExec, FNotifyHook{
 			ParseUBOOL(Cmd, "All=", ShowAll);
 
 			if(Objects.Num() > 0){
+				GEngine->Client->Viewports[0]->Exec("ENDFULLSCREEN", Ar);
+
 				if(ShowAll){
 					for(INT i = 0; i < Objects.Num(); ++i){
 						WObjectProperties* P = new WObjectProperties("EditObj", 0, "", NULL, 1);
@@ -148,6 +151,7 @@ static struct FExecHook : public FExec, FNotifyHook{
 				}
 
 				if(Found){
+					GEngine->Client->Viewports[0]->Exec("ENDFULLSCREEN", Ar);
 					WObjectProperties* P = new WObjectProperties("EditActor", 0, "", NULL, 1);
 					P->SetNotifyHook(this);
 					P->OpenWindow(ParentWindow);
@@ -167,6 +171,8 @@ static struct FExecHook : public FExec, FNotifyHook{
 
 			return 1;
 		}else if(ParseCommand(&Cmd, "PREFERENCES")){
+			GEngine->Client->Viewports[0]->Exec("ENDFULLSCREEN", Ar);
+
 			if(!Preferences){
 				Preferences = new WConfigProperties("Preferences", LocalizeGeneral("AdvancedOptionsTitle", "Window"));
 				Preferences->SetNotifyHook(this);

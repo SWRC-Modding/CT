@@ -12,7 +12,6 @@ var() config bool    LimitHudArmsFOV;
 var() config bool    AutoFOV;
 var() config bool    EnableCustomMenu;
 var() config bool    EnableEditorSelectionFix;
-var() config bool    OverrideD3DRenderDevice;
 
 var FunctionOverride CTPlayerEndZoomOverride;
 var FunctionOverride CTPlayerResetFOVOverride;
@@ -224,5 +223,4 @@ defaultproperties
 	AutoFOV=True
 	EnableCustomMenu=True
 	EnableEditorSelectionFix=True
-	OverrideD3DRenderDevice=True
 }

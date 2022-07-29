@@ -81,15 +81,6 @@ void USWRCFix::Init(){
 	guardFunc;
 	debugf("Applying fixes");
 
-	if(OverrideD3DRenderDevice){
-		// Apply the bumpmapping fix by setting the render device in the config. This only works if Init is called before the engine is initialized.
-		// Otherwise, the render device must be set in System.ini.
-		FString RenDevClassName;
-
-		if(GConfig->GetFString("Engine.Engine", "RenderDevice", RenDevClassName) && RenDevClassName == "D3DDrv.D3DRenderDevice")
-			GConfig->SetString("Engine.Engine", "RenderDevice", "Mod.ModRenderDevice");
-	}
-
 	/*
 	 * Fix 1:
 	 * Placing a FluidSurfaceInfo crashes because the constructor for FDynamicActor accesses its 'Skins' array which is empty by default.

@@ -248,6 +248,8 @@ static struct FExecHook : public FExec, FNotifyHook{
 	}
 } LauncherExecHook;
 
+static bool RenDevSetOnCommandLine = false;
+
 static void InitEngine(){
 	guard(InitEngine);
 	check(!GEngine);
@@ -283,6 +285,7 @@ static void InitEngine(){
 
 		debugf("RenderDevice set on command line: %s", *RenderDeviceClass);
 		GConfig->SetString("Engine.Engine", "RenderDevice", *RenderDeviceClass);
+		RenDevSetOnCommandLine = true;
 	}
 
 	// Create game engine.
@@ -425,17 +428,23 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 		GExec = &LauncherExecHook;
 
+		InitEngine();
+
 		// Init SWRCFix if it exists
 		void* ModDLL = appGetDllHandle("Mod.dll");
 
 		if(ModDLL){
 			void(CDECL*InitSWRCFix)(void) = static_cast<void(CDECL*)(void)>(appGetDllExport(ModDLL, "InitSWRCFix"));
 
-			if(InitSWRCFix)
+			if(InitSWRCFix){
 				InitSWRCFix();
-		}
 
-		InitEngine();
+				if(!RenDevSetOnCommandLine && GEngine->GRenDev && appStricmp(GEngine->GRenDev->GetClass()->GetPathName(), "D3DDrv.D3DRenderDevice") == 0){
+					GEngine->Client->Viewports[0]->Exec("ENDFULLSCREEN", *GLog); // D3D doesn't like being created while already in fullscreen
+					LauncherExecHook.Exec("USERENDEV MOD", *GLog);
+				}
+			}
+		}
 
 		if(GEngine && !GIsRequestingExit)
 			MainLoop();

@@ -182,13 +182,13 @@ int __cdecl main(int argc, char** argv){
 						UObject::GetRegistryObjects(List, UClass::StaticClass(), UExporter::StaticClass(), 0);
 
 						for(INT i = 0; i < List.Num(); i++)
-							UObject::StaticLoadClass(UExporter::StaticClass(), NULL, *List[i].Object, NULL, LoadFlags, NULL);
+							LoadClass<UExporter>(NULL, *List[i].Object, NULL, LoadFlags, NULL);
 
 						List.Empty();
 						UObject::GetRegistryObjects(List, UClass::StaticClass(), UFactory::StaticClass(), 0);
 
 						for(INT i = 0; i < List.Num(); i++)
-							UObject::StaticLoadClass(UFactory::StaticClass(), NULL, *List[i].Object, NULL, LoadFlags, NULL);
+							LoadClass<UFactory>(NULL, *List[i].Object, NULL, LoadFlags, NULL);
 					}
 
 					// Contains only the command-line options that are passed to the commandlet
@@ -207,10 +207,6 @@ int __cdecl main(int argc, char** argv){
 					}
 
 					if(ClassName == "Editor.MakeCommandlet"){
-						// Load default packages to avoid 'Superclass not found' errors
-						UObject::LoadPackage(NULL, "Core", LOAD_NoFail);
-						UObject::LoadPackage(NULL, "Engine", LOAD_NoFail);
-
 						// Print full path of source files in error messages
 						if(ParseParam(appCmdLine(), "FullSourcePath") && (GSys->SourcePath.Len() < 2 || GSys->SourcePath[1] != ':'))
 							GSys->SourcePath = FStringTemp(appBaseDir()) * GSys->SourcePath;
@@ -231,6 +227,21 @@ int __cdecl main(int argc, char** argv){
 									GLog->Logf("Deleting %s", *Filename.GetCleanFilename());
 									GFileManager->Delete(*Filename, 1);
 								}
+							}
+						}
+
+						// Load classes that are specified in the config to avoid 'Superclass not found' errors
+						FConfigSection* Section = GConfig->GetSectionPrivate("UCC.Make", 0, 1);
+
+						if(Section){
+							TArray<FConfigString> Values;
+							Section->MultiFind(NAME_AutoLoad, Values);
+
+							for(INT i = 0; i < Values.Num(); ++i){
+								Warn.Logf("Loading %s", *Values[i]);
+
+								if(!LoadObject<UObject>(NULL, *Values[i], NULL, LOAD_NoWarn | LOAD_Quiet, NULL))
+									Warn.Logf(NAME_Warning, "Failed to load '%s'", *Values[i]);
 							}
 						}
 					}

@@ -760,7 +760,7 @@ bool FOpenGLRenderInterface::HandleShaderMaterial(UShader* Shader, FShaderGenera
 			if(Shader->DiffuseEnvMap)
 				DiffuseEnvMap = CastChecked<UBitmapMaterial>(Shader->DiffuseEnvMap);
 
-			if(!DiffuseEnvMap)
+			if(!DiffuseEnvMap && BumpmapIndex != INDEX_NONE)
 				DiffuseEnvMap = GCubemapManager->StaticDiffuse;
 		}
 

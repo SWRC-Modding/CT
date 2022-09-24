@@ -5031,6 +5031,43 @@ public:
 	NO_DEFAULT_CONSTRUCTOR(UInteractions)
 };
 
+
+/*
+ * InteractionMaster
+ */
+
+class ENGINE_API UInteractionMaster : public UInteractions{
+public:
+	class UClient* Client;
+	class UInteraction* BaseMenu;
+	class UInteraction* Console;
+	TArrayNoInit<class UInteraction*> GlobalInteractions;
+	BITFIELD bRequireRawJoystick:1;
+
+	UBOOL Exec(const TCHAR* Cmd, FOutputDevice& Ar);
+	void DisplayCopyright();
+	int MasterProcessKeyType(class UViewport* Viewport, EInputKey iKey, TCHAR Unicode);
+	int MasterProcessKeyEvent(class UViewport* Viewport, EInputKey iKey, EInputAction State, FLOAT Delta);
+	int MasterProcessJoyInput(INT ControlIndex, EInputKey iKey, FLOAT Axis);
+	void MasterProcessTick(float DeltaTime);
+	void MasterProcessPreRender(class UCanvas* Canvas);
+	void MasterProcessPostRender(class UCanvas* Canvas);
+	void MasterProcessMessage(const FString& Msg, FLOAT MsgLife);
+
+	// Events
+	class UInteraction* AddInteraction(const FString& InteractionName, class UPlayer* AttachTo);
+	void RemoveInteraction(class UInteraction* RemoveMe);
+	void SetFocusTo(class UInteraction* Inter, class UPlayer* ViewportOwner);
+	UBOOL Process_KeyType(TArray<class UInteraction*> InteractionArray, BYTE& Key, const FString& Unicode);
+	UBOOL Process_KeyEvent(TArray<class UInteraction*> InteractionArray, BYTE& Key, BYTE& Action, FLOAT Delta);
+	void Process_PreRender(TArray<class UInteraction*> InteractionArray, class UCanvas* Canvas);
+	void Process_PostRender(TArray<class UInteraction*> InteractionArray, class UCanvas* Canvas);
+	void Process_Tick(TArray<class UInteraction*> InteractionArray, FLOAT DeltaTime);
+	void Process_Message(const FString& Msg, FLOAT MsgLife, TArray<class UInteraction*> InteractionArray);
+
+	DECLARE_CLASS(UInteractionMaster,UInteractions,CLASS_Transient,Engine)
+};
+
 /*
  * Interaction
  */
@@ -5046,6 +5083,13 @@ public:
 
 	// Events
 	void Initialized();
+
+	void  virtual NativeMessage(FString Msg, FLOAT MsgLife);
+	UBOOL virtual NativeKeyType(BYTE& iKey, TCHAR Unicode);
+	UBOOL virtual NativeKeyEvent(BYTE& iKey, BYTE& State, FLOAT Delta);
+	void  virtual NativeTick(FLOAT DeltaTime);
+	void  virtual NativePreRender(UCanvas* Canvas);
+	void  virtual NativePostRender(UCanvas* Canvas);
 
 	DECLARE_CLASS(UInteraction,UInteractions,0,Engine)
 };
@@ -5127,32 +5171,6 @@ public:
 	bool IsMenuBackgroundMusicPlaying(USound* sound);
 	void PauseLevelMusic();
 	void ResumeLevelMusic();
-};
-
-/*
- * InteractionMaster
- */
-
-class ENGINE_API UInteractionMaster : public UInteractions{
-public:
-	class UClient* Client;
-	class UInteraction* BaseMenu;
-	class UInteraction* Console;
-	TArrayNoInit<class UInteraction*> GlobalInteractions;
-	BITFIELD bRequireRawJoystick:1;
-
-	// Events
-	class UInteraction* AddInteraction(const FString& InteractionName, class UPlayer* AttachTo);
-	void RemoveInteraction(class UInteraction* RemoveMe);
-	void SetFocusTo(class UInteraction* Inter, class UPlayer* ViewportOwner);
-	UBOOL Process_KeyType(TArray<class UInteraction*> InteractionArray, BYTE& Key, const FString& Unicode);
-	UBOOL Process_KeyEvent(TArray<class UInteraction*> InteractionArray, BYTE& Key, BYTE& Action, FLOAT Delta);
-	void Process_PreRender(TArray<class UInteraction*> InteractionArray, class UCanvas* Canvas);
-	void Process_PostRender(TArray<class UInteraction*> InteractionArray, class UCanvas* Canvas);
-	void Process_Tick(TArray<class UInteraction*> InteractionArray, FLOAT DeltaTime);
-	void Process_Message(const FString& Msg, FLOAT MsgLife, TArray<class UInteraction*> InteractionArray);
-
-	DECLARE_CLASS(UInteractionMaster,UInteractions,CLASS_Transient,Engine)
 };
 
 /*

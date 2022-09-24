@@ -423,48 +423,49 @@ public:
 	TArray<UViewport*> Viewports;
 
 	// Configurable.
-	BITFIELD           CaptureMouse;
-	BITFIELD           ScreenFlashes;
-	BITFIELD           NoLighting;
-	BITFIELD           Decals;
-	BITFIELD           NoDynamicLights;
-	BITFIELD           NoFractalAnim;
-	BITFIELD           Coronas;
-	BITFIELD           DecoLayers;
-	BITFIELD           Projectors;
-	BITFIELD           ReportDynamicUploads;
-	BITFIELD           Shadows;
-	BITFIELD           FrameFXDisabled;
-	BITFIELD           NoHud;
-	BITFIELD           NoDistort;
-	BITFIELD           BlurEnabled;
-	BYTE               BloomQuality;
-	BYTE               BumpmappingQuality;
-	INT                Bloom;
-	INT                BloomFilter;
-	INT                FilmGrain;
-	INT                LightOpt;
-	INT                LightEnvFlag;
-	INT                HWCull;
-	INT                ShadowsPerFrame;
-	INT                ShadowLength;
-	INT                X;
-	INT                Y;
-	INT                Z;
-	INT                WindowedViewportX;
-	INT                WindowedViewportY;
-	INT                FullscreenViewportX;
-	INT                FullscreenViewportY;
-	INT                FullscreenColorBits;
-	FLOAT              Gamma;
-	char               Padding1[4]; // PADDING!!!
-	BYTE               TextureLODSet[LODSET_MAX];
-	char               Padding2[20]; // PADDING!!!
-	FLOAT              MinDesiredFramerate;
-	UViewport*         LastCurrent;
-	INT                DropLODBy;
-	INT                FSAA;
-	char               Padding3[12]; // PADDING!!!
+	BITFIELD            CaptureMouse;
+	BITFIELD            ScreenFlashes;
+	BITFIELD            NoLighting;
+	BITFIELD            Decals;
+	BITFIELD            NoDynamicLights;
+	BITFIELD            NoFractalAnim;
+	BITFIELD            Coronas;
+	BITFIELD            DecoLayers;
+	BITFIELD            Projectors;
+	BITFIELD            ReportDynamicUploads;
+	BITFIELD            Shadows;
+	BITFIELD            FrameFXDisabled;
+	BITFIELD            NoHud;
+	BITFIELD            NoDistort;
+	BITFIELD            BlurEnabled;
+	BYTE                BloomQuality;
+	BYTE                BumpmappingQuality;
+	INT                 Bloom;
+	INT                 BloomFilter;
+	INT                 FilmGrain;
+	INT                 LightOpt;
+	INT                 LightEnvFlag;
+	INT                 HWCull;
+	INT                 ShadowsPerFrame;
+	INT                 ShadowLength;
+	INT                 X;
+	INT                 Y;
+	INT                 Z;
+	INT                 WindowedViewportX;
+	INT                 WindowedViewportY;
+	INT                 FullscreenViewportX;
+	INT                 FullscreenViewportY;
+	INT                 FullscreenColorBits;
+	FLOAT               Gamma;
+	char                Padding1[4]; // PADDING!!!
+	BYTE                TextureLODSet[LODSET_MAX];
+	char                Padding2[20]; // PADDING!!!
+	FLOAT               MinDesiredFramerate;
+	UViewport*          LastCurrent;
+	INT                 DropLODBy;
+	INT                 FSAA;
+	char                Padding3[8]; // PADDING!!!
+	UInteractionMaster* InteractionMaster;
 
 	// Constructors.
 	UClient();

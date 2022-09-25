@@ -420,7 +420,8 @@ private:
 struct CORE_API FStatRecord{
 	DWORD        DWORD0;
 	DWORD        Count;
-	char         Padding2[8]; // 8
+	DWORD        Pad1;
+	DWORD        Pad2;
 	const TCHAR* Tag;
 	DWORD        DWORD20;
 	FStatRecord* Parent;
@@ -432,10 +433,10 @@ struct CORE_API FStatRecord{
 	FStatRecord(const TCHAR* Tag, struct FStatRecord& Parent);
 	~FStatRecord();
 
-	void operator++(INT);
-	void operator--(INT);
-	void operator+=(DWORD);
-	void operator-=(DWORD);
+	FORCEINLINE void operator++(INT){ ++Count; }
+	FORCEINLINE void operator--(INT){ --Count; }
+	FORCEINLINE void operator+=(DWORD Value){ Count += Value; }
+	FORCEINLINE void operator-=(DWORD Value){ Count -= Value; }
 
 	FStatRecord& ActualStat();
 	void AddChild(FStatRecord* Child);

@@ -288,7 +288,7 @@ inline FLOAT appSqrt(FLOAT F){
 #pragma warning (push)
 #pragma warning (disable : 4035)
 #pragma warning (disable : 4715)
-inline DWORD appCycles(){
+__forceinline DWORD appCycles(){
 	__asm{
 		rdtsc				// RDTSC  -  Pentium+ time stamp register to EDX:EAX
 							// Use only 32 bits in EAX - a Ghz cpu has a 4+ sec period.

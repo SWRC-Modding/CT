@@ -1093,8 +1093,7 @@ protected:
 		TK  Key;
 		TI  Value;
 
-		TPair(typename TTypeInfo<TK>::ConstInitType InKey, typename TTypeInfo<TI>::ConstInitType InValue) : HashNext(INDEX_NONE),
-		                                                                                                    Key(InKey),
+		TPair(typename TTypeInfo<TK>::ConstInitType InKey, typename TTypeInfo<TI>::ConstInitType InValue) : Key(InKey),
 		                                                                                                    Value(InValue){}
 		TPair(){}
 
@@ -1114,17 +1113,11 @@ protected:
 			Hash[i] = INDEX_NONE;
 
 		for(INT i = 0; i < Pairs.Num(); ++i){
-			TPair& Pair = Pairs[i];
-			INT iHash = GetTypeHash(Pair.Key) & (HashCount - 1);
+			TPair& Pair   = Pairs[i];
+			INT    iHash  = (GetTypeHash(Pair.Key) & (HashCount - 1));
 
-			Pair.HashNext = INDEX_NONE;
-
-			INT* Temp = &Hash[iHash];
-
-			while(*Temp != INDEX_NONE)
-				Temp = &Pairs[*Temp].HashNext;
-
-			*Temp = i;
+			Pair.HashNext = Hash[iHash];
+			Hash[iHash]   = i;
 		}
 	}
 
@@ -1136,21 +1129,15 @@ protected:
 	}
 
 	TI& Add(typename TTypeInfo<TK>::ConstInitType InKey, typename TTypeInfo<TI>::ConstInitType InValue){
-		TPair& Pair = *new(Pairs)TPair(InKey, InValue);
-		INT iHash = GetTypeHash(Pair.Key) & (HashCount - 1);
+		TPair& Pair   = *new(Pairs)TPair(InKey, InValue);
+		INT    iHash  = (GetTypeHash(Pair.Key) & (HashCount-1));
 
+		Pair.HashNext = Hash[iHash];
+		Hash[iHash]   = Pairs.Num()-1;
 		if(HashCount * 2 + 8 < Pairs.Num()){
 			HashCount *= 2;
 			Rehash();
-		}else{
-			INT* Temp = &Hash[iHash];
-
-			while(*Temp != INDEX_NONE)
-				Temp = &Pairs[*Temp].HashNext;
-
-			*Temp = Pairs.Num() - 1;
 		}
-
 		return Pair.Value;
 	}
 

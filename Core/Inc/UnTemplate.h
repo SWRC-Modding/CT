@@ -1317,7 +1317,7 @@ public:
 	void MultiFind(const TK& Key, TArray<TI>& Values) const{
 		for(INT i = Hash[(GetTypeHash(Key) & (HashCount - 1))]; i != INDEX_NONE; i = Pairs[i].HashNext){
 			if(Pairs[i].Key == Key)
-				new(Values) TI(Pairs[i].Value);
+				new(Values, 0) TI(Pairs[i].Value);
 		}
 	}
 

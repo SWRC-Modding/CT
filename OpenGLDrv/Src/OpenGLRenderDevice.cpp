@@ -7,9 +7,9 @@
 IMPLEMENT_PACKAGE(OpenGLDrv)
 IMPLEMENT_CLASS(UOpenGLRenderDevice)
 
-UOpenGLRenderDevice::UOpenGLRenderDevice() : RenderInterface(this),
-                                             Backbuffer(0, 0, TEXF_RGBA8, false, false),
-                                             ErrorShader(this){}
+UOpenGLRenderDevice::UOpenGLRenderDevice() : ErrorShader(this),
+                                             RenderInterface(this),
+                                             Backbuffer(0, 0, TEXF_RGBA8, false, false){}
 
 void UOpenGLRenderDevice::StaticConstructor(){
 	SupportsCubemaps       = 1;
@@ -124,7 +124,7 @@ const FOpenGLShader* UOpenGLRenderDevice::GetShaderForMaterial(UMaterial* Materi
 	if(!LoadedShader && Shader && Shader->IsValid())
 		Material->UseFallback = 1; // Set UseFallback when a custom shader is used so we don't convert the d3d assembly shader
 
-	if(HardwareShader && (!LoadedShader && !Material->UseFallback || LoadedEmpty)){
+	if(HardwareShader && ((!LoadedShader && !Material->UseFallback) || LoadedEmpty)){
 		ShaderText = GLSLShaderFromD3DHardwareShader(HardwareShader);
 		check(ShaderText.Len() > 0);
 

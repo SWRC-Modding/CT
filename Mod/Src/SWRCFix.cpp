@@ -1,4 +1,5 @@
 #include "../../Engine/Inc/Engine.h"
+#include "../../Window/Inc/Window.h"
 #include "../Inc/Mod.h"
 
 /*
@@ -73,6 +74,52 @@ static void __fastcall EngineDrawOverride(UEngine* Self, DWORD Edx, UViewport* V
 	OriginalUEngineDraw(Self, Edx, Viewport, Blit, HitData, HitSize);
 }
 
+
+/*
+ * UEngine exec hook
+ */
+
+static void FlushResources(){
+	// Flush render resources
+	if(GEngine->GRenDev)
+		GEngine->GRenDev->Flush(NULL);
+
+	// Unload texture data
+	for(TObjectIterator<UTexture> It; It; ++It){
+		for(INT i = 0; i < It->Mips.Num(); ++i)
+			It->Mips[i].DataArray.Unload();
+	}
+}
+
+static UBOOL(__fastcall*OriginalUEngineExec)(UEngine*, DWORD, const TCHAR*, FOutputDevice&) = NULL;
+
+static UBOOL __fastcall EngineExecOverride(UEngine* Self, DWORD Edx, const TCHAR* Cmd, FOutputDevice& Ar){
+	const TCHAR* TempCmd = Cmd;
+
+	if(ParseCommand(&Cmd, "FLUSHRESOURCES")){
+		FlushResources();
+
+		return 1;
+	}else if(ParseCommand(&TempCmd, "CAMERA") && ParseCommand(&TempCmd, "UPDATE")){
+		FString TempString;
+
+		if(Parse(TempCmd, "NAME=", TempString) && TempString == "TextureBrowser"){
+			if(Parse(TempCmd, "PACKAGE=", TempString) && TempString == ""){
+				if(!GConfig->GetFString("Mod.SWRCFix", "InitialTextureBrowserPackage", TempString)){
+					TempString = "Engine";
+					GConfig->SetString("Mod.SWRCFix", "InitialTextureBrowserPackage", *TempString);
+				}
+
+				OriginalUEngineExec(Self, Edx, *("CAMERA UPDATE FLAGS=1073742464 MISC2=0 REN=17 NAME=TextureBrowser PACKAGE=\"" + TempString + "\" GROUP=\"(All)\""), Ar);
+				FlushResources();
+
+				return 1;
+			}
+		}
+	}
+
+	return OriginalUEngineExec(Self, Edx, Cmd, Ar);
+}
 /*
  * Fix initialization
  */
@@ -159,6 +206,15 @@ void USWRCFix::Init(){
 	 */
 	OriginalUEngineDraw = static_cast<void(__fastcall*)(UEngine*, DWORD, UViewport*, UBOOL, BYTE*, INT*)>(PatchDllClassVTable("Engine.dll", "UGameEngine", "UObject", 41, EngineDrawOverride));
 
+	/* Fix 7:
+	 * The editor loads all textures at startup which can consume a significant amount of memory.
+	 * It does so because initially there is no package selected for the texture browser and thus all textures are shown.
+	 * This is fixed by overriding the Exec function and checking for the command that intiializes the texture browser and providing a single package to be initially loadedA.
+	 * Additionally, a new command is added that alluws manually flushing resources if memory usage gets too high.
+	 */
+	OriginalUEngineExec = static_cast<UBOOL(__fastcall*)(UEngine*, DWORD, const TCHAR*, FOutputDevice&)>(PatchVTable(static_cast<FExec*>(GEngine), 0, EngineExecOverride));
+
+	// Initialize the UnrealScript part of the fix
 	InitScript();
 	unguard;
 }

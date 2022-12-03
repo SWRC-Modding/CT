@@ -216,7 +216,7 @@ static struct FExecHook : public FExec, FNotifyHook{
 					GEngine->GRenDev->Init();
 
 					// We need to reset all FCanvasUtils since they still reference the old render interface
-					for(TObjectIterator<UCanvas> It; It; ++It){
+					foreachobj(UCanvas, It){
 						if(It->pCanvasUtil){
 							delete It->pCanvasUtil;
 							It->pCanvasUtil = NULL;

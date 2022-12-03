@@ -85,7 +85,7 @@ static void FlushResources(){
 		GEngine->GRenDev->Flush(NULL);
 
 	// Unload texture data
-	for(TObjectIterator<UTexture> It; It; ++It){
+	foreachobj(UTexture, It){
 		for(INT i = 0; i < It->Mips.Num(); ++i)
 			It->Mips[i].DataArray.Unload();
 	}
@@ -133,7 +133,7 @@ void USWRCFix::Init(){
 	 * Placing a FluidSurfaceInfo crashes because the constructor for FDynamicActor accesses its 'Skins' array which is empty by default.
 	 * To fix this we simply resize the property in the default actor so that it contains an element.
 	 */
-	AFluidSurfaceInfo::StaticClass()->GetDefaultActor()->Skins.Set(1);
+	GetDefault<AFluidSurfaceInfo>()->Skins.Set(1);
 
 	/*
 	 * Fix 2:
@@ -160,7 +160,7 @@ void USWRCFix::Init(){
 	 * Creating a new HardwareShader via the texture browser crashes because the vertex and pixel shader variables are empty by default which causes the compilation to fail.
 	 * To fix it, we simply add a dummy shader implementation.
 	 */
-	UHardwareShader* DefaultHardwareShader = static_cast<UHardwareShader*>(UHardwareShader::StaticClass()->GetDefaultObject());
+	UHardwareShader* DefaultHardwareShader = GetDefault<UHardwareShader>();
 
 	DefaultHardwareShader->VertexShaderText = "vs.1.1\n\n"
 	                                          "mov oPos, v0\n";

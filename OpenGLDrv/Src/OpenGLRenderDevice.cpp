@@ -106,6 +106,10 @@ FOpenGLResource* UOpenGLRenderDevice::GetCachedResource(QWORD CacheId){
 }
 
 const FOpenGLShader* UOpenGLRenderDevice::GetShaderForMaterial(UMaterial* Material){
+	// UMaterial::UseFallback and UMaterial::Validated have a different meaning here which is fine since they're not used in engine code.
+	//  - UseFallback: The material has a valid shader that can be used for rendering
+	//  - Validated: The following code needs to check whether there is an updated version of the shader available and load it if that is the case
+
 	// HACK:
 	// Use the 30 bit padding space after UMaterial::UseFallback and UMaterial::Validated to store an index to quickly retrieve the shader for that material.
 	if(Material->Validated && Material->UseFallback)
@@ -124,11 +128,11 @@ const FOpenGLShader* UOpenGLRenderDevice::GetShaderForMaterial(UMaterial* Materi
 	if(!LoadedShader && Shader && Shader->IsValid())
 		Material->UseFallback = 1; // Set UseFallback when a custom shader is used so we don't convert the d3d assembly shader
 
+	// Generate GLSL shader from D3D assemly if the shader is not yet valid or an empty file was loaded, meaning the default implementation is requested
 	if(HardwareShader && ((!LoadedShader && !Material->UseFallback) || LoadedEmpty)){
 		ShaderText = GLSLShaderFromD3DHardwareShader(HardwareShader);
-		check(ShaderText.Len() > 0);
 
-		if(!LoadedShader && bSaveShadersToDisk)
+		if(!LoadedShader && bSaveShadersToDisk) // Save generated shader to disk only if the file doesn't exist yet
 			SaveShader(ShaderPath, ShaderText);
 	}
 
@@ -341,7 +345,7 @@ UBOOL UOpenGLRenderDevice::Init(){
 	if(bUseTrilinear)
 		TextureFilter = TF_Trilinear;
 
-	for(TObjectIterator<UMaterial> It; It; ++It){
+	foreachobj(UMaterial, It){
 		It->UseFallback = 0;
 		It->Validated = 0;
 		reinterpret_cast<INT*>(*It)[24] &= 0x3;

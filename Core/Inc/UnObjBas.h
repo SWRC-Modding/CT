@@ -667,6 +667,9 @@ public:
 	T* operator->(){ return static_cast<T*>(FObjectIterator::operator->()); }
 };
 
+#define foreachobj(cls, var) \
+	for(TObjectIterator<cls> var; var; ++var)
+
 /*----------------------------------------------------------------------------
 	The End.
 ----------------------------------------------------------------------------*/

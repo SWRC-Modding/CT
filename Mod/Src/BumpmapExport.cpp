@@ -65,7 +65,7 @@ INT UExportBumpMapsCommandlet::Main(const TCHAR* Parms){
 		return 1;
 	}
 
-	for(TObjectIterator<UTexture> It; It; ++It){
+	foreachobj(UTexture, It){
 		FBaseTexture* BaseTexture = It->GetRenderInterface();
 		FTexture* Texture = BaseTexture ? BaseTexture->GetTextureInterface() : NULL;
 

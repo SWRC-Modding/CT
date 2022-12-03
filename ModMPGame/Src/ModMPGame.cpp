@@ -525,7 +525,7 @@ void ABotSupport::Spawned(){
 		// Spawn inventory spots for each pickup in the level
 		foreach(DynamicActors, APickup, It, XLevel){
 			SpawnNavigationPoint(AInventorySpot::StaticClass(),
-			                     It->Location + FVector(0, 0, AScout::StaticClass()->GetDefaultActor()->CollisionHeight));
+			                     It->Location + FVector(0, 0, GetDefault<AScout>()->CollisionHeight));
 		}
 
 		if(bAutoImportPaths){
@@ -1031,7 +1031,7 @@ class UExportPathsCommandlet : public UCommandlet{
 			UPackage* Package = UObject::LoadPackage(NULL, *MapName, LOAD_NoFail);
 			ULevel* Level = NULL;
 
-			for(TObjectIterator<ULevel> It; It; ++It){
+			foreachobj(ULevel, It){
 				if(It->IsIn(Package)){
 					Level = *It;
 

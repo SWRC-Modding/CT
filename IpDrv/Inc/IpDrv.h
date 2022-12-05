@@ -52,6 +52,10 @@ Revision history:
 	#endif
 #endif
 
+#if SUPPORTS_PRAGMA_PACK
+#pragma pack(push,4)
+#endif
+
 /*-----------------------------------------------------------------------------
 	Includes..
 -----------------------------------------------------------------------------*/
@@ -252,6 +256,10 @@ inline in_addr getlocalbindaddr( FOutputDevice& Out )
 #include "UnTcpNetDriver.h"
 
 #pragma LINK_LIB(IpDrv)
+
+#if SUPPORTS_PRAGMA_PACK
+#pragma pack(pop)
+#endif
 
 #endif // UNIPDRV_H
 

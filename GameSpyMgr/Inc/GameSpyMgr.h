@@ -7,6 +7,10 @@
 LINK_LIB(GameSpyMgr)
 #endif
 
+#if SUPPORTS_PRAGMA_PACK
+#pragma pack(push,4)
+#endif
+
 /*
  * GameSpyCDKeyResponseInterface
  */
@@ -74,3 +78,8 @@ private:
 	FString Idk;
 	char Padding2[10]; // Padding
 };
+
+#if SUPPORTS_PRAGMA_PACK
+#pragma pack(pop)
+#endif
+

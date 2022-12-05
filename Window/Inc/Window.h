@@ -17,6 +17,10 @@
 LINK_LIB(Window)
 #endif
 
+#if SUPPORTS_PRAGMA_PACK
+#pragma pack(push,4)
+#endif
+
 // TODO: Check all virtual tables
 
 /*-----------------------------------------------------------------------------
@@ -2044,6 +2048,10 @@ public:
 	void Restore();
 
 };
+
+#if SUPPORTS_PRAGMA_PACK
+#pragma pack(pop)
+#endif
 
 /*-----------------------------------------------------------------------------
 	The End.

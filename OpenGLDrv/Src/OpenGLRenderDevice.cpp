@@ -128,7 +128,7 @@ const FOpenGLShader* UOpenGLRenderDevice::GetShaderForMaterial(UMaterial* Materi
 
 	if(Material->IsA<UHardwareShader>()){
 		// Generate GLSL from D3D shader if no shader exists yet for the material or the source file is empty or deleted.
-		if(!Shader || (ShaderLoaded && ShaderText.Len() == 0)){
+		if((!Shader && !ShaderLoaded) || (ShaderLoaded && ShaderText.Len() == 0)){
 			ShaderText = GLSLShaderFromD3DHardwareShader(static_cast<UHardwareShader*>(Material));
 
 			if(bSaveShadersToDisk)

@@ -9,6 +9,8 @@
 	API.
 ----------------------------------------------------------------------------*/
 
+#include "../../Core/Inc/Core.h"
+
 #ifndef ENGINE_API
 #define ENGINE_API DLL_IMPORT
 #endif
@@ -17,9 +19,11 @@
 	Dependencies.
 -----------------------------------------------------------------------------*/
 
-#include "../../Core/Inc/Core.h"
-
 LINK_LIB(Engine)
+
+#if SUPPORTS_PRAGMA_PACK
+#pragma pack(push,4)
+#endif
 
 /*-----------------------------------------------------------------------------
 	Global variables.
@@ -91,6 +95,10 @@ ENGINE_API extern class FRebuildTools       GRebuildTools;
 ENGINE_API extern class FStatGraph*         GStatGraph;
 ENGINE_API extern class FTempLineBatcher*   GTempLineBatcher;
 ENGINE_API extern class FTerrainTools       GTerrainTools;
+
+#if SUPPORTS_PRAGMA_PACK
+#pragma pack(pop)
+#endif
 
 /*-----------------------------------------------------------------------------
 	The End.

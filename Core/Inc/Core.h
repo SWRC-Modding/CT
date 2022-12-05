@@ -37,6 +37,10 @@ LINK_LIB(Core)
 	#error Must use Visual Studio (Ideally .NET 2003)
 #endif
 
+#if SUPPORTS_PRAGMA_PACK
+#pragma pack(push,4)
+#endif
+
 // Global constants.
 enum{ MAXBYTE       = 0xff        };
 enum{ MAXWORD       = 0xffffU     };
@@ -711,6 +715,10 @@ inline void* PatchDllClassVTable(const TCHAR* DllName, const TCHAR* ClassName, c
 
 	return PatchVTable(&VTable, Index, NewFunc);
 }
+
+#if SUPPORTS_PRAGMA_PACK
+#pragma pack(pop)
+#endif
 
 /*-----------------------------------------------------------------------------
 	The End.

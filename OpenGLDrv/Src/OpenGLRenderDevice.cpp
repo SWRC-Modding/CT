@@ -106,62 +106,58 @@ FOpenGLResource* UOpenGLRenderDevice::GetCachedResource(QWORD CacheId){
 }
 
 const FOpenGLShader* UOpenGLRenderDevice::GetShaderForMaterial(UMaterial* Material){
-	// UMaterial::UseFallback and UMaterial::Validated have a different meaning here which is fine since they're not used in engine code.
-	//  - UseFallback: The material has a valid shader that can be used for rendering
-	//  - Validated: The following code needs to check whether there is an updated version of the shader available and load it if that is the case
+	// HACK: The 30 bit padding space after UMaterial::Validated is used to store a flag, indicating whether the material has a shader or not and an index to retrieve it.
 
-	// HACK:
-	// Use the 30 bit padding space after UMaterial::UseFallback and UMaterial::Validated to store an index to quickly retrieve the shader for that material.
-	if(Material->Validated && Material->UseFallback)
-		return &ShadersByMaterial.GetPairs()[reinterpret_cast<INT*>(Material)[24] >> 2].Value;
+	if(Material->Validated){
+		if(Material->UseFallback) // Material has a shader, so quickly look it up by index
+			return &ShadersByMaterial.GetPairs()[reinterpret_cast<INT*>(Material)[24] >> 3].Value;
 
-	if(Material->IsIn(UObject::GetTransientPackage())) // Only unique names, no Transient.InGameTempName
+		return NULL;
+	}
+
+	Material->Validated = 1;
+
+	if(Material->IsIn(UObject::GetTransientPackage()))
 		return NULL;
 
-	FOpenGLCachedShader* Shader = ShadersByMaterial.Find(Material->GetPathName());
-	FStringTemp ShaderPath = FStringTemp(Material->GetPathName()).Substitute(".", "\\").Substitute(".", "\\");
+	FString MaterialPathName = Material->GetPathName();
+	FString ShaderPath = MaterialPathName.Substitute(".", "\\").Substitute(".", "\\");
 	FString ShaderText;
-	bool LoadedShader = LoadShaderIfChanged(ShaderPath, ShaderText);
-	bool LoadedEmpty = LoadedShader && ShaderText.Len() == 0;
-	UHardwareShader* HardwareShader = Cast<UHardwareShader>(Material);
+	bool ShaderLoaded = LoadShaderIfChanged(ShaderPath, ShaderText);
+	FOpenGLCachedShader* Shader = ShadersByMaterial.Find(*MaterialPathName);
 
-	if(!LoadedShader && Shader && Shader->IsValid())
-		Material->UseFallback = 1; // Set UseFallback when a custom shader is used so we don't convert the d3d assembly shader
+	if(Material->IsA<UHardwareShader>()){
+		// Generate GLSL from D3D shader if no shader exists yet for the material or the source file is empty or deleted.
+		if(!Shader || (ShaderLoaded && ShaderText.Len() == 0)){
+			ShaderText = GLSLShaderFromD3DHardwareShader(static_cast<UHardwareShader*>(Material));
 
-	// Generate GLSL shader from D3D assemly if the shader is not yet valid or an empty file was loaded, meaning the default implementation is requested
-	if(HardwareShader && ((!LoadedShader && !Material->UseFallback) || LoadedEmpty)){
-		ShaderText = GLSLShaderFromD3DHardwareShader(HardwareShader);
-
-		if(!LoadedShader && bSaveShadersToDisk) // Save generated shader to disk only if the file doesn't exist yet
-			SaveShader(ShaderPath, ShaderText);
+			if(bSaveShadersToDisk)
+				SaveShader(ShaderPath, ShaderText);
+		}
+	}else{
+		// Source file is empty or deleted, so free the shader and set the flag indicating that the material should use the shader generator instead.
+		// TODO: Handle this like the hardware shaders and write the generated shader code to the file in that case instead of using the flag.
+		if(Shader && ShaderLoaded && ShaderText.Len() == 0){
+			Shader->Free();
+			Shader = NULL;
+			reinterpret_cast<INT*>(Material)[24] = (reinterpret_cast<INT*>(Material)[24] & 0x3) | 0x4;
+		}else if(!ShaderLoaded && reinterpret_cast<INT*>(Material)[24] & 0x4){ // The material previously used a shader but now doesn't anymore so return NULL
+			Shader = NULL;
+		}
 	}
 
 	if(ShaderText.Len() > 0){
 		if(!Shader){
-			Shader = &ShadersByMaterial[Material->GetPathName()];
+			Shader = &ShadersByMaterial[*MaterialPathName];
+			Shader->RenDev = this;
 			Shader->Index = ShadersByMaterial.Num() - 1;
 		}
 
-		Shader->RenDev = this;
-		Shader->Compile(*ShaderText, *ShaderPath);
-		Material->UseFallback = 1;
-
-		INT Index = (reinterpret_cast<INT*>(Material)[24] & 0x3) | (Shader->Index << 2);
-
-		reinterpret_cast<INT*>(Material)[24] = Index;
-	}else if(!HardwareShader && LoadedEmpty){ // Reset shader if file is empty or deleted
-		if(Shader){
-			Shader->Free();
-			Shader = NULL;
-			Material->UseFallback = 0;
-		}
-
-		reinterpret_cast<INT*>(Material)[24] &= 0x3;
-	}else if(!Material->UseFallback){
-		Shader = NULL;
+		Shader->Compile(*ShaderText, *MaterialPathName);
+		reinterpret_cast<INT*>(Material)[24] = (reinterpret_cast<INT*>(Material)[24] & 0x3) | (Shader->Index << 3);
 	}
 
-	Material->Validated = !bAutoReloadShaders;
+	Material->UseFallback = Shader != NULL;
 
 	return Shader;
 }
@@ -194,12 +190,10 @@ UBOOL UOpenGLRenderDevice::Exec(const TCHAR* Cmd, FOutputDevice& Ar){
 		}else if(ParseCommand(&Cmd, "AUTORELOADSHADERS")){
 			bAutoReloadShaders = !bAutoReloadShaders;
 
-			if(bAutoReloadShaders){
+			if(bAutoReloadShaders)
 				Ar.Log("Automatic shader reloading enabled");
-				UMaterial::ClearFallbacks();
-			}else{
+			else
 				Ar.Log("Automatic shader reloading disabled");
-			}
 
 			return 1;
 		}
@@ -348,7 +342,7 @@ UBOOL UOpenGLRenderDevice::Init(){
 	foreachobj(UMaterial, It){
 		It->UseFallback = 0;
 		It->Validated = 0;
-		reinterpret_cast<INT*>(*It)[24] &= 0x3;
+		reinterpret_cast<INT*>(*It)[24] &= 0x3; // Clear 30 bit padding after UMaterial::Validated that is used by the OpenGL renderer
 	}
 
 	checkSlow(UTexture::__Client);
@@ -688,8 +682,10 @@ void UOpenGLRenderDevice::EnableVSync(bool bEnable){
 FRenderInterface* UOpenGLRenderDevice::Lock(UViewport* Viewport, BYTE* HitData, INT* HitSize){
 	MakeCurrent();
 
-	if(bAutoReloadShaders && LoadShaderMacroText()){
-		ShaderFileTimes.Empty(); // Macros may have changed, so force reload all shaders
+	if(bAutoReloadShaders){
+		if(LoadShaderMacroText())
+			ShaderFileTimes.Empty(); // Macros may have changed, so force reload all shaders
+
 		UMaterial::ClearFallbacks();
 	}
 

@@ -1226,7 +1226,16 @@ public:
 		return Count;
 	}
 
-	TI* Find(const TK& Key){
+	TI* Find(typename TTypeInfo<TK>::ConstInitType Key){
+		for(INT i = Hash[(GetTypeHash(Key) & (HashCount - 1))]; i != INDEX_NONE; i = Pairs[i].HashNext){
+			if(Pairs[i].Key == Key)
+				return &Pairs[i].Value;
+		}
+
+		return NULL;
+	}
+
+	const TI* Find(typename TTypeInfo<TK>::ConstInitType Key) const{
 		for(INT i = Hash[(GetTypeHash(Key) & (HashCount - 1))]; i != INDEX_NONE; i = Pairs[i].HashNext){
 			if(Pairs[i].Key == Key)
 				return &Pairs[i].Value;
@@ -1239,15 +1248,6 @@ public:
 		for(INT i = Hash[(GetTypeHash(Key) & (HashCount - 1))]; i != INDEX_NONE; i = Pairs[i].HashNext){
 			if(Pairs[i].Key == Key)
 				return Pairs[i].Value;
-		}
-
-		return NULL;
-	}
-
-	const TI* Find(const TK& Key) const{
-		for(INT i = Hash[(GetTypeHash(Key) & (HashCount - 1))]; i != INDEX_NONE; i = Pairs[i].HashNext){
-			if(Pairs[i].Key == Key)
-				return &Pairs[i].Value;
 		}
 
 		return NULL;

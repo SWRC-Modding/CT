@@ -44,7 +44,7 @@ void FOpenGLIndexBuffer::Cache(FIndexBuffer* IndexBuffer, INT DynamicBufferSize)
 		BufferSize = Max(IndexBufferSize, DynamicBufferSize);
 
 		if(DynamicBufferSize > 0)
-			debugf("Allocating %ikb byte dynamic index buffer", BufferSize / 1024);
+			debugf("Allocating %ikb dynamic index buffer", BufferSize / 1024);
 
 		RenDev->glNamedBufferStorage(EBO, BufferSize, NULL, GL_MAP_WRITE_BIT | GL_DYNAMIC_STORAGE_BIT);
 		RenDev->glNamedBufferSubData(EBO, 0, IndexBufferSize, Data);

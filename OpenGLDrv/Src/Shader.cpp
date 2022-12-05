@@ -33,31 +33,28 @@ void FOpenGLShader::Compile(const TCHAR* InShaderCode, const TCHAR* ShaderName){
 		return;
 	}
 
-	GLuint NewProgram = RenDev->glCreateProgram();
+	if(!Program)
+		Program = RenDev->glCreateProgram();
 
-	RenDev->glAttachShader(NewProgram, VertexShader);
-	RenDev->glAttachShader(NewProgram, FragmentShader);
-	RenDev->glLinkProgram(NewProgram);
-	RenDev->glDetachShader(NewProgram, VertexShader);
-	RenDev->glDetachShader(NewProgram, FragmentShader);
+	RenDev->glAttachShader(Program, VertexShader);
+	RenDev->glAttachShader(Program, FragmentShader);
+	RenDev->glLinkProgram(Program);
+	RenDev->glDetachShader(Program, VertexShader);
+	RenDev->glDetachShader(Program, FragmentShader);
 	RenDev->glDeleteShader(VertexShader);
 	RenDev->glDeleteShader(FragmentShader);
 
 	GLint Status;
 
-	RenDev->glGetProgramiv(NewProgram, GL_LINK_STATUS, &Status);
+	RenDev->glGetProgramiv(Program, GL_LINK_STATUS, &Status);
 
-	if(Status){
-		if(Program)
-			RenDev->glDeleteProgram(Program);
-
-		Program = NewProgram;
-	}else{
+	if(!Status){
 		GLchar Buffer[512];
 
-		RenDev->glGetProgramInfoLog(NewProgram, ARRAY_COUNT(Buffer), NULL, Buffer);
+		RenDev->glGetProgramInfoLog(Program, ARRAY_COUNT(Buffer), NULL, Buffer);
 		debugf("Shader program linking failed for %s: %s", ShaderName, Buffer);
-		RenDev->glDeleteProgram(NewProgram);
+		RenDev->glDeleteProgram(Program);
+		Program = GL_NONE;
 	}
 }
 

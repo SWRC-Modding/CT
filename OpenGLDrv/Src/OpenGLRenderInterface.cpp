@@ -1144,8 +1144,12 @@ void FOpenGLRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorStri
 		else
 			Result = SetSimpleMaterial(Material, ModifierInfo);
 
-		if(Shader)
-			SetShader(*Shader);
+		if(Shader){
+			if(Shader->IsValid())
+				SetShader(*Shader);
+			else
+				Result = false;
+		}
 	}
 
 	if(!Result)
@@ -1168,8 +1172,6 @@ UBOOL FOpenGLRenderInterface::SetHardwareShaderMaterial(UHardwareShader* Hardwar
 	guardFuncSlow;
 
 	const FOpenGLShader* Shader = RenDev->GetShaderForMaterial(HardwareShader);
-
-	checkSlow(Shader);
 
 	if(Shader && Shader->IsValid()){
 		SetShader(*Shader);

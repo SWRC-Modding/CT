@@ -878,7 +878,7 @@ INT ASkinChanger::Tick(FLOAT DeltaTime, ELevelTick TickType){
 				continue;
 
 			FString PlayerID = GetPlayerID(C);
-			FSkinEntry* Skin = SkinsByPlayerID.Find(PlayerID);
+			FSkinEntry* Skin = SkinsByPlayerID.Find(*PlayerID);
 			APawn* Pawn = C->Pawn;
 
 			if(Skin){
@@ -933,7 +933,7 @@ INT ASkinChanger::Tick(FLOAT DeltaTime, ELevelTick TickType){
 		if(!C->Pawn)
 			continue;
 
-		FSkinEntry* Skin = SkinsByPlayerID.Find(GetPlayerID(C));
+		FSkinEntry* Skin = SkinsByPlayerID.Find(*GetPlayerID(C));
 
 		if(!Skin)
 			continue;

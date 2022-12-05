@@ -198,7 +198,7 @@ public:
 			Filename = SystemIni;
 
 		// Get file.
-		FConfigFile* Result = TMap<FString, FConfigFile>::Find(Filename.GetCleanFilename());
+		FConfigFile* Result = TMap<FString, FConfigFile>::Find(*Filename.GetCleanFilename());
 
 		if(!Result && (CreateIfNotFound || GFileManager->FileSize(*Filename) >= 0)){
 			Result = &Set(*Filename.GetCleanFilename(), FConfigFile());

@@ -8,7 +8,7 @@ The project is called `CT` because that was the name used for the original proje
 The following projects are part of the Visual Studio solution and built by default:
 * __UCC__  
 	A custom written Unreal command line tool to compile UnrealScript code, run a server and more because the game shipped without one.
-* __CT__  
+* __Launcher__  
 	A custom game executable that automatically loads the Republic Commando Fix if present and adds some useful functionality like changing render devices at runtime and an improved EditActor command.
 * __Mod__  
 	The Republic Commando Fix and some useful functionality for modding like UnrealScript code injection.
@@ -20,7 +20,7 @@ The following projects are part of the Visual Studio solution and built by defau
 ## Building
 First you need to clone this repository into the Republic Commando installation directory next to `GameData`. It should be called `Code` because that's where the game expects the UnrealScript files. But the name can be configured in `System.ini`.
 ```
-git clone https://github.com/Leon280698/CT.git Code
+git clone https://github.com/SWRC-Modding/CT.git Code
 ```
 In order to build the project you'll need Microsoft Visual Studio .NET 2003. This is the same version that was used to compile the original game. Newer versions should work too but for compatibility reasons it's best to stick with that one. Have a look at the [installation instructions](https://wiki.swrc-modding.net/index.php?title=MS_Visual_Studio_2003) to get it to work on modern Windows.
 

@@ -1130,7 +1130,7 @@ void FOpenGLRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorStri
 			Shader = RenDev->GetShaderForMaterial(Material);
 
 		if(Material->IsA<UBitmapMaterial>())
-			Result = (Modifier && Modifier->IsA<UTexModifier>()) ? SetSimpleMaterial(Material, ModifierInfo) : SetBitmapMaterial(static_cast<UBitmapMaterial*>(Material));
+			Result = ModifierInfo.bModifiesTextureCoordinates ? SetSimpleMaterial(Material, ModifierInfo) : SetBitmapMaterial(static_cast<UBitmapMaterial*>(Material));
 		else if(Material->IsA<UShader>())
 			Result = SetShaderMaterial(static_cast<UShader*>(Material), ModifierInfo);
 		else if(Material->IsA<UCombiner>())

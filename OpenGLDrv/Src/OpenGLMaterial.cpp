@@ -2,78 +2,61 @@
 #include "OpenGLRenderDevice.h"
 #include "OpenGLResource.h"
 
-UMaterial* FOpenGLRenderInterface::RemoveModifiers(UMaterial* InMaterial, FModifierInfo& ModifierInfo){
-	UModifier* Modifier = Cast<UModifier>(InMaterial);
+UMaterial* FOpenGLRenderInterface::RemoveModifiers(UMaterial* Material, FModifierInfo& ModifierInfo){
+	checkSlow(Material);
 
-	if(!Modifier)
-		return InMaterial;
+	while(Material->IsA<UModifier>()){
+		if(Material->IsA<UTexModifier>()){
+			ModifierInfo.bModifiesTextureCoordinates = true;
 
-	UModifier* FirstModifier = Cast<UModifier>(Modifier);
-	UMaterial* Material = NULL;
+			UTexModifier* TexModifier = static_cast<UTexModifier*>(Material);
+			FMatrix* Matrix = TexModifier->GetMatrix(GEngineTime);
 
-	while(Modifier){
-		Material = Modifier->Material;
-		Modifier = Cast<UModifier>(Material);
-	}
-
-	// Collect modifiers
-
-	if(Material){
-		Modifier = FirstModifier;
-
-		// Apply modifiers
-		while(Modifier != Material){
-			if(Modifier->IsA<UTexModifier>()){
-				UTexModifier* TexModifier = static_cast<UTexModifier*>(Modifier);
-
-				FMatrix* Matrix = TexModifier->GetMatrix(GEngineTime);
-
-				if(Matrix && *Matrix != FMatrix::Identity){
-					ModifierInfo.TexMatrix *= *Matrix;
-					ModifierInfo.bUseTexMatrix = 1;
-				}
-
-				if(TexModifier->TexCoordSource != TCS_NoChange){
-					ModifierInfo.bTexCoordProjected = TexModifier->TexCoordProjected;
-					ModifierInfo.TexCoordSrc = static_cast<ETexCoordSrc>(TexModifier->TexCoordSource);
-					ModifierInfo.TexCoordCount = static_cast<ETexCoordCount>(TexModifier->TexCoordCount);
-				}
-
-				ModifierInfo.TexUClamp = static_cast<ETexClampModeOverride>(TexModifier->UClampMode);
-				ModifierInfo.TexVClamp = static_cast<ETexClampModeOverride>(TexModifier->VClampMode);
-			}else if(Modifier->IsA<UFinalBlend>()){
-				UFinalBlend* FinalBlend = static_cast<UFinalBlend*>(Modifier);
-
-				if(!ModifyFramebufferBlending){
-					ModifyFramebufferBlending = true;
-					SetFramebufferBlending(static_cast<EFrameBufferBlending>(FinalBlend->FrameBufferBlending));
-					CurrentState->bZTest = FinalBlend->ZTest != 0;
-					CurrentState->bZWrite = FinalBlend->ZWrite != 0;
-				}
-
-				if(FinalBlend->TwoSided)
-					CurrentState->CullMode = CM_None;
-
-				if(FinalBlend->AlphaTest){
-					CurrentState->AlphaRef = FinalBlend->AlphaRef / 255.0f;
-					++CurrentState->UniformRevision;
-				}
-			}else if(Modifier->IsA<UColorModifier>()){
-				UColorModifier* ColorModifier = static_cast<UColorModifier*>(Modifier);
-
-				CurrentState->ModifyColor = 1;
-				CurrentState->ColorFactor = ColorModifier->Color;
-				++CurrentState->UniformRevision;
-
-				if(ColorModifier->RenderTwoSided)
-					CurrentState->CullMode = CM_None;
-
-				if(!ModifyFramebufferBlending && ColorModifier->AlphaBlend)
-					SetFramebufferBlending(FB_AlphaBlend);
+			if(Matrix && *Matrix != FMatrix::Identity){
+				ModifierInfo.TexMatrix *= *Matrix;
+				ModifierInfo.bUseTexMatrix = 1;
 			}
 
-			Modifier = static_cast<UModifier*>(Modifier->Material);
+			if(TexModifier->TexCoordSource != TCS_NoChange){
+				ModifierInfo.bTexCoordProjected = TexModifier->TexCoordProjected;
+				ModifierInfo.TexCoordSrc = static_cast<ETexCoordSrc>(TexModifier->TexCoordSource);
+				ModifierInfo.TexCoordCount = static_cast<ETexCoordCount>(TexModifier->TexCoordCount);
+			}
+
+			ModifierInfo.TexUClamp = static_cast<ETexClampModeOverride>(TexModifier->UClampMode);
+			ModifierInfo.TexVClamp = static_cast<ETexClampModeOverride>(TexModifier->VClampMode);
+		}else if(Material->IsA<UFinalBlend>()){
+			UFinalBlend* FinalBlend = static_cast<UFinalBlend*>(Material);
+
+			if(!ModifyFramebufferBlending){
+				ModifyFramebufferBlending = true;
+				SetFramebufferBlending(static_cast<EFrameBufferBlending>(FinalBlend->FrameBufferBlending));
+				CurrentState->bZTest = FinalBlend->ZTest != 0;
+				CurrentState->bZWrite = FinalBlend->ZWrite != 0;
+			}
+
+			if(FinalBlend->TwoSided)
+				CurrentState->CullMode = CM_None;
+
+			if(FinalBlend->AlphaTest){
+				CurrentState->AlphaRef = FinalBlend->AlphaRef / 255.0f;
+				++CurrentState->UniformRevision;
+			}
+		}else if(Material->IsA<UColorModifier>()){
+			UColorModifier* ColorModifier = static_cast<UColorModifier*>(Material);
+
+			CurrentState->ModifyColor = 1;
+			CurrentState->ColorFactor = ColorModifier->Color;
+			++CurrentState->UniformRevision;
+
+			if(ColorModifier->RenderTwoSided)
+				CurrentState->CullMode = CM_None;
+
+			if(!ModifyFramebufferBlending && ColorModifier->AlphaBlend)
+				SetFramebufferBlending(FB_AlphaBlend);
 		}
+
+		Material = static_cast<UModifier*>(Material)->Material;
 	}
 
 	return Material;
@@ -915,7 +898,7 @@ bool FOpenGLRenderInterface::HandleShaderMaterial(UShader* Shader, FShaderGenera
 	}
 
 	if(Shader->Opacity){
-		if((HaveDiffuse && Shader->Opacity != Shader->Diffuse) || (HaveSelfIllumination && Shader->Opacity != Shader->SelfIllumination) || !HaveDiffuse && !HaveSelfIllumination){
+		if((HaveDiffuse && Shader->Opacity != Shader->Diffuse) || (HaveSelfIllumination && Shader->Opacity != Shader->SelfIllumination) || (!HaveDiffuse && !HaveSelfIllumination)){
 			ShaderGenerator.AddColorOp(CA_R0, CA_R0, COP_Arg1, CC_RGB, ShaderGenerator.PushTempRegister());
 
 			if(!HandleSimpleMaterial(Shader->Opacity, ShaderGenerator, &ModifierInfo))

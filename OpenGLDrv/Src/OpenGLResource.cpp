@@ -219,14 +219,12 @@ void FOpenGLTexture::Cache(FBaseTexture* BaseTexture, bool bOwnDepthBuffer){
 			}
 		}
 
-		if(bOwnDepthBuffer || IsMipTarget){
-			if(IsMipTarget){
-				DepthStencilAttachment = GL_NONE; // The FrameFX mip targets don't need a depth or stencil buffer
-			}else{
-				RenDev->glCreateRenderbuffers(1, &DepthStencilAttachment);
-				RenDev->glNamedRenderbufferStorage(DepthStencilAttachment, GL_DEPTH24_STENCIL8, Width, Height);
-				HasSharedDepthStencil = false;
-			}
+		if(IsMipTarget){
+			DepthStencilAttachment = GL_NONE; // The FrameFX mip targets don't need a depth or stencil buffer
+		}else if(bOwnDepthBuffer){
+			RenDev->glCreateRenderbuffers(1, &DepthStencilAttachment);
+			RenDev->glNamedRenderbufferStorage(DepthStencilAttachment, GL_DEPTH24_STENCIL8, Width, Height);
+			HasSharedDepthStencil = false;
 		}else{
 			checkSlow(RenDev->BackbufferDepthStencil);
 			DepthStencilAttachment = RenDev->BackbufferDepthStencil;

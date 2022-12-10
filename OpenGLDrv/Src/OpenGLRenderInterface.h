@@ -278,6 +278,7 @@ public:
 private:
 	struct FModifierInfo{
 		FMatrix               TexMatrix;
+		bool                  bModifiesTextureCoordinates;
 		bool                  bUseTexMatrix;
 		bool                  bTexCoordProjected;
 		ETexCoordSrc          TexCoordSrc;
@@ -286,13 +287,14 @@ private:
 		ETexClampModeOverride TexVClamp;
 
 		FModifierInfo() : TexMatrix(FMatrix::Identity),
-		                  bUseTexMatrix(0),
-		                  bTexCoordProjected(0),
+		                  bModifiesTextureCoordinates(false),
+		                  bUseTexMatrix(false),
+		                  bTexCoordProjected(false),
 		                  TexCoordSrc(TCS_Stream0),
 		                  TexCoordCount(TCN_2DCoords){}
 	};
 
-	UMaterial* RemoveModifiers(UMaterial* InMaterial, FModifierInfo& ModifierInfo);
+	UMaterial* RemoveModifiers(UMaterial* Material, FModifierInfo& ModifierInfo);
 	void GetShaderConstants(FSConstantsInfo* Info, FPlane* Constants, INT NumConstants);
 	void SetTexture(FBaseTexture* Texture, INT TextureIndex, FLOAT UVScale = 1.0f, FLOAT BumpSize = 1.0f, FLOAT BumpLumaScale = 1.0f, FLOAT BumpLumaOffset = 0.0f);
 	void SetBitmapTexture(UBitmapMaterial* Bitmap, INT TextureIndex, FLOAT UVScale = 1.0f, FLOAT BumpSize = 1.0f, FLOAT BumpLumaScale = 1.0f, FLOAT BumpLumaOffset = 0.0f);

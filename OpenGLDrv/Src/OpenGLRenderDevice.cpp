@@ -555,17 +555,17 @@ UBOOL UOpenGLRenderDevice::SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL
 		// Initialize shaders
 
 		ErrorShader.Compile("#ifdef VERTEX_SHADER\n"
-                            "void main(void){\n"
-                            "\tgl_Position = LocalToScreen * vec4(InPosition.xyz, 1.0);\n"
-                            "}\n"
-                            "#elif defined(FRAGMENT_SHADER)\n"
-                            "void main(void){\n"
-                            "\tFragColor = vec4(1.0, 0.0, 1.0, 1.0);\n"
-                            "}\n"
-                            "#else\n"
-                            "#error Shader type not implemented\n"
-                            "#endif\n",
-							"ERRORSHADER");
+		                    "void main(void){\n"
+		                    "\tgl_Position = LocalToScreen * vec4(InPosition.xyz, 1.0);\n"
+		                    "}\n"
+		                    "#elif defined(FRAGMENT_SHADER)\n"
+		                    "void main(void){\n"
+		                    "\tFragColor = vec4(1.0, 0.0, 1.0, 1.0);\n"
+		                    "}\n"
+		                    "#else\n"
+		                    "#error Shader type not implemented\n"
+		                    "#endif\n",
+		                    "ERRORSHADER");
 		check(ErrorShader.IsValid());
 
 		/*

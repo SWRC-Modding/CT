@@ -317,7 +317,7 @@ CORE_API TCHAR* appStrcat(TCHAR* Dest, const TCHAR* Src);
 CORE_API INT appStrcmp(const TCHAR* String1, const TCHAR* String2);
 CORE_API INT appStricmp(const TCHAR* String1, const TCHAR* String2);
 CORE_API INT appStrncmp(const TCHAR* String1, const TCHAR* String2, INT Count);
-//CORE_API TCHAR* appStaticString1024(); // Broken, don't use!
+CORE_API TCHAR* appStaticString1024();
 
 CORE_API const TCHAR* appSpc(int Num);
 CORE_API TCHAR* appStrncpy(TCHAR* Dest, const TCHAR* Src, int Max);

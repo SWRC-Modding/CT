@@ -228,8 +228,9 @@ public:
 	){
 		guard(FConfigCacheIni::GetBool);
 
-		TCHAR Text[80];
-		if(GetString(Section, Key, Text, ARRAY_COUNT(Text), Filename)){
+		const TCHAR* Text = GetStr(Section, Key, Filename);
+
+		if(Text){
 			if(appStricmp(Text, "True") == 0)
 				Value = 1;
 			else
@@ -237,6 +238,7 @@ public:
 
 			return 1;
 		}
+
 		return 0;
 
 		unguard;
@@ -250,8 +252,9 @@ public:
 	){
 		guard(FConfigCacheIni::GetInt);
 
-		TCHAR Text[80];
-		if(GetString(Section, Key, Text, ARRAY_COUNT(Text), Filename)){
+		const TCHAR* Text = GetStr(Section, Key, Filename);
+
+		if(Text){
 			Value = appAtoi(Text);
 
 			return 1;
@@ -270,8 +273,9 @@ public:
 	){
 		guard(FConfigCacheIni::GetFloat);
 
-		TCHAR Text[80];
-		if(GetString(Section, Key, Text, ARRAY_COUNT(Text), Filename)){
+		const TCHAR* Text = GetStr(Section, Key, Filename);
+
+		if(Text){
 			Value = appAtof(Text);
 
 			return 1;
@@ -285,24 +289,15 @@ public:
 	UBOOL GetFString(const TCHAR* Section, const TCHAR* Key, FString& Str, const TCHAR* Filename){
 		guard(FConfigCacheIni::GetString);
 
-		Str = "";
+		const TCHAR* Value = GetStr(Section, Key, Filename);
 
-		FConfigFile* File = Find(Filename, false);
+		if(!Value){
+			Str = "";
 
-		if(!File )
 			return 0;
+		}
 
-		FConfigSection* Sec = File->Find(Section);
-
-		if(!Sec)
-			return 0;
-
-		FString* PairString = Sec->Find(Key);
-
-		if(!PairString)
-			return 0;
-
-		Str = **PairString;
+		Str = Value;
 
 		return 1;
 
@@ -312,24 +307,15 @@ public:
 	UBOOL GetString(const TCHAR* Section, const TCHAR* Key, TCHAR* Value, INT Size, const TCHAR* Filename){
 		guard(FConfigCacheIni::GetString);
 
-		*Value = 0;
+		const TCHAR* Str = GetStr(Section, Key, Filename);
 
-		FConfigFile* File = Find(Filename, false);
+		if(!Str){
+			*Value = 0;
 
-		if(!File)
 			return 0;
+		}
 
-		FConfigSection* Sec = File->Find(Section);
-
-		if(!Sec)
-			return 0;
-
-		FString* PairString = Sec->Find(Key);
-
-		if(!PairString)
-			return 0;
-
-		appStrncpy(Value, **PairString, Size);
+		appStrncpy(Value, Str, Size);
 
 		return 1;
 
@@ -339,17 +325,22 @@ public:
 	const TCHAR* GetStr(const TCHAR* Section, const TCHAR* Key, const TCHAR* Filename){
 		guard(FConfigCacheIni::GetStr);
 
-		// appStaticString1024 is broken and shouldn't be used
-		//TCHAR* Result = appStaticString1024();
-		static INT Idx = 0;
-		static TCHAR Buffer[4][1024];
+		FConfigFile* File = Find(Filename, false);
 
-		TCHAR* Result = Buffer[Idx++ & 3];
+		if(!File)
+			return NULL;
 
-		if(GetString(Section, Key, Result, 1024, Filename))
-			return Result;
+		FConfigSection* Sec = File->Find(Section);
 
-		return NULL;
+		if(!Sec)
+			return NULL;
+
+		FConfigString* Str = Sec->Find(Key);
+
+		if(!Str)
+			return NULL;
+
+		return **Str;
 
 		unguard;
 	}

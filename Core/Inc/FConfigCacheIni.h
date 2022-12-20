@@ -339,7 +339,12 @@ public:
 	const TCHAR* GetStr(const TCHAR* Section, const TCHAR* Key, const TCHAR* Filename){
 		guard(FConfigCacheIni::GetStr);
 
-		TCHAR* Result = appStaticString1024();
+		// appStaticString1024 is broken and shouldn't be used
+		//TCHAR* Result = appStaticString1024();
+		static INT Idx = 0;
+		static TCHAR Buffer[4][1024];
+
+		TCHAR* Result = Buffer[Idx++ & 3];
 
 		if(GetString(Section, Key, Result, 1024, Filename))
 			return Result;

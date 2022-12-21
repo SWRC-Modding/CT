@@ -730,8 +730,7 @@ bool FOpenGLRenderInterface::HandleShaderMaterial(UShader* Shader, FShaderGenera
 	if(GCubemapManager && GCubemapManager->bEnabled){
 		INT BumpmapIndex = INDEX_NONE;
 
-		if(Shader->Bumpmap){
-			checkSlow(Shader->Bumpmap->IsA<UBitmapMaterial>());
+		if(Shader->Bumpmap && Shader->Bumpmap->IsA<UBitmapMaterial>()){
 			BumpmapIndex = CurrentState->NumTextures++;
 			SetBitmapTexture(static_cast<UBitmapMaterial*>(Shader->Bumpmap), BumpmapIndex, Shader->BumpUVScale);
 			ShaderGenerator.AddTexture(BumpmapIndex, TCS_Stream0);

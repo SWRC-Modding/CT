@@ -154,10 +154,14 @@ const FOpenGLShader* UOpenGLRenderDevice::GetShaderForMaterial(UMaterial* Materi
 		}
 
 		Shader->Compile(*ShaderText, *MaterialPathName);
-		reinterpret_cast<INT*>(Material)[24] = (reinterpret_cast<INT*>(Material)[24] & 0x3) | (Shader->Index << 3);
 	}
 
-	Material->UseFallback = Shader != NULL;
+	if(Shader){
+		Material->UseFallback = 1;
+		reinterpret_cast<INT*>(Material)[24] = (reinterpret_cast<INT*>(Material)[24] & 0x3) | (Shader->Index << 3);
+	}else{
+		Material->UseFallback = 0;
+	}
 
 	return Shader;
 }

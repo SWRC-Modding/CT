@@ -431,6 +431,8 @@ CORE_API void appMemswap(void* Ptr1, void* Ptr2, DWORD Size);
 #define appFree    GMalloc->Free
 #define appRealloc GMalloc->Realloc
 
+#pragma warning(push, 0)
+
 //
 // C++ style memory allocation.
 //
@@ -479,6 +481,8 @@ inline void* __cdecl operator new(size_t, void* Ptr){
 inline void* __cdecl operator new[](size_t, void* Ptr){
 	return Ptr;
 }
+
+#pragma warning(pop)
 
 /*-----------------------------------------------------------------------------
 	Math functions.

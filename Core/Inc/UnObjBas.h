@@ -365,15 +365,15 @@ class CORE_API UObject{
 	friend class FObjectIterator;
 private:
 	// Internal per-object variables.
-	INT          Index;        // Index of object into table.
-	UObject*     HashNext;     // Next object in this hash bin.
-	FStateFrame* StateFrame;   // Main script execution stack.
+	INT          _Index;       // Index of object into table.
+	UObject*     _HashNext;    // Next object in this hash bin.
+	FStateFrame* _StateFrame;  // Main script execution stack.
 	ULinkerLoad* _Linker;      // Linker it came from, or NULL if none.
 	INT          _LinkerIndex; // Index of this object in the linker's export map.
-	UObject*     Outer;        // Object this object resides in.
-	DWORD        ObjectFlags;  // Private EObjectFlags used by object manager.
-	FName        Name;         // Name of the object.
-	UClass*      Class;        // Class the object belongs to.
+	UObject*     _Outer;       // Object this object resides in.
+	DWORD        _ObjectFlags; // Private EObjectFlags used by object manager.
+	FName        _Name;        // Name of the object.
+	UClass*      _Class;       // Class the object belongs to.
 
 	// Private systemwide variables.
 	static UBOOL                       GObjInitialized;        // Whether initialized.
@@ -538,18 +538,18 @@ public:
 
 	// Accessors.
 
-	FORCEINLINE UClass* GetClass() const{ return Class; }
-	FORCEINLINE void SetClass(UClass* NewClass){ Class = NewClass; }
-	FORCEINLINE DWORD GetFlags() const{ return ObjectFlags; }
-	FORCEINLINE void SetFlags(DWORD NewFlags){ ObjectFlags |= NewFlags; }
-	FORCEINLINE void ClearFlags(DWORD NewFlags){ ObjectFlags &= ~NewFlags; }
-	FORCEINLINE const TCHAR* GetName() const{ return *Name; }
-	FORCEINLINE const FName GetFName() const{ return Name; }
-	FORCEINLINE UObject* GetOuter() const{ return Outer; }
-	FORCEINLINE DWORD GetIndex() const{ return Index; }
+	FORCEINLINE UClass* GetClass() const{ return _Class; }
+	FORCEINLINE void SetClass(UClass* NewClass){ _Class = NewClass; }
+	FORCEINLINE DWORD GetFlags() const{ return _ObjectFlags; }
+	FORCEINLINE void SetFlags(DWORD NewFlags){ _ObjectFlags |= NewFlags; }
+	FORCEINLINE void ClearFlags(DWORD NewFlags){ _ObjectFlags &= ~NewFlags; }
+	FORCEINLINE const TCHAR* GetName() const{ return *_Name; }
+	FORCEINLINE const FName GetFName() const{ return _Name; }
+	FORCEINLINE UObject* GetOuter() const{ return _Outer; }
+	FORCEINLINE DWORD GetIndex() const{ return _Index; }
 	FORCEINLINE ULinkerLoad* GetLinker(){ return _Linker; }
 	FORCEINLINE INT GetLinkerIndex(){ return _LinkerIndex; }
-	FORCEINLINE FStateFrame* GetStateFrame(){ return StateFrame; }
+	FORCEINLINE FStateFrame* GetStateFrame(){ return _StateFrame; }
 };
 
 #define DECLARE_NAME(name) static FName N##name(#name);

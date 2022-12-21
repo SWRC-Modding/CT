@@ -19,7 +19,7 @@ void UOpenGLRenderDevice::StaticConstructor(){
 	TextureFilter          = TF_Trilinear;
 	TextureAnisotropy      = 16;
 	bFirstRun              = 1;
-	ShaderDir              = FStringTemp("OpenGLShaders");
+	ShaderDir              = "OpenGLShaders";
 
 	new(GetClass(), "DistortionEffects",      RF_Public) UBoolProperty(CPP_PROPERTY(CanDoDistortionEffects),  "Options", CPF_Config);
 	new(GetClass(), "UseDesktopResolution",   RF_Public) UBoolProperty(CPP_PROPERTY(bUseDesktopResolution),   "Options", CPF_Config);
@@ -406,9 +406,7 @@ UBOOL UOpenGLRenderDevice::SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL
 
 		debugf("SetRes: %ix%i, %i-bit, Fullscreen: %i", NewX, NewY, ColorBytes * 8, Fullscreen);
 
-		INT PfdFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER | PFD_DEPTH_DONTCARE;
-		INT DepthBits = 0;
-		INT StencilBits = 0;
+		DWORD PfdFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER | PFD_DEPTH_DONTCARE;
 
 		PIXELFORMATDESCRIPTOR Pfd = {
 			sizeof(PIXELFORMATDESCRIPTOR), // size
@@ -421,8 +419,8 @@ UBOOL UOpenGLRenderDevice::SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL
 			0,                             // alpha bits (ignored)
 			0,                             // accumulation buffer
 			0, 0, 0, 0,                    // accum bits (ignored)
-			DepthBits,                     // depth buffer
-			StencilBits,                   // stencil buffer
+			0,                             // depth buffer
+			0,                             // stencil buffer
 			0,                             // auxiliary buffers
 			PFD_MAIN_PLANE,                // main layer
 			0,                             // reserved

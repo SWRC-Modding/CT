@@ -109,9 +109,9 @@ public:
 	// iBack:  4  Index to node in front (in direction of Normal).
 	// iFront: 4  Index to node in back  (opposite direction as Normal).
 	// iPlane: 4  Index to next coplanar poly in coplanar list.
-	union { INT iBack; INT iChild[1]; };
-	        INT iFront;
-			INT iPlane;
+	INT iBack;
+	INT iFront;
+	INT iPlane;
 
 	INT				iCollisionBound;// 4  Collision bound.
 	INT				iRenderBound;	// 4  Rendering bound.

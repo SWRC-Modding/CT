@@ -134,7 +134,7 @@ protected:
 	INT bNoShrink    : 1; // Don't shrink allocation when elements are removed
 
 	FArray(bool NoShrink = false) : Data(NULL), ArrayNum(0), bIsReference(0), bIsTemporary(0), bNoShrink(NoShrink){}
-	//FArray(void* Src, INT Count) : Data(Src), ArrayNum(Count), bIsReference(1), bIsTemporary(0), bNoShrink(0){}
+	//FArray(void* Src, INT Count) : Data(Src), ArrayNum(Count), bIsReference(1), bIsTemporary(0), bNoShrink(0){} // Should not be used due to a memory leak in Core.dll
 	FArray(ENoInit){}
 };
 
@@ -146,7 +146,7 @@ template<typename T>
 class TArray : public FArray{
 public:
 	TArray() : FArray(){}
-	//TArray(T* Src, INT Count) : FArray(Src, Count){}
+	//TArray(T* Src, INT Count) : FArray(Src, Count){} // Should not be used due to a memory leak in Core.dll
 	TArray(ENoInit) : FArray(E_NoInit){}
 
 	TArray(INT Size, bool NoShrink = false) : FArray(NoShrink){
@@ -202,7 +202,7 @@ public:
 			Result.ArrayNum += Other.ArrayNum;
 		}
 
-		Result.bIsTemporary = 1;
+		Result.bIsTemporary |= 1;
 
 		return Result;
 	}
@@ -288,7 +288,13 @@ public:
 		return INDEX_NONE;
 	}
 
-	void SetNoShrink(bool NoShrink){ bNoShrink = NoShrink; }
+	void SetNoShrink(bool NoShrink){
+		if(NoShrink)
+			bNoShrink |= 1;
+		else
+			bNoShrink = 0;
+	}
+
 	void CountBytes(FArchive& Ar){ Ar.CountBytes(Data, Num() * sizeof(T)); }
 	INT GetMaxSize() const{ return Capacity(); }
 
@@ -461,7 +467,7 @@ protected:
 	}
 
 	void Unreference() const{ // Unreference seems like a bad name choice but we want to use the original naming...
-		const_cast<TArray<T>*>(this)->bIsReference = 1; // Need to do a const_cast because the function is const in the original code as well
+		const_cast<TArray<T>*>(this)->bIsReference |= 1; // Need to do a const_cast because the function is const in the original code as well
 	}
 
 	void Init(INT Index, INT Count){
@@ -1046,8 +1052,8 @@ class FStringOutputDevice : public FString, public FOutputDevice{
 public:
 	FStringOutputDevice(const TCHAR* InStr = "") : FString(InStr){}
 
-	void Serialize(const TCHAR* Data, EName Event){
-		*this += Data;
+	void Serialize(const TCHAR* Str, EName Event){
+		*this += Str;
 	}
 };
 

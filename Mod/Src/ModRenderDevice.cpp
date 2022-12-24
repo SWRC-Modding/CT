@@ -34,17 +34,17 @@ enum{
  * L6V5U5 to X8L8V8U8 texture format conversion.
  *
  * L6V5U5 is not supported on newer hardware and either makes the game and editor crash or the driver converts it directly to X8L8V8U8 which results in visual artifacts.
- * That's why we detect if a texture is created with the L6V5U5 format and perform a proper conversion to X8L8V8U8 or if that is not available V8U8 and if not even that one works ARGB.
+ * That's why we detect if a texture is created with the L6V5U5 format and perform a proper conversion to X8L8V8U8 or if that is not available V8U8 and if not even that one works ARGB8.
  */
 
 // Information about the current texture returned by CreateTexture and used by Lock/UnlockRect
-static IDirect3DTexture8* CurrentTexture;
-static D3DFORMAT          CurrentTextureSourceFormat;
-static D3DFORMAT          CurrentTextureTargetFormat;
-static UINT               CurrentTextureNumMipLevels;
-static UINT               CurrentMipLevelWidth;
-static UINT               CurrentMipLevelHeight;
-static void*              CurrentMipLevelPixels;
+static IDirect3DTexture8* CurrentD3D8Texture;
+static D3DFORMAT          CurrentD3D8TextureSourceFormat;
+static D3DFORMAT          CurrentD3D8TextureTargetFormat;
+static UINT               CurrentD3D8TextureNumMipLevels;
+static UINT               CurrentD3D8MipLevelWidth;
+static UINT               CurrentD3D8MipLevelHeight;
+static void*              CurrentD3D8MipLevelPixels;
 
 // Conversion from one bumpmap format to another
 
@@ -100,12 +100,13 @@ static void ConvertX8L8V8U8ToV8U8(void* Dest, const void* Src, INT Width, INT He
  * LockRect
  */
 
-typedef HRESULT(__stdcall*D3DTextureLockRectFunc)(IDirect3DTexture8*, UINT, D3DLOCKED_RECT*, const RECT*, DWORD);
+#define D3DTEXTURE_LOCKRECT(name) HRESULT __stdcall name(IDirect3DTexture8* D3DTexture, UINT Level, D3DLOCKED_RECT* pLockedRect, const RECT* pRect, DWORD Flags)
+typedef D3DTEXTURE_LOCKRECT(D3DTextureLockRectFunc);
 
-D3DTextureLockRectFunc D3DTextureLockRect = NULL;
+static D3DTextureLockRectFunc* D3DTextureLockRect = NULL;
 
-static HRESULT __stdcall D3DTextureLockRectOverride(IDirect3DTexture8* D3DTexture, UINT Level, D3DLOCKED_RECT* pLockedRect, const RECT* pRect, DWORD Flags){
-	if(D3DTexture != CurrentTexture)
+static D3DTEXTURE_LOCKRECT(D3DTextureLockRectOverride){
+	if(D3DTexture != CurrentD3D8Texture)
 		return D3DTextureLockRect(D3DTexture, Level, pLockedRect, pRect, Flags);
 
 	D3DSURFACE_DESC SurfaceDesc;
@@ -114,13 +115,14 @@ static HRESULT __stdcall D3DTextureLockRectOverride(IDirect3DTexture8* D3DTextur
 	if(FAILED(GetLevelDescResult))
 		return GetLevelDescResult;
 
-	CurrentMipLevelWidth = SurfaceDesc.Width;
-	CurrentMipLevelHeight = SurfaceDesc.Height;
-	CurrentMipLevelPixels = appMalloc(SurfaceDesc.Size);
+	CurrentD3D8MipLevelWidth = SurfaceDesc.Width;
+	CurrentD3D8MipLevelHeight = SurfaceDesc.Height;
+	check(CurrentD3D8MipLevelPixels == NULL);
+	CurrentD3D8MipLevelPixels = appMalloc(SurfaceDesc.Size);
 
 	INT BytesPerPixel = 0;
 
-	switch(CurrentTextureSourceFormat){
+	switch(CurrentD3D8TextureSourceFormat){
 	case D3DFMT_A8R8G8B8:
 		BytesPerPixel = sizeof(FColor);
 		break;
@@ -134,11 +136,11 @@ static HRESULT __stdcall D3DTextureLockRectOverride(IDirect3DTexture8* D3DTextur
 		BytesPerPixel = sizeof(FX8L8V8U8Pixel);
 		break;
 	default:
-		appErrorf("Unexpected texture format (%i)", CurrentTextureSourceFormat);
+		appErrorf("Unexpected texture format (%i)", CurrentD3D8TextureSourceFormat);
 	}
 
-	pLockedRect->Pitch = CurrentMipLevelWidth * BytesPerPixel;
-	pLockedRect->pBits = CurrentMipLevelPixels;
+	pLockedRect->Pitch = CurrentD3D8MipLevelWidth * BytesPerPixel;
+	pLockedRect->pBits = CurrentD3D8MipLevelPixels;
 
 	return S_OK;
 }
@@ -147,42 +149,43 @@ static HRESULT __stdcall D3DTextureLockRectOverride(IDirect3DTexture8* D3DTextur
  * UnlockRect
  */
 
-typedef HRESULT(__stdcall*D3DTextureUnlockRectFunc)(IDirect3DTexture8*, UINT);
+#define D3DTEXTURE_UNLOCKRECT(name) HRESULT __stdcall name(IDirect3DTexture8* D3DTexture, UINT Level)
+typedef D3DTEXTURE_UNLOCKRECT(D3DTextureUnlockRectFunc);
 
-D3DTextureUnlockRectFunc D3DTextureUnlockRect = NULL;
+static D3DTextureUnlockRectFunc* D3DTextureUnlockRect = NULL;
 
-static HRESULT __stdcall D3DTextureUnlockRectOverride(IDirect3DTexture8* D3DTexture, UINT Level){
-	if(D3DTexture != CurrentTexture)
+static D3DTEXTURE_UNLOCKRECT(D3DTextureUnlockRectOverride){
+	if(D3DTexture != CurrentD3D8Texture)
 		return D3DTextureUnlockRect(D3DTexture, Level);
 
 	D3DLOCKED_RECT LockedRect;
 	HRESULT Result = D3DTextureLockRect(D3DTexture, Level, &LockedRect, NULL, 0);
 
 	if(SUCCEEDED(Result)){
-		if(CurrentTextureSourceFormat == D3DFMT_V8U8){
-			ConvertV8U8ToBGRA8(LockedRect.pBits, CurrentMipLevelPixels, CurrentMipLevelWidth, CurrentMipLevelHeight);
-		}else if(CurrentTextureSourceFormat == D3DFMT_L6V5U5){
-			if(CurrentTextureTargetFormat == D3DFMT_V8U8)
-				ConvertL6V5U5ToV8U8(LockedRect.pBits, CurrentMipLevelPixels, CurrentMipLevelWidth, CurrentMipLevelHeight);
-			else if(CurrentTextureTargetFormat == D3DFMT_X8L8V8U8)
-				ConvertL6V5U5ToX8L8V8U8(LockedRect.pBits, CurrentMipLevelPixels, CurrentMipLevelWidth, CurrentMipLevelHeight);
-			else if(CurrentTextureTargetFormat == D3DFMT_A8R8G8B8)
-				ConvertL6V5U5ToBGRA8(LockedRect.pBits, CurrentMipLevelPixels, CurrentMipLevelWidth, CurrentMipLevelHeight);
-		}else if(CurrentTextureSourceFormat == D3DFMT_X8L8V8U8){
-			if(CurrentTextureTargetFormat == D3DFMT_V8U8)
-				ConvertX8L8V8U8ToV8U8(LockedRect.pBits, CurrentMipLevelPixels, CurrentMipLevelWidth, CurrentMipLevelHeight);
-			else if(CurrentTextureTargetFormat == D3DFMT_A8R8G8B8)
-				ConvertX8L8V8U8ToBGRA8(LockedRect.pBits, CurrentMipLevelPixels, CurrentMipLevelWidth, CurrentMipLevelHeight);
+		if(CurrentD3D8TextureSourceFormat == D3DFMT_V8U8){
+			ConvertV8U8ToBGRA8(LockedRect.pBits, CurrentD3D8MipLevelPixels, CurrentD3D8MipLevelWidth, CurrentD3D8MipLevelHeight);
+		}else if(CurrentD3D8TextureSourceFormat == D3DFMT_L6V5U5){
+			if(CurrentD3D8TextureTargetFormat == D3DFMT_V8U8)
+				ConvertL6V5U5ToV8U8(LockedRect.pBits, CurrentD3D8MipLevelPixels, CurrentD3D8MipLevelWidth, CurrentD3D8MipLevelHeight);
+			else if(CurrentD3D8TextureTargetFormat == D3DFMT_X8L8V8U8)
+				ConvertL6V5U5ToX8L8V8U8(LockedRect.pBits, CurrentD3D8MipLevelPixels, CurrentD3D8MipLevelWidth, CurrentD3D8MipLevelHeight);
+			else if(CurrentD3D8TextureTargetFormat == D3DFMT_A8R8G8B8)
+				ConvertL6V5U5ToBGRA8(LockedRect.pBits, CurrentD3D8MipLevelPixels, CurrentD3D8MipLevelWidth, CurrentD3D8MipLevelHeight);
+		}else if(CurrentD3D8TextureSourceFormat == D3DFMT_X8L8V8U8){
+			if(CurrentD3D8TextureTargetFormat == D3DFMT_V8U8)
+				ConvertX8L8V8U8ToV8U8(LockedRect.pBits, CurrentD3D8MipLevelPixels, CurrentD3D8MipLevelWidth, CurrentD3D8MipLevelHeight);
+			else if(CurrentD3D8TextureTargetFormat == D3DFMT_A8R8G8B8)
+				ConvertX8L8V8U8ToBGRA8(LockedRect.pBits, CurrentD3D8MipLevelPixels, CurrentD3D8MipLevelWidth, CurrentD3D8MipLevelHeight);
 		}
 
 		Result = D3DTextureUnlockRect(D3DTexture, Level);
 	}
 
-	appFree(CurrentMipLevelPixels);
-	CurrentMipLevelPixels = NULL;
+	appFree(CurrentD3D8MipLevelPixels);
+	CurrentD3D8MipLevelPixels = NULL;
 
-	if(Level == CurrentTextureNumMipLevels - 1) // This is the last mip level which means the current texture is fully converted and should be set to NULL
-		CurrentTexture = NULL;
+	if(Level == CurrentD3D8TextureNumMipLevels - 1) // This is the last mip level which means the current texture is fully converted and should be set to NULL
+		CurrentD3D8Texture = NULL;
 
 	return Result;
 }
@@ -191,18 +194,19 @@ static HRESULT __stdcall D3DTextureUnlockRectOverride(IDirect3DTexture8* D3DText
  * CreateTexture
  */
 
-typedef HRESULT(__stdcall*D3DDeviceCreateTextureFunc)(IDirect3DDevice8*, UINT, UINT, UINT, DWORD, D3DFORMAT, D3DPOOL, IDirect3DTexture8**);
+#define D3DDEVICE_CREATETEXTURE(name) HRESULT __stdcall name(IDirect3DDevice8* D3DDevice, \
+                                                             UINT Width, \
+                                                             UINT Height, \
+                                                             UINT Levels, \
+                                                             DWORD Usage, \
+                                                             D3DFORMAT Format, \
+                                                             D3DPOOL Pool, \
+                                                             IDirect3DTexture8** ppTexture)
+typedef D3DDEVICE_CREATETEXTURE(D3DDeviceCreateTextureFunc);
 
-D3DDeviceCreateTextureFunc D3DDeviceCreateTexture = NULL;
+static D3DDeviceCreateTextureFunc* D3DDeviceCreateTexture = NULL;
 
-static HRESULT __stdcall D3DDeviceCreateTextureOverride(IDirect3DDevice8* D3DDevice,
-														UINT Width,
-														UINT Height,
-														UINT Levels,
-														DWORD Usage,
-														D3DFORMAT Format,
-														D3DPOOL Pool,
-														IDirect3DTexture8** ppTexture){
+static D3DDEVICE_CREATETEXTURE(D3DDeviceCreateTextureOverride){
 	// X8L8V8U8 is used as the first fallback format because no information is lost in the conversion
 	D3DFORMAT FallbackFormat = Format == D3DFMT_L6V5U5 ? D3DFMT_X8L8V8U8 : Format;
 	HRESULT Result = D3DDeviceCreateTexture(D3DDevice,
@@ -253,10 +257,10 @@ static HRESULT __stdcall D3DDeviceCreateTextureOverride(IDirect3DDevice8* D3DDev
 	MaybePatchVTable(&D3DTextureUnlockRect, *ppTexture, D3DVTableIndex_TextureUnlockRect, D3DTextureUnlockRectOverride);
 
 	// Updating the current texture with the newly created one
-	CurrentTexture = *ppTexture;
-	CurrentTextureSourceFormat = Format;
-	CurrentTextureTargetFormat = FallbackFormat;
-	CurrentTextureNumMipLevels = Levels;
+	CurrentD3D8Texture = *ppTexture;
+	CurrentD3D8TextureSourceFormat = Format;
+	CurrentD3D8TextureTargetFormat = FallbackFormat;
+	CurrentD3D8TextureNumMipLevels = Levels;
 
 	return Result;
 }
@@ -265,23 +269,18 @@ static HRESULT __stdcall D3DDeviceCreateTextureOverride(IDirect3DDevice8* D3DDev
  * CreateDevice
  */
 
-typedef HRESULT(__stdcall*D3D8CreateDeviceFunc)(IDirect3D8* D3D8,
-                                                UINT Adapter,
-                                                D3DDEVTYPE DeviceType,
-                                                HWND hFocusWindow,
-                                                DWORD BehaviorFlags,
-                                                D3DPRESENT_PARAMETERS* pPresentationParameters,
-                                                IDirect3DDevice8** ppReturnedDeviceInterface);
+#define D3D_CREATEDEVICE(name) HRESULT __stdcall name(IDirect3D8* D3D8, \
+                                                      UINT Adapter, \
+                                                      D3DDEVTYPE DeviceType, \
+                                                      HWND hFocusWindow, \
+                                                      DWORD BehaviorFlags, \
+                                                      D3DPRESENT_PARAMETERS* pPresentationParameters, \
+                                                      IDirect3DDevice8** ppReturnedDeviceInterface)
+typedef D3D_CREATEDEVICE(D3D8CreateDeviceFunc);
 
-D3D8CreateDeviceFunc D3D8CreateDevice = NULL;
+static D3D8CreateDeviceFunc* D3D8CreateDevice = NULL;
 
-HRESULT __stdcall D3D8CreateDeviceOverride(IDirect3D8* D3D8,
-                                           UINT Adapter,
-                                           D3DDEVTYPE DeviceType,
-                                           HWND hFocusWindow,
-                                           DWORD BehaviorFlags,
-                                           D3DPRESENT_PARAMETERS* pPresentationParameters,
-                                           IDirect3DDevice8** ppReturnedDeviceInterface){
+static D3D_CREATEDEVICE(D3D8CreateDeviceOverride){
 	HRESULT Result = D3D8CreateDevice(D3D8, Adapter, DeviceType, hFocusWindow, BehaviorFlags, pPresentationParameters, ppReturnedDeviceInterface);
 
 	if(SUCCEEDED(Result))
@@ -541,6 +540,9 @@ UBOOL UModRenderDevice::Exec(const TCHAR* Cmd, FOutputDevice& Ar){
 }
 
 FRenderInterface* UModRenderDevice::Lock(UViewport* Viewport, BYTE* HitData, INT* HitSize){
+	if(!USWRCFix::RenderingReady) // Return NULL (meaning no rendering) until ready to avoid caching all textures at startup, causing a high memory load
+		return NULL;
+
 	FRenderInterface* RI = Super::Lock(Viewport, HitData, HitSize);
 
 	if(bEnableSelectionFix && GIsEditor && RI && HitData && CastChecked<UEditorEngine>(GEngine)->Mode != EM_EyeDropper){

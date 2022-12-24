@@ -71,10 +71,10 @@ public:
 	virtual FRenderCaps* GetRenderCaps();
 	virtual void RenderMovie(UViewport* Viewport);
 	virtual FMovie* GetNewMovie(ECodecType Codec, FString Filename, UBOOL UseSound, INT FrameRate, int);
-	virtual int GetStateCaching(){ return 0; }
-	virtual int SetStateCaching(int){ return 0; }
-	virtual int RefreshStates(){ return 0; }
-	virtual INT DoesSupportFSAA(INT Level){ return 0; }
+	virtual UBOOL GetStateCaching(){ return 0; }
+	virtual UBOOL SetStateCaching(int){ return 0; }
+	virtual UBOOL RefreshStates(){ return 0; }
+	virtual INT DoesSupportFSAA(INT Level){ return Level == 2 || Level == 4 || Level == 8; }
 	virtual void TakeScreenshot(const TCHAR* Name, UViewport* Viewport, INT Width, INT Height);
 	virtual UBOOL SupportsTextureFormat(ETextureFormat){ return 0; }
 

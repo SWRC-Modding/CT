@@ -89,6 +89,7 @@ public:
 	void Init();
 
 	static USWRCFix* Instance;
+	static UBOOL     RenderingReady; // Used by ModRenderDevice to only render once everything is started up. This avoids loading tons of textures for no reason.
 };
 
 
@@ -100,9 +101,7 @@ public:
 #if __STATIC_LINK
 
 #define AUTO_INITIALIZE_REGISTRANTS_MOD \
-	UExportBumpMapsCommandlet::StaticClass(); \
 	UFunctionOverride::StaticClass(); \
-	UModRenderDevice::StaticClass(); \
 	USWRCFix::StaticClass(); \
 
 #endif // __STATIC_LINK

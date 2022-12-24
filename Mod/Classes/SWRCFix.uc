@@ -211,6 +211,7 @@ cpptext
 	void Init();
 
 	static USWRCFix* Instance;
+	static UBOOL     RenderingReady; // Used by ModRenderDevice to only render once everything is started up. This avoids loading tons of textures for no reason.
 }
 
 defaultproperties

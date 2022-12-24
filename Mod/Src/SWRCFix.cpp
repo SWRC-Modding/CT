@@ -2,6 +2,24 @@
 #include "../../Window/Inc/Window.h"
 #include "../Inc/Mod.h"
 
+USWRCFix* USWRCFix::Instance = NULL;
+UBOOL USWRCFix::RenderingReady = 0;
+
+void CDECL InitSWRCFix(void){
+	USWRCFix::Instance = FindObject<USWRCFix>(ANY_PACKAGE, "SWRCFixInstance");
+
+	if(!USWRCFix::Instance){
+		// NOTE: Need to use LoadClass here since the class might not be registered yet if Mod.dll was loaded directly with LoadLibrary
+		USWRCFix::Instance = ConstructObject<USWRCFix>(LoadClass<USWRCFix>(NULL, "Mod.SWRCFix", NULL, LOAD_NoFail | LOAD_Throw, NULL),
+		                                               ANY_PACKAGE,
+		                                               FName("SWRCFixInstance"));
+		USWRCFix::Instance->AddToRoot(); // This object should never be garbage collected
+		USWRCFix::Instance->Init();
+	}
+
+	USWRCFix::RenderingReady = !GIsEditor;
+}
+
 /*
  * Property window crash fix
  */
@@ -112,6 +130,7 @@ static UBOOL __fastcall EngineExecOverride(UEngine* Self, DWORD Edx, const TCHAR
 
 				OriginalUEngineExec(Self, Edx, *("CAMERA UPDATE FLAGS=1073742464 MISC2=0 REN=17 NAME=TextureBrowser PACKAGE=\"" + TempString + "\" GROUP=\"(All)\""), Ar);
 				FlushResources();
+				USWRCFix::RenderingReady = 1;
 
 				return 1;
 			}
@@ -217,19 +236,4 @@ void USWRCFix::Init(){
 	// Initialize the UnrealScript part of the fix
 	InitScript();
 	unguard;
-}
-
-USWRCFix* USWRCFix::Instance = NULL;
-
-void CDECL InitSWRCFix(void){
-	USWRCFix::Instance = FindObject<USWRCFix>(ANY_PACKAGE, "SWRCFixInstance");
-
-	if(!USWRCFix::Instance){
-		// NOTE: Need to use LoadClass here since the class might not be registered yet if Mod.dll was loaded directly with LoadLibrary
-		USWRCFix::Instance = ConstructObject<USWRCFix>(LoadClass<USWRCFix>(NULL, "Mod.SWRCFix", NULL, LOAD_NoFail | LOAD_Throw, NULL),
-		                                               ANY_PACKAGE,
-		                                               FName("SWRCFixInstance"));
-		USWRCFix::Instance->AddToRoot(); // This object should never be garbage collected
-		USWRCFix::Instance->Init();
-	}
 }

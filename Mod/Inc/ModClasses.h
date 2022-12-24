@@ -101,7 +101,9 @@ public:
 #if __STATIC_LINK
 
 #define AUTO_INITIALIZE_REGISTRANTS_MOD \
+	UExportBumpMapsCommandlet::StaticClass(); \
 	UFunctionOverride::StaticClass(); \
+	UModRenderDevice::StaticClass(); \
 	USWRCFix::StaticClass(); \
 
 #endif // __STATIC_LINK

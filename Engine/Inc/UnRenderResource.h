@@ -170,11 +170,8 @@ struct FVertexComponent{
 	BYTE Function; // EFixedVertexFunction
 
 	FVertexComponent(){}
-
-	FVertexComponent(EComponentType InType,EFixedVertexFunction InFunction){
-		Type = InType;
-		Function = InFunction;
-	}
+	FVertexComponent(EComponentType InType, EFixedVertexFunction InFunction) : Type(InType),
+	                                                                           Function(InFunction){}
 };
 
 enum { MAX_VERTEX_COMPONENTS = 16 };

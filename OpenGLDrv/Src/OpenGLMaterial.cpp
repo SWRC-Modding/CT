@@ -316,7 +316,14 @@ void FOpenGLRenderInterface::GetShaderConstants(FSConstantsInfo* Info, FPlane* C
 	}
 }
 
-void FOpenGLRenderInterface::SetTexture(FBaseTexture* Texture, INT TextureIndex, FLOAT UVScale, FLOAT BumpSize, FLOAT BumpLumaScale, FLOAT BumpLumaOffset){
+void FOpenGLRenderInterface::SetTexture(FBaseTexture* Texture,
+                                        INT TextureIndex,
+                                        FLOAT UVScale,
+                                        ETexClampModeOverride UClamp,
+                                        ETexClampModeOverride VClamp,
+                                        FLOAT BumpSize,
+                                        FLOAT BumpLumaScale,
+                                        FLOAT BumpLumaOffset){
 	checkSlow(Texture);
 	checkSlow(TextureIndex < MAX_TEXTURES);
 
@@ -345,8 +352,8 @@ void FOpenGLRenderInterface::SetTexture(FBaseTexture* Texture, INT TextureIndex,
 		TextureInfo.IsCubemap = 0;
 
 		if(GLTexture->FBO == GL_NONE){
-			TextureUnit.ClampU = Texture->GetUClamp();
-			TextureUnit.ClampV = Texture->GetVClamp();
+			TextureUnit.ClampU = UClamp == TCO_UseTextureMode ? Texture->GetUClamp() : UClamp - 1;
+			TextureUnit.ClampV = VClamp == TCO_UseTextureMode ? Texture->GetVClamp() : VClamp - 1;
 		}else{
 			 // Render targets should use TC_Clamp to avoid artifacts at the edges of the screen
 			TextureUnit.ClampU = TC_Clamp;
@@ -370,9 +377,16 @@ void FOpenGLRenderInterface::SetTexture(FBaseTexture* Texture, INT TextureIndex,
 		++CurrentState->UniformRevision;
 }
 
-void FOpenGLRenderInterface::SetBitmapTexture(UBitmapMaterial* Bitmap, INT TextureIndex, FLOAT UVScale, FLOAT BumpSize, FLOAT BumpLumaScale, FLOAT BumpLumaOffset){
+void FOpenGLRenderInterface::SetBitmapTexture(UBitmapMaterial* Bitmap,
+                                              INT TextureIndex,
+																							FLOAT UVScale,
+                                              ETexClampModeOverride UClamp,
+                                              ETexClampModeOverride VClamp,
+                                              FLOAT BumpSize,
+                                              FLOAT BumpLumaScale,
+                                              FLOAT BumpLumaOffset){
 	FBaseTexture* Texture = Bitmap->Get(LockedViewport->CurrentTime, LockedViewport)->GetRenderInterface();
-	SetTexture(Texture, TextureIndex, UVScale, BumpSize, BumpLumaScale, BumpLumaOffset);
+	SetTexture(Texture, TextureIndex, UVScale, UClamp, VClamp, BumpSize, BumpLumaScale, BumpLumaOffset);
 }
 
 void FOpenGLRenderInterface::SetGeneratedShader(FShaderGenerator& ShaderGenerator, bool UseStaticLighting){
@@ -389,7 +403,7 @@ void FOpenGLRenderInterface::SetGeneratedShader(FShaderGenerator& ShaderGenerato
 	SetShader(*Shader);
 }
 
-bool FOpenGLRenderInterface::SetBitmapMaterial(UBitmapMaterial* Material){
+bool FOpenGLRenderInterface::SetBitmapMaterial(UBitmapMaterial* Material, const FModifierInfo& ModifierInfo){
 	UBitmapMaterial* Detail = NULL;
 
 	if(Material->IsA<UTexture>()){
@@ -416,10 +430,10 @@ bool FOpenGLRenderInterface::SetBitmapMaterial(UBitmapMaterial* Material){
 		}
 	}
 
-	SetBitmapTexture(Material, 0);
+	SetBitmapTexture(Material, 0, 1.0f, ModifierInfo.TexUClamp, ModifierInfo.TexVClamp);
 
 	if(Detail)
-		SetBitmapTexture(Detail, 2, static_cast<UTexture*>(Material)->DetailScale);
+		SetBitmapTexture(Detail, 2, static_cast<UTexture*>(Material)->DetailScale, TCO_Wrap, TCO_Wrap);
 
 	FOpenGLShader* Shader;
 
@@ -561,7 +575,7 @@ bool FOpenGLRenderInterface::HandleSimpleMaterial(UMaterial* Material, FShaderGe
 
 		INT Index = CurrentState->NumTextures++;
 
-		SetBitmapTexture(static_cast<UBitmapMaterial*>(Material), Index);
+		SetBitmapTexture(static_cast<UBitmapMaterial*>(Material), Index, 1.0f, ModifierInfo.TexUClamp, ModifierInfo.TexVClamp);
 
 		SBYTE Matrix = INDEX_NONE;
 
@@ -578,7 +592,7 @@ bool FOpenGLRenderInterface::HandleSimpleMaterial(UMaterial* Material, FShaderGe
 
 		if(Texture && Texture->Detail && Texture->Detail->IsA<UBitmapMaterial>()){
 			Index = CurrentState->NumTextures++;
-			SetBitmapTexture(static_cast<UBitmapMaterial*>(Texture->Detail), Index, Texture->DetailScale);
+			SetBitmapTexture(static_cast<UBitmapMaterial*>(Texture->Detail), Index, Texture->DetailScale, TCO_Wrap, TCO_Wrap);
 			EColorArg DetailArg = ShaderGenerator.AddTexture(Index, TCS_Stream0);
 			ShaderGenerator.AddColorOp(DetailArg, TextureArg, COP_Modulate2X, CC_RGB, CR_0);
 		}
@@ -732,7 +746,7 @@ bool FOpenGLRenderInterface::HandleShaderMaterial(UShader* Shader, FShaderGenera
 
 		if(Shader->Bumpmap && Shader->Bumpmap->IsA<UBitmapMaterial>()){
 			BumpmapIndex = CurrentState->NumTextures++;
-			SetBitmapTexture(static_cast<UBitmapMaterial*>(Shader->Bumpmap), BumpmapIndex, Shader->BumpUVScale);
+			SetBitmapTexture(static_cast<UBitmapMaterial*>(Shader->Bumpmap), BumpmapIndex, Shader->BumpUVScale, ModifierInfo.TexUClamp, ModifierInfo.TexVClamp);
 			ShaderGenerator.AddTexture(BumpmapIndex, TCS_Stream0);
 		}
 
@@ -752,7 +766,7 @@ bool FOpenGLRenderInterface::HandleShaderMaterial(UShader* Shader, FShaderGenera
 		if(DiffuseEnvMap){
 			INT Index = CurrentState->NumTextures++;
 			DiffuseEnvTex = ShaderGenerator.AddTexture(Index, BumpTexCoordSrc, TCN_2DCoords, INDEX_NONE, false, BumpmapIndex);
-			SetBitmapTexture(DiffuseEnvMap, Index, 1.0, Shader->BumpSize, Shader->DiffuseMaskStrength / 255.0f, Shader->DiffuseStrength / 255.0f);
+			SetBitmapTexture(DiffuseEnvMap, Index, 1.0, TCO_Clamp, TCO_Clamp, Shader->BumpSize, Shader->DiffuseMaskStrength / 255.0f, Shader->DiffuseStrength / 255.0f);
 		}
 
 		bool UseMatrix = false;
@@ -878,7 +892,7 @@ bool FOpenGLRenderInterface::HandleShaderMaterial(UShader* Shader, FShaderGenera
 
 	if(Shader->Detail && Shader->Detail->IsA<UBitmapMaterial>()){
 		INT Index = CurrentState->NumTextures++;
-		SetBitmapTexture(static_cast<UBitmapMaterial*>(Shader->Detail), Index, Shader->DetailScale);
+		SetBitmapTexture(static_cast<UBitmapMaterial*>(Shader->Detail), Index, Shader->DetailScale, TCO_Wrap, TCO_Wrap);
 		EColorArg DetailArg = ShaderGenerator.AddTexture(Index, TCS_Stream0);
 		ShaderGenerator.AddColorOp(DetailArg, CA_R0, COP_Modulate2X, CC_RGB, CR_0);
 	}
@@ -930,7 +944,7 @@ bool FOpenGLRenderInterface::HandleSpecular(UMaterial* Specular, UMaterial* Spec
 			TexMatrices[SpecularMatrix] = SpecularModifier.TexMatrix;
 		}
 
-		SetBitmapTexture(static_cast<UBitmapMaterial*>(SpecularMaterial), Index, 1.0f, BumpSize, SpecularMaskStrength, SpecularStrength);
+		SetBitmapTexture(static_cast<UBitmapMaterial*>(SpecularMaterial), Index, 1.0f, SpecularModifier.TexUClamp, SpecularModifier.TexVClamp, BumpSize, SpecularMaskStrength, SpecularStrength);
 		EColorArg SpecTex = ShaderGenerator.AddTexture(Index, SpecularModifier.TexCoordSrc, SpecularModifier.TexCoordCount, SpecularMatrix, false, BumpmapIndex);
 		ShaderGenerator.AddColorOp(SpecTex, SpecTex, COP_Arg1, CC_RGB, CR_0);
 	}else{
@@ -1234,7 +1248,7 @@ bool FOpenGLRenderInterface::SetTerrainMaterial(UTerrainMaterial* TerrainMateria
 				++CurrentState->UniformRevision;
 			}
 
-			SetBitmapTexture(BitmapMaterial, 0);
+			SetBitmapTexture(BitmapMaterial, 0, 1.0f, TCO_Wrap, TCO_Wrap);
 			SetBitmapTexture(Layer.AlphaWeight, 1);
 
 			CurrentState->NumTextures = 2;
@@ -1282,9 +1296,9 @@ bool FOpenGLRenderInterface::SetTerrainMaterial(UTerrainMaterial* TerrainMateria
 			checkSlow(Layers[2].Texture->IsA<UBitmapMaterial>());
 
 			SetBitmapTexture(Layers[0].AlphaWeight, 0);
-			SetBitmapTexture(static_cast<UBitmapMaterial*>(Layers[0].Texture), 1);
-			SetBitmapTexture(static_cast<UBitmapMaterial*>(Layers[1].Texture), 2);
-			SetBitmapTexture(static_cast<UBitmapMaterial*>(Layers[2].Texture), 3);
+			SetBitmapTexture(static_cast<UBitmapMaterial*>(Layers[0].Texture), 1, 1.0f, TCO_Wrap, TCO_Wrap);
+			SetBitmapTexture(static_cast<UBitmapMaterial*>(Layers[1].Texture), 2, 1.0f, TCO_Wrap, TCO_Wrap);
+			SetBitmapTexture(static_cast<UBitmapMaterial*>(Layers[2].Texture), 3, 1.0f, TCO_Wrap, TCO_Wrap);
 
 			TexMatrices[0] = Layers[0].TextureMatrix;
 			TexMatrices[1] = Layers[1].TextureMatrix;
@@ -1293,7 +1307,7 @@ bool FOpenGLRenderInterface::SetTerrainMaterial(UTerrainMaterial* TerrainMateria
 			bool Layer4 = Layers.Num() > 3;
 
 			if(Layer4){
-				SetBitmapTexture(static_cast<UBitmapMaterial*>(Layers[3].Texture), 4);
+				SetBitmapTexture(static_cast<UBitmapMaterial*>(Layers[3].Texture), 4, 1.0f, TCO_Wrap, TCO_Wrap);
 				TexMatrices[3] = Layers[3].TextureMatrix;
 				NumTexMatrices = 4;
 			}else{
@@ -1324,7 +1338,7 @@ bool FOpenGLRenderInterface::SetTerrainMaterial(UTerrainMaterial* TerrainMateria
 			const TArray<FTerrainMaterialLayer>& Layers = TerrainMaterial->Layers;
 			checkSlow(Layers[0].Texture->IsA<UBitmapMaterial>());
 
-			SetBitmapTexture(static_cast<UBitmapMaterial*>(Layers[0].Texture), 0);
+			SetBitmapTexture(static_cast<UBitmapMaterial*>(Layers[0].Texture), 0, 1.0f, TCO_Wrap, TCO_Wrap);
 			SetBitmapTexture(static_cast<UBitmapMaterial*>(Layers[0].AlphaWeight), 1);
 			TexMatrices[0] = Layers[0].TextureMatrix;
 			NumTexMatrices = 1;
@@ -1339,7 +1353,7 @@ bool FOpenGLRenderInterface::SetTerrainMaterial(UTerrainMaterial* TerrainMateria
 				INT TextureIndex = i * 2;
 				INT AlphaWeightIndex = TextureIndex + 1;
 
-				SetBitmapTexture(static_cast<UBitmapMaterial*>(Layers[i].Texture), TextureIndex);
+				SetBitmapTexture(static_cast<UBitmapMaterial*>(Layers[i].Texture), TextureIndex, 1.0f, TCO_Wrap, TCO_Wrap);
 				SetBitmapTexture(static_cast<UBitmapMaterial*>(Layers[i].AlphaWeight), AlphaWeightIndex);
 				TexMatrices[i] = Layers[i].TextureMatrix;
 				++NumTexMatrices;

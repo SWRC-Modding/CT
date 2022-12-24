@@ -296,8 +296,22 @@ private:
 
 	UMaterial* RemoveModifiers(UMaterial* Material, FModifierInfo& ModifierInfo);
 	void GetShaderConstants(FSConstantsInfo* Info, FPlane* Constants, INT NumConstants);
-	void SetTexture(FBaseTexture* Texture, INT TextureIndex, FLOAT UVScale = 1.0f, FLOAT BumpSize = 1.0f, FLOAT BumpLumaScale = 1.0f, FLOAT BumpLumaOffset = 0.0f);
-	void SetBitmapTexture(UBitmapMaterial* Bitmap, INT TextureIndex, FLOAT UVScale = 1.0f, FLOAT BumpSize = 1.0f, FLOAT BumpLumaScale = 1.0f, FLOAT BumpLumaOffset = 0.0f);
+	                        void SetTexture(FBaseTexture* Texture,
+	                        INT TextureIndex,
+													FLOAT UVScale = 1.0f,
+	                        ETexClampModeOverride UClamp = TCO_UseTextureMode,
+	                        ETexClampModeOverride VClamp = TCO_UseTextureMode,
+	                        FLOAT BumpSize = 1.0f,
+	                        FLOAT BumpLumaScale = 1.0f,
+	                        FLOAT BumpLumaOffset = 0.0f);
+	void SetBitmapTexture(UBitmapMaterial* Bitmap,
+	                      INT TextureIndex,
+												FLOAT UVScale = 1.0f,
+	                      ETexClampModeOverride UClamp = TCO_UseTextureMode,
+	                      ETexClampModeOverride VClamp = TCO_UseTextureMode,
+	                      FLOAT BumpSize = 1.0f,
+	                      FLOAT BumpLumaScale = 1.0f,
+	                      FLOAT BumpLumaOffset = 0.0f);
 
 	FOpenGLShader               LightingOnlyShader;
 	FOpenGLShader               LightingOnlyShader2X;
@@ -331,7 +345,7 @@ private:
 
 	void SetGeneratedShader(FShaderGenerator& ShaderGenerator, bool UseStaticLighting);
 
-	bool SetBitmapMaterial(UBitmapMaterial* Material);
+	bool SetBitmapMaterial(UBitmapMaterial* Material, const FModifierInfo& ModifierInfo);
 	bool SetSimpleMaterial(UMaterial* Material, const FModifierInfo& ModifierInfo);
 	bool SetShaderMaterial(UShader* Shader, const FModifierInfo& ModifierInfo);
 	bool SetCombinerMaterial(UCombiner* Combiner);

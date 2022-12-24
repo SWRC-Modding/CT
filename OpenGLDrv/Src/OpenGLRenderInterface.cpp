@@ -1130,7 +1130,7 @@ void FOpenGLRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorStri
 			Shader = RenDev->GetShaderForMaterial(Material);
 
 		if(Material->IsA<UBitmapMaterial>())
-			Result = ModifierInfo.bModifiesTextureCoordinates ? SetSimpleMaterial(Material, ModifierInfo) : SetBitmapMaterial(static_cast<UBitmapMaterial*>(Material));
+			Result = ModifierInfo.bModifiesTextureCoordinates ? SetSimpleMaterial(Material, ModifierInfo) : SetBitmapMaterial(static_cast<UBitmapMaterial*>(Material), ModifierInfo);
 		else if(Material->IsA<UShader>())
 			Result = SetShaderMaterial(static_cast<UShader*>(Material), ModifierInfo);
 		else if(Material->IsA<UCombiner>())
@@ -1189,7 +1189,7 @@ UBOOL FOpenGLRenderInterface::SetHardwareShaderMaterial(UHardwareShader* Hardwar
 
 		for(INT i = 0; i < MAX_TEXTURES; ++i){
 			if(HardwareShader->Textures[i]){
-				SetBitmapTexture(HardwareShader->Textures[i], i, 1.0f, HardwareShader->BumpSettings[i].BumpSize);
+				SetBitmapTexture(HardwareShader->Textures[i], i, 1.0f, TCO_UseTextureMode, TCO_UseTextureMode, HardwareShader->BumpSettings[i].BumpSize);
 				CurrentState->NumTextures = i + 1;
 			}
 		}

@@ -117,7 +117,7 @@ enum EPropertyFlags{
 	CPF_Travel           = 0x00010000, // Property travels across levels/servers.
 	CPF_EditConst        = 0x00020000, // Property is uneditable in the editor.
 	CPF_GlobalConfig     = 0x00040000, // Load config from base class, not subclass.
-	CPF_OnDemand         = 0x00100000, // Object or dynamic array loaded on demand only.
+	CPF_Autoload         = 0x00100000, // Preload object from string property value.
 	CPF_New              = 0x00200000, // Automatically create inner object.
 	CPF_NeedCtorLink     = 0x00400000, // Fields need construction/destruction.
 	CPF_NoExport         = 0x00800000, // Property should not be exported to the native class header file.

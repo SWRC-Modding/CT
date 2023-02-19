@@ -94,7 +94,7 @@ static void __fastcall EngineDrawOverride(UEngine* Self, DWORD Edx, UViewport* V
 
 
 /*
- * UEngine exec hook
+ * UUnrealEdEngine exec hook
  */
 
 static void FlushResources(){
@@ -109,9 +109,9 @@ static void FlushResources(){
 	}
 }
 
-static UBOOL(__fastcall*OriginalUEngineExec)(UEngine*, DWORD, const TCHAR*, FOutputDevice&) = NULL;
+static UBOOL(__fastcall*OriginalUUnrealEdEngineExec)(UEngine*, DWORD, const TCHAR*, FOutputDevice&) = NULL;
 
-static UBOOL __fastcall EngineExecOverride(UEngine* Self, DWORD Edx, const TCHAR* Cmd, FOutputDevice& Ar){
+static UBOOL __fastcall UnrealEdEngineExecOverride(UEngine* Self, DWORD Edx, const TCHAR* Cmd, FOutputDevice& Ar){
 	const TCHAR* TempCmd = Cmd;
 
 	if(ParseCommand(&Cmd, "FLUSHRESOURCES")){
@@ -128,7 +128,7 @@ static UBOOL __fastcall EngineExecOverride(UEngine* Self, DWORD Edx, const TCHAR
 					GConfig->SetString("Mod.SWRCFix", "InitialTextureBrowserPackage", *TempString);
 				}
 
-				OriginalUEngineExec(Self, Edx, *("CAMERA UPDATE FLAGS=1073742464 MISC2=0 REN=17 NAME=TextureBrowser PACKAGE=\"" + TempString + "\" GROUP=\"(All)\""), Ar);
+				OriginalUUnrealEdEngineExec(Self, Edx, *("CAMERA UPDATE FLAGS=1073742464 MISC2=0 REN=17 NAME=TextureBrowser PACKAGE=\"" + TempString + "\" GROUP=\"(All)\""), Ar);
 				FlushResources();
 				USWRCFix::RenderingReady = 1;
 
@@ -137,8 +137,9 @@ static UBOOL __fastcall EngineExecOverride(UEngine* Self, DWORD Edx, const TCHAR
 		}
 	}
 
-	return OriginalUEngineExec(Self, Edx, Cmd, Ar);
+	return OriginalUUnrealEdEngineExec(Self, Edx, Cmd, Ar);
 }
+
 /*
  * Fix initialization
  */
@@ -146,6 +147,11 @@ static UBOOL __fastcall EngineExecOverride(UEngine* Self, DWORD Edx, const TCHAR
 void USWRCFix::Init(){
 	guardFunc;
 	debugf("Applying fixes");
+
+	HMODULE ExeModule = GetModuleHandleA(*(FString(appPackage()) + ".exe"));
+	bool IsUnrealEd = ExeModule && GetProcAddress(ExeModule, "autoclassUUnrealEdEngine") != NULL;
+
+	// Common fixes
 
 	/*
 	 * Fix 1:
@@ -166,72 +172,72 @@ void USWRCFix::Init(){
 
 	/*
 	 * Fix 3:
-	 * VSync doesn't seem to work for most people with the d3d8 renderer. A very high frame rate causes the mouse pointer in the menu to be super
-	 * fast and the helmet shake caused by explosions is way stronger as well.
-	 * The engine has a mechanism to limit the fps to a specific value that is returned from UGameEngine::GetMaxTickRate.
-	 * However, this is always zero, meaning no limit.
-	 * This fix patches the vtable of UGameEngine so it returns a custom value specified in the config.
-	 */
-	OriginalUEngineGetMaxTickRate = static_cast<FLOAT(__fastcall*)(UEngine*, DWORD)>(PatchDllClassVTable("Engine.dll", "UGameEngine", "UObject", 49, EngineGetMaxTickRateOverride));
-
-	/*
-	 * Fix 4:
 	 * Creating a new HardwareShader via the texture browser crashes because the vertex and pixel shader variables are empty by default which causes the compilation to fail.
 	 * To fix it, we simply add a dummy shader implementation.
 	 */
 	UHardwareShader* DefaultHardwareShader = GetDefault<UHardwareShader>();
+	DefaultHardwareShader->VertexShaderText = "vs.1.1\n\nmov oPos, v0\n";
+	DefaultHardwareShader->PixelShaderText  = "ps.1.1\n\nmov r0, c0\n";
 
-	DefaultHardwareShader->VertexShaderText = "vs.1.1\n\n"
-	                                          "mov oPos, v0\n";
-	DefaultHardwareShader->PixelShaderText  = "ps.1.1\n\n"
-	                                          "mov r0, c0\n";
+	if(!IsUnrealEd){ // Game specific fixes
+		/*
+		 * Fix 4:
+		 * VSync doesn't seem to work for most people with the d3d8 renderer. A very high frame rate causes the mouse pointer in the menu to be super
+		 * fast and the helmet shake caused by explosions is way stronger as well.
+		 * The engine has a mechanism to limit the fps to a specific value that is returned from UGameEngine::GetMaxTickRate.
+		 * However, this is always zero, meaning no limit.
+		 * This fix patches the vtable of UGameEngine so it returns a custom value specified in the config.
+		 */
+		OriginalUEngineGetMaxTickRate = static_cast<FLOAT(__fastcall*)(UEngine*, DWORD)>(PatchDllClassVTable("Engine.dll", "UGameEngine", "UObject", 49, EngineGetMaxTickRateOverride));
 
-	/*
-	 * Fix 5:
-	 * By default RC only has a fixed set of screen resolutions.
-	 * To support any available resolution, EnumDisplaySettings is used and a list of supported resolutions is created and written to the config file.
-	 */
-	DEVMODE dm = {{0}};
+		/*
+		 * Fix 5:
+		 * By default RC only has a fixed set of screen resolutions.
+		 * To support any available resolution, EnumDisplaySettings is used and a list of supported resolutions is created and written to the config file.
+		 */
+		DEVMODE dm = {{0}};
 
-	dm.dmSize = sizeof(dm);
+		dm.dmSize = sizeof(dm);
 
-	TArray<DWORD> AvailableResolutions;
+		TArray<DWORD> AvailableResolutions;
 
-	for(int i = 0; EnumDisplaySettings(NULL, i, &dm) != 0; ++i)
-		AvailableResolutions.AddUniqueItem(MAKELONG(dm.dmPelsWidth, dm.dmPelsHeight));
+		for(int i = 0; EnumDisplaySettings(NULL, i, &dm) != 0; ++i)
+			AvailableResolutions.AddUniqueItem(MAKELONG(dm.dmPelsWidth, dm.dmPelsHeight));
 
-	if(AvailableResolutions.Num() > 0){
-		Sort(AvailableResolutions.GetData(), AvailableResolutions.Num());
+		if(AvailableResolutions.Num() > 0){
+			Sort(AvailableResolutions.GetData(), AvailableResolutions.Num());
 
-		FString ResolutionList = "(";
+			FString ResolutionList = "(";
 
-		for(int i = 0; i < AvailableResolutions.Num() - 1; ++i)
-			ResolutionList += FString::Printf("\"%ix%i\",", LOWORD(AvailableResolutions[i]), HIWORD(AvailableResolutions[i]));
+			for(int i = 0; i < AvailableResolutions.Num() - 1; ++i)
+				ResolutionList += FString::Printf("\"%ix%i\",", LOWORD(AvailableResolutions[i]), HIWORD(AvailableResolutions[i]));
 
-		ResolutionList += FString::Printf("\"%ix%i\")", LOWORD(AvailableResolutions.Last()), HIWORD(AvailableResolutions.Last()));
+			ResolutionList += FString::Printf("\"%ix%i\")", LOWORD(AvailableResolutions.Last()), HIWORD(AvailableResolutions.Last()));
 
-		GConfig->SetString("CTGraphicsOptionsPCMenu",
-		                   "Options[2].Items",
-		                   *ResolutionList,
-		                   *(FString("XInterfaceCTMenus.") + UObject::GetLanguage()));
+			GConfig->SetString("CTGraphicsOptionsPCMenu",
+												 "Options[2].Items",
+												 *ResolutionList,
+												 *(FString("XInterfaceCTMenus.") + UObject::GetLanguage()));
+		}
+
+		/*
+		 * Fix 6:
+		 * This mods FOV options revealed an issue with how the game draws the weapon's reticles. It basically checks if the current FOV is lower than the default one
+		 * and only then draws the reticle. This way it is hidden when zoomed in. However if you set a very high custom FOV, this check will always fail and the reticle is always drawn.
+		 * To fix it, we hook the UEngine::Draw function and set the current weapon's reticle property to NULL if zoomed in which causes it to be hidden.
+		 * Here we also calculate the current FOV based on the aspect ratio.
+		 */
+		OriginalUEngineDraw = static_cast<void(__fastcall*)(UEngine*, DWORD, UViewport*, UBOOL, BYTE*, INT*)>(PatchDllClassVTable("Engine.dll", "UGameEngine", "UObject", 41, EngineDrawOverride));
+	}else{ // Editor specific fixes
+
+		/* Fix 7:
+		 * The editor loads all textures at startup which can consume a significant amount of memory.
+		 * It does so because initially there is no package selected for the texture browser and thus all textures are shown.
+		 * This is fixed by overriding the Exec function and checking for the command that intiializes the texture browser and providing a single package to be initially loaded.
+		 * Additionally, a new command is added that alluws manually flushing resources if memory usage gets too high.
+		 */
+		OriginalUUnrealEdEngineExec = static_cast<UBOOL(__fastcall*)(UEngine*, DWORD, const TCHAR*, FOutputDevice&)>(PatchDllClassVTable(*(FString(appPackage()) + ".exe"), "UUnrealEdEngine", "FExec", 0, UnrealEdEngineExecOverride));
 	}
-
-	/*
-	 * Fix 6:
-	 * This mods FOV options revealed an issue with how the game draws the weapon's reticles. It basically checks if the current FOV is lower than the default one
-	 * and only then draws the reticle. This way it is hidden when zoomed in. However if you set a very high custom FOV, this check will always fail and the reticle is always drawn.
-	 * To fix it, we hook the UEngine::Draw function and set the current weapon's reticle property to NULL if zoomed in which causes it to be hidden.
-	 * Here we also calculate the current FOV based on the aspect ratio.
-	 */
-	OriginalUEngineDraw = static_cast<void(__fastcall*)(UEngine*, DWORD, UViewport*, UBOOL, BYTE*, INT*)>(PatchDllClassVTable("Engine.dll", "UGameEngine", "UObject", 41, EngineDrawOverride));
-
-	/* Fix 7:
-	 * The editor loads all textures at startup which can consume a significant amount of memory.
-	 * It does so because initially there is no package selected for the texture browser and thus all textures are shown.
-	 * This is fixed by overriding the Exec function and checking for the command that intiializes the texture browser and providing a single package to be initially loadedA.
-	 * Additionally, a new command is added that alluws manually flushing resources if memory usage gets too high.
-	 */
-	OriginalUEngineExec = static_cast<UBOOL(__fastcall*)(UEngine*, DWORD, const TCHAR*, FOutputDevice&)>(PatchVTable(static_cast<FExec*>(GEngine), 0, EngineExecOverride));
 
 	// Initialize the UnrealScript part of the fix
 	InitScript();

@@ -240,6 +240,10 @@ static struct FExecHook : public FExec, FNotifyHook{
 			}
 
 			return 1;
+		}else if(ParseCommand(&Cmd, ":q")){
+			GIsRequestingExit = 1;
+
+			return 1;
 		}
 
 		return 0;

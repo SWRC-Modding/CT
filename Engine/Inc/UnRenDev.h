@@ -228,7 +228,7 @@ public:
 	virtual FMovie* GetNewMovie(ECodecType Codec, FString Filename, UBOOL UseSound, INT FrameRate, int){ return NULL; }
 	virtual UBOOL GetStateCaching(){ return 0; }
 	virtual UBOOL SetStateCaching(int){ return 0; }
-	virtual UBOOL RefreshStates(){}
+	virtual UBOOL RefreshStates(){ return 0; }
 	virtual INT DoesSupportFSAA(INT Level){ return 0; }
 	virtual void TakeScreenshot(const TCHAR* Name, UViewport* Viewport, INT Width, INT Height);
 	virtual UBOOL SupportsTextureFormat(ETextureFormat) = 0;

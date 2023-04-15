@@ -126,6 +126,10 @@ struct FOpenGLRenderState{
 
 	BYTE                      CullMode; // ECullMode
 
+	FColor                    ClearColor;
+	FLOAT                     ClearDepth;
+	DWORD                     ClearStencil;
+
 	bool                      bZWrite;
 	bool                      bZTest;
 	bool                      bStencilTest;
@@ -291,7 +295,9 @@ private:
 		                  bUseTexMatrix(false),
 		                  bTexCoordProjected(false),
 		                  TexCoordSrc(TCS_Stream0),
-		                  TexCoordCount(TCN_2DCoords){}
+		                  TexCoordCount(TCN_2DCoords),
+		                  TexUClamp(TCO_UseTextureMode),
+		                  TexVClamp(TCO_UseTextureMode){}
 	};
 
 	UMaterial* RemoveModifiers(UMaterial* Material, FModifierInfo& ModifierInfo);

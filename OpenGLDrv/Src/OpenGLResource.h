@@ -66,6 +66,7 @@ public:
 	void Free();
 	void BindTexture(GLuint TextureUnit);
 	void BindRenderTarget();
+	bool IsRenderTarget() const{ return FBO != GL_NONE; }
 
 	INT    Width;
 	INT    Height;

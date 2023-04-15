@@ -221,6 +221,11 @@ void FOpenGLRenderInterface::Init(INT ViewportWidth, INT ViewportHeight){
 	RenDev->glEnable(GL_POLYGON_OFFSET_LINE);
 	RenDev->glEnable(GL_POLYGON_OFFSET_FILL);
 
+	// Color
+
+	RenderState.ClearColor = FColor(0, 0, 0, 0);
+	RenDev->glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+
 	// Viewport
 
 	RenderState.ViewportX = 0;
@@ -249,6 +254,9 @@ void FOpenGLRenderInterface::Init(INT ViewportWidth, INT ViewportHeight){
 	RenderState.bZWrite = true;
 	RenDev->glDepthMask(GL_TRUE);
 
+	RenderState.ClearDepth = 1.0f;
+	RenDev->glClearDepth(RenderState.ClearDepth);
+
 	// Stencil
 
 	RenDev->glDisable(GL_STENCIL_TEST);
@@ -267,6 +275,9 @@ void FOpenGLRenderInterface::Init(INT ViewportWidth, INT ViewportHeight){
 	RenDev->glStencilOp(GetStencilOp(RenderState.StencilFailOp), GetStencilOp(RenderState.StencilZFailOp), GetStencilOp(RenderState.StencilPassOp));
 	RenDev->glStencilFunc(GetStencilFunc(RenderState.StencilCompare), RenderState.StencilRef, RenderState.StencilMask);
 	RenDev->glStencilMask(RenderState.StencilWriteMask);
+
+	RenderState.ClearStencil = 0x0;
+	RenDev->glClearStencil(RenderState.ClearStencil);
 
 	// Texture samplers
 
@@ -555,10 +566,11 @@ void FOpenGLRenderInterface::CommitRenderState(){
 	}
 
 	for(INT i = 0; i < CurrentState->NumTextures; ++i){
-		if(RenderState.TextureUnits[i].Texture != CurrentState->TextureUnits[i].Texture){
-			if(CurrentState->TextureUnits[i].Texture) // Texture might not be set if the current material is a hardware shader
-				CurrentState->TextureUnits[i].Texture->BindTexture(i + CurrentState->TextureInfos[i].IsCubemap * MAX_TEXTURES);
+		if(!CurrentState->TextureUnits[i].Texture) // Texture might not be set if the current material is a hardware shader
+			continue;
 
+		if(RenderState.TextureUnits[i].Texture != CurrentState->TextureUnits[i].Texture){
+			CurrentState->TextureUnits[i].Texture->BindTexture(i + CurrentState->TextureInfos[i].IsCubemap * MAX_TEXTURES);
 			RenderState.TextureUnits[i].Texture = CurrentState->TextureUnits[i].Texture;
 		}
 
@@ -785,7 +797,11 @@ void FOpenGLRenderInterface::Clear(UBOOL UseColor, FColor Color, UBOOL UseDepth,
 	GLbitfield Flags = 0;
 
 	if(UseColor){
-		RenDev->glClearColor(Color.R / 255.0f, Color.G / 255.0f, Color.B / 255.0f, Color.A / 255.0f);
+		if(RenderState.ClearColor != Color){
+			RenDev->glClearColor(Color.R / 255.0f, Color.G / 255.0f, Color.B / 255.0f, Color.A / 255.0f);
+			RenderState.ClearColor = Color;
+		}
+
 		Flags |= GL_COLOR_BUFFER_BIT;
 	}
 
@@ -796,18 +812,26 @@ void FOpenGLRenderInterface::Clear(UBOOL UseColor, FColor Color, UBOOL UseDepth,
 			RenderState.bZWrite = true;
 		}
 
-		RenDev->glClearDepth(Depth);
+		if(RenderState.ClearDepth != Depth){
+			RenDev->glClearDepth(Depth);
+			RenderState.ClearDepth = Depth;
+		}
+
 		Flags |= GL_DEPTH_BUFFER_BIT;
 	}
 
 	if(UseStencil && bStencilEnabled){
 		// Same thing as with depth
-		if((RenderState.StencilWriteMask) != 0xFF){
+		if(RenderState.StencilWriteMask != 0xFF){
 			RenDev->glStencilMask(0xFF);
 			RenderState.StencilWriteMask = 0xFF;
 		}
 
-		RenDev->glClearStencil(Stencil);
+		if(RenderState.ClearStencil != Stencil){
+			RenDev->glClearStencil(Stencil);
+			RenderState.ClearStencil = Stencil;
+		}
+
 		Flags |= GL_STENCIL_BUFFER_BIT;
 	}
 
@@ -1188,10 +1212,8 @@ UBOOL FOpenGLRenderInterface::SetHardwareShaderMaterial(UHardwareShader* Hardwar
 		}
 
 		for(INT i = 0; i < MAX_TEXTURES; ++i){
-			if(HardwareShader->Textures[i]){
+			if(HardwareShader->Textures[i])
 				SetBitmapTexture(HardwareShader->Textures[i], i, 1.0f, TCO_UseTextureMode, TCO_UseTextureMode, HardwareShader->BumpSettings[i].BumpSize);
-				CurrentState->NumTextures = i + 1;
-			}
 		}
 
 		// Cache number of vertex and pixel shader constants

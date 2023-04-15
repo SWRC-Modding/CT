@@ -351,7 +351,7 @@ void FOpenGLRenderInterface::SetTexture(FBaseTexture* Texture,
 	}else{
 		TextureInfo.IsCubemap = 0;
 
-		if(GLTexture->FBO == GL_NONE){
+		if(!GLTexture->IsRenderTarget()){
 			TextureUnit.ClampU = UClamp == TCO_UseTextureMode ? Texture->GetUClamp() : UClamp - 1;
 			TextureUnit.ClampV = VClamp == TCO_UseTextureMode ? Texture->GetVClamp() : VClamp - 1;
 		}else{

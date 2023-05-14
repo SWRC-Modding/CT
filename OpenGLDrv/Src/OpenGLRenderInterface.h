@@ -25,11 +25,6 @@ struct FStreamDeclaration{
 	void Init(FVertexStream* VertexStream){ NumComponents = VertexStream->GetComponents(Components); }
 };
 
-enum EHardwareShaderUniforms{
-	HSU_VSConstants = 0,
-	HSU_PSConstants = MAX_VERTEX_SHADER_CONSTANTS
-};
-
 enum EShaderLightType{
 	SL_Directional,
 	SL_Point,

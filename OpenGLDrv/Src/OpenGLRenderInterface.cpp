@@ -1237,9 +1237,9 @@ UBOOL FOpenGLRenderInterface::SetHardwareShaderMaterial(UHardwareShader* Hardwar
 		}
 
 		GetShaderConstants(HardwareShader->VSConstants, ShaderConstants, HardwareShader->NumVSConstants);
-		RenDev->glProgramUniform4fv(CurrentShader->Program, HSU_VSConstants, HardwareShader->NumVSConstants, (GLfloat*)ShaderConstants);
+		RenDev->glProgramUniform4fv(CurrentShader->Program, 0, HardwareShader->NumVSConstants, (GLfloat*)ShaderConstants);
 		GetShaderConstants(HardwareShader->PSConstants, ShaderConstants, HardwareShader->NumPSConstants);
-		RenDev->glProgramUniform4fv(CurrentShader->Program, HSU_PSConstants, HardwareShader->NumPSConstants, (GLfloat*)ShaderConstants);
+		RenDev->glProgramUniform4fv(CurrentShader->Program, MAX_VERTEX_SHADER_CONSTANTS, HardwareShader->NumPSConstants, (GLfloat*)ShaderConstants);
 
 		return 1;
 	}

@@ -270,7 +270,7 @@ FStringTemp UOpenGLRenderDevice::GLSLShaderFromD3DHardwareShader(UHardwareShader
 
 	FStringTemp GLSLShaderText = "#ifdef VERTEX_SHADER\n" +
 		GetShaderHeaderComment(Shader, "vertex shader") +
-		FString::Printf("layout(location = %i) uniform vec4 VSConstants[%i];\n\n", HSU_VSConstants, MAX_VERTEX_SHADER_CONSTANTS) +
+		FString::Printf("layout(location = 0) uniform vec4 VSConstants[%i];\n\n", MAX_VERTEX_SHADER_CONSTANTS) +
 		                "#define c VSConstants\n" +
 		                VertexAttributes +
 		                "#define oPos gl_Position\n"
@@ -297,7 +297,7 @@ FStringTemp UOpenGLRenderDevice::GLSLShaderFromD3DHardwareShader(UHardwareShader
 		                "vec4 r7;\n"
 		                "vec4 r8;\n"
 		                "vec4 r9;\n"
-						"vec4 r10;\n"
+		                "vec4 r10;\n"
 		                "vec4 r11;\n\n"
 		                "void main(void){\n";
 
@@ -328,7 +328,7 @@ FStringTemp UOpenGLRenderDevice::GLSLShaderFromD3DHardwareShader(UHardwareShader
 
 	GLSLShaderText += "#elif defined(FRAGMENT_SHADER)\n" +
 		GetShaderHeaderComment(Shader, "pixel shader") +
-		FString::Printf("layout(location = %i) uniform vec4 PSConstants[%i];\n\n", HSU_PSConstants, MAX_PIXEL_SHADER_CONSTANTS) +
+		FString::Printf("layout(location = %i) uniform vec4 PSConstants[%i];\n\n", MAX_VERTEX_SHADER_CONSTANTS, MAX_PIXEL_SHADER_CONSTANTS) +
 		                "#define c PSConstants\n"
 		                "#define v0 Diffuse\n"
 		                "#define v1 Specular\n\n"

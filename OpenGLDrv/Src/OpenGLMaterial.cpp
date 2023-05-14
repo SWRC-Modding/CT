@@ -927,8 +927,6 @@ bool FOpenGLRenderInterface::HandleShaderMaterial(UShader* Shader, FShaderGenera
 bool FOpenGLRenderInterface::HandleSpecular(UMaterial* Specular, UMaterial* SpecularMask, const FModifierInfo& ModifierInfo, FShaderGenerator& ShaderGenerator, INT BumpmapIndex, FLOAT BumpSize, FLOAT SpecularMaskStrength, FLOAT SpecularStrength){
 	checkSlow(Specular);
 
-	ShaderGenerator.AddColorOp(CA_R0, CA_R0, COP_Arg1, CC_RGBA, ShaderGenerator.PushTempRegister());
-
 	FModifierInfo SpecularModifier = ModifierInfo;
 
 	SpecularModifier.TexCoordSrc = TCS_SphereWorldSpaceReflection;

@@ -11,7 +11,6 @@
 -----------------------------------------------------------------------------*/
 
 #include <cstdio>
-#include <Windows.h>
 
 /*
  * Windows command prompt feedback context.
@@ -25,8 +24,8 @@ public:
 
 	// Constructor
 	FFeedbackContextCmd() : SlowTaskCount(0),
-							Context(NULL),
-							AuxOut(NULL){}
+	                        Context(NULL),
+	                        AuxOut(NULL){}
 
 	// Functions
 
@@ -37,12 +36,10 @@ public:
 		const TCHAR* Temp = V;
 
 		if(Event == NAME_Title){
-			SetConsoleTitle(V);
-
+			SetConsoleTitleA(V);
 			return; // Prevents the server from spamming the player count to the log
 		}else if(Event == NAME_Heading){
 			appSprintf(Buffer, "--------------------%s--------------------", V);
-
 			Temp = Buffer;
 			V = Buffer; // So that the log file also contains the formatted string
 		}else if(Event == NAME_Warning || Event == NAME_ExecWarning || Event == NAME_ScriptWarning || Event == NAME_Error || Event == NAME_Critical){
@@ -97,19 +94,14 @@ public:
 
 	void BeginSlowTask(const TCHAR* Task, UBOOL StatusWindow){
 		guard(FFeedbackContextCmd::BeginSlowTask);
-
 		GIsSlowTask = ++SlowTaskCount > 0;
-
 		unguard;
 	}
 
 	void EndSlowTask(){
 		guard(FFeedbackContextCmd::EndSlowTask);
-
 		check(SlowTaskCount>0);
-
 		GIsSlowTask = --SlowTaskCount > 0;
-
 		unguard;
 	}
 

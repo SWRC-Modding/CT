@@ -113,6 +113,8 @@ void UExportBumpMapsCommandlet::ExportTga(FTexture* Texture, const FString& File
 		break;
 	case TEXF_X8L8V8U8:
 		ConvertX8L8V8U8ToBGRA8(Dest, Src, Width, Height);
+	default:
+		return;
 	}
 
 	// Convert bumpmap to original normal map by setting Z to 1 and exchanging X and Y

@@ -1,13 +1,3 @@
-/*
- * This is a custom UCC.exe for Star Wars Republic Commando since the game shipped without one.
- * Everything compiles fine with Visual Studio .NET 2003 which is being used to achieve maximum compatibility
- * since it was also used to compile RC
- * The following settings are required in order to compile everything without errors:
- * - Character Set = Not Set
- * - Struct Member Alignment = 4 Bytes
- * - Calling Convention = __fastcall
- */
-
 #include "../../Core/Inc/Core.h"
 #include "../../Core/Inc/FOutputDeviceFile.h"
 #include "../../Core/Inc/FOutputDeviceWindowsError.h"
@@ -71,12 +61,11 @@ static FString ResolveCommandletClassName(const FString& ClassName, const TArray
 }
 
 int __cdecl main(int argc, char** argv){
+	GIsStarted = 1;
 	int ExitCode = EXIT_SUCCESS;
 	FOutputDeviceFile Log;
 	FOutputDeviceWindowsError Error;
 	FFeedbackContextCmd Warn;
-
-	GIsStarted = 1;
 
 	try{
 		GIsGuarded = 1;
@@ -105,18 +94,11 @@ int __cdecl main(int argc, char** argv){
 				UObject::LoadPackage(NULL, "Core", LOAD_NoFail);
 
 				bool ShowSpecializedHelp = ClassName.Len() > 0;
-				bool FoundSpecializedHelp = false;
 
-				if(!ShowSpecializedHelp){
-					ShowBanner(Warn);
-					Warn.Log("Usage:");
-					Warn.Log("    ucc <command> <parameters>");
-					Warn.Log("");
-					Warn.Log("Registered commands:");
-				}
+				if(ShowSpecializedHelp){ // Show detailed help for a specific commandlet
+					bool FoundSpecializedHelp = false;
 
-				for(TArray<FRegistryObjectInfo>::TIterator It(List); It; ++It){
-					if(ShowSpecializedHelp){
+					for(TArray<FRegistryObjectInfo>::TIterator It(List); It; ++It){
 						if(It->Object == ResolveCommandletClassName(ClassName, List)){
 							UClass* Class = LoadClass<UCommandlet>(NULL, *It->Object, NULL, LoadFlags, NULL);
 
@@ -127,7 +109,28 @@ int __cdecl main(int argc, char** argv){
 
 							break;
 						}
-					}else{
+					}
+
+					if(!FoundSpecializedHelp){
+						// Show help for a commandlet that is not in the registry objects list
+						UClass* Class = LoadClass<UCommandlet>(NULL, *ClassName, NULL, LoadFlags, NULL);
+
+						if(!Class)
+							Class = LoadClass<UCommandlet>(NULL, *(ClassName + "Commandlet"), NULL, LoadFlags, NULL);
+
+						if(Class)
+							ShowCommandletHelp(static_cast<UCommandlet*>(Class->GetDefaultObject()), Warn);
+						else
+							Warn.Logf("    Unable to show help: Commandlet %s not found", *ClassName);
+					}
+				}else{ // Show general help for all commandlets
+					ShowBanner(Warn);
+					Warn.Log("Usage:");
+					Warn.Log("    ucc <command> <parameters>");
+					Warn.Log("");
+					Warn.Log("Registered commands:");
+
+					for(TArray<FRegistryObjectInfo>::TIterator It(List); It; ++It){
 						UClass* Class = LoadClass<UCommandlet>(NULL, *It->Object, NULL, LoadFlags, NULL);
 
 						if(Class){
@@ -136,23 +139,10 @@ int __cdecl main(int argc, char** argv){
 							Warn.Logf("    %-20s %s", *Default->HelpCmd, *Default->HelpOneLiner);
 						}
 					}
-				}
 
-				if(!ShowSpecializedHelp){
 					Warn.Log("    help <command>       Get help on a command");
-				}else if(!FoundSpecializedHelp){
-					// Show help for a commandlet that is not in the registry objects list
-					UClass* Class = LoadClass<UCommandlet>(NULL, *ClassName, NULL, LoadFlags, NULL);
-
-					if(!Class)
-						Class = LoadClass<UCommandlet>(NULL, *(ClassName + "Commandlet"), NULL, LoadFlags, NULL);
-
-					if(Class)
-						ShowCommandletHelp(static_cast<UCommandlet*>(Class->GetDefaultObject()), Warn);
-					else
-						Warn.Logf("    Unable to show help: Commandlet %s not found", *ClassName);
 				}
-			}else{
+			}else{ // Execute commandlet
 				ClassName = ResolveCommandletClassName(ClassName, List);
 
 				if(ClassName == "Editor.Make" || ClassName == "Editor.MakeCommandlet")
@@ -206,12 +196,12 @@ int __cdecl main(int argc, char** argv){
 						GLog = &Warn;
 					}
 
-					if(ClassName == "Editor.MakeCommandlet"){
+					if(ClassName == "Editor.Make" || ClassName == "Editor.MakeCommandlet"){
 						// Print full path of source files in error messages
 						if(ParseParam(appCmdLine(), "FullSourcePath") && (GSys->SourcePath.Len() < 2 || GSys->SourcePath[1] != ':'))
 							GSys->SourcePath = FStringTemp(appBaseDir()) * GSys->SourcePath;
 
-						if(ParseParam(appCmdLine(), "NoIncremental")){
+						if(ParseParam(appCmdLine(), "NoIncremental") || ParseParam(appCmdLine(), "All")){
 							Warn.Log("Full rebuild");
 
 							FConfigSection* ConfigSection = GConfig->GetSectionPrivate("Editor.EditorEngine", 0, 0);
@@ -238,10 +228,10 @@ int __cdecl main(int argc, char** argv){
 							Section->MultiFind(NAME_AutoLoad, Values);
 
 							for(INT i = 0; i < Values.Num(); ++i){
-								Warn.Logf("Loading %s", *Values[i]);
+								Warn.Logf("AutoLoad: %s", *Values[i]);
 
 								if(!LoadObject<UObject>(NULL, *Values[i], NULL, LOAD_NoWarn | LOAD_Quiet, NULL))
-									Warn.Logf(NAME_Warning, "Failed to load '%s'", *Values[i]);
+									Warn.Logf(NAME_Warning, "AutoLoad: Failed to load '%s'", *Values[i]);
 							}
 						}
 					}

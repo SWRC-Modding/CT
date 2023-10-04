@@ -44,10 +44,10 @@ static struct FExecHook : public FExec, FNotifyHook{
 
 		HWND ParentWindow = NULL;
 
-		if(GEngine->Client && GEngine->Client->Viewports.Num() > 0)
-			ParentWindow = static_cast<HWND>(GEngine->Client->Viewports[0]->GetWindow());
-		else
+		if(GLogWindow)
 			ParentWindow = GLogWindow->hWnd;
+		else if(GEngine->Client && GEngine->Client->Viewports.Num() > 0)
+			ParentWindow = static_cast<HWND>(GEngine->Client->Viewports[0]->GetWindow());
 
 		if(ParseCommand(&Cmd, "SHOWLOG")){
 			GEngine->Client->Viewports[0]->Exec("ENDFULLSCREEN", Ar);
@@ -58,7 +58,6 @@ static struct FExecHook : public FExec, FNotifyHook{
 			return 1;
 		}else if(ParseCommand(&Cmd, "HIDELOG")){
 			GLogWindow->Show(0);
-
 			return 1;
 		}else if(ParseCommand(&Cmd, "EDITOBJ")){
 			UClass*          Class;
@@ -117,56 +116,68 @@ static struct FExecHook : public FExec, FNotifyHook{
 
 			return 1;
 		}else if(ParseCommand(&Cmd, "EDITACTOR")){
-			UClass* Class;
-			AActor* Found = NULL;
-			FName ActorName;
-			APlayerController* Player = GIsClient ? GEngine->Client->Viewports[0]->Actor : NULL;
 			ULevel* Level = NULL;
 
 			if(GEngine->IsA<UGameEngine>())
 				Level = static_cast<UGameEngine*>(GEngine)->GLevel;
 
-			if(Level){
-				if(ParseObject<UClass>(Cmd, "Class=", Class, ANY_PACKAGE)){
-					FLOAT MinDist = 999999.0f;
+			if(!Level){
+				Ar.Log("No Level loaded");
+				return 1;
+			}
 
-					foreach(AllActors, AActor, It, Level){
-						FLOAT Dist = Player ? FDist(It->Location, Player->Pawn ? Player->Pawn->Location : Player->Location) : 0.0f;
+			UClass* Class = NULL;
 
-						if(!It->bDeleteMe && It->IsA(Class) && Dist < MinDist){
-							MinDist = Dist;
-							Found   = *It;
-						}
-					}
-				}else if(Parse(Cmd, "Name=", ActorName)){
-					foreach(AllActors, AActor, It, Level){
-						if(!It->bDeleteMe && It->GetFName() == ActorName){
-							Found = *It;
-
-							break;
-						}
-					}
-				}else if(Player){
-					Found = Player->Target;
+			if(appStrfind(Cmd, "Class=")){
+				if(!ParseObject<UClass>(Cmd, "Class=", Class, ANY_PACKAGE)){
+					Ar.Log("Invalid class name");
+					return 1;
 				}
+			}
 
-				if(Found){
-					GEngine->Client->Viewports[0]->Exec("ENDFULLSCREEN", Ar);
-					WObjectProperties* P = new WObjectProperties("EditActor", 0, "", NULL, 1);
-					P->SetNotifyHook(this);
-					P->OpenWindow(ParentWindow);
-					P->Root.SetObjects((UObject**)&Found, 1);
-					P->Show(1);
+			FName ActorName = NAME_None;
+			UBOOL HaveName = Parse(Cmd, "Name=", ActorName);
 
-					foreach(AllActors, AActor, It, Level)
-						It->bSelected = 0;
+			AActor* Found = NULL;
+			APlayerController* Player = GIsClient ? GEngine->Client->Viewports[0]->Actor : NULL;
 
-					Found->bSelected = 1;
-				}else{
-					Ar.Logf("Target not found");
+			if(Class){ // Find the closest Actor with the given class and optional name
+				FLOAT MinDist = 999999.0f;
+
+				foreach(AllActors, AActor, It, Level){
+					FLOAT Dist = Player ? FDist(It->Location, Player->Pawn ? Player->Pawn->Location : Player->Location) : 0.0f;
+
+					if(!It->bDeleteMe && It->IsA(Class) && Dist < MinDist && (!HaveName || It->GetFName() == ActorName)){
+						MinDist = Dist;
+						Found   = *It;
+					}
+				}
+			}else if(HaveName){ // Find the first actor with the given name
+				foreach(AllActors, AActor, It, Level){
+					if(!It->bDeleteMe && It->GetFName() == ActorName){
+						Found = *It;
+						break;
+					}
 				}
 			}else{
-				Ar.Log("No Level Loaded");
+				if(Player)
+					Found = Player->Target;
+			}
+
+			if(Found){
+				GEngine->Client->Viewports[0]->Exec("ENDFULLSCREEN", Ar);
+				WObjectProperties* P = new WObjectProperties("EditActor", 0, "", NULL, 1);
+				P->SetNotifyHook(this);
+				P->OpenWindow(ParentWindow);
+				P->Root.SetObjects((UObject**)&Found, 1);
+				P->Show(1);
+
+				foreach(AllActors, AActor, It, Level)
+					It->bSelected = 0;
+
+				Found->bSelected = 1;
+			}else{
+				Ar.Logf("Target not found");
 			}
 
 			return 1;

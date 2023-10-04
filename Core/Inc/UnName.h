@@ -56,6 +56,12 @@ struct FNameEntry{
  */
 class FName{
 public:
+	// Constructors
+	FName(){}
+	FName(EName N) : Entry(N != NAME_None ? Names[N] : NULL){}
+	FName(const TCHAR* Name, EFindName FindType = FNAME_Add);
+	FName(const FString& Name, EFindName FindType = FNAME_Add);
+
 	// Accessors
 	const TCHAR* operator*() const{ return Entry ? Entry->Name : Names[NAME_None]->Name; }
 	INT GetIndex() const{ return Entry ? Entry->Index : 0; }
@@ -66,16 +72,10 @@ public:
 
 	bool operator!() const{ return Entry == NULL; }
 	bool operator+() const{ return Entry != NULL; }
-	bool operator==(const FName& Other) const{ return Entry == Other.Entry; }
-	bool operator!=(const FName& Other) const{ return Entry != Other.Entry; }
-	bool operator<(const FName& Other) const{ return Entry < Other.Entry; }
+	bool operator==(FName Other) const{ return Entry == Other.Entry; }
+	bool operator!=(FName Other) const{ return Entry != Other.Entry; }
+	bool operator<(FName Other) const{ return Entry < Other.Entry; }
 	operator FString(){ return FString(**this); }
-
-	// Constructors
-	FName(){}
-	FName(EName N) : Entry(N != NAME_None ? Names[N] : NULL){}
-	FName(const TCHAR* Name, EFindName FindType = FNAME_Add);
-	FName(const FString& Name, EFindName FindType = FNAME_Add);
 
 	// Name subsystem.
 	static void StaticInit();
@@ -101,7 +101,7 @@ private:
 	CORE_API static bool                Initialized;    // Subsystem initialized.
 };
 
-inline DWORD GetTypeHash(const FName N){
+inline DWORD GetTypeHash(FName N){
 	return N.GetIndex();
 }
 

@@ -289,7 +289,7 @@ function RemoveBot(optional string Name){
 
 cpptext
 {
-	void SpawnNavigationPoint(UClass* NavPtClass, const FVector& Location, const FRotator& Rotation = FRotator(0, 0, 0));
+	void SpawnNavigationPoint(UClass* NavigationPointClass, const FVector& Loc, const FRotator& Rot = FRotator(0, 0, 0));
 	void ImportPaths();
 	void ExportPaths();
 	void BuildPaths();

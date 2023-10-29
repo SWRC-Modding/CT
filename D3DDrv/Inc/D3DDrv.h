@@ -2,7 +2,6 @@
 #define D3DDRV_NATIVE_DEFS
 
 #include "../../Engine/Inc/Engine.h"
-#include <d3d8.h>
 
 #if SUPPORTS_PRAGMA_PACK
 #pragma pack (push,4)
@@ -12,6 +11,9 @@
 #define D3DDRV_API DLL_IMPORT
 LINK_LIB(D3DDrv)
 #endif
+
+struct IDirect3D8;
+struct IDirect3DDevice8;
 
 class D3DDRV_API UD3DRenderDevice : public URenderDevice{
 	DECLARE_CLASS(UD3DRenderDevice,URenderDevice,CLASS_Config,D3DDrv);

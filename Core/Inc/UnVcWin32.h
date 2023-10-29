@@ -33,12 +33,6 @@
 #undef MAXINT
 #undef CDECL
 
-// Make sure HANDLE is defined.
-#ifndef _WINDOWS_
-	#define HANDLE void*
-	#define HINSTANCE void*
-#endif
-
 // Sizes.
 enum {DEFAULT_ALIGNMENT = 8 }; // Default boundary to align memory allocations on.
 enum {CACHE_LINE_SIZE   = 32}; // Cache line size.
@@ -160,9 +154,9 @@ typedef DOUBLE              FTime;
 
 // Package implementation.
 #define IMPLEMENT_PACKAGE_PLATFORM(pkgname) \
-	HINSTANCE hInstance; \
-	DLL_EXPORT INT STDCALL DllMain(HINSTANCE hInInstance, DWORD Reason, void* Reserved){ \
-		hInstance = hInInstance; \
+	HINSTANCE GModuleInstance; \
+	DLL_EXPORT INT STDCALL DllMain(HINSTANCE hInstDLL, DWORD Reason, void* Reserved){ \
+		GModuleInstance = hInstDLL; \
 		return 1; \
 	}
 
@@ -178,7 +172,7 @@ typedef DOUBLE              FTime;
 
 // System identification.
 extern "C"{
-	extern HINSTANCE hInstance;
+	extern HINSTANCE GModuleInstance;
 }
 
 /*----------------------------------------------------------------------------

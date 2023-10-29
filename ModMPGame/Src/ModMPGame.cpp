@@ -141,17 +141,17 @@ void AAdminControl::Destroy(){
 	}
 }
 
-void AAdminControl::EventLog(const TCHAR* Msg, FName Event){
-	AdminControlEventLog.Log(static_cast<EName>(Event.GetIndex()), Msg);
-	GLog->Log(static_cast<EName>(Event.GetIndex()), Msg);
+void AAdminControl::EventLog(const TCHAR* Msg, FName EventTag){
+	AdminControlEventLog.Log(static_cast<EName>(EventTag.GetIndex()), Msg);
+	GLog->Log(static_cast<EName>(EventTag.GetIndex()), Msg);
 }
 
 void AAdminControl::execEventLog(FFrame& Stack, void* Result){
 	P_GET_STR(Msg);
-	P_GET_NAME(Tag);
+	P_GET_NAME(EventTag);
 	P_FINISH;
 
-	EventLog(*Msg, Tag);
+	EventLog(*Msg, EventTag);
 }
 
 void AAdminControl::execSaveStats(FFrame& Stack, void* Result){
@@ -351,15 +351,15 @@ struct FNavPtInfo{
  * ABotSupport::SpawnNavigationPoint
  * Spawns a navigation point at the specified position. Can be called during gameplay
  */
-void ABotSupport::SpawnNavigationPoint(UClass* NavPtClass, const FVector& Location, const FRotator& Rotation){
+void ABotSupport::SpawnNavigationPoint(UClass* NavigationPointClass, const FVector& Loc, const FRotator& Rot){
 	guard(ABotSupport::SpawnNavigationPoint);
-	check(NavPtClass->IsChildOf(ANavigationPoint::StaticClass()));
+	check(NavigationPointClass->IsChildOf(ANavigationPoint::StaticClass()));
 
 	UBOOL IsEd = GIsEditor;
 
 	GIsEditor = 1;
 
-	ANavigationPoint* NavPt = Cast<ANavigationPoint>(XLevel->SpawnActor(NavPtClass, NAME_None, Location, Rotation));
+	ANavigationPoint* NavPt = Cast<ANavigationPoint>(XLevel->SpawnActor(NavigationPointClass, NAME_None, Loc, Rot));
 
 	if(NavPt){
 		if(XLevel->Actors.Last() == NavPt && !Level->bStartup){ // We shouldn't mess with the actor list if bStartup == true
@@ -372,8 +372,8 @@ void ABotSupport::SpawnNavigationPoint(UClass* NavPtClass, const FVector& Locati
 
 		bPathsHaveChanged = 1;
 	}else{
-		GLog->Logf(NAME_Error, "Failed to spawn %s", *NavPtClass->FriendlyName);
-		NavPtFailLocations.AddItem(Location);
+		GLog->Logf(NAME_Error, "Failed to spawn %s", *NavigationPointClass->FriendlyName);
+		NavPtFailLocations.AddItem(Loc);
 	}
 
 	GIsEditor = IsEd;
@@ -401,17 +401,17 @@ void ABotSupport::ImportPaths(){
 		*Ar << NavPtInfo;
 
 		for(int i = 0; i < NavPtInfo.Num(); ++i){
-			UClass* NavPtClass;
+			UClass* NavigationPointClass;
 
 			if(NavPtInfo[i].Type == NAVPT_CoverPoint)
-				NavPtClass = ACoverPoint::StaticClass();
+				NavigationPointClass = ACoverPoint::StaticClass();
 			else if(NavPtInfo[i].Type == NAVPT_PatrolPoint)
-				NavPtClass = APatrolPoint::StaticClass();
+				NavigationPointClass = APatrolPoint::StaticClass();
 			else
-				NavPtClass = APathNode::StaticClass();
+				NavigationPointClass = APathNode::StaticClass();
 
 			SpawnNavigationPoint(
-				NavPtClass,
+				NavigationPointClass,
 				NavPtInfo[i].Location,
 				NavPtInfo[i].Rotation
 			);
@@ -438,7 +438,7 @@ void ABotSupport::ImportPaths(){
 void ABotSupport::ExportPaths(){
 	guard(ABotSupport::ExportPaths);
 
-	TArray<FNavPtInfo> NavPts;
+	TArray<FNavPtInfo> NavigationPoints;
 
 	foreach(StaticActors, ANavigationPoint, It, XLevel){
 		if(It->IsA(APlayerStart::StaticClass()) || It->IsA(AInventorySpot::StaticClass()))
@@ -457,17 +457,17 @@ void ABotSupport::ExportPaths(){
 		NavPtInfo.Type = NavPtType;
 		NavPtInfo.Location = It->Location;
 		NavPtInfo.Rotation = It->Rotation;
-		NavPts.AddItem(NavPtInfo);
+		NavigationPoints.AddItem(NavPtInfo);
 	}
 
-	if(NavPts.Num() > 0){
+	if(NavigationPoints.Num() > 0){
 		FFilename Filename = GetPathFileName(Level->GetOuter()->GetName());
 		GFileManager->MakeDirectory(*Filename.GetPath(), 1);
 		FArchive* Ar = GFileManager->CreateFileWriter(*Filename);
 
 		if(Ar){
 			GLog->Logf("Exporting paths to %s", *Filename.GetCleanFilename());
-			*Ar << NavPts;
+			*Ar << NavigationPoints;
 
 			delete Ar;
 		}else{

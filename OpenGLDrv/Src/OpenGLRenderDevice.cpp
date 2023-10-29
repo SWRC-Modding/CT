@@ -409,22 +409,22 @@ UBOOL UOpenGLRenderDevice::SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL
 		DWORD PfdFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER | PFD_DEPTH_DONTCARE;
 
 		PIXELFORMATDESCRIPTOR Pfd = {
-			sizeof(PIXELFORMATDESCRIPTOR), // size
-			1,                             // version
-			PfdFlags,                      // flags
-			PFD_TYPE_RGBA,                 // color type
-			ColorBytes * 8,                // preferred color depth
-			0, 0, 0, 0, 0, 0,              // color bits (ignored)
-			0,                             // alpha buffer
-			0,                             // alpha bits (ignored)
-			0,                             // accumulation buffer
-			0, 0, 0, 0,                    // accum bits (ignored)
-			0,                             // depth buffer
-			0,                             // stencil buffer
-			0,                             // auxiliary buffers
-			PFD_MAIN_PLANE,                // main layer
-			0,                             // reserved
-			0, 0, 0,                       // layer, visible, damage masks
+			sizeof(PIXELFORMATDESCRIPTOR),     // size
+			1,                                 // version
+			PfdFlags,                          // flags
+			PFD_TYPE_RGBA,                     // color type
+			static_cast<BYTE>(ColorBytes * 8), // preferred color depth
+			0, 0, 0, 0, 0, 0,                  // color bits (ignored)
+			0,                                 // alpha buffer
+			0,                                 // alpha bits (ignored)
+			0,                                 // accumulation buffer
+			0, 0, 0, 0,                        // accum bits (ignored)
+			0,                                 // depth buffer
+			0,                                 // stencil buffer
+			0,                                 // auxiliary buffers
+			PFD_MAIN_PLANE,                    // main layer
+			0,                                 // reserved
+			0, 0, 0,                           // layer, visible, damage masks
 		};
 
 		INT PixelFormat = ChoosePixelFormat(DeviceContext, &Pfd);

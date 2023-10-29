@@ -1,6 +1,94 @@
 #include "../Inc/ModRenderDevice.h"
 #include "../../Editor/Inc/Editor.h"
-#include <Windows.h>
+
+/*
+ * D3D8 declarations to avoid including d3d8.h which is not available with newer SDKs
+ */
+
+#pragma pack(push, 4)
+
+struct IDirect3DSurface8;
+struct IDirect3DTexture8;
+struct D3DPRESENT_PARAMETERS;
+
+enum D3DFORMAT{
+	D3DFMT_A8R8G8B8    = 21,
+	D3DFMT_V8U8        = 60,
+	D3DFMT_L6V5U5      = 61,
+	D3DFMT_X8L8V8U8    = 62,
+
+	D3DFMT_FORCE_DWORD = 0x7fffffff
+};
+
+typedef DWORD D3DRESOURCETYPE;
+typedef DWORD D3DPOOL;
+typedef DWORD D3DMULTISAMPLE_TYPE;
+typedef DWORD D3DDEVTYPE;
+
+struct D3DSURFACE_DESC{
+	D3DFORMAT           Format;
+	D3DRESOURCETYPE     Type;
+	DWORD               Usage;
+	D3DPOOL             Pool;
+	UINT                Size;
+	D3DMULTISAMPLE_TYPE MultiSampleType;
+	UINT                Width;
+	UINT                Height;
+};
+
+struct D3DLOCKED_RECT{
+	INT   Pitch;
+	void* pBits;
+};
+
+#pragma pack(pop)
+
+// Virtual table indices of different d3d functions that we are trying to hook
+enum{
+	// D3D8
+	D3DVTIdx_D3D8CreateDevice      = 15,
+	// D3DDevice
+	D3DVTIdx_DeviceCreateTexture   = 20,
+	D3DVTIdx_DeviceGetRenderTarget = 32,
+	// D3DSurface
+	D3DVTIdx_SurfaceGetDesc        = 8,
+	D3DVTIdx_SurfaceLockRect       = 9,
+	D3DVTIdx_SurfaceUnlockRect     = 10,
+	// D3DTexture
+	D3DVTIdx_TextureGetLevelDesc   = 14,
+	D3DVTIdx_TextureLockRect       = 16,
+	D3DVTIdx_TextureUnlockRect     = 17
+};
+
+static HRESULT D3DDeviceGetRenderTarget(IDirect3DDevice8* Self, IDirect3DSurface8** ppRenderTarget){
+	void** VTable = *reinterpret_cast<void***>(Self);
+	return reinterpret_cast<HRESULT(__stdcall*)(IDirect3DDevice8*, IDirect3DSurface8**)>(
+		VTable[D3DVTIdx_DeviceGetRenderTarget])(Self, ppRenderTarget);
+}
+
+static HRESULT D3DSurfaceGetDesc(IDirect3DSurface8* Self, D3DSURFACE_DESC *pDesc){
+	void** VTable = *reinterpret_cast<void***>(Self);
+	return reinterpret_cast<HRESULT(__stdcall*)(IDirect3DSurface8*, D3DSURFACE_DESC*)>(
+		VTable[D3DVTIdx_SurfaceGetDesc])(Self, pDesc);
+}
+
+static HRESULT D3DSurfaceLockRect(IDirect3DSurface8* Self, D3DLOCKED_RECT* pLockedRect, const RECT* pRect, DWORD Flags){
+	void** VTable = *reinterpret_cast<void***>(Self);
+	return reinterpret_cast<HRESULT(__stdcall*)(IDirect3DSurface8*, D3DLOCKED_RECT*, const RECT*, DWORD)>(
+		VTable[D3DVTIdx_SurfaceLockRect])(Self, pLockedRect, pRect, Flags);
+}
+
+static HRESULT D3DSurfaceUnlockRect(IDirect3DSurface8* Self){
+	void** VTable = *reinterpret_cast<void***>(Self);
+	return reinterpret_cast<HRESULT(__stdcall*)(IDirect3DSurface8*)>(
+		VTable[D3DVTIdx_SurfaceUnlockRect])(Self);
+}
+
+static HRESULT D3DTextureGetLevelDesc(IDirect3DTexture8* Self, UINT Level, D3DSURFACE_DESC* pDesc){
+	void** VTable = *reinterpret_cast<void***>(Self);
+	return reinterpret_cast<HRESULT(__stdcall*)(IDirect3DTexture8*, UINT, D3DSURFACE_DESC*)>(
+		VTable[D3DVTIdx_TextureGetLevelDesc])(Self, Level, pDesc);
+}
 
 /*
  * Helper function that only patches a vtable if it wasn't done already.
@@ -9,7 +97,7 @@
  * vtable index is already the override function and if not patch it.
  */
 template<typename F>
-void MaybePatchVTable(F* OutFunc, void* Object, INT Index, F NewFunc){
+static void MaybePatchVTable(F* OutFunc, void* Object, INT Index, F NewFunc){
 	if((*reinterpret_cast<void***>(Object))[Index] == NewFunc){
 		checkSlow(OutFunc);
 
@@ -18,17 +106,6 @@ void MaybePatchVTable(F* OutFunc, void* Object, INT Index, F NewFunc){
 
 	*OutFunc = static_cast<F>(PatchVTable(Object, Index, NewFunc));
 }
-
-// Virtual table indices of different d3d functions that we are trying to hook
-enum{
-	// D3D8
-	D3DVTableIndex_D3D8CreateDevice    = 15,
-	// D3DDevice
-	D3DVTableIndex_DeviceCreateTexture = 20,
-	// D3DTexture
-	D3DVTableIndex_TextureLockRect     = 16,
-	D3DVTableIndex_TextureUnlockRect   = 17
-};
 
 /*
  * L6V5U5 to X8L8V8U8 texture format conversion.
@@ -110,7 +187,7 @@ static D3DTEXTURE_LOCKRECT(D3DTextureLockRectOverride){
 		return D3DTextureLockRect(D3DTexture, Level, pLockedRect, pRect, Flags);
 
 	D3DSURFACE_DESC SurfaceDesc;
-	HRESULT GetLevelDescResult = D3DTexture->GetLevelDesc(Level, &SurfaceDesc);
+	HRESULT GetLevelDescResult = D3DTextureGetLevelDesc(D3DTexture, Level, &SurfaceDesc);
 
 	if(FAILED(GetLevelDescResult))
 		return GetLevelDescResult;
@@ -253,8 +330,8 @@ static D3DDEVICE_CREATETEXTURE(D3DDeviceCreateTextureOverride){
 
 	// Patching vtables if it wasn't done already
 
-	MaybePatchVTable(&D3DTextureLockRect, *ppTexture, D3DVTableIndex_TextureLockRect, D3DTextureLockRectOverride);
-	MaybePatchVTable(&D3DTextureUnlockRect, *ppTexture, D3DVTableIndex_TextureUnlockRect, D3DTextureUnlockRectOverride);
+	MaybePatchVTable(&D3DTextureLockRect, *ppTexture, D3DVTIdx_TextureLockRect, D3DTextureLockRectOverride);
+	MaybePatchVTable(&D3DTextureUnlockRect, *ppTexture, D3DVTIdx_TextureUnlockRect, D3DTextureUnlockRectOverride);
 
 	// Updating the current texture with the newly created one
 	CurrentD3D8Texture = *ppTexture;
@@ -284,7 +361,7 @@ static D3D_CREATEDEVICE(D3D8CreateDeviceOverride){
 	HRESULT Result = D3D8CreateDevice(D3D8, Adapter, DeviceType, hFocusWindow, BehaviorFlags, pPresentationParameters, ppReturnedDeviceInterface);
 
 	if(SUCCEEDED(Result))
-		MaybePatchVTable(&D3DDeviceCreateTexture, *ppReturnedDeviceInterface, D3DVTableIndex_DeviceCreateTexture, D3DDeviceCreateTextureOverride);
+		MaybePatchVTable(&D3DDeviceCreateTexture, *ppReturnedDeviceInterface, D3DVTIdx_DeviceCreateTexture, D3DDeviceCreateTextureOverride);
 
 	return Result;
 }
@@ -477,7 +554,7 @@ UBOOL UModRenderDevice::Init(){
 	UBOOL Result = Super::Init();
 
 	if(Result){
-		MaybePatchVTable(&D3D8CreateDevice, Direct3D8, D3DVTableIndex_D3D8CreateDevice, D3D8CreateDeviceOverride);
+		MaybePatchVTable(&D3D8CreateDevice, Direct3D8, D3DVTIdx_D3D8CreateDevice, D3D8CreateDeviceOverride);
 
 		if(!SolidSelectionShader){
 			// Initialize shader used for selection in the editor
@@ -569,17 +646,17 @@ void UModRenderDevice::Unlock(FRenderInterface* RI){
 
 		IDirect3DSurface8* RenderTarget = NULL;
 
-		Direct3DDevice8->GetRenderTarget(&RenderTarget);
+		D3DDeviceGetRenderTarget(Direct3DDevice8, &RenderTarget);
 
 		checkSlow(RenderTarget != NULL);
 
 		D3DSURFACE_DESC Desc;
 
-		RenderTarget->GetDesc(&Desc);
+		D3DSurfaceGetDesc(RenderTarget, &Desc);
 
 		D3DLOCKED_RECT LockedRect;
 
-		RenderTarget->LockRect(&LockedRect, NULL, 0);
+		D3DSurfaceLockRect(RenderTarget, &LockedRect, NULL, 0);
 
 		INT HitProxyIndex = INDEX_NONE;
 
@@ -622,7 +699,7 @@ void UModRenderDevice::Unlock(FRenderInterface* RI){
 			HitProxyIndex = PreferredHitProxyIndex;
 		}
 
-		RenderTarget->UnlockRect();
+		D3DSurfaceUnlockRect(RenderTarget);
 		Super::Unlock(RenderInterface.Impl);
 		RenderInterface.ProcessHit(HitProxyIndex);
 

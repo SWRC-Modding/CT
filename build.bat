@@ -1,4 +1,19 @@
 @echo off
+setlocal enabledelayedexpansion
+
+rem Check if devenv.exe is in the PATH
+set DEVENV=devenv
+where /Q !DEVENV!
+
+if %ERRORLEVEL% neq 0 (
+	rem Try to detect Visual Studio .NET 2003
+	set DEVENV="%VS71COMNTOOLS%\..\IDE\devenv.com"
+
+	if not exist !DEVENV! (
+		echo Failed to detect Visual Studio environment. Please run this inside of a x86 developer command prompt!
+		exit /B 1
+	)
+)
 
 if /I "%1" == "clean" (
 	set CMD=clean
@@ -14,6 +29,4 @@ if /I %CONFIG% == "release" (
 	set CONFIG=debug
 )
 
-if /I not "%CMD%" == "clean" set CMD="build"
-
-"%VS71COMNTOOLS%\..\IDE\devenv.com" /%CMD% %CONFIG% CT.sln
+!DEVENV! /%CMD% %CONFIG% CT.sln

@@ -262,8 +262,10 @@ public: \
 		{ return &PrivateStaticClass; } \
 	void* operator new(size_t Size, UObject* Outer = (UObject*)GetTransientPackage(), FName Name = NAME_None, DWORD SetFlags = 0) \
 		{ return StaticAllocateObject(StaticClass(), Outer, Name, SetFlags); } \
+private: \
 	void* operator new(size_t Size, EInternal* Mem) \
 		{ return (void*)Mem; } \
+public: \
 	static const char* StaticPackageName(){ return #TPackage; }
 
 //Declare a concrete class.
@@ -274,7 +276,7 @@ public: \
 	virtual ~TClass() \
 		{ ConditionalDestroy(); } \
 	static void InternalConstructor(void* X) \
-		{ new((EInternal*)X) TClass(); } \
+		{ new((EInternal*)X) TClass; }
 
 //Declare an abstract class.
 #define DECLARE_ABSTRACT_CLASS(TClass, TSuperClass, TStaticFlags, TPackage) \
@@ -282,7 +284,7 @@ public: \
 	friend FArchive &operator<<(FArchive& Ar, TClass*& Res) \
 		{ return Ar << *(UObject**)&Res; } \
 	virtual ~TClass() \
-		{ ConditionalDestroy(); } \
+		{ ConditionalDestroy(); }
 
 //Declare that objects of class being defined reside within objects of the specified class.
 #define DECLARE_WITHIN(TWithinClass) \

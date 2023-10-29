@@ -10,7 +10,7 @@ void CDECL InitSWRCFix(void){
 
 	if(!USWRCFix::Instance){
 		// NOTE: Need to use LoadClass here since the class might not be registered yet if Mod.dll was loaded directly with LoadLibrary
-		USWRCFix::Instance = ConstructObject<USWRCFix>(LoadClass<USWRCFix>(NULL, "Mod.SWRCFix", NULL, LOAD_NoFail | LOAD_Throw, NULL),
+		USWRCFix::Instance = ConstructObject<USWRCFix>(LoadClass<UObject>(NULL, "Mod.SWRCFix", NULL, LOAD_NoFail | LOAD_Throw, NULL),
 		                                               ANY_PACKAGE,
 		                                               FName("SWRCFixInstance"));
 		USWRCFix::Instance->AddToRoot(); // This object should never be garbage collected
@@ -26,7 +26,7 @@ void CDECL InitSWRCFix(void){
 
 static bool(__fastcall*OriginalUClassIsDefaultValue)(UObject* Self, DWORD, const FPropertyInstance&) = NULL;
 
-bool __fastcall UClassIsDefaultValueOverride(UObject* Self, DWORD edx, const FPropertyInstance& PropertyInstance){
+static bool __fastcall UClassIsDefaultValueOverride(UObject* Self, DWORD edx, const FPropertyInstance& PropertyInstance){
 	for(INT i = 1; i < PropertyInstance.NestedProperties.Num(); ++i){
 		if(PropertyInstance.NestedProperties[i].Property->IsA(UStrProperty::StaticClass()))
 			return false;
@@ -146,12 +146,10 @@ static UBOOL __fastcall UnrealEdEngineExecOverride(UEngine* Self, DWORD Edx, con
 
 void USWRCFix::Init(){
 	guardFunc;
-	debugf("Applying fixes");
-
-	HMODULE ExeModule = GetModuleHandleA(*(FString(appPackage()) + ".exe"));
-	bool IsUnrealEd = ExeModule && GetProcAddress(ExeModule, "autoclassUUnrealEdEngine") != NULL;
 
 	// Common fixes
+
+	debugf("Applying common fixes");
 
 	/*
 	 * Fix 1:
@@ -179,7 +177,14 @@ void USWRCFix::Init(){
 	DefaultHardwareShader->VertexShaderText = "vs.1.1\n\nmov oPos, v0\n";
 	DefaultHardwareShader->PixelShaderText  = "ps.1.1\n\nmov r0, c0\n";
 
+	/*
+	 * Detect whether the game or editor is running
+	 */
+	HMODULE ExeModule = GetModuleHandleA(NULL);
+	bool IsUnrealEd = ExeModule && GetProcAddress(ExeModule, "autoclassUUnrealEdEngine") != NULL;
+
 	if(!IsUnrealEd){ // Game specific fixes
+		debugf("Applying game fixes");
 		/*
 		 * Fix 4:
 		 * VSync doesn't seem to work for most people with the d3d8 renderer. A very high frame rate causes the mouse pointer in the menu to be super
@@ -229,6 +234,7 @@ void USWRCFix::Init(){
 		 */
 		OriginalUEngineDraw = static_cast<void(__fastcall*)(UEngine*, DWORD, UViewport*, UBOOL, BYTE*, INT*)>(PatchDllClassVTable("Engine.dll", "UGameEngine", "UObject", 41, EngineDrawOverride));
 	}else{ // Editor specific fixes
+		debugf("Applying editor fixes");
 
 		/* Fix 7:
 		 * The editor loads all textures at startup which can consume a significant amount of memory.

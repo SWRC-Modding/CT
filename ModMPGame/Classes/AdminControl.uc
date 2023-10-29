@@ -15,7 +15,7 @@ var bool                   bPrintCommands;  // Commands are not executed but ins
 var array<string>          CurrentCommands; // Only used as temporary storage when bPrintCommands == true
 var AdminService           Services;        // Linked list of all currently active services
 
-native final function EventLog(coerce string Msg, name Tag);
+native final function EventLog(coerce string Msg, name EventTag);
 native final function SaveStats(PlayerController PC);
 native final function RestoreStats(PlayerController PC);
 native final function ReleaseAllCDKeys();
@@ -239,7 +239,7 @@ cpptext
 	virtual void Spawned();
 	virtual void Destroy();
 
-	void EventLog(const TCHAR* Msg, FName Event);
+	void EventLog(const TCHAR* Msg, FName EventTag);
 }
 
 defaultproperties

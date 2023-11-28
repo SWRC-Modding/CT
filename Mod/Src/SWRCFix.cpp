@@ -209,7 +209,7 @@ void USWRCFix::Init(){
 		for(int i = 0; EnumDisplaySettings(NULL, i, &dm) != 0; ++i)
 			AvailableResolutions.AddUniqueItem(MAKELONG(dm.dmPelsWidth, dm.dmPelsHeight));
 
-		if(AvailableResolutions.Num() > 0){
+		if(AvailableResolutions.Num() > 1){
 			Sort(AvailableResolutions.GetData(), AvailableResolutions.Num());
 
 			FString ResolutionList = "(";

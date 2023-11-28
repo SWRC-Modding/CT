@@ -30,5 +30,7 @@ build.bat clean <configuration>
 ```
 where `<configuration>` is either `debug` or `release`. `debug` is the default if no arguments are given.  
 All dlls and executables are automatically copied into `..\GameData\System`.  
+
+If you want to use a more recent Visual Studio version you need to first open the solution and convert it. Then you can use the `build.bat` file or build from within Visual Studio.  
   
 Follow this [guide](https://wiki.swrc-modding.net/index.php?title=Writing_Native_Code) on how to create C++ based mods.

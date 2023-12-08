@@ -337,7 +337,7 @@ void FOpenGLRenderInterface::SetTexture(FBaseTexture* Texture,
 		GLTexture->Cache(Texture);
 
 	FOpenGLTextureUnit& TextureUnit = CurrentState->TextureUnits[TextureIndex];
-	FOpenGLGlobalUniforms::TextureInfo& TextureInfo = CurrentState->TextureInfos[TextureIndex];
+	GLSL_TextureInfo& TextureInfo = CurrentState->TextureInfos[TextureIndex];
 
 	TextureUnit.Texture = GLTexture;
 	CurrentState->NumTextures = Max(CurrentState->NumTextures, TextureIndex + 1);

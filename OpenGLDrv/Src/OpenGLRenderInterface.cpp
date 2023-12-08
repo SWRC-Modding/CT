@@ -309,7 +309,7 @@ void FOpenGLRenderInterface::Init(INT ViewportWidth, INT ViewportHeight){
 
 	// Create uniform buffer
 	RenDev->glCreateBuffers(1, &GlobalUBO);
-	RenDev->glNamedBufferStorage(GlobalUBO, sizeof(FOpenGLGlobalUniforms), static_cast<FOpenGLGlobalUniforms*>(CurrentState), GL_DYNAMIC_STORAGE_BIT);
+	RenDev->glNamedBufferStorage(GlobalUBO, sizeof(GLSL_Globals), static_cast<GLSL_Globals*>(CurrentState), GL_DYNAMIC_STORAGE_BIT);
 	RenDev->glBindBufferBase(GL_UNIFORM_BUFFER, 0, GlobalUBO); // Binding index 0 is reserved for the global uniform block
 
 	// Initialize default shaders
@@ -592,7 +592,7 @@ void FOpenGLRenderInterface::CommitRenderState(){
 		if(CurrentState->MatricesChanged)
 			UpdateMatrices();
 
-		RenDev->glNamedBufferSubData(GlobalUBO, 0, sizeof(FOpenGLGlobalUniforms), static_cast<FOpenGLGlobalUniforms*>(CurrentState));
+		RenDev->glNamedBufferSubData(GlobalUBO, 0, sizeof(GLSL_Globals), static_cast<GLSL_Globals*>(CurrentState));
 
 		LastUniformRevision = CurrentState->UniformRevision;
 	}
@@ -874,7 +874,7 @@ void FOpenGLRenderInterface::SetLight(INT LightIndex, FDynamicLight* Light, FLOA
 
 	CurrentState->HardwareShaderLights[LightIndex] = Light;
 
-	FOpenGLGlobalUniforms::Light* ShaderLight = &CurrentState->Lights[LightIndex];
+	GLSL_Light* ShaderLight = &CurrentState->Lights[LightIndex];
 
 	if(Light){
 		if(Light->Actor && Light->Actor->LightEffect == LE_Sunlight){

@@ -1026,8 +1026,9 @@ void UOpenGLRenderDevice::LoadGLExtFuncs(){
 
 // Default shader code
 
-#define UNIFORM_BLOCK_MEMBER(type, name) "\t" STRINGIFY(type) " " STRINGIFY(name) ";\n"
-#define UNIFORM_STRUCT_MEMBER(type, name) type name;
+#define UNIFORM_STRUCT_BEGIN(x) "struct " STRINGIFY(x) "{\n"
+#define UNIFORM_STRUCT_END "};\n\n"
+#define UNIFORM_STRUCT_MEMBER(type, name) "\t" STRINGIFY(type) " " STRINGIFY(name) ";\n"
 #define SHADER_HEADER \
 	"#version 450 core\n\n" \
 	"// EShaderLight\n" \
@@ -1035,8 +1036,9 @@ void UOpenGLRenderDevice::LoadGLExtFuncs(){
 	"#define SL_Point       1\n" \
 	"#define SL_Spot        2\n\n" \
 	"// Global shared uniforms\n\n" \
+	UNIFORM_STRUCTS \
 	"layout(std140, binding = 0) uniform Globals{\n" \
-		UNIFORM_BLOCK_CONTENTS \
+		UNIFORM_BLOCK_MEMBERS \
 	"};\n\n" \
 	"float saturate(float v){ return min(max(v, 0.0), 1.0); }\n" \
 	"vec2  saturate(vec2  v){ return min(max(v, 0.0), 1.0); }\n" \

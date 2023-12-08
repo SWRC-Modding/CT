@@ -32,41 +32,17 @@ enum EShaderLightType{
 };
 
 // NOTE: There seems to be a compiler bug that produces incorrect alignment if both the struct and variable have the same name
-#define GLSL_STRUCT(x) GLSL_struct x
-#define STRUCT(x) struct
 
-// Macro to synchronize the GLSL uniform block with the C++ struct
-#define UNIFORM_BLOCK_CONTENTS \
-	UNIFORM_BLOCK_MEMBER(mat4, LocalToWorld) \
-	UNIFORM_BLOCK_MEMBER(mat4, WorldToCamera) \
-	UNIFORM_BLOCK_MEMBER(mat4, CameraToScreen) \
-	UNIFORM_BLOCK_MEMBER(mat4, LocalToCamera) \
-	UNIFORM_BLOCK_MEMBER(mat4, LocalToScreen) \
-	UNIFORM_BLOCK_MEMBER(mat4, WorldToLocal) \
-	UNIFORM_BLOCK_MEMBER(mat4, WorldToScreen) \
-	UNIFORM_BLOCK_MEMBER(mat4, CameraToWorld) \
-	UNIFORM_BLOCK_MEMBER(vec4, GlobalColor) \
-	UNIFORM_BLOCK_MEMBER(vec4, ColorFactor) \
-	UNIFORM_BLOCK_MEMBER(vec4, AmbientLightColor) \
-	UNIFORM_BLOCK_MEMBER(vec4, FogColor) \
-	UNIFORM_BLOCK_MEMBER(bool, FogEnabled) \
-	UNIFORM_BLOCK_MEMBER(float, LightFactor) \
-	UNIFORM_BLOCK_MEMBER(float, AlphaRef) \
-	UNIFORM_BLOCK_MEMBER(float, Time) \
-	UNIFORM_BLOCK_MEMBER(float, CosTime) \
-	UNIFORM_BLOCK_MEMBER(float, SinTime) \
-	UNIFORM_BLOCK_MEMBER(float, TanTime) \
-	UNIFORM_BLOCK_MEMBER(float, FogStart) \
-	UNIFORM_BLOCK_MEMBER(float, FogEnd) \
-	UNIFORM_BLOCK_MEMBER(STRUCT(TextureInfo){ \
+#define UNIFORM_STRUCTS \
+	UNIFORM_STRUCT_BEGIN(TextureInfo) \
 		UNIFORM_STRUCT_MEMBER(bool, IsCubemap) \
 		UNIFORM_STRUCT_MEMBER(bool, IsBumpmap) \
 		UNIFORM_STRUCT_MEMBER(float, UVScale) \
 		UNIFORM_STRUCT_MEMBER(float, BumpSize) \
 		UNIFORM_STRUCT_MEMBER(float, BumpLumaScale) \
 		UNIFORM_STRUCT_MEMBER(float, BumpLumaOffset) \
-	}, TextureInfos[MAX_TEXTURES]) \
-	UNIFORM_BLOCK_MEMBER(STRUCT(Light){ \
+	UNIFORM_STRUCT_END \
+	UNIFORM_STRUCT_BEGIN(Light) \
 		UNIFORM_STRUCT_MEMBER(vec4, Color) \
 		UNIFORM_STRUCT_MEMBER(vec4, Position) \
 		UNIFORM_STRUCT_MEMBER(vec4, Direction) \
@@ -75,20 +51,48 @@ enum EShaderLightType{
 		UNIFORM_STRUCT_MEMBER(float, Quadratic) \
 		UNIFORM_STRUCT_MEMBER(float, Cone) \
 		UNIFORM_STRUCT_MEMBER(int, Type) \
-	}, Lights[MAX_SHADER_LIGHTS]) \
-	UNIFORM_BLOCK_MEMBER(bool, UseDynamicLighting)
+	UNIFORM_STRUCT_END
+
+#define UNIFORM_BLOCK_MEMBERS \
+	UNIFORM_STRUCT_MEMBER(mat4, LocalToWorld) \
+	UNIFORM_STRUCT_MEMBER(mat4, WorldToCamera) \
+	UNIFORM_STRUCT_MEMBER(mat4, CameraToScreen) \
+	UNIFORM_STRUCT_MEMBER(mat4, LocalToCamera) \
+	UNIFORM_STRUCT_MEMBER(mat4, LocalToScreen) \
+	UNIFORM_STRUCT_MEMBER(mat4, WorldToLocal) \
+	UNIFORM_STRUCT_MEMBER(mat4, WorldToScreen) \
+	UNIFORM_STRUCT_MEMBER(mat4, CameraToWorld) \
+	UNIFORM_STRUCT_MEMBER(vec4, GlobalColor) \
+	UNIFORM_STRUCT_MEMBER(vec4, ColorFactor) \
+	UNIFORM_STRUCT_MEMBER(vec4, AmbientLightColor) \
+	UNIFORM_STRUCT_MEMBER(vec4, FogColor) \
+	UNIFORM_STRUCT_MEMBER(bool, FogEnabled) \
+	UNIFORM_STRUCT_MEMBER(float, LightFactor) \
+	UNIFORM_STRUCT_MEMBER(float, AlphaRef) \
+	UNIFORM_STRUCT_MEMBER(float, Time) \
+	UNIFORM_STRUCT_MEMBER(float, CosTime) \
+	UNIFORM_STRUCT_MEMBER(float, SinTime) \
+	UNIFORM_STRUCT_MEMBER(float, TanTime) \
+	UNIFORM_STRUCT_MEMBER(float, FogStart) \
+	UNIFORM_STRUCT_MEMBER(float, FogEnd) \
+	UNIFORM_STRUCT_MEMBER(TextureInfo, TextureInfos[MAX_TEXTURES]) \
+	UNIFORM_STRUCT_MEMBER(Light, Lights[MAX_SHADER_LIGHTS]) \
+	UNIFORM_STRUCT_MEMBER(bool, UseDynamicLighting) \
 
 #pragma warning(push)
 #pragma warning(disable : 4324) // structure was padded due to __declspec(align())
 
 // Global uniforms available in every shader
-struct FOpenGLGlobalUniforms{
-#define UNIFORM_BLOCK_MEMBER(type, name) GLSL_ ## type name;
+#define UNIFORM_STRUCT_BEGIN(x) ALIGN(16) struct GLSL_ ## x{
+#define UNIFORM_STRUCT_END };
 #define UNIFORM_STRUCT_MEMBER(type, name) GLSL_ ## type name;
-	UNIFORM_BLOCK_CONTENTS
+	UNIFORM_STRUCTS
+	struct GLSL_Globals{
+		UNIFORM_BLOCK_MEMBERS
+	};
 #undef UNIFORM_STRUCT_MEMBER
-#undef UNIFORM_BLOCK_MEMBER
-};
+#undef UNIFORM_STRUCT_END
+#undef UNIFORM_STRUCT_BEGIN
 
 #pragma warning(pop)
 
@@ -167,7 +171,7 @@ enum EFixedFunctionShader{
  */
 class FOpenGLRenderInterface : public FRenderInterface{
 public:
-	struct FOpenGLSavedState : FOpenGLGlobalUniforms, FOpenGLRenderState{
+	struct FOpenGLSavedState : GLSL_Globals, FOpenGLRenderState{
 		bool            MatricesChanged;
 		INT             UniformRevision;
 

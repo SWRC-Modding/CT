@@ -256,6 +256,7 @@ typedef OPENGL_MESSAGE_CALLBACK(opengl_message_callback);
 	GL_FUNC(CullFace, void, (GLenum Mode)) \
 	GL_FUNC(PolygonMode, void, (GLenum Face, GLenum Mode)) \
 	GL_FUNC(PolygonOffset, void, (GLfloat Factor, GLfloat Units)) \
+	GL_FUNC(DeleteTextures, void, (GLsizei Num, const GLuint* Textures)) \
 	GL_FUNC(DrawArrays, void, (GLenum Mode, GLint First, GLsizei Count)) \
 	GL_FUNC(DrawElements, void, (GLenum Mode, GLsizei Count, GLenum Type, const void* Indices))
 
@@ -288,7 +289,6 @@ typedef OPENGL_MESSAGE_CALLBACK(opengl_message_callback);
 	GL_FUNC(SamplerParameteri, void, (GLuint Sampler, GLenum Name, GLint Param)) \
 	GL_FUNC(SamplerParameterf, void, (GLuint Sampler, GLenum Name, GLfloat Param)) \
 	GL_FUNC(CreateTextures, void, (GLenum Target, GLsizei Num, GLuint* Textures)) \
-	GL_FUNC(DeleteTextures, void, (GLsizei Num, const GLuint* Textures)) \
 	GL_FUNC(BindTextureUnit, void, (GLuint Unit, GLuint Texture)) \
 	GL_FUNC(TextureParameteri, void, (GLuint Texture, GLenum Name, GLint Param)) \
 	GL_FUNC(TextureStorage2D, void, (GLuint Texture, GLsizei Levels, GLenum InternalFormat, GLsizei Width, GLsizei Height)) \

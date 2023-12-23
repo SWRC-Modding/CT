@@ -135,6 +135,14 @@ static UBOOL __fastcall UnrealEdEngineExecOverride(UEngine* Self, DWORD Edx, con
 				return 1;
 			}
 		}
+	}else if(ParseCommand(&TempCmd, "ENDTASK")){
+		// Fixes the progress indicator that won't disappear sometimes in the editor when compiling scripts.
+		// No guarantee this doesn't break anything else...
+		INT* TaskCount = reinterpret_cast<INT*>(GWarn) + 3;
+		while(*TaskCount > 0)
+			GWarn->EndSlowTask();
+
+		return 1;
 	}
 
 	return OriginalUUnrealEdEngineExec(Self, Edx, Cmd, Ar);
@@ -236,7 +244,8 @@ void USWRCFix::Init(){
 	}else{ // Editor specific fixes
 		debugf("Applying editor fixes");
 
-		/* Fix 7:
+		/*
+		 * Fix 7:
 		 * The editor loads all textures at startup which can consume a significant amount of memory.
 		 * It does so because initially there is no package selected for the texture browser and thus all textures are shown.
 		 * This is fixed by overriding the Exec function and checking for the command that intiializes the texture browser and providing a single package to be initially loaded.

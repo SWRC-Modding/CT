@@ -1,5 +1,4 @@
 #include "../../Engine/Inc/Engine.h"
-#include "../../Window/Inc/Window.h"
 #include "../Inc/Mod.h"
 
 USWRCFix* USWRCFix::Instance = NULL;
@@ -123,9 +122,9 @@ static UBOOL __fastcall UnrealEdEngineExecOverride(UEngine* Self, DWORD Edx, con
 
 		if(Parse(TempCmd, "NAME=", TempString) && TempString == "TextureBrowser"){
 			if(Parse(TempCmd, "PACKAGE=", TempString) && TempString == ""){
-				if(!GConfig->GetFString("Mod.SWRCFix", "InitialTextureBrowserPackage", TempString)){
+				if(!GConfig->GetFString("ModEd", "DefaultTextureBrowserPackage", TempString, "UnrealEd.ini")){
 					TempString = "Engine";
-					GConfig->SetString("Mod.SWRCFix", "InitialTextureBrowserPackage", *TempString);
+					GConfig->SetString("ModEd", "DefaultTextureBrowserPackage", *TempString, "UnrealEd.ini");
 				}
 
 				OriginalUUnrealEdEngineExec(Self, Edx, *("CAMERA UPDATE FLAGS=1073742464 MISC2=0 REN=17 NAME=TextureBrowser PACKAGE=\"" + TempString + "\" GROUP=\"(All)\""), Ar);

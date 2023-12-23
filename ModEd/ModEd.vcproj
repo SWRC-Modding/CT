@@ -41,7 +41,7 @@
 				Name="VCMIDLTool"/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="copy &quot;$(ProjectDir)\ModEd.exe&quot; &quot;$(OutDir)\ModEd.exe&quot;"/>
+				CommandLine="copy &quot;$(ProjectDir)\ModEd.exe&quot; &quot;$(OutDir)\CTEditor.exe&quot;"/>
 			<Tool
 				Name="VCPreBuildEventTool"/>
 			<Tool
@@ -80,7 +80,7 @@
 				Name="VCMIDLTool"/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="copy &quot;$(ProjectDir)\ModEd.exe&quot; &quot;$(OutDir)\ModEd.exe&quot;"/>
+				CommandLine="copy &quot;$(ProjectDir)\ModEd.exe&quot; &quot;$(OutDir)\CTEditor.exe&quot;"/>
 			<Tool
 				Name="VCPreBuildEventTool"/>
 			<Tool

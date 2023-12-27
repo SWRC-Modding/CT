@@ -8,6 +8,53 @@
 IMPLEMENT_PACKAGE(ModEd);
 
 /*
+ * Custom configuration that converts absolute paths to relative ones, making it easier to copy or move the game directory and access the correct files.
+ */
+class FConfigCacheIniEditor : public FConfigCacheIni{
+public:
+	static FConfigCache* Factory(){
+		return new FConfigCacheIniEditor();
+	}
+
+	void Init(const TCHAR* InSystem, const TCHAR* InUser, UBOOL RequireConfig){
+		FConfigCacheIni::Init(InSystem, InUser, RequireConfig);
+		NormalizeMRUPaths();
+	}
+
+	void Flush(UBOOL Read, const TCHAR* Filename, const TCHAR* Section){
+		NormalizeMRUPaths();
+		FConfigCacheIni::Flush(Read, Filename, Section);
+	}
+
+private:
+	void NormalizeMRUPaths(){
+		const TCHAR* BaseDir = appBaseDir();
+		INT BaseDirLen = appStrlen(BaseDir);
+
+		// Remove the system directory from the path so the base dir points to GameData
+
+		while(BaseDirLen > 0 && (BaseDir[BaseDirLen - 1] == '\\' || BaseDir[BaseDirLen - 1] == '/'))
+			--BaseDirLen;
+
+		if(BaseDirLen > 6 && appStrnicmp(BaseDir + BaseDirLen - 6, "System", 6) == 0){
+			BaseDirLen -= 6;
+
+			for(INT i = 0; i < 8; ++i){
+				FString Key = FString::Printf("MRUItem%i", i);
+				FString MRUItem;
+
+				if(GetFString("MRU", *Key, MRUItem, "UnrealEd.ini")){
+					if(MRUItem.Len() > BaseDirLen && appStrnicmp(*MRUItem, BaseDir, BaseDirLen) == 0){
+						MRUItem = FStringTemp("..") * MRUItem.Right(MRUItem.Len() - BaseDirLen);
+						SetString("MRU", *Key, *MRUItem, "UnrealEd.ini");
+					}
+				}
+			}
+		}
+	}
+};
+
+/*
  * HACK:
  * The main window is not exported but it can be obtained using its address.
  */
@@ -18,7 +65,7 @@ static WWindow* GetMainWindow(){
 static void(__fastcall*OriginalUUnrealEdEngineTick)(UEditorEngine*, DWORD, FLOAT) = NULL;
 
 /*
- * Override for UEditorEngine::Tick used to do initial setup because when it is called, the engine is fully loaded.
+ * Override for UEditorEngine::Tick used to do initial setup because the engine is fully loaded when it is called for the first time.
  */
 static void __fastcall UnrealEdEngineTickOverride(UEditorEngine* Self, DWORD Edx, FLOAT DeltaTime){
 	OriginalUUnrealEdEngineTick(Self, Edx, DeltaTime);
@@ -93,7 +140,7 @@ DLL_EXPORT void ModEdInit(const TCHAR* InPackage, const TCHAR* InCmdLine, FOutpu
 	FOutputDeviceFile*  Log   = new FOutputDeviceFile;
 	Log->Unbuffered = 1; // Always unbuffered during appInit
 
-	appInit(InPackage, InCmdLine, Log, Error, InWarn, FConfigCacheIni::Factory, RequireConfig);
+	appInit(InPackage, InCmdLine, Log, Error, InWarn, FConfigCacheIniEditor::Factory, RequireConfig);
 
 	if(!GConfig->GetBool("ModEd", "UnbufferedLog", Log->Unbuffered, "UnrealEd.ini")){
 		GConfig->SetBool("ModEd", "UnbufferedLog", 0, "UnrealEd.ini");

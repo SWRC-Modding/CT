@@ -912,39 +912,40 @@ public:
  */
 class FConfigString : public FString{
 public:
-	FConfigString() : bDirty(false){}
+	FConfigString() : Flags(0){}
 	FConfigString(const TCHAR* Src) : FString(Src),
-	                                  bDirty(false){}
+	                                  Flags(0){}
 	FConfigString(const FString& Src) : FString(Src),
-	                                    bDirty(false){}
+	                                    Flags(0){}
 	FConfigString(const FConfigString& Src) : FString(Src),
-	                                          bDirty(Src.bDirty){}
-	~FConfigString(){ FString::~FString(); }
+	                                          Flags(Src.Flags){}
 
 	FConfigString& operator=(const FConfigString& Other){
 		FString::operator=(Other);
-		bDirty = Other.bDirty;
-
+		Flags = Other.Flags;
 		return *this;
 	}
 
 	FConfigString& operator=(const FString& Other){
 		FString::operator=(Other);
-
 		return *this;
 	}
 
 	FConfigString& operator=(const TCHAR* Other){
 		FString::operator=(Other);
-
 		return *this;
 	}
 
-	void SetDirty(bool InDirty){ bDirty = InDirty; }
-	bool Dirty() const{ return bDirty; }
+	enum{
+		Flag_Dirty = 0x1,
+		Flag_Array = 0x2
+	};
+
+	BYTE GetFlags() const{ return Flags; }
+	void SetFlags(BYTE InFlags){ Flags = InFlags; }
 
 private:
-	bool bDirty;
+	BYTE Flags;
 };
 
 inline DWORD GetTypeHash(const FString& S){
@@ -983,7 +984,6 @@ public:
 	FFilename(const FString& Other) : FString(Other){}
 	FFilename(const TCHAR* In) : FString(In){}
 	FFilename(ENoInit) : FString(E_NoInit){}
-	~FFilename(){ FString::~FString(); }
 
 	// Returns the text following the last period.
 	FStringTemp GetExtension() const{

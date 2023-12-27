@@ -52,6 +52,9 @@ public:
 			while(*Ptr && *Ptr != '\r' && *Ptr != '\n')
 				Ptr++;
 
+			if(*Start == ';') // Skip comments
+				continue;
+
 			Done = *Ptr == '\0';
 			*Ptr++ = '\0';
 
@@ -102,16 +105,12 @@ public:
 			Text += FString::Printf("[%s]\r\n", *SectionIt.Key());
 
 			for(FConfigSection::TIterator It(SectionIt.Value()); It; ++It){
-				if(!It.Value().Dirty() && IsSpecifiedSection)
+				if(!(It.Value().GetFlags() & FConfigString::Flag_Dirty) && IsSpecifiedSection)
 					Text += ";  ";
 
 				Text += *It.Key();
 
-				TArray<FConfigString> Values;
-
-				SectionIt.Value().MultiFind(It.Key(), Values);
-
-				if(Values.Num() > 1)
+				if(It.Value().GetFlags() & FConfigString::Flag_Array)
 					Text += "+=";
 				else
 					Text += "=";
@@ -136,11 +135,9 @@ public:
 	void SetString(FConfigSection* Section, const TCHAR* Key, const TCHAR* Value, bool IsArrayElement = false, bool IsDefault = false){
 		guard(FConfigFile::SetString);
 
-		if(Key[0] == ';') // Skip comments
-			return;
-
 		FName          KeyName(Key);
-		FConfigString* Str = Section->Find(KeyName);
+		FConfigString* Str   = Section->Find(KeyName);
+		BYTE           Flags = IsArrayElement ? FConfigString::Flag_Array : 0;
 
 		if(!Str || IsArrayElement){
 			Str = &Section->Add(KeyName, Value);
@@ -157,8 +154,12 @@ public:
 			*Str = Value;
 		}
 
-		Dirty = !IsDefault;
-		Str->SetDirty(!IsDefault);
+		if(!IsDefault){
+			Dirty = true;
+			Flags |= FConfigString::Flag_Dirty;
+		}
+
+		Str->SetFlags(Flags);
 
 		unguard;
 	}

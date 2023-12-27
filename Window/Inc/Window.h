@@ -10,7 +10,7 @@
 
 #include <Windows.h>
 #include <commctrl.h>
-#include "../../Core/Inc/Core.h"
+#include "Core.h"
 
 #ifndef WINDOW_API
 #define WINDOW_API DLL_IMPORT

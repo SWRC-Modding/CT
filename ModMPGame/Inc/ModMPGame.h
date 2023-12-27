@@ -1,5 +1,5 @@
-#include "../../Engine/Inc/Engine.h"
-#include "../../CTGame/Inc/CTGame.h"
+#include "Engine.h"
+#include "CTGame.h"
 
 #ifndef MODMPGAME_API
 #define MODMPGAME_API DLL_IMPORT

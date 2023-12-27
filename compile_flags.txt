@@ -1,4 +1,7 @@
--DDO_GUARD=0
+-D_DEBUG=1
+-DDO_CHECK=1
+-DDO_CHECK_SLOW=1
+-DDO_GUARD=1
 -DCORE_API=
 -DCTGAME_API=
 -DCTMARKERS_API=
@@ -16,9 +19,22 @@
 -DXINTERFACE_API=
 -fms-compatibility-version=13
 -m32
--IC:/Program Files (x86)/Microsoft Visual Studio .NET 2003/Vc7/PlatformSDK/Include
--I.
 -xc++
 -Wall
 -Wno-microsoft-cast
 -Wno-string-plus-int
+-Wno-unused-includes
+-IC:/Program Files (x86)/Microsoft Visual Studio .NET 2003/Vc7/PlatformSDK/Include
+-I./Core/Inc
+-I./CTGame/Inc
+-I./CTMarkers/Inc
+-I./Editor/Inc
+-I./Engine/Inc
+-I./Gameplay/Inc
+-I./GameSpyMgr/Inc
+-I./IpDrv/Inc
+-I./Mod/Inc
+-I./ModMPGame/Inc
+-I./Window/Inc
+-I./XGame/Inc
+-I./XInterface/Inc

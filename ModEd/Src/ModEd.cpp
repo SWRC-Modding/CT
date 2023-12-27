@@ -1,8 +1,8 @@
-#include "../../Editor/Inc/Editor.h"
-#include "../../Window/Inc/Window.h"
-#include "../../Core/Inc/FOutputDeviceWindowsError.h"
-#include "../../Core/Inc/FOutputDeviceFile.h"
-#include "../../Core/Inc/FConfigCacheIni.h"
+#include "Editor.h"
+#include "Window.h"
+#include "FOutputDeviceWindowsError.h"
+#include "FOutputDeviceFile.h"
+#include "FConfigCacheIni.h"
 #include "../Res/resource.h"
 
 IMPLEMENT_PACKAGE(ModEd);

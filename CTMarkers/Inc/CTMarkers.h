@@ -7,7 +7,7 @@
 #ifndef CTMARKERS_NATIVE_DEFS
 #define CTMARKERS_NATIVE_DEFS
 
-#include "../../CTGame/Inc/CTGame.h"
+#include "CTGame.h"
 
 #if SUPPORTS_PRAGMA_PACK
 #pragma pack (push,4)

@@ -1,5 +1,5 @@
-#include "../Inc/ModRenderDevice.h"
-#include "../../Editor/Inc/Editor.h"
+#include "ModRenderDevice.h"
+#include "Editor.h"
 
 /*
  * D3D8 declarations to avoid including d3d8.h which is not available with newer SDKs

@@ -7,8 +7,8 @@
 #ifndef XINTERFACE_NATIVE_DEFS
 #define XINTERFACE_NATIVE_DEFS
 
-#include "../../Engine/Inc/Engine.h"
-#include "../../XGame/Inc/XGame.h"
+#include "Engine.h"
+#include "XGame.h"
 
 #if SUPPORTS_PRAGMA_PACK
 #pragma pack (push,4)

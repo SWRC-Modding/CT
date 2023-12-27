@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../Engine/Inc/Engine.h"
+#include "Engine.h"
 
 class FOpenGLShader;
 class UOpenGLRenderDevice;

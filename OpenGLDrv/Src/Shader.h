@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../Core/Inc/Core.h"
+#include "Core.h"
 #include "opengl.h"
 
 class UOpenGLRenderDevice;

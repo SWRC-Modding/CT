@@ -7,7 +7,7 @@
 #ifndef XGAME_NATIVE_DEFS
 #define XGAME_NATIVE_DEFS
 
-#include "../../Core/Inc/Core.h"
+#include "Core.h"
 
 #if SUPPORTS_PRAGMA_PACK
 #pragma pack (push,4)

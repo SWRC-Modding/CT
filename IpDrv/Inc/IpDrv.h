@@ -60,8 +60,8 @@ Revision history:
 	Includes..
 -----------------------------------------------------------------------------*/
 
-#include "../../Engine/Inc/Engine.h"
-#include "../../Engine/Inc/UnNet.h"
+#include "Engine.h"
+#include "UnNet.h"
 #include "UnSocket.h"
 
 /*-----------------------------------------------------------------------------

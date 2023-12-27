@@ -1,11 +1,11 @@
-#include "../../Core/Inc/Core.h"
-#include "../../Core/Inc/FOutputDeviceFile.h"
-#include "../../Core/Inc/FOutputDeviceWindowsError.h"
-#include "../../Core/Inc/FFeedbackContextCmd.h"
-#include "../../Core/Inc/FConfigCacheIni.h"
-#include "../../Engine/Inc/Engine.h"
-#include "../../Window/Inc/Window.h"
-#include "../../GameSpyMgr/Inc/GameSpyMgr.h"
+#include "Core.h"
+#include "FOutputDeviceFile.h"
+#include "FOutputDeviceWindowsError.h"
+#include "FFeedbackContextCmd.h"
+#include "FConfigCacheIni.h"
+#include "Engine.h"
+#include "Window.h"
+#include "GameSpyMgr.h"
 
 #pragma comment(lib, "Winmm.lib") // timeBeginPeriod, timeEndPeriod
 

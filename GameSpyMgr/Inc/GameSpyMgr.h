@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../Engine/Inc/Engine.h"
+#include "Engine.h"
 
 #ifndef GAMESPYMGR_API
 #define GAMESPYMGR_API DLL_IMPORT

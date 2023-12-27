@@ -1,8 +1,8 @@
-#include "../../Core/Inc/Core.h"
-#include "../../Core/Inc/FOutputDeviceFile.h"
-#include "../../Core/Inc/FOutputDeviceWindowsError.h"
-#include "../../Core/Inc/FFeedbackContextCmd.h"
-#include "../../Core/Inc/FConfigCacheIni.h"
+#include "Core.h"
+#include "FOutputDeviceFile.h"
+#include "FOutputDeviceWindowsError.h"
+#include "FFeedbackContextCmd.h"
+#include "FConfigCacheIni.h"
 
 INT UServerCommandletMain(); // Defined in ServerCommandlet.cpp
 

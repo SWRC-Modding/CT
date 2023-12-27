@@ -9,7 +9,7 @@
 	API.
 ----------------------------------------------------------------------------*/
 
-#include "../../Core/Inc/Core.h"
+#include "Core.h"
 
 #ifndef ENGINE_API
 #define ENGINE_API DLL_IMPORT

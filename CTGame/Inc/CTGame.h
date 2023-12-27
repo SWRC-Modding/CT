@@ -7,7 +7,7 @@
 #ifndef CTGAME_NATIVE_DEFS
 #define CTGAME_NATIVE_DEFS
 
-#include "../../Gameplay/Inc/Gameplay.h"
+#include "Gameplay.h"
 
 #if SUPPORTS_PRAGMA_PACK
 #pragma pack (push,4)

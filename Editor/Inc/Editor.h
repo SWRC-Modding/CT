@@ -7,7 +7,7 @@
 #ifndef EDITOR_NATIVE_DEFS
 #define EDITOR_NATIVE_DEFS
 
-#include "../../Engine/Inc/Engine.h"
+#include "Engine.h"
 
 #if SUPPORTS_PRAGMA_PACK
 #pragma pack (push,4)

@@ -529,7 +529,7 @@ CORE_API extern DWORD                   GPhysicalMemory;            // Bytes of 
 CORE_API extern DWORD                   GUglyHackFlags;             // Flags for passing around globally hacked stuff
 CORE_API extern UBOOL                   GIsBenchmarking;            // Whether we are in benchmark mode or not
 CORE_API extern UBOOL                   GIsClient;                  // Whether engine was launched as a client
-CORE_API extern UBOOL                   GIsCriticalError;           // An appError() has occured
+CORE_API extern UBOOL                   GIsCriticalError;           // An appError() has occurred
 CORE_API extern UBOOL                   GIsEditor;                  // Whether engine was launched for editing
 CORE_API extern UBOOL                   GIsGarbageCollecting;
 CORE_API extern UBOOL                   GIsGuarded;                 // Whether execution is happening within main()/WinMain()'s try/catch handler

@@ -20,6 +20,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/FC"
+				AdditionalIncludeDirectories="&quot;$(SolutionDir)Core\Inc&quot;;&quot;$(SolutionDir)CTGame\Inc&quot;;&quot;$(SolutionDir)CTMarkers\Inc&quot;;&quot;$(SolutionDir)Editor\Inc&quot;;&quot;$(SolutionDir)Engine\Inc&quot;;&quot;$(SolutionDir)Gameplay\Inc&quot;;&quot;$(SolutionDir)GameSpyMgr\Inc&quot;;&quot;$(SolutionDir)IpDrv\Inc&quot;;&quot;$(SolutionDir)Mod\Inc&quot;;&quot;$(SolutionDir)ModMPGame\Inc&quot;;&quot;$(SolutionDir)Window\Inc&quot;;&quot;$(SolutionDir)XGame\Inc&quot;;&quot;$(SolutionDir)XInterface\Inc&quot;"
 				PreprocessorDefinitions="OPENGLDRV_API=DLL_EXPORT"
 				RuntimeLibrary="2"
 				ForceConformanceInForLoopScope="TRUE"
@@ -59,6 +60,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/FC"
 				Optimization="0"
+				AdditionalIncludeDirectories="&quot;$(SolutionDir)Core\Inc&quot;;&quot;$(SolutionDir)CTGame\Inc&quot;;&quot;$(SolutionDir)CTMarkers\Inc&quot;;&quot;$(SolutionDir)Editor\Inc&quot;;&quot;$(SolutionDir)Engine\Inc&quot;;&quot;$(SolutionDir)Gameplay\Inc&quot;;&quot;$(SolutionDir)GameSpyMgr\Inc&quot;;&quot;$(SolutionDir)IpDrv\Inc&quot;;&quot;$(SolutionDir)Mod\Inc&quot;;&quot;$(SolutionDir)ModMPGame\Inc&quot;;&quot;$(SolutionDir)Window\Inc&quot;;&quot;$(SolutionDir)XGame\Inc&quot;;&quot;$(SolutionDir)XInterface\Inc&quot;"
 				PreprocessorDefinitions="OPENGLDRV_API=DLL_EXPORT;DO_CHECK_SLOW=1;DO_GUARD_SLOW=1;DO_CLOCK_SLOW=1"
 				RuntimeLibrary="2"
 				ForceConformanceInForLoopScope="TRUE"

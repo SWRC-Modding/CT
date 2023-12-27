@@ -1,7 +1,6 @@
-#include "../Inc/ModMPGame.h"
-
-#include "../../Core/Inc/FOutputDeviceFile.h"
-#include "../../GameSpyMgr/Inc/GameSpyMgr.h"
+#include "ModMPGame.h"
+#include "FOutputDeviceFile.h"
+#include "GameSpyMgr.h"
 
 APlayerController* GetLocalPlayerController(){
 	TObjectIterator<UViewport> It;

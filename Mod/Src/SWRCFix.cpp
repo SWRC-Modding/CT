@@ -1,5 +1,4 @@
-#include "../../Engine/Inc/Engine.h"
-#include "../Inc/Mod.h"
+#include "Mod.h"
 
 USWRCFix* USWRCFix::Instance = NULL;
 UBOOL USWRCFix::RenderingReady = 0;

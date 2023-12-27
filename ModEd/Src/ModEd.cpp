@@ -2,9 +2,24 @@
 #include "../../Window/Inc/Window.h"
 #include "../../Core/Inc/FOutputDeviceWindowsError.h"
 #include "../../Core/Inc/FOutputDeviceFile.h"
+#include "../../Core/Inc/FConfigCacheIni.h"
+#include "../Res/resource.h"
+
+IMPLEMENT_PACKAGE(ModEd);
+
+/*
+ * HACK:
+ * The main window is not exported but it can be obtained using its address.
+ */
+static WWindow* GetMainWindow(){
+	return *reinterpret_cast<WWindow**>(0x10FE39D4);
+}
 
 static void(__fastcall*OriginalUUnrealEdEngineTick)(UEditorEngine*, DWORD, FLOAT) = NULL;
 
+/*
+ * Override for UEditorEngine::Tick used to do initial setup because when it is called, the engine is fully loaded.
+ */
 static void __fastcall UnrealEdEngineTickOverride(UEditorEngine* Self, DWORD Edx, FLOAT DeltaTime){
 	OriginalUUnrealEdEngineTick(Self, Edx, DeltaTime);
 
@@ -22,11 +37,19 @@ static void __fastcall UnrealEdEngineTickOverride(UEditorEngine* Self, DWORD Edx
 			 * Opening the map using the command MAP LOAD FILE=... works but it does not set the global map name.
 			 * The map will be treated as "Untitled" and you'll always have to manually select the file to save to.
 			 * This is circumvented by calling the command on the editor window itself.
-			 * Since the window is not exported it has to be accessed by its address and sent the command to open MRU1 with the command id 20001.
+			 * 20001 is the id for the MRU1 command.
 			 */
-			WWindow* Window = *reinterpret_cast<WWindow**>(0x10FE39D4);
-			Window->OnCommand(20001);
+			GetMainWindow()->OnCommand(20001);
 		}
+	}
+
+	// Set a custom icon for the main window
+
+	HICON hIcon = LoadIconA(GModuleInstance, MAKEINTRESOURCEA(IDI_ICON1));
+
+	if(hIcon){
+		SendMessageA(GetMainWindow()->hWnd, WM_SETICON, ICON_SMALL, (LPARAM)hIcon);
+		SendMessageA(GetMainWindow()->hWnd, WM_SETICON, ICON_BIG, (LPARAM)hIcon);
 	}
 
 	// Restore original tick function now that the initial setup is done.
@@ -48,9 +71,10 @@ static void InitSWRCFix(){
 			for(INT i = 0; i < 8; ++i)
 				GConfig->SetString(*FString::Printf("U2Viewport%i", i), "Device", "Mod.ModRenderDevice", "UnrealEd.ini");
 
-			GConfig->SetString("Texture Browser",         "Device", "Mod.ModRenderDevice", "UnrealEd.ini");
-			GConfig->SetString("Static Mesh Browser",     "Device", "Mod.ModRenderDevice", "UnrealEd.ini");
-			GConfig->SetString("Particle System Browser", "Device", "Mod.ModRenderDevice", "UnrealEd.ini");
+			GConfig->SetString("Texture Browser",         "Device",       "Mod.ModRenderDevice", "UnrealEd.ini");
+			GConfig->SetString("Static Mesh Browser",     "Device",       "Mod.ModRenderDevice", "UnrealEd.ini");
+			GConfig->SetString("Particle System Browser", "Device",       "Mod.ModRenderDevice", "UnrealEd.ini");
+			GConfig->SetString("Engine.Engine",           "RenderDevice", "Mod.ModRenderDevice", "System.ini");
 		}
 	}
 }
@@ -59,7 +83,7 @@ static void InitSWRCFix(){
  * appInit hook.
  * This requires a modified executable that calls the ModEdInit function instead of appInit.
  */
-DLL_EXPORT void ModEdInit(const TCHAR* InPackage, const TCHAR* InCmdLine, FOutputDevice*, FOutputDeviceError*, FFeedbackContext* InWarn, FConfigCache*(*ConfigFactory)(), UBOOL RequireConfig){
+DLL_EXPORT void ModEdInit(const TCHAR* InPackage, const TCHAR* InCmdLine, FOutputDevice*, FOutputDeviceError*, FFeedbackContext* InWarn, FConfigCache*(*)(), UBOOL RequireConfig){
 	/*
 	 * The output devices are dynamically allocated because otherwise weird stuff happens when an error occurs: For some reason the CRT calls the destructor of the file output device.
 	 * However, it is then used again to by UObject::ExitProperties and reopened, deleting the file on disk and losing all previous output.
@@ -69,7 +93,7 @@ DLL_EXPORT void ModEdInit(const TCHAR* InPackage, const TCHAR* InCmdLine, FOutpu
 	FOutputDeviceFile*  Log   = new FOutputDeviceFile;
 	Log->Unbuffered = 1; // Always unbuffered during appInit
 
-	appInit(InPackage, InCmdLine, Log, Error, InWarn, ConfigFactory, RequireConfig);
+	appInit(InPackage, InCmdLine, Log, Error, InWarn, FConfigCacheIni::Factory, RequireConfig);
 
 	if(!GConfig->GetBool("ModEd", "UnbufferedLog", Log->Unbuffered, "UnrealEd.ini")){
 		GConfig->SetBool("ModEd", "UnbufferedLog", 0, "UnrealEd.ini");

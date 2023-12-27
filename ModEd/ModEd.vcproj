@@ -104,6 +104,19 @@
 				RelativePath=".\Src\ModEd.cpp">
 			</File>
 		</Filter>
+		<Filter
+			Name="Res"
+			Filter="rc,h">
+			<File
+				RelativePath=".\Res\ModEd.rc">
+			</File>
+			<File
+				RelativePath=".\Res\resource.h">
+			</File>
+			<File
+				RelativePath=".\Res\UnrealEd.ico">
+			</File>
+		</Filter>
 	</Files>
 	<Globals>
 	</Globals>

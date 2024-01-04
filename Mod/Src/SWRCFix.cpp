@@ -116,21 +116,23 @@ static UBOOL __fastcall UnrealEdEngineExecOverride(UEngine* Self, DWORD Edx, con
 		FlushResources();
 
 		return 1;
-	}else if(ParseCommand(&TempCmd, "CAMERA") && ParseCommand(&TempCmd, "UPDATE")){
-		FString TempString;
+	}else if(ParseCommand(&TempCmd, "CAMERA")){
+		if(ParseCommand(&TempCmd, "UPDATE")){
+			FString TempString;
 
-		if(Parse(TempCmd, "NAME=", TempString) && TempString == "TextureBrowser"){
-			if(Parse(TempCmd, "PACKAGE=", TempString) && TempString == ""){
-				if(!GConfig->GetFString("ModEd", "DefaultTextureBrowserPackage", TempString, "UnrealEd.ini")){
-					TempString = "Engine";
-					GConfig->SetString("ModEd", "DefaultTextureBrowserPackage", *TempString, "UnrealEd.ini");
+			if(Parse(TempCmd, "NAME=", TempString) && TempString == "TextureBrowser"){
+				if(Parse(TempCmd, "PACKAGE=", TempString) && TempString == ""){
+					if(!GConfig->GetFString("ModEd", "DefaultTextureBrowserPackage", TempString, "UnrealEd.ini")){
+						TempString = "Engine";
+						GConfig->SetString("ModEd", "DefaultTextureBrowserPackage", *TempString, "UnrealEd.ini");
+					}
+
+					OriginalUUnrealEdEngineExec(Self, Edx, *("CAMERA UPDATE FLAGS=1073742464 MISC2=0 REN=17 NAME=TextureBrowser PACKAGE=\"" + TempString + "\" GROUP=\"(All)\""), Ar);
+					FlushResources();
+					USWRCFix::RenderingReady = 1;
+
+					return 1;
 				}
-
-				OriginalUUnrealEdEngineExec(Self, Edx, *("CAMERA UPDATE FLAGS=1073742464 MISC2=0 REN=17 NAME=TextureBrowser PACKAGE=\"" + TempString + "\" GROUP=\"(All)\""), Ar);
-				FlushResources();
-				USWRCFix::RenderingReady = 1;
-
-				return 1;
 			}
 		}
 	}else if(ParseCommand(&TempCmd, "ENDTASK")){
@@ -141,6 +143,35 @@ static UBOOL __fastcall UnrealEdEngineExecOverride(UEngine* Self, DWORD Edx, con
 			GWarn->EndSlowTask();
 
 		return 1;
+	}else if(appStrnicmp(Cmd, "CLASS NEW", 9) == 0){ // Add a script to newly created classes, fixing the "no script to edit" error.
+		TCHAR ClassName[NAME_SIZE];
+
+		if(Parse( Cmd, "NAME=", ClassName, NAME_SIZE )){
+			UClass* Class = NULL;
+
+			if(!FindObject<UClass>(ANY_PACKAGE, ClassName)){
+				if(OriginalUUnrealEdEngineExec(Self, Edx, Cmd, Ar)){
+					UClass* Parent = NULL;
+					TCHAR PackageName[NAME_SIZE];
+
+					if(ParseObject<UClass>(Cmd, "PARENT=", Parent, ANY_PACKAGE) &&
+						 Parse( Cmd, "PACKAGE=", PackageName, NAME_SIZE)){
+						UPackage* Package = UObject::CreatePackage(NULL, PackageName);
+						Class = FindObject<UClass>(Package, ClassName, 1);
+
+						if(Class && !Class->ScriptText){
+							debugf("Creating editable script for %s", ClassName);
+							Class->ScriptText = new(Class->GetOuter(), ClassName, RF_NotForClient | RF_NotForServer) UTextBuffer;
+						}
+					}
+
+					return 1;
+				}
+			}else{
+				appMsgf(3, "A class with that name already exists");
+				return 1;
+			}
+		}
 	}
 
 	return OriginalUUnrealEdEngineExec(Self, Edx, Cmd, Ar);

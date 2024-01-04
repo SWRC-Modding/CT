@@ -6,6 +6,7 @@
 #include "Engine.h"
 #include "Window.h"
 #include "GameSpyMgr.h"
+#include "../Res/resource.h"
 
 #pragma comment(lib, "Winmm.lib") // timeBeginPeriod, timeEndPeriod
 
@@ -445,9 +446,19 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 		InitEngine();
 
+		// Show the custom icon in the taskbar and window title bar
+		HICON hIcon = LoadIconA(GetModuleHandleA(NULL), MAKEINTRESOURCEA(IDI_ICON1));
+		if(hIcon){
+			SendMessageA(GLogWindow->hWnd, WM_SETICON, ICON_SMALL, (LPARAM)hIcon);
+
+			if(GEngine->Client && GEngine->Client->Viewports.Num() > 0){
+				SendMessageA((HWND)GEngine->Client->Viewports[0]->GetWindow(), WM_SETICON, ICON_SMALL, (LPARAM)hIcon);
+				SendMessageA((HWND)GEngine->Client->Viewports[0]->GetWindow(), WM_SETICON, ICON_BIG, (LPARAM)hIcon);
+			}
+		}
+
 		// Init SWRCFix if it exists
 		void* ModDLL = appGetDllHandle("Mod.dll");
-
 		if(ModDLL){
 			void(CDECL*InitSWRCFix)(void) = static_cast<void(CDECL*)(void)>(appGetDllExport(ModDLL, "InitSWRCFix"));
 

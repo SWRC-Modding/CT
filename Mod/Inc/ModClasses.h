@@ -38,11 +38,19 @@ public:
     DECLARE_NATIVES(UFunctionOverride)
 };
 
+struct MOD_API FMPPawnHudArmsShaderPair
+{
+    class UMaterial* Pawn;
+    class UMaterial* HudArms;
+};
+
 
 class MOD_API USWRCFix : public UObject
 {
 public:
-    FLOAT ViewShake;
+    TArrayNoInit<FMPPawnHudArmsShaderPair> MPPawnHudArmsShaders;
+    BITFIELD OverrideMPSkins:1 GCC_PACK(4);
+    FLOAT ViewShake GCC_PACK(4);
     FLOAT BaseFOV;
     FLOAT FpsLimit;
     FLOAT FOV;
@@ -59,6 +67,7 @@ public:
     class UFunctionOverride* MenuBaseCallMenuClassOverride;
     class UFunctionOverride* MenuBaseOverlayMenuClassOverride;
     class UFunctionOverride* MenuBaseGotoMenuClassOverride;
+    class UFunctionOverride* MPPawnSetHudArmTextureOverride;
     void InitScript()
     {
         DECLARE_NAME(InitScript);

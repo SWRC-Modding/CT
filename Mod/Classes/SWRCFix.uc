@@ -1,6 +1,16 @@
 class SWRCFix extends Object config native transient;
 
 #exec OBJ LOAD FILE="Properties.u"
+#exec OBJ LOAD FILE="CloneTextures.utx"
+#exec OBJ LOAD FILE="HudArmsTextures.utx"
+
+struct MPPawnHudArmsShaderPair{
+	var Material Pawn;
+	var Material HudArms;
+};
+
+var() config bool OverrideMPSkins; // Override the default MP skins with the ones that are in the game but unused
+var() config array<MPPawnHudArmsShaderPair> MPPawnHudArmsShaders; // List of matching Pawn and HudArms skins to match them correctly
 
 var() config float   ViewShake;
 var() config float   BaseFOV;
@@ -24,7 +34,11 @@ var FunctionOverride MenuBaseCallMenuClassOverride;
 var FunctionOverride MenuBaseOverlayMenuClassOverride;
 var FunctionOverride MenuBaseGotoMenuClassOverride;
 
+var FunctionOverride MPPawnSetHudArmTextureOverride;
+
 event InitScript(){
+	local int i;
+
 	// Hook necessary functions
 
 	// CTPlayer
@@ -51,6 +65,41 @@ event InitScript(){
 
 	// Fixing battle droids using clone weapons in the first mission
 	class'Properties.BattleDroidBlasterTM'.default.AttachmentClass = class'Properties.BattleDroidBlasterAttachmentTM';
+
+	MPPawnSetHudArmTextureOverride = new class'FunctionOverride';
+	MPPawnSetHudArmTextureOverride.Init(class'MPPawn', 'SetHudArmTexture', self, 'MPPawnSetHudArmTexture');
+
+	if(OverrideMPSkins){
+		for(i = 0; i < MPPawnHudArmsShaders.Length && i < arraycount(class'CTCharacters.MPClone'.default.MPSkins); ++i)
+			class'CTCharacters.MPClone'.default.MPSkins[i] = MPPawnHudArmsShaders[i].Pawn;
+	}
+}
+
+simulated function MPPawnSetHudArmTexture(Weapon theWeapon){
+	local int i;
+	local MPPawn Pawn;
+	local Material Skin;
+
+	Pawn = MPPawn(MPPawnSetHudArmTextureOverride.CurrentSelf);
+
+	if(Pawn.bIsTrandoshan)
+		return;
+
+	theWeapon.CopyMaterialsToSkins();
+
+	if(theWeapon.HudArmsShaderIndex[0] != -1 && Pawn.Skins.Length > 0){
+		for(i = 0; i < MPPawnHudArmsShaders.Length; ++i){
+			if(Pawn.Skins[0] == MPPawnHudArmsShaders[i].Pawn){
+				Skin = MPPawnHudArmsShaders[i].HudArms;
+				break;
+			}
+		}
+
+		if(Skin != None)
+			theWeapon.Skins[theWeapon.HudArmsShaderIndex[0]] = Skin;
+		else
+			theWeapon.Skins[theWeapon.HudArmsShaderIndex[0]] = Shader'HudArmsTextures.HudArms.HudArmsWhite_Shader';
+	}
 }
 
 event float GetDefaultFOV(){
@@ -224,4 +273,14 @@ defaultproperties
 	AutoFOV=True
 	EnableCustomMenu=True
 	EnableEditorSelectionFix=True
+	OverrideMPSkins=True
+	MPPawnHudArmsShaders(0)=(Pawn=Shader'CloneTextures.CloneTextures.CloneCommandoWhite_Shader',HudArms=Shader'HudArmsTextures.HudArms.HudArmsWhite_Shader')
+	MPPawnHudArmsShaders(1)=(Pawn=Shader'CloneTextures.CloneTextures.MP_CloneCommandoD_Shader',HudArms=Shader'HudArmsTextures.HudArms.MP_HudArmsD_Shader')
+	MPPawnHudArmsShaders(2)=(Pawn=Shader'CloneTextures.CloneTextures.MP_CloneCommandoB_Shader',HudArms=Shader'HudArmsTextures.HudArms.MP_HudArmsB_Shader')
+	MPPawnHudArmsShaders(3)=(Pawn=Shader'CloneTextures.CloneTextures.MP_CloneCommandoC_Shader',HudArms=Shader'HudArmsTextures.HudArms.MP_HudArmsC_Shader')
+	MPPawnHudArmsShaders(4)=(Pawn=Shader'CloneTextures.CloneTextures.MP_CloneCommandoA_Shader',HudArms=Shader'HudArmsTextures.HudArms.MP_HudArmsA_Shader')
+	MPPawnHudArmsShaders(5)=(Pawn=Shader'CloneTextures.CloneTextures.CloneCommando40_Shader',HudArms=Shader'HudArmsTextures.HudArms.HudArmsWhite_Shader')
+	MPPawnHudArmsShaders(6)=(Pawn=Shader'CloneTextures.CloneTextures.CloneCommando62_Shader',HudArms=Shader'HudArmsTextures.HudArms.HudArmsWhite_Shader')
+	MPPawnHudArmsShaders(7)=(Pawn=Shader'CloneTextures.CloneTextures.CloneCommando07_Shader',HudArms=Shader'HudArmsTextures.HudArms.HudArmsWhite_Shader')
+	MPPawnHudArmsShaders(8)=(Pawn=Shader'CloneTextures.CloneTextures.CloneCommando38_Shader',HudArms=Shader'HudArmsTextures.HudArms.HudArms_Shader')
 }

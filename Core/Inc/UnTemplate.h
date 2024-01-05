@@ -908,44 +908,23 @@ public:
 /*
  * String that contains the value of a configuration variable.
  * Only intended to be used with FConfigSection.
- * It has an additional bool member that is set to true when the value of the config entry has changed.
+ * It has an additional bool member that indicates whether the config entry is a default value or if it was modified.
  */
 class FConfigString : public FString{
 public:
-	FConfigString() : Flags(0){}
+	FConfigString() : Default(false){}
 	FConfigString(const TCHAR* Src) : FString(Src),
-	                                  Flags(0){}
+	                                  Default(false){}
 	FConfigString(const FString& Src) : FString(Src),
-	                                    Flags(0){}
+	                                    Default(false){}
 	FConfigString(const FConfigString& Src) : FString(Src),
-	                                          Flags(Src.Flags){}
+	                                          Default(Src.Default){}
 
-	FConfigString& operator=(const FConfigString& Other){
-		FString::operator=(Other);
-		Flags = Other.Flags;
-		return *this;
-	}
-
-	FConfigString& operator=(const FString& Other){
-		FString::operator=(Other);
-		return *this;
-	}
-
-	FConfigString& operator=(const TCHAR* Other){
-		FString::operator=(Other);
-		return *this;
-	}
-
-	enum{
-		Flag_Dirty = 0x1,
-		Flag_Array = 0x2
-	};
-
-	BYTE GetFlags() const{ return Flags; }
-	void SetFlags(BYTE InFlags){ Flags = InFlags; }
+	bool IsDefault() const{ return Default; }
+	void SetDefault(bool InDefault){ Default = InDefault; }
 
 private:
-	BYTE Flags;
+	bool Default;
 };
 
 inline DWORD GetTypeHash(const FString& S){
@@ -1295,6 +1274,8 @@ public:
 		operator UBOOL() const     { return Index<Pairs.Num(); }
 		TK& Key() const            { return Pairs[Index].Key; }
 		TI& Value() const          { return Pairs[Index].Value; }
+		TI& operator*() const      { return Value(); }
+		TI* operator->() const     { return &Value(); }
 
 	private:
 		TArray<TPair>& Pairs;

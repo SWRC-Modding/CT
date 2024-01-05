@@ -89,7 +89,7 @@ public:
 		unguard;
 	}
 
-	UBOOL Write(const TCHAR* Filename, const TCHAR* Section = NULL){
+	UBOOL Write(const TCHAR* Filename, bool CommentDefaultValues = false, const TCHAR* Section = NULL){
 		guard(FConfigFile::Write);
 
 		if(!Dirty || NoSave)
@@ -104,23 +104,26 @@ public:
 
 			Text += FString::Printf("[%s]\r\n", *SectionIt.Key());
 
-			for(FConfigSection::TIterator It(SectionIt.Value()); It; ++It){
-				if(!(It.Value().GetFlags() & FConfigString::Flag_Dirty) && IsSpecifiedSection)
+			for(FConfigSection::TIterator ValueIt(*SectionIt); ValueIt; ++ValueIt){
+				if(CommentDefaultValues && ValueIt->IsDefault() && IsSpecifiedSection)
 					Text += ";  ";
 
-				Text += *It.Key();
+				Text += *ValueIt.Key();
 
-				if(It.Value().GetFlags() & FConfigString::Flag_Array)
+				TArray<FConfigString> Values;
+				SectionIt->MultiFind(ValueIt.Key(), Values);
+
+				if(Values.Num() > 1)
 					Text += "+=";
 				else
 					Text += "=";
 
 				if(Quotes){
 					Text += "\"";
-					Text += It.Value();
+					Text += *ValueIt;
 					Text += "\"\r\n";
 				}else{
-					Text += It.Value() + "\r\n";
+					Text += *ValueIt + "\r\n";
 				}
 			}
 
@@ -137,11 +140,10 @@ public:
 
 		FName          KeyName(Key);
 		FConfigString* Str   = Section->Find(KeyName);
-		BYTE           Flags = IsArrayElement ? FConfigString::Flag_Array : 0;
 
 		if(!Str || IsArrayElement){
 			Str = &Section->Add(KeyName, Value);
-		}else{
+		}else{ // Check if the value is the same as the default and return if that's the case
 			if(appStricmp(**Str, Value) == 0)
 				return;
 
@@ -154,12 +156,10 @@ public:
 			*Str = Value;
 		}
 
-		if(!IsDefault){
+		if(!IsDefault)
 			Dirty = true;
-			Flags |= FConfigString::Flag_Dirty;
-		}
 
-		Str->SetFlags(Flags);
+		Str->SetDefault(IsDefault);
 
 		unguard;
 	}
@@ -317,6 +317,7 @@ public:
 		}
 
 		appStrncpy(Value, Str, Size);
+		Value[Min(appStrlen(Str), Size)] = '\0';
 
 		return 1;
 
@@ -363,7 +364,7 @@ public:
 		TCHAR* End = Result;
 
 		for(FConfigSection::TIterator It(*Sec); It && End-Result+appStrlen(*It.Key())+1<Size; ++It)
-			End += appSprintf(End, "%s=%s", *It.Key(), *It.Value()) + 1;
+			End += appSprintf(End, "%s=%s", *It.Key(), **It) + 1;
 
 		*End++ = 0;
 
@@ -472,7 +473,7 @@ public:
 
 		for(TIterator It(*this); It; ++It){
 			if(!Filename || It.Key() == Filename)
-				It.Value().Write(*GetWritableFilePath(*It.Key()), Section);
+				It->Write(*GetWritableFilePath(*It.Key()), true, Section);
 		}
 
 		if(Read){

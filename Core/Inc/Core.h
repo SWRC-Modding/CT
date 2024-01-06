@@ -209,7 +209,7 @@ public:
 };
 
 // Single section in a config file.
-typedef TMultiMap<FName, FConfigString> FConfigSection;
+class FConfigSection;
 
 // Configuration database cache.
 class FConfigCache{
@@ -661,6 +661,13 @@ class UDebugger{ //DEBUGGER
 public:
 	virtual void DebugInfo(UObject* Debugee, FFrame* Stack, FString InfoType, int LineNumber, int InputPos) = 0;
 	virtual void NotifyAccessedNone() = 0;
+};
+
+class FConfigSection : public TMultiMap<FName, FConfigString>{
+public:
+	bool Dirty;
+
+	FConfigSection() : Dirty(false){}
 };
 
 /*-----------------------------------------------------------------------------

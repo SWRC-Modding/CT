@@ -517,7 +517,7 @@ public:
 	UFunction* FindFunction(FName InName, UBOOL Global = 0);
 	UFunction* FindFunctionChecked(FName InName, UBOOL Global = 0);
 	UState* FindState(FName InName);
-	void SaveConfig(DWORD Flags=CPF_Config, const TCHAR* Filename = NULL, const char* IDONTKNOWWHATTHISIS = NULL);
+	void SaveConfig(DWORD Flags = CPF_Config, const TCHAR* Filename = NULL, const char* Section = NULL);
 	void LoadConfig(UBOOL Propagate = 0, UClass* Class = NULL, const TCHAR* Filename = NULL);
 	void LoadLocalized();
 	void InitClassDefaultObject(UClass* InClass);

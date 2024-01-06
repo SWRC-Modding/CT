@@ -64,12 +64,12 @@ public:
 				CurrentSection = &(*this)[Start];
 			}else if(CurrentSection && *Start){
 				TCHAR* Value        = appStrstr(Start, "=");
-				bool IsArrayElement = false;
+				bool IsMultiValue = false;
 
 				if(Value){
-					IsArrayElement = Value > Start && Value[-1] == '+'; // RC uses '+=' for arrays
+					IsMultiValue = Value > Start && Value[-1] == '+'; // RC uses '+=' for arrays
 
-					if(IsArrayElement)
+					if(IsMultiValue)
 						Value[-1] = '\0';
 
 					*Value++ = '\0';
@@ -82,7 +82,7 @@ public:
 					Value = "";
 				}
 
-				SetString(CurrentSection, Start, Value, IsArrayElement, IsDefault);
+				SetString(CurrentSection, Start, Value, IsMultiValue, IsDefault);
 			}
 		}
 
@@ -100,12 +100,10 @@ public:
 		FString Text;
 
 		for(TIterator SectionIt(*this); SectionIt; ++SectionIt){
-			bool IsSpecifiedSection = (Section == NULL || SectionIt.Key() != Section);
-
-			Text += FString::Printf("[%s]\r\n", *SectionIt.Key());
+			Text += FString::Printf("[%s]\n", *SectionIt.Key());
 
 			for(FConfigSection::TIterator ValueIt(*SectionIt); ValueIt; ++ValueIt){
-				if(CommentDefaultValues && ValueIt->IsDefault() && IsSpecifiedSection)
+				if(CommentDefaultValues && !ValueIt->Dirty && (Section == NULL || SectionIt.Key() != Section))
 					Text += ";  ";
 
 				Text += *ValueIt.Key();
@@ -121,13 +119,13 @@ public:
 				if(Quotes){
 					Text += "\"";
 					Text += *ValueIt;
-					Text += "\"\r\n";
+					Text += "\"\n";
 				}else{
-					Text += *ValueIt + "\r\n";
+					Text += *ValueIt + "\n";
 				}
 			}
 
-			Text += "\r\n";
+			Text += "\n";
 		}
 
 		return appSaveStringToFile(Text, Filename);
@@ -135,13 +133,13 @@ public:
 		unguard;
 	}
 
-	void SetString(FConfigSection* Section, const TCHAR* Key, const TCHAR* Value, bool IsArrayElement = false, bool IsDefault = false){
+	void SetString(FConfigSection* Section, const TCHAR* Key, const TCHAR* Value, bool MultiValue = false, bool IsDefault = false){
 		guard(FConfigFile::SetString);
 
 		FName          KeyName(Key);
 		FConfigString* Str   = Section->Find(KeyName);
 
-		if(!Str || IsArrayElement){
+		if(!Str || MultiValue){
 			Str = &Section->Add(KeyName, Value);
 		}else{ // Check if the value is the same as the default and return if that's the case
 			if(appStricmp(**Str, Value) == 0)
@@ -159,7 +157,7 @@ public:
 		if(!IsDefault)
 			Dirty = true;
 
-		Str->SetDefault(IsDefault);
+		Str->Dirty = !IsDefault;
 
 		unguard;
 	}
@@ -386,8 +384,10 @@ public:
 		if(!Sec && Force)
 			Sec = &File->Set(Section, FConfigSection());
 
-		if(Sec && (Force || !Const))
+		if(Sec && (Force || !Const)){
 			File->Dirty = true;
+			Sec->Dirty = true;
+		}
 
 		return Sec;
 

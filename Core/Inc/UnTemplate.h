@@ -912,19 +912,15 @@ public:
  */
 class FConfigString : public FString{
 public:
-	FConfigString() : Default(false){}
+	FConfigString() : Dirty(false){}
 	FConfigString(const TCHAR* Src) : FString(Src),
-	                                  Default(false){}
+	                                  Dirty(false){}
 	FConfigString(const FString& Src) : FString(Src),
-	                                    Default(false){}
+	                                    Dirty(false){}
 	FConfigString(const FConfigString& Src) : FString(Src),
-	                                          Default(Src.Default){}
+	                                          Dirty(Src.Dirty){}
 
-	bool IsDefault() const{ return Default; }
-	void SetDefault(bool InDefault){ Default = InDefault; }
-
-private:
-	bool Default;
+	bool Dirty;
 };
 
 inline DWORD GetTypeHash(const FString& S){

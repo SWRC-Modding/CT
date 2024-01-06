@@ -268,6 +268,7 @@ defaultproperties
 	ViewShake=1.0
 	FOV=85.0
 	BaseFOV=85.0
+	FpsLimit=60
 	HUDArmsFOVFactor=1.0
 	LimitHudArmsFOV=True
 	AutoFOV=True

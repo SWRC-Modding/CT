@@ -10,7 +10,8 @@ struct MPPawnHudArmsShaderPair{
 };
 
 var() config bool OverrideMPSkins; // Override the default MP skins with the ones that are in the game but unused
-var() config array<MPPawnHudArmsShaderPair> MPPawnHudArmsShaders; // List of matching Pawn and HudArms skins to match them correctly
+var() config array<MPPawnHudArmsShaderPair> MPCloneHudArmsShaders;
+var() config array<MPPawnHudArmsShaderPair> MPTrandoHudArmsShaders;
 
 var() config float   ViewShake;
 var() config float   BaseFOV;
@@ -70,35 +71,43 @@ event InitScript(){
 	MPPawnSetHudArmTextureOverride.Init(class'MPPawn', 'SetHudArmTexture', self, 'MPPawnSetHudArmTexture');
 
 	if(OverrideMPSkins){
-		for(i = 0; i < MPPawnHudArmsShaders.Length && i < arraycount(class'CTCharacters.MPClone'.default.MPSkins); ++i)
-			class'CTCharacters.MPClone'.default.MPSkins[i] = MPPawnHudArmsShaders[i].Pawn;
+		for(i = 0; i < MPCloneHudArmsShaders.Length && i < arraycount(class'CTCharacters.MPClone'.default.MPSkins); ++i)
+			class'CTCharacters.MPClone'.default.MPSkins[i] = MPCloneHudArmsShaders[i].Pawn;
 	}
 }
 
-simulated function MPPawnSetHudArmTexture(Weapon theWeapon){
+simulated function MPPawnSetHudArmTexture(Weapon Weapon){
 	local int i;
 	local MPPawn Pawn;
 	local Material Skin;
 
 	Pawn = MPPawn(MPPawnSetHudArmTextureOverride.CurrentSelf);
 
-	if(Pawn.bIsTrandoshan)
-		return;
+	Weapon.CopyMaterialsToSkins();
 
-	theWeapon.CopyMaterialsToSkins();
-
-	if(theWeapon.HudArmsShaderIndex[0] != -1 && Pawn.Skins.Length > 0){
-		for(i = 0; i < MPPawnHudArmsShaders.Length; ++i){
-			if(Pawn.Skins[0] == MPPawnHudArmsShaders[i].Pawn){
-				Skin = MPPawnHudArmsShaders[i].HudArms;
-				break;
+	if(Weapon.HudArmsShaderIndex[0] != -1 && Pawn.Skins.Length > 0){
+		if(Pawn.bIsTrandoshan){
+			for(i = 0; i < MPTrandoHudArmsShaders.Length; ++i){
+				if(Pawn.Skins[0] == MPTrandoHudArmsShaders[i].Pawn){
+					Skin = MPTrandoHudArmsShaders[i].HudArms;
+					break;
+				}
+			}
+		}else{
+			for(i = 0; i < MPCloneHudArmsShaders.Length; ++i){
+				if(Pawn.Skins[0] == MPCloneHudArmsShaders[i].Pawn){
+					Skin = MPCloneHudArmsShaders[i].HudArms;
+					break;
+				}
 			}
 		}
 
-		if(Skin != None)
-			theWeapon.Skins[theWeapon.HudArmsShaderIndex[0]] = Skin;
-		else
-			theWeapon.Skins[theWeapon.HudArmsShaderIndex[0]] = Shader'HudArmsTextures.HudArms.HudArmsWhite_Shader';
+		if(Skin != None){
+			if(Pawn.bIsTrandoshan)
+				Weapon.Skins[Weapon.HudArmsShaderIndex[1]] = Skin;
+			else
+				Weapon.Skins[Weapon.HudArmsShaderIndex[0]] = Skin;
+		}
 	}
 }
 
@@ -275,13 +284,18 @@ defaultproperties
 	EnableCustomMenu=True
 	EnableEditorSelectionFix=True
 	OverrideMPSkins=True
-	MPPawnHudArmsShaders(0)=(Pawn=Shader'CloneTextures.CloneTextures.CloneCommandoWhite_Shader',HudArms=Shader'HudArmsTextures.HudArms.HudArmsWhite_Shader')
-	MPPawnHudArmsShaders(1)=(Pawn=Shader'CloneTextures.CloneTextures.MP_CloneCommandoD_Shader',HudArms=Shader'HudArmsTextures.HudArms.MP_HudArmsD_Shader')
-	MPPawnHudArmsShaders(2)=(Pawn=Shader'CloneTextures.CloneTextures.MP_CloneCommandoB_Shader',HudArms=Shader'HudArmsTextures.HudArms.MP_HudArmsB_Shader')
-	MPPawnHudArmsShaders(3)=(Pawn=Shader'CloneTextures.CloneTextures.MP_CloneCommandoC_Shader',HudArms=Shader'HudArmsTextures.HudArms.MP_HudArmsC_Shader')
-	MPPawnHudArmsShaders(4)=(Pawn=Shader'CloneTextures.CloneTextures.MP_CloneCommandoA_Shader',HudArms=Shader'HudArmsTextures.HudArms.MP_HudArmsA_Shader')
-	MPPawnHudArmsShaders(5)=(Pawn=Shader'CloneTextures.CloneTextures.CloneCommando40_Shader',HudArms=Shader'HudArmsTextures.HudArms.HudArmsWhite_Shader')
-	MPPawnHudArmsShaders(6)=(Pawn=Shader'CloneTextures.CloneTextures.CloneCommando62_Shader',HudArms=Shader'HudArmsTextures.HudArms.HudArmsWhite_Shader')
-	MPPawnHudArmsShaders(7)=(Pawn=Shader'CloneTextures.CloneTextures.CloneCommando07_Shader',HudArms=Shader'HudArmsTextures.HudArms.HudArmsWhite_Shader')
-	MPPawnHudArmsShaders(8)=(Pawn=Shader'CloneTextures.CloneTextures.CloneCommando38_Shader',HudArms=Shader'HudArmsTextures.HudArms.HudArms_Shader')
+	MPCloneHudArmsShaders(0)=(Pawn=Shader'CloneTextures.CloneTextures.CloneCommandoWhite_Shader',HudArms=Shader'HudArmsTextures.HudArms.HudArmsWhite_Shader')
+	MPCloneHudArmsShaders(1)=(Pawn=Shader'CloneTextures.CloneTextures.MP_CloneCommandoD_Shader',HudArms=Shader'HudArmsTextures.HudArms.MP_HudArmsD_Shader')
+	MPCloneHudArmsShaders(2)=(Pawn=Shader'CloneTextures.CloneTextures.MP_CloneCommandoB_Shader',HudArms=Shader'HudArmsTextures.HudArms.MP_HudArmsB_Shader')
+	MPCloneHudArmsShaders(3)=(Pawn=Shader'CloneTextures.CloneTextures.MP_CloneCommandoC_Shader',HudArms=Shader'HudArmsTextures.HudArms.MP_HudArmsC_Shader')
+	MPCloneHudArmsShaders(4)=(Pawn=Shader'CloneTextures.CloneTextures.MP_CloneCommandoA_Shader',HudArms=Shader'HudArmsTextures.HudArms.MP_HudArmsA_Shader')
+	MPCloneHudArmsShaders(5)=(Pawn=Shader'CloneTextures.CloneTextures.CloneCommando40_Shader',HudArms=Shader'HudArmsTextures.HudArms.HudArmsWhite_Shader')
+	MPCloneHudArmsShaders(6)=(Pawn=Shader'CloneTextures.CloneTextures.CloneCommando62_Shader',HudArms=Shader'HudArmsTextures.HudArms.HudArmsWhite_Shader')
+	MPCloneHudArmsShaders(7)=(Pawn=Shader'CloneTextures.CloneTextures.CloneCommando07_Shader',HudArms=Shader'HudArmsTextures.HudArms.HudArmsWhite_Shader')
+	MPCloneHudArmsShaders(8)=(Pawn=Shader'CloneTextures.CloneTextures.CloneCommando38_Shader',HudArms=Shader'HudArmsTextures.HudArms.HudArms_Shader')
+	MPTrandoHudArmsShaders(0)=(Pawn=Shader'CloneTextures.TrandoshanMercTextures.TrandoshanMerc_Shader',HudArms=Shader'HudArmsTextures.HudArms.tHudArms_Shader')
+	MPTrandoHudArmsShaders(1)=(Pawn=Shader'CloneTextures.TrandoshanMercTextures.MP_TrandoshanMercA_Shader',HudArms=Shader'HudArmsTextures.HudArms.MP_tHudArmsA_Shader')
+	MPTrandoHudArmsShaders(2)=(Pawn=Shader'CloneTextures.TrandoshanMercTextures.MP_TrandoshanMercB_Shader',HudArms=Shader'HudArmsTextures.HudArms.MP_tHudArmsB_Shader')
+	MPTrandoHudArmsShaders(3)=(Pawn=Shader'CloneTextures.TrandoshanMercTextures.MP_TrandoshanMercC_Shader',HudArms=Shader'HudArmsTextures.HudArms.MP_tHudArmsC_Shader')
+	MPTrandoHudArmsShaders(4)=(Pawn=Shader'CloneTextures.TrandoshanMercTextures.MP_TrandoshanMercD_Shader',HudArms=Shader'HudArmsTextures.HudArms.MP_tHudArmsD_Shader')
 }

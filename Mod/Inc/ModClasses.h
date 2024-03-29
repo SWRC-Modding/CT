@@ -49,7 +49,8 @@ class MOD_API USWRCFix : public UObject
 {
 public:
     BITFIELD OverrideMPSkins:1 GCC_PACK(4);
-    TArrayNoInit<FMPPawnHudArmsShaderPair> MPPawnHudArmsShaders GCC_PACK(4);
+    TArrayNoInit<FMPPawnHudArmsShaderPair> MPCloneHudArmsShaders GCC_PACK(4);
+    TArrayNoInit<FMPPawnHudArmsShaderPair> MPTrandoHudArmsShaders;
     FLOAT ViewShake;
     FLOAT BaseFOV;
     FLOAT FpsLimit;

@@ -99,34 +99,6 @@ public:
 };
 
 
-class MODMPGAME_API ASkinChanger : public AAdminService
-{
-public:
-    BITFIELD RandomizeBotSkins:1 GCC_PACK(4);
-    TArrayNoInit<class UShader*> CloneSkins GCC_PACK(4);
-    TArrayNoInit<class UShader*> TrandoSkins;
-    FLOAT NextSkinUpdateTime;
-    INT NextBotCloneSkin;
-    INT NextBotTrandoSkin;
-    void execSetCloneSkin(FFrame& Stack, void* Result);
-    void execSetTrandoSkin(FFrame& Stack, void* Result);
-    DECLARE_CLASS(ASkinChanger,AAdminService,0|CLASS_Config,ModMPGame)
-	// Overrides
-	virtual INT Tick(FLOAT DeltaTime, ELevelTick TickType);
-	virtual void Spawned();
-
-	struct FSkinEntry{
-		INT NumSeenBy;
-		INT CloneIndex;
-		INT TrandoIndex;
-	};
-
-	static TMap<FString, FSkinEntry> SkinsByPlayerID;
-	static INT                       LastSkinResetDay;
-    DECLARE_NATIVES(ASkinChanger)
-};
-
-
 class MODMPGAME_API AMPBot : public ACTBot
 {
 public:

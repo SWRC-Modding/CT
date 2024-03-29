@@ -31,14 +31,6 @@ FNativeEntry<ABotSupport> ABotSupport::StaticNativeMap[] = {
 };
 LINK_NATIVES(ABotSupport);
 
-IMPLEMENT_CLASS(ASkinChanger);
-FNativeEntry<ASkinChanger> ASkinChanger::StaticNativeMap[] = {
-	MAP_NATIVE(SetCloneSkin,0)
-	MAP_NATIVE(SetTrandoSkin,0)
-	{NULL,NULL}
-};
-LINK_NATIVES(ASkinChanger);
-
 IMPLEMENT_CLASS(AMPBot);
 FNativeEntry<AMPBot> AMPBot::StaticNativeMap[] = {
 	MAP_NATIVE(UpdatePawnAccuracy,0)

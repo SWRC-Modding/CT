@@ -52,7 +52,7 @@ public:
 class CORE_API UField : public UObject{
 	DECLARE_ABSTRACT_CLASS(UField,UObject,0,Core)
 	NO_DEFAULT_CONSTRUCTOR(UField)
-
+public:
 	// Constants.
 	enum{ HASH_COUNT = 128 };
 
@@ -61,7 +61,6 @@ class CORE_API UField : public UObject{
 
 	// Constructors.
 	UField(ENativeConstructor, UClass* InClass, const TCHAR* InName, const TCHAR* InPackageName, DWORD InFlags);
-	UField(EStaticConstructor, const TCHAR* InName, const TCHAR* InPackageName, DWORD InFlags);
 
 	// UObject interface.
 	void Serialize(FArchive& Ar);
@@ -190,7 +189,7 @@ class CORE_API UStruct : public UField{
 	UTextBuffer* CppText;
 	UField*      Children;
 	INT          PropertiesSize;
-	char         Pad2[4]; // Padding
+	INT          PropertiesSizeAligned; // 0 for native classes
 	INT          MinAlignment;
 	FName        FriendlyName;
 	TArray<BYTE> Script;
@@ -199,11 +198,10 @@ class CORE_API UStruct : public UField{
 	INT          TextPos;
 	INT          Line;
 	DWORD        StructFlags;
-	char         Pad3[4]; // Padding
+	UProperty*   Properties;
 
 	// Constructors.
 	UStruct(ENativeConstructor, INT InSize, const TCHAR* InName, const TCHAR* InPackageName, DWORD InFlags, UStruct* InSuperStruct);
-	UStruct(EStaticConstructor, INT InSize, const TCHAR* InName, const TCHAR* InPackageName, DWORD InFlags);
 	UStruct(UStruct* InSuperStruct);
 
 	// UObject interface.
@@ -301,7 +299,6 @@ class CORE_API UState : public UStruct{
 
 	// Constructors.
 	UState(ENativeConstructor, INT InSize, const TCHAR* InName, const TCHAR* InPackageName, DWORD InFlags, UState* InSuperState);
-	UState(EStaticConstructor, INT InSize, const TCHAR* InName, const TCHAR* InPackageName, DWORD InFlags);
 	UState(UState* InSuperState);
 
 	// UObject interface.
@@ -360,7 +357,7 @@ class CORE_API UClass : public UState{
 	DWORD                  ClassCRC;
 	UClass*                ClassWithin;
 	FName                  ClassConfigName;
-	INT                    ScriptPropertiesSize;
+	INT                    NativeSize; // 0 if not a native class
 	TArray<FRepRecord>     ClassReps;
 	TArray<UField*>        NetFields;
 	TArray<FDependency>    Dependencies;
@@ -375,13 +372,12 @@ class CORE_API UClass : public UState{
 
 	// In memory only.
 	FString                DefaultPropText;
-	UClass*                DefaultClass; // Just a guess... Is initialized with 'this' in UClass::UClass
+	UClass*                DefaultsClass; // If GIsEditor is set this will be the property override class if one exists (Base class name + "Defaults")
 
 	// Constructors.
 	UClass();
 	UClass(UClass* InSuperClass);
 	UClass(ENativeConstructor, DWORD InSize, DWORD InClassFlags, UClass* InBaseClass, UClass* InWithinClass, FGuid InGuid, const TCHAR* InNameStr, const TCHAR* InPackageName, const TCHAR* InClassConfigName, DWORD InFlags, Constructor InClassConstructor, StaticConstructor InClassStaticConstructor);
-	UClass(EStaticConstructor, DWORD InSize, DWORD InClassFlags, FGuid InGuid, const TCHAR* InNameStr, const TCHAR* InPackageName, const TCHAR* InClassConfigName, DWORD InFlags, Constructor InClassConstructor, StaticConstructor InClassStaticConstructor);
 
 	// UObject interface.
 	virtual void Serialize(FArchive& Ar);

@@ -22,13 +22,13 @@ class CORE_API UProperty : public UField{
 	DECLARE_WITHIN(UField)
 
 	// Persistent variables.
-	DWORD PropertyFlags;
-	FName Category;
-	_WORD RepOffset;
-	_WORD RepIndex;
-	_WORD ArrayDim;
-	_WORD Offset;
-	char  Padding[4]; // Padding
+	DWORD      PropertyFlags;
+	FName      Category;
+	_WORD      RepOffset;
+	_WORD      RepIndex;
+	_WORD      ArrayDim;
+	_WORD      Offset;
+	UProperty* RepOwner;
 
 	// Constructors.
 	UProperty();

@@ -188,7 +188,6 @@ public:
 #define AUTO_INITIALIZE_REGISTRANTS_MODMPGAME \
 	AAdminService::StaticClass(); \
 	ABotSupport::StaticClass(); \
-	ASkinChanger::StaticClass(); \
 	AMPBot::StaticClass(); \
 	AAdminControl::StaticClass(); \
 	APatrolPoint::StaticClass(); \

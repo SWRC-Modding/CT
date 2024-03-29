@@ -64,8 +64,10 @@ event InitScript(){
 		MenuBaseGotoMenuClassOverride.Init(class'MenuBase', 'GotoMenuClass', self, 'MenuBaseGotoMenuClass');
 	}
 
-	// Fixing battle droids using clone weapons in the first mission
+	// Fix battle droids using clone weapons in the first mission
 	class'Properties.BattleDroidBlasterTM'.default.AttachmentClass = class'Properties.BattleDroidBlasterAttachmentTM';
+	// Fix trandos using clone damage sounds in MP
+	class'CTCharacters.MPTrandoshan'.default.AudioTable = Class'CTAudio.MPTranAudio';
 
 	MPPawnSetHudArmTextureOverride = new class'FunctionOverride';
 	MPPawnSetHudArmTextureOverride.Init(class'MPPawn', 'SetHudArmTexture', self, 'MPPawnSetHudArmTexture');

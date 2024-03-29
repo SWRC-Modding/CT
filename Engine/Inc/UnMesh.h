@@ -190,140 +190,56 @@ struct FMeshVertConnect
 	UMesh.
 -----------------------------------------------------------------------------*/
 
-//
-// A mesh, completely describing a 3D object (creature, weapon, etc) and
-// its animation sequences.  Does not reference textures.
-//
-class ENGINE_API UMesh : public UPrimitive
-{
+class UMeshInstance;
+
+class ENGINE_API UMesh : public UPrimitive{
 	DECLARE_CLASS(UMesh,UPrimitive,0,Engine)
+public:
+	 UMeshInstance* DefMeshInstance;
 
-	// Objects.
-	TLazyArray<FMeshVert>			Verts;
-	TLazyArray<FMeshTri>			Tris;
-	TArray<FMeshAnimSeq>			AnimSeqs;
-	TLazyArray<FMeshVertConnect>	Connects;
-	TArray<FBox>					BoundingBoxes;
-	TArray<FSphere>					BoundingSpheres;//!!currently broken
-	TLazyArray<INT>					VertLinks;
-	TArray<UTexture*>				Textures;
-	TArray<FLOAT>					TextureLOD;
+	 UMesh();
 
-	// Counts.
-	INT						FrameVerts;
-	INT						AnimFrames;
+	 // TODO: Virtual functions
+};
 
-	// Render info.
-	DWORD					AndFlags;
-	DWORD					OrFlags;
+/*-----------------------------------------------------------------------------
+	UMeshInstance.
+-----------------------------------------------------------------------------*/
 
-	// Scaling.
-	FVector					Scale;		// Mesh scaling.
-	FVector 				Origin;		// Origin in original coordinate system.
-	FRotator				RotOrigin;	// Amount to rotate when importing (mostly for yawing).
+class ENGINE_API UMeshInstance : public UPrimitive{
+	DECLARE_CLASS(UMeshInstance,UPrimitive,0,Engine)
+public:
+	 UMeshInstance();
 
-	// Editing info.
-	INT						CurPoly;	// Index of selected polygon.
-	INT						CurVertex;	// Index of selected vertex.
+	 INT Padding;
 
-	// UObject interface.
-	UMesh();
-	void Serialize( FArchive& Ar );
-
-	// UPrimitive interface.
-	virtual FBox GetRenderBoundingBox( const AActor* Owner, UBOOL Exact );
-	virtual FSphere GetRenderBoundingSphere( const AActor* Owner, UBOOL Exact );
-	UBOOL LineCheck
-	(
-		FCheckResult&	Result,
-		AActor*			Owner,
-		FVector			End,
-		FVector			Start,
-		FVector			Size,
-		DWORD           ExtraNodeFlags
-	);
-
-	// UMesh interface.
-	UMesh( INT NumPolys, INT NumVerts, INT NumFrames );
-	virtual const FMeshAnimSeq* GetAnimSeq( FName SeqName ) const
-	{
-		guardSlow(UMesh::GetAnimSeq);
-		for( INT i=0; i<AnimSeqs.Num(); i++ )
-			if( SeqName == AnimSeqs[i].Name )
-				return &AnimSeqs[i];
-		return NULL;
-		unguardSlow;
-	}
-	virtual FMeshAnimSeq* GetAnimSeq( FName SeqName )
-	{
-		guardSlow(UMesh::GetAnimSeq);
-		for( INT i=0; i<AnimSeqs.Num(); i++ )
-			if( SeqName == AnimSeqs[i].Name )
-				return &AnimSeqs[i];
-		return NULL;
-		unguardSlow;
-	}
-	virtual void GetFrame( FVector* Verts, INT Size, FCoords Coords, AActor* Owner );
-	void AMD3DGetFrame( FVector* Verts, INT Size, FCoords Coords, AActor* Owner );
-	virtual UTexture* GetTexture( INT Count, AActor* Owner )
-	{
-		guardSlow(UMesh::GetTexture);
-		return NULL;
-		unguardSlow;
-	}
-	virtual void SetScale( FVector NewScale );
+	 // TODO: Virtual functions
 };
 
 /*-----------------------------------------------------------------------------
 	ULodMesh.
 -----------------------------------------------------------------------------*/
 
-//
-// A LodMesh, completely describing a 3D object (creature, weapon, etc) and
-// its animation sequences.  Does not reference textures.
-//
-class ENGINE_API ULodMesh : public UMesh
-{
-	DECLARE_CLASS(ULodMesh,UMesh,0,Engine)
+class ENGINE_API ULodMesh : public UMesh{
+	DECLARE_CLASS(ULodMesh,UMesh,CLASS_SafeReplace,Engine)
+public:
+	INT                InternalVersion;
+	// General LOD mesh data
+	INT                ModelVerts;
+	TArray<FMeshVert>  Verts;
+	TArray<UMaterial*> Materials;
+
+	// Scaling.
+	FVector            Scale; // Mesh scaling.
+	FVector            Origin; // Origin in original coordinate system.
+	FRotator           RotOrigin; // Amount to rotate when importing (mostly for yawing).
 
 	// LOD-specific objects.
-	// Make lazy arrays where useful.
-	TArray<_WORD>			CollapsePointThus;  // Lod-collapse single-linked list for points.
-	TArray<_WORD>           FaceLevel;          // Minimum lod-level indicator for each face.
-	TArray<FMeshFace>       Faces;              // Faces
-	TArray<_WORD>			CollapseWedgeThus;  // Lod-collapse single-linked list for the wedges.
-	TArray<FMeshWedge>		Wedges;             // 'Hoppe-style' textured vertices.
-	TArray<FMeshMaterial>   Materials;          // Materials
-	TArray<FMeshFace>       SpecialFaces;       // Invisible special-coordinate faces.
+	TArray<FMeshFace>  Faces; // Faces
 
-	// Misc Internal.
-	INT    ModelVerts;     // Number of 'visible' vertices.
-	INT	   SpecialVerts;   // Number of 'invisible' (special attachment) vertices.
-
-	// Max of x/y/z mesh scale for LOD gauging (works on top of drawscale).
-	FLOAT  MeshScaleMax;
-
-	// Script-settable LOD controlling parameters.
-	FLOAT  LODStrength;    // Scales the (not necessarily linear) falloff of vertices with distance.
-	INT    LODMinVerts;    // Minimum number of vertices with which to draw a model.
-	FLOAT  LODMorph;       // >0.0 = allow morphing ; 0.0-1.0 = range of vertices to morph.
-	FLOAT  LODZDisplace;   // Z displacement for LOD distance-dependency tweaking.
-	FLOAT  LODHysteresis;  // Controls LOD-level change delay and morphing.
-
-	// Remapping of animation vertices.
-	TArray<_WORD> RemapAnimVerts;
-	INT    OldFrameVerts;  // Possibly different old per-frame vertex count.
-
-	//  UObject interface.
-	ULodMesh(){};
-	void Serialize( FArchive& Ar );
-
-	//  UMesh interface.
-	void SetScale( FVector NewScale );
-	ULodMesh( INT NumPolys, INT NumVerts, INT NumFrames );
-
-	// GetFrame for LOD.
-	virtual void GetFrame( FVector* Verts, INT Size, FCoords Coords, AActor* Owner, INT& LODRequest );
+	// TODO: Variables
+	char Padding[140];
+	// TODO: Virtual functions
 };
 
 /*----------------------------------------------------------------------------

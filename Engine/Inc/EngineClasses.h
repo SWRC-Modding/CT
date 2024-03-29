@@ -17,333 +17,333 @@
  */
 
 enum ETravelType{
-    TRAVEL_Absolute,
-    TRAVEL_Partial,
-    TRAVEL_Relative,
-    TRAVEL_MAX
+	TRAVEL_Absolute,
+	TRAVEL_Partial,
+	TRAVEL_Relative,
+	TRAVEL_MAX
 };
 
 enum ELightEffect{
-    LE_None,
-    LE_TorchWaver,
-    LE_FireWaver,
-    LE_WateryShimmer,
-    LE_Searchlight,
-    LE_SlowWave,
-    LE_FastWave,
-    LE_CloudCast,
-    LE_StaticSpot,
-    LE_Shock,
-    LE_Disco,
-    LE_Warp,
-    LE_Spotlight,
-    LE_NonIncidence,
-    LE_Shell,
-    LE_OmniBumpMap,
-    LE_Interference,
-    LE_Cylinder,
-    LE_Rotor,
-    LE_Sunlight,
-    LE_QuadraticNonIncidence,
-    LE_MAX
+	LE_None,
+	LE_TorchWaver,
+	LE_FireWaver,
+	LE_WateryShimmer,
+	LE_Searchlight,
+	LE_SlowWave,
+	LE_FastWave,
+	LE_CloudCast,
+	LE_StaticSpot,
+	LE_Shock,
+	LE_Disco,
+	LE_Warp,
+	LE_Spotlight,
+	LE_NonIncidence,
+	LE_Shell,
+	LE_OmniBumpMap,
+	LE_Interference,
+	LE_Cylinder,
+	LE_Rotor,
+	LE_Sunlight,
+	LE_QuadraticNonIncidence,
+	LE_MAX
 };
 
 enum ELightType{
-    LT_None,
-    LT_Steady,
-    LT_Pulse,
-    LT_Blink,
-    LT_Flicker,
-    LT_Strobe,
-    LT_BackdropLight,
-    LT_SubtlePulse,
-    LT_TexturePaletteOnce,
-    LT_TexturePaletteLoop,
-    LT_FadeOut,
-    LT_Flame,
-    LT_MAX
+	LT_None,
+	LT_Steady,
+	LT_Pulse,
+	LT_Blink,
+	LT_Flicker,
+	LT_Strobe,
+	LT_BackdropLight,
+	LT_SubtlePulse,
+	LT_TexturePaletteOnce,
+	LT_TexturePaletteLoop,
+	LT_FadeOut,
+	LT_Flame,
+	LT_MAX
 };
 
 enum EMusicTransition{
-    MTRAN_None,
-    MTRAN_Instant,
-    MTRAN_Segue,
-    MTRAN_Fade,
-    MTRAN_FastFade,
-    MTRAN_SlowFade,
-    MTRAN_MAX
+	MTRAN_None,
+	MTRAN_Instant,
+	MTRAN_Segue,
+	MTRAN_Fade,
+	MTRAN_FastFade,
+	MTRAN_SlowFade,
+	MTRAN_MAX
 };
 
 enum ESoundSlot{
-    SLOT_None,
-    SLOT_Misc,
-    SLOT_Pain,
-    SLOT_Ambient,
-    SLOT_Interact,
-    SLOT_Talk,
-    SLOT_Interface,
-    SLOT_Music,
-    SLOT_MAX
+	SLOT_None,
+	SLOT_Misc,
+	SLOT_Pain,
+	SLOT_Ambient,
+	SLOT_Interact,
+	SLOT_Talk,
+	SLOT_Interface,
+	SLOT_Music,
+	SLOT_MAX
 };
 
 enum ERenderStyle{
-    STY_None,
-    STY_Normal,
-    STY_Masked,
-    STY_Translucent,
-    STY_Modulated,
-    STY_Alpha,
-    STY_Additive,
-    STY_Subtractive,
-    STY_Particle,
-    STY_AlphaZ,
-    STY_MAX
+	STY_None,
+	STY_Normal,
+	STY_Masked,
+	STY_Translucent,
+	STY_Modulated,
+	STY_Alpha,
+	STY_Additive,
+	STY_Subtractive,
+	STY_Particle,
+	STY_AlphaZ,
+	STY_MAX
 };
 
 enum EDrawType{
-    DT_None,
-    DT_Sprite,
-    DT_Mesh,
-    DT_Brush,
-    DT_RopeSprite,
-    DT_VerticalSprite,
-    DT_Terraform,
-    DT_SpriteAnimOnce,
-    DT_StaticMesh,
-    DT_DrawType,
-    DT_Particle,
-    DT_AntiPortal,
-    DT_FluidSurface,
-    DT_MAX
+	DT_None,
+	DT_Sprite,
+	DT_Mesh,
+	DT_Brush,
+	DT_RopeSprite,
+	DT_VerticalSprite,
+	DT_Terraform,
+	DT_SpriteAnimOnce,
+	DT_StaticMesh,
+	DT_DrawType,
+	DT_Particle,
+	DT_AntiPortal,
+	DT_FluidSurface,
+	DT_MAX
 };
 
 enum ENetRole{
-    ROLE_None,
-    ROLE_DumbProxy,
-    ROLE_SimulatedProxy,
-    ROLE_AutonomousProxy,
-    ROLE_Authority,
-    ROLE_MAX
+	ROLE_None,
+	ROLE_DumbProxy,
+	ROLE_SimulatedProxy,
+	ROLE_AutonomousProxy,
+	ROLE_Authority,
+	ROLE_MAX
 };
 
 enum EPhysics{
-    PHYS_None,
-    PHYS_Walking,
-    PHYS_Falling,
-    PHYS_Swimming,
-    PHYS_Flying,
-    PHYS_Rotating,
-    PHYS_Projectile,
-    PHYS_Interpolating,
-    PHYS_MovingBrush,
-    PHYS_Spider,
-    PHYS_Trailer,
-    PHYS_Ladder,
-    PHYS_RootMotion,
-    PHYS_Karma,
-    PHYS_KarmaRagDoll,
-    PHYS_MAX
+	PHYS_None,
+	PHYS_Walking,
+	PHYS_Falling,
+	PHYS_Swimming,
+	PHYS_Flying,
+	PHYS_Rotating,
+	PHYS_Projectile,
+	PHYS_Interpolating,
+	PHYS_MovingBrush,
+	PHYS_Spider,
+	PHYS_Trailer,
+	PHYS_Ladder,
+	PHYS_RootMotion,
+	PHYS_Karma,
+	PHYS_KarmaRagDoll,
+	PHYS_MAX
 };
 
 enum EStimulusGroup{
-    SG_WeaponFire,
-    SG_WeaponHit,
-    SG_CharacterNoise,
-    SG_Stunned,
-    SG_Explosion,
-    SG_GrenadeBounce,
-    SG_Died,
-    SG_DoorBreach,
-    SG_Reloading,
-    SG_Flashlight,
-    SG_Damaged,
-    SG_EnemySpotted,
-    SG_Triggered,
-    SG_Bumped,
-    SG_Targeted,
-    SG_LostEnemy,
-    SG_KilledSomeone,
-    SG_ExplosionLarge,
-    SG_MineChirp,
-    SG_MAX
+	SG_WeaponFire,
+	SG_WeaponHit,
+	SG_CharacterNoise,
+	SG_Stunned,
+	SG_Explosion,
+	SG_GrenadeBounce,
+	SG_Died,
+	SG_DoorBreach,
+	SG_Reloading,
+	SG_Flashlight,
+	SG_Damaged,
+	SG_EnemySpotted,
+	SG_Triggered,
+	SG_Bumped,
+	SG_Targeted,
+	SG_LostEnemy,
+	SG_KilledSomeone,
+	SG_ExplosionLarge,
+	SG_MineChirp,
+	SG_MAX
 };
 
 enum EStimulusType{
-    ST_Invalid,
-    ST_WeaponFireDefault,
-    ST_WeaponFireQuiet,
-    ST_WeaponHitDefault,
-    ST_CharacterNoiseDefault,
-    ST_FootstepSoft,
-    ST_FootstepLoud,
-    ST_Stunned,
-    ST_ExplosionDefault,
-    ST_ExplosionLarge,
-    ST_GrenadeBounceDefault,
-    ST_DiedDefault,
-    ST_DiedQuiet,
-    ST_DoorBreach,
-    ST_DemolitionExplode,
-    ST_ProxMineExplode,
-    ST_MineChirp,
-    ST_JetpackExplosion,
-    ST_Reloading,
-    ST_Flashlight,
-    ST_Damaged,
-    ST_EnemySpotted,
-    ST_Triggered,
-    ST_Bumped,
-    ST_Targeted,
-    ST_LostEnemy,
-    ST_KilledSomeone,
-    ST_MAX
+	ST_Invalid,
+	ST_WeaponFireDefault,
+	ST_WeaponFireQuiet,
+	ST_WeaponHitDefault,
+	ST_CharacterNoiseDefault,
+	ST_FootstepSoft,
+	ST_FootstepLoud,
+	ST_Stunned,
+	ST_ExplosionDefault,
+	ST_ExplosionLarge,
+	ST_GrenadeBounceDefault,
+	ST_DiedDefault,
+	ST_DiedQuiet,
+	ST_DoorBreach,
+	ST_DemolitionExplode,
+	ST_ProxMineExplode,
+	ST_MineChirp,
+	ST_JetpackExplosion,
+	ST_Reloading,
+	ST_Flashlight,
+	ST_Damaged,
+	ST_EnemySpotted,
+	ST_Triggered,
+	ST_Bumped,
+	ST_Targeted,
+	ST_LostEnemy,
+	ST_KilledSomeone,
+	ST_MAX
 };
 
 enum EStimulusResponse{
-    SR_None,
-    SR_WalkToward,
-    SR_RunToward,
-    SR_RunAway,
-    SR_LookAt,
-    SR_Crouch,
-    SR_TakeCover,
-    SR_Duck,
-    SR_Dodge,
-    SR_DiveAway,
-    SR_ReturnGrenade,
-    SR_Bump,
-    SR_GrenadeReaction,
-    SR_CheckCorpse,
-    SR_MeleeStrike,
-    SR_Follow,
-    SR_ExplosionShield,
-    SR_LookAtInstigator,
-    SR_RunTowardInstigator,
-    SR_MAX
+	SR_None,
+	SR_WalkToward,
+	SR_RunToward,
+	SR_RunAway,
+	SR_LookAt,
+	SR_Crouch,
+	SR_TakeCover,
+	SR_Duck,
+	SR_Dodge,
+	SR_DiveAway,
+	SR_ReturnGrenade,
+	SR_Bump,
+	SR_GrenadeReaction,
+	SR_CheckCorpse,
+	SR_MeleeStrike,
+	SR_Follow,
+	SR_ExplosionShield,
+	SR_LookAtInstigator,
+	SR_RunTowardInstigator,
+	SR_MAX
 };
 
 enum EDirection{
-    DIR_None,
-    DIR_Up,
-    DIR_Down,
-    DIR_Left,
-    DIR_Right,
-    DIR_Forward,
-    DIR_Backward,
-    DIR_Auto,
-    DIR_MAX
+	DIR_None,
+	DIR_Up,
+	DIR_Down,
+	DIR_Left,
+	DIR_Right,
+	DIR_Forward,
+	DIR_Backward,
+	DIR_Auto,
+	DIR_MAX
 };
 
 enum EDetailMode{
-    DM_Low,
-    DM_High,
-    DM_SuperHigh,
-    DM_MAX
+	DM_Low,
+	DM_High,
+	DM_SuperHigh,
+	DM_MAX
 };
 
 enum ESoundOcclusion{
-    OCCLUSION_Default,
-    OCCLUSION_None,
-    OCCLUSION_BSP,
-    OCCLUSION_StaticMeshes,
-    OCCLUSION_MAX
+	OCCLUSION_Default,
+	OCCLUSION_None,
+	OCCLUSION_BSP,
+	OCCLUSION_StaticMeshes,
+	OCCLUSION_MAX
 };
 
 enum EMaterialType{
-    MT_None,
-    MT_Rock,
-    MT_Dirt,
-    MT_Mud,
-    MT_MetalSolid,
-    MT_MetalGrate,
-    MT_MetalHollow,
-    MT_Sand,
-    MT_Concrete,
-    MT_Wood,
-    MT_Forest,
-    MT_Brush,
-    MT_Puddle,
-    MT_Water,
-    MT_Marble,
-    MT_Debris_GEO,
-    MT_Debris_RAS,
-    MT_Debris_YYY,
-    MT_Glass,
-    MT_HumanFlesh,
-    MT_TrandoFlesh,
-    MT_BugFlesh,
-    MT_DroidMetal,
-    MT_WookieeFlesh,
-    MT_Shield,
-    MT_PersonalShield,
-    MT_MetalPipe,
-    MT_EliteFlesh,
-    MT_NoEffectSpawned,
-    MT_ShieldGreen,
-    MT_MAX
+	MT_None,
+	MT_Rock,
+	MT_Dirt,
+	MT_Mud,
+	MT_MetalSolid,
+	MT_MetalGrate,
+	MT_MetalHollow,
+	MT_Sand,
+	MT_Concrete,
+	MT_Wood,
+	MT_Forest,
+	MT_Brush,
+	MT_Puddle,
+	MT_Water,
+	MT_Marble,
+	MT_Debris_GEO,
+	MT_Debris_RAS,
+	MT_Debris_YYY,
+	MT_Glass,
+	MT_HumanFlesh,
+	MT_TrandoFlesh,
+	MT_BugFlesh,
+	MT_DroidMetal,
+	MT_WookieeFlesh,
+	MT_Shield,
+	MT_PersonalShield,
+	MT_MetalPipe,
+	MT_EliteFlesh,
+	MT_NoEffectSpawned,
+	MT_ShieldGreen,
+	MT_MAX
 };
 
 enum EBattleEngineBattleCriteria{
-    BATTLECRITERIA_Attack,
-    BATTLECRITERIA_Proximity,
-    BATTLECRITERIA_AttackAndProximity,
-    BATTLECRITERIA_MAX
+	BATTLECRITERIA_Attack,
+	BATTLECRITERIA_Proximity,
+	BATTLECRITERIA_AttackAndProximity,
+	BATTLECRITERIA_MAX
 };
 
 enum EMusicFadeType{
-    MFT_Linear,
-    MFT_Sine,
-    MFT_Log,
-    MFT_LogInverse,
-    MFT_MAX
+	MFT_Linear,
+	MFT_Sine,
+	MFT_Log,
+	MFT_LogInverse,
+	MFT_MAX
 };
 
 enum EFilterState{
-    FS_Maybe,
-    FS_Yes,
-    FS_No,
-    FS_MAX
+	FS_Maybe,
+	FS_Yes,
+	FS_No,
+	FS_MAX
 };
 
 struct FBatchReference{
-    INT BatchIndex;
-    INT ElementIndex;
+	INT BatchIndex;
+	INT ElementIndex;
 };
 
 struct FXboxAddr{
-    INT ina;
-    INT inaOnline;
-    INT wPortOnline;
-    BYTE abEnet[6];
-    BYTE abOnline[20];
-    FString Gamertag;
-    FString xuid;
+	INT ina;
+	INT inaOnline;
+	INT wPortOnline;
+	BYTE abEnet[6];
+	BYTE abOnline[20];
+	FString Gamertag;
+	FString xuid;
 };
 
 struct FNavPtLocator{
-    FVector Offset;
-    FLOAT Yaw;
+	FVector Offset;
+	FLOAT Yaw;
 };
 
 struct FKRBVec{
-    FLOAT X;
-    FLOAT Y;
-    FLOAT Z;
+	FLOAT X;
+	FLOAT Y;
+	FLOAT Z;
 };
 
 struct FKRigidBodyState{
-    FKRBVec Position;
-    FQuat Quaternion;
-    FKRBVec LinVel;
-    FKRBVec AngVel;
+	FKRBVec Position;
+	FQuat Quaternion;
+	FKRBVec LinVel;
+	FKRBVec AngVel;
 };
 
 struct FAnimRep{
-    FName AnimSequence;
-    BYTE Bone;
-    BYTE Priority;
-    BYTE RateScale;
-    BYTE AnimFrame;
+	FName AnimSequence;
+	BYTE Bone;
+	BYTE Priority;
+	BYTE RateScale;
+	BYTE AnimFrame;
 };
 
 #define UCONST_SG_MAX 19
@@ -2329,32 +2329,32 @@ public:
  */
 
 enum EFluidGridType{
-    FGT_Square,
-    FGT_Hexagonal,
-    FGT_MAX
+	FGT_Square,
+	FGT_Hexagonal,
+	FGT_MAX
 };
 
 class ENGINE_API AFluidSurfaceInfo : public AInfo{
 public:
-    DECLARE_CLASS(AFluidSurfaceInfo,AInfo,0,Engine)
+	DECLARE_CLASS(AFluidSurfaceInfo,AInfo,0,Engine)
 	NO_DEFAULT_CONSTRUCTOR(AFluidSurfaceInfo)
 
 	BYTE FluidGridType;
 	FLOAT FluidGridSpacing;
-    INT FluidXSize;
-    INT FluidYSize;
+	INT FluidXSize;
+	INT FluidYSize;
 	FLOAT FluidHeightScale;
-    FLOAT FluidSpeed;
-    FLOAT FluidDamping;
-    FLOAT FluidNoiseFrequency;
-    FRange FluidNoiseStrength;
-    BITFIELD TestRipple:1;
-    FLOAT TestRippleSpeed;
-    FLOAT TestRippleStrength;
+	FLOAT FluidSpeed;
+	FLOAT FluidDamping;
+	FLOAT FluidNoiseFrequency;
+	FRange FluidNoiseStrength;
+	BITFIELD TestRipple:1;
+	FLOAT TestRippleSpeed;
+	FLOAT TestRippleStrength;
 	FLOAT TestRippleRadius;
-    FLOAT UTiles;
+	FLOAT UTiles;
 	FLOAT UOffset;
-    FLOAT VTiles;
+	FLOAT VTiles;
 	FLOAT VOffset;
 	FLOAT AlphaCurveScale;
 	FLOAT AlphaHeightScale;
@@ -2364,9 +2364,9 @@ public:
 	FLOAT RippleVelocityFactor;
 	FLOAT TouchStrength;
 	class UClass* ShootEffect;
-    BITFIELD OrientShootEffect:1;
+	BITFIELD OrientShootEffect:1;
 	class UClass* TouchEffect1;
-    BITFIELD OrientTouchEffect:1;
+	BITFIELD OrientTouchEffect:1;
 	TArray<DWORD> ClampBitmap;
 	ATerrainInfo* ClampTerrain;
 	BITFIELD bShowBoundingBox:1;
@@ -2375,14 +2375,14 @@ public:
 	FLOAT WarmUpTime;
 	FLOAT UpdateRate;
 	FColor FluidColor;
-    TArrayNoInit<FLOAT> Verts0;
-    TArrayNoInit<FLOAT> Verts1;
+	TArrayNoInit<FLOAT> Verts0;
+	TArrayNoInit<FLOAT> Verts1;
 	TArrayNoInit<BYTE>	VertAlpha;
-    INT LatestVerts;
-    FBox FluidBoundingBox;
+	INT LatestVerts;
+	FBox FluidBoundingBox;
 	FVector FluidOrigin;
 	FLOAT TimeRollover;
-    FLOAT TestRippleAng;
+	FLOAT TestRippleAng;
 	class UFluidSurfacePrimitive* Primitive;
 	TArrayNoInit<class AFluidSurfaceOscillator*> Oscillators;
 	BITFIELD bHasWarmedUp;

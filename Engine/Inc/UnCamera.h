@@ -238,14 +238,17 @@ public:
 	FName           Group;          // Group for editing.
 	FTime           LastUpdateTime; // Time of last update.
 	INT             DirtyViewport;  // Count how many times the viewport needs to be repainted.
-	INT             SizeX, SizeY;   // Buffer X & Y resolutions.
-	char            Padding1[8];    //! PADDING
-	FLOAT           ScaleX, ScaleY; // Scale factor.
+	INT             SizeX;          // Buffer X & Y resolutions.
+	INT             SizeY;
+	INT             Padding0;       //!PADDING Could be X and Y offset (always 0)
+	INT             Padding1;       //!PADDING
+	FLOAT           ScaleX;
+	FLOAT           ScaleY;
 	INT             ColorBytes;     // 1=256-color, 4=32-bit color.
-	char            Padding2[4];    //! PADDING
 	INT             FrameCount;     // Frame count, incremented when locked.
 	DWORD           Caps;           // Capabilities (CC_).
 	UBOOL           Current;        // If this is the current input viewport.
+	INT             Padding2;       //! PADDING
 	UBOOL           Dragging;       // Dragging mouse.
 	FVector         OrigCursor;     // The position where the mouse was originally clicked in the viewport.
 	UBOOL           FullscreenOnly; // Engine requires desktop set to 32 bpp for windowed mode.
@@ -255,7 +258,8 @@ public:
 	FViewportRenderTarget RenderTarget; // A dummy render target that exposes the viewport's size to interfaces that take a FRenderTarget.
 
 	// The current position of the mouse both on the screen, and within this viewports client area (using the X, Y ... Z is unused)
-	FVector         MouseScreenPos, MouseClientPos;
+	FVector         MouseScreenPos;
+	FVector         MouseClientPos;
 
 	UBOOL           bLockOnSelectedActors; // Update the location/rotation of selected actors when the camera is moved?
 	AActor*         LockedActor;           // The actor we're locked to
@@ -304,8 +308,10 @@ public:
 
 	// Hit testing.
 	UBOOL           HitTesting;   // Whether hit-testing.
-	INT             HitX, HitY;   // Hit rectangle top left.
-	INT             HitXL, HitYL; // Hit size.
+	INT             HitX;         // Hit rectangle top left.
+	INT             HitY;
+	INT             HitXL;        // Hit size.
+	INT             HitYL;
 	TArray<INT>     HitSizes;     // Currently pushed hit sizes.
 
 	// Saved-actor parameters.

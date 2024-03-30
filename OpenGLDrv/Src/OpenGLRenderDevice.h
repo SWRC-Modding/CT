@@ -102,7 +102,7 @@ private:
 	INT                                 SavedViewportWidth;
 	INT                                 SavedViewportHeight;
 
-	BYTE                                TextureLODSet[LODSET_MAX];
+	ELODSet                             TextureLODSet[LODSET_MAX];
 
 	FOpenGLIndexBuffer*                 DynamicIndexBuffer;
 	FOpenGLVertexStream*                DynamicVertexStream;

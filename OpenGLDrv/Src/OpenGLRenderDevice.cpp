@@ -350,7 +350,7 @@ UBOOL UOpenGLRenderDevice::Init(){
 	}
 
 	checkSlow(UTexture::__Client);
-	appMemcpy(TextureLODSet, UTexture::__Client->TextureLODSet, LODSET_MAX);
+	appMemcpy(TextureLODSet, UTexture::__Client->TextureLODSet, sizeof(UTexture::__Client->TextureLODSet));
 
 	// Disable squad shadows for now since there's an unexplained crash in USkeletalMeshInstance::ApplyAnimation if they're enabled
 	GEngine->Exec("SET WINDOWSCLIENT SHADOWS FALSE", *GWarn);
@@ -691,11 +691,15 @@ FRenderInterface* UOpenGLRenderDevice::Lock(UViewport* Viewport, BYTE* HitData, 
 		UMaterial::ClearFallbacks();
 	}
 
-	BYTE* ClientTextureLODSet = UTexture::__Client->TextureLODSet;
+	// Detect texture quality setting changes
 
-	if(appMemcmp(TextureLODSet, ClientTextureLODSet, LODSET_MAX) != 0){
-		appMemcpy(TextureLODSet, ClientTextureLODSet, LODSET_MAX);
-		Flush(Viewport);
+	UClient* Client = UTexture::__Client;
+	for(INT i = 0; i < LODSET_MAX; ++i){
+		if(TextureLODSet[i] != Client->TextureLODSet[i]){
+			appMemcpy(TextureLODSet, Client->TextureLODSet, sizeof(Client->TextureLODSet));
+			Flush(Viewport);
+			break;
+		}
 	}
 
 	RenderInterface.Locked(Viewport);

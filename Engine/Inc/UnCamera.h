@@ -369,20 +369,17 @@ public:
 	void ExecMacro( const TCHAR* Filename, FOutputDevice& Ar = *GLog);
 
 	// UViewport inlines.
-	BYTE* _Screen(INT X, INT Y);//{ return ScreenPointer + (X + Y * Stride) * ColorBytes; }
-	UBOOL IsOrtho();//{ return Actor && (Actor->RendMap == REN_OrthXY || Actor->RendMap == REN_OrthXZ || Actor->RendMap == REN_OrthYZ); }
-	UBOOL IsPerspective();//{ return Actor && (Actor->RendMap == REN_Wire || Actor->RendMap == REN_Zones || Actor->RendMap == REN_Polys || Actor->RendMap == REN_PolyCuts || Actor->RendMap == REN_DynLight || Actor->RendMap == REN_PlainTex || Actor->RendMap == REN_LightingOnly || Actor->RendMap == REN_MatineePreview || (Actor->RendMap == REN_TexView && Actor->Misc1 != MVT_TEXTURE)); }
-	UBOOL IsTopView();//{ return Actor && Actor->RendMap == REN_OrthXY; }
-	UBOOL IsRealtime();//{ return Actor && (Actor->ShowFlags & (SHOW_RealTime | SHOW_PlayerCtrl)); }
-	UBOOL IsLit();//{ return Actor && (Actor->RendMap == REN_DynLight || Actor->RendMap == REN_LightingOnly || Actor->RendMap == REN_DepthComplexity || Actor->RendMap == REN_MatineePreview || (Actor->RendMap == REN_TexView && Actor->Misc1 != MVT_TEXTURE)); }
-	UBOOL IsDepthComplexity();//{ return Actor && (Actor->RendMap == REN_DepthComplexity); }
+	BYTE* _Screen(INT X, INT Y);
+	UBOOL IsOrtho();
+	UBOOL IsPerspective();
+	UBOOL IsTopView();
+	UBOOL IsRealtime();
+	UBOOL IsLit();
+	UBOOL IsDepthComplexity();
 	// Determines if the viewport is a viewport where the user can be editing the level (i.e. not a browser viewport)
-	UBOOL IsEditing();//{ return Actor && (IsOrtho() || Actor->RendMap == REN_Wire || Actor->RendMap == REN_Zones || Actor->RendMap == REN_Polys || Actor->RendMap == REN_PolyCuts || Actor->RendMap == REN_DynLight || Actor->RendMap == REN_PlainTex || Actor->RendMap == REN_LightingOnly || Actor->RendMap == REN_DepthComplexity); }
+	UBOOL IsEditing();
 	// Refresh all viewports.
-	static void RefreshAll();/*{
-		for(TObjectIterator<UViewport> It; It; ++It)
-			It->DirtyViewport = 1;
-	}*/
+	static void RefreshAll();
 };
 
 // Viewport hit-testing macros.
@@ -425,25 +422,25 @@ class ENGINE_API UClient : public UObject{
 	DECLARE_ABSTRACT_CLASS(UClient,UObject,CLASS_Config,Engine)
 public:
 	// Variables.
-	UEngine*           Engine;
-	TArray<UViewport*> Viewports;
+	UEngine*            Engine;
+	TArray<UViewport*>  Viewports;
 
 	// Configurable.
-	BITFIELD            CaptureMouse;
-	BITFIELD            ScreenFlashes;
-	BITFIELD            NoLighting;
-	BITFIELD            Decals;
-	BITFIELD            NoDynamicLights;
-	BITFIELD            NoFractalAnim;
-	BITFIELD            Coronas;
-	BITFIELD            DecoLayers;
-	BITFIELD            Projectors;
-	BITFIELD            ReportDynamicUploads;
-	BITFIELD            Shadows;
-	BITFIELD            FrameFXDisabled;
-	BITFIELD            NoHud;
-	BITFIELD            NoDistort;
-	BITFIELD            BlurEnabled;
+	BOOL                CaptureMouse;
+	BOOL                ScreenFlashes;
+	BOOL                NoLighting;
+	BOOL                Decals;
+	BOOL                NoDynamicLights;
+	BOOL                NoFractalAnim;
+	BOOL                Coronas;
+	BOOL                DecoLayers;
+	BOOL                Projectors;
+	BOOL                ReportDynamicUploads;
+	BOOL                Shadows;
+	BOOL                FrameFXDisabled;
+	BOOL                NoHud;
+	BOOL                NoDistort;
+	BOOL                BlurEnabled;
 	BYTE                BloomQuality;
 	BYTE                BumpmappingQuality;
 	INT                 Bloom;
@@ -463,14 +460,13 @@ public:
 	INT                 FullscreenViewportY;
 	INT                 FullscreenColorBits;
 	FLOAT               Gamma;
-	char                Padding1[4]; // PADDING!!!
-	BYTE                TextureLODSet[LODSET_MAX];
-	char                Padding2[20]; // PADDING!!!
+	INT                 TextureLODSet[LODSET_MAX];
 	FLOAT               MinDesiredFramerate;
 	UViewport*          LastCurrent;
 	INT                 DropLODBy;
 	INT                 FSAA;
-	char                Padding3[8]; // PADDING!!!
+	FLOAT               float1; // Always 0.2. Changing it has no observable effect.
+	UEnum*              PTextureDetail;
 	UInteractionMaster* InteractionMaster;
 
 	// Constructors.

@@ -37,7 +37,8 @@ var FunctionOverride MenuBaseGotoMenuClassOverride;
 
 var FunctionOverride MPPawnSetHudArmTextureOverride;
 
-event InitScript(){
+event InitScript()
+{
 	local int i;
 
 	// Hook necessary functions
@@ -54,7 +55,8 @@ event InitScript(){
 	WeaponSetWeapFOVOverride = new class'FunctionOverride';
 	WeaponSetWeapFOVOverride.Init(class'Weapon', 'SetWeapFOV', self, 'WeaponSetWeapFOV');
 
-	if(EnableCustomMenu){
+	if(EnableCustomMenu)
+	{
 		// MenuBase
 		MenuBaseCallMenuClassOverride = new class'FunctionOverride';
 		MenuBaseCallMenuClassOverride.Init(class'MenuBase', 'CallMenuClass', self, 'MenuBaseCallMenuClass');
@@ -72,13 +74,15 @@ event InitScript(){
 	MPPawnSetHudArmTextureOverride = new class'FunctionOverride';
 	MPPawnSetHudArmTextureOverride.Init(class'MPPawn', 'SetHudArmTexture', self, 'MPPawnSetHudArmTexture');
 
-	if(OverrideMPSkins){
+	if(OverrideMPSkins)
+	{
 		for(i = 0; i < MPCloneHudArmsShaders.Length && i < arraycount(class'CTCharacters.MPClone'.default.MPSkins); ++i)
 			class'CTCharacters.MPClone'.default.MPSkins[i] = MPCloneHudArmsShaders[i].Pawn;
 	}
 }
 
-simulated function MPPawnSetHudArmTexture(Weapon Weapon){
+simulated function MPPawnSetHudArmTexture(Weapon Weapon)
+{
 	local int i;
 	local MPPawn Pawn;
 	local Material Skin;
@@ -87,24 +91,33 @@ simulated function MPPawnSetHudArmTexture(Weapon Weapon){
 
 	Weapon.CopyMaterialsToSkins();
 
-	if(Weapon.HudArmsShaderIndex[0] != -1 && Pawn.Skins.Length > 0){
-		if(Pawn.bIsTrandoshan){
-			for(i = 0; i < MPTrandoHudArmsShaders.Length; ++i){
-				if(Pawn.Skins[0] == MPTrandoHudArmsShaders[i].Pawn){
+	if(Weapon.HudArmsShaderIndex[0] != -1 && Pawn.Skins.Length > 0)
+	{
+		if(Pawn.bIsTrandoshan)
+		{
+			for(i = 0; i < MPTrandoHudArmsShaders.Length; ++i)
+			{
+				if(Pawn.Skins[0] == MPTrandoHudArmsShaders[i].Pawn)
+				{
 					Skin = MPTrandoHudArmsShaders[i].HudArms;
 					break;
 				}
 			}
-		}else{
-			for(i = 0; i < MPCloneHudArmsShaders.Length; ++i){
-				if(Pawn.Skins[0] == MPCloneHudArmsShaders[i].Pawn){
+		}
+		else
+		{
+			for(i = 0; i < MPCloneHudArmsShaders.Length; ++i)
+			{
+				if(Pawn.Skins[0] == MPCloneHudArmsShaders[i].Pawn)
+				{
 					Skin = MPCloneHudArmsShaders[i].HudArms;
 					break;
 				}
 			}
 		}
 
-		if(Skin != None){
+		if(Skin != None)
+		{
 			if(Pawn.bIsTrandoshan)
 				Weapon.Skins[Weapon.HudArmsShaderIndex[1]] = Skin;
 			else
@@ -113,14 +126,16 @@ simulated function MPPawnSetHudArmTexture(Weapon Weapon){
 	}
 }
 
-event float GetDefaultFOV(){
+event float GetDefaultFOV()
+{
 	if(OverrideDefaultFOV)
 		return BaseFOV;
 
 	return class'CTPlayer'.default.FOVAngle;
 }
 
-function CTPlayerEndZoom(){
+function CTPlayerEndZoom()
+{
 	local CTPlayer Player;
 
 	Player = CTPlayer(CTPlayerEndZoomOverride.CurrentSelf);
@@ -129,7 +144,8 @@ function CTPlayerEndZoom(){
 	SetViewFOV(Player);
 }
 
-function CTPlayerResetFOV(){
+function CTPlayerResetFOV()
+{
 	local CTPlayer Player;
 
 	Player = CTPlayer(CTPlayerResetFOVOverride.CurrentSelf);
@@ -143,7 +159,8 @@ function CTPlayerResetFOV(){
 	Player.NoHUDArms(false);
 }
 
-function WeaponSetWeapFOV(float NewFOV){
+function WeaponSetWeapFOV(float NewFOV)
+{
 	local Weapon Weapon;
 	local float HudArmsFOV;
 
@@ -152,7 +169,8 @@ function WeaponSetWeapFOV(float NewFOV){
 
 	UpdateWeaponZoomFOVs(Weapon);
 
-	if(LimitHudArmsFOV && !Weapon.bWeaponZoom){
+	if(LimitHudArmsFOV && !Weapon.bWeaponZoom)
+	{
 		if(Weapon.IsA('Boy'))
 			HudArmsFOV = FMin(HudArmsFOV, 90);
 		else if(Weapon.IsA('HeavyTurret'))
@@ -174,7 +192,8 @@ function WeaponSetWeapFOV(float NewFOV){
 
 //====================================================================================================
 
-function UpdateWeaponZoomFOVs(Weapon Weapon){
+function UpdateWeaponZoomFOVs(Weapon Weapon)
+{
 	local float DefaultFOV;
 
 	DefaultFOV = GetDefaultFOV();
@@ -187,19 +206,23 @@ function UpdateWeaponZoomFOVs(Weapon Weapon){
 	Weapon.ZoomFOVs[3] = FOV - (DefaultFOV - Weapon.default.ZoomFOVs[3]);
 }
 
-function SetViewFOV(PlayerController Player){
+function SetViewFOV(PlayerController Player)
+{
 	local Weapon Weapon;
 	local float CurrentFOV;
 
 	if(Player == None)
 		return;
 
-	if(Player.Pawn != None && Player.Pawn.Weapon != None){
+	if(Player.Pawn != None && Player.Pawn.Weapon != None)
+	{
 		Weapon = Player.Pawn.Weapon;
 		UpdateWeaponZoomFOVs(Weapon);
 		CurrentFOV = Weapon.ZoomFOVs[Weapon.CurrentZoomFOVIndex];
 		Weapon.SetWeapFOV(CurrentFOV);
-	}else{
+	}
+	else
+	{
 		CurrentFOV = FOV;
 	}
 
@@ -208,7 +231,8 @@ function SetViewFOV(PlayerController Player){
 	Player.FOVAngle = CurrentFOV;
 }
 
-event SetFOV(PlayerController Player, float NewFOV){
+event SetFOV(PlayerController Player, float NewFOV)
+{
 	FOV = NewFOV;
 
 	SaveConfig();
@@ -217,8 +241,10 @@ event SetFOV(PlayerController Player, float NewFOV){
 
 // View shake
 
-function PlayerControllerShakeView(float InTime, float SustainTime, float OutTime, float XMag, float YMag, float ZMag, float YawMag, float PitchMag, float Frequency){
-	if(ViewShake > 0){
+function PlayerControllerShakeView(float InTime, float SustainTime, float OutTime, float XMag, float YMag, float ZMag, float YawMag, float PitchMag, float Frequency)
+{
+	if(ViewShake > 0)
+	{
 		PlayerController(PlayerControllerShakeViewOverride.CurrentSelf).ShakeView(InTime,
 		                                                                          SustainTime,
 		                                                                          OutTime,
@@ -233,7 +259,8 @@ function PlayerControllerShakeView(float InTime, float SustainTime, float OutTim
 
 // Menu stuff
 
-simulated function MenuBaseCallMenuClass(String MenuClassName, optional String Args){
+simulated function MenuBaseCallMenuClass(String MenuClassName, optional String Args)
+{
 	local MenuBase Menu;
 
 	if(MenuClassName == "XInterfaceCTMenus.CTGameOptionsPCMenu")
@@ -244,7 +271,8 @@ simulated function MenuBaseCallMenuClass(String MenuClassName, optional String A
 	Menu.CallMenu(Menu.Spawn(class<Menu>(DynamicLoadObject(MenuClassName, class'Class')), Menu.Owner), Args);
 }
 
-simulated function MenuBaseOverlayMenuClass(String MenuClassName, optional String Args){
+simulated function MenuBaseOverlayMenuClass(String MenuClassName, optional String Args)
+{
 	local MenuBase Menu;
 
 	if(MenuClassName == "XInterfaceCTMenus.CTGameOptionsPCMenu")
@@ -255,7 +283,8 @@ simulated function MenuBaseOverlayMenuClass(String MenuClassName, optional Strin
 	Menu.OverlayMenu(Menu.Spawn(class<Menu>(DynamicLoadObject(MenuClassName, class'Class')), Menu.Owner), Args);
 }
 
-simulated function MenuBaseGotoMenuClass(String MenuClassName, optional String Args){
+simulated function MenuBaseGotoMenuClass(String MenuClassName, optional String Args)
+{
 	local MenuBase Menu;
 
 	if(MenuClassName == "XInterfaceCTMenus.CTGameOptionsPCMenu")

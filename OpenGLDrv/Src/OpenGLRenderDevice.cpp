@@ -576,7 +576,7 @@ UBOOL UOpenGLRenderDevice::SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL
 
 			if(!SupportsEXTFilterAnisotropic &&
 			   (appStrcmp(Extension, "GL_ARB_texture_filter_anisotropic") == 0 || appStrcmp(Extension, "GL_EXT_texture_filter_anisotropic") == 0))
-			   {
+			{
 				SupportsEXTFilterAnisotropic = 1;
 			}
 			else if(!SupportsDXTCompression && appStrcmp(Extension, "GL_EXT_texture_compression_s3tc") == 0)

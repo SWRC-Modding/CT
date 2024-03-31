@@ -20,12 +20,14 @@ native final function SaveStats(PlayerController PC);
 native final function RestoreStats(PlayerController PC);
 native final function ReleaseAllCDKeys();
 
-function Init(){
+function Init()
+{
 	if(DoStatLogging)
 		Super.Init();
 }
 
-function Timer(){
+function Timer()
+{
 	// Print Message of the Day (HUD code has this disabled for some reason)
 
 	if(Len(Level.Game.GameReplicationInfo.MOTDLine1) > 0)
@@ -41,7 +43,8 @@ function Timer(){
 		Level.Game.Broadcast(self, Level.Game.GameReplicationInfo.MOTDLine4);
 }
 
-function ConnectEvent(PlayerReplicationInfo Who){
+function ConnectEvent(PlayerReplicationInfo Who)
+{
 	EventLog(Who.PlayerName $ " entered the game", 'Join');
 
 	if(ReleaseCDKeys)
@@ -51,15 +54,18 @@ function ConnectEvent(PlayerReplicationInfo Who){
 	Super.ConnectEvent(Who);
 }
 
-function DisconnectEvent(PlayerReplicationInfo Who){
-	if(!Who.bBot){
+function DisconnectEvent(PlayerReplicationInfo Who)
+{
+	if(!Who.bBot)
+	{
 		EventLog(Who.PlayerName $ " left the game", 'Leave');
 		SaveStats(PlayerController(Who.Owner));
 		Super.DisconnectEvent(Who);
 	}
 }
 
-function KillEvent(string KillType, PlayerReplicationInfo Killer, PlayerReplicationInfo Victim, class<DamageType> Damage){
+function KillEvent(string KillType, PlayerReplicationInfo Killer, PlayerReplicationInfo Victim, class<DamageType> Damage)
+{
 	local Controller       KillerController;
 	local PlayerController VictimController;
 	local float            Health;
@@ -74,8 +80,10 @@ function KillEvent(string KillType, PlayerReplicationInfo Killer, PlayerReplicat
 	KillerController = Controller(Killer.Owner);
 	VictimController = PlayerController(Victim.Owner);
 
-	if(VictimController != None && KillerController != None){
-		if(KillerController.Pawn != None){
+	if(VictimController != None && KillerController != None)
+	{
+		if(KillerController.Pawn != None)
+		{
 			// Health can be negative but we only show 0 in that case
 			Health = FClamp(KillerController.Pawn.Health / KillerController.Pawn.MaxHealth * 100, 0.0, 100.0);
 			Shields = KillerController.Pawn.Shields / KillerController.Pawn.MaxShields * 100;
@@ -85,15 +93,20 @@ function KillEvent(string KillType, PlayerReplicationInfo Killer, PlayerReplicat
 	}
 }
 
-function PostBeginPlay(){
+function PostBeginPlay()
+{
 	local int i;
 	local class<AdminService> ServiceClass;
 	local AdminService Service;
 
-	if(Level.Game.GameStats != None){
-		if(Level.Game.GameStats != self){
+	if(Level.Game.GameStats != None)
+	{
+		if(Level.Game.GameStats != self)
+		{
 			Warn("GameStats will be replaced by AdminControl!");
-		}else if(Level.Game.GameStats.IsA('AdminControl')){
+		}
+		else if(Level.Game.GameStats.IsA('AdminControl'))
+		{
 			Destroy();
 
 			return;
@@ -108,22 +121,26 @@ function PostBeginPlay(){
 	Level.Game.BroadcastHandlerClass = "ModMPGame.AdminControlBroadcastHandler";
 	Level.Game.AccessControlClass = "ModMPGame.AdminAccessControl";
 
-	if(Level.Game.BroadcastHandler != None && !Level.Game.BroadcastHandler.IsA('AdminControlBroadcastHandler')){
+	if(Level.Game.BroadcastHandler != None && !Level.Game.BroadcastHandler.IsA('AdminControlBroadcastHandler'))
+	{
 		Level.Game.BroadcastHandler.Destroy();
 		Level.Game.BroadcastHandler = Spawn(class'AdminControlBroadcastHandler');
 	}
 
-	if(Level.Game.AccessControl != None && !Level.Game.AccessControl.IsA('AdminAccessControl')){
+	if(Level.Game.AccessControl != None && !Level.Game.AccessControl.IsA('AdminAccessControl'))
+	{
 		Level.Game.AccessControl.Destroy();
 		Level.Game.AccessControl = Spawn(class'AdminAccessControl');
 	}
 
 	Level.Game.SaveConfig();
 
-	for(i = 0; i < ServiceClasses.Length; ++i){
+	for(i = 0; i < ServiceClasses.Length; ++i)
+	{
 		ServiceClass = Class<AdminService>(DynamicLoadObject(ServiceClasses[i], class'Class'));
 
-		if(ServiceClass == None){
+		if(ServiceClass == None)
+		{
 			Warn("'" $ ServiceClasses[i] $ "' is not a subclass of AdminService");
 
 			continue;
@@ -135,7 +152,8 @@ function PostBeginPlay(){
 		Log("Spawning actor for admin service class '" $ ServiceClass $ "'");
 		Service = Spawn(ServiceClass);
 
-		if(Service == None){
+		if(Service == None)
+		{
 			Warn("Unable to spawn admin service '" $ ServiceClass $ "'");
 
 			continue;
@@ -150,7 +168,8 @@ function PostBeginPlay(){
 		SetTimer(MOTDInterval, true);
 }
 
-function bool DispatchCmd(PlayerController PC, string Cmd){
+function bool DispatchCmd(PlayerController PC, string Cmd)
+{
 	local int i;
 	local AdminService Service;
 	local int NumLines;
@@ -159,7 +178,8 @@ function bool DispatchCmd(PlayerController PC, string Cmd){
 
 	bAdmin = PC == None || PC.PlayerReplicationInfo.bAdmin;
 
-	for(Service = Services; Service != None; Service = Service.nextAdminService){
+	for(Service = Services; Service != None; Service = Service.nextAdminService)
+	{
 		if(Service.bRequiresAdminPermissions && !bAdmin)
 			continue;
 
@@ -170,7 +190,8 @@ function bool DispatchCmd(PlayerController PC, string Cmd){
 			Service.CommandFeedback(PC, string(Service.Class.Name) $ ":", PC != None);
 			++NumLines;
 
-			for(i = 0; i < CurrentCommands.Length; ++i){
+			for(i = 0; i < CurrentCommands.Length; ++i)
+			{
 				Service.CommandFeedback(PC, "  - " $ CurrentCommands[i], PC != None);
 				++NumLines;
 			}
@@ -185,7 +206,8 @@ function bool DispatchCmd(PlayerController PC, string Cmd){
 	return RecognizedCmd || bPrintCommands;
 }
 
-event bool ExecCmd(string Cmd, optional PlayerController PC){
+event bool ExecCmd(string Cmd, optional PlayerController PC)
+{
 	local AdminService Service;
 	local bool RecognizedCmd;
 	local string CommandSource;
@@ -210,18 +232,22 @@ event bool ExecCmd(string Cmd, optional PlayerController PC){
 
 	EventLog("(" $ CommandSource $ "): " $ Cmd, 'Command');
 
-	if((PC == None || PC.PlayerReplicationInfo.bAdmin) && Cmd ~= "SAVECONFIG"){
+	if((PC == None || PC.PlayerReplicationInfo.bAdmin) && Cmd ~= "SAVECONFIG")
+	{
 		for(Service = Services; Service != None; Service = Service.nextAdminService)
 			Service.SaveConfig();
 
 		SaveConfig();
 
 		RecognizedCmd = true;
-	}else{
+	}
+	else
+	{
 		RecognizedCmd = DispatchCmd(PC, Cmd);
 	}
 
-	if(PC != None && !RecognizedCmd){
+	if(PC != None && !RecognizedCmd)
+	{
 		if(PC.PlayerReplicationInfo.bAdmin)
 			PC.ClientMessage("Unrecognized command");
 		else

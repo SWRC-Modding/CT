@@ -8,14 +8,16 @@ var int LastViewRotationYaw;
 
 var FirstPersonPlayerShadowCaster ShadowCaster;
 
-function PreBeginPlay(){
+function PreBeginPlay()
+{
 	if(Level.NetMode != NM_Standalone)
 		Destroy();
 	else
 		Super.PreBeginPlay();
 }
 
-function Tick(float DeltaTime){
+function Tick(float DeltaTime)
+{
 	local float Speed;
 	local float MaxSpeed;
 	local float TurnSpeed;
@@ -26,8 +28,10 @@ function Tick(float DeltaTime){
 	local name AnimName;
 	local float AnimRate;
 
-	if(Player == None){
-		for(C = Level.ControllerList; C != None; C = C.nextController){
+	if(Player == None)
+	{
+		for(C = Level.ControllerList; C != None; C = C.nextController)
+		{
 			Player = PlayerController(C);
 
 			if(Player != None)
@@ -37,12 +41,15 @@ function Tick(float DeltaTime){
 
 	bHidden = Player == None || Player.Pawn == None || Player.Pawn.bIncapacitated || Player.IsInState('Briefing') || Player.bBehindView;
 
-	if(Level.ShadowsEnabled){
+	if(Level.ShadowsEnabled)
+	{
 		/* if(ShadowCaster == None) */
 		/* 	ShadowCaster = Spawn(class'FirstPersonPlayerShadowCaster'); */
 
 		/* ShadowCaster.bHidden = bHidden; */
-	}else if(ShadowCaster != None){
+	}
+	else if(ShadowCaster != None)
+	{
 		ShadowCaster.Destroy();
 		ShadowCaster = None;
 	}
@@ -57,42 +64,64 @@ function Tick(float DeltaTime){
 	Speed = VSize(PlayerPawn.Velocity);
 	TurnSpeed = ViewRotation.Yaw - LastViewRotationYaw;
 
-	if(PlayerPawn.Base != None){
-		if(PlayerPawn.bIsCrouched){
+	if(PlayerPawn.Base != None)
+	{
+		if(PlayerPawn.bIsCrouched)
+		{
 			MaxSpeed = PlayerPawn.GroundSpeed * PlayerPawn.CrouchSpeedRatio;
 			PlayerLocation.Z += 30.0f;
-		}else if(PlayerPawn.bIsWalking){
+		}
+		else if(PlayerPawn.bIsWalking)
+		{
 			MaxSpeed = PlayerPawn.GroundSpeed * PlayerPawn.WalkSpeedRatio;
-		}else{
+		}
+		else
+		{
 			MaxSpeed = PlayerPawn.GroundSpeed * 0.75f; // Slightly decrease max speed to get a higher anim rate which looks better with the 'WalkForward' anim
 																								 // (Can't use 'RunFoward' because it does not look good in first person)
 		}
 
-		if(Speed <= MaxSpeed * 0.05f){ // Small threshold so very little movement does not play a walk animation which looks weird
-			if(PlayerPawn.bIsCrouched){
-				if(TurnSpeed > 0){
+		if(Speed <= MaxSpeed * 0.05f) // Small threshold so very little movement does not play a walk animation which looks weird
+		{
+			if(PlayerPawn.bIsCrouched)
+			{
+				if(TurnSpeed > 0)
+				{
 					AnimName = 'CrouchTurnRight';
 					AnimRate = FMin(TurnSpeed / TURN_SPEED, MAX_TURN_ANIM_RATE);
-				}else if(TurnSpeed < 0){
+				}
+				else if(TurnSpeed < 0)
+				{
 					AnimName = 'CrouchTurnLeft';
 					AnimRate = FMin(-TurnSpeed / TURN_SPEED, MAX_TURN_ANIM_RATE);
-				}else{
+				}
+				else
+				{
 					AnimName = 'CrouchBreathe';
 					AnimRate = 1.0;
 				}
-			}else{
-				if(TurnSpeed > 0){
+			}
+			else
+			{
+				if(TurnSpeed > 0)
+				{
 					AnimName = 'TurnRight';
 					AnimRate = FMin(TurnSpeed / TURN_SPEED, MAX_TURN_ANIM_RATE);
-				}else if(TurnSpeed < 0){
+				}
+				else if(TurnSpeed < 0)
+				{
 					AnimName = 'TurnLeft';
 					AnimRate = FMin(-TurnSpeed / TURN_SPEED, MAX_TURN_ANIM_RATE);
-				}else{
+				}
+				else
+				{
 					AnimName = 'ActionBreathe';
 					AnimRate = 1.0;
 				}
 			}
-		}else{
+		}
+		else
+		{
 			if(PlayerPawn.bIsCrouched)
 				AnimName = 'CrouchForward';
 			else
@@ -100,13 +129,16 @@ function Tick(float DeltaTime){
 
 			AnimRate = Speed / MaxSpeed;
 		}
-	}else{
+	}
+	else
+	{
 		PlayerLocation.Z -= 15.0f;
 		AnimName = 'FallBreathe';
 		AnimRate = 1.0;
 	}
 
-	if(AnimName != 'None'){
+	if(AnimName != 'None')
+	{
 		LoopAnim(AnimName, 'None', AnimRate);
 
 		if(ShadowCaster != None)
@@ -116,7 +148,8 @@ function Tick(float DeltaTime){
 	SetLocation(PlayerLocation);
 	SetRotation(ViewRotation);
 
-	if(ShadowCaster != None){
+	if(ShadowCaster != None)
+	{
 		ShadowCaster.SetLocation(PlayerPawn.Location);
 		ShadowCaster.SetRotation(ViewRotation);
 	}

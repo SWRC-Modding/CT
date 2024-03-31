@@ -5,24 +5,28 @@ var float Accuracy;
 
 native final function UpdatePawnAccuracy();
 
-function SetAccuracy(float NewAcccuracy){
+function SetAccuracy(float NewAcccuracy)
+{
 	Accuracy = NewAcccuracy;
 	UpdatePawnAccuracy();
 }
 
-function PawnDied(Pawn P){
+function PawnDied(Pawn P)
+{
 	Super.PawnDied(P);
 	GotoState('Dead');
 }
 
-function ServerRestartPlayer(){
+function ServerRestartPlayer()
+{
 	local MPPawn MPP;
 
 	Level.Game.RestartPlayer(self);
 
 	MPP = MPPawn(Pawn);
 
-	if(MPP != None){
+	if(MPP != None)
+	{
 		MPP.ChosenSkin = ChosenSkin;
 		MPP.DoCustomizations();
 		MPP.PatrolRoute = BotSupport(Owner).BotPatrolRoute;
@@ -31,7 +35,8 @@ function ServerRestartPlayer(){
 	}
 }
 
-State Dead{
+State Dead
+{
 	ignores SeePlayer, HearNoise, KilledBy;
 
 Begin:
@@ -47,13 +52,16 @@ MPStart:
 	Goto('TryAgain');
 }
 
-state GameEnded{
+state GameEnded
+{
 	ignores SeePlayer, HearNoise, KilledBy, NotifyBump, HitWall, NotifyHeadVolumeChange, NotifyPhysicsVolumeChange, Falling, TakeDamage;
 
 	function ServerReStartPlayer();
 
-	function BeginState(){
-		if(Pawn != None ){
+	function BeginState()
+	{
+		if(Pawn != None )
+		{
 			if(Pawn.Weapon != None)
 				Pawn.Weapon.HolderDied();
 

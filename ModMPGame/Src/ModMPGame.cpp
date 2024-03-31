@@ -39,8 +39,8 @@ static FStringTemp GetPlayerID(AController* C)
 		{
 			return "__HOST__";
 		}
-		else
-		{ // Combine ip address with cd key hash to uniquely identify a player even in the same network
+		else // Combine ip address with cd key hash to uniquely identify a player even in the same network
+		{
 			UNetConnection* Con = static_cast<UNetConnection*>(PC->Player);
 			FString IP = Con->LowLevelGetRemoteAddress();
 

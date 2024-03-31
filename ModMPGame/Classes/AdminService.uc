@@ -20,11 +20,13 @@ native function bool ExecCmd(String Cmd, optional PlayerController PC);
 
 native final function EventLog(coerce string Msg);
 
-static final function bool IsLocalPlayer(PlayerController PC){
+static final function bool IsLocalPlayer(PlayerController PC)
+{
 	return PC == None || Viewport(PC.Player) != None;
 }
 
-event CommandFeedback(PlayerController PC, string Msg, optional bool DontWriteToLog){
+event CommandFeedback(PlayerController PC, string Msg, optional bool DontWriteToLog)
+{
 	if(PC != None)
 		PC.ClientMessage(Msg);
 

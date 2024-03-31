@@ -2,38 +2,51 @@ class AdminCommands extends AdminService;
 
 var() config bool bAllowConsoleCommands;
 
-function bool ExecCmd(String Cmd, optional PlayerController PC){
+function bool ExecCmd(String Cmd, optional PlayerController PC)
+{
 	local PlayerReplicationInfo PRI;
 	local String CommandResult;
 	local int IntParam;
 	local string StringParam;
 	local Controller C;
 
-	if(ParseCommand(Cmd, "CMD")){
+	if(ParseCommand(Cmd, "CMD"))
+	{
 		if(bAllowConsoleCommands || IsLocalPlayer(PC)){ // The host can always execute console commands
 			StringParam = Cmd;
 
-			if(IsLocalPlayer(PC)){
+			if(IsLocalPlayer(PC))
+			{
 				CommandResult = ConsoleCommand(Cmd);
-			}else if(ParseCommand(StringParam, "GET") || ParseCommand(StringParam, "SET")){
+			}
+			else if(ParseCommand(StringParam, "GET") || ParseCommand(StringParam, "SET"))
+			{
 				if(InStr(Caps(StringParam), "ADMINPASSWORD") == -1) // Security measure
 					CommandResult = ConsoleCommand(Cmd);
 				else
 					CommandResult = "Remote players are not allowed to access the admin password";
-			}else{
+			}
+			else
+			{
 				CommandResult = "Remote players are only allowed to use the get and set commands"; // Might still mess things up but at least some access should be provided
 			}
 
 			if(CommandResult != "")
 				CommandFeedback(PC, CommandResult);
-		}else{
+		}
+		else
+		{
 			CommandFeedback(PC, "Console commands are not allowed!");
 		}
 
 		return true;
-	}else if(ParseCommand(Cmd, "LISTPLAYERS")){ // Mostly useful for the console since ingame you can just look at the scoreboard
-		for(C = Level.ControllerList; C != None; C = C.nextController){
-			if(PlayerController(C) != None){
+	}
+	else if(ParseCommand(Cmd, "LISTPLAYERS")) // Mostly useful for the console since ingame you can just look at the scoreboard
+	{
+		for(C = Level.ControllerList; C != None; C = C.nextController)
+		{
+			if(PlayerController(C) != None)
+			{
 				PRI = C.PlayerReplicationInfo;
 				CommandResult = "name=" $ PRI.PlayerName $ " id=" $ PRI.PlayerID $ " kills=" $ int(PRI.Score) $ " deaths=" $ int(PRI.Deaths);
 
@@ -42,11 +55,15 @@ function bool ExecCmd(String Cmd, optional PlayerController PC){
 		}
 
 		return true;
-	}else if(ParseCommand(Cmd, "KICK")){
+	}
+	else if(ParseCommand(Cmd, "KICK"))
+	{
 		StringParam = ParseToken(Cmd);
 
-		for(C = Level.ControllerList; C != None; C = C.nextController){
-			if(PlayerController(C) != None && C != PC){
+		for(C = Level.ControllerList; C != None; C = C.nextController)
+		{
+			if(PlayerController(C) != None && C != PC)
+			{
 				PRI = C.PlayerReplicationInfo;
 
 				if(PRI.PlayerName ~= StringParam)
@@ -55,21 +72,29 @@ function bool ExecCmd(String Cmd, optional PlayerController PC){
 		}
 
 		return true;
-	}else if(ParseCommand(Cmd, "KICKALL")){
-		for(C = Level.ControllerList; C != None; C = C.nextController){
+	}
+	else if(ParseCommand(Cmd, "KICKALL"))
+	{
+		for(C = Level.ControllerList; C != None; C = C.nextController)
+		{
 			if(PlayerController(C) != None && C != PC) // Don't kick yourself
 				AdminAccessControl(Level.Game.AccessControl).KickPlayerController(PlayerController(C));
 		}
 
 		return true;
-	}else if(ParseCommand(Cmd, "KICKID")){
+	}
+	else if(ParseCommand(Cmd, "KICKID"))
+	{
 		IntParam = int(ParseToken(Cmd));
 
-		for(C = Level.ControllerList; C != None; C = C.nextController){
-			if(PlayerController(C) != None && C != PC){
+		for(C = Level.ControllerList; C != None; C = C.nextController)
+		{
+			if(PlayerController(C) != None && C != PC)
+			{
 				PRI = C.PlayerReplicationInfo;
 
-				if(PRI.PlayerID == IntParam){
+				if(PRI.PlayerID == IntParam)
+				{
 					AdminAccessControl(Level.Game.AccessControl).KickPlayerController(PlayerController(C), Cmd);
 
 					break;
@@ -78,11 +103,15 @@ function bool ExecCmd(String Cmd, optional PlayerController PC){
 		}
 
 		return true;
-	}else if(ParseCommand(Cmd, "KICKSCORE")){
+	}
+	else if(ParseCommand(Cmd, "KICKSCORE"))
+	{
 		IntParam = int(Cmd);
 
-		for(C = Level.ControllerList; C != None; C = C.nextController){
-			if(PlayerController(C) != None && C != PC){
+		for(C = Level.ControllerList; C != None; C = C.nextController)
+		{
+			if(PlayerController(C) != None && C != PC)
+			{
 				PRI = C.PlayerReplicationInfo;
 
 				if(PRI.Score == IntParam)
@@ -91,11 +120,15 @@ function bool ExecCmd(String Cmd, optional PlayerController PC){
 		}
 
 		return true;
-	}else if(ParseCommand(Cmd, "KICKSCOREBELOW")){
+	}
+	else if(ParseCommand(Cmd, "KICKSCOREBELOW"))
+	{
 		IntParam = int(ParseToken(Cmd));
 
-		for(C = Level.ControllerList; C != None; C = C.nextController){
-			if(PlayerController(C) != None && C != PC){
+		for(C = Level.ControllerList; C != None; C = C.nextController)
+		{
+			if(PlayerController(C) != None && C != PC)
+			{
 				PRI = C.PlayerReplicationInfo;
 
 				if(PRI.Score < IntParam)
@@ -104,11 +137,15 @@ function bool ExecCmd(String Cmd, optional PlayerController PC){
 		}
 
 		return true;
-	}else if(ParseCommand(Cmd, "KICKSCOREABOVE")){
+	}
+	else if(ParseCommand(Cmd, "KICKSCOREABOVE"))
+	{
 		IntParam = int(Cmd);
 
-		for(C = Level.ControllerList; C != None; C = C.nextController){
-			if(PlayerController(C) != None && C != PC){
+		for(C = Level.ControllerList; C != None; C = C.nextController)
+		{
+			if(PlayerController(C) != None && C != PC)
+			{
 				PRI = C.PlayerReplicationInfo;
 
 				if(PRI.Score > IntParam)
@@ -117,11 +154,15 @@ function bool ExecCmd(String Cmd, optional PlayerController PC){
 		}
 
 		return true;
-	}else if(ParseCommand(Cmd, "BAN")){
+	}
+	else if(ParseCommand(Cmd, "BAN"))
+	{
 		StringParam = ParseToken(Cmd);
 
-		for(C = Level.ControllerList; C != None; C = C.nextController){
-			if(PlayerController(C) != None && C != PC){
+		for(C = Level.ControllerList; C != None; C = C.nextController)
+		{
+			if(PlayerController(C) != None && C != PC)
+			{
 				PRI = C.PlayerReplicationInfo;
 
 				if(PRI.PlayerName ~= StringParam)
@@ -130,14 +171,19 @@ function bool ExecCmd(String Cmd, optional PlayerController PC){
 		}
 
 		return true;
-	}else if(ParseCommand(Cmd, "BANID")){
+	}
+	else if(ParseCommand(Cmd, "BANID"))
+	{
 		IntParam = int(ParseToken(Cmd));
 
-		for(C = Level.ControllerList; C != None; C = C.nextController){
-			if(PlayerController(C) != None && C != PC){
+		for(C = Level.ControllerList; C != None; C = C.nextController)
+		{
+			if(PlayerController(C) != None && C != PC)
+			{
 				PRI = C.PlayerReplicationInfo;
 
-				if(PRI.PlayerID == IntParam){
+				if(PRI.PlayerID == IntParam)
+				{
 					AdminAccessControl(Level.Game.AccessControl).BanPlayerController(PlayerController(C), Cmd);
 
 					break;
@@ -146,11 +192,15 @@ function bool ExecCmd(String Cmd, optional PlayerController PC){
 		}
 
 		return true;
-	}else if (ParseCommand(Cmd, "PROMOTE")){
-		for(C = Level.ControllerList; C != None; C = C.nextController){
+	}
+	else if (ParseCommand(Cmd, "PROMOTE"))
+	{
+		for(C = Level.ControllerList; C != None; C = C.nextController)
+		{
 			PRI = C.PlayerReplicationInfo;
 
-			if(C.IsA('PlayerController') && !PRI.bAdmin && PRI.PlayerName ~= Cmd){
+			if(C.IsA('PlayerController') && !PRI.bAdmin && PRI.PlayerName ~= Cmd)
+			{
 				PRI.bAdmin = true;
 
 				if(PC != None)
@@ -169,11 +219,15 @@ function bool ExecCmd(String Cmd, optional PlayerController PC){
 		}
 
 		return true;
-	}else if(ParseCommand(Cmd, "DEMOTE")){
-		for(C = Level.ControllerList; C != None; C = C.nextController){
+	}
+	else if(ParseCommand(Cmd, "DEMOTE"))
+	{
+		for(C = Level.ControllerList; C != None; C = C.nextController)
+		{
 			PRI = C.PlayerReplicationInfo;
 
-			if(PRI.bAdmin && PRI.PlayerName ~= Cmd){
+			if(PRI.bAdmin && PRI.PlayerName ~= Cmd)
+			{
 				PRI.bAdmin = false;
 
 				if(PC != None)
@@ -192,8 +246,11 @@ function bool ExecCmd(String Cmd, optional PlayerController PC){
 		}
 
 		return true;
-	}else if(ParseCommand(Cmd, "SWITCHMAP")){
-		if(Len(Cmd) > 0){
+	}
+	else if(ParseCommand(Cmd, "SWITCHMAP"))
+	{
+		if(Len(Cmd) > 0)
+		{
 			IntParam = InStr(Cmd, "?");
 
 			if(IntParam == -1)
@@ -204,12 +261,16 @@ function bool ExecCmd(String Cmd, optional PlayerController PC){
 				Level.Game.Broadcast(self, "Switching map to " $ Left(Cmd, IntParam));
 
 			Level.ServerTravel(Cmd, false);
-		}else{
+		}
+		else
+		{
 			CommandFeedback(PC, "Expected map URL");
 		}
 
 		return true;
-	}else if(ParseCommand(Cmd, "NEXTMAP")){
+	}
+	else if(ParseCommand(Cmd, "NEXTMAP"))
+	{
 		Level.Game.Broadcast(self, "Switching to next map in rotation");
 		Level.Game.GameRulesModifiers = None;
 		Level.Game.bGameRestarted = false;
@@ -218,7 +279,9 @@ function bool ExecCmd(String Cmd, optional PlayerController PC){
 		Level.Game.RestartGame();
 
 		return true;
-	}else if(ParseCommand(Cmd, "RESTARTMAP")){
+	}
+	else if(ParseCommand(Cmd, "RESTARTMAP"))
+	{
 		Level.Game.Broadcast(self, "Restarting map");
 		Level.ServerTravel("?restart", false);
 

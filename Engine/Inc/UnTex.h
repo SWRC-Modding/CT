@@ -106,13 +106,15 @@ public:
 	FMipmap(BYTE InUBits, BYTE InVBits, INT InSize) : FMipmapBase(InUBits, InVBits),
 													  DataArray(InSize){}
 
-	void Clear(){
+	void Clear()
+	{
 		guard(FMipmap::Clear);
 		appMemzero(&DataArray[0], DataArray.Num());
 		unguard;
 	}
 
-	friend FArchive& operator<<(FArchive& Ar, FMipmap& M){
+	friend FArchive& operator<<(FArchive& Ar, FMipmap& M)
+	{
 		guard(FMipmap<<);
 
 		Ar << M.DataArray;

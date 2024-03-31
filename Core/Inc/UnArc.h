@@ -33,13 +33,15 @@ public:
 	// FArchive interface.
 	virtual ~FArchive(){}
 	virtual void Serialize(void* V, INT Length){}
-	virtual void SerializeBits(void* V, INT LengthBits){
+	virtual void SerializeBits(void* V, INT LengthBits)
+	{
 		Serialize(V, (LengthBits + 7) / 8);
 
 		if(IsLoading())
 			((BYTE*)V)[LengthBits / 8] &= ((1 << (LengthBits & 7)) - 1);
 	}
-	virtual void SerializeInt(DWORD& Value, DWORD Max){
+	virtual void SerializeInt(DWORD& Value, DWORD Max)
+	{
 		*this << *(DWORD*)Value;
 	}
 	virtual void SerializeText(char const*);
@@ -53,7 +55,8 @@ public:
 	virtual INT MapObject(UObject*){ return 0; }
 	virtual INT Tell(){ return INDEX_NONE; }
 	virtual INT TotalSize(){ return INDEX_NONE; }
-	virtual UBOOL AtEnd(){
+	virtual UBOOL AtEnd()
+	{
 		INT Pos = Tell();
 
 		return Pos != INDEX_NONE && Pos >= TotalSize();
@@ -114,67 +117,78 @@ protected:
 	bool ArContainsCode;
 };
 
-inline FArchive& operator<<(FArchive& Ar, TCHAR& C){
+inline FArchive& operator<<(FArchive& Ar, TCHAR& C)
+{
 	Ar.Serialize(&C, 1);
 
 	return Ar;
 }
 
-inline FArchive& operator<<(FArchive& Ar, BYTE& B){
+inline FArchive& operator<<(FArchive& Ar, BYTE& B)
+{
 	Ar.Serialize(&B, 1);
 
 	return Ar;
 }
 
-inline FArchive& operator<<(FArchive& Ar, SBYTE& B){
+inline FArchive& operator<<(FArchive& Ar, SBYTE& B)
+{
 	Ar.Serialize(&B, 1);
 
 	return Ar;
 }
 
-inline FArchive& operator<<(FArchive& Ar, _WORD& W){
+inline FArchive& operator<<(FArchive& Ar, _WORD& W)
+{
 	Ar.Serialize(&W, sizeof(W));
 
 	return Ar;
 }
 
-inline FArchive& operator<<(FArchive& Ar, SWORD& S){
+inline FArchive& operator<<(FArchive& Ar, SWORD& S)
+{
 	Ar.Serialize(&S, sizeof(S));
 
 	return Ar;
 }
 
-inline FArchive& operator<<(FArchive& Ar, DWORD& D){
+inline FArchive& operator<<(FArchive& Ar, DWORD& D)
+{
 	Ar.Serialize(&D, sizeof(D));
 
 	return Ar;
 }
 
-inline FArchive& operator<<(FArchive& Ar, INT& I){
+inline FArchive& operator<<(FArchive& Ar, INT& I)
+{
 	Ar.Serialize(&I, sizeof(I));
 
 	return Ar;
 }
 
-inline FArchive& operator<<(FArchive& Ar, FLOAT& F){
+inline FArchive& operator<<(FArchive& Ar, FLOAT& F)
+{
 	Ar.Serialize(&F, sizeof(F));
 
 	return Ar;
 }
 
-inline FArchive& operator<<(FArchive& Ar, DOUBLE& D){
+inline FArchive& operator<<(FArchive& Ar, DOUBLE& D)
+{
 	Ar.Serialize(&D, sizeof(D));
 
 	return Ar;
 }
 
-inline FArchive& operator<<(FArchive &Ar, QWORD& Q){
+inline FArchive& operator<<(FArchive &Ar, QWORD& Q)
+{
 	Ar.Serialize(&Q, sizeof(Q));
 
 	return Ar;
 }
 
-inline FArchive& operator<<(FArchive& Ar, SQWORD& S){
+inline FArchive& operator<<(FArchive& Ar, SQWORD& S)
+{
 	Ar.Serialize(&S, sizeof(S));
 
 	return Ar;
@@ -194,7 +208,8 @@ public:
 
 	void Serialize(FArchive& Ar);
 
-	friend FArchive& operator<<(FArchive& Ar, FCompactIndex& I){
+	friend FArchive& operator<<(FArchive& Ar, FCompactIndex& I)
+	{
 		I.Serialize(Ar);
 
 		return Ar;
@@ -203,7 +218,8 @@ public:
 
 // Archive constructor.
 template<typename T>
-T Arctor(FArchive& Ar){
+T Arctor(FArchive& Ar)
+{
 	T Tmp;
 	Ar << Tmp;
 

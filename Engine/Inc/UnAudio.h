@@ -15,7 +15,7 @@ class UAudioSubsystem;
 	Special Sony VAG Includes.
 -----------------------------------------------------------------------------*/
 
-#define HAVE_VAG 0 
+#define HAVE_VAG 0
 #if HAVE_VAG
 	#include "ENCVAG.h"
 #endif
@@ -134,7 +134,7 @@ class ENGINE_API UMusic : public UObject
 };
 
 /*-----------------------------------------------------------------------------
-	FWaveModInfo. 
+	FWaveModInfo.
 -----------------------------------------------------------------------------*/
 
 //  Macros to convert 4 bytes to a Riff-style ID DWORD.
@@ -149,7 +149,7 @@ class ENGINE_API UMusic : public UObject
 
 // Main Riff-Wave header.
 struct FRiffWaveHeader
-{ 
+{
 	DWORD	rID;			// Contains 'RIFF'
 	DWORD	ChunkLen;		// Remaining length of the entire riff chunk (= file).
 	DWORD	wID;			// Form type. Contains 'WAVE' for .wav files.
@@ -158,11 +158,11 @@ struct FRiffWaveHeader
 // General chunk header format.
 struct FRiffChunkOld
 {
-	DWORD	ChunkID;		  // General data chunk ID like 'data', or 'fmt ' 
+	DWORD	ChunkID;		  // General data chunk ID like 'data', or 'fmt '
 	DWORD	ChunkLen;		  // Length of the rest of this chunk in bytes.
 };
 
-// ChunkID: 'fmt ' ("WaveFormatEx" structure ) 
+// ChunkID: 'fmt ' ("WaveFormatEx" structure )
 struct FFormatChunk
 {
     _WORD   wFormatTag;        // Format type: 1 = PCM
@@ -182,12 +182,12 @@ struct FSampleChunk
 	DWORD   dwSamplePeriod;
 	DWORD   dwMIDIUnityNote;
 	DWORD   dwMIDIPitchFraction;
-	DWORD	dwSMPTEFormat;		
+	DWORD	dwSMPTEFormat;
 	DWORD   dwSMPTEOffset;		//
 	DWORD   cSampleLoops;		// Number of tSampleLoop structures following this chunk
-	DWORD   cbSamplerData;		// 
+	DWORD   cbSamplerData;		//
 };
- 
+
 struct FSampleLoop				// Immediately following cbSamplerData in the SMPL chunk.
 {
 	DWORD	dwIdentifier;		//
@@ -233,18 +233,18 @@ public:
 		NoiseGate   = false;
 		SampleLoopsNum = 0;
 	}
-	
+
 	// 16-bit padding.
 	DWORD Pad16Bit( DWORD InDW )
 	{
 		return ((InDW + 1)& ~1);
 	}
 
-	// Read headers and load all info pointers in WaveModInfo. 
+	// Read headers and load all info pointers in WaveModInfo.
 	// Returns 0 if invalid data encountered.
 	// UBOOL ReadWaveInfo( TArray<BYTE>& WavData );
 	UBOOL ReadWaveInfo( TArray<BYTE>& WavData );
-	
+
 	// Handle RESIZING and updating of all variables needed for the new size:
 	// notably the (possibly multiple) loop structures.
 	UBOOL UpdateWaveData( TArray<BYTE>& WavData);
@@ -252,10 +252,10 @@ public:
 	// Wave size and/or bitdepth reduction.
 	void Reduce16to8();
 	void HalveData();
-	void HalveReduce16to8(); 
+	void HalveReduce16to8();
 
 	// Filters.
-	void NoiseGateFilter(); 
+	void NoiseGateFilter();
 };
 
 /*-----------------------------------------------------------------------------

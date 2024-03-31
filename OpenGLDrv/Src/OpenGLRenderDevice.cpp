@@ -11,7 +11,8 @@ UOpenGLRenderDevice::UOpenGLRenderDevice() : ErrorShader(this),
                                              RenderInterface(this),
                                              Backbuffer(0, 0, TEXF_RGBA8, false, false){}
 
-void UOpenGLRenderDevice::StaticConstructor(){
+void UOpenGLRenderDevice::StaticConstructor()
+{
 	SupportsCubemaps       = 1;
 	SupportsZBIAS          = 1;
 	CanDoDistortionEffects = 1;
@@ -38,21 +39,25 @@ void UOpenGLRenderDevice::StaticConstructor(){
 	new(GetClass(), "ShaderDir",              RF_Public) UStrProperty (CPP_PROPERTY(ShaderDir),               "",        CPF_Config);
 }
 
-bool UOpenGLRenderDevice::IsCurrent(){
+bool UOpenGLRenderDevice::IsCurrent()
+{
 	return OpenGLContext != NULL && wglGetCurrentContext() == OpenGLContext;
 }
 
-void UOpenGLRenderDevice::MakeCurrent(){
+void UOpenGLRenderDevice::MakeCurrent()
+{
 	checkSlow(OpenGLContext);
 
 	if(!IsCurrent())
 		wglMakeCurrent(DeviceContext, OpenGLContext);
 }
 
-void UOpenGLRenderDevice::UnSetRes(UViewport* Viewport){
+void UOpenGLRenderDevice::UnSetRes(UViewport* Viewport)
+{
 	guardFunc;
 
-	if(OpenGLContext){
+	if(OpenGLContext)
+	{
 		MakeCurrent();
 		Flush(Viewport);
 		RenderInterface.Exit();
@@ -64,7 +69,8 @@ void UOpenGLRenderDevice::UnSetRes(UViewport* Viewport){
 	unguard;
 }
 
-void UOpenGLRenderDevice::AddResource(FOpenGLResource* Resource){
+void UOpenGLRenderDevice::AddResource(FOpenGLResource* Resource)
+{
 	checkSlow(Resource->HashIndex == INDEX_NONE);
 	checkSlow(Resource->HashNext == NULL);
 	checkSlow(GetCachedResource(Resource->CacheId) == NULL);
@@ -74,14 +80,17 @@ void UOpenGLRenderDevice::AddResource(FOpenGLResource* Resource){
 	ResourceHash[Resource->HashIndex] = Resource;
 }
 
-void UOpenGLRenderDevice::RemoveResource(FOpenGLResource* Resource){
+void UOpenGLRenderDevice::RemoveResource(FOpenGLResource* Resource)
+{
 	checkSlow(Resource->RenDev == this);
 	checkSlow(Resource->HashIndex != INDEX_NONE);
 
 	FOpenGLResource** Temp = &ResourceHash[Resource->HashIndex];
 
-	while(*Temp){
-		if(*Temp == Resource){
+	while(*Temp)
+	{
+		if(*Temp == Resource)
+		{
 			*Temp = (*Temp)->HashNext;
 
 			break;
@@ -91,11 +100,13 @@ void UOpenGLRenderDevice::RemoveResource(FOpenGLResource* Resource){
 	}
 }
 
-FOpenGLResource* UOpenGLRenderDevice::GetCachedResource(QWORD CacheId){
+FOpenGLResource* UOpenGLRenderDevice::GetCachedResource(QWORD CacheId)
+{
 	INT HashIndex = GetResourceHashIndex(CacheId);
 	FOpenGLResource* Resource = ResourceHash[HashIndex];
 
-	while(Resource){
+	while(Resource)
+	{
 		if(Resource->CacheId == CacheId)
 			return Resource;
 
@@ -105,10 +116,12 @@ FOpenGLResource* UOpenGLRenderDevice::GetCachedResource(QWORD CacheId){
 	return NULL;
 }
 
-const FOpenGLShader* UOpenGLRenderDevice::GetShaderForMaterial(UMaterial* Material){
+const FOpenGLShader* UOpenGLRenderDevice::GetShaderForMaterial(UMaterial* Material)
+{
 	// HACK: The 30 bit padding space after UMaterial::Validated is used to store a flag, indicating whether the material has a shader or not and an index to retrieve it.
 
-	if(Material->Validated){
+	if(Material->Validated)
+	{
 		if(Material->UseFallback) // Material has a shader, so quickly look it up by index
 			return &ShadersByMaterial.GetPairs()[reinterpret_cast<INT*>(Material)[24] >> 3].Value;
 
@@ -126,28 +139,37 @@ const FOpenGLShader* UOpenGLRenderDevice::GetShaderForMaterial(UMaterial* Materi
 	bool ShaderLoaded = LoadShaderIfChanged(ShaderPath, ShaderText);
 	FOpenGLCachedShader* Shader = ShadersByMaterial.Find(*MaterialPathName);
 
-	if(Material->IsA<UHardwareShader>()){
+	if(Material->IsA<UHardwareShader>())
+	{
 		// Generate GLSL from D3D shader if no shader exists yet for the material or the source file is empty or deleted.
-		if((!Shader && !ShaderLoaded) || (ShaderLoaded && ShaderText.Len() == 0)){
+		if((!Shader && !ShaderLoaded) || (ShaderLoaded && ShaderText.Len() == 0))
+		{
 			ShaderText = GLSLShaderFromD3DHardwareShader(static_cast<UHardwareShader*>(Material));
 
 			if(bSaveShadersToDisk)
 				SaveShader(ShaderPath, ShaderText);
 		}
-	}else{
+	}
+	else
+	{
 		// Source file is empty or deleted, so free the shader and set the flag indicating that the material should use the shader generator instead.
 		// TODO: Handle this like the hardware shaders and write the generated shader code to the file in that case instead of using the flag.
-		if(Shader && ShaderLoaded && ShaderText.Len() == 0){
+		if(Shader && ShaderLoaded && ShaderText.Len() == 0)
+		{
 			Shader->Free();
 			Shader = NULL;
 			reinterpret_cast<INT*>(Material)[24] = (reinterpret_cast<INT*>(Material)[24] & 0x3) | 0x4;
-		}else if(!ShaderLoaded && reinterpret_cast<INT*>(Material)[24] & 0x4){ // The material previously used a shader but now doesn't anymore so return NULL
+		}
+		else if(!ShaderLoaded && reinterpret_cast<INT*>(Material)[24] & 0x4) // The material previously used a shader but now doesn't anymore so return NULL
+		{
 			Shader = NULL;
 		}
 	}
 
-	if(ShaderText.Len() > 0){
-		if(!Shader){
+	if(ShaderText.Len() > 0)
+	{
+		if(!Shader)
+		{
 			Shader = &ShadersByMaterial[*MaterialPathName];
 			Shader->RenDev = this;
 			Shader->Index = ShadersByMaterial.Num() - 1;
@@ -156,33 +178,41 @@ const FOpenGLShader* UOpenGLRenderDevice::GetShaderForMaterial(UMaterial* Materi
 		Shader->Compile(*ShaderText, *MaterialPathName);
 	}
 
-	if(Shader){
+	if(Shader)
+	{
 		Material->UseFallback = 1;
 		reinterpret_cast<INT*>(Material)[24] = (reinterpret_cast<INT*>(Material)[24] & 0x3) | (Shader->Index << 3);
-	}else{
+	}
+	else
+	{
 		Material->UseFallback = 0;
 	}
 
 	return Shader;
 }
 
-FOpenGLIndexBuffer* UOpenGLRenderDevice::GetDynamicIndexBuffer(INT IndexSize){
+FOpenGLIndexBuffer* UOpenGLRenderDevice::GetDynamicIndexBuffer(INT IndexSize)
+{
 	if(!DynamicIndexBuffer)
 		DynamicIndexBuffer = new FOpenGLIndexBuffer(this, MakeCacheID(CID_RenderIndices), true);
 
 	return DynamicIndexBuffer;
 }
 
-FOpenGLVertexStream* UOpenGLRenderDevice::GetDynamicVertexStream(){
+FOpenGLVertexStream* UOpenGLRenderDevice::GetDynamicVertexStream()
+{
 	if(!DynamicVertexStream)
 		DynamicVertexStream = new FOpenGLVertexStream(this, MakeCacheID(CID_RenderVertices), true);
 
 	return DynamicVertexStream;
 }
 
-UBOOL UOpenGLRenderDevice::Exec(const TCHAR* Cmd, FOutputDevice& Ar){
-	if(ParseCommand(&Cmd, "OPENGL")){
-		if(ParseCommand(&Cmd, "RELOADSHADERS")){
+UBOOL UOpenGLRenderDevice::Exec(const TCHAR* Cmd, FOutputDevice& Ar)
+{
+	if(ParseCommand(&Cmd, "OPENGL"))
+	{
+		if(ParseCommand(&Cmd, "RELOADSHADERS"))
+		{
 			Ar.Log("Reloading shaders from disk");
 
 			if(LoadShaderMacroText()) // Load the macros here. the shaders themselves are loaded on demand.
@@ -191,7 +221,9 @@ UBOOL UOpenGLRenderDevice::Exec(const TCHAR* Cmd, FOutputDevice& Ar){
 			UMaterial::ClearFallbacks();
 
 			return 1;
-		}else if(ParseCommand(&Cmd, "AUTORELOADSHADERS")){
+		}
+		else if(ParseCommand(&Cmd, "AUTORELOADSHADERS"))
+		{
 			bAutoReloadShaders = !bAutoReloadShaders;
 
 			if(bAutoReloadShaders)
@@ -206,10 +238,12 @@ UBOOL UOpenGLRenderDevice::Exec(const TCHAR* Cmd, FOutputDevice& Ar){
 	return 0;
 }
 
-static OPENGL_MESSAGE_CALLBACK(OpenGLMessageCallback){
+static OPENGL_MESSAGE_CALLBACK(OpenGLMessageCallback)
+{
 	const char* SourceStr;
 
-	switch(Source){
+	switch(Source)
+	{
 	case GL_DEBUG_SOURCE_API:
 		SourceStr = "API";
 		break;
@@ -234,7 +268,8 @@ static OPENGL_MESSAGE_CALLBACK(OpenGLMessageCallback){
 
 	const char* TypeStr;
 
-	switch(Type){
+	switch(Type)
+	{
 	case GL_DEBUG_TYPE_ERROR:
 		TypeStr = "ERROR";
 		break;
@@ -268,7 +303,8 @@ static OPENGL_MESSAGE_CALLBACK(OpenGLMessageCallback){
 
 	const char* SeverityStr;
 
-	switch(Severity){
+	switch(Severity)
+	{
 	case GL_DEBUG_SEVERITY_NOTIFICATION:
 		SeverityStr = "notification";
 		break;
@@ -288,7 +324,8 @@ static OPENGL_MESSAGE_CALLBACK(OpenGLMessageCallback){
 	if(Severity != GL_DEBUG_SEVERITY_NOTIFICATION || ((UOpenGLRenderDevice*)UserParam)->bShowDebugNotifications)
 		debugf("GL CALLBACK: source=%s, type=%s, severity=%s - %s", SourceStr, TypeStr, SeverityStr, Message);
 
-	if(Type == GL_DEBUG_TYPE_ERROR){
+	if(Type == GL_DEBUG_TYPE_ERROR)
+	{
 		GLog->Flush();
 
 		if(appIsDebuggerPresent())
@@ -296,11 +333,13 @@ static OPENGL_MESSAGE_CALLBACK(OpenGLMessageCallback){
 	}
 }
 
-UBOOL UOpenGLRenderDevice::Init(){
+UBOOL UOpenGLRenderDevice::Init()
+{
 	// Init SWRCFix if it exists. Hacky but RenderDevice is always loaded at startup...
 	HMODULE ModDLL = LoadLibraryA("Mod.dll");
 
-	if(ModDLL){
+	if(ModDLL)
+	{
 		void(CDECL*InitSWRCFix)(void) = reinterpret_cast<void(CDECL*)(void)>(GetProcAddress(ModDLL, "InitSWRCFix"));
 
 		if(InitSWRCFix)
@@ -343,7 +382,8 @@ UBOOL UOpenGLRenderDevice::Init(){
 	if(bUseTrilinear)
 		TextureFilter = TF_Trilinear;
 
-	foreachobj(UMaterial, It){
+	foreachobj(UMaterial, It)
+	{
 		It->UseFallback = 0;
 		It->Validated = 0;
 		reinterpret_cast<INT*>(*It)[24] &= 0x3; // Clear 30 bit padding after UMaterial::Validated that is used by the OpenGL renderer
@@ -358,10 +398,12 @@ UBOOL UOpenGLRenderDevice::Init(){
 	return 1;
 }
 
-UBOOL UOpenGLRenderDevice::SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL Fullscreen, INT ColorBytes, UBOOL bSaveSize){
+UBOOL UOpenGLRenderDevice::SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL Fullscreen, INT ColorBytes, UBOOL bSaveSize)
+{
 	guardFunc;
 
-	if(bFirstRun){
+	if(bFirstRun)
+	{
 		// Use desktop resolution when using the OpenGL renderer for the first time
 		bUseDesktopResolution = 1;
 		bFirstRun = 0;
@@ -373,7 +415,8 @@ UBOOL UOpenGLRenderDevice::SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL
 	INT FullscreenHeight = NewY;
 
 	// Set NewX and NewY to screen resolution if bUseDesktopResolution is true
-	if(Fullscreen){
+	if(Fullscreen)
+	{
 		HMONITOR    Monitor = MonitorFromWindow(Window, MONITOR_DEFAULTTOPRIMARY);
 		MONITORINFO Info    = {sizeof(MONITORINFO)};
 
@@ -382,7 +425,8 @@ UBOOL UOpenGLRenderDevice::SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL
 		FullscreenWidth  = Info.rcMonitor.right - Info.rcMonitor.left;
 		FullscreenHeight = Info.rcMonitor.bottom - Info.rcMonitor.top;
 
-		if(bUseDesktopResolution){
+		if(bUseDesktopResolution)
+		{
 			NewX = FullscreenWidth;
 			NewY = FullscreenHeight;
 		}
@@ -396,7 +440,8 @@ UBOOL UOpenGLRenderDevice::SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL
 		Use16bit = 0;
 
 	// Create new context if there isn't one already or if the desired color depth has changed.
-	if(!OpenGLContext || Was16Bit != Use16bit){
+	if(!OpenGLContext || Was16Bit != Use16bit)
+	{
 		UnSetRes(Viewport);
 
 		DeviceContext = GetDC(Window);
@@ -443,7 +488,8 @@ UBOOL UOpenGLRenderDevice::SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL
 
 		LoadWGLExtFuncs();
 
-		if(wglCreateContextAttribsARB){
+		if(wglCreateContextAttribsARB)
+		{
 			int Attribs[16];
 			int NumAttribs = 0;
 
@@ -454,7 +500,8 @@ UBOOL UOpenGLRenderDevice::SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL
 			Attribs[NumAttribs++] = WGL_CONTEXT_FLAGS_ARB;
 			Attribs[NumAttribs++] = WGL_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB;
 
-			if(bDebugOpenGL){
+			if(bDebugOpenGL)
+			{
 				debugf("OpenGL debugging enabled");
 				Attribs[NumAttribs - 1] |= WGL_CONTEXT_DEBUG_BIT_ARB;
 			}
@@ -465,16 +512,21 @@ UBOOL UOpenGLRenderDevice::SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL
 
 			OpenGLContext = wglCreateContextAttribsARB(DeviceContext, NULL, Attribs);
 
-			if(OpenGLContext){
+			if(OpenGLContext)
+			{
 				wglMakeCurrent(DeviceContext, OpenGLContext);
 				wglDeleteContext(TempContext);
 				LoadWGLExtFuncs();
-			}else{
+			}
+			else
+			{
 				debugf(NAME_Warning, "wglCreateContextAttribsARB failed");
 				// Use the temp context as a fallback. It might still work if it supports the required OpenGL version.
 				OpenGLContext = TempContext;
 			}
-		}else{
+		}
+		else
+		{
 			debugf("WGL_ARB_create_context not supported");
 			OpenGLContext = TempContext;
 		}
@@ -496,7 +548,8 @@ UBOOL UOpenGLRenderDevice::SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL
 
 		LoadGLFuncs();
 
-		if(bDebugOpenGL){
+		if(bDebugOpenGL)
+		{
 			glEnable(GL_DEBUG_OUTPUT);
 			glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
 			glDebugMessageCallback(OpenGLMessageCallback, this);
@@ -504,7 +557,8 @@ UBOOL UOpenGLRenderDevice::SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL
 
 		// Check for extensions
 
-		if(wglGetExtensionsStringARB){
+		if(wglGetExtensionsStringARB)
+		{
 			const char* WGLExtensions = wglGetExtensionsStringARB(DeviceContext);
 
 			if(WGLExtensions)
@@ -516,13 +570,17 @@ UBOOL UOpenGLRenderDevice::SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL
 
 		glGetIntegerv(GL_NUM_EXTENSIONS, &NumExtensions);
 
-		for(GLint i = 0; i < NumExtensions; ++i){
+		for(GLint i = 0; i < NumExtensions; ++i)
+		{
 			const TCHAR* Extension = reinterpret_cast<const TCHAR*>(glGetStringi(GL_EXTENSIONS, i));
 
 			if(!SupportsEXTFilterAnisotropic &&
-			   (appStrcmp(Extension, "GL_ARB_texture_filter_anisotropic") == 0 || appStrcmp(Extension, "GL_EXT_texture_filter_anisotropic") == 0)){
+			   (appStrcmp(Extension, "GL_ARB_texture_filter_anisotropic") == 0 || appStrcmp(Extension, "GL_EXT_texture_filter_anisotropic") == 0))
+			   {
 				SupportsEXTFilterAnisotropic = 1;
-			}else if(!SupportsDXTCompression && appStrcmp(Extension, "GL_EXT_texture_compression_s3tc") == 0){
+			}
+			else if(!SupportsDXTCompression && appStrcmp(Extension, "GL_EXT_texture_compression_s3tc") == 0)
+			{
 				SupportsDXTCompression = 1;
 			}
 		}
@@ -575,14 +633,17 @@ UBOOL UOpenGLRenderDevice::SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL
 		 * This means that glBlitNamedFramebuffer needs to be called with y and height exchanged in UOpenGLRenderDevice::Present
 		 */
 		glClipControl(GL_UPPER_LEFT, GL_NEGATIVE_ONE_TO_ONE);
-	}else{
+	}
+	else
+	{
 		MakeCurrent();
 		glDeleteRenderbuffers(1, &BackbufferDepthStencil);
 		BackbufferDepthStencil = GL_NONE;
 		RenderInterface.SetViewport(0, 0, NewX, NewY);
 	}
 
-	if(Fullscreen){
+	if(Fullscreen)
+	{
 		Viewport->ResizeViewport(BLIT_Fullscreen | BLIT_OpenGL, FullscreenWidth, FullscreenHeight);
 		SavedViewportWidth = Viewport->SizeX;
 		SavedViewportHeight = Viewport->SizeY;
@@ -590,7 +651,8 @@ UBOOL UOpenGLRenderDevice::SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL
 		Viewport->SizeY = NewY;
 		bIsFullscreen = 1;
 
-		if(bSaveSize){
+		if(bSaveSize)
+		{
 			UClient* Client = Viewport->GetOuterUClient();
 
 			// NOTE: We have to do it like this since the bSaveSize parameter for ResizeViewport seems to have no effect
@@ -598,7 +660,9 @@ UBOOL UOpenGLRenderDevice::SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL
 			Client->FullscreenViewportY = Viewport->SizeY;
 			Client->SaveConfig();
 		}
-	}else{
+	}
+	else
+	{
 		Viewport->ResizeViewport(BLIT_OpenGL, NewX, NewY);
 		bIsFullscreen = 0;
 	}
@@ -608,7 +672,8 @@ UBOOL UOpenGLRenderDevice::SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL
 	glNamedRenderbufferStorage(BackbufferDepthStencil, GL_DEPTH24_STENCIL8, NewX, NewY);
 
 	// Resize screen render target if necessary
-	if(Backbuffer.Width != NewX || Backbuffer.Height != NewY){
+	if(Backbuffer.Width != NewX || Backbuffer.Height != NewY)
+	{
 		Backbuffer.Width = NewX;
 		Backbuffer.Height = NewY;
 		++Backbuffer.Revision;
@@ -619,7 +684,8 @@ UBOOL UOpenGLRenderDevice::SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL
 	unguard;
 }
 
-void UOpenGLRenderDevice::Exit(UViewport* Viewport){
+void UOpenGLRenderDevice::Exit(UViewport* Viewport)
+{
 	UnSetRes(Viewport);
 	GIsOpenGL = 0;
 
@@ -628,7 +694,8 @@ void UOpenGLRenderDevice::Exit(UViewport* Viewport){
 	OpenGL32Dll = NULL;
 }
 
-void UOpenGLRenderDevice::Flush(UViewport* Viewport){
+void UOpenGLRenderDevice::Flush(UViewport* Viewport)
+{
 	checkSlow(IsCurrent());
 	RenderInterface.Flush();
 	Scratch.Empty();
@@ -636,10 +703,12 @@ void UOpenGLRenderDevice::Flush(UViewport* Viewport){
 	if(Viewport && Viewport->Actor && Viewport->Actor->FrameFX)
 		Viewport->Actor->FrameFX->FreeRenderTargets();
 
-	for(INT i = 0; i < ARRAY_COUNT(ResourceHash); ++i){
+	for(INT i = 0; i < ARRAY_COUNT(ResourceHash); ++i)
+	{
 		FOpenGLResource* Resource = ResourceHash[i];
 
-		while(Resource){
+		while(Resource)
+		{
 			delete Resource;
 			Resource = ResourceHash[i];
 		}
@@ -653,19 +722,23 @@ void UOpenGLRenderDevice::Flush(UViewport* Viewport){
 	UMaterial::ClearFallbacks();
 }
 
-void UOpenGLRenderDevice::FlushResource(QWORD CacheId){
+void UOpenGLRenderDevice::FlushResource(QWORD CacheId)
+{
 	FOpenGLResource* Resource = GetCachedResource(CacheId);
 
 	if(Resource)
 		delete Resource;
 }
 
-UBOOL UOpenGLRenderDevice::ResourceCached(QWORD CacheId){
+UBOOL UOpenGLRenderDevice::ResourceCached(QWORD CacheId)
+{
 	return GetCachedResource(CacheId) != NULL;
 }
 
-void UOpenGLRenderDevice::EnableVSync(bool bEnable){
-	if(wglSwapIntervalEXT){
+void UOpenGLRenderDevice::EnableVSync(bool bEnable)
+{
+	if(wglSwapIntervalEXT)
+	{
 		bVSync = bEnable;
 
 		INT Interval;
@@ -676,15 +749,19 @@ void UOpenGLRenderDevice::EnableVSync(bool bEnable){
 			Interval = 0;
 
 		wglSwapIntervalEXT(Interval);
-	}else{
+	}
+	else
+	{
 		bVSync = 0;
 	}
 }
 
-FRenderInterface* UOpenGLRenderDevice::Lock(UViewport* Viewport, BYTE* HitData, INT* HitSize){
+FRenderInterface* UOpenGLRenderDevice::Lock(UViewport* Viewport, BYTE* HitData, INT* HitSize)
+{
 	MakeCurrent();
 
-	if(bAutoReloadShaders){
+	if(bAutoReloadShaders)
+	{
 		if(LoadShaderMacroText())
 			ShaderFileTimes.Empty(); // Macros may have changed, so force reload all shaders
 
@@ -694,8 +771,10 @@ FRenderInterface* UOpenGLRenderDevice::Lock(UViewport* Viewport, BYTE* HitData, 
 	// Detect texture quality setting changes
 
 	UClient* Client = UTexture::__Client;
-	for(INT i = 0; i < LODSET_MAX; ++i){
-		if(TextureLODSet[i] != Client->TextureLODSet[i]){
+	for(INT i = 0; i < LODSET_MAX; ++i)
+	{
+		if(TextureLODSet[i] != Client->TextureLODSet[i])
+		{
 			appMemcpy(TextureLODSet, Client->TextureLODSet, sizeof(Client->TextureLODSet));
 			Flush(Viewport);
 			break;
@@ -708,12 +787,14 @@ FRenderInterface* UOpenGLRenderDevice::Lock(UViewport* Viewport, BYTE* HitData, 
 	return &RenderInterface;
 }
 
-void UOpenGLRenderDevice::Unlock(FRenderInterface* RI){
+void UOpenGLRenderDevice::Unlock(FRenderInterface* RI)
+{
 	checkSlow(RI == &RenderInterface);
 	RenderInterface.Unlocked();
 }
 
-void UOpenGLRenderDevice::Present(UViewport* Viewport){
+void UOpenGLRenderDevice::Present(UViewport* Viewport)
+{
 	checkSlow(IsCurrent());
 
 	HandleMovieWindow(Viewport);
@@ -723,7 +804,8 @@ void UOpenGLRenderDevice::Present(UViewport* Viewport){
 	INT ViewportWidth;
 	INT ViewportHeight;
 
-	if(bKeepAspectRatio && bIsFullscreen){
+	if(bKeepAspectRatio && bIsFullscreen)
+	{
 		// Clear black bars.
 		FPlane Black(0.0f, 0.0f, 0.0f, 1.0f);
 		glClearNamedFramebufferfv(GL_NONE, GL_COLOR, GL_NONE, reinterpret_cast<GLfloat*>(&Black));
@@ -736,24 +818,32 @@ void UOpenGLRenderDevice::Present(UViewport* Viewport){
 		FLOAT ScreenAspectRatio = static_cast<FLOAT>(ScreenWidth) / ScreenHeight;
 		FLOAT FramebufferAspectRatio = static_cast<FLOAT>(FramebufferWidth) / FramebufferHeight;
 
-		if(FramebufferAspectRatio < ScreenAspectRatio){ // Vertical black bars
+		if(FramebufferAspectRatio < ScreenAspectRatio) // Vertical black bars
+		{
 			ViewportWidth = FramebufferWidth * (static_cast<FLOAT>(ScreenHeight) / FramebufferHeight);
 			ViewportHeight = ScreenHeight;
-		}else{ // Horizontal black bars
+		}
+		else
+		{ // Horizontal black bars
 			ViewportWidth = ScreenWidth;
 			ViewportHeight = FramebufferHeight * (static_cast<FLOAT>(ScreenWidth) / FramebufferWidth);
 		}
 
 		ViewportX = (ScreenWidth - ViewportWidth) / 2;
 		ViewportY = (ScreenHeight - ViewportHeight) / 2;
-	}else{
+	}
+	else
+	{
 		ViewportX = 0;
 		ViewportY = 0;
 
-		if(bIsFullscreen){
+		if(bIsFullscreen)
+		{
 			ViewportWidth = SavedViewportWidth;
 			ViewportHeight = SavedViewportHeight;
-		}else{
+		}
+		else
+		{
 			ViewportWidth = Viewport->SizeX;
 			ViewportHeight = Viewport->SizeY;
 		}
@@ -761,7 +851,8 @@ void UOpenGLRenderDevice::Present(UViewport* Viewport){
 
 	FOpenGLTexture* BackbufferTexture = static_cast<FOpenGLTexture*>(GetCachedResource(Backbuffer.GetCacheId()));
 
-	if(BackbufferTexture){
+	if(BackbufferTexture)
+	{
 		glBlitNamedFramebuffer(BackbufferTexture->FBO, GL_NONE,
 		                       0, 0, BackbufferTexture->Width, BackbufferTexture->Height,
 		                       ViewportX, ViewportY + ViewportHeight, ViewportX + ViewportWidth, ViewportY,
@@ -773,8 +864,10 @@ void UOpenGLRenderDevice::Present(UViewport* Viewport){
 	checkSlow(glGetError() == GL_NO_ERROR);
 }
 
-void UOpenGLRenderDevice::ReadPixels(UViewport* Viewport, FColor* Pixels){
-	if(Viewport && Pixels){
+void UOpenGLRenderDevice::ReadPixels(UViewport* Viewport, FColor* Pixels)
+{
+	if(Viewport && Pixels)
+	{
 		RenderInterface.PushState();
 		RenderInterface.SetRenderTarget(&Backbuffer, true);
 		glReadPixels(0, 0, Viewport->SizeX, Viewport->SizeY, GL_BGRA, GL_UNSIGNED_BYTE, Pixels);
@@ -782,13 +875,15 @@ void UOpenGLRenderDevice::ReadPixels(UViewport* Viewport, FColor* Pixels){
 	}
 }
 
-FRenderCaps* UOpenGLRenderDevice::GetRenderCaps(){
+FRenderCaps* UOpenGLRenderDevice::GetRenderCaps()
+{
 	static FRenderCaps RenderCaps(4, 14, 1);
 
 	return &RenderCaps;
 }
 
-void UOpenGLRenderDevice::RenderMovie(UViewport* Viewport){
+void UOpenGLRenderDevice::RenderMovie(UViewport* Viewport)
+{
 	FMovie* Movie = NULL;
 
 	if(Viewport->Actor && Viewport->Actor->myHUD && Viewport->Actor->myHUD->Movie)
@@ -808,31 +903,36 @@ void UOpenGLRenderDevice::RenderMovie(UViewport* Viewport){
 		Unlock(&RenderInterface);
 }
 
-FMovie* UOpenGLRenderDevice::GetNewMovie(ECodecType Codec, FString Filename, UBOOL UseSound, INT FrameRate, int){
+FMovie* UOpenGLRenderDevice::GetNewMovie(ECodecType Codec, FString Filename, UBOOL UseSound, INT FrameRate, int)
+{
 	if(Codec == CODEC_RoQ)
 		return new FRoQMovie(Filename, UseSound, FrameRate);
 
 	return NULL;
 }
 
-void UOpenGLRenderDevice::TakeScreenshot(const TCHAR* Name, UViewport* Viewport, INT Width, INT Height){
+void UOpenGLRenderDevice::TakeScreenshot(const TCHAR* Name, UViewport* Viewport, INT Width, INT Height)
+{
 	check(Width == Viewport->SizeX);
 	check(Height == Viewport->SizeY);
 	URenderDevice::TakeScreenshot(Name, Viewport, Width, Height);
 }
 
-FStringTemp UOpenGLRenderDevice::MakeShaderFilename(const FString& ShaderName, const TCHAR* Extension){
+FStringTemp UOpenGLRenderDevice::MakeShaderFilename(const FString& ShaderName, const TCHAR* Extension)
+{
 	return FStringTemp(appBaseDir()) * ShaderDir * ShaderName + Extension;
 }
 
-bool UOpenGLRenderDevice::ShaderFileNeedsReload(const char* Filename){
+bool UOpenGLRenderDevice::ShaderFileNeedsReload(const char* Filename)
+{
 	SQWORD CurrentFileTime = GFileManager->GetGlobalTime(Filename);
 	SQWORD PreviousFileTime = ShaderFileTimes[Filename];
 
 	return CurrentFileTime != PreviousFileTime;
 }
 
-bool UOpenGLRenderDevice::LoadShaderIfChanged(const FString& Name, FString& Out){
+bool UOpenGLRenderDevice::LoadShaderIfChanged(const FString& Name, FString& Out)
+{
 	FFilename Filename = MakeShaderFilename(Name, SHADER_FILE_EXTENSION);
 
 	// If macros have updated the shader code needs to be reloaded even if the file wasn't updated since it might use some macros
@@ -842,11 +942,13 @@ bool UOpenGLRenderDevice::LoadShaderIfChanged(const FString& Name, FString& Out)
 	return false;
 }
 
-void UOpenGLRenderDevice::SaveShader(const FString& Name, const FString& Text){
+void UOpenGLRenderDevice::SaveShader(const FString& Name, const FString& Text)
+{
 	SaveShaderText(MakeShaderFilename(Name, SHADER_FILE_EXTENSION), Text);
 }
 
-bool UOpenGLRenderDevice::LoadShaderMacroText(){
+bool UOpenGLRenderDevice::LoadShaderMacroText()
+{
 	FFilename Filename = MakeShaderFilename("Macros", SHADER_MACROS_FILE_EXTENSION);
 	SQWORD CurrentFileTime = GFileManager->GetGlobalTime(*Filename);
 
@@ -855,7 +957,8 @@ bool UOpenGLRenderDevice::LoadShaderMacroText(){
 
 	FString Macros;
 
-	if(appLoadFileToString(Macros, *Filename)){
+	if(appLoadFileToString(Macros, *Filename))
+	{
 		ShaderMacroFileTime = CurrentFileTime;
 		debugf("Loaded %s", *Filename.GetCleanFilename());
 		ParseGLSLMacros(Macros);
@@ -864,7 +967,8 @@ bool UOpenGLRenderDevice::LoadShaderMacroText(){
 	}
 
 	// Reset file time in case the file was deleted
-	if(GFileManager->FileSize(*Filename) < 0){
+	if(GFileManager->FileSize(*Filename) < 0)
+	{
 		ShaderMacroFileTime = 0;
 
 		return true;
@@ -873,15 +977,19 @@ bool UOpenGLRenderDevice::LoadShaderMacroText(){
 	return false;
 }
 
-void UOpenGLRenderDevice::SaveShaderMacroText(){
+void UOpenGLRenderDevice::SaveShaderMacroText()
+{
 	FString Macros;
 
-	for(TMap<FString, FString>::TIterator It(ShaderMacros); It; ++It){
+	for(TMap<FString, FString>::TIterator It(ShaderMacros); It; ++It)
+	{
 		FString MacroText = It.Value();
 
 		// Trim leading empty lines
-		for(INT i = 0; i < MacroText.Len(); ++i){
-			if(!appIsSpace(MacroText[i])){
+		for(INT i = 0; i < MacroText.Len(); ++i)
+		{
+			if(!appIsSpace(MacroText[i]))
+			{
 				while(i > 0 && MacroText[i - 1] != '\n') // Preserve leading whitespace on first line
 					--i;
 
@@ -891,8 +999,10 @@ void UOpenGLRenderDevice::SaveShaderMacroText(){
 		}
 
 		// Trim trailing empty lines
-		for(INT i = MacroText.Len() - 1; i >= 0; --i){
-			if(!appIsSpace(MacroText[i])){
+		for(INT i = MacroText.Len() - 1; i >= 0; --i)
+		{
+			if(!appIsSpace(MacroText[i]))
+			{
 				MacroText = MacroText.Left(i + 1);
 				break;
 			}
@@ -904,8 +1014,10 @@ void UOpenGLRenderDevice::SaveShaderMacroText(){
 	SaveShaderText(MakeShaderFilename("Macros", SHADER_MACROS_FILE_EXTENSION), Macros);
 }
 
-bool UOpenGLRenderDevice::LoadShaderText(const FFilename& Filename, FString* Out){
-	if(appLoadFileToString(*Out, *Filename)){
+bool UOpenGLRenderDevice::LoadShaderText(const FFilename& Filename, FString* Out)
+{
+	if(appLoadFileToString(*Out, *Filename))
+	{
 		ShaderFileTimes[*Filename] = GFileManager->GetGlobalTime(*Filename);
 		debugf("Loaded %s", *Filename.GetCleanFilename());
 
@@ -913,7 +1025,8 @@ bool UOpenGLRenderDevice::LoadShaderText(const FFilename& Filename, FString* Out
 	}
 
 	// Reset file time in case the file was deleted
-	if(GFileManager->FileSize(*Filename) < 0){
+	if(GFileManager->FileSize(*Filename) < 0)
+	{
 		ShaderFileTimes[*Filename] = 0;
 
 		return true;
@@ -922,7 +1035,8 @@ bool UOpenGLRenderDevice::LoadShaderText(const FFilename& Filename, FString* Out
 	return false;
 }
 
-void UOpenGLRenderDevice::SaveShaderText(const FFilename& Filename, const FString& Text){
+void UOpenGLRenderDevice::SaveShaderText(const FFilename& Filename, const FString& Text)
+{
 	GFileManager->MakeDirectory(*(Filename.GetPath() + "\\"), 1);
 
 	if(appSaveStringToFile(Text, *Filename, GFileManager))
@@ -934,18 +1048,23 @@ void UOpenGLRenderDevice::SaveShaderText(const FFilename& Filename, const FStrin
  * Movies like the intros and extras are played in a separate window. We resize and position it on top of the game window.
  * Works alright, except for the mouse cursor which is visible in the center of the window in fullscreen mode.
  */
-void UOpenGLRenderDevice::HandleMovieWindow(UViewport* Viewport){
-	if(Viewport->GetOuterUClient()->IsMoviePlaying()){
+void UOpenGLRenderDevice::HandleMovieWindow(UViewport* Viewport)
+{
+	if(Viewport->GetOuterUClient()->IsMoviePlaying())
+	{
 		HWND MovieWindow = FindWindowA(NULL, "ActiveMovie Window");
 
-		if(CurrentMovieWindow != MovieWindow){
+		if(CurrentMovieWindow != MovieWindow)
+		{
 			CurrentMovieWindow = MovieWindow;
 
 			if(!CurrentMovieWindow)
 				return;
 
 			SetWindowLongA(CurrentMovieWindow, GWL_STYLE, GetWindowLongA(CurrentMovieWindow, GWL_STYLE) & ~(WS_CAPTION | WS_THICKFRAME));
-		}else if(!CurrentMovieWindow){
+		}
+		else if(!CurrentMovieWindow)
+		{
 			return;
 		}
 
@@ -955,13 +1074,15 @@ void UOpenGLRenderDevice::HandleMovieWindow(UViewport* Viewport){
 		GetClientRect(ViewportWindow, &Rect);
 		MapWindowPoints(ViewportWindow, NULL, reinterpret_cast<POINT*>(&Rect), 2); // Map client rect to screen coordinates
 
-		if(GetAsyncKeyState(VK_LBUTTON) || GetAsyncKeyState(VK_RBUTTON)){
+		if(GetAsyncKeyState(VK_LBUTTON) || GetAsyncKeyState(VK_RBUTTON))
+		{
 			POINT CursorPos;
 			GetCursorPos(&CursorPos);
 
 			// Stop movie if mouse was clicked in client area
 			if(CursorPos.x >= Rect.left && CursorPos.x <= Rect.right &&
-			   CursorPos.y >= Rect.top && CursorPos.y <= Rect.bottom){
+			   CursorPos.y >= Rect.top && CursorPos.y <= Rect.bottom)
+			   {
 				Viewport->GetOuterUClient()->StopMovie();
 
 				return;
@@ -969,7 +1090,8 @@ void UOpenGLRenderDevice::HandleMovieWindow(UViewport* Viewport){
 		}
 
 		// Correct aspect ratio of video player in fullscreen to fit inside black bars
-		if(bIsFullscreen && bKeepAspectRatio){
+		if(bIsFullscreen && bKeepAspectRatio)
+		{
 			INT FramebufferWidth = Viewport->SizeX;
 			INT FramebufferHeight = Viewport->SizeY;
 			INT ScreenWidth = SavedViewportWidth;
@@ -979,11 +1101,14 @@ void UOpenGLRenderDevice::HandleMovieWindow(UViewport* Viewport){
 			FLOAT ScreenAspectRatio = static_cast<FLOAT>(ScreenWidth) / ScreenHeight;
 			FLOAT FramebufferAspectRatio = static_cast<FLOAT>(FramebufferWidth) / FramebufferHeight;
 
-			if(FramebufferAspectRatio < ScreenAspectRatio){
+			if(FramebufferAspectRatio < ScreenAspectRatio)
+			{
 				FLOAT Scale = static_cast<FLOAT>(ScreenHeight) / FramebufferHeight;
 
 				XScale = FramebufferWidth * Scale / ScreenWidth;
-			}else{
+			}
+			else
+			{
 				FLOAT Scale = static_cast<FLOAT>(ScreenWidth) / FramebufferWidth;
 
 				YScale = FramebufferHeight * Scale / ScreenHeight;
@@ -1000,19 +1125,23 @@ void UOpenGLRenderDevice::HandleMovieWindow(UViewport* Viewport){
 
 		SetWindowPos(CurrentMovieWindow, HWND_TOPMOST, Rect.left, Rect.top, Rect.right - Rect.left, Rect.bottom - Rect.top, SWP_SHOWWINDOW);
 		SetFocus(ViewportWindow); // Focus on viewport window to let the engine handle any keyboard input
-	}else{
+	}
+	else
+	{
 		CurrentMovieWindow = NULL;
 	}
 }
 
-void UOpenGLRenderDevice::LoadWGLExtFuncs(){
+void UOpenGLRenderDevice::LoadWGLExtFuncs()
+{
 #define WGL_FUNC(name, ret, args) \
 	wgl ## name = reinterpret_cast<ret(OPENGL_CALL*)args>(wglGetProcAddress("wgl" #name));
 	WGL_EXT_FUNCS
 #undef WGL_FUNC
 }
 
-void UOpenGLRenderDevice::LoadGLFuncs(){
+void UOpenGLRenderDevice::LoadGLFuncs()
+{
 #define GL_FUNC(name, ret, args) \
 	gl ## name = reinterpret_cast<ret(OPENGL_CALL*)args>(wglGetProcAddress("gl" #name)); \
 	if(!gl ## name) \
@@ -1021,7 +1150,8 @@ void UOpenGLRenderDevice::LoadGLFuncs(){
 #undef GL_FUNC
 }
 
-void UOpenGLRenderDevice::LoadGLExtFuncs(){
+void UOpenGLRenderDevice::LoadGLExtFuncs()
+{
 #define GL_FUNC(name, ret, args) \
 	gl ## name = reinterpret_cast<ret(OPENGL_CALL*)args>(wglGetProcAddress("gl" #name));
 	GL_EXT_FUNCS

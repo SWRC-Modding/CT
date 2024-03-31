@@ -22,7 +22,7 @@ enum EHTTPState
 class UHTTPDownload : public UDownload
 {
 	DECLARE_CLASS(UHTTPDownload,UDownload,CLASS_Transient|CLASS_Config,Engine);
-    	
+
 	// Config.
 	FStringNoInit	ProxyServerHost;
 	INT				ProxyServerPort;

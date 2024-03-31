@@ -2,22 +2,27 @@
 #include "OpenGLRenderDevice.h"
 #include "OpenGLResource.h"
 
-UMaterial* FOpenGLRenderInterface::RemoveModifiers(UMaterial* Material, FModifierInfo& ModifierInfo){
+UMaterial* FOpenGLRenderInterface::RemoveModifiers(UMaterial* Material, FModifierInfo& ModifierInfo)
+{
 	checkSlow(Material);
 
-	while(Material->IsA<UModifier>()){
-		if(Material->IsA<UTexModifier>()){
+	while(Material->IsA<UModifier>())
+	{
+		if(Material->IsA<UTexModifier>())
+		{
 			ModifierInfo.bModifiesTextureCoordinates = true;
 
 			UTexModifier* TexModifier = static_cast<UTexModifier*>(Material);
 			FMatrix* Matrix = TexModifier->GetMatrix(GEngineTime);
 
-			if(Matrix && *Matrix != FMatrix::Identity){
+			if(Matrix && *Matrix != FMatrix::Identity)
+			{
 				ModifierInfo.TexMatrix *= *Matrix;
 				ModifierInfo.bUseTexMatrix = 1;
 			}
 
-			if(TexModifier->TexCoordSource != TCS_NoChange){
+			if(TexModifier->TexCoordSource != TCS_NoChange)
+			{
 				ModifierInfo.bTexCoordProjected = TexModifier->TexCoordProjected;
 				ModifierInfo.TexCoordSrc = static_cast<ETexCoordSrc>(TexModifier->TexCoordSource);
 				ModifierInfo.TexCoordCount = static_cast<ETexCoordCount>(TexModifier->TexCoordCount);
@@ -25,10 +30,13 @@ UMaterial* FOpenGLRenderInterface::RemoveModifiers(UMaterial* Material, FModifie
 
 			ModifierInfo.TexUClamp = static_cast<ETexClampModeOverride>(TexModifier->UClampMode);
 			ModifierInfo.TexVClamp = static_cast<ETexClampModeOverride>(TexModifier->VClampMode);
-		}else if(Material->IsA<UFinalBlend>()){
+		}
+		else if(Material->IsA<UFinalBlend>())
+		{
 			UFinalBlend* FinalBlend = static_cast<UFinalBlend*>(Material);
 
-			if(!ModifyFramebufferBlending){
+			if(!ModifyFramebufferBlending)
+			{
 				ModifyFramebufferBlending = true;
 				SetFramebufferBlending(static_cast<EFrameBufferBlending>(FinalBlend->FrameBufferBlending));
 				CurrentState->bZTest = FinalBlend->ZTest != 0;
@@ -38,11 +46,14 @@ UMaterial* FOpenGLRenderInterface::RemoveModifiers(UMaterial* Material, FModifie
 			if(FinalBlend->TwoSided)
 				CurrentState->CullMode = CM_None;
 
-			if(FinalBlend->AlphaTest){
+			if(FinalBlend->AlphaTest)
+			{
 				CurrentState->AlphaRef = FinalBlend->AlphaRef / 255.0f;
 				++CurrentState->UniformRevision;
 			}
-		}else if(Material->IsA<UColorModifier>()){
+		}
+		else if(Material->IsA<UColorModifier>())
+		{
 			UColorModifier* ColorModifier = static_cast<UColorModifier*>(Material);
 
 			CurrentState->ModifyColor = 1;
@@ -62,14 +73,17 @@ UMaterial* FOpenGLRenderInterface::RemoveModifiers(UMaterial* Material, FModifie
 	return Material;
 }
 
-void FOpenGLRenderInterface::GetShaderConstants(FSConstantsInfo* Info, FPlane* Constants, INT NumConstants){
+void FOpenGLRenderInterface::GetShaderConstants(FSConstantsInfo* Info, FPlane* Constants, INT NumConstants)
+{
 	if(CurrentState->MatricesChanged)
 		UpdateMatrices();
 
 	FMatrix Matrix;
 
-	for(INT i = 0; i < NumConstants; ++i){
-		switch(Info[i].Type){
+	for(INT i = 0; i < NumConstants; ++i)
+	{
+		switch(Info[i].Type)
+		{
 		case EVC_Unused:
 			continue;
 		case EVC_MaterialDefined:
@@ -160,13 +174,17 @@ void FOpenGLRenderInterface::GetShaderConstants(FSConstantsInfo* Info, FPlane* C
 				FDynamicLight* Spotlight = ShaderLights[0];
 				BYTE ConstantType = Info[i].Type;
 
-				if(ConstantType == EVC_SpotlightDirection){
-					if(Spotlight && Spotlight->Actor && Spotlight->Actor->LightCone > 0){
+				if(ConstantType == EVC_SpotlightDirection)
+				{
+					if(Spotlight && Spotlight->Actor && Spotlight->Actor->LightCone > 0)
+					{
 						Constants[i].X = Spotlight->Direction.X;
 						Constants[i].Y = Spotlight->Direction.Y;
 						Constants[i].Z = Spotlight->Direction.Z;
 						Constants[i].W = 1.0f;
-					}else{
+					}
+					else
+					{
 						Constants[i].X = 1.0f;
 						Constants[i].Y = 0.0f;
 						Constants[i].Z = 0.0f;
@@ -174,15 +192,20 @@ void FOpenGLRenderInterface::GetShaderConstants(FSConstantsInfo* Info, FPlane* C
 					}
 
 					continue;
-				}else if(ConstantType == EVC_SpotlightCosCone){
-					if(Spotlight && Spotlight->Actor && Spotlight->Actor->LightCone > 0){
+				}
+				else if(ConstantType == EVC_SpotlightCosCone)
+				{
+					if(Spotlight && Spotlight->Actor && Spotlight->Actor->LightCone > 0)
+					{
 						FLOAT CosCone = Spotlight->Actor->LightCone * 0.00097659999f;
 
 						Constants[i].X = Square(1.0f - CosCone) * 1.075f;
 						Constants[i].Y = Constants[i].X * 0.1;
 						Constants[i].Z = 1.0f / Constants[i].Y;
 						Constants[i].W = 1.0f;
-					}else{
+					}
+					else
+					{
 						Constants[i].X = 0.0f;
 						Constants[i].Y = 0.0f;
 						Constants[i].Z = 0.0f;
@@ -190,16 +213,22 @@ void FOpenGLRenderInterface::GetShaderConstants(FSConstantsInfo* Info, FPlane* C
 					}
 
 					continue;
-				}else{
+				}
+				else
+				{
 					FDynamicLight* Light = ShaderLights[(ConstantType - EVC_LightPos1) / 3];
 					BYTE LightConstant = (ConstantType - EVC_LightPos1) % 3; // 0 = Position, 1 = Color, 2 = InvRadius
 
-					switch(LightConstant){
+					switch(LightConstant)
+					{
 					case 0: // Position
-						if(Light){
+						if(Light)
+						{
 							// Transform light from world to object space
 							Constants[i] = CurrentState->WorldToLocal.TransformFPlane(FPlane(Light->Position, 1.0f));
-						}else{
+						}
+						else
+						{
 							Constants[i].X = 10000000.0f;
 							Constants[i].Y = 10000000.0f;
 							Constants[i].Z = 10000000.0f;
@@ -215,7 +244,8 @@ void FOpenGLRenderInterface::GetShaderConstants(FSConstantsInfo* Info, FPlane* C
 
 						continue;
 					case 2: // InvRadius
-						if(Light){
+						if(Light)
+						{
 #if 0
 							// NOTE: This version of the inv radius constants should be correct as it produces the same values the d3d renderer does.
 							//       However, for an unknown reason it causes some objects to be very bright so until the problem is known, there's a
@@ -232,7 +262,9 @@ void FOpenGLRenderInterface::GetShaderConstants(FSConstantsInfo* Info, FPlane* C
 							Constants[i].Z = 0.0f;
 							Constants[i].W = 1.0f;
 #endif
-						}else{
+						}
+						else
+						{
 							Constants[i].X = 10000000.0f;
 							Constants[i].Y = 10000000.0f;
 							Constants[i].Z = 10000000.0f;
@@ -255,7 +287,8 @@ void FOpenGLRenderInterface::GetShaderConstants(FSConstantsInfo* Info, FPlane* C
 				static FLOAT Rand2 = 0.5f;
 				static FLOAT Rand3 = 0.5f;
 
-				if(LastEngineTime != GEngineTime){ // Don't update flicker if the game is paused
+				if(LastEngineTime != GEngineTime) // Don't update flicker if the game is paused
+				{
 					LastEngineTime = GEngineTime;
 					Rand1 = appRand() / (float)RAND_MAX;
 					Rand2 = appRand() / (float)RAND_MAX;
@@ -273,11 +306,14 @@ void FOpenGLRenderInterface::GetShaderConstants(FSConstantsInfo* Info, FPlane* C
 			}
 			continue;
 		case EVC_DrawScale3D:
-			if(GCubemapManager && GCubemapManager->Actor){
+			if(GCubemapManager && GCubemapManager->Actor)
+			{
 				Constants[i].X = GCubemapManager->Actor->DrawScale3D.X;
 				Constants[i].Y = GCubemapManager->Actor->DrawScale3D.Y;
 				Constants[i].Z = GCubemapManager->Actor->DrawScale3D.Z;
-			}else{
+			}
+			else
+			{
 				Constants[i].X = CurrentState->LocalToWorld.M[0][0];
 				Constants[i].Y = CurrentState->LocalToWorld.M[1][1];
 				Constants[i].Z = CurrentState->LocalToWorld.M[2][2];
@@ -323,7 +359,8 @@ void FOpenGLRenderInterface::SetTexture(FBaseTexture* Texture,
                                         ETexClampModeOverride VClamp,
                                         FLOAT BumpSize,
                                         FLOAT BumpLumaScale,
-                                        FLOAT BumpLumaOffset){
+                                        FLOAT BumpLumaOffset)
+                                        {
 	checkSlow(Texture);
 	checkSlow(TextureIndex < MAX_TEXTURES);
 
@@ -344,17 +381,23 @@ void FOpenGLRenderInterface::SetTexture(FBaseTexture* Texture,
 
 	UBOOL WasCubemap = TextureInfo.IsCubemap;
 
-	if(GLTexture->IsCubemap){
+	if(GLTexture->IsCubemap)
+	{
 		TextureInfo.IsCubemap = 1;
 		TextureUnit.ClampU = TC_Clamp;
 		TextureUnit.ClampV = TC_Clamp;
-	}else{
+	}
+	else
+	{
 		TextureInfo.IsCubemap = 0;
 
-		if(!GLTexture->IsRenderTarget()){
+		if(!GLTexture->IsRenderTarget())
+		{
 			TextureUnit.ClampU = UClamp == TCO_UseTextureMode ? Texture->GetUClamp() : UClamp - 1;
 			TextureUnit.ClampV = VClamp == TCO_UseTextureMode ? Texture->GetVClamp() : VClamp - 1;
-		}else{
+		}
+		else
+		{
 			 // Render targets should use TC_Clamp to avoid artifacts at the edges of the screen
 			TextureUnit.ClampU = TC_Clamp;
 			TextureUnit.ClampV = TC_Clamp;
@@ -384,15 +427,18 @@ void FOpenGLRenderInterface::SetBitmapTexture(UBitmapMaterial* Bitmap,
                                               ETexClampModeOverride VClamp,
                                               FLOAT BumpSize,
                                               FLOAT BumpLumaScale,
-                                              FLOAT BumpLumaOffset){
+                                              FLOAT BumpLumaOffset)
+                                              {
 	FBaseTexture* Texture = Bitmap->Get(LockedViewport->CurrentTime, LockedViewport)->GetRenderInterface();
 	SetTexture(Texture, TextureIndex, UVScale, UClamp, VClamp, BumpSize, BumpLumaScale, BumpLumaOffset);
 }
 
-void FOpenGLRenderInterface::SetGeneratedShader(FShaderGenerator& ShaderGenerator, bool UseStaticLighting){
+void FOpenGLRenderInterface::SetGeneratedShader(FShaderGenerator& ShaderGenerator, bool UseStaticLighting)
+{
 	FOpenGLShader* Shader = &ShadersById[ShaderGenerator.GetShaderId(UseStaticLighting)];
 
-	if(!Shader->IsValid()){
+	if(!Shader->IsValid())
+	{
 		Shader->RenDev = RenDev;
 		Shader->Compile(*ShaderGenerator.GetShaderText(UseStaticLighting), "<generated>");
 	}
@@ -403,22 +449,28 @@ void FOpenGLRenderInterface::SetGeneratedShader(FShaderGenerator& ShaderGenerato
 	SetShader(*Shader);
 }
 
-bool FOpenGLRenderInterface::SetBitmapMaterial(UBitmapMaterial* Material, const FModifierInfo& ModifierInfo){
+bool FOpenGLRenderInterface::SetBitmapMaterial(UBitmapMaterial* Material, const FModifierInfo& ModifierInfo)
+{
 	UBitmapMaterial* Detail = NULL;
 
-	if(Material->IsA<UTexture>()){
+	if(Material->IsA<UTexture>())
+	{
 		Detail = Cast<UBitmapMaterial>(static_cast<UTexture*>(Material)->Detail);
 
 		// If the material is a simple texture, use it to get the blending options
-		if(!ModifyFramebufferBlending){
+		if(!ModifyFramebufferBlending)
+		{
 			UTexture* Texture = static_cast<UTexture*>(Material);
 
-			if(Texture->bMasked){
+			if(Texture->bMasked)
+			{
 				ModifyFramebufferBlending = true;
 				CurrentState->UniformRevision += CurrentState->AlphaRef != 0.5f;
 				CurrentState->AlphaRef = 0.5f;
 				SetFramebufferBlending(FB_Overwrite);
-			}else if(Texture->bAlphaTexture){
+			}
+			else if(Texture->bAlphaTexture)
+			{
 				ModifyFramebufferBlending = true;
 				CurrentState->UniformRevision += CurrentState->AlphaRef != 0.0f;
 				CurrentState->AlphaRef = 0.0f;
@@ -437,34 +489,46 @@ bool FOpenGLRenderInterface::SetBitmapMaterial(UBitmapMaterial* Material, const 
 
 	FOpenGLShader* Shader;
 
-	if(!CurrentState->Lightmap){
-		if(CurrentState->UseStaticLighting){
+	if(!CurrentState->Lightmap)
+	{
+		if(CurrentState->UseStaticLighting)
+		{
 			if(Detail)
 				Shader = &BitmapShaderStaticLightingDetail;
 			else
 				Shader = &BitmapShaderStaticLighting;
-		}else{
+		}
+		else
+		{
 			if(Detail)
 				Shader = &BitmapShaderDetail;
 			else
 				Shader = &BitmapShader;
 		}
-	}else{
+	}
+	else
+	{
 		SetTexture(CurrentState->Lightmap, 1);
 
-		if(CurrentState->UseStaticLighting || !CurrentState->LightingModulate2X){
-			if(CurrentState->UseStaticLighting){
+		if(CurrentState->UseStaticLighting || !CurrentState->LightingModulate2X)
+		{
+			if(CurrentState->UseStaticLighting)
+			{
 				if(Detail)
 					Shader = &BitmapShaderLightmapStaticLightingDetail;
 				else
 					Shader = &BitmapShaderLightmapStaticLighting;
-			}else{
+			}
+			else
+			{
 				if(Detail)
 					Shader = &BitmapShaderLightmapDetail;
 				else
 					Shader = &BitmapShaderLightmap;
 			}
-		}else{
+		}
+		else
+		{
 			if(Detail)
 				Shader = &BitmapShaderLightmap2XDetail;
 			else
@@ -479,7 +543,8 @@ bool FOpenGLRenderInterface::SetBitmapMaterial(UBitmapMaterial* Material, const 
 	return true;
 }
 
-bool FOpenGLRenderInterface::SetSimpleMaterial(UMaterial* Material, const FModifierInfo& ModifierInfo){
+bool FOpenGLRenderInterface::SetSimpleMaterial(UMaterial* Material, const FModifierInfo& ModifierInfo)
+{
 	FShaderGenerator ShaderGenerator;
 
 	if(!HandleSimpleMaterial(Material, ShaderGenerator, &ModifierInfo))
@@ -493,7 +558,8 @@ bool FOpenGLRenderInterface::SetSimpleMaterial(UMaterial* Material, const FModif
 	return true;
 }
 
-bool FOpenGLRenderInterface::SetShaderMaterial(UShader* Shader, const FModifierInfo& ModifierInfo){
+bool FOpenGLRenderInterface::SetShaderMaterial(UShader* Shader, const FModifierInfo& ModifierInfo)
+{
 	FShaderGenerator ShaderGenerator;
 
 	if(!HandleShaderMaterial(Shader, ShaderGenerator, ModifierInfo))
@@ -505,13 +571,16 @@ bool FOpenGLRenderInterface::SetShaderMaterial(UShader* Shader, const FModifierI
 	if(Shader->Wireframe)
 		CurrentState->FillMode = FM_Wireframe;
 
-	if(!ModifyFramebufferBlending){
+	if(!ModifyFramebufferBlending)
+	{
 		CurrentState->bZTest = true;
 		CurrentState->bZWrite = true;
 
-		switch(Shader->OutputBlending){
+		switch(Shader->OutputBlending)
+		{
 		case OB_Normal:
-			if(Shader->Opacity){
+			if(Shader->Opacity)
+			{
 				CurrentState->AlphaRef = 0.0f;
 				++CurrentState->UniformRevision;
 				SetFramebufferBlending(FB_AlphaBlend);
@@ -546,23 +615,29 @@ bool FOpenGLRenderInterface::SetShaderMaterial(UShader* Shader, const FModifierI
 	return true;
 }
 
-bool FOpenGLRenderInterface::HandleSimpleMaterial(UMaterial* Material, FShaderGenerator& ShaderGenerator, const FModifierInfo* InModifierInfo){
+bool FOpenGLRenderInterface::HandleSimpleMaterial(UMaterial* Material, FShaderGenerator& ShaderGenerator, const FModifierInfo* InModifierInfo)
+{
 	FModifierInfo ModifierInfo = InModifierInfo ? *InModifierInfo : FModifierInfo();
 
 	if(Material->IsA<UModifier>())
 		Material = RemoveModifiers(static_cast<UModifier*>(Material), ModifierInfo);
 
-	if(Material->IsA<UBitmapMaterial>()){
-		if(!ModifyFramebufferBlending && Material->IsA<UTexture>()){
+	if(Material->IsA<UBitmapMaterial>())
+	{
+		if(!ModifyFramebufferBlending && Material->IsA<UTexture>())
+		{
 			// If the material is a simple texture, use it to get the blending options
 			UTexture* Texture = static_cast<UTexture*>(Material);
 
-			if(Texture->bMasked){
+			if(Texture->bMasked)
+			{
 				ModifyFramebufferBlending = true;
 				CurrentState->UniformRevision += CurrentState->AlphaRef != 0.5f;
 				CurrentState->AlphaRef = 0.5f;
 				SetFramebufferBlending(FB_Overwrite);
-			}else if(Texture->bAlphaTexture){
+			}
+			else if(Texture->bAlphaTexture)
+			{
 				ModifyFramebufferBlending = true;
 				CurrentState->UniformRevision += CurrentState->AlphaRef != 0.0f;
 				CurrentState->AlphaRef = 0.0f;
@@ -579,7 +654,8 @@ bool FOpenGLRenderInterface::HandleSimpleMaterial(UMaterial* Material, FShaderGe
 
 		SBYTE Matrix = INDEX_NONE;
 
-		if(ModifierInfo.bUseTexMatrix){
+		if(ModifierInfo.bUseTexMatrix)
+		{
 			Matrix = static_cast<SBYTE>(NumTexMatrices++);
 			TexMatrices[Matrix] = ModifierInfo.TexMatrix;
 		}
@@ -590,30 +666,40 @@ bool FOpenGLRenderInterface::HandleSimpleMaterial(UMaterial* Material, FShaderGe
 
 		UTexture* Texture = Cast<UTexture>(Material);
 
-		if(Texture && Texture->Detail && Texture->Detail->IsA<UBitmapMaterial>()){
+		if(Texture && Texture->Detail && Texture->Detail->IsA<UBitmapMaterial>())
+		{
 			Index = CurrentState->NumTextures++;
 			SetBitmapTexture(static_cast<UBitmapMaterial*>(Texture->Detail), Index, Texture->DetailScale, TCO_Wrap, TCO_Wrap);
 			EColorArg DetailArg = ShaderGenerator.AddTexture(Index, TCS_Stream0);
 			ShaderGenerator.AddColorOp(DetailArg, TextureArg, COP_Modulate2X, CC_RGB, CR_0);
 		}
-	}else if(Material->IsA<UCombiner>()){
+	}
+	else if(Material->IsA<UCombiner>())
+	{
 		if(!HandleCombinerMaterial(static_cast<UCombiner*>(Material), ShaderGenerator, false))
 			return false;
-	}else if(Material->IsA<UConstantMaterial>()){
+	}
+	else if(Material->IsA<UConstantMaterial>())
+	{
 		CurrentState->GlobalColor = static_cast<UConstantMaterial*>(Material)->GetColor(GEngineTime);
 		++CurrentState->UniformRevision;
 		ShaderGenerator.AddColorOp(CA_GlobalColor, CA_GlobalColor, COP_Arg1, CC_RGB, CR_0);
 		ShaderGenerator.AddColorOp(CA_Const1, CA_Const1, COP_Arg1, CC_A, CR_0); // Constant color alpha is not used
-	}else if(Material->IsA<UVertexColor>()){
+	}
+	else if(Material->IsA<UVertexColor>())
+	{
 		ShaderGenerator.AddColorOp(CA_Diffuse, CA_Diffuse, COP_Arg1, CC_RGBA, CR_0);
-	}else{
+	}
+	else
+	{
 		return false;
 	}
 
 	return true;
 }
 
-bool FOpenGLRenderInterface::HandleCombinerMaterial(UCombiner* Combiner, FShaderGenerator& ShaderGenerator, bool IsRootMaterial){
+bool FOpenGLRenderInterface::HandleCombinerMaterial(UCombiner* Combiner, FShaderGenerator& ShaderGenerator, bool IsRootMaterial)
+{
 	UMaterial* Material1 = Combiner->Material1;
 
 	if(!Material1)
@@ -632,7 +718,8 @@ bool FOpenGLRenderInterface::HandleCombinerMaterial(UCombiner* Combiner, FShader
 	UMaterial* Material2 = Combiner->Material2;
 	bool HaveUniqueMaterial2 = false;
 
-	if(Material2 && Material2 != Material1){
+	if(Material2 && Material2 != Material1)
+	{
 		if(!HandleSimpleMaterial(Material2, ShaderGenerator))
 			return false;
 
@@ -647,7 +734,8 @@ bool FOpenGLRenderInterface::HandleCombinerMaterial(UCombiner* Combiner, FShader
 	if(!Mask && (Combiner->CombineOperation >= CO_AlphaBlend_With_Mask || Combiner->AlphaOperation == AO_Use_Mask || Combiner->AlphaOperation == AO_AlphaBlend_With_Mask))
 		Mask = Material1;
 
-	if(Mask && Mask != Material1 && Mask != Material2 && !Mask->IsA<UVertexColor>()){
+	if(Mask && Mask != Material1 && Mask != Material2 && !Mask->IsA<UVertexColor>())
+	{
 		if(!HandleSimpleMaterial(Mask, ShaderGenerator))
 			return false;
 
@@ -673,7 +761,8 @@ bool FOpenGLRenderInterface::HandleCombinerMaterial(UCombiner* Combiner, FShader
 	if(Mask && IsRootMaterial && !Combiner->LightBothMaterials)
 		ShaderGenerator.AddColorOp(MaskArg, MaskArg, COP_Arg1, CC_A_TO_RGBA, CR_EmissionFactor);
 
-	switch(Combiner->CombineOperation){
+	switch(Combiner->CombineOperation)
+	{
 	case CO_Use_Color_From_Material1:
 		ShaderGenerator.AddColorOp(Material1Arg, Material1Arg, COP_Arg1, CC_RGB, CR_0);
 		break;
@@ -700,7 +789,8 @@ bool FOpenGLRenderInterface::HandleCombinerMaterial(UCombiner* Combiner, FShader
 		ShaderGenerator.AddColorOp(MaskArg, MaskArg, COP_Arg1, CC_RGB, CR_0);
 	}
 
-	switch(Combiner->AlphaOperation){
+	switch(Combiner->AlphaOperation)
+	{
 	case AO_Use_Mask:
 		ShaderGenerator.AddColorOp(MaskArg, MaskArg, COP_Arg1, CC_A, CR_0);
 		break;
@@ -726,10 +816,12 @@ bool FOpenGLRenderInterface::HandleCombinerMaterial(UCombiner* Combiner, FShader
 	return true;
 }
 
-bool FOpenGLRenderInterface::HandleShaderMaterial(UShader* Shader, FShaderGenerator& ShaderGenerator, const FModifierInfo& ModifierInfo){
+bool FOpenGLRenderInterface::HandleShaderMaterial(UShader* Shader, FShaderGenerator& ShaderGenerator, const FModifierInfo& ModifierInfo)
+{
 	bool HaveDiffuse = Shader->Diffuse != NULL && (!Shader->SelfIllumination || Shader->SelfIlluminationMask);
 
-	if(HaveDiffuse){
+	if(HaveDiffuse)
+	{
 		if(!HandleSimpleMaterial(Shader->Diffuse, ShaderGenerator, &ModifierInfo))
 			return false;
 
@@ -741,10 +833,12 @@ bool FOpenGLRenderInterface::HandleShaderMaterial(UShader* Shader, FShaderGenera
 	bool HaveSpecular = false;
 	EColorOp EnvColorOp = COP_Arg1;
 
-	if(GCubemapManager && GCubemapManager->bEnabled){
+	if(GCubemapManager && GCubemapManager->bEnabled)
+	{
 		INT BumpmapIndex = INDEX_NONE;
 
-		if(Shader->Bumpmap && Shader->Bumpmap->IsA<UBitmapMaterial>()){
+		if(Shader->Bumpmap && Shader->Bumpmap->IsA<UBitmapMaterial>())
+		{
 			BumpmapIndex = CurrentState->NumTextures++;
 			SetBitmapTexture(static_cast<UBitmapMaterial*>(Shader->Bumpmap), BumpmapIndex, Shader->BumpUVScale, ModifierInfo.TexUClamp, ModifierInfo.TexVClamp);
 			ShaderGenerator.AddTexture(BumpmapIndex, TCS_Stream0);
@@ -752,7 +846,8 @@ bool FOpenGLRenderInterface::HandleShaderMaterial(UShader* Shader, FShaderGenera
 
 		UBitmapMaterial* DiffuseEnvMap = NULL;
 
-		if(Shader->BumpMapType != BMT_Static_Specular && Shader->BumpMapType != BMT_Specular){
+		if(Shader->BumpMapType != BMT_Static_Specular && Shader->BumpMapType != BMT_Specular)
+		{
 			if(Shader->DiffuseEnvMap)
 				DiffuseEnvMap = CastChecked<UBitmapMaterial>(Shader->DiffuseEnvMap);
 
@@ -763,7 +858,8 @@ bool FOpenGLRenderInterface::HandleShaderMaterial(UShader* Shader, FShaderGenera
 		EColorArg DiffuseEnvTex = CA_Diffuse;
 		ETexCoordSrc BumpTexCoordSrc = TCS_SphereWorldSpaceNormal;
 
-		if(DiffuseEnvMap){
+		if(DiffuseEnvMap)
+		{
 			INT Index = CurrentState->NumTextures++;
 			DiffuseEnvTex = ShaderGenerator.AddTexture(Index, BumpTexCoordSrc, TCN_2DCoords, INDEX_NONE, false, BumpmapIndex);
 			SetBitmapTexture(DiffuseEnvMap, Index, 1.0, TCO_Clamp, TCO_Clamp, Shader->BumpSize, Shader->DiffuseMaskStrength / 255.0f, Shader->DiffuseStrength / 255.0f);
@@ -773,19 +869,22 @@ bool FOpenGLRenderInterface::HandleShaderMaterial(UShader* Shader, FShaderGenera
 		FMatrix* Matrix = NULL;
 		UMaterial* SpecularEnvMap = NULL;
 
-		if(Shader->BumpMapType != BMT_Static_Diffuse && Shader->BumpMapType != BMT_Diffuse){
+		if(Shader->BumpMapType != BMT_Static_Diffuse && Shader->BumpMapType != BMT_Diffuse)
+		{
 			SpecularEnvMap = Shader->Specular;
 
 			if(!SpecularEnvMap)
 				SpecularEnvMap = GCubemapManager->GetEnvLightmap(BMT_Static_Specular, Shader, &Matrix, UseMatrix);
 		}
 
-		if(SpecularEnvMap){
+		if(SpecularEnvMap)
+		{
 			HaveSpecular = true;
 
 			FModifierInfo SpecularModifier = ModifierInfo;
 
-			if(UseMatrix){
+			if(UseMatrix)
+			{
 				SpecularModifier.bUseTexMatrix = true;
 				SpecularModifier.TexMatrix *= *Matrix;
 			}
@@ -804,12 +903,15 @@ bool FOpenGLRenderInterface::HandleShaderMaterial(UShader* Shader, FShaderGenera
 
 			if(HaveDiffuse)
 				ShaderGenerator.AddColorOp(ShaderGenerator.PopTempRegister(), CA_R0, COP_Arg1, CC_RGBA, CR_0);
-		}else{
+		}
+		else
+		{
 			ShaderGenerator.AddColorOp(DiffuseEnvTex, DiffuseEnvTex, COP_Arg1, CC_RGBA, CR_1);
 			ShaderGenerator.AddColorOp(CA_Const1, CA_Const1, COP_Arg1, CC_A, CR_1);
 		}
 
-		if(DiffuseEnvMap || SpecularEnvMap){
+		if(DiffuseEnvMap || SpecularEnvMap)
+		{
 			EnvColorOp = Shader->BumpMapType == BMT_Static_Specular || Shader->BumpMapType == BMT_Specular ? COP_Add : COP_Modulate2X;
 			HaveEnv = true;
 		}
@@ -817,15 +919,20 @@ bool FOpenGLRenderInterface::HandleShaderMaterial(UShader* Shader, FShaderGenera
 
 	bool HaveSelfIllumination = Shader->SelfIllumination != NULL;
 
-	if(HaveSelfIllumination){
-		if(Shader->SelfIlluminationMask){
+	if(HaveSelfIllumination)
+	{
+		if(Shader->SelfIlluminationMask)
+		{
 			EColorRegister DiffuseRegister = ShaderGenerator.PushTempRegister();
 
-			if(HaveDiffuse){
+			if(HaveDiffuse)
+			{
 				ShaderGenerator.AddColorOp(CA_R0, CA_R1, EnvColorOp, CC_RGB, CR_1);
 				ShaderGenerator.AddColorOp(CA_R1, CA_R0, COP_AlphaBlendInverted, CC_RGB, DiffuseRegister);
 				ShaderGenerator.AddColorOp(CA_R0, CA_R0, COP_Arg1, CC_A, DiffuseRegister);
-			}else{
+			}
+			else
+			{
 				ShaderGenerator.AddColorOp(CA_Diffuse, CA_R1, EnvColorOp, CC_RGB, CR_1);
 				ShaderGenerator.AddColorOp(CA_R1, CA_Diffuse, COP_AlphaBlendInverted, CC_RGB, DiffuseRegister);
 				ShaderGenerator.AddColorOp(CA_Diffuse, CA_Diffuse, COP_Arg1, CC_A, DiffuseRegister);
@@ -833,19 +940,23 @@ bool FOpenGLRenderInterface::HandleShaderMaterial(UShader* Shader, FShaderGenera
 
 			bool HaveUniqueSelfIllumination = false;
 
-			if(HaveDiffuse && Shader->SelfIllumination != Shader->Diffuse){
+			if(HaveDiffuse && Shader->SelfIllumination != Shader->Diffuse)
+			{
 				if(!HandleSimpleMaterial(Shader->SelfIllumination, ShaderGenerator, &ModifierInfo))
 					return false;
 
 				ShaderGenerator.AddColorOp(CA_R0, CA_R0, COP_Arg1, CC_RGBA, ShaderGenerator.PushTempRegister());
 				HaveUniqueSelfIllumination = true;
-			}else{
+			}
+			else
+			{
 				ShaderGenerator.AddColorOp(CA_R0, CA_R0, COP_Arg1, CC_RGBA, ShaderGenerator.PushTempRegister());
 			}
 
 			bool HaveUniqueMask = false;
 
-			if(Shader->SelfIlluminationMask != Shader->SelfIllumination && Shader->SelfIlluminationMask != Shader->Diffuse){
+			if(Shader->SelfIlluminationMask != Shader->SelfIllumination && Shader->SelfIlluminationMask != Shader->Diffuse)
+			{
 				if(!HandleSimpleMaterial(Shader->SelfIlluminationMask, ShaderGenerator, &ModifierInfo))
 					return false;
 
@@ -867,37 +978,47 @@ bool FOpenGLRenderInterface::HandleShaderMaterial(UShader* Shader, FShaderGenera
 			ShaderGenerator.AddColorOp(SelfIllumArg, SelfIllumArg, COP_Arg1, CC_RGB, CR_1);
 			ShaderGenerator.AddColorOp(MaskArg, MaskArg, COP_Arg1, CC_A, CR_1);
 
-			if(HaveEnv && Shader->SpecularInTheDark){
+			if(HaveEnv && Shader->SpecularInTheDark)
+			{
 				ShaderGenerator.AddColorOp(MaskArg, MaskArg, COP_Arg1, CC_A_TO_RGBA, CR_0);
 				ShaderGenerator.AddColorOp(CA_R0, CA_EmissionFactor, COP_Add, CC_RGBA, CR_EmissionFactor, COPM_Saturate);
-			}else{
+			}
+			else
+			{
 				ShaderGenerator.AddColorOp(MaskArg, MaskArg, COP_Arg1, CC_A_TO_RGBA, CR_EmissionFactor);
 			}
 
 			ShaderGenerator.AddColorOp(DiffuseArg, DiffuseArg, COP_Arg1, CC_RGBA, CR_0);
 			ShaderGenerator.AddColorOp(CA_R1, CA_R0, COP_AlphaBlendInverted, CC_RGB, CR_0);
-		}else{
+		}
+		else
+		{
 			if(!HandleSimpleMaterial(Shader->SelfIllumination, ShaderGenerator, &ModifierInfo))
 				return false;
 
 			// TODO: Maybe just disable dynamic lighting here
 			ShaderGenerator.AddColorOp(CA_Const1, CA_Const1, COP_Arg1, CC_RGBA, CR_EmissionFactor);
 		}
-	}else{
-		if(HaveEnv){
+	}
+	else
+	{
+		if(HaveEnv)
+		{
 			ShaderGenerator.AddColorOp(CA_R0, CA_R1, EnvColorOp, CC_RGB, CR_1);
 			ShaderGenerator.AddColorOp(CA_R1, CA_R0, COP_AlphaBlendInverted, CC_RGB, CR_0);
 		}
 	}
 
-	if(Shader->Detail && Shader->Detail->IsA<UBitmapMaterial>()){
+	if(Shader->Detail && Shader->Detail->IsA<UBitmapMaterial>())
+	{
 		INT Index = CurrentState->NumTextures++;
 		SetBitmapTexture(static_cast<UBitmapMaterial*>(Shader->Detail), Index, Shader->DetailScale, TCO_Wrap, TCO_Wrap);
 		EColorArg DetailArg = ShaderGenerator.AddTexture(Index, TCS_Stream0);
 		ShaderGenerator.AddColorOp(DetailArg, CA_R0, COP_Modulate2X, CC_RGB, CR_0);
 	}
 
-	if(!HaveSpecular && Shader->Specular){
+	if(!HaveSpecular && Shader->Specular)
+	{
 		ShaderGenerator.AddColorOp(CA_R0, CA_R0, COP_Arg1, CC_RGBA, ShaderGenerator.PushTempRegister());
 
 		if(!HandleSpecular(Shader->Specular, Shader->SpecularityMask, ModifierInfo, ShaderGenerator, INDEX_NONE, 1.0f, 1.0f, 1.0f))
@@ -910,8 +1031,10 @@ bool FOpenGLRenderInterface::HandleShaderMaterial(UShader* Shader, FShaderGenera
 		ShaderGenerator.AddColorOp(PrevArg, PrevArg, COP_Arg1, CC_A, CR_0);
 	}
 
-	if(Shader->Opacity){
-		if((HaveDiffuse && Shader->Opacity != Shader->Diffuse) || (HaveSelfIllumination && Shader->Opacity != Shader->SelfIllumination) || (!HaveDiffuse && !HaveSelfIllumination)){
+	if(Shader->Opacity)
+	{
+		if((HaveDiffuse && Shader->Opacity != Shader->Diffuse) || (HaveSelfIllumination && Shader->Opacity != Shader->SelfIllumination) || (!HaveDiffuse && !HaveSelfIllumination))
+		{
 			ShaderGenerator.AddColorOp(CA_R0, CA_R0, COP_Arg1, CC_RGB, ShaderGenerator.PushTempRegister());
 
 			if(!HandleSimpleMaterial(Shader->Opacity, ShaderGenerator, &ModifierInfo))
@@ -924,7 +1047,8 @@ bool FOpenGLRenderInterface::HandleShaderMaterial(UShader* Shader, FShaderGenera
 	return true;
 }
 
-bool FOpenGLRenderInterface::HandleSpecular(UMaterial* Specular, UMaterial* SpecularMask, const FModifierInfo& ModifierInfo, FShaderGenerator& ShaderGenerator, INT BumpmapIndex, FLOAT BumpSize, FLOAT SpecularMaskStrength, FLOAT SpecularStrength){
+bool FOpenGLRenderInterface::HandleSpecular(UMaterial* Specular, UMaterial* SpecularMask, const FModifierInfo& ModifierInfo, FShaderGenerator& ShaderGenerator, INT BumpmapIndex, FLOAT BumpSize, FLOAT SpecularMaskStrength, FLOAT SpecularStrength)
+{
 	checkSlow(Specular);
 
 	FModifierInfo SpecularModifier = ModifierInfo;
@@ -933,11 +1057,13 @@ bool FOpenGLRenderInterface::HandleSpecular(UMaterial* Specular, UMaterial* Spec
 
 	UMaterial* SpecularMaterial = RemoveModifiers(Specular, SpecularModifier);
 
-	if(SpecularMaterial->IsA<UBitmapMaterial>()){
+	if(SpecularMaterial->IsA<UBitmapMaterial>())
+	{
 		INT Index = CurrentState->NumTextures++;
 		SBYTE SpecularMatrix = INDEX_NONE;
 
-		if(SpecularModifier.bUseTexMatrix){
+		if(SpecularModifier.bUseTexMatrix)
+		{
 			SpecularMatrix = static_cast<SBYTE>(NumTexMatrices++);
 			TexMatrices[SpecularMatrix] = SpecularModifier.TexMatrix;
 		}
@@ -945,13 +1071,17 @@ bool FOpenGLRenderInterface::HandleSpecular(UMaterial* Specular, UMaterial* Spec
 		SetBitmapTexture(static_cast<UBitmapMaterial*>(SpecularMaterial), Index, 1.0f, SpecularModifier.TexUClamp, SpecularModifier.TexVClamp, BumpSize, SpecularMaskStrength, SpecularStrength);
 		EColorArg SpecTex = ShaderGenerator.AddTexture(Index, SpecularModifier.TexCoordSrc, SpecularModifier.TexCoordCount, SpecularMatrix, false, BumpmapIndex);
 		ShaderGenerator.AddColorOp(SpecTex, SpecTex, COP_Arg1, CC_RGB, CR_0);
-	}else{
+	}
+	else
+	{
 		if(!HandleSimpleMaterial(Specular, ShaderGenerator, &ModifierInfo))
 			return false;
 	}
 
-	if(SpecularMask){
-		if(SpecularMask != Specular){
+	if(SpecularMask)
+	{
+		if(SpecularMask != Specular)
+		{
 			FModifierInfo SpecularMaskModifier = ModifierInfo;
 			UMaterial* SpecularMaskMaterial = RemoveModifiers(SpecularMask, SpecularMaskModifier);
 
@@ -962,14 +1092,17 @@ bool FOpenGLRenderInterface::HandleSpecular(UMaterial* Specular, UMaterial* Spec
 
 			ShaderGenerator.AddColorOp(ShaderGenerator.PopTempRegister(), CA_R0, COP_Arg1, CC_RGB, CR_0);
 		}
-	}else{
+	}
+	else
+	{
 		ShaderGenerator.AddColorOp(CA_Const1, CA_Const1, COP_Arg1, CC_A, CR_0);
 	}
 
 	return true;
 }
 
-void FOpenGLRenderInterface::UseLightmap(FShaderGenerator& ShaderGenerator){
+void FOpenGLRenderInterface::UseLightmap(FShaderGenerator& ShaderGenerator)
+{
 	checkSlow(CurrentState->Lightmap);
 	INT Index = CurrentState->NumTextures++;
 	SetTexture(CurrentState->Lightmap, Index);
@@ -978,7 +1111,8 @@ void FOpenGLRenderInterface::UseLightmap(FShaderGenerator& ShaderGenerator){
 	UsingLightmap = true;
 }
 
-bool FOpenGLRenderInterface::SetCombinerMaterial(UCombiner* Combiner){
+bool FOpenGLRenderInterface::SetCombinerMaterial(UCombiner* Combiner)
+{
 	FShaderGenerator ShaderGenerator;
 
 	if(!HandleCombinerMaterial(Combiner, ShaderGenerator, true))
@@ -989,10 +1123,12 @@ bool FOpenGLRenderInterface::SetCombinerMaterial(UCombiner* Combiner){
 	return true;
 }
 
-bool FOpenGLRenderInterface::SetParticleMaterial(UParticleMaterial* ParticleMaterial){
+bool FOpenGLRenderInterface::SetParticleMaterial(UParticleMaterial* ParticleMaterial)
+{
 	bool UseSpecialBlend = false;
 
-	switch(ParticleMaterial->ParticleBlending){
+	switch(ParticleMaterial->ParticleBlending)
+	{
 	case PTDS_Regular:
 		SetFramebufferBlending(FB_Overwrite);
 		break;
@@ -1034,7 +1170,8 @@ bool FOpenGLRenderInterface::SetParticleMaterial(UParticleMaterial* ParticleMate
 	if(ParticleMaterial->BitmapMaterial)
 		SetBitmapTexture(ParticleMaterial->BitmapMaterial, CurrentState->NumTextures++);
 
-	if(ParticleMaterial->AlphaTest){
+	if(ParticleMaterial->AlphaTest)
+	{
 		CurrentState->AlphaRef = ParticleMaterial->AlphaRef / 255.0f;
 		++CurrentState->UniformRevision;
 	}
@@ -1045,19 +1182,25 @@ bool FOpenGLRenderInterface::SetParticleMaterial(UParticleMaterial* ParticleMate
 
 	FOpenGLShader* Shader;
 
-	if(!ParticleMaterial->BlendBetweenSubdivisions){
-		if(UseSpecialBlend){
+	if(!ParticleMaterial->BlendBetweenSubdivisions)
+	{
+		if(UseSpecialBlend)
+		{
 			if(ParticleMaterial->UseTFactor)
 				Shader = &ParticleShaderSpecialBlendTFactor;
 			else
 				Shader = &ParticleShaderSpecialBlend;
-		}else{
+		}
+		else
+		{
 			if(ParticleMaterial->UseTFactor)
 				Shader = &ParticleShaderTFactor;
 			else
 				Shader = &ParticleShader;
 		}
-	}else{
+	}
+	else
+	{
 		Shader = &ParticleShaderBlendSubdivisions;
 	}
 
@@ -1072,16 +1215,20 @@ bool FOpenGLRenderInterface::SetParticleMaterial(UParticleMaterial* ParticleMate
 	return true;
 }
 
-bool FOpenGLRenderInterface::SetProjectorMaterial(UProjectorMaterial* ProjectorMaterial){
+bool FOpenGLRenderInterface::SetProjectorMaterial(UProjectorMaterial* ProjectorMaterial)
+{
 	UShader*   BaseShader = Cast<UShader>(ProjectorMaterial->BaseMaterial);
 	UTexture*  BaseTexture = Cast<UTexture>(ProjectorMaterial->BaseMaterial);
 	UMaterial* BaseDiffuse = ProjectorMaterial->BaseMaterial;
 	UMaterial* BaseOpacity = NULL;
 	FShaderGenerator ShaderGenerator;
 
-	if(BaseTexture && (BaseTexture->bMasked || BaseTexture->bAlphaTexture)){
+	if(BaseTexture && (BaseTexture->bMasked || BaseTexture->bAlphaTexture))
+	{
 		BaseOpacity = BaseTexture;
-	}else if(BaseShader){
+	}
+	else if(BaseShader)
+	{
 		BaseDiffuse = BaseShader->Diffuse;
 		BaseOpacity = BaseShader->Opacity;
 	}
@@ -1089,13 +1236,15 @@ bool FOpenGLRenderInterface::SetProjectorMaterial(UProjectorMaterial* ProjectorM
 	FModifierInfo ModifierInfo;
 	UBitmapMaterial* ProjectedBitmap = Cast<UBitmapMaterial>(RemoveModifiers(ProjectorMaterial->Projected, ModifierInfo));
 
-	if(ProjectedBitmap){
+	if(ProjectedBitmap)
+	{
 		BYTE BaseMaterialBlending = ProjectorMaterial->BaseMaterialBlending;
 
 		if(BaseMaterialBlending != PB_None && (BaseDiffuse->IsA<UHardwareShaderWrapper>() || BaseDiffuse->IsA<UHardwareShader>()))
 			BaseMaterialBlending = PB_None;
 
-		if(BaseMaterialBlending != PB_None && BaseDiffuse){
+		if(BaseMaterialBlending != PB_None && BaseDiffuse)
+		{
 			FModifierInfo BaseModifierInfo;
 
 			BaseModifierInfo.TexCoordSrc = TCS_Stream1;
@@ -1106,7 +1255,8 @@ bool FOpenGLRenderInterface::SetProjectorMaterial(UProjectorMaterial* ProjectorM
 
 		SBYTE Matrix = INDEX_NONE;
 
-		if(ModifierInfo.bUseTexMatrix){
+		if(ModifierInfo.bUseTexMatrix)
+		{
 			Matrix = static_cast<SBYTE>(NumTexMatrices++);
 			TexMatrices[Matrix] = ModifierInfo.TexMatrix;
 		}
@@ -1114,11 +1264,15 @@ bool FOpenGLRenderInterface::SetProjectorMaterial(UProjectorMaterial* ProjectorM
 		ETexCoordSrc TexCoordSrc = TCS_Stream0;
 
 		// TODO: This isn't enough to support dynamic projectors but for now it looks fine (no effect visible but also no pink error material).
-		if(!ProjectorMaterial->bStaticProjector){
-			if(Matrix == INDEX_NONE){
+		if(!ProjectorMaterial->bStaticProjector)
+		{
+			if(Matrix == INDEX_NONE)
+			{
 				Matrix = static_cast<SBYTE>(NumTexMatrices++);
 				TexMatrices[Matrix] = ProjectorMaterial->Matrix;
-			}else{
+			}
+			else
+			{
 				TexMatrices[Matrix] *= ProjectorMaterial->Matrix;
 			}
 
@@ -1129,7 +1283,8 @@ bool FOpenGLRenderInterface::SetProjectorMaterial(UProjectorMaterial* ProjectorM
 		SetBitmapTexture(ProjectedBitmap, TextureIndex);
 		EColorArg TextureArg = ShaderGenerator.AddTexture(TextureIndex, TexCoordSrc, TCN_3DCoords, Matrix, true);
 
-		switch(BaseMaterialBlending){
+		switch(BaseMaterialBlending)
+		{
 		case PB_AlphaBlend:
 			ShaderGenerator.AddColorOp(TextureArg, CA_R0, COP_AlphaBlend, CC_RGB, CR_0);
 			ShaderGenerator.AddColorOp(TextureArg, TextureArg, COP_Arg1, CC_A, CR_0);
@@ -1140,7 +1295,8 @@ bool FOpenGLRenderInterface::SetProjectorMaterial(UProjectorMaterial* ProjectorM
 			break;
 		case PB_None:
 		default:
-			switch(ProjectorMaterial->FrameBufferBlending){
+			switch(ProjectorMaterial->FrameBufferBlending)
+			{
 			case PB_Add:
 				ShaderGenerator.AddColorOp(TextureArg, CA_DiffuseAlpha, COP_Modulate, CC_RGB, CR_0);
 				ShaderGenerator.AddColorOp(TextureArg, TextureArg, COP_Arg1, CC_A, CR_0);
@@ -1156,7 +1312,9 @@ bool FOpenGLRenderInterface::SetProjectorMaterial(UProjectorMaterial* ProjectorM
 				++CurrentState->UniformRevision;
 			}
 		}
-	}else{
+	}
+	else
+	{
 		return false; // TODO
 	}
 
@@ -1167,7 +1325,8 @@ bool FOpenGLRenderInterface::SetProjectorMaterial(UProjectorMaterial* ProjectorM
 
 	CurrentState->bZWrite = false;
 
-	switch(ProjectorMaterial->FrameBufferBlending){
+	switch(ProjectorMaterial->FrameBufferBlending)
+	{
 	case PB_Add:
 		SetFramebufferBlending(FB_Translucent);
 		CurrentState->FogColor = FPlane(0.0f, 0.0f, 0.0f, 0.0f);
@@ -1188,7 +1347,8 @@ bool FOpenGLRenderInterface::SetProjectorMaterial(UProjectorMaterial* ProjectorM
 	return true;
 }
 
-bool FOpenGLRenderInterface::SetProjectorMultiMaterial(UProjectorMultiMaterial* ProjectorMaterial){
+bool FOpenGLRenderInterface::SetProjectorMultiMaterial(UProjectorMultiMaterial* ProjectorMaterial)
+{
 	INT NumRenderEntries = Min(ProjectorMaterial->RemainingEntries, 4);
 	UHardwareShader* HardwareShader = ProjectorMaterial->GetHardwareShader(NumRenderEntries);
 
@@ -1197,7 +1357,8 @@ bool FOpenGLRenderInterface::SetProjectorMultiMaterial(UProjectorMultiMaterial* 
 
 	INT FirstEntry = ProjectorMaterial->RenderEntries.Num() - NumRenderEntries;
 
-	for(INT i = 0; i < NumRenderEntries; ++i){
+	for(INT i = 0; i < NumRenderEntries; ++i)
+	{
 		const FProjectorRenderEntry& Entry = ProjectorMaterial->RenderEntries[FirstEntry + i];
 		HardwareShader->Textures[i] = CastChecked<UBitmapMaterial>(Entry.ProjectedTexture);
 		FMatrix Matrix = Entry.Matrix.Transpose();
@@ -1213,8 +1374,10 @@ bool FOpenGLRenderInterface::SetProjectorMultiMaterial(UProjectorMultiMaterial* 
 
 	bool Result = SetHardwareShaderMaterial(HardwareShader) != 0;
 
-	if(Result){
-		switch(ProjectorMaterial->FrameBufferBlending){
+	if(Result)
+	{
+		switch(ProjectorMaterial->FrameBufferBlending)
+		{
 		case PB_Modulate:
 			SetFramebufferBlending(FB_Modulate);
 			break;
@@ -1232,15 +1395,19 @@ bool FOpenGLRenderInterface::SetProjectorMultiMaterial(UProjectorMultiMaterial* 
 	return Result;
 }
 
-bool FOpenGLRenderInterface::SetTerrainMaterial(UTerrainMaterial* TerrainMaterial){
+bool FOpenGLRenderInterface::SetTerrainMaterial(UTerrainMaterial* TerrainMaterial)
+{
 	checkSlow(TerrainMaterial->Layers.Num() >= 1);
 
-	if(TerrainMaterial->RenderMethod == RM_AlphaMap){
+	if(TerrainMaterial->RenderMethod == RM_AlphaMap)
+	{
 		FTerrainMaterialLayer& Layer = TerrainMaterial->Layers[0];
 		UBitmapMaterial* BitmapMaterial = Cast<UBitmapMaterial>(Layer.Texture);
 
-		if(BitmapMaterial){
-			if(!TerrainMaterial->FirstPass){
+		if(BitmapMaterial)
+		{
+			if(!TerrainMaterial->FirstPass)
+			{
 				SetFramebufferBlending(FB_AlphaBlend);
 				CurrentState->AlphaRef = 0;
 				++CurrentState->UniformRevision;
@@ -1256,7 +1423,9 @@ bool FOpenGLRenderInterface::SetTerrainMaterial(UTerrainMaterial* TerrainMateria
 
 			RenDev->glProgramUniformMatrix4fv(Shader.Program, 0, 1, GL_TRUE, reinterpret_cast<const GLfloat*>(&Layer.TextureMatrix));
 			SetShader(Shader);
-		}else{
+		}
+		else
+		{
 			UShader* ShaderMaterial = Cast<UShader>(Layer.Texture);
 
 			checkSlow(ShaderMaterial);
@@ -1278,9 +1447,13 @@ bool FOpenGLRenderInterface::SetTerrainMaterial(UTerrainMaterial* TerrainMateria
 			ShaderMaterial->Opacity = Opacity;
 			SetGeneratedShader(ShaderGenerator, CurrentState->UseStaticLighting);
 		}
-	}else{
-		if(TerrainMaterial->RenderMethod == RM_CombinedWeightMap){
-			if(!TerrainMaterial->FirstPass){
+	}
+	else
+	{
+		if(TerrainMaterial->RenderMethod == RM_CombinedWeightMap)
+		{
+			if(!TerrainMaterial->FirstPass)
+			{
 				SetFramebufferBlending(FB_Translucent);
 				CurrentState->bZWrite = false;
 				CurrentState->FogColor = FPlane(0.0f, 0.0f, 0.0f, 0.0f);
@@ -1304,19 +1477,24 @@ bool FOpenGLRenderInterface::SetTerrainMaterial(UTerrainMaterial* TerrainMateria
 
 			bool Layer4 = Layers.Num() > 3;
 
-			if(Layer4){
+			if(Layer4)
+			{
 				SetBitmapTexture(static_cast<UBitmapMaterial*>(Layers[3].Texture), 4, 1.0f, TCO_Wrap, TCO_Wrap);
 				TexMatrices[3] = Layers[3].TextureMatrix;
 				NumTexMatrices = 4;
-			}else{
+			}
+			else
+			{
 				NumTexMatrices = 3;
 			}
 
 			// HACK:
 			// WTF??? Terrain code _sometimes_ produces a matrix where the first three rows are exchanged (2,3,1 instead of 1,2,3)
 			// M[0][0] == 0.0f is a reliable way to check for that and correct the error.
-			for(INT i = 0; i < NumTexMatrices; ++i){
-				if(TexMatrices[i].M[0][0] == 0.0f){
+			for(INT i = 0; i < NumTexMatrices; ++i)
+			{
+				if(TexMatrices[i].M[0][0] == 0.0f)
+				{
 					FPlane Row0 = TexMatrices[i].Rows()[0];
 					FPlane Row1 = TexMatrices[i].Rows()[1];
 					FPlane Row2 = TexMatrices[i].Rows()[2];
@@ -1331,7 +1509,9 @@ bool FOpenGLRenderInterface::SetTerrainMaterial(UTerrainMaterial* TerrainMateria
 
 			RenDev->glProgramUniformMatrix4fv(Shader.Program, 0, NumTexMatrices, GL_TRUE, reinterpret_cast<const GLfloat*>(TexMatrices));
 			SetShader(Shader);
-		}else{
+		}
+		else
+		{
 			FShaderGenerator ShaderGenerator;
 			const TArray<FTerrainMaterialLayer>& Layers = TerrainMaterial->Layers;
 			checkSlow(Layers[0].Texture->IsA<UBitmapMaterial>());
@@ -1346,7 +1526,8 @@ bool FOpenGLRenderInterface::SetTerrainMaterial(UTerrainMaterial* TerrainMateria
 			ShaderGenerator.AddColorOp(CA_Diffuse, CA_T0, COP_Modulate, CC_RGBA, CR_0);
 			ShaderGenerator.AddColorOp(CA_R0, CA_T1, COP_Modulate, CC_RGBA, CR_0);
 
-			for(INT i = 1; i < Layers.Num(); ++i){
+			for(INT i = 1; i < Layers.Num(); ++i)
+			{
 				checkSlow(Layers[i].Texture->IsA<UBitmapMaterial>());
 				INT TextureIndex = i * 2;
 				INT AlphaWeightIndex = TextureIndex + 1;

@@ -128,12 +128,14 @@ class UGlobalTempObjects : public UObject{
 	void AddGlobalObject(UObject** InObjectPtr){ GlobalObjectPtrs.AddItem(InObjectPtr); }
 
 	// UObject interface
-	void Serialize(FArchive& Ar){
+	void Serialize(FArchive& Ar)
+	{
 		guardFunc;
 
 		Super::Serialize(Ar);
 
-		if(!(Ar.IsLoading() || Ar.IsSaving())){
+		if(!(Ar.IsLoading() || Ar.IsSaving()))
+		{
 			for(INT i = 0; i < GlobalObjectPtrs.Num(); ++i)
 				*(GlobalObjectPtrs[i]) = NULL;
 
@@ -143,7 +145,8 @@ class UGlobalTempObjects : public UObject{
 		unguard;
 	}
 
-	void Destroy(){
+	void Destroy()
+	{
 		Super::Destroy();
 
 		for(INT i = 0; i < GlobalObjectPtrs.Num(); ++i)

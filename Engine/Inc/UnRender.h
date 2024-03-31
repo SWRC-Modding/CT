@@ -284,7 +284,8 @@ struct ENGINE_API HCoords : public HHitProxy{
 	FVector Origin;
 	FVector Direction;
 
-	HCoords(FCameraSceneNode* InFrame){
+	HCoords(FCameraSceneNode* InFrame)
+	{
 		FLOAT X = (FLOAT) ((InFrame->Viewport->HitX + InFrame->Viewport->HitXL / 2) - (InFrame->Viewport->SizeX / 2)) / (InFrame->Viewport->SizeX / 2.0f);
 		FLOAT Y = (FLOAT) ((InFrame->Viewport->HitY + InFrame->Viewport->HitYL / 2) - (InFrame->Viewport->SizeY / 2)) / -(InFrame->Viewport->SizeY / 2.0f);
 

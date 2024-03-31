@@ -14,10 +14,12 @@ public:
 	FOutputDeviceWindowsError() : ErrorPos(0),
 	                              ErrorType(NAME_None){}
 
-	void Serialize(const TCHAR* Msg, enum EName Event){
+	void Serialize(const TCHAR* Msg, enum EName Event)
+	{
 		INT Error = GetLastError();
 
-		if(!GIsCriticalError){
+		if(!GIsCriticalError)
+		{
 			//First appError.
 			GIsCriticalError = 1;
 			ErrorType        = Event;
@@ -33,13 +35,18 @@ public:
 			appStrncat(GErrorHist, "\r\n\r\n", ARRAY_COUNT(GErrorHist));
 			ErrorPos = appStrlen(GErrorHist);
 
-			if(GIsGuarded){
+			if(GIsGuarded)
+			{
 				appStrncat(GErrorHist, GIsGuarded ? LocalizeError("History", "Core") : "History: ", ARRAY_COUNT(GErrorHist));
 				appStrncat(GErrorHist, ": ", ARRAY_COUNT(GErrorHist));
-			}else{
+			}
+			else
+			{
 				HandleError();
 			}
-		}else{
+		}
+		else
+		{
 			debugf(NAME_Critical, "Error reentered: %s", Msg);
 		}
 
@@ -50,7 +57,8 @@ public:
 			appRequestExit(1);
 	}
 
-	void HandleError(){
+	void HandleError()
+	{
 		try{
 			GIsGuarded = 0;
 			GIsRunning = 0;

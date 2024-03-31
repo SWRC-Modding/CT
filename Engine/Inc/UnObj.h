@@ -254,12 +254,12 @@ enum EPolyFlags
 	// Editor flags.
 	PF_Memorized     	= 0x01000000,	// Editor: Poly is remembered.
 	PF_Selected      	= 0x02000000,	// Editor: Poly is selected.
-	PF_Highlighted      = 0x10000000,	// Editor: Poly is highlighted.   
-	PF_FlatShaded		= 0x40000000,	// FPoly has been split by SplitPolyWithPlane.   
+	PF_Highlighted      = 0x10000000,	// Editor: Poly is highlighted.
+	PF_FlatShaded		= 0x40000000,	// FPoly has been split by SplitPolyWithPlane.
 
 	// Internal.
 	PF_EdProcessed 		= 0x40000000,	// FPoly was already processed in editorBuildFPolys.
-	PF_EdCut       		= 0x80000000,	// FPoly has been split by SplitPolyWithPlane.  
+	PF_EdCut       		= 0x80000000,	// FPoly has been split by SplitPolyWithPlane.
 	PF_RenderFog		= 0x40000000,	// Render with fogmapping.
 	PF_Occlude			= 0x80000000,	// Occludes even if PF_NoOcclude.
 	PF_RenderHint       = 0x01000000,   // Rendering optimization hint.

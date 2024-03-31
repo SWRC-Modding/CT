@@ -29,7 +29,8 @@ struct CORE_API FObjectExport{
 	FObjectExport();
 	FObjectExport(UObject* InObject);
 
-	friend FArchive& operator<<(FArchive& Ar, FObjectExport& E){
+	friend FArchive& operator<<(FArchive& Ar, FObjectExport& E)
+	{
 		guard(FObjectExport<<);
 
 		Ar << AR_INDEX(E.ClassIndex);
@@ -69,14 +70,16 @@ struct CORE_API FObjectImport{
 	FObjectImport();
 	FObjectImport(UObject* InObject);
 
-	friend FArchive& operator<<(FArchive& Ar, FObjectImport& I){
+	friend FArchive& operator<<(FArchive& Ar, FObjectImport& I)
+	{
 		guard(FObjectImport<<);
 
 		Ar << I.ClassPackage << I.ClassName;
 		Ar << I.PackageIndex;
 		Ar << I.ObjectName;
 
-		if(Ar.IsLoading()){
+		if(Ar.IsLoading())
+		{
 			I.SourceIndex = INDEX_NONE;
 			I.XObject     = NULL;
 		}
@@ -99,7 +102,8 @@ struct FGenerationInfo{
 
 	FGenerationInfo(INT InExportCount, INT InNameCount);
 
-	friend FArchive& operator<<(FArchive& Ar, FGenerationInfo& Info){
+	friend FArchive& operator<<(FArchive& Ar, FGenerationInfo& Info)
+	{
 		guard(FGenerationInfo<<);
 
 		return Ar << Info.ExportCount << Info.NameCount;
@@ -129,19 +133,22 @@ public:
 	INT GetFileVersionLicensee() const { return ((FileVersion >> 16) & 0xffff); }
 	void SetFileVersions(INT Epic, INT Licensee) { if(GSys->LicenseeMode == 0) FileVersion = Epic; else FileVersion = ((Licensee << 16) | Epic); }
 
-	friend FArchive& operator<<(FArchive& Ar, FPackageFileSummary& Sum){
+	friend FArchive& operator<<(FArchive& Ar, FPackageFileSummary& Sum)
+	{
 		guard(FUnrealfileSummary<<);
 
 		Ar << Sum.Tag;
 
-		if(!Ar.IsLoading() || Sum.Tag == PACKAGE_FILE_TAG){
+		if(!Ar.IsLoading() || Sum.Tag == PACKAGE_FILE_TAG)
+		{
 			Ar << Sum.FileVersion;
 			Ar << Sum.PackageFlags;
 			Ar << Sum.NameCount     << Sum.NameOffset;
 			Ar << Sum.ExportCount   << Sum.ExportOffset;
 			Ar << Sum.ImportCount   << Sum.ImportOffset;
 
-			if(Sum.GetFileVersion() >= 68){
+			if(Sum.GetFileVersion() >= 68)
+			{
 				INT GenerationCount = Sum.Generations.Num();
 				Ar << Sum.Guid << GenerationCount;
 				//!!67 had: return
@@ -149,12 +156,15 @@ public:
 					Sum.Generations = TArray<FGenerationInfo>(GenerationCount);
 				for(INT i=0; i<GenerationCount; i++)
 					Ar << Sum.Generations[i];
-			}else{ // oldver
+			}
+			else
+			{ // oldver
 				INT HeritageCount, HeritageOffset;
 				Ar << HeritageCount << HeritageOffset;
 				INT Saved = Ar.Tell();
 
-				if(HeritageCount){
+				if(HeritageCount)
+				{
 					Ar.Seek(HeritageOffset);
 					for(INT i=0; i<HeritageCount; i++)
 						Ar << Sum.Guid;
@@ -162,7 +172,8 @@ public:
 
 				Ar.Seek(Saved);
 
-				if(Ar.IsLoading()){
+				if(Ar.IsLoading())
+				{
 					Sum.Generations.Empty(1);
 					new(Sum.Generations)FGenerationInfo(Sum.ExportCount,Sum.NameCount);
 				}
@@ -272,7 +283,8 @@ private:
 	INT TotalSize();
 	void Serialize(void* V, INT Length);
 
-	FArchive& operator<<(UObject*& Object){
+	FArchive& operator<<(UObject*& Object)
+	{
 		guard(ULinkerLoad<<UObject);
 
 		INT Index;
@@ -288,7 +300,8 @@ private:
 		unguardf(("(%s %i))", GetFullName(), Tell()));
 	}
 
-	FArchive& operator<<(FName& Name){
+	FArchive& operator<<(FName& Name)
+	{
 		guard(ULinkerLoad<<FName);
 
 		NAME_INDEX NameIndex;
@@ -332,7 +345,8 @@ class ULinkerSave : public ULinker, public FArchive{
 	INT MapName(FName* Name);
 	INT MapObject(UObject* Object);
 
-	FArchive& operator<<(FName& Name){
+	FArchive& operator<<(FName& Name)
+	{
 		guardSlow(ULinkerSave<<FName);
 
 		INT Save = NameIndices[Name.GetIndex()];
@@ -342,7 +356,8 @@ class ULinkerSave : public ULinker, public FArchive{
 		unguardobjSlow;
 	}
 
-	FArchive& operator<<(UObject*& Obj){
+	FArchive& operator<<(UObject*& Obj)
+	{
 		guardSlow(ULinkerSave<<UObject);
 
 		INT Save = Obj ? ObjectIndices[Obj->GetIndex()] : 0;

@@ -3,10 +3,12 @@
 USWRCFix* USWRCFix::Instance = NULL;
 UBOOL USWRCFix::RenderingReady = 0;
 
-void CDECL InitSWRCFix(void){
+void CDECL InitSWRCFix(void)
+{
 	USWRCFix::Instance = FindObject<USWRCFix>(ANY_PACKAGE, "SWRCFixInstance");
 
-	if(!USWRCFix::Instance){
+	if(!USWRCFix::Instance)
+	{
 		// NOTE: Need to use LoadClass here since the class might not be registered yet if Mod.dll was loaded directly with LoadLibrary
 		USWRCFix::Instance = ConstructObject<USWRCFix>(LoadClass<UObject>(NULL, "Mod.SWRCFix", NULL, LOAD_NoFail | LOAD_Throw, NULL),
 		                                               ANY_PACKAGE,
@@ -24,8 +26,10 @@ void CDECL InitSWRCFix(void){
 
 static bool(__fastcall*OriginalUClassIsDefaultValue)(UObject* Self, DWORD, const FPropertyInstance&) = NULL;
 
-static bool __fastcall UClassIsDefaultValueOverride(UObject* Self, DWORD edx, const FPropertyInstance& PropertyInstance){
-	for(INT i = 1; i < PropertyInstance.NestedProperties.Num(); ++i){
+static bool __fastcall UClassIsDefaultValueOverride(UObject* Self, DWORD edx, const FPropertyInstance& PropertyInstance)
+{
+	for(INT i = 1; i < PropertyInstance.NestedProperties.Num(); ++i)
+	{
 		if(PropertyInstance.NestedProperties[i].Property->IsA(UStrProperty::StaticClass()))
 			return false;
 	}
@@ -39,7 +43,8 @@ static bool __fastcall UClassIsDefaultValueOverride(UObject* Self, DWORD edx, co
 
 static FLOAT(__fastcall*OriginalUEngineGetMaxTickRate)(UEngine*, DWORD) = NULL;
 
-static FLOAT __fastcall EngineGetMaxTickRateOverride(UEngine* Self, DWORD Edx){
+static FLOAT __fastcall EngineGetMaxTickRateOverride(UEngine* Self, DWORD Edx)
+{
 	FLOAT MaxTickRate = OriginalUEngineGetMaxTickRate(Self, Edx);
 
 	// If the engine doesn't set it's own tick rate (i.e. GetMaxTickRate returns 0), we use FpsLimit instead
@@ -57,9 +62,11 @@ static INT   PrevAutoFOV = 0;
 static FLOAT PrevFOV = 0.0f;
 static FLOAT PrevHudArmsFOVFactor = 0.0f;
 
-static void __fastcall EngineDrawOverride(UEngine* Self, DWORD Edx, UViewport* Viewport, UBOOL Blit, BYTE* HitData, INT* HitSize){
+static void __fastcall EngineDrawOverride(UEngine* Self, DWORD Edx, UViewport* Viewport, UBOOL Blit, BYTE* HitData, INT* HitSize)
+{
 	// Update field of view
-	if(USWRCFix::Instance->AutoFOV && ((Viewport->SizeX != PrevViewportWidth || Viewport->SizeY != PrevViewportHeight) || USWRCFix::Instance->AutoFOV != PrevAutoFOV)){
+	if(USWRCFix::Instance->AutoFOV && ((Viewport->SizeX != PrevViewportWidth || Viewport->SizeY != PrevViewportHeight) || USWRCFix::Instance->AutoFOV != PrevAutoFOV))
+	{
 		PrevViewportWidth = Viewport->SizeX;
 		PrevViewportHeight = Viewport->SizeY;
 		PrevAutoFOV = 1;
@@ -68,7 +75,9 @@ static void __fastcall EngineDrawOverride(UEngine* Self, DWORD Edx, UViewport* V
 		FLOAT FOV = appCeil(appAtan(appTan(USWRCFix::Instance->GetDefaultFOV() * PI / 360.0f) * FOVScale) * 360.0f / PI);
 
 		USWRCFix::Instance->SetFOV(Viewport->Actor, FOV);
-	}else if(USWRCFix::Instance->FOV != PrevFOV || USWRCFix::Instance->HudArmsFOVFactor != PrevHudArmsFOVFactor){
+	}
+	else if(USWRCFix::Instance->FOV != PrevFOV || USWRCFix::Instance->HudArmsFOVFactor != PrevHudArmsFOVFactor)
+	{
 		PrevFOV = USWRCFix::Instance->FOV;
 		PrevHudArmsFOVFactor = USWRCFix::Instance->HudArmsFOVFactor;
 		USWRCFix::Instance->SetFOV(Viewport->Actor, USWRCFix::Instance->FOV);
@@ -76,10 +85,12 @@ static void __fastcall EngineDrawOverride(UEngine* Self, DWORD Edx, UViewport* V
 	}
 
 	// Hide reticle when zoomed in
-	if(Viewport->Actor && Viewport->Actor->Pawn && Viewport->Actor->Pawn->Weapon){
+	if(Viewport->Actor && Viewport->Actor->Pawn && Viewport->Actor->Pawn->Weapon)
+	{
 		AWeapon* Weapon = Viewport->Actor->Pawn->Weapon;
 
-		if(!Weapon->bZoomedUsesNoHUDArms){
+		if(!Weapon->bZoomedUsesNoHUDArms)
+		{
 			if(Weapon->bWeaponZoom)
 				Weapon->Reticle = NULL;
 			else if(!Weapon->Reticle)
@@ -95,13 +106,15 @@ static void __fastcall EngineDrawOverride(UEngine* Self, DWORD Edx, UViewport* V
  * UUnrealEdEngine exec hook
  */
 
-static void FlushResources(){
+static void FlushResources()
+{
 	// Flush render resources
 	if(GEngine->GRenDev)
 		GEngine->GRenDev->Flush(NULL);
 
 	// Unload texture data
-	foreachobj(UTexture, It){
+	foreachobj(UTexture, It)
+	{
 		for(INT i = 0; i < It->Mips.Num(); ++i)
 			It->Mips[i].DataArray.Unload();
 	}
@@ -109,20 +122,28 @@ static void FlushResources(){
 
 static UBOOL(__fastcall*OriginalUUnrealEdEngineExec)(UEngine*, DWORD, const TCHAR*, FOutputDevice&) = NULL;
 
-static UBOOL __fastcall UnrealEdEngineExecOverride(UEngine* Self, DWORD Edx, const TCHAR* Cmd, FOutputDevice& Ar){
+static UBOOL __fastcall UnrealEdEngineExecOverride(UEngine* Self, DWORD Edx, const TCHAR* Cmd, FOutputDevice& Ar)
+{
 	const TCHAR* TempCmd = Cmd;
 
-	if(ParseCommand(&Cmd, "FLUSHRESOURCES")){
+	if(ParseCommand(&Cmd, "FLUSHRESOURCES"))
+	{
 		FlushResources();
 
 		return 1;
-	}else if(ParseCommand(&TempCmd, "CAMERA")){
-		if(ParseCommand(&TempCmd, "UPDATE")){
+	}
+	else if(ParseCommand(&TempCmd, "CAMERA"))
+	{
+		if(ParseCommand(&TempCmd, "UPDATE"))
+		{
 			FString TempString;
 
-			if(Parse(TempCmd, "NAME=", TempString) && TempString == "TextureBrowser"){
-				if(Parse(TempCmd, "PACKAGE=", TempString) && TempString == ""){
-					if(!GConfig->GetFString("ModEd", "DefaultTextureBrowserPackage", TempString, "UnrealEd.ini")){
+			if(Parse(TempCmd, "NAME=", TempString) && TempString == "TextureBrowser")
+			{
+				if(Parse(TempCmd, "PACKAGE=", TempString) && TempString == "")
+				{
+					if(!GConfig->GetFString("ModEd", "DefaultTextureBrowserPackage", TempString, "UnrealEd.ini"))
+					{
 						TempString = "Engine";
 						GConfig->SetString("ModEd", "DefaultTextureBrowserPackage", *TempString, "UnrealEd.ini");
 					}
@@ -135,7 +156,9 @@ static UBOOL __fastcall UnrealEdEngineExecOverride(UEngine* Self, DWORD Edx, con
 				}
 			}
 		}
-	}else if(ParseCommand(&TempCmd, "ENDTASK")){
+	}
+	else if(ParseCommand(&TempCmd, "ENDTASK"))
+	{
 		// Fixes the progress indicator that won't disappear sometimes in the editor when compiling scripts.
 		// No guarantee this doesn't break anything else...
 		INT* TaskCount = reinterpret_cast<INT*>(GWarn) + 3;
@@ -143,23 +166,30 @@ static UBOOL __fastcall UnrealEdEngineExecOverride(UEngine* Self, DWORD Edx, con
 			GWarn->EndSlowTask();
 
 		return 1;
-	}else if(appStrnicmp(Cmd, "CLASS NEW", 9) == 0){ // Add a script to newly created classes, fixing the "no script to edit" error.
+	}
+	else if(appStrnicmp(Cmd, "CLASS NEW", 9) == 0) // Add a script to newly created classes, fixing the "no script to edit" error.
+	{
 		TCHAR ClassName[NAME_SIZE];
 
-		if(Parse( Cmd, "NAME=", ClassName, NAME_SIZE )){
+		if(Parse( Cmd, "NAME=", ClassName, NAME_SIZE ))
+		{
 			UClass* Class = NULL;
 
-			if(!FindObject<UClass>(ANY_PACKAGE, ClassName)){
-				if(OriginalUUnrealEdEngineExec(Self, Edx, Cmd, Ar)){
+			if(!FindObject<UClass>(ANY_PACKAGE, ClassName))
+			{
+				if(OriginalUUnrealEdEngineExec(Self, Edx, Cmd, Ar))
+				{
 					UClass* Parent = NULL;
 					TCHAR PackageName[NAME_SIZE];
 
 					if(ParseObject<UClass>(Cmd, "PARENT=", Parent, ANY_PACKAGE) &&
-						 Parse( Cmd, "PACKAGE=", PackageName, NAME_SIZE)){
+						 Parse( Cmd, "PACKAGE=", PackageName, NAME_SIZE))
+						 {
 						UPackage* Package = UObject::CreatePackage(NULL, PackageName);
 						Class = FindObject<UClass>(Package, ClassName, 1);
 
-						if(Class && !Class->ScriptText){
+						if(Class && !Class->ScriptText)
+						{
 							debugf("Creating editable script for %s", ClassName);
 							Class->ScriptText = new(Class->GetOuter(), ClassName, RF_NotForClient | RF_NotForServer) UTextBuffer;
 						}
@@ -167,7 +197,9 @@ static UBOOL __fastcall UnrealEdEngineExecOverride(UEngine* Self, DWORD Edx, con
 
 					return 1;
 				}
-			}else{
+			}
+			else
+			{
 				appMsgf(3, "A class with that name already exists");
 				return 1;
 			}
@@ -181,7 +213,8 @@ static UBOOL __fastcall UnrealEdEngineExecOverride(UEngine* Self, DWORD Edx, con
  * Fix initialization
  */
 
-void USWRCFix::Init(){
+void USWRCFix::Init()
+{
 	guardFunc;
 
 	// Common fixes
@@ -220,7 +253,8 @@ void USWRCFix::Init(){
 	HMODULE ExeModule = GetModuleHandleA(NULL);
 	bool IsUnrealEd = ExeModule && GetProcAddress(ExeModule, "autoclassUUnrealEdEngine") != NULL;
 
-	if(!IsUnrealEd){ // Game specific fixes
+	if(!IsUnrealEd) // Game specific fixes
+	{
 		debugf("Applying game fixes");
 		/*
 		 * Fix 4:
@@ -246,7 +280,8 @@ void USWRCFix::Init(){
 		for(int i = 0; EnumDisplaySettings(NULL, i, &dm) != 0; ++i)
 			AvailableResolutions.AddUniqueItem(MAKELONG(dm.dmPelsWidth, dm.dmPelsHeight));
 
-		if(AvailableResolutions.Num() > 1){
+		if(AvailableResolutions.Num() > 1)
+		{
 			Sort(AvailableResolutions.GetData(), AvailableResolutions.Num());
 
 			FString ResolutionList = "(";
@@ -270,7 +305,9 @@ void USWRCFix::Init(){
 		 * Here we also calculate the current FOV based on the aspect ratio.
 		 */
 		OriginalUEngineDraw = static_cast<void(__fastcall*)(UEngine*, DWORD, UViewport*, UBOOL, BYTE*, INT*)>(PatchDllClassVTable("Engine.dll", "UGameEngine", "UObject", 41, EngineDrawOverride));
-	}else{ // Editor specific fixes
+	}
+	else
+	{ // Editor specific fixes
 		debugf("Applying editor fixes");
 
 		/*

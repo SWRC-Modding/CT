@@ -50,7 +50,8 @@ class CORE_API UFactory : public UObject{
 
 // Import an object using a UFactory.
 template<typename T>
-T* ImportObject(ULevel* InLevel, UObject* Outer, FName Name, DWORD Flags, const TCHAR* Filename = "", UObject* Context = NULL, UFactory* Factory = NULL, const TCHAR* Parms = NULL, FFeedbackContext* Warn = GWarn){
+T* ImportObject(ULevel* InLevel, UObject* Outer, FName Name, DWORD Flags, const TCHAR* Filename = "", UObject* Context = NULL, UFactory* Factory = NULL, const TCHAR* Parms = NULL, FFeedbackContext* Warn = GWarn)
+{
 	return static_cast<T*>(UFactory::StaticImportObject(T::StaticClass(), Outer, Name, Flags, Filename, Context, Factory, Parms, Warn));
 }
 

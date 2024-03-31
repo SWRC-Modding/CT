@@ -86,11 +86,13 @@ template<typename T>
 class TFieldIterator{
 public:
 	TFieldIterator(UStruct* InStruct) : Struct(InStruct),
-										Field(InStruct ? InStruct->Children : NULL){
+										Field(InStruct ? InStruct->Children : NULL)
+										{
 		IterateToNext();
 	}
 
-	void operator++(){
+	void operator++()
+	{
 		Field = Field->Next;
 
 		IterateToNext();
@@ -105,9 +107,12 @@ protected:
 	UStruct* Struct;
 	UField* Field;
 
-	void IterateToNext(){
-		while(Struct){
-			while(Field){
+	void IterateToNext()
+	{
+		while(Struct)
+		{
+			while(Field)
+			{
 				if(Field->IsA(T::StaticClass()))
 					return;
 
@@ -126,11 +131,13 @@ template<typename T, EClassFlags Flag>
 class TFieldFlagIterator{
 public:
 	TFieldFlagIterator(UStruct* InStruct) : Struct(InStruct),
-											Field(InStruct ? InStruct->Children : NULL){
+											Field(InStruct ? InStruct->Children : NULL)
+											{
 		IterateToNext();
 	}
 
-	inline void operator++(){
+	inline void operator++()
+	{
 		Field = Field->Next;
 
 		IterateToNext();
@@ -145,9 +152,12 @@ protected:
 	UStruct* Struct;
 	UField*  Field;
 
-	inline void IterateToNext(){
-		while(Struct){
-			while(Field){
+	inline void IterateToNext()
+	{
+		while(Struct)
+		{
+			while(Field)
+			{
                 if(Field->GetClass()->ClassFlags & Flag)
                     return;
 

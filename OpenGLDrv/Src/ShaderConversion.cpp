@@ -4,32 +4,42 @@ UHardwareShaderMacros* UOpenGLRenderDevice::HardwareShaderMacros = NULL;
 TMap<FString, FString> UOpenGLRenderDevice::ShaderMacros;
 TArray<FString>        UOpenGLRenderDevice::ExpandedMacros;
 
-static void SkipWhitespaceSingleLine(const TCHAR** Text){
+static void SkipWhitespaceSingleLine(const TCHAR** Text)
+{
 	while(**Text && appIsSpace(**Text) && **Text != '\n')
 		++*Text;
 }
 
 // If Out is specified, comments and newlines will be written to it
-static void SkipWhitespaceAndComments(const TCHAR** Text, FString* Out = NULL){
-	for(;;){
-		while(appIsSpace(**Text)){
-			if(Out && **Text == '\n'){
+static void SkipWhitespaceAndComments(const TCHAR** Text, FString* Out = NULL)
+{
+	for(;;)
+	{
+		while(appIsSpace(**Text))
+		{
+			if(Out && **Text == '\n')
+			{
 				if(*(*Text + 1) == '\r' && *(*Text + 1) == '\n')
 					*Text += 2;
 				else
 					++*Text;
 
 				*Out += "\n";
-			}else{
+			}
+			else
+			{
 				++*Text;
 			}
 
 			// Remove trailing whitespace at end of text
-			if(Out && **Text == '\0'){
+			if(Out && **Text == '\0')
+			{
 				TArray<TCHAR>& CharArray = Out->GetCharArray();
 
-				for(INT i = CharArray.Num() - 2; i >= 0; --i){
-					if(!appIsSpace(CharArray[i])){
+				for(INT i = CharArray.Num() - 2; i >= 0; --i)
+				{
+					if(!appIsSpace(CharArray[i]))
+					{
 						CharArray[i + 1] = '\0';
 						CharArray.Set(i + 2);
 						break;
@@ -38,19 +48,22 @@ static void SkipWhitespaceAndComments(const TCHAR** Text, FString* Out = NULL){
 			}
 		}
 
-		if(**Text == ';' || (**Text == '/' && *(*Text + 1) == '/')){
+		if(**Text == ';' || (**Text == '/' && *(*Text + 1) == '/'))
+		{
 			const TCHAR* Start = *Text;
 
 			while(**Text && **Text != '\n')
 				++*Text;
 
-			if(Out){
+			if(Out)
+			{
 				if(Out->Len() == 0 || (*Out)[Out->Len() - 1] == '\n')
 					*Out += "\t";
 				else
 					*Out += " ";
 
-				if(*Start == ';'){
+				if(*Start == ';')
+				{
 					++Start;
 					SkipWhitespaceSingleLine(&Start);
 					*Out += "// ";
@@ -63,13 +76,17 @@ static void SkipWhitespaceAndComments(const TCHAR** Text, FString* Out = NULL){
 
 				*Out += FStringTemp(static_cast<INT>(End - Start), Start);
 			}
-		}else if(**Text == '/' && *(*Text + 1) == '*'){
+		}
+		else if(**Text == '/' && *(*Text + 1) == '*')
+		{
 			const TCHAR* Start = *Text;
 
 			*Text += 2;
 
-			while(**Text){
-				if(**Text == '*' && *(*Text + 1) == '/'){
+			while(**Text)
+			{
+				if(**Text == '*' && *(*Text + 1) == '/')
+				{
 					*Text += 2;
 
 					break;
@@ -80,13 +97,16 @@ static void SkipWhitespaceAndComments(const TCHAR** Text, FString* Out = NULL){
 
 			if(Out)
 				*Out += FStringTemp(static_cast<INT>(*Text - Start), Start);
-		}else if(!appIsSpace(**Text)){
+		}
+		else if(!appIsSpace(**Text))
+		{
 			break;
 		}
 	}
 }
 
-void UOpenGLRenderDevice::SetHardwareShaderMacros(UHardwareShaderMacros* Macros){
+void UOpenGLRenderDevice::SetHardwareShaderMacros(UHardwareShaderMacros* Macros)
+{
 	checkSlow(Macros);
 	debugf("Parsing shader macros from '%s'", Macros->GetPathName());
 
@@ -99,26 +119,33 @@ void UOpenGLRenderDevice::SetHardwareShaderMacros(UHardwareShaderMacros* Macros)
 		FStringTemp Comments("");
 		SkipWhitespaceAndComments(&Pos, &Comments);
 
-		if(Comments.Len() > 0){
+		if(Comments.Len() > 0)
+		{
 			FString* PrevComments = ShaderMacros.Find("__COMMENTS__");
 
-			if(PrevComments){
+			if(PrevComments)
+			{
 				if(Comments != *PrevComments) // Append new comments if they are not identical to the previous ones
 					*PrevComments += "\n" + Comments;
-			}else{
+			}
+			else
+			{
 				ShaderMacros["__COMMENTS__"] = Comments;
 			}
 		}
 	}
 
-	while(*Pos){
-		if(*Pos == '{'){
+	while(*Pos)
+	{
+		if(*Pos == '{')
+		{
 			const TCHAR* First = Pos + 1;
 
 			while(*Pos && *Pos != '}')
 				++Pos;
 
-			if(*Pos){
+			if(*Pos)
+			{
 				FStringTemp Name(static_cast<INT>(Pos - First), First);
 
 				++Pos;
@@ -131,26 +158,34 @@ void UOpenGLRenderDevice::SetHardwareShaderMacros(UHardwareShaderMacros* Macros)
 				FString MacroGLSL;
 				bool UsesFog = false;
 
-				if(ConvertD3DAssemblyToGLSL(*MacroText, &MacroGLSL, &UsesFog)){
+				if(ConvertD3DAssemblyToGLSL(*MacroText, &MacroGLSL, &UsesFog))
+				{
 					if(UsesFog)
 						MacroGLSL += "\n\t#define MACRO_FOG // This macro writes to oFog\n";
 
 					ShaderMacros[*Name] = MacroGLSL;
-				}else{
+				}
+				else
+				{
 					debugf(NAME_Error, "Failed to convert hardware shader macro '%s' to GLSL", *Name);
 				}
 			}
-		}else{
+		}
+		else
+		{
 			++Pos;
 		}
 	}
 }
 
-void UOpenGLRenderDevice::ExpandShaderMacros(FString* Text){
+void UOpenGLRenderDevice::ExpandShaderMacros(FString* Text)
+{
 	const TCHAR* Pos = **Text;
 
-	while(*Pos){
-		if(*Pos == '$'){
+	while(*Pos)
+	{
+		if(*Pos == '$')
+		{
 			const TCHAR* First = Pos;
 
 			++Pos;
@@ -169,8 +204,10 @@ void UOpenGLRenderDevice::ExpandShaderMacros(FString* Text){
 
 			FString Tmp;
 
-			for(INT i = 0; i < ExpandedMacros.Num(); ++i){
-				if(ExpandedMacros[i] == Name){
+			for(INT i = 0; i < ExpandedMacros.Num(); ++i)
+			{
+				if(ExpandedMacros[i] == Name)
+				{
 					for(INT j = 0; j < ExpandedMacros.Num(); ++j)
 						Tmp += ExpandedMacros[j] + "->";
 
@@ -192,17 +229,22 @@ void UOpenGLRenderDevice::ExpandShaderMacros(FString* Text){
 
 			*Text = FStringTemp(MacroOffset, **Text) + Tmp + Pos;
 			Pos = **Text + MacroOffset + Tmp.Len();
-		}else{
+		}
+		else
+		{
 			++Pos;
 		}
 	}
 }
 
-void UOpenGLRenderDevice::ParseGLSLMacros(const FString& Text){
+void UOpenGLRenderDevice::ParseGLSLMacros(const FString& Text)
+{
 	const TCHAR* Pos = *Text;
 
-	while(*Pos){
-		if(*Pos == '@'){
+	while(*Pos)
+	{
+		if(*Pos == '@')
+		{
 			++Pos;
 
 			const TCHAR* First = Pos;
@@ -210,7 +252,8 @@ void UOpenGLRenderDevice::ParseGLSLMacros(const FString& Text){
 			while(appIsAlnum(*Pos) || *Pos == '_')
 				++Pos;
 
-			if(*Pos){
+			if(*Pos)
+			{
 				FStringTemp Name(static_cast<INT>(Pos - First), First);
 
 				First = Pos;
@@ -220,13 +263,16 @@ void UOpenGLRenderDevice::ParseGLSLMacros(const FString& Text){
 
 				ShaderMacros[*Name] = FStringTemp(static_cast<INT>(Pos - First), First);
 			}
-		}else{
+		}
+		else
+		{
 			++Pos;
 		}
 	}
 }
 
-static FStringTemp GetShaderHeaderComment(UHardwareShader* Shader, const char* ShaderType){
+static FStringTemp GetShaderHeaderComment(UHardwareShader* Shader, const char* ShaderType)
+{
 	return FString::Printf("/*================================================================================================================================\n"
 	                       " * %s - %s\n"
 	                       " *================================================================================================================================*/\n\n",
@@ -234,15 +280,18 @@ static FStringTemp GetShaderHeaderComment(UHardwareShader* Shader, const char* S
 	                       ShaderType);
 }
 
-FStringTemp UOpenGLRenderDevice::GLSLShaderFromD3DHardwareShader(UHardwareShader* Shader){
+FStringTemp UOpenGLRenderDevice::GLSLShaderFromD3DHardwareShader(UHardwareShader* Shader)
+{
 	debugf("Converting D3D shader assembly to GLSL for '%s'", Shader->GetPathName());
 
 	// Vertex shader
 
 	FString VertexAttributes;
 
-	for(INT i = 0; i < Shader->StreamMapping.Num(); ++i){
-		switch(Shader->StreamMapping[i]){
+	for(INT i = 0; i < Shader->StreamMapping.Num(); ++i)
+	{
+		switch(Shader->StreamMapping[i])
+		{
 #define VERTEX_ATTRIB(name) \
 	case FVF_ ## name: \
 		VertexAttributes += FString::Printf("#define v%i In" #name "\n", i); \
@@ -308,10 +357,13 @@ FStringTemp UOpenGLRenderDevice::GLSLShaderFromD3DHardwareShader(UHardwareShader
 
 	GLSLShaderText += "\n\tif(FogEnabled){\n";
 
-	if(UsesFog){
+	if(UsesFog)
+	{
 		// The shader assigns a value to the fog register, so we use that
 		GLSLShaderText += "\t\tFog = calculate_fog(oFog);\n";
-	}else{
+	}
+	else
+	{
 		// The base shader doesn't write to oFog but a macro might. If it does, MACRO_FOG is defined and we can use oFog
 		GLSLShaderText += "#ifndef MACRO_FOG\n"
 		                          "\t\toFog = (LocalToCamera * vec4(InPosition.xyz, 1.0)).z;\n"
@@ -416,7 +468,8 @@ enum EShaderInstruction{
 	INS_MAX
 };
 
-static INT GetShaderInstructionStringNumMatches(const TCHAR* Str, const TCHAR* Prev){
+static INT GetShaderInstructionStringNumMatches(const TCHAR* Str, const TCHAR* Prev)
+{
 	INT i = 0;
 
 	while(Str[i] == Prev[i] && Str[i] && Prev[i])
@@ -441,22 +494,27 @@ static FShaderInstructionString ShaderInstructionStrings[] = {
 #undef INSTRUCTION
 };
 
-static EShaderInstruction ParseShaderInstructionName(const TCHAR** Text){
+static EShaderInstruction ParseShaderInstructionName(const TCHAR** Text)
+{
 	INT StartIndex;
 
 	// Ignore coissued instruction operator
-	if(**Text == '+'){
+	if(**Text == '+')
+	{
 		++*Text;
 		SkipWhitespaceSingleLine(Text);
 	}
 
 	// Basic binary search for the first character to bring down the number of comparisons.
-	if(**Text < ShaderInstructionStrings[INS_MAX / 2].Str[0]){
+	if(**Text < ShaderInstructionStrings[INS_MAX / 2].Str[0])
+	{
 		StartIndex = INS_MAX / 4;
 
 		if(**Text < ShaderInstructionStrings[StartIndex].Str[0])
 			StartIndex = 0;
-	}else{
+	}
+	else
+	{
 		StartIndex = INS_MAX / 2 + INS_MAX / 4;
 
 		if(**Text < ShaderInstructionStrings[StartIndex].Str[0])
@@ -469,7 +527,8 @@ static EShaderInstruction ParseShaderInstructionName(const TCHAR** Text){
 
 	INT NumMatches = 0;
 
-	for(INT i = StartIndex; appIsAlnum(**Text) && i < INS_MAX; ++i){
+	for(INT i = StartIndex; appIsAlnum(**Text) && i < INS_MAX; ++i)
+	{
 		if(NumMatches < ShaderInstructionStrings[i].NumMatchesWithPrev)
 			continue;
 
@@ -479,7 +538,8 @@ static EShaderInstruction ParseShaderInstructionName(const TCHAR** Text){
 		while(*(*Text + NumMatches) == ShaderInstructionStrings[i].Str[NumMatches])
 			++NumMatches;
 
-		if(!appIsAlnum(*(*Text + NumMatches)) && ShaderInstructionStrings[i].Str[NumMatches] == '\0'){
+		if(!appIsAlnum(*(*Text + NumMatches)) && ShaderInstructionStrings[i].Str[NumMatches] == '\0')
+		{
 			*Text += NumMatches;
 
 			return static_cast<EShaderInstruction>(i);
@@ -528,10 +588,12 @@ struct FShaderInstruction{
 	INT NumModifiers;
 };
 
-static bool ParseShaderInstructionArg(const TCHAR** Text, FShaderInstructionArg* Arg){
+static bool ParseShaderInstructionArg(const TCHAR** Text, FShaderInstructionArg* Arg)
+{
 	appMemzero(Arg, sizeof(FShaderInstructionArg));
 
-	if(**Text == '1'){
+	if(**Text == '1')
+	{
 		Arg->Invert = true;
 		++*Text;
 
@@ -543,7 +605,9 @@ static bool ParseShaderInstructionArg(const TCHAR** Text, FShaderInstructionArg*
 		++*Text;
 
 		SkipWhitespaceSingleLine(Text);
-	}else if(**Text == '-'){
+	}
+	else if(**Text == '-')
+	{
 		Arg->Negate = true;
 		++*Text;
 
@@ -558,7 +622,8 @@ static bool ParseShaderInstructionArg(const TCHAR** Text, FShaderInstructionArg*
 
 	SkipWhitespaceSingleLine(Text);
 
-	if(**Text == '['){
+	if(**Text == '[')
+	{
 		++*Text;
 		SkipWhitespaceSingleLine(Text);
 	}
@@ -566,7 +631,8 @@ static bool ParseShaderInstructionArg(const TCHAR** Text, FShaderInstructionArg*
 	if(!appIsDigit(**Text))
 		return false;
 
-	while(appIsDigit(**Text)){
+	while(appIsDigit(**Text))
+	{
 		Arg->RegisterIndex = Arg->RegisterIndex * 10 + (**Text - '0');
 		++*Text;
 	}
@@ -576,7 +642,8 @@ static bool ParseShaderInstructionArg(const TCHAR** Text, FShaderInstructionArg*
 	if(**Text == ']')
 		++*Text;
 
-	if(**Text == '_'){
+	if(**Text == '_')
+	{
 		++*Text;
 
 		if(appStrncmp(*Text, "x2", 2) == 0)
@@ -596,7 +663,8 @@ static bool ParseShaderInstructionArg(const TCHAR** Text, FShaderInstructionArg*
 
 	INT MaskLen = 0;
 
-	if(**Text == '.'){
+	if(**Text == '.')
+	{
 		++*Text;
 
 		SkipWhitespaceSingleLine(Text);
@@ -631,11 +699,14 @@ static bool ParseShaderInstructionArg(const TCHAR** Text, FShaderInstructionArg*
 	return true;
 }
 
-static bool ParseShaderInstructionArgs(const TCHAR** Text, FShaderInstruction* Instruction){
-	for(INT i = 0; i < MAX_SHADER_INSTRUCTION_ARGS; ++i){
+static bool ParseShaderInstructionArgs(const TCHAR** Text, FShaderInstruction* Instruction)
+{
+	for(INT i = 0; i < MAX_SHADER_INSTRUCTION_ARGS; ++i)
+	{
 		SkipWhitespaceSingleLine(Text);
 
-		if(**Text == '\n' || **Text == ';' || **Text == '/' || **Text == '\0'){ // End of line or start of comment means we are done parsing the arguments
+		if(**Text == '\n' || **Text == ';' || **Text == '/' || **Text == '\0') // End of line or start of comment means we are done parsing the arguments
+		{
 			Instruction->NumArgs = i;
 
 			return true;
@@ -655,7 +726,8 @@ static bool ParseShaderInstructionArgs(const TCHAR** Text, FShaderInstruction* I
 	return false;
 }
 
-static bool ParseShaderInstruction(const TCHAR** Text, FShaderInstruction* Instruction){
+static bool ParseShaderInstruction(const TCHAR** Text, FShaderInstruction* Instruction)
+{
 	appMemzero(Instruction, sizeof(FShaderInstruction));
 
 	Instruction->Type = ParseShaderInstructionName(Text);
@@ -663,10 +735,12 @@ static bool ParseShaderInstruction(const TCHAR** Text, FShaderInstruction* Instr
 	if(Instruction->Type == INS_INVALID)
 		return false;
 
-	while(**Text == '_'){
+	while(**Text == '_')
+	{
 		++*Text;
 
-		if(**Text == 'x' || **Text == 'd'){
+		if(**Text == 'x' || **Text == 'd')
+		{
 			TCHAR Op = **Text == 'x' ? '*' : '/';
 
 			++*Text;
@@ -677,10 +751,14 @@ static bool ParseShaderInstruction(const TCHAR** Text, FShaderInstruction* Instr
 			Instruction->Modifiers[Instruction->NumModifiers].Operator = Op;
 			Instruction->Modifiers[Instruction->NumModifiers].Operand = **Text - '0';
 			++*Text;
-		}else if(appStrncmp(*Text, "sat", 3) == 0){
+		}
+		else if(appStrncmp(*Text, "sat", 3) == 0)
+		{
 			*Text += 3;
 			Instruction->Modifiers[Instruction->NumModifiers].Saturate = true;
-		}else{
+		}
+		else
+		{
 			return false;
 		}
 
@@ -704,7 +782,8 @@ static bool ParseShaderInstruction(const TCHAR** Text, FShaderInstruction* Instr
 
 	INT MaskLen = 0;
 
-	if(**Text == '.'){
+	if(**Text == '.')
+	{
 		++*Text;
 
 		SkipWhitespaceSingleLine(Text);
@@ -741,7 +820,8 @@ static bool ParseShaderInstruction(const TCHAR** Text, FShaderInstruction* Instr
 	return ParseShaderInstructionArgs(Text, Instruction);
 }
 
-static void WriteShaderInstructionArg(const FShaderInstructionArg& Arg, EShaderExpr TargetType, FString* Out){
+static void WriteShaderInstructionArg(const FShaderInstructionArg& Arg, EShaderExpr TargetType, FString* Out)
+{
 	FString Tmp;
 
 	if(Arg.Register == 'c')
@@ -752,8 +832,10 @@ static void WriteShaderInstructionArg(const FShaderInstructionArg& Arg, EShaderE
 	if(Arg.Swizzle[0])
 		Tmp += FString::Printf(".%s", Arg.Swizzle);
 
-	if(TargetType != Arg.ExprType){
-		switch(Arg.ExprType){
+	if(TargetType != Arg.ExprType)
+	{
+		switch(Arg.ExprType)
+		{
 		case EXPR_Float:
 			if(TargetType == EXPR_Float2)
 				Tmp = "vec2(" + Tmp + ")";
@@ -805,14 +887,16 @@ static void WriteShaderInstructionArg(const FShaderInstructionArg& Arg, EShaderE
 		*Out += Tmp;
 }
 
-static bool WriteShaderInstructionRhs(FString* Out, FShaderInstruction& Instruction, EShaderExpr* ResultExpr){
+static bool WriteShaderInstructionRhs(FString* Out, FShaderInstruction& Instruction, EShaderExpr* ResultExpr)
+{
 	FShaderInstructionArg* Args = Instruction.Args;
 
 #define REQUIRE_ARGS(n) \
 	if(Instruction.NumArgs != n) \
 		return false
 
-	switch(Instruction.Type){
+	switch(Instruction.Type)
+	{
 	case INS_add:
 		REQUIRE_ARGS(2);
 		*ResultExpr = Args[0].ExprType;
@@ -1118,7 +1202,8 @@ static bool WriteShaderInstructionRhs(FString* Out, FShaderInstruction& Instruct
 	return true;
 }
 
-static bool WriteShaderInstruction(FShaderInstruction& Instruction, FString* Out){
+static bool WriteShaderInstruction(FShaderInstruction& Instruction, FString* Out)
+{
 	EShaderExpr ResultExpr = EXPR_Float4;
 	FString Rhs;
 
@@ -1131,25 +1216,32 @@ static bool WriteShaderInstruction(FShaderInstruction& Instruction, FString* Out
 		*Out += FString::Printf("\t%s = ", Instruction.Destination);
 
 	// Move saturate modifier to the beginning of the list since it needs to be applied first.
-	for(INT i = 0; i < Instruction.NumModifiers - 1; ++i){
+	for(INT i = 0; i < Instruction.NumModifiers - 1; ++i)
+	{
 		if(Instruction.Modifiers[i + 1].Saturate)
 			Exchange(Instruction.Modifiers[i], Instruction.Modifiers[i + 1]);
 	}
 
-	for(INT i = 0; i < Instruction.NumModifiers; ++i){
+	for(INT i = 0; i < Instruction.NumModifiers; ++i)
+	{
 		if(Instruction.Modifiers[i].Saturate)
 			*Out += "saturate(";
 		else
 			*Out += "(";
 	}
 
-	if(Instruction.ExprType != ResultExpr){
+	if(Instruction.ExprType != ResultExpr)
+	{
 		const TCHAR* WriteMask = appStrstr(Instruction.Destination, ".");
 
-		if(WriteMask && Instruction.ExprType <= ResultExpr){
+		if(WriteMask && Instruction.ExprType <= ResultExpr)
+		{
 			*Out += FString::Printf("(%s)%s", *Rhs, WriteMask);
-		}else{
-			switch(Instruction.ExprType){
+		}
+		else
+		{
+			switch(Instruction.ExprType)
+			{
 			case EXPR_Float:
 				*Out += "(" + Rhs + ").x";
 				break;
@@ -1178,11 +1270,14 @@ static bool WriteShaderInstruction(FShaderInstruction& Instruction, FString* Out
 					*Out += "(" + Rhs + ").xyzz";
 			}
 		}
-	}else{
+	}
+	else
+	{
 		*Out += Rhs;
 	}
 
-	for(INT i = 0; i < Instruction.NumModifiers; ++i){
+	for(INT i = 0; i < Instruction.NumModifiers; ++i)
+	{
 		if(Instruction.Modifiers[i].Saturate)
 			*Out += ")";
 		else
@@ -1194,11 +1289,13 @@ static bool WriteShaderInstruction(FShaderInstruction& Instruction, FString* Out
 	return true;
 }
 
-bool UOpenGLRenderDevice::ConvertD3DAssemblyToGLSL(const TCHAR* Text, FString* Out, bool* UsesFog){
+bool UOpenGLRenderDevice::ConvertD3DAssemblyToGLSL(const TCHAR* Text, FString* Out, bool* UsesFog)
+{
 	SkipWhitespaceAndComments(&Text, Out);
 
 	// Skip shader type and version. We don't care and just assume the highest supported versions are vs.1.1 and ps.1.4
-	if((*Text == 'v' || *Text == 'p') && Text[1] == 's'){
+	if((*Text == 'v' || *Text == 'p') && Text[1] == 's')
+	{
 		while(*Text && *Text != '\n')
 			++Text;
 	}
@@ -1210,25 +1307,31 @@ bool UOpenGLRenderDevice::ConvertD3DAssemblyToGLSL(const TCHAR* Text, FString* O
 
 	FShaderInstruction Instruction;
 
-	while(*Text){
-		if(*Text != '{'){
+	while(*Text)
+	{
+		if(*Text != '{')
+		{
 			if(!ParseShaderInstruction(&Text, &Instruction))
 				return false;
 
 			if(!WriteShaderInstruction(Instruction, Out))
 				return false;
 
-			if(UsesFog){
+			if(UsesFog)
+			{
 				if(!*UsesFog && appStrncmp(Instruction.Destination, "oFog", 4) == 0)
 					*UsesFog = true;
 			}
-		}else{
+		}
+		else
+		{
 			const TCHAR* First = Text + 1;
 
 			while(*Text && *Text != '}')
 				++Text;
 
-			if(*Text){
+			if(*Text)
+			{
 				*Out += "\t$" + FStringTemp(static_cast<INT>(Text - First), First);
 				++Text;
 			}

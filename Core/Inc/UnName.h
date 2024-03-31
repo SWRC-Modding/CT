@@ -101,7 +101,8 @@ private:
 	CORE_API static bool                Initialized;    // Subsystem initialized.
 };
 
-inline DWORD GetTypeHash(FName N){
+inline DWORD GetTypeHash(FName N)
+{
 	return N.GetIndex();
 }
 

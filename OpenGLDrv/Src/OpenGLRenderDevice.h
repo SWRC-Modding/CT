@@ -78,7 +78,8 @@ public:
 	virtual void TakeScreenshot(const TCHAR* Name, UViewport* Viewport, INT Width, INT Height);
 	virtual UBOOL SupportsTextureFormat(ETextureFormat){ return 0; }
 
-	void* GetScratchBuffer(INT Size){
+	void* GetScratchBuffer(INT Size)
+	{
 		if(Scratch.Num() < Size)
 			Scratch.Set(Size);
 

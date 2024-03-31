@@ -433,10 +433,12 @@ class CORE_API UDelegateProperty : public UProperty{
  * Find a typed field in a struct.
  */
 template<typename T>
-T* FindField(UStruct* Owner, const TCHAR* FieldName){
+T* FindField(UStruct* Owner, const TCHAR* FieldName)
+{
 	guard(FindField);
 
-	for(TFieldIterator<T> It(Owner); It; ++It){
+	for(TFieldIterator<T> It(Owner); It; ++It)
+	{
 		if(appStricmp(It->GetName(), FieldName) == 0)
 			return *It;
 	}
@@ -454,7 +456,8 @@ T* FindField(UStruct* Owner, const TCHAR* FieldName){
  * See if this object belongs to the specified class.
  */
 inline UBOOL UObject::IsA(UClass* SomeBase) const{
-	for(UClass* TempClass = _Class; TempClass; TempClass = static_cast<UClass*>(TempClass->SuperStruct)){
+	for(UClass* TempClass = _Class; TempClass; TempClass = static_cast<UClass*>(TempClass->SuperStruct))
+	{
 		if(TempClass == SomeBase)
 			return 1;
 	}
@@ -466,7 +469,8 @@ inline UBOOL UObject::IsA(UClass* SomeBase) const{
  * See if this object is in a certain package.
  */
 inline UBOOL UObject::IsIn(UObject* SomeOuter) const{
-	for(UObject* It = GetOuter(); It; It = It->GetOuter()){
+	for(UObject* It = GetOuter(); It; It = It->GetOuter())
+	{
 		if(It == SomeOuter)
 			return 1;
 	}

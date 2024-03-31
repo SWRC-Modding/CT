@@ -82,7 +82,8 @@ class CORE_API UCommandlet : public UObject{
  * Calling UCommandlet::Main gives a 'Function Main not found' error for some commandlets which makes no sense at all.
  * This function provides a workaround by checking whether main exists without throwing an error.
  */
-inline INT CommandletMain(UCommandlet* Commandlet, const FString& InParms){
+inline INT CommandletMain(UCommandlet* Commandlet, const FString& InParms)
+{
 	UFunction* MainFunc = Commandlet->FindFunction(NAME_Main);
 	UCommandlet_eventMain_Parms Parms = {InParms, 0};
 

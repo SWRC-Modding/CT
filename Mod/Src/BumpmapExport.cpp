@@ -34,7 +34,8 @@ class UExportBumpMapsCommandlet : public UCommandlet{
 
 IMPLEMENT_CLASS(UExportBumpMapsCommandlet)
 
-void UExportBumpMapsCommandlet::StaticConstructor(){
+void UExportBumpMapsCommandlet::StaticConstructor()
+{
 	LogToStdout     = 0;
 	IsClient        = 1;
 	IsEditor        = 1;
@@ -43,10 +44,12 @@ void UExportBumpMapsCommandlet::StaticConstructor(){
 	ShowErrorCount  = 0;
 }
 
-INT UExportBumpMapsCommandlet::Main(const TCHAR* Parms){
+INT UExportBumpMapsCommandlet::Main(const TCHAR* Parms)
+{
 	FString PackageName;
 
-	if(!ParseToken(Parms, PackageName, 0)){
+	if(!ParseToken(Parms, PackageName, 0))
+	{
 		GWarn->Log("Package file not specified");
 
 		return 1;
@@ -59,17 +62,20 @@ INT UExportBumpMapsCommandlet::Main(const TCHAR* Parms){
 
 	UObject* Package = LoadPackage(NULL, *PackageName, LOAD_NoFail);
 
-	if(!GFileManager->MakeDirectory(*OutPath, 1)){
+	if(!GFileManager->MakeDirectory(*OutPath, 1))
+	{
 		GWarn->Log("Failed to create output directory");
 
 		return 1;
 	}
 
-	foreachobj(UTexture, It){
+	foreachobj(UTexture, It)
+	{
 		FBaseTexture* BaseTexture = It->GetRenderInterface();
 		FTexture* Texture = BaseTexture ? BaseTexture->GetTextureInterface() : NULL;
 
-		if(Texture && It->IsIn(Package) && IsBumpmap(Texture->GetFormat())){
+		if(Texture && It->IsIn(Package) && IsBumpmap(Texture->GetFormat()))
+		{
 			FFilename Filename = OutPath * FStringTemp(It->GetPathName()).Substitute(".", "\\").Substitute(".", "\\") + ".TGA";
 
 			GWarn->Logf("Exporting bump map: %s", It->GetPathName());
@@ -81,7 +87,8 @@ INT UExportBumpMapsCommandlet::Main(const TCHAR* Parms){
 	return 0;
 }
 
-void UExportBumpMapsCommandlet::ExportTga(FTexture* Texture, const FString& Filename){
+void UExportBumpMapsCommandlet::ExportTga(FTexture* Texture, const FString& Filename)
+{
 	check(sizeof(FTGAHeader) == 18);
 
 	ETextureFormat Format = Texture->GetFormat();
@@ -104,7 +111,8 @@ void UExportBumpMapsCommandlet::ExportTga(FTexture* Texture, const FString& File
 	BYTE* Dest = Archive.GetData() + Archive.Tell();
 	void* Src = Texture->GetRawTextureData(0);
 
-	switch(Format){
+	switch(Format)
+	{
 	case TEXF_V8U8:
 		ConvertV8U8ToBGRA8(Dest, Src, Width, Height);
 		break;
@@ -121,7 +129,8 @@ void UExportBumpMapsCommandlet::ExportTga(FTexture* Texture, const FString& File
 
 	INT NumPixels = Width * Height;
 
-	for(INT i = 0; i < NumPixels; ++i){
+	for(INT i = 0; i < NumPixels; ++i)
+	{
 		Dest[i * 4] = 0xFF;
 		Exchange(Dest[i * 4 + 1], Dest[i * 4 + 2]);
 	}

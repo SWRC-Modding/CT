@@ -35,12 +35,14 @@ public:
 
 	INT GetMaxIndex(){ return FieldsBase+Fields.Num(); }
 	INT FClassNetCache::GetRepConditionCount(){ return RepConditionCount; }
-	FFieldNetCache* GetFromField(UObject* Field){
+	FFieldNetCache* GetFromField(UObject* Field)
+	{
 		guardSlow(FClassNetCache::GetFromField);
 
 		FFieldNetCache* Result = NULL;
 
-		for(FClassNetCache* C = this; C; C = C->Super){
+		for(FClassNetCache* C = this; C; C = C->Super)
+		{
 			Result = C->FieldMap.FindRef(Field);
 
 			if(Result)
@@ -51,10 +53,12 @@ public:
 
 		unguardSlow;
 	}
-	FFieldNetCache* GetFromIndex(INT Index){
+	FFieldNetCache* GetFromIndex(INT Index)
+	{
 		guardSlow(FFieldNetCache::GetFromIndex);
 
-		for(FClassNetCache* C = this; C; C = C->Super){
+		for(FClassNetCache* C = this; C; C = C->Super)
+		{
 			if(Index >= C->FieldsBase && Index < C->FieldsBase + C->Fields.Num())
 				return &C->Fields[Index-C->FieldsBase];
 		}

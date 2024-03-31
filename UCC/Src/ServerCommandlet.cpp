@@ -9,20 +9,24 @@ static const TCHAR* CurrentConsoleCommand;
  * This function runs in a separate thread in order to not having
  * to pause the main loop while waiting for input.
  */
-static DWORD WINAPI UpdateServerConsoleInput(PVOID){
+static DWORD WINAPI UpdateServerConsoleInput(PVOID)
+{
 	HANDLE InputHandle = CreateFileA("CONIN$", GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ, 0, OPEN_EXISTING, 0, 0);
 
 	if(!InputHandle)
 		return 1;
 
-	while(GIsRunning && !GIsRequestingExit){
+	while(GIsRunning && !GIsRequestingExit)
+	{
 		TCHAR ConsoleCommandBuffer[512];
 
-		if(!CurrentConsoleCommand){
+		if(!CurrentConsoleCommand)
+		{
 			DWORD InputLen;
 			ReadConsoleA(InputHandle, ConsoleCommandBuffer, ARRAY_COUNT(ConsoleCommandBuffer) - 1, &InputLen, NULL);
 
-			if(InputLen > 0){
+			if(InputLen > 0)
+			{
 				TCHAR* Cmd = ConsoleCommandBuffer;
 
 				// Trim spaces from command
@@ -32,7 +36,8 @@ static DWORD WINAPI UpdateServerConsoleInput(PVOID){
 
 				Cmd[InputLen] = '\0';
 
-				while(InputLen > 0 && appIsSpace(*Cmd)){
+				while(InputLen > 0 && appIsSpace(*Cmd))
+				{
 					++Cmd;
 					--InputLen;
 				}
@@ -40,7 +45,9 @@ static DWORD WINAPI UpdateServerConsoleInput(PVOID){
 				if(InputLen > 0)
 					CurrentConsoleCommand = Cmd;
 			}
-		}else{
+		}
+		else
+		{
 			Sleep(100);
 		}
 	}
@@ -51,7 +58,8 @@ static DWORD WINAPI UpdateServerConsoleInput(PVOID){
 }
 
 // Replacement for UServerCommandlet::Main since the one from Engine.dll crashes because it doesn't assign a value to GEngine
-INT UServerCommandletMain(){
+INT UServerCommandletMain()
+{
 	FString Language;
 
 	if(GConfig->GetFString("Engine.Engine", "Language", Language, "System.ini"))
@@ -72,10 +80,12 @@ INT UServerCommandletMain(){
 	GIsRunning = 1;
 
 	// Main loop
-	while(GIsRunning && !GIsRequestingExit){
+	while(GIsRunning && !GIsRequestingExit)
+	{
 		DOUBLE NewTime = appSeconds();
 
-		if(CurrentConsoleCommand){
+		if(CurrentConsoleCommand)
+		{
 			if(appStricmp(CurrentConsoleCommand, "CLS") == 0) // In case user wants to clear screen. Can be useful for testing.
 				system("cls"); // Hate using system but it's ok here
 			else if(!GEngine->Exec(CurrentConsoleCommand, *GWarn))
@@ -95,7 +105,8 @@ INT UServerCommandletMain(){
 
 		++TickCount;
 
-		if(OldTime > SecondStartTime + 1.0){
+		if(OldTime > SecondStartTime + 1.0)
+		{
 			GEngine->CurrentTickRate = TickCount / (OldTime - SecondStartTime);
 			SecondStartTime = OldTime;
 			TickCount = 0;
@@ -104,7 +115,8 @@ INT UServerCommandletMain(){
 		// Enforce optional maximum tick rate
 		FLOAT MaxTickRate = GEngine->GetMaxTickRate();
 
-		if(MaxTickRate > 0.0f){
+		if(MaxTickRate > 0.0f)
+		{
 			FLOAT Delta = (1.0f / MaxTickRate) - (appSeconds() - OldTime);
 
 			appSleep(Delta > 0.0f ? Delta : 0.0f);

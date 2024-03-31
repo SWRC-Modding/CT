@@ -45,7 +45,8 @@ public:
 	// Operators.
 	UBOOL operator==(const FColor& C) const{ return DWColor() == C.DWColor(); }
 	UBOOL operator!=(const FColor& C ) const{ return DWColor() != C.DWColor(); }
-	void operator+=(FColor C){
+	void operator+=(FColor C)
+	{
 #ifdef ASM
 		_asm{
 			mov edi, DWORD PTR [this]
@@ -237,22 +238,26 @@ enum ETexClampMode{
 //
 // IsDXTC
 //
-inline bool IsDXTC(ETextureFormat Format){
+inline bool IsDXTC(ETextureFormat Format)
+{
 	return Format == TEXF_DXT1 || Format == TEXF_DXT3 || Format == TEXF_DXT5;
 }
 
 //
 // IsBumpmap
 //
-inline bool IsBumpmap(ETextureFormat Format){
+inline bool IsBumpmap(ETextureFormat Format)
+{
 	return Format == TEXF_V8U8 || Format == TEXF_L6V5U5 || Format == TEXF_X8L8V8U8;
 }
 
 //
 // GetBytesPerPixel
 //
-inline INT GetBytesPerPixel(ETextureFormat Format, INT NumPixels){
-	switch(Format){
+inline INT GetBytesPerPixel(ETextureFormat Format, INT NumPixels)
+{
+	switch(Format)
+	{
 	case TEXF_DXT1:
 		return NumPixels / 2;
 	case TEXF_P8:
@@ -280,8 +285,10 @@ inline INT GetBytesPerPixel(ETextureFormat Format, INT NumPixels){
 //
 // CalculateTexelPointer
 //
-inline BYTE* CalculateTexelPointer(BYTE* Base, ETextureFormat Format, INT Stride, INT X, INT Y){
-	switch(Format){
+inline BYTE* CalculateTexelPointer(BYTE* Base, ETextureFormat Format, INT Stride, INT X, INT Y)
+{
+	switch(Format)
+	{
 	case TEXF_DXT1:
 		return Base + Stride * (Y / 4) + (X * 2);
 	case TEXF_DXT3:
@@ -377,7 +384,8 @@ public:
 class FShader : public FRenderResource{
 public:
 	FShader(class UHardwareShader* InShader, INT InPass) : Shader(InShader),
-	                                                       Pass(InPass){
+	                                                       Pass(InPass)
+	                                                       {
 		CacheId = MakeCacheID(CID_RenderShader);
 	}
 
@@ -431,11 +439,13 @@ struct FX8L8V8U8Pixel{
 
 // Integer range mapping
 
-inline BYTE Map6BitUnsignedTo8BitUnsigned(BYTE U6){
+inline BYTE Map6BitUnsignedTo8BitUnsigned(BYTE U6)
+{
 	return (UINT8)(U6 * 255 / 63);
 }
 
-inline SBYTE Map5BitSignedTo8BitSigned(SBYTE S5){
+inline SBYTE Map5BitSignedTo8BitSigned(SBYTE S5)
+{
 	const int Min5 = -16;
 	const int Max5 = 15;
 	const int Range5 = Max5 - Min5;
@@ -447,16 +457,19 @@ inline SBYTE Map5BitSignedTo8BitSigned(SBYTE S5){
 	return (SBYTE)((S5 - Min5) * Range8 / Range5 + Min8);
 }
 
-inline BYTE Map8BitSignedTo8BitUnsigned(SBYTE S8){
+inline BYTE Map8BitSignedTo8BitUnsigned(SBYTE S8)
+{
 	return S8 + 128;
 }
 
 // V8U8
 
-inline void ConvertV8U8ToBGRA8(void* Dest, const void* Src, INT Width, INT Height){
+inline void ConvertV8U8ToBGRA8(void* Dest, const void* Src, INT Width, INT Height)
+{
 	INT NumPixels = Width * Height;
 
-	for(INT i = 0; i < NumPixels; ++i){
+	for(INT i = 0; i < NumPixels; ++i)
+	{
 		const FV8U8Pixel* P1 = static_cast<const FV8U8Pixel*>(Src) + i;
 		BYTE* P2 = static_cast<BYTE*>(Dest) + i * 4;
 
@@ -469,10 +482,12 @@ inline void ConvertV8U8ToBGRA8(void* Dest, const void* Src, INT Width, INT Heigh
 
 // L6V5U5
 
-inline void ConvertL6V5U5ToBGRA8(void* Dest, const void* Src, INT Width, INT Height){
+inline void ConvertL6V5U5ToBGRA8(void* Dest, const void* Src, INT Width, INT Height)
+{
 	INT NumPixels = Width * Height;
 
-	for(INT i = 0; i < NumPixels; ++i){
+	for(INT i = 0; i < NumPixels; ++i)
+	{
 		const FL6V5U5Pixel* P1 = static_cast<const FL6V5U5Pixel*>(Src) + i;
 		BYTE* P2 = static_cast<BYTE*>(Dest) + i * 4;
 
@@ -485,10 +500,12 @@ inline void ConvertL6V5U5ToBGRA8(void* Dest, const void* Src, INT Width, INT Hei
 
 // X8L8V8U8
 
-inline void ConvertX8L8V8U8ToBGRA8(void* Dest, const void* Src, INT Width, INT Height){
+inline void ConvertX8L8V8U8ToBGRA8(void* Dest, const void* Src, INT Width, INT Height)
+{
 	INT NumPixels = Width * Height;
 
-	for(INT i = 0; i < NumPixels; ++i){
+	for(INT i = 0; i < NumPixels; ++i)
+	{
 		const FX8L8V8U8Pixel* P1 = static_cast<const FX8L8V8U8Pixel*>(Src) + i;
 		BYTE* P2 = static_cast<BYTE*>(Dest) + i * 4;
 

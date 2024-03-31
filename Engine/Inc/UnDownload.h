@@ -35,7 +35,7 @@ class ENGINE_API UDownload : public UObject
 	virtual UBOOL TrySkipFile();
 	virtual void ReceiveFile( UNetConnection* InConnection, INT PackageIndex, const TCHAR *Params=NULL, UBOOL InCompression=0 );
 	virtual void ReceiveData( BYTE* Data, INT Count );
-	virtual void Tick() {} 
+	virtual void Tick() {}
 	virtual void DownloadError( const TCHAR* Error );
 	virtual void DownloadDone();
 };
@@ -44,7 +44,7 @@ class ENGINE_API UChannelDownload : public UDownload
 {
 	DECLARE_CLASS(UChannelDownload,UDownload,CLASS_Transient|CLASS_Config,Engine);
     NO_DEFAULT_CONSTRUCTOR(UChannelDownload);
-	
+
 	// Variables.
 	UFileChannel* Ch;
 

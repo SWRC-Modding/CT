@@ -1464,7 +1464,8 @@ struct FKeyValuePair{
 	FString Key;
 	FString Value;
 
-	friend ENGINE_API FArchive& operator<<(FArchive& Ar,FKeyValuePair& MyKeyValuePair){
+	friend ENGINE_API FArchive& operator<<(FArchive& Ar,FKeyValuePair& MyKeyValuePair)
+	{
 		return Ar << MyKeyValuePair.Key << MyKeyValuePair.Value;
 	}
 };
@@ -2404,12 +2405,14 @@ public:
 	void Pling(const FVector& Position, FLOAT Strength, FLOAT Radius);
 	void PlingVertex(INT x, INT y, FLOAT Strength);
 
-	inline UBOOL GetClampedBitmap(INT x, INT y){
+	inline UBOOL GetClampedBitmap(INT x, INT y)
+	{
 		INT BitIndex = x + y * FluidXSize;
 		return (ClampBitmap[BitIndex >> 5] & (1 << (BitIndex & 0x1f))) ? 1 : 0;
 	}
 
-	inline void SetClampedBitmap(INT x, INT y, UBOOL Clamp){
+	inline void SetClampedBitmap(INT x, INT y, UBOOL Clamp)
+	{
 		INT BitIndex = x + (y * FluidXSize);
 		INT Index = BitIndex >> 5;
 		DWORD Bitmask = 1 << (BitIndex & 0x1f);
@@ -5791,8 +5794,10 @@ public:
 	DECLARE_CLASS(UProjectorMultiMaterial,URenderedMaterial,0,Engine)
 	NO_DEFAULT_CONSTRUCTOR(UProjectorMultiMaterial)
 
-	inline UHardwareShader* GetHardwareShader(int NumProjectors){
-		switch(FrameBufferBlending){
+	inline UHardwareShader* GetHardwareShader(int NumProjectors)
+	{
+		switch(FrameBufferBlending)
+		{
 		case PB_Add:
 			return AddShaders[NumProjectors - 1];
 		case PB_AlphaBlend:
@@ -5942,21 +5947,24 @@ public:
 	virtual INT SetupShaderWrapper(class FRenderInterface* RI){ return 0; }
 
 	// TimR: Use first texture as the default size for the browsers
-	virtual INT MaterialUSize(){
+	virtual INT MaterialUSize()
+	{
 		if(ShaderImplementation && ShaderImplementation->Textures[0])
 			return ShaderImplementation->Textures[0]->MaterialUSize();
 
 		return 0;
 	}
 
-	virtual INT MaterialVSize(){
+	virtual INT MaterialVSize()
+	{
 		if(ShaderImplementation && ShaderImplementation->Textures[0])
 			return ShaderImplementation->Textures[0]->MaterialVSize();
 
 		return 0;
 	}
 
-	virtual UBOOL RequiresSorting(){
+	virtual UBOOL RequiresSorting()
+	{
 		if(ShaderImplementation)
 			return ShaderImplementation->RequiresSorting();
 
@@ -6117,21 +6125,24 @@ public:
 	virtual UHardwareShader* GetStaticMeshShader(UViewport* Viewport, AActor* Actor, float Fade=1.f){ return NULL; }
 
 	// TimR: Use first texture as the default size for the browsers
-	virtual INT MaterialUSize(){
+	virtual INT MaterialUSize()
+	{
 		if(VisionShader && VisionShader->Textures[0])
 			return VisionShader->Textures[0]->MaterialUSize();
 
 		return 0;
 	}
 
-	virtual INT MaterialVSize(){
+	virtual INT MaterialVSize()
+	{
 		if(VisionShader && VisionShader->Textures[0])
 			return VisionShader->Textures[0]->MaterialUSize();
 
 		return 0;
 	}
 
-	virtual UBOOL RequiresSorting(){
+	virtual UBOOL RequiresSorting()
+	{
 		if(VisionShader)
 			return VisionShader->RequiresSorting();
 
@@ -6986,7 +6997,8 @@ public:
 	DECLARE_CLASS(URumbleParams,USoundBase,0,Engine)
 	virtual void PostEditChange();
 
-	inline void CalcIntensities(FLOAT TotalTime, FLOAT& Left, FLOAT& Right){
+	inline void CalcIntensities(FLOAT TotalTime, FLOAT& Left, FLOAT& Right)
+	{
 		//if(TotalTime > (TimeFadeIn + TimeHold + TimeFadeOut))
 		//{ // done
 			Left = 0;

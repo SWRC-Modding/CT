@@ -88,7 +88,8 @@ public:
 	UModRenderDevice() : RenderInterface(this){}
 	void StaticConstructor(){ bEnableSelectionFix = 1; }
 
-	virtual void Serialize(FArchive& Ar){
+	virtual void Serialize(FArchive& Ar)
+	{
 		Super::Serialize(Ar);
 		Ar << SolidSelectionShader << AlphaSelectionShader;
 	}

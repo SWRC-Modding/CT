@@ -2,22 +2,27 @@
 #include "OpenGLResource.h"
 #include "OpenGLRenderDevice.h"
 
-FStringTemp FShaderGenerator::GetShaderText(bool UseStaticLighting){
+FStringTemp FShaderGenerator::GetShaderText(bool UseStaticLighting)
+{
 	BYTE TexCoordsBySrc[TCS_MAX] = {0};
 	INT NumTexMatrices = 0;
 	BYTE NumTexCoords = 0;
 	FString VertexShaderText;
 	FString FragmentShaderText;
 
-	for(INT i = 0; i < NumTextures; ++i){
+	for(INT i = 0; i < NumTextures; ++i)
+	{
 		BYTE TexCoordIndex;
 		BYTE TexCoordSrcIndex = Textures[i].TexCoordSrc;
 		bool HaveTexCoord = false;
 
-		if(TexCoordsBySrc[TexCoordSrcIndex] && Textures[i].Matrix < 0){
+		if(TexCoordsBySrc[TexCoordSrcIndex] && Textures[i].Matrix < 0)
+		{
 			TexCoordIndex = TexCoordsBySrc[TexCoordSrcIndex] - 1;
 			HaveTexCoord = true;
-		}else{
+		}
+		else
+		{
 			TexCoordIndex = NumTexCoords;
 
 			if(Textures[i].Matrix < 0)
@@ -26,12 +31,14 @@ FStringTemp FShaderGenerator::GetShaderText(bool UseStaticLighting){
 				++NumTexCoords;
 		}
 
-		if(!HaveTexCoord){
+		if(!HaveTexCoord)
+		{
 			VertexShaderText += FString::Printf("\tTexCoord%i = ", TexCoordIndex);
 
 			FString TexCoord;
 
-			switch(Textures[i].TexCoordSrc){
+			switch(Textures[i].TexCoordSrc)
+			{
 			case TCS_Stream0:
 			case TCS_Stream1:
 			case TCS_Stream2:
@@ -84,8 +91,10 @@ FStringTemp FShaderGenerator::GetShaderText(bool UseStaticLighting){
 				appErrorf("Invalid texture coordinate source (%i)", Textures[i].TexCoordSrc);
 			}
 
-			if(Textures[i].Matrix >= 0){
-				switch(Textures[i].TexCoordCount){
+			if(Textures[i].Matrix >= 0)
+			{
+				switch(Textures[i].TexCoordCount)
+				{
 				case TCN_2DCoords:
 					TexCoord = "vec4(" + TexCoord + ".xy" + ", 1.0, 1.0)";
 					break;
@@ -99,8 +108,10 @@ FStringTemp FShaderGenerator::GetShaderText(bool UseStaticLighting){
 
 			VertexShaderText += TexCoord + ";\n";
 
-			if(Textures[i].bTexCoordProjected){
-				switch(Textures[i].TexCoordCount){
+			if(Textures[i].bTexCoordProjected)
+			{
+				switch(Textures[i].TexCoordCount)
+				{
 				case TCN_3DCoords:
 					VertexShaderText += FString::Printf("\tTexCoord%i.xy /= TexCoord%i.z;\n", TexCoordIndex, TexCoordIndex);
 					break;
@@ -110,11 +121,14 @@ FStringTemp FShaderGenerator::GetShaderText(bool UseStaticLighting){
 			}
 		}
 
-		if(Textures[i].Bumpmap > 0){
+		if(Textures[i].Bumpmap > 0)
+		{
 			INT BumpIndex = INDEX_NONE;
 
-			for(INT b = 0; b < i; ++b){
-				if(Textures[b].Index == Textures[i].Bumpmap){
+			for(INT b = 0; b < i; ++b)
+			{
+				if(Textures[b].Index == Textures[i].Bumpmap)
+				{
 					BumpIndex = b;
 					break;
 				}
@@ -125,16 +139,20 @@ FStringTemp FShaderGenerator::GetShaderText(bool UseStaticLighting){
 			check(BumpIndex >= 0 && BumpIndex < i);
 
 			FragmentShaderText += FString::Printf("\tconst vec4 t%i = sample_texture%i(TexCoord%i + t%i * TextureInfos[%i].BumpSize) * vec4(vec3(saturate(t%i.a * TextureInfos[%i].BumpLumaScale + TextureInfos[%i].BumpLumaOffset)), 1.0);\n", i, TexIndex, TexCoordIndex, BumpIndex, TexIndex, BumpIndex, TexIndex, TexIndex);
-		}else{
+		}
+		else
+		{
 			FragmentShaderText += FString::Printf("\tconst vec4 t%i = sample_texture%i(TexCoord%i);\n", i, Textures[i].Index, TexCoordIndex);
 		}
 	}
 
-	for(INT i = 0; i < NumColorOps; ++i){
+	for(INT i = 0; i < NumColorOps; ++i)
+	{
 		const char* SrcSwizzle = "";
 		const char* DestSwizzle = "";
 
-		switch(ColorOps[i].Channel){
+		switch(ColorOps[i].Channel)
+		{
 		case CC_RGB:
 			SrcSwizzle = ".rgb";
 			DestSwizzle = ".rgb";
@@ -156,7 +174,8 @@ FStringTemp FShaderGenerator::GetShaderText(bool UseStaticLighting){
 		if(ColorOps[i].Channel == CC_A_TO_RGBA)
 			FragmentShaderText += "(";
 
-		switch(ColorOps[i].Op){
+		switch(ColorOps[i].Op)
+		{
 		case COP_Arg1:
 			FragmentShaderText += Arg1;
 			break;
@@ -260,7 +279,8 @@ FStringTemp FShaderGenerator::GetShaderText(bool UseStaticLighting){
 	return ShaderText;
 }
 
-FStringTemp FShaderGenerator::GetArgString(BYTE Arg){
+FStringTemp FShaderGenerator::GetArgString(BYTE Arg)
+{
 	if(Arg <= CA_T7)
 		return FString::Printf("t%i", Arg);
 

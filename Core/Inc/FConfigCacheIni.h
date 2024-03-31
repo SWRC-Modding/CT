@@ -31,7 +31,8 @@ public:
 	                NoSave(ParseParam(appCmdLine(), "nosaveconfig") != 0),
 	                Quotes(false){}
 
-	void Read(const TCHAR* Filename, bool IsDefault){
+	void Read(const TCHAR* Filename, bool IsDefault)
+	{
 		guard(FConfigFile::Read);
 
 		FString Text;
@@ -43,7 +44,8 @@ public:
 		FConfigSection* CurrentSection = NULL;
 		bool Done = false;
 
-		while(!Done){
+		while(!Done)
+		{
 			while(*Ptr == '\r' || *Ptr == '\n')
 				Ptr++;
 
@@ -58,15 +60,19 @@ public:
 			Done = *Ptr == '\0';
 			*Ptr++ = '\0';
 
-			if(Start[0] == '[' && Start[appStrlen(Start) - 1] == ']'){
+			if(Start[0] == '[' && Start[appStrlen(Start) - 1] == ']')
+			{
 				Start++;
 				Start[appStrlen(Start) - 1] = '\0';
 				CurrentSection = &(*this)[Start];
-			}else if(CurrentSection && *Start){
+			}
+			else if(CurrentSection && *Start)
+			{
 				TCHAR* Value        = appStrstr(Start, "=");
 				bool IsMultiValue = false;
 
-				if(Value){
+				if(Value)
+				{
 					IsMultiValue = Value > Start && Value[-1] == '+'; // RC uses '+=' for arrays
 
 					if(IsMultiValue)
@@ -74,11 +80,14 @@ public:
 
 					*Value++ = '\0';
 
-					if(*Value == '\"' && Value[appStrlen(Value) - 1] == '\"'){
+					if(*Value == '\"' && Value[appStrlen(Value) - 1] == '\"')
+					{
 						Value++;
 						Value[appStrlen(Value) - 1] = '\0';
 					}
-				}else{
+				}
+				else
+				{
 					Value = "";
 				}
 
@@ -89,7 +98,8 @@ public:
 		unguard;
 	}
 
-	UBOOL Write(const TCHAR* Filename, bool CommentDefaultValues = false, const TCHAR* Section = NULL){
+	UBOOL Write(const TCHAR* Filename, bool CommentDefaultValues = false, const TCHAR* Section = NULL)
+	{
 		guard(FConfigFile::Write);
 
 		if(!Dirty || NoSave)
@@ -99,10 +109,12 @@ public:
 
 		FString Text;
 
-		for(TIterator SectionIt(*this); SectionIt; ++SectionIt){
+		for(TIterator SectionIt(*this); SectionIt; ++SectionIt)
+		{
 			Text += FString::Printf("[%s]\n", *SectionIt.Key());
 
-			for(FConfigSection::TIterator ValueIt(*SectionIt); ValueIt; ++ValueIt){
+			for(FConfigSection::TIterator ValueIt(*SectionIt); ValueIt; ++ValueIt)
+			{
 				if(CommentDefaultValues && !ValueIt->Dirty && (Section == NULL || SectionIt.Key() != Section))
 					Text += ";  ";
 
@@ -116,11 +128,14 @@ public:
 				else
 					Text += "=";
 
-				if(Quotes){
+				if(Quotes)
+				{
 					Text += "\"";
 					Text += *ValueIt;
 					Text += "\"\n";
-				}else{
+				}
+				else
+				{
 					Text += *ValueIt + "\n";
 				}
 			}
@@ -133,15 +148,19 @@ public:
 		unguard;
 	}
 
-	void SetString(FConfigSection* Section, const TCHAR* Key, const TCHAR* Value, bool MultiValue = false, bool IsDefault = false){
+	void SetString(FConfigSection* Section, const TCHAR* Key, const TCHAR* Value, bool MultiValue = false, bool IsDefault = false)
+	{
 		guard(FConfigFile::SetString);
 
 		FName          KeyName(Key);
 		FConfigString* Str   = Section->Find(KeyName);
 
-		if(!Str || MultiValue){
+		if(!Str || MultiValue)
+		{
 			Str = &Section->Add(KeyName, Value);
-		}else{ // Check if the value is the same as the default and return if that's the case
+		}
+		else
+		{ // Check if the value is the same as the default and return if that's the case
 			if(appStricmp(**Str, Value) == 0)
 				return;
 
@@ -173,14 +192,16 @@ public:
 	FString SystemIni;
 	FString UserIni;
 
-	FStringTemp GetWritableFilePath(const TCHAR* Filename){
+	FStringTemp GetWritableFilePath(const TCHAR* Filename)
+	{
 		if(UserIni == Filename) // The User.ini is stored in the directory of the current profile if there is one
 			return (GCurrProfilePath.Len() > 0 ? GCurrProfilePath : GGlobalSettingsPath) * FFilename(Filename).GetCleanFilename();
 
 		return GGlobalSettingsPath * FFilename(Filename).GetCleanFilename();
 	}
 
-	FConfigFile* Find(const TCHAR* InFilename, bool CreateIfNotFound){
+	FConfigFile* Find(const TCHAR* InFilename, bool CreateIfNotFound)
+	{
 		guard(FConfigCacheIni::Find);
 
 		// If filename not specified, use default.
@@ -199,11 +220,13 @@ public:
 		// Get file.
 		FConfigFile* Result = TMap<FString, FConfigFile>::Find(*Filename.GetCleanFilename());
 
-		if(!Result && (CreateIfNotFound || GFileManager->FileSize(*Filename) >= 0)){
+		if(!Result && (CreateIfNotFound || GFileManager->FileSize(*Filename) >= 0))
+		{
 			Result = &Set(*Filename.GetCleanFilename(), FConfigFile());
 			Result->Read(*Filename, true);
 
-			if(Filename.GetExtension() == "ini"){
+			if(Filename.GetExtension() == "ini")
+			{
 				FString OverrideFilename = GetWritableFilePath(*Filename);
 
 				// Check for override and read it if found.
@@ -224,12 +247,14 @@ public:
 		const TCHAR*	Key,
 		UBOOL&			Value,
 		const TCHAR*	Filename
-	){
+	)
+{
 		guard(FConfigCacheIni::GetBool);
 
 		const TCHAR* Text = GetStr(Section, Key, Filename);
 
-		if(Text){
+		if(Text)
+		{
 			if(appStricmp(Text, "True") == 0)
 				Value = 1;
 			else
@@ -248,12 +273,14 @@ public:
 		const TCHAR*	Key,
 		INT&			Value,
 		const TCHAR*	Filename
-	){
+	)
+{
 		guard(FConfigCacheIni::GetInt);
 
 		const TCHAR* Text = GetStr(Section, Key, Filename);
 
-		if(Text){
+		if(Text)
+		{
 			Value = appAtoi(Text);
 
 			return 1;
@@ -269,12 +296,14 @@ public:
 		const TCHAR*	Key,
 		FLOAT&			Value,
 		const TCHAR*	Filename
-	){
+	)
+{
 		guard(FConfigCacheIni::GetFloat);
 
 		const TCHAR* Text = GetStr(Section, Key, Filename);
 
-		if(Text){
+		if(Text)
+		{
 			Value = appAtof(Text);
 
 			return 1;
@@ -285,12 +314,14 @@ public:
 		unguard;
 	}
 
-	UBOOL GetFString(const TCHAR* Section, const TCHAR* Key, FString& Str, const TCHAR* Filename){
+	UBOOL GetFString(const TCHAR* Section, const TCHAR* Key, FString& Str, const TCHAR* Filename)
+	{
 		guard(FConfigCacheIni::GetString);
 
 		const TCHAR* Value = GetStr(Section, Key, Filename);
 
-		if(!Value){
+		if(!Value)
+		{
 			Str = "";
 
 			return 0;
@@ -303,12 +334,14 @@ public:
 		unguard;
 	}
 
-	UBOOL GetString(const TCHAR* Section, const TCHAR* Key, TCHAR* Value, INT Size, const TCHAR* Filename){
+	UBOOL GetString(const TCHAR* Section, const TCHAR* Key, TCHAR* Value, INT Size, const TCHAR* Filename)
+	{
 		guard(FConfigCacheIni::GetString);
 
 		const TCHAR* Str = GetStr(Section, Key, Filename);
 
-		if(!Str){
+		if(!Str)
+		{
 			*Value = 0;
 
 			return 0;
@@ -322,7 +355,8 @@ public:
 		unguard;
 	}
 
-	const TCHAR* GetStr(const TCHAR* Section, const TCHAR* Key, const TCHAR* Filename){
+	const TCHAR* GetStr(const TCHAR* Section, const TCHAR* Key, const TCHAR* Filename)
+	{
 		guard(FConfigCacheIni::GetStr);
 
 		FConfigFile* File = Find(Filename, false);
@@ -345,7 +379,8 @@ public:
 		unguard;
 	}
 
-	UBOOL GetSection(const TCHAR* Section, TCHAR* Result, INT Size, const TCHAR* Filename){
+	UBOOL GetSection(const TCHAR* Section, TCHAR* Result, INT Size, const TCHAR* Filename)
+	{
 		guard(FConfigCacheIni::GetSection);
 
 		*Result = 0;
@@ -371,7 +406,8 @@ public:
 		unguard;
 	}
 
-	FConfigSection* GetSectionPrivate(const TCHAR* Section, UBOOL Force, UBOOL Const, const TCHAR* Filename){
+	FConfigSection* GetSectionPrivate(const TCHAR* Section, UBOOL Force, UBOOL Const, const TCHAR* Filename)
+	{
 		guard(FConfigCacheIni::GetSectionPrivate);
 
 		FConfigFile* File = Find(Filename, Force != 0);
@@ -384,7 +420,8 @@ public:
 		if(!Sec && Force)
 			Sec = &File->Set(Section, FConfigSection());
 
-		if(Sec && (Force || !Const)){
+		if(Sec && (Force || !Const))
+		{
 			File->Dirty = true;
 			Sec->Dirty = true;
 		}
@@ -394,15 +431,18 @@ public:
 		unguard;
 	}
 
-	void EmptySection(const TCHAR* Section, const TCHAR* Filename){
+	void EmptySection(const TCHAR* Section, const TCHAR* Filename)
+	{
 		guard(FConfigCacheIni::EmptySection);
 
 		FConfigFile* File = Find(Filename, false);
 
-		if(File){
+		if(File)
+		{
 			FConfigSection* Sec = File->Find(Section);
 
-			if(Sec && FConfigSection::TIterator(*Sec)){
+			if(Sec && FConfigSection::TIterator(*Sec))
+			{
 				Sec->Empty();
 				File->Dirty = true;
 			}
@@ -416,7 +456,8 @@ public:
 		const TCHAR* Key,
 		UBOOL		 Value,
 		const TCHAR* Filename
-	){
+	)
+{
 		guard(FConfigCacheIni::SetBool);
 
 		SetString(Section, Key, Value ? "True" : "False", Filename);
@@ -429,7 +470,8 @@ public:
 		const TCHAR* Key,
 		INT			 Value,
 		const TCHAR* Filename
-	){
+	)
+{
 		guard(FConfigCacheIni::SetInt);
 
 		TCHAR Text[30];
@@ -444,7 +486,8 @@ public:
 		const TCHAR*	Key,
 		FLOAT			Value,
 		const TCHAR*	Filename
-	){
+	)
+{
 		guard(FConfigCacheIni::SetFloat);
 
 		TCHAR Text[30];
@@ -454,7 +497,8 @@ public:
 		unguard;
 	}
 
-	void SetString(const TCHAR* Section, const TCHAR* Key, const TCHAR* Value, const TCHAR* Filename){
+	void SetString(const TCHAR* Section, const TCHAR* Key, const TCHAR* Value, const TCHAR* Filename)
+	{
 		guard(FConfigCacheIni::SetString);
 
 		FConfigFile* File = Find(Filename, true);
@@ -468,15 +512,18 @@ public:
 		unguard;
 	}
 
-	void Flush(UBOOL Read, const TCHAR* Filename = NULL, const TCHAR* Section = NULL){
+	void Flush(UBOOL Read, const TCHAR* Filename = NULL, const TCHAR* Section = NULL)
+	{
 		guard(FConfigCacheIni::Flush);
 
-		for(TIterator It(*this); It; ++It){
+		for(TIterator It(*this); It; ++It)
+		{
 			if(!Filename || It.Key() == Filename)
 				It->Write(*GetWritableFilePath(*It.Key()), true, Section);
 		}
 
-		if(Read){
+		if(Read)
+		{
 			if(Filename)
 				Remove(Filename);
 			else
@@ -486,7 +533,8 @@ public:
 		unguard;
 	}
 
-	void UnloadFile(const TCHAR* Filename){
+	void UnloadFile(const TCHAR* Filename)
+	{
 		guard(FConfigCacheIni::UnloadFile);
 
 		FConfigFile* File = Find(Filename, true);
@@ -497,7 +545,8 @@ public:
 		unguard;
 	}
 
-	void UnloadInts(const TCHAR* Filename){
+	void UnloadInts(const TCHAR* Filename)
+	{
 		guard(FConfigCacheIni::UnloadInts);
 
 		TCHAR Buffer[1024];
@@ -508,7 +557,8 @@ public:
 		unguard;
 	}
 
-	void Detach(const TCHAR* Filename){
+	void Detach(const TCHAR* Filename)
+	{
 		guard(FConfigCacheIni::Cancel);
 
 		FConfigFile* File = Find(Filename, true);
@@ -519,7 +569,8 @@ public:
 		unguard;
 	}
 
-	void Init(const TCHAR* InSystem, const TCHAR* InUser, UBOOL RequireConfig = 0){
+	void Init(const TCHAR* InSystem, const TCHAR* InUser, UBOOL RequireConfig = 0)
+	{
 		guard(FConfigCacheIni::Init);
 
 		SystemIni = InSystem;
@@ -528,13 +579,15 @@ public:
 		unguard;
 	}
 
-	void Exit(){
+	void Exit()
+	{
 		guard(FConfigCacheIni::Exit);
 		Flush(1);
 		unguard;
 	}
 
-	void Dump(FOutputDevice& Ar){
+	void Dump(FOutputDevice& Ar)
+	{
 		guard(FConfigCacheIni::Dump);
 
 		Ar.Log("Files map:");
@@ -543,12 +596,14 @@ public:
 		unguard;
 	}
 
-	void Serialize(FArchive& Ar){
+	void Serialize(FArchive& Ar)
+	{
 		Ar << *this;
 	}
 
 	//Static allocator.
-	static FConfigCache* Factory(){
+	static FConfigCache* Factory()
+	{
 		return new FConfigCacheIni();
 	}
 };

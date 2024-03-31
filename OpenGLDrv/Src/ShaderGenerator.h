@@ -76,17 +76,20 @@ enum EColorRegister{
 
 class FShaderGenerator{
 public:
-	FShaderGenerator(){
+	FShaderGenerator()
+	{
 		Reset();
 	}
 
-	void Reset(){
+	void Reset()
+	{
 		TempRegister = 0;
 		NumTextures = 0;
 		NumColorOps = 0;
 	}
 
-	EColorArg AddTexture(INT Index, ETexCoordSrc TexCoordSrc, ETexCoordCount TexCoordCount = TCN_2DCoords, SBYTE Matrix = INDEX_NONE, bool bTexCoordProjected = false, INT Bumpmap = INDEX_NONE){
+	EColorArg AddTexture(INT Index, ETexCoordSrc TexCoordSrc, ETexCoordCount TexCoordCount = TCN_2DCoords, SBYTE Matrix = INDEX_NONE, bool bTexCoordProjected = false, INT Bumpmap = INDEX_NONE)
+	{
 		checkSlow(Index < 8);
 		checkSlow(Bumpmap < Index);
 		checkSlow(NumTextures < MAX_SHADER_TEXTURE_REGISTERS)
@@ -101,7 +104,8 @@ public:
 		return static_cast<EColorArg>(NumTextures++);
 	}
 
-	void AddColorOp(EColorArg Arg1, EColorArg Arg2, EColorOp Op, EColorChannel Channel, EColorRegister Dest, EColorOpModifier Modifier = COPM_None){
+	void AddColorOp(EColorArg Arg1, EColorArg Arg2, EColorOp Op, EColorChannel Channel, EColorRegister Dest, EColorOpModifier Modifier = COPM_None)
+	{
 		checkSlow(NumColorOps < MAX_SHADER_COLOR_OPERATIONS);
 
 		ColorOps[NumColorOps].Dest = static_cast<BYTE>(Dest);
@@ -113,12 +117,14 @@ public:
 		++NumColorOps;
 	}
 
-	EColorRegister PushTempRegister(){
+	EColorRegister PushTempRegister()
+	{
 		checkSlow(TempRegister < MAX_TEMP_REGISTERS);
 		return static_cast<EColorRegister>(CR_2 + TempRegister++);
 	}
 
-	EColorArg PopTempRegister(){
+	EColorArg PopTempRegister()
+	{
 		checkSlow(TempRegister > 0);
 		return static_cast<EColorArg>(CA_R2 + --TempRegister);
 	}

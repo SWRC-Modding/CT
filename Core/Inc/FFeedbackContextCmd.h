@@ -29,20 +29,26 @@ public:
 
 	// Functions
 
-	void Serialize(const TCHAR* V, EName Event){
+	void Serialize(const TCHAR* V, EName Event)
+	{
 		guard(FFeedbackContextCmd::Serialize);
 
 		TCHAR Buffer[1024]= "";
 		const TCHAR* Temp = V;
 
-		if(Event == NAME_Title){
+		if(Event == NAME_Title)
+		{
 			SetConsoleTitleA(V);
 			return; // Prevents the server from spamming the player count to the log
-		}else if(Event == NAME_Heading){
+		}
+		else if(Event == NAME_Heading)
+		{
 			appSprintf(Buffer, "--------------------%s--------------------", V);
 			Temp = Buffer;
 			V = Buffer; // So that the log file also contains the formatted string
-		}else if(Event == NAME_Warning || Event == NAME_ExecWarning || Event == NAME_ScriptWarning || Event == NAME_Error || Event == NAME_Critical){
+		}
+		else if(Event == NAME_Warning || Event == NAME_ExecWarning || Event == NAME_ScriptWarning || Event == NAME_Error || Event == NAME_Critical)
+		{
 			if(Context)
 				appSprintf(Buffer, "%s: %s, %s", *Context->GetContext(), *FName(Event), V);
 			else
@@ -67,17 +73,20 @@ public:
 		unguard;
 	}
 
-	void Flush(){
+	void Flush()
+	{
 		std::fflush(stdout);
 	}
 
-	UBOOL YesNof(const TCHAR* Fmt, ...){
+	UBOOL YesNof(const TCHAR* Fmt, ...)
+	{
 		TCHAR TempStr[4096];
 		GET_VARARGS(TempStr, ARRAY_COUNT(TempStr), Fmt);
 
 		guard(FFeedbackContextCmd::YesNof);
 
-		if((GIsClient || GIsEditor) && !ParseParam(appCmdLine(), "Silent")){
+		if((GIsClient || GIsEditor) && !ParseParam(appCmdLine(), "Silent"))
+		{
 			std::printf("%s %s", TempStr, "(Y/N): ");
 
 			INT Ch = std::getchar();
@@ -85,31 +94,37 @@ public:
 			std::getchar(); // Removing newline from input stream
 
 			return Ch == 'Y' || Ch == 'y';
-		}else{
+		}
+		else
+		{
 			return 1;
 		}
 
 		unguard;
 	}
 
-	void BeginSlowTask(const TCHAR* Task, UBOOL StatusWindow){
+	void BeginSlowTask(const TCHAR* Task, UBOOL StatusWindow)
+	{
 		guard(FFeedbackContextCmd::BeginSlowTask);
 		GIsSlowTask = ++SlowTaskCount > 0;
 		unguard;
 	}
 
-	void EndSlowTask(){
+	void EndSlowTask()
+	{
 		guard(FFeedbackContextCmd::EndSlowTask);
 		check(SlowTaskCount>0);
 		GIsSlowTask = --SlowTaskCount > 0;
 		unguard;
 	}
 
-	UBOOL VARARGS StatusUpdatef(INT Numerator, INT Denominator, const TCHAR* Fmt, ...){
+	UBOOL VARARGS StatusUpdatef(INT Numerator, INT Denominator, const TCHAR* Fmt, ...)
+	{
 		return 1;
 	}
 
-	void SetContext(FContextSupplier* InSupplier){
+	void SetContext(FContextSupplier* InSupplier)
+	{
 		Context = InSupplier;
 	}
 };

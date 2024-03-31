@@ -31,7 +31,8 @@ BYTE CORE_API GRegisterCast(INT CastCode, const Native& Func);
  */
 template<typename T>
 struct FNativeInitializer{
-	FNativeInitializer(){
+	FNativeInitializer()
+	{
 		T::StaticClass()->NativeFunctions = reinterpret_cast<FNativeEntry<UObject>*>(T::StaticNativeMap);
 		T::StaticClass()->RegisterNatives();
 	}
@@ -103,13 +104,15 @@ struct FNativeInitializer{
 	FFrame implementation.
 -----------------------------------------------------------------------------*/
 
-FORCEINLINE void FFrame::Step(UObject* Context, RESULT_DECL){
+FORCEINLINE void FFrame::Step(UObject* Context, RESULT_DECL)
+{
 	INT B = *Code++;
 
 	(Context->*GNatives[B])(*this, Result);
 }
 
-FORCEINLINE INT FFrame::ReadInt(){
+FORCEINLINE INT FFrame::ReadInt()
+{
 	INT Result = *(INT*)Code;
 
 	Code += sizeof(INT);
@@ -117,7 +120,8 @@ FORCEINLINE INT FFrame::ReadInt(){
 	return Result;
 }
 
-FORCEINLINE UObject* FFrame::ReadObject(){
+FORCEINLINE UObject* FFrame::ReadObject()
+{
 	UObject* Result = *(UObject**)Code;
 
 	Code += sizeof(INT);
@@ -125,7 +129,8 @@ FORCEINLINE UObject* FFrame::ReadObject(){
 	return Result;
 }
 
-FORCEINLINE FLOAT FFrame::ReadFloat(){
+FORCEINLINE FLOAT FFrame::ReadFloat()
+{
 	FLOAT Result = *(FLOAT*)Code;
 
 	Code += sizeof(FLOAT);
@@ -133,7 +138,8 @@ FORCEINLINE FLOAT FFrame::ReadFloat(){
 	return Result;
 }
 
-FORCEINLINE INT FFrame::ReadWord(){
+FORCEINLINE INT FFrame::ReadWord()
+{
 	INT Result = *(_WORD*)Code;
 
 	Code += sizeof(_WORD);
@@ -141,7 +147,8 @@ FORCEINLINE INT FFrame::ReadWord(){
 	return Result;
 }
 
-FORCEINLINE FName FFrame::ReadName(){
+FORCEINLINE FName FFrame::ReadName()
+{
 	FName Result = *(FName*)Code;
 
 	Code += sizeof(FName);

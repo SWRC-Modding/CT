@@ -6,11 +6,13 @@
 FOpenGLShader::FOpenGLShader(UOpenGLRenderDevice* InRenDev) : RenDev(InRenDev),
                                                               Program(GL_NONE){}
 
-FOpenGLShader::~FOpenGLShader(){
+FOpenGLShader::~FOpenGLShader()
+{
 	Free();
 }
 
-void FOpenGLShader::Compile(const TCHAR* InShaderCode, const TCHAR* ShaderName){
+void FOpenGLShader::Compile(const TCHAR* InShaderCode, const TCHAR* ShaderName)
+{
 	FString ShaderCode = InShaderCode;
 
 	RenDev->ExpandShaderMacros(&ShaderCode);
@@ -18,14 +20,16 @@ void FOpenGLShader::Compile(const TCHAR* InShaderCode, const TCHAR* ShaderName){
 	GLuint VertexShader = CompileShader(GL_VERTEX_SHADER, *ShaderCode, *(FStringTemp(ShaderName) + SHADER_FILE_EXTENSION + " - vertex shader"));
 	GLuint FragmentShader = CompileShader(GL_FRAGMENT_SHADER, *ShaderCode, *(FStringTemp(ShaderName) + SHADER_FILE_EXTENSION + " - fragment shader"));
 
-	if(!VertexShader || !FragmentShader){
+	if(!VertexShader || !FragmentShader)
+	{
 		if(VertexShader)
 			RenDev->glDeleteShader(VertexShader);
 
 		if(FragmentShader)
 			RenDev->glDeleteShader(FragmentShader);
 
-		if(Program){
+		if(Program)
+		{
 			RenDev->glDeleteProgram(Program);
 			Program = GL_NONE;
 		}
@@ -48,7 +52,8 @@ void FOpenGLShader::Compile(const TCHAR* InShaderCode, const TCHAR* ShaderName){
 
 	RenDev->glGetProgramiv(Program, GL_LINK_STATUS, &Status);
 
-	if(!Status){
+	if(!Status)
+	{
 		GLchar Buffer[512];
 
 		RenDev->glGetProgramInfoLog(Program, ARRAY_COUNT(Buffer), NULL, Buffer);
@@ -68,15 +73,18 @@ void FOpenGLShader::Bind() const{
 
 }
 
-void FOpenGLShader::Free(){
-	if(RenDev->IsCurrent() && Program){
+void FOpenGLShader::Free()
+{
+	if(RenDev->IsCurrent() && Program)
+	{
 		checkSlow(RenDev->IsCurrent());
 		RenDev->glDeleteProgram(Program);
 		Program = GL_NONE;
 	}
 }
 
-GLuint FOpenGLShader::CompileShader(GLenum Type, const TCHAR* ShaderCode, const TCHAR* ShaderName){
+GLuint FOpenGLShader::CompileShader(GLenum Type, const TCHAR* ShaderCode, const TCHAR* ShaderName)
+{
 	GLuint Handle = RenDev->glCreateShader(Type);
 	const TCHAR* ShaderVars = NULL;
 
@@ -100,7 +108,8 @@ GLuint FOpenGLShader::CompileShader(GLenum Type, const TCHAR* ShaderCode, const 
 
 	RenDev->glGetShaderiv(Handle, GL_COMPILE_STATUS, &Status);
 
-	if(!Status){
+	if(!Status)
+	{
 		GLchar Buffer[512];
 
 		RenDev->glGetShaderInfoLog(Handle, ARRAY_COUNT(Buffer), NULL, Buffer);

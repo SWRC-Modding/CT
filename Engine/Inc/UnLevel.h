@@ -260,8 +260,10 @@ class TActorIterator{
 public:
 	TActorIterator(ULevel* InLevel, EActorIterator It = IT_AllActors) : Level(InLevel),
 																		Index(-1),
-																		Max(Level->Actors.Num()){
-		switch(It){
+																		Max(Level->Actors.Num())
+																		{
+		switch(It)
+		{
 		case IT_DynamicActors:
 			Index = InLevel->iFirstDynamicActor - 1;
 
@@ -278,8 +280,10 @@ public:
 		++(*this);
 	}
 
-	TActorIterator& operator++(){
-		for(;;){
+	TActorIterator& operator++()
+	{
+		for(;;)
+		{
 			++Index;
 
 			if(!static_cast<bool>(*this) || (Level->Actors[Index] && Level->Actors[Index]->IsA(T::StaticClass())))

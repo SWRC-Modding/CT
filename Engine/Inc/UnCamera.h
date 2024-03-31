@@ -199,7 +199,8 @@ public:
 
 	// Constructor.
 
-	FViewportRenderTarget(UViewport* InViewport){
+	FViewportRenderTarget(UViewport* InViewport)
+	{
 		Viewport = InViewport;
 		CacheId = MakeCacheID(CID_RenderTexture, (UObject*)Viewport);
 	}
@@ -523,11 +524,13 @@ protected:
 
 // FAuxRenderTarget inlines
 
-inline FAuxRenderTarget::~FAuxRenderTarget(){
+inline FAuxRenderTarget::~FAuxRenderTarget()
+{
 	// Need to do this via UTexture::__Client since GEngine is not set to NULL and might be an invalid pointer
 	if(UTexture::__Client &&
 	   UTexture::__Client->Engine &&
-	   UTexture::__Client->Engine->GRenDev){
+	   UTexture::__Client->Engine->GRenDev)
+	   {
 		UTexture::__Client->Engine->GRenDev->FlushResource(GetCacheId());
 	}
 }

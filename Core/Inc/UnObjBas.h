@@ -324,7 +324,8 @@ struct FScriptDelegate{
 	UObject* Object;
 	FName FunctionName;
 
-	friend FArchive& operator<<(FArchive& Ar, FScriptDelegate& D){
+	friend FArchive& operator<<(FArchive& Ar, FScriptDelegate& D)
+	{
 		return Ar << D.Object << D.FunctionName;
 	}
 };
@@ -561,36 +562,42 @@ public:
 ----------------------------------------------------------------------------*/
 
 // Hash function.
-inline DWORD GetTypeHash(const UObject* A){
+inline DWORD GetTypeHash(const UObject* A)
+{
 	return A ? A->GetIndex() : 0;
 }
 
 // Parse an object name in the input stream.
 template<typename T>
-UBOOL ParseObject(const TCHAR* Stream, const TCHAR* Match, T*& Obj, UObject* Outer){
+UBOOL ParseObject(const TCHAR* Stream, const TCHAR* Match, T*& Obj, UObject* Outer)
+{
 	return ParseObject(Stream, Match, T::StaticClass(), *reinterpret_cast<UObject**>(&Obj), Outer);
 }
 
 // Find an optional object.
 template<typename T>
-T* FindObject(UObject* Outer, const TCHAR* Name, UBOOL ExactClass = 0){
+T* FindObject(UObject* Outer, const TCHAR* Name, UBOOL ExactClass = 0)
+{
 	return static_cast<T*>(UObject::StaticFindObject(T::StaticClass(), Outer, Name, ExactClass));
 }
 
 // Find an object, no failure allowed.
 template<typename T>
-T* FindObjectChecked(UObject* Outer, const TCHAR* Name, UBOOL ExactClass = 0){
+T* FindObjectChecked(UObject* Outer, const TCHAR* Name, UBOOL ExactClass = 0)
+{
 	return static_cast<T*>(UObject::StaticFindObjectChecked(T::StaticClass(), Outer, Name, ExactClass));
 }
 
 // Dynamically cast an object type-safely.
 template<typename T>
-T* Cast(UObject* Src){
+T* Cast(UObject* Src)
+{
 	return Src && Src->IsA(T::StaticClass()) ? static_cast<T*>(Src) : NULL;
 }
 
 template<typename T, typename U>
-T* CastChecked(U* Src){
+T* CastChecked(U* Src)
+{
 	if(!Src || !Src->IsA(T::StaticClass()))
 		appErrorf("Cast of %s to %s failed", Src ? Src->GetFullName() : "NULL", T::StaticClass()->GetName());
 
@@ -599,7 +606,8 @@ T* CastChecked(U* Src){
 
 // Construct an object of a particular class.
 template<typename T>
-T* ConstructObject(UClass* Class = T::StaticClass(), UObject* Outer = ANY_PACKAGE, FName Name = NAME_None, DWORD SetFlags = 0){
+T* ConstructObject(UClass* Class = T::StaticClass(), UObject* Outer = ANY_PACKAGE, FName Name = NAME_None, DWORD SetFlags = 0)
+{
 	check(Class->IsChildOf(T::StaticClass()));
 
 	if(Outer == ANY_PACKAGE)
@@ -610,19 +618,22 @@ T* ConstructObject(UClass* Class = T::StaticClass(), UObject* Outer = ANY_PACKAG
 
 // Load an object.
 template<typename T>
-T* LoadObject(UObject* Outer, const TCHAR* Name, const TCHAR* Filename, DWORD LoadFlags, UPackageMap* Sandbox){
+T* LoadObject(UObject* Outer, const TCHAR* Name, const TCHAR* Filename, DWORD LoadFlags, UPackageMap* Sandbox)
+{
 	return static_cast<T*>(UObject::StaticLoadObject(T::StaticClass(), Outer, Name, Filename, LoadFlags, Sandbox));
 }
 
 // Load a class object.
 template<typename T>
-UClass* LoadClass(UObject* Outer, const TCHAR* Name, const TCHAR* Filename, DWORD LoadFlags, UPackageMap* Sandbox){
+UClass* LoadClass(UObject* Outer, const TCHAR* Name, const TCHAR* Filename, DWORD LoadFlags, UPackageMap* Sandbox)
+{
 	return UObject::StaticLoadClass(T::StaticClass(), Outer, Name, Filename, LoadFlags, Sandbox);
 }
 
 // Get default object of a class.
 template<typename T>
-T* GetDefault(){
+T* GetDefault()
+{
 	return static_cast<T*>(T::StaticClass()->GetDefaultObject());
 }
 
@@ -636,12 +647,14 @@ T* GetDefault(){
 class FObjectIterator{
 public:
 	FObjectIterator(UClass* InClass = UObject::StaticClass()) : Class(InClass),
-                                                                Index(-1){
+                                                                Index(-1)
+                                                                {
 		check(Class);
 		++*this;
 	}
 
-	void operator++(){
+	void operator++()
+	{
 		do{
 			++Index;
 		}while(Index < UObject::GObjObjects.Num() && (!UObject::GObjObjects[Index] || !UObject::GObjObjects[Index]->IsA(Class)));

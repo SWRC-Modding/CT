@@ -9,7 +9,8 @@
 
 static TMap<UFunction*, UFunctionOverride*> FunctionOverrides;
 
-static void __fastcall ScriptFunctionHook(UObject* Self, int, FFrame& Stack, void* Result){
+static void __fastcall ScriptFunctionHook(UObject* Self, int, FFrame& Stack, void* Result)
+{
 	/*
 	 * The stack doesn't contain any information about the called function at this point.
 	 * We only know that the last four bytes at the top are either a UFunction* or an FName so we need to check both.
@@ -19,13 +20,15 @@ static void __fastcall ScriptFunctionHook(UObject* Self, int, FFrame& Stack, voi
 
 	appMemcpy(&Function, Stack.Code - sizeof(void*), sizeof(void*));
 
-	if(!FunctionOverrides.Find(Function)){
+	if(!FunctionOverrides.Find(Function))
+	{
 		Function = NULL;
 
 		appMemcpy(&FunctionName, Stack.Code - sizeof(FName), sizeof(FName));
 
 		if(!((reinterpret_cast<DWORD>(FunctionName.GetEntry()) & 0xFFFF0000) == 0 || // Seems to be enough to check for a valid name
-		     IsBadReadPtr(FunctionName.GetEntry(), sizeof(FNameEntry) - NAME_SIZE))){ // Using IsBadReadPtr as a backup check just in case
+		     IsBadReadPtr(FunctionName.GetEntry(), sizeof(FNameEntry) - NAME_SIZE))) // Using IsBadReadPtr as a backup check just in case
+		     {
 			Function = Self->FindFunction(FunctionName);
 		}
 
@@ -45,12 +48,15 @@ static void __fastcall ScriptFunctionHook(UObject* Self, int, FFrame& Stack, voi
 
 	Override->CurrentSelf = Self;
 
-	if(Self == Override->TargetObject || !Override->TargetObject){
+	if(Self == Override->TargetObject || !Override->TargetObject)
+	{
 		if(IsEvent)
 			Override->OverrideObject->ProcessEvent(Override->OverrideFunction, Stack.Locals);
 		else
 			Override->OverrideObject->CallFunction(Stack, Result, Override->OverrideFunction);
-	}else{ // Function was not called on the target object so just call the original one
+	}
+	else
+	{ // Function was not called on the target object so just call the original one
 		if(IsEvent)
 			(Self->*Function->Func)(Stack, Result);
 		else
@@ -64,7 +70,8 @@ static void __fastcall ScriptFunctionHook(UObject* Self, int, FFrame& Stack, voi
 	Function->FunctionFlags |= FUNC_Native;
 }
 
-void UFunctionOverride::execInit(FFrame& Stack, void* Result){
+void UFunctionOverride::execInit(FFrame& Stack, void* Result)
+{
 	P_GET_OBJECT(UObject, InTargetObject);
 	P_GET_NAME(TargetFuncName);
 	P_GET_OBJECT(UObject, InOverrideObject);
@@ -80,7 +87,8 @@ void UFunctionOverride::execInit(FFrame& Stack, void* Result){
 	OverrideObject = InOverrideObject;
 	OverrideFunction = OverrideObject->FindFunctionChecked(OverrideFuncName);
 
-	if(TargetFunction->iNative != 0){ // TODO: Allow this in the future
+	if(TargetFunction->iNative != 0) // TODO: Allow this in the future
+	{
 		appErrorf("Cannot override native final function '%s' in '%s'",
 				  *TargetFunction->FriendlyName,
 				  OverrideForAllObjects ? InTargetObject->GetName() : InTargetObject->GetClass()->GetName());
@@ -95,18 +103,22 @@ void UFunctionOverride::execInit(FFrame& Stack, void* Result){
 	FunctionOverrides[TargetFunction] = this;
 }
 
-void UFunctionOverride::execDeinit(FFrame& Stack, void* Result){
+void UFunctionOverride::execDeinit(FFrame& Stack, void* Result)
+{
 	P_FINISH;
 	Deinit();
 }
 
-void UFunctionOverride::Destroy(){
+void UFunctionOverride::Destroy()
+{
 	Deinit();
 	Super::Destroy();
 }
 
-void UFunctionOverride::Deinit(){
-	if(TargetFunction && FunctionOverrides.Find(TargetFunction) && FunctionOverrides[TargetFunction] == this){
+void UFunctionOverride::Deinit()
+{
+	if(TargetFunction && FunctionOverrides.Find(TargetFunction) && FunctionOverrides[TargetFunction] == this)
+	{
 		TargetFunction->FunctionFlags = OriginalFunctionFlags;
 		TargetFunction->Func = OriginalNative;
 		FunctionOverrides.Remove(TargetFunction);

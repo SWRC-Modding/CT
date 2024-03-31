@@ -15,10 +15,14 @@ static struct FExecHook : public FExec, FNotifyHook{
 
 	FExecHook() : Preferences(NULL){}
 
-	virtual void NotifyDestroy(void* Src){
-		if(Src == Preferences){
+	virtual void NotifyDestroy(void* Src)
+	{
+		if(Src == Preferences)
+		{
 			Preferences = NULL;
-		}else{
+		}
+		else
+		{
 			// Set Actor bSelected to false if properties window is closed
 
 			TCHAR SrcWindowClassName[128];
@@ -27,10 +31,12 @@ static struct FExecHook : public FExec, FNotifyHook{
 			static_cast<WWindow*>(Src)->GetWindowClassName(SrcWindowClassName);
 			MakeWindowClassName(ObjPropWindowClassName, "WObjectProperties");
 
-			if(appStricmp(SrcWindowClassName, ObjPropWindowClassName) == 0){
+			if(appStricmp(SrcWindowClassName, ObjPropWindowClassName) == 0)
+			{
 				WObjectProperties* P = static_cast<WObjectProperties*>(Src);
 
-				for(INT i = 0; i < P->Root._Objects.Num(); ++i){
+				for(INT i = 0; i < P->Root._Objects.Num(); ++i)
+				{
 					AActor* A = Cast<AActor>(P->Root._Objects[i]);
 
 					if(A)
@@ -40,7 +46,8 @@ static struct FExecHook : public FExec, FNotifyHook{
 		}
 	}
 
-	virtual UBOOL Exec(const TCHAR* Cmd, FOutputDevice& Ar){
+	virtual UBOOL Exec(const TCHAR* Cmd, FOutputDevice& Ar)
+	{
 		guard(FExecHook::Exec);
 
 		HWND ParentWindow = NULL;
@@ -50,38 +57,52 @@ static struct FExecHook : public FExec, FNotifyHook{
 		else if(GEngine->Client && GEngine->Client->Viewports.Num() > 0)
 			ParentWindow = static_cast<HWND>(GEngine->Client->Viewports[0]->GetWindow());
 
-		if(ParseCommand(&Cmd, "SHOWLOG")){
+		if(ParseCommand(&Cmd, "SHOWLOG"))
+		{
 			GEngine->Client->Viewports[0]->EndFullscreen();
 			GLogWindow->Show(1);
 			SetFocus(*GLogWindow);
 			GLogWindow->Display.ScrollCaret();
 
 			return 1;
-		}else if(ParseCommand(&Cmd, "HIDELOG")){
+		}
+		else if(ParseCommand(&Cmd, "HIDELOG"))
+		{
 			GLogWindow->Show(0);
 			return 1;
-		}else if(ParseCommand(&Cmd, "EDITOBJ")){
+		}
+		else if(ParseCommand(&Cmd, "EDITOBJ"))
+		{
 			UClass*          Class;
 			FName            ObjectName;
 			UObject*         Outer;
 			TArray<UObject*> Objects;
 
-			if(ParseObject<UClass>(Cmd, "Class=", Class, ANY_PACKAGE)){
-				for(FObjectIterator It; It; ++It){
+			if(ParseObject<UClass>(Cmd, "Class=", Class, ANY_PACKAGE))
+			{
+				for(FObjectIterator It; It; ++It)
+				{
 					if(It->IsA(Class))
 						Objects.AddItem(*It);
 				}
-			}else if(ParseObject<UObject>(Cmd, "Outer=", Outer, ANY_PACKAGE)){
-				for(FObjectIterator It; It; ++It){
+			}
+			else if(ParseObject<UObject>(Cmd, "Outer=", Outer, ANY_PACKAGE))
+			{
+				for(FObjectIterator It; It; ++It)
+				{
 					if(It->IsIn(Outer))
 						Objects.AddItem(*It);
 				}
-			}else{
+			}
+			else
+			{
 				if(!Parse(Cmd, "Name=", ObjectName))
 					ObjectName = FName(Cmd, FNAME_Find);
 
-				if(ObjectName != NAME_None){
-					for(FObjectIterator It; It; ++It){
+				if(ObjectName != NAME_None)
+				{
+					for(FObjectIterator It; It; ++It)
+					{
 						if(It->GetFName() == ObjectName)
 							Objects.AddItem(*It);
 					}
@@ -91,18 +112,23 @@ static struct FExecHook : public FExec, FNotifyHook{
 			UBOOL ShowAll = 0;
 			ParseUBOOL(Cmd, "All=", ShowAll);
 
-			if(Objects.Num() > 0){
+			if(Objects.Num() > 0)
+			{
 				GEngine->Client->Viewports[0]->EndFullscreen();
 
-				if(ShowAll){
-					for(INT i = 0; i < Objects.Num(); ++i){
+				if(ShowAll)
+				{
+					for(INT i = 0; i < Objects.Num(); ++i)
+					{
 						WObjectProperties* P = new WObjectProperties("EditObj", 0, "", NULL, 1);
 						P->SetNotifyHook(this);
 						P->OpenWindow(ParentWindow);
 						P->Root.SetObjects(&Objects[i], 1);
 						P->Show(1);
 					}
-				}else{
+				}
+				else
+				{
 					static INT Count = 0; // Used to cycle through objects when reentering the same command
 
 					WObjectProperties* P = new WObjectProperties("EditObj", 0, "", NULL, 1);
@@ -111,26 +137,33 @@ static struct FExecHook : public FExec, FNotifyHook{
 					P->Root.SetObjects(&Objects[Count++ % Objects.Num()], 1);
 					P->Show(1);
 				}
-			}else{
+			}
+			else
+			{
 				Ar.Logf("No objects found");
 			}
 
 			return 1;
-		}else if(ParseCommand(&Cmd, "EDITACTOR")){
+		}
+		else if(ParseCommand(&Cmd, "EDITACTOR"))
+		{
 			ULevel* Level = NULL;
 
 			if(GEngine->IsA<UGameEngine>())
 				Level = static_cast<UGameEngine*>(GEngine)->GLevel;
 
-			if(!Level){
+			if(!Level)
+			{
 				Ar.Log("No Level loaded");
 				return 1;
 			}
 
 			UClass* Class = NULL;
 
-			if(appStrfind(Cmd, "Class=")){
-				if(!ParseObject<UClass>(Cmd, "Class=", Class, ANY_PACKAGE)){
+			if(appStrfind(Cmd, "Class="))
+			{
+				if(!ParseObject<UClass>(Cmd, "Class=", Class, ANY_PACKAGE))
+				{
 					Ar.Log("Invalid class name");
 					return 1;
 				}
@@ -142,30 +175,40 @@ static struct FExecHook : public FExec, FNotifyHook{
 			AActor* Found = NULL;
 			APlayerController* Player = GIsClient ? GEngine->Client->Viewports[0]->Actor : NULL;
 
-			if(Class){ // Find the closest Actor with the given class and optional name
+			if(Class) // Find the closest Actor with the given class and optional name
+			{
 				FLOAT MinDist = 999999.0f;
 
-				foreach(AllActors, AActor, It, Level){
+				foreach(AllActors, AActor, It, Level)
+				{
 					FLOAT Dist = Player ? FDist(It->Location, Player->Pawn ? Player->Pawn->Location : Player->Location) : 0.0f;
 
-					if(!It->bDeleteMe && It->IsA(Class) && Dist < MinDist && (!HaveName || It->GetFName() == ActorName)){
+					if(!It->bDeleteMe && It->IsA(Class) && Dist < MinDist && (!HaveName || It->GetFName() == ActorName))
+					{
 						MinDist = Dist;
 						Found   = *It;
 					}
 				}
-			}else if(HaveName){ // Find the first actor with the given name
-				foreach(AllActors, AActor, It, Level){
-					if(!It->bDeleteMe && It->GetFName() == ActorName){
+			}
+			else if(HaveName) // Find the first actor with the given name
+			{
+				foreach(AllActors, AActor, It, Level)
+				{
+					if(!It->bDeleteMe && It->GetFName() == ActorName)
+					{
 						Found = *It;
 						break;
 					}
 				}
-			}else{
+			}
+			else
+			{
 				if(Player)
 					Found = Player->Target;
 			}
 
-			if(Found){
+			if(Found)
+			{
 				GEngine->Client->Viewports[0]->EndFullscreen();
 				WObjectProperties* P = new WObjectProperties("EditActor", 0, "", NULL, 1);
 				P->SetNotifyHook(this);
@@ -177,15 +220,20 @@ static struct FExecHook : public FExec, FNotifyHook{
 					It->bSelected = 0;
 
 				Found->bSelected = 1;
-			}else{
+			}
+			else
+			{
 				Ar.Logf("Target not found");
 			}
 
 			return 1;
-		}else if(ParseCommand(&Cmd, "PREFERENCES")){
+		}
+		else if(ParseCommand(&Cmd, "PREFERENCES"))
+		{
 			GEngine->Client->Viewports[0]->EndFullscreen();
 
-			if(!Preferences){
+			if(!Preferences)
+			{
 				Preferences = new WConfigProperties("Preferences", LocalizeGeneral("AdvancedOptionsTitle", "Window"));
 				Preferences->SetNotifyHook(this);
 				Preferences->OpenWindow(ParentWindow);
@@ -196,14 +244,18 @@ static struct FExecHook : public FExec, FNotifyHook{
 			SetFocus(Preferences->hWnd);
 
 			return 1;
-		}else if(ParseCommand(&Cmd, "GETRENDEV")){
+		}
+		else if(ParseCommand(&Cmd, "GETRENDEV"))
+		{
 			if(GEngine && GEngine->GRenDev)
 				Ar.Log(GEngine->GRenDev->GetClass()->GetPathName());
 			else
 				Ar.Logf("No render device in use");
 
 			return 1;
-		}else if(!GIsEditor && GIsClient && ParseCommand(&Cmd, "USERENDEV")){
+		}
+		else if(!GIsEditor && GIsClient && ParseCommand(&Cmd, "USERENDEV"))
+		{
 			FString RenderDeviceClass = Cmd;
 
 			if(RenderDeviceClass == "D3D")
@@ -215,8 +267,10 @@ static struct FExecHook : public FExec, FNotifyHook{
 
 			UClass* Class = LoadClass<URenderDevice>(NULL, *RenderDeviceClass, NULL, LOAD_NoWarn | LOAD_Quiet, NULL);
 
-			if(Class){
-				if(GEngine->GRenDev && GEngine->GRenDev->GetClass() != Class){
+			if(Class)
+			{
+				if(GEngine->GRenDev && GEngine->GRenDev->GetClass() != Class)
+				{
 					// Apparently the FStatRecord destructor does not clean up properly and there is still a reference to the old stat record stored in the linked list of child records.
 					// So we need to find the records belonging to the old render device and clean them up.
 					// This is only done once the render device has successfully been changed but the pointer to the record needs to be acquired here.
@@ -228,8 +282,10 @@ static struct FExecHook : public FExec, FNotifyHook{
 					GEngine->GRenDev->Init();
 
 					// We need to reset all FCanvasUtils since they still reference the old render interface
-					foreachobj(UCanvas, It){
-						if(It->pCanvasUtil){
+					foreachobj(UCanvas, It)
+					{
+						if(It->pCanvasUtil)
+						{
 							delete It->pCanvasUtil;
 							It->pCanvasUtil = NULL;
 						}
@@ -238,21 +294,28 @@ static struct FExecHook : public FExec, FNotifyHook{
 					UViewport* Viewport = GEngine->Client->Viewports[0];
 					Viewport->TryRenderDevice(*RenderDeviceClass, Viewport->SizeX, Viewport->SizeY, Viewport->IsFullscreen());
 
-					if(GEngine->GRenDev && GEngine->GRenDev->GetClass() == Class){
+					if(GEngine->GRenDev && GEngine->GRenDev->GetClass() == Class)
+					{
 						GConfig->SetString("Engine.Engine", "RenderDevice", *RenderDeviceClass);
 
 						if(OldStatRecord)
 							RemoveStatRecordFromChildList(*OldStatRecord, FStatRecord::Main());
-					}else{
+					}
+					else
+					{
 						Ar.Logf("Failed to set render device with class %s", *RenderDeviceClass);
 					}
 				}
-			}else{
+			}
+			else
+			{
 				Ar.Logf("Unable to find render device class '%s'", *RenderDeviceClass);
 			}
 
 			return 1;
-		}else if(ParseCommand(&Cmd, ":q")){
+		}
+		else if(ParseCommand(&Cmd, ":q"))
+		{
 			GIsRequestingExit = 1;
 
 			return 1;
@@ -266,7 +329,8 @@ static struct FExecHook : public FExec, FNotifyHook{
 
 static bool RenDevSetOnCommandLine = false;
 
-static void InitEngine(){
+static void InitEngine()
+{
 	guard(InitEngine);
 	check(!GEngine);
 
@@ -290,7 +354,8 @@ static void InitEngine(){
 
 	FString RenderDeviceClass;
 
-	if(Parse(appCmdLine(), "RenDev=", RenderDeviceClass)){
+	if(Parse(appCmdLine(), "RenDev=", RenderDeviceClass))
+	{
 		// Allow short form of known render devices.
 		if(RenderDeviceClass == "D3D")
 			RenderDeviceClass = "D3DDrv.D3DRenderDevice";
@@ -322,7 +387,8 @@ static void InitEngine(){
 // Unreal's main message loop.  All windows in Unreal receive messages
 // somewhere below this function on the stack.
 //
-static void MainLoop(){
+static void MainLoop()
+{
 	guard(MainLoop);
 	check(GEngine);
 
@@ -343,7 +409,8 @@ static void MainLoop(){
 	QWORD PreviousTicks = Counter.QuadPart;
 	QWORD RemainingTicks = 0;
 
-	while(GIsRunning && !GIsRequestingExit){
+	while(GIsRunning && !GIsRequestingExit)
+	{
 		DOUBLE NewTime  = appSeconds();
 		FLOAT DeltaTime = NewTime - OldTime;
 
@@ -351,7 +418,8 @@ static void MainLoop(){
 		guard(MessagePump);
 		MSG Msg;
 
-		while(PeekMessageA(&Msg,NULL, 0, 0, PM_REMOVE)){
+		while(PeekMessageA(&Msg,NULL, 0, 0, PM_REMOVE))
+		{
 			if(Msg.message == WM_QUIT)
 				GIsRequestingExit = 1;
 
@@ -370,7 +438,8 @@ static void MainLoop(){
 		OldTime = NewTime;
 		++TickCount;
 
-		if(OldTime > SecondStartTime + 1){
+		if(OldTime > SecondStartTime + 1)
+		{
 			GEngine->CurrentTickRate = (FLOAT)TickCount / (OldTime - SecondStartTime);
 			SecondStartTime = OldTime;
 			TickCount = 0;
@@ -381,7 +450,8 @@ static void MainLoop(){
 		guard(EnforceTickRate);
 		DWORD MaxTickRate = static_cast<DWORD>(GEngine->GetMaxTickRate());
 
-		if(MaxTickRate > 0){
+		if(MaxTickRate > 0)
+		{
 			QWORD Wait = (CounterFrequency.QuadPart + RemainingTicks) / MaxTickRate;
 			RemainingTicks = (CounterFrequency.QuadPart + RemainingTicks) % MaxTickRate;
 
@@ -400,7 +470,9 @@ static void MainLoop(){
 			timeEndPeriod(1);
 
 			PreviousTicks += Wait;
-		}else{
+		}
+		else
+		{
 			QueryPerformanceCounter(&Counter);
 
 			PreviousTicks = Counter.QuadPart;
@@ -414,7 +486,8 @@ static void MainLoop(){
 	unguard;
 }
 
-int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nShowCmd){
+int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nShowCmd)
+{
 	int ExitCode = EXIT_SUCCESS;
 	FOutputDeviceFile Log;
 	FOutputDeviceWindowsError Error;
@@ -448,10 +521,12 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 		// Show the custom icon in the taskbar and window title bar
 		HICON hIcon = LoadIconA(GetModuleHandleA(NULL), MAKEINTRESOURCEA(IDI_ICON1));
-		if(hIcon){
+		if(hIcon)
+		{
 			SendMessageA(GLogWindow->hWnd, WM_SETICON, ICON_SMALL, (LPARAM)hIcon);
 
-			if(GEngine->Client && GEngine->Client->Viewports.Num() > 0){
+			if(GEngine->Client && GEngine->Client->Viewports.Num() > 0)
+			{
 				SendMessageA((HWND)GEngine->Client->Viewports[0]->GetWindow(), WM_SETICON, ICON_SMALL, (LPARAM)hIcon);
 				SendMessageA((HWND)GEngine->Client->Viewports[0]->GetWindow(), WM_SETICON, ICON_BIG, (LPARAM)hIcon);
 			}
@@ -459,13 +534,16 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 		// Init SWRCFix if it exists
 		void* ModDLL = appGetDllHandle("Mod.dll");
-		if(ModDLL){
+		if(ModDLL)
+		{
 			void(CDECL*InitSWRCFix)(void) = static_cast<void(CDECL*)(void)>(appGetDllExport(ModDLL, "InitSWRCFix"));
 
-			if(InitSWRCFix){
+			if(InitSWRCFix)
+			{
 				InitSWRCFix();
 
-				if(!RenDevSetOnCommandLine && GEngine->GRenDev && appStricmp(GEngine->GRenDev->GetClass()->GetPathName(), "D3DDrv.D3DRenderDevice") == 0){
+				if(!RenDevSetOnCommandLine && GEngine->GRenDev && appStricmp(GEngine->GRenDev->GetClass()->GetPathName(), "D3DDrv.D3DRenderDevice") == 0)
+				{
 					GEngine->Client->Viewports[0]->Exec("ENDFULLSCREEN", *GLog); // D3D doesn't like being created while already in fullscreen
 					LauncherExecHook.Exec("USERENDEV MOD", *GLog);
 				}
@@ -485,7 +563,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		appPreExit();
 
 		GIsGuarded = 0;
-	}catch(...){
+	}catch(...)
+	{
 		GIsGuarded = 0;
 		ExitCode = EXIT_FAILURE;
 		Error.HandleError();

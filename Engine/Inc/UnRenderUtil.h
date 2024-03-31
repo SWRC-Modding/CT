@@ -392,7 +392,8 @@ public:
 	                                                   Height(InHeight),
 	                                                   Format(InFormat),
 	                                                   bFSAA(InFSAA),
-	                                                   bMatchBackBuffer(InMatchBackBuffer){
+	                                                   bMatchBackBuffer(InMatchBackBuffer)
+	                                                   {
 		CacheId = MakeCacheID(CID_RenderTexture);
 	}
 

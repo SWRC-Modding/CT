@@ -44,13 +44,15 @@ inline	INT Unfix	(INT A)			{return A>>16;};
 -----------------------------------------------------------------------------*/
 
 // Snap a value to the nearest grid multiple.
-inline FLOAT FSnap(FLOAT Location, FLOAT Grid){
+inline FLOAT FSnap(FLOAT Location, FLOAT Grid)
+{
 	if(Grid==0.0f)	return Location;
 	else			return appFloor((Location + 0.5*Grid)/Grid)*Grid;
 }
 
 // Internal sheer adjusting function so it snaps nicely at 0 and 45 degrees.
-inline FLOAT FSheerSnap (FLOAT Sheer){
+inline FLOAT FSheerSnap (FLOAT Sheer)
+{
 	if		(Sheer < -0.65f) return Sheer + 0.15f;
 	else if (Sheer > +0.65f) return Sheer - 0.15f;
 	else if (Sheer < -0.55f) return -0.50f;
@@ -61,7 +63,8 @@ inline FLOAT FSheerSnap (FLOAT Sheer){
 }
 
 // Find the closest power of 2 that is >= N.
-inline DWORD FNextPowerOfTwo(DWORD N){
+inline DWORD FNextPowerOfTwo(DWORD N)
+{
 	if (N<=0L		) return 0L;
 	if (N<=1L		) return 1L;
 	if (N<=2L		) return 2L;
@@ -83,7 +86,8 @@ inline DWORD FNextPowerOfTwo(DWORD N){
 	else			  return 0;
 }
 
-inline UBOOL FIsPowerOfTwo(DWORD N){
+inline UBOOL FIsPowerOfTwo(DWORD N)
+{
 	return !(N & (N - 1));
 }
 
@@ -92,12 +96,15 @@ inline UBOOL FIsPowerOfTwo(DWORD N){
  * and a max (not to cross).  Accounts for funkyness of word angles.
  * Assumes that angle is initially in the desired range.
  */
-inline _WORD FAddAngleConfined(INT Angle, INT Delta, INT MinThresh, INT MaxThresh){
-	if(Delta < 0){
+inline _WORD FAddAngleConfined(INT Angle, INT Delta, INT MinThresh, INT MaxThresh)
+{
+	if(Delta < 0)
+	{
 		if (Delta<=-0x10000L || Delta<=-(INT)((_WORD)(Angle-MinThresh)))
 			return MinThresh;
 	}
-	else if(Delta > 0){
+	else if(Delta > 0)
+	{
 		if(Delta>=0x10000L || Delta>=(INT)((_WORD)(MaxThresh-Angle)))
 			return MaxThresh;
 	}
@@ -112,30 +119,36 @@ INT ReduceAngle(INT Angle);
  * Warning: likely not portable, and useful on Pentium class processors only.
  */
 
-inline UBOOL IsSmallerPositiveFloat(float F1,float F2){
+inline UBOOL IsSmallerPositiveFloat(float F1,float F2)
+{
 	return ((*(DWORD*)&F1) < (*(DWORD*)&F2));
 }
 
-inline FLOAT MinPositiveFloat(float F1, float F2){
+inline FLOAT MinPositiveFloat(float F1, float F2)
+{
 	if ((*(DWORD*)&F1) < (*(DWORD*)&F2)) return F1; else return F2;
 }
 
 // Warning: 0 and -0 have different binary representations.
 
-inline UBOOL EqualPositiveFloat(float F1, float F2){
+inline UBOOL EqualPositiveFloat(float F1, float F2)
+{
 	return (*(DWORD*)&F1 == *(DWORD*)&F2);
 }
 
-inline UBOOL IsNegativeFloat(float F1){
+inline UBOOL IsNegativeFloat(float F1)
+{
 	return ((*(DWORD*)&F1) >= (DWORD)0x80000000); // Detects sign bit.
 }
 
-inline FLOAT MaxPositiveFloat(float F1, float F2){
+inline FLOAT MaxPositiveFloat(float F1, float F2)
+{
 	if ((*(DWORD*)&F1) < (*(DWORD*)&F2)) return F2; else return F1;
 }
 
 // Clamp F0 between F1 and F2, all positive assumed.
-inline FLOAT ClampPositiveFloat(float F0, float F1, float F2){
+inline FLOAT ClampPositiveFloat(float F0, float F1, float F2)
+{
 	if      ((*(DWORD*)&F0) < (*(DWORD*)&F1)) return F1;
 	else if ((*(DWORD*)&F0) > (*(DWORD*)&F2)) return F2;
 	else return F0;
@@ -192,7 +205,8 @@ public:
 	FLOAT operator|(const FVector& V) const{
 		return X*V.X + Y*V.Y + Z*V.Z;
 	}
-	friend FVector operator*(FLOAT Scale, const FVector& V){
+	friend FVector operator*(FLOAT Scale, const FVector& V)
+	{
 		return FVector(V.X * Scale, V.Y * Scale, V.Z * Scale);
 	}
 	FVector operator+(const FVector& V) const{
@@ -226,32 +240,39 @@ public:
 	}
 
 	// Assignment operators.
-	FVector operator+=(const FVector& V){
+	FVector operator+=(const FVector& V)
+	{
 		X += V.X; Y += V.Y; Z += V.Z;
 		return *this;
 	}
-	FVector operator-=(const FVector& V){
+	FVector operator-=(const FVector& V)
+	{
 		X -= V.X; Y -= V.Y; Z -= V.Z;
 		return *this;
 	}
-	FVector operator*=(FLOAT Scale){
+	FVector operator*=(FLOAT Scale)
+	{
 		X *= Scale; Y *= Scale; Z *= Scale;
 		return *this;
 	}
-	FVector operator/=(FLOAT V){
+	FVector operator/=(FLOAT V)
+	{
 		FLOAT RV = 1.0f/V;
 		X *= RV; Y *= RV; Z *= RV;
 		return *this;
 	}
-	FVector operator*=(const FVector& V){
+	FVector operator*=(const FVector& V)
+	{
 		X *= V.X; Y *= V.Y; Z *= V.Z;
 		return *this;
 	}
-	FVector operator/=(const FVector& V){
+	FVector operator/=(const FVector& V)
+	{
 		X /= V.X; Y /= V.Y; Z /= V.Z;
 		return *this;
 	}
-    FLOAT& operator[](INT i){
+    FLOAT& operator[](INT i)
+    {
 		checkSlow(i>-1);
 		checkSlow(i<3);
 		if(i == 0)		return X;
@@ -290,18 +311,22 @@ public:
 	UBOOL IsZero() const{
 		return X==0.0f && Y==0.0f && Z==0.0f;
 	}
-	UBOOL Normalize(){
+	UBOOL Normalize()
+	{
 		FLOAT SquareSum = X*X+Y*Y+Z*Z;
-		if(SquareSum >= SMALL_NUMBER){
+		if(SquareSum >= SMALL_NUMBER)
+		{
 			FLOAT Scale = 1.0f/appSqrt(SquareSum);
 			X *= Scale; Y *= Scale; Z *= Scale;
 			return 1;
 		}
 		else return 0;
 	}
-	FVector GetNormalized(){
+	FVector GetNormalized()
+	{
 		FLOAT SquareSum = X*X+Y*Y+Z*Z;
-		if(SquareSum >= SMALL_NUMBER){
+		if(SquareSum >= SMALL_NUMBER)
+		{
 			FLOAT Scale = 1.0f/appSqrt(SquareSum);
 			X *= Scale; Y *= Scale; Z *= Scale;
 			return *this;
@@ -310,7 +335,8 @@ public:
 		return FVector(0,0,0);
 	}
 	//Expects a unit vector and returns a vector that is sufficiently non parallel ;)
-	FVector GetNonParallel(){
+	FVector GetNonParallel()
+	{
 		// One of the components in a unit vector has to be > 0.57f [sqrt(1/3)].
 		if (Abs(X) > 0.57f)
 			return FVector(0,1,0);
@@ -328,10 +354,12 @@ public:
 
 		return FVector(X*Scale, Y*Scale, Z*Scale);
 	}
-	FVector GridSnap(const FVector& Grid){
+	FVector GridSnap(const FVector& Grid)
+	{
 		return FVector(FSnap(X, Grid.X),FSnap(Y, Grid.Y),FSnap(Z, Grid.Z));
 	}
-	FVector BoundToCube(FLOAT Radius){
+	FVector BoundToCube(FLOAT Radius)
+	{
 		return FVector
 		(
 			Clamp(X,-Radius,Radius),
@@ -339,10 +367,12 @@ public:
 			Clamp(Z,-Radius,Radius)
 		);
 	}
-	void AddBounded(const FVector& V, FLOAT Radius=MAXSWORD){
+	void AddBounded(const FVector& V, FLOAT Radius=MAXSWORD)
+	{
 		*this = (*this + V).BoundToCube(Radius);
 	}
-	FLOAT& Component(INT Index){
+	FLOAT& Component(INT Index)
+	{
 		return (&X)[Index];
 	}
 
@@ -352,7 +382,8 @@ public:
 	 * When      V==(0,0,0) Booleanize(0)=1.
 	 * Otherwise Booleanize(V) <-> !Booleanize(!B).
 	 */
-	UBOOL Booleanize(){
+	UBOOL Booleanize()
+	{
 		return
 			X >  0.0f ? 1 :
 			X <  0.0f ? 0 :
@@ -362,7 +393,8 @@ public:
 	}
 
 	//See if X == Y == Z (within fairly small tolerance)
-	UBOOL IsUniform(){
+	UBOOL IsUniform()
+	{
 		return (Abs(X-Y) < KINDA_SMALL_NUMBER) && (Abs(Y-Z) < KINDA_SMALL_NUMBER);
 	}
 
@@ -392,7 +424,8 @@ public:
 	friend UBOOL FCoplanar(const FVector& Base1, const FVector& Normal1, const FVector& Base2, const FVector& Normal2);
 
 	//Serializer.
-	friend FArchive& operator<<(FArchive& Ar, FVector& V){
+	friend FArchive& operator<<(FArchive& Ar, FVector& V)
+	{
 		return Ar << V.X << V.Y << V.Z;
 	}
 };
@@ -410,11 +443,13 @@ public:
 	INT VertexIndex;
 
 	// Constructors.
-	FVertexHit(){
+	FVertexHit()
+	{
 		pBrush = NULL;
 		PolyIndex = VertexIndex = 0;
 	}
-	FVertexHit(ABrush* InBrush, INT InPolyIndex, INT InVertexIndex){
+	FVertexHit(ABrush* InBrush, INT InPolyIndex, INT InVertexIndex)
+	{
 		pBrush = InBrush;
 		PolyIndex = InPolyIndex;
 		VertexIndex = InVertexIndex;
@@ -437,7 +472,8 @@ class CORE_API FEdge{
 public:
 	// Constructors.
 	FEdge(){}
-	FEdge(FVector v1, FVector v2){
+	FEdge(FVector v1, FVector v2)
+	{
 		Vertex[0] = v1;
 		Vertex[1] = v2;
 	}
@@ -510,34 +546,42 @@ public:
 	FPlane operator*(FLOAT Scale) const{
 		return FPlane(X * Scale, Y * Scale, Z * Scale, W * Scale);
 	}
-	FPlane operator*(const FPlane& V){
+	FPlane operator*(const FPlane& V)
+	{
 		return FPlane (X*V.X,Y*V.Y,Z*V.Z,W*V.W);
 	}
-	FPlane operator+=(const FPlane& V){
+	FPlane operator+=(const FPlane& V)
+	{
 		X += V.X; Y += V.Y; Z += V.Z; W += V.W;
 		return *this;
 	}
-	FPlane operator-=(const FPlane& V){
+	FPlane operator-=(const FPlane& V)
+	{
 		X -= V.X; Y -= V.Y; Z -= V.Z; W -= V.W;
 		return *this;
 	}
-	FPlane operator*=(FLOAT Scale){
+	FPlane operator*=(FLOAT Scale)
+	{
 		X *= Scale; Y *= Scale; Z *= Scale; W *= Scale;
 		return *this;
 	}
-	FPlane operator*=(const FPlane& V){
+	FPlane operator*=(const FPlane& V)
+	{
 		X *= V.X; Y *= V.Y; Z *= V.Z; W *= V.W;
 		return *this;
 	}
-	FPlane operator/=(FLOAT V){
+	FPlane operator/=(FLOAT V)
+	{
 		FLOAT RV = 1.0f/V;
 		X *= RV; Y *= RV; Z *= RV; W *= RV;
 		return *this;
 	}
-	FLOAT& operator[](INT i){
+	FLOAT& operator[](INT i)
+	{
 		checkSlow(i < 4);
 		checkSlow(i >= 0);
-		switch(i){
+		switch(i)
+		{
 		case 0:
 			return X;
 		case 1:
@@ -552,7 +596,8 @@ public:
 	}
 
 	//Serializer.
-	friend FArchive& operator<<(FArchive& Ar, FPlane &P){
+	friend FArchive& operator<<(FArchive& Ar, FPlane &P)
+	{
 		return Ar << (FVector&)P << P.W;
 	}
 };
@@ -585,7 +630,8 @@ public:
 
 	FSphere TransformBy(const FMatrix& M) const;
 
-	friend FArchive& operator<<(FArchive& Ar, FSphere& S){
+	friend FArchive& operator<<(FArchive& Ar, FSphere& S)
+	{
 		guardSlow(FSphere<<);
 		if(Ar.Ver()<=61)//oldver
 			Ar << (FVector&)S;
@@ -626,7 +672,8 @@ public:
 	BYTE		SheerAxis; // From ESheerAxis
 
 	//Serializer.
-	friend FArchive& operator<<(FArchive& Ar, FScale &S){
+	friend FArchive& operator<<(FArchive& Ar, FScale &S)
+	{
 		return Ar << S.Scale << S.SheerRate << S.SheerAxis;
 	}
 
@@ -641,7 +688,8 @@ public:
 	}
 
 	// Functions.
-	FLOAT  Orientation(){
+	FLOAT  Orientation()
+	{
 		return Sgn(Scale.X * Scale.Y * Scale.Z);
 	}
 };
@@ -694,7 +742,8 @@ public:
 	FCoords  operator/	(const FScale    &Scale) const;
 
 	//Serializer.
-	friend FArchive& operator<<(FArchive& Ar, FCoords& F){
+	friend FArchive& operator<<(FArchive& Ar, FCoords& F)
+	{
 		return Ar << F.Origin << F.XAxis << F.YAxis << F.ZAxis;
 	}
 };
@@ -719,7 +768,8 @@ public:
 	:	PointXform(InCovariant), VectorXform(InContravariant){}
 
 	// Functions.
-	FModelCoords Inverse(){
+	FModelCoords Inverse()
+	{
 		return FModelCoords(VectorXform.Transpose(), PointXform.Transpose());
 	}
 };
@@ -739,7 +789,8 @@ public:
 	INT Roll;  // Rotation about axis of screen, 0=Straight, +Clockwise, -CCW.
 
 	//Serializer.
-	friend FArchive& operator<<(FArchive& Ar, FRotator& R){
+	friend FArchive& operator<<(FArchive& Ar, FRotator& R)
+	{
 		return Ar << R.Pitch << R.Yaw << R.Roll;
 	}
 
@@ -759,10 +810,12 @@ public:
 	FRotator operator*(FLOAT Scale) const{
 		return FRotator((INT)(Pitch*Scale), (INT)(Yaw*Scale), (INT)(Roll*Scale));
 	}
-	friend FRotator operator*(FLOAT Scale, const FRotator &R){
+	friend FRotator operator*(FLOAT Scale, const FRotator &R)
+	{
 		return FRotator((INT)(R.Pitch*Scale), (INT)(R.Yaw*Scale), (INT)(R.Roll*Scale));
 	}
-	FRotator operator*= (FLOAT Scale){
+	FRotator operator*= (FLOAT Scale)
+	{
 		Pitch = (INT)(Pitch*Scale); Yaw = (INT)(Yaw*Scale); Roll = (INT)(Roll*Scale);
 		return *this;
 	}
@@ -774,11 +827,13 @@ public:
 		return Pitch!=V.Pitch || Yaw!=V.Yaw || Roll!=V.Roll;
 	}
 	// Assignment operators.
-	FRotator operator+=(const FRotator &R){
+	FRotator operator+=(const FRotator &R)
+	{
 		Pitch += R.Pitch; Yaw += R.Yaw; Roll += R.Roll;
 		return *this;
 	}
-	FRotator operator-=(const FRotator &R){
+	FRotator operator-=(const FRotator &R)
+	{
 		Pitch -= R.Pitch; Yaw -= R.Yaw; Roll -= R.Roll;
 		return *this;
 	}
@@ -789,19 +844,22 @@ public:
 	int IsZero() const{
 		return ((Pitch&65535)==0) && ((Yaw&65535)==0) && ((Roll&65535)==0);
 	}
-	FRotator Add(INT DeltaPitch, INT DeltaYaw, INT DeltaRoll){
+	FRotator Add(INT DeltaPitch, INT DeltaYaw, INT DeltaRoll)
+	{
 		Yaw   += DeltaYaw;
 		Pitch += DeltaPitch;
 		Roll  += DeltaRoll;
 		return *this;
 	}
-	FRotator AddBounded(INT DeltaPitch, INT DeltaYaw, INT DeltaRoll){
+	FRotator AddBounded(INT DeltaPitch, INT DeltaYaw, INT DeltaRoll)
+	{
 		Yaw  += DeltaYaw;
 		Pitch = FAddAngleConfined(Pitch,DeltaPitch,192*0x100,64*0x100);
 		Roll  = FAddAngleConfined(Roll, DeltaRoll, 192*0x100,64*0x100);
 		return *this;
 	}
-	FRotator GridSnap(const FRotator &RotGrid){
+	FRotator GridSnap(const FRotator &RotGrid)
+	{
 		return FRotator
 		(
 			(INT)(FSnap(Pitch,RotGrid.Pitch)),
@@ -811,12 +869,14 @@ public:
 	}
 	FVector Vector();
 	//Resets the rotation values so they fall within the range -65535,65535
-	FRotator Clamp(){
+	FRotator Clamp()
+	{
 		guard(FRotator::Clamp);
 		return FRotator(Pitch%65535, Yaw%65535, Roll%65535);
 		unguard;
 	}
-	FRotator ClampPos(){
+	FRotator ClampPos()
+	{
 		guard(FRotator::Clamp);
 		return FRotator(Abs(Pitch)%65535, Abs(Yaw)%65535, Abs(Roll)%65535);
 		unguard;
@@ -858,7 +918,8 @@ public:
 
 	// Constructors.
 	FRange(){}
-	FRange(FLOAT InMin, FLOAT InMax){
+	FRange(FLOAT InMin, FLOAT InMax)
+	{
 		Min = ::Min(InMin, InMax);
 		Max = ::Max(InMin, InMax);
 	}
@@ -867,7 +928,8 @@ public:
 		Max = Value;
 	}
 	// Binary math operators.
-	friend FRange operator*(FLOAT Scale, const FRange& R){
+	friend FRange operator*(FLOAT Scale, const FRange& R)
+	{
 		return FRange(R.Min * Scale, R.Max * Scale);
 	}
 	FRange operator+(const FRange& R) const{
@@ -907,36 +969,44 @@ public:
 	}
 
 	// Assignment operators.
-	FRange operator+=(const FRange& R){
+	FRange operator+=(const FRange& R)
+	{
 		Min += R.Min; Max += R.Max;
 		return *this;
 	}
-	FRange operator-=(const FRange& R){
+	FRange operator-=(const FRange& R)
+	{
 		Min -= R.Min; Max -= R.Max;
 		return *this;
 	}
-	FRange operator+=(FLOAT V){
+	FRange operator+=(FLOAT V)
+	{
 		Min += V; Max += V;
 		return *this;
 	}
-	FRange operator-=(FLOAT V){
+	FRange operator-=(FLOAT V)
+	{
 		Min -= V; Max -= V;
 		return *this;
 	}
-	FRange operator*=(FLOAT Scale){
+	FRange operator*=(FLOAT Scale)
+	{
 		Min *= Scale; Max *= Scale;
 		return *this;
 	}
-	FRange operator/=(FLOAT Scale){
+	FRange operator/=(FLOAT Scale)
+	{
 		FLOAT RScale = 1.0/Scale;
 		Min *= RScale; Max *= RScale;
 		return *this;
 	}
-	FRange operator*=(const FRange& R){
+	FRange operator*=(const FRange& R)
+	{
 		Min *= R.Min; Max *= R.Max;
 		return *this;
 	}
-	FRange operator/=(const FRange& R){
+	FRange operator/=(const FRange& R)
+	{
 		Min /= R.Min; Max /= R.Max;
 		return *this;
 	}
@@ -973,10 +1043,12 @@ public:
 	UBOOL IsZero() const{
 		return Min==0.0 && Max==0.0;
 	}
-	FRange GridSnap(const FRange& Grid){
+	FRange GridSnap(const FRange& Grid)
+	{
 		return FRange(FSnap(Min, Grid.Min),FSnap(Max, Grid.Max));
 	}
-	FLOAT& Component(INT Index){
+	FLOAT& Component(INT Index)
+	{
 		return (&Min)[Index];
 	}
 
@@ -984,7 +1056,8 @@ public:
 	 * When      R==(0.0) Booleanize(0)=1.
 	 * Otherwise Booleanize(R) <-> !Booleanize(!R).
 	 */
-	UBOOL Booleanize(){
+	UBOOL Booleanize()
+	{
 		return
 			Min >  0.0 ? 1 :
 			Min <  0.0 ? 0 :
@@ -992,7 +1065,8 @@ public:
 	}
 
 	//Serializer.
-	friend FArchive& operator<<(FArchive& Ar, FRange& R){
+	friend FArchive& operator<<(FArchive& Ar, FRange& R)
+	{
 		return Ar << R.Min << R.Max;
 	}
 };
@@ -1016,7 +1090,8 @@ public:
 	FRangeVector(FVector V)
 	:	X(V.X), Y(V.Y), Z(V.Z){}
 	// Binary math operators.
-	friend FRangeVector operator*(FLOAT Scale, const FRangeVector& R){
+	friend FRangeVector operator*(FLOAT Scale, const FRangeVector& R)
+	{
 		return FRangeVector(R.X * Scale, R.Y * Scale, R.Z * Scale);
 	}
 	FRangeVector operator+(const FRangeVector& R) const{
@@ -1056,36 +1131,44 @@ public:
 	}
 
 	// Assignment operators.
-	FRangeVector operator+=(const FRangeVector& R){
+	FRangeVector operator+=(const FRangeVector& R)
+	{
 		X += R.X; Y += R.Y; Z += R.Z;
 		return *this;
 	}
-	FRangeVector operator-=(const FRangeVector& R){
+	FRangeVector operator-=(const FRangeVector& R)
+	{
 		X -= R.X; Y -= R.Y; Z -= R.Z;
 		return *this;
 	}
-	FRangeVector operator+=(const FVector& V){
+	FRangeVector operator+=(const FVector& V)
+	{
 		X += V.X; Y += V.Y; Z += V.Z;
 		return *this;
 	}
-	FRangeVector operator-=(const FVector& V){
+	FRangeVector operator-=(const FVector& V)
+	{
 		X -= V.X; Y -= V.Y; Z -= V.Z;
 		return *this;
 	}
-	FRangeVector operator*=(FLOAT Scale){
+	FRangeVector operator*=(FLOAT Scale)
+	{
 		X *= Scale; Y *= Scale; Z *= Scale;
 		return *this;
 	}
-	FRangeVector operator/=(FLOAT Scale){
+	FRangeVector operator/=(FLOAT Scale)
+	{
 		FLOAT RScale = 1.0/Scale;
 		X *= RScale; Y *= RScale; Z *= RScale;
 		return *this;
 	}
-	FRangeVector operator*=(const FRangeVector& R){
+	FRangeVector operator*=(const FRangeVector& R)
+	{
 		X *= R.X; Y *= R.Y; Z *= R.Z;
 		return *this;
 	}
-	FRangeVector operator/=(const FRangeVector& R){
+	FRangeVector operator/=(const FRangeVector& R)
+	{
 		X /= R.X; Y /= R.Y; Z /= R.Z;
 		return *this;
 	}
@@ -1110,15 +1193,18 @@ public:
 	UBOOL IsZero() const{
 		return X.IsZero() && Y.IsZero() && Z.IsZero();
 	}
-	FRangeVector GridSnap(const FRangeVector& Grid){
+	FRangeVector GridSnap(const FRangeVector& Grid)
+	{
 		return FRangeVector(X.GridSnap(Grid.X), Y.GridSnap(Grid.Y), Z.GridSnap(Grid.Z));
 	}
-	FRange& Component(INT Index){
+	FRange& Component(INT Index)
+	{
 		return (&X)[Index];
 	}
 
 	//Serializer.
-	friend FArchive& operator<<(FArchive& Ar, FRangeVector& R){
+	friend FArchive& operator<<(FArchive& Ar, FRangeVector& R)
+	{
 		return Ar << R.X << R.Y << R.Z;
 	}
 };
@@ -1145,7 +1231,8 @@ public:
 	FBox(const FVector* Points, INT Count);
 
 	// Accessors.
-	FVector& GetExtrema(int i){
+	FVector& GetExtrema(int i)
+	{
 		return (&Min)[i];
 	}
 	const FVector& GetExtrema(int i) const{
@@ -1153,12 +1240,15 @@ public:
 	}
 
 	// Functions.
-	void Init(){
+	void Init()
+	{
 		Min = Max = FVector(0,0,0);
 		IsValid = 0;
 	}
-	FBox& operator+=(const FVector &Other){
-		if(IsValid){
+	FBox& operator+=(const FVector &Other)
+	{
+		if(IsValid)
+		{
 			Min.X = ::Min(Min.X, Other.X);
 			Min.Y = ::Min(Min.Y, Other.Y);
 			Min.Z = ::Min(Min.Z, Other.Z);
@@ -1167,7 +1257,8 @@ public:
 			Max.Y = ::Max(Max.Y, Other.Y);
 			Max.Z = ::Max(Max.Z, Other.Z);
 		}
-		else{
+		else
+		{
 			Min = Max = Other;
 			IsValid = 1;
 		}
@@ -1176,8 +1267,10 @@ public:
 	FBox operator+(const FVector& Other) const{
 		return FBox(*this) += Other;
 	}
-	FBox& operator+=(const FBox& Other){
-		if(IsValid && Other.IsValid){
+	FBox& operator+=(const FBox& Other)
+	{
+		if(IsValid && Other.IsValid)
+		{
 			Min.X = ::Min(Min.X, Other.Min.X);
 			Min.Y = ::Min(Min.Y, Other.Min.Y);
 			Min.Z = ::Min(Min.Z, Other.Min.Z);
@@ -1192,7 +1285,8 @@ public:
 	FBox operator+(const FBox& Other) const{
 		return FBox(*this) += Other;
 	}
-    FVector& operator[](INT i){
+    FVector& operator[](INT i)
+    {
 		check(i>-1);
 		check(i<2);
 		if(i == 0)		return Min;
@@ -1237,7 +1331,8 @@ public:
 
 
 	//Serializer.
-	friend FArchive& operator<<(FArchive& Ar, FBox& Bound){
+	friend FArchive& operator<<(FArchive& Ar, FBox& Bound)
+	{
 		return Ar << Bound.Min << Bound.Max << Bound.IsValid;
 	}
 };
@@ -1253,12 +1348,14 @@ public:
 	FInterpCurvePoint() {}
 	FInterpCurvePoint(FLOAT I, FLOAT O) : InVal(I), OutVal(O) {}
 
-	UBOOL operator==(const FInterpCurvePoint &Other){
+	UBOOL operator==(const FInterpCurvePoint &Other)
+	{
 		return (InVal == Other.InVal && OutVal == Other.OutVal);
 	}
 
 	//Serializer.
-	friend FArchive& operator<<(FArchive& Ar, FInterpCurvePoint& Point){
+	friend FArchive& operator<<(FArchive& Ar, FInterpCurvePoint& Point)
+	{
 		return Ar << Point.InVal << Point.OutVal;
 	}
 };
@@ -1274,12 +1371,14 @@ public:
 	FLOAT	Eval(FLOAT in);
 
 	//Serializer.
-	friend FArchive& operator<<(FArchive& Ar, FInterpCurve& Curve){
+	friend FArchive& operator<<(FArchive& Ar, FInterpCurve& Curve)
+	{
 		return Ar << Curve.Points;
 	}
 
 	//Assignment (copy)
-	void operator=(const FInterpCurve &Other){
+	void operator=(const FInterpCurve &Other)
+	{
 		Points = Other.Points;
 	}
 };
@@ -1309,19 +1408,24 @@ public:
 	const FCoords	ViewCoords;
 
 	// Basic math functions.
-	FLOAT Sqrt(int i){
+	FLOAT Sqrt(int i)
+	{
 		return SqrtFLOAT[i];
 	}
-	FLOAT SinTab(int i){
+	FLOAT SinTab(int i)
+	{
 		return TrigFLOAT[((i>>ANGLE_SHIFT)&(NUM_ANGLES-1))];
 	}
-	FLOAT CosTab(int i){
+	FLOAT CosTab(int i)
+	{
 		return TrigFLOAT[(((i+16384)>>ANGLE_SHIFT)&(NUM_ANGLES-1))];
 	}
-	FLOAT SinFloat(FLOAT F){
+	FLOAT SinFloat(FLOAT F)
+	{
 		return SinTab((INT)((F*65536.0f)/(2.0f*PI)));
 	}
-	FLOAT CosFloat(FLOAT F){
+	FLOAT CosFloat(FLOAT F)
+	{
 		return CosTab((INT)((F*65536.0f)/(2.0f*PI)));
 	}
 
@@ -1335,7 +1439,8 @@ private:
 	FLOAT  LightSqrtFLOAT	[NUM_SQRTS];
 };
 
-inline INT ReduceAngle(INT Angle){
+inline INT ReduceAngle(INT Angle)
+{
 	return Angle & FGlobalMath::ANGLE_MASK;
 };
 
@@ -1369,7 +1474,8 @@ inline INT ReduceAngle(INT Angle){
  * FVerticesEqual
  */
 
-inline UBOOL FVerticesEqual(const FVector& V1, const FVector& V2){
+inline UBOOL FVerticesEqual(const FVector& V1, const FVector& V2)
+{
 	if(Abs(V1.X - V2.X) > THRESH_POINTS_ARE_SAME * 4.0f)
 		return 0;
 
@@ -1391,7 +1497,8 @@ inline UBOOL FVerticesEqual(const FVector& V1, const FVector& V2){
  * An adaption of Michael Abrash' optimal transformation code.
  */
 #if ASM
-inline void ASMTransformPoint(const FCoords &Coords, const FVector &InVector, FVector &OutVector){
+inline void ASMTransformPoint(const FCoords &Coords, const FVector &InVector, FVector &OutVector)
+{
 	// FCoords is a structure of 4 vectors: Origin, X, Y, Z
 	//				 	  x  y  z
 	// FVector	Origin;   0  4  8
@@ -1466,7 +1573,8 @@ inline void ASMTransformPoint(const FCoords &Coords, const FVector &InVector, FV
 	}
 }
 
-inline void ASMTransformVector(const FCoords &Coords, const FVector &InVector, FVector &OutVector){
+inline void ASMTransformVector(const FCoords &Coords, const FVector &InVector, FVector &OutVector)
+{
 	__asm{
 		mov     esi,[InVector]
 		mov     edx,[Coords]
@@ -1610,12 +1718,15 @@ inline FVector FVector::RotateAngleAxis(const INT Angle, const FVector& Axis) co
  * Compare two points and see if they're the same, using a threshold.
  * Uses fast distance approximation.
  */
-inline bool FPointsAreSame(const FVector &P, const FVector &Q){
+inline bool FPointsAreSame(const FVector &P, const FVector &Q)
+{
 	FLOAT Temp;
 	Temp=P.X-Q.X;
-	if((Temp > -THRESH_POINTS_ARE_SAME) && (Temp < THRESH_POINTS_ARE_SAME)){
+	if((Temp > -THRESH_POINTS_ARE_SAME) && (Temp < THRESH_POINTS_ARE_SAME))
+	{
 		Temp=P.Y-Q.Y;
-		if((Temp > -THRESH_POINTS_ARE_SAME) && (Temp < THRESH_POINTS_ARE_SAME)){
+		if((Temp > -THRESH_POINTS_ARE_SAME) && (Temp < THRESH_POINTS_ARE_SAME))
+		{
 			Temp=P.Z-Q.Z;
 
 			if((Temp > -THRESH_POINTS_ARE_SAME) && (Temp < THRESH_POINTS_ARE_SAME))
@@ -1629,7 +1740,8 @@ inline bool FPointsAreSame(const FVector &P, const FVector &Q){
  * Compare two points and see if they're the same, using a threshold.
  * Uses fast distance approximation.
  */
-inline bool FPointsAreNear(const FVector &Point1, const FVector &Point2, FLOAT Dist){
+inline bool FPointsAreNear(const FVector &Point1, const FVector &Point2, FLOAT Dist)
+{
 	FLOAT Temp;
 	Temp = (Point1.X - Point2.X); if(Abs(Temp) >= Dist) return false;
 	Temp = (Point1.Y - Point2.Y); if(Abs(Temp) >= Dist) return false;
@@ -1651,30 +1763,35 @@ inline FLOAT FPointPlaneDist
 }
 
 // Euclidean distance between two points.
-inline FLOAT FDist(const FVector &V1, const FVector &V2){
+inline FLOAT FDist(const FVector &V1, const FVector &V2)
+{
 	return appSqrt(Square(V2.X-V1.X) + Square(V2.Y-V1.Y) + Square(V2.Z-V1.Z));
 }
 
 // Squared distance between two points.
-inline FLOAT FDistSquared(const FVector &V1, const FVector &V2){
+inline FLOAT FDistSquared(const FVector &V1, const FVector &V2)
+{
 	return Square(V2.X-V1.X) + Square(V2.Y-V1.Y) + Square(V2.Z-V1.Z);
 }
 
 // See if two normal vectors (or plane normals) are nearly parallel.
-inline int FParallel(const FVector &Normal1, const FVector &Normal2){
+inline int FParallel(const FVector &Normal1, const FVector &Normal2)
+{
 	FLOAT NormalDot = Normal1 | Normal2;
 	return (Abs (NormalDot - 1.0f) <= THRESH_VECTORS_ARE_PARALLEL);
 }
 
 // See if two planes are coplanar.
-inline int FCoplanar(const FVector &Base1, const FVector &Normal1, const FVector &Base2, const FVector &Normal2){
+inline int FCoplanar(const FVector &Base1, const FVector &Normal1, const FVector &Base2, const FVector &Normal2)
+{
 	if      (!FParallel(Normal1,Normal2)) return 0;
 	else if (FPointPlaneDist (Base2,Base1,Normal1) > THRESH_POINT_ON_PLANE) return 0;
 	else    return 1;
 }
 
 // Triple product of three vectors.
-inline FLOAT FTriple(const FVector& X, const FVector& Y, const FVector& Z){
+inline FLOAT FTriple(const FVector& X, const FVector& Y, const FVector& Z)
+{
 	return
 	(	(X.X * (Y.Y * Z.Z - Y.Z * Z.Y))
 	+	(X.Y * (Y.Z * Z.X - Y.X * Z.Z))
@@ -1727,7 +1844,8 @@ inline FCoords FCoords::MirrorByPlane(const FPlane& Plane) const{
 -----------------------------------------------------------------------------*/
 
 // Transform this coordinate system by another coordinate system.
-inline FCoords& FCoords::operator*=(const FCoords& TransformCoords){
+inline FCoords& FCoords::operator*=(const FCoords& TransformCoords)
+{
 	//!! Proper solution:
 	//Origin = Origin.TransformPointBy(TransformCoords.Inverse().Transpose());
 	// Fast solution assuming orthogonal coordinate system:
@@ -1742,7 +1860,8 @@ inline FCoords FCoords::operator*(const FCoords &TransformCoords) const{
 }
 
 // Transform this coordinate system by a pitch-yaw-roll rotation.
-inline FCoords& FCoords::operator*=(const FRotator &Rot){
+inline FCoords& FCoords::operator*=(const FRotator &Rot)
+{
 	// Apply yaw rotation.
 	*this *= FCoords
 	(
@@ -1775,7 +1894,8 @@ inline FCoords FCoords::operator*(const FRotator &Rot) const{
 	return FCoords(*this) *= Rot;
 }
 
-inline FCoords& FCoords::operator*=(const FVector &Point){
+inline FCoords& FCoords::operator*=(const FVector &Point)
+{
 	Origin -= Point;
 	return *this;
 }
@@ -1784,7 +1904,8 @@ inline FCoords FCoords::operator*(const FVector &Point) const{
 }
 
 // Detransform this coordinate system by a pitch-yaw-roll rotation.
-inline FCoords& FCoords::operator/=(const FRotator &Rot){
+inline FCoords& FCoords::operator/=(const FRotator &Rot)
+{
 	// Apply inverse roll rotation.
 	*this *= FCoords
 	(
@@ -1817,7 +1938,8 @@ inline FCoords FCoords::operator/(const FRotator &Rot) const{
 	return FCoords(*this) /= Rot;
 }
 
-inline FCoords& FCoords::operator/=(const FVector &Point){
+inline FCoords& FCoords::operator/=(const FVector &Point)
+{
 	Origin += Point;
 	return *this;
 }
@@ -1831,11 +1953,13 @@ inline FCoords FCoords::operator/(const FVector &Point) const{
  * Note: Will return coordinate system of opposite handedness if
  * Scale.X*Scale.Y*Scale.Z is negative.
  */
-inline FCoords& FCoords::operator*=(const FScale &Scale){
+inline FCoords& FCoords::operator*=(const FScale &Scale)
+{
 	// Apply sheering.
 	FLOAT   Sheer      = FSheerSnap(Scale.SheerRate);
 	FCoords TempCoords = GMath.UnitCoords;
-	switch(Scale.SheerAxis){
+	switch(Scale.SheerAxis)
+	{
 		case SHEER_XY:
 			TempCoords.XAxis.Y = Sheer;
 			break;
@@ -1874,7 +1998,8 @@ inline FCoords FCoords::operator*(const FScale &Scale) const{
 }
 
 // Detransform a coordinate system by a scale.
-inline FCoords& FCoords::operator/=(const FScale &Scale){
+inline FCoords& FCoords::operator/=(const FScale &Scale)
+{
 	// Deapply scaling.
 	XAxis    /= Scale.Scale;
 	YAxis    /= Scale.Scale;
@@ -1886,7 +2011,8 @@ inline FCoords& FCoords::operator/=(const FScale &Scale){
 	// Deapply sheering.
 	FCoords TempCoords(GMath.UnitCoords);
 	FLOAT Sheer = FSheerSnap(Scale.SheerRate);
-	switch(Scale.SheerAxis){
+	switch(Scale.SheerAxis)
+	{
 		case SHEER_XY:
 			TempCoords.XAxis.Y = -Sheer;
 			break;
@@ -1923,7 +2049,8 @@ inline FCoords FCoords::operator/(const FScale &Scale) const{
 const int FPSignBitMask = ~(1 << 31); // sjs
 
 // Compute pushout of a box from a plane.
-inline FLOAT FBoxPushOut(const FVector & Normal, const FVector & Size){
+inline FLOAT FBoxPushOut(const FVector & Normal, const FVector & Size)
+{
     float dx = Normal.X*Size.X;
     float dy = Normal.Y*Size.Y;
     float dz = Normal.Z*Size.Z;
@@ -1935,7 +2062,8 @@ inline FLOAT FBoxPushOut(const FVector & Normal, const FVector & Size){
 
 
 //Returns uniformly distributed random unit vector.
-inline FVector VRand(){
+inline FVector VRand()
+{
 	FVector Result;
 
 	do{
@@ -1952,16 +2080,19 @@ inline FVector VRand(){
 extern CORE_API unsigned long qRandSeed;
 const float INV_MAX_QUICK_RAND = 1.0f/0xffff;
 
-inline void qSeedRand(unsigned int inSeed){
+inline void qSeedRand(unsigned int inSeed)
+{
 	qRandSeed = inSeed;
 }
 
-inline unsigned int qRand(){
+inline unsigned int qRand()
+{
    qRandSeed = (qRandSeed * 196314165) + 907633515;
    return (qRandSeed >> 17);
 }
 
-inline float qFRand(){
+inline float qFRand()
+{
    qRandSeed = (qRandSeed * 196314165) + 907633515;
 
    return (float)(qRandSeed>>16) * INV_MAX_QUICK_RAND;
@@ -1973,7 +2104,8 @@ inline float qFRand(){
 
 
 // Returns UV texture coordinates for the specified vertex.
-inline void FVectorsToTexCoords(FVector InVtx, FVector InPolyBase, FVector InTextureU, FVector InTextureV, FLOAT InMaterialUSize, FLOAT InMaterialVSize, FLOAT* InU, FLOAT* InV){
+inline void FVectorsToTexCoords(FVector InVtx, FVector InPolyBase, FVector InTextureU, FVector InTextureV, FLOAT InMaterialUSize, FLOAT InMaterialVSize, FLOAT* InU, FLOAT* InV)
+{
 	*InU = ((InVtx - InPolyBase) | InTextureU) / InMaterialUSize;
 	*InV = ((InVtx - InPolyBase) | InTextureV) / InMaterialVSize;
 }
@@ -1983,7 +2115,8 @@ inline void FVectorsToTexCoords(FVector InVtx, FVector InPolyBase, FVector InTex
  *
  * NOTE : the UV coords should be scaled by the texture size
  */
-inline void FTexCoordsToVectors(FVector V0, FVector UV0, FVector V1, FVector UV1, FVector V2, FVector UV2, FVector* InBaseResult, FVector* InUResult, FVector* InVResult){
+inline void FTexCoordsToVectors(FVector V0, FVector UV0, FVector V1, FVector UV1, FVector V2, FVector UV2, FVector* InBaseResult, FVector* InUResult, FVector* InVResult)
+{
 	guard(FTexCoordsToVectors);
 
 	// Create polygon normal.
@@ -1992,7 +2125,8 @@ inline void FTexCoordsToVectors(FVector V0, FVector UV0, FVector V1, FVector UV1
 
 	// Fudge UV's to make sure no infinities creep into UV vector math, whenever we detect identical U or V's.
 	if((UV0.X == UV1.X) || (UV2.X == UV1.X) || (UV2.X == UV0.X) ||
-		(UV0.Y == UV1.Y) || (UV2.Y == UV1.Y) || (UV2.Y == UV0.Y)){
+		(UV0.Y == UV1.Y) || (UV2.Y == UV1.Y) || (UV2.Y == UV0.Y))
+		{
 		UV1 += FVector(0.004173f,0.004123f,0.0f);
 		UV2 += FVector(0.003173f,0.003123f,0.0f);
 	}
@@ -2034,7 +2168,8 @@ inline void FTexCoordsToVectors(FVector V0, FVector UV0, FVector V1, FVector UV1
 }
 
 // Projects a texture coordinate system onto a plane.
-inline void FProjectTextureToPlane(FVector& Base,FVector& X,FVector& Y,FPlane Plane){
+inline void FProjectTextureToPlane(FVector& Base,FVector& X,FVector& Y,FPlane Plane)
+{
 	guard(FTexCoordsProjectToPlane);
 
 	// Calculate a vector perpendicular to the texture(the texture normal).
@@ -2117,18 +2252,22 @@ inline UBOOL FLineBoxIntersection
 	FVector	Time;
 	UBOOL	Inside = 1;
 
-	if(Start.X < Box.Min.X){
+	if(Start.X < Box.Min.X)
+	{
 		if(Direction.X <= 0.0f)
 			return 0;
-		else{
+		else
+		{
 			Inside = 0;
 			Time.X = (Box.Min.X - Start.X) * OneOverDirection.X;
 		}
 	}
-	else if(Start.X > Box.Max.X){
+	else if(Start.X > Box.Max.X)
+	{
 		if(Direction.X >= 0.0f)
 			return 0;
-		else{
+		else
+		{
 			Inside = 0;
 			Time.X = (Box.Max.X - Start.X) * OneOverDirection.X;
 		}
@@ -2136,18 +2275,22 @@ inline UBOOL FLineBoxIntersection
 	else
 		Time.X = 0.0f;
 
-	if(Start.Y < Box.Min.Y){
+	if(Start.Y < Box.Min.Y)
+	{
 		if(Direction.Y <= 0.0f)
 			return 0;
-		else{
+		else
+		{
 			Inside = 0;
 			Time.Y = (Box.Min.Y - Start.Y) * OneOverDirection.Y;
 		}
 	}
-	else if(Start.Y > Box.Max.Y){
+	else if(Start.Y > Box.Max.Y)
+	{
 		if(Direction.Y >= 0.0f)
 			return 0;
-		else{
+		else
+		{
 			Inside = 0;
 			Time.Y = (Box.Max.Y - Start.Y) * OneOverDirection.Y;
 		}
@@ -2155,18 +2298,22 @@ inline UBOOL FLineBoxIntersection
 	else
 		Time.Y = 0.0f;
 
-	if(Start.Z < Box.Min.Z){
+	if(Start.Z < Box.Min.Z)
+	{
 		if(Direction.Z <= 0.0f)
 			return 0;
-		else{
+		else
+		{
 			Inside = 0;
 			Time.Z = (Box.Min.Z - Start.Z) * OneOverDirection.Z;
 		}
 	}
-	else if(Start.Z > Box.Max.Z){
+	else if(Start.Z > Box.Max.Z)
+	{
 		if(Direction.Z >= 0.0f)
 			return 0;
-		else{
+		else
+		{
 			Inside = 0;
 			Time.Z = (Box.Max.Z - Start.Z) * OneOverDirection.Z;
 		}
@@ -2176,10 +2323,12 @@ inline UBOOL FLineBoxIntersection
 
 	if(Inside)
 		return 1;
-	else{
+	else
+	{
 		FLOAT	MaxTime = Max(Time.X,Max(Time.Y,Time.Z));
 
-		if(MaxTime >= 0.0f && MaxTime <= 1.0f){
+		if(MaxTime >= 0.0f && MaxTime <= 1.0f)
+		{
 			FVector	Hit = Start + Direction * MaxTime;
 
 			if(	Hit.X > Box.Min.X - BOX_SIDE_THRESHOLD && Hit.X < Box.Max.X + BOX_SIDE_THRESHOLD &&
@@ -2201,12 +2350,14 @@ CORE_API UBOOL FLineExtentBoxIntersection(const FBox& inBox,
 								 FLOAT& HitTime);
 
 // Determines whether a line intersects a sphere.
-inline UBOOL FLineSphereIntersection(FVector Start,FVector Dir,FLOAT Length,FVector Origin,FLOAT Radius){
+inline UBOOL FLineSphereIntersection(FVector Start,FVector Dir,FLOAT Length,FVector Origin,FLOAT Radius)
+{
 	FVector	EO = Start - Origin;
 	FLOAT	v = (Dir | (Origin - Start)),
 			disc = Radius * Radius - ((EO | EO) - v * v);
 
-	if(disc >= 0.0f){
+	if(disc >= 0.0f)
+	{
 		FLOAT	Time = (v - appSqrt(disc)) / Length;
 
 		if(Time >= 0.0f && Time <= 1.0f)
@@ -2226,17 +2377,20 @@ inline UBOOL FLineSphereIntersection(FVector Start,FVector Dir,FLOAT Length,FVec
  * Compute intersection point of three planes.
  * Returns true if valid, false if infinite.
  */
-inline bool FIntersectPlanes3(FVector& I, const FPlane& P1, const FPlane& P2, const FPlane& P3){
+inline bool FIntersectPlanes3(FVector& I, const FPlane& P1, const FPlane& P2, const FPlane& P3)
+{
 	guard(FIntersectPlanes3);
 
 	// Compute determinant, the triple product P1|(P2^P3)==(P1^P2)|P3.
 	FLOAT Det = (P1 ^ P2) | P3;
-	if(Square(Det) < Square(0.001f)){
+	if(Square(Det) < Square(0.001f))
+	{
 		// Degenerate.
 		I = FVector(0,0,0);
 		return false;
 	}
-	else{
+	else
+	{
 		// Compute the intersection point, guaranteed valid if determinant is nonzero.
 		I = (P1.W*(P2^P3) + P2.W*(P3^P1) + P3.W*(P1^P2)) / Det;
 	}
@@ -2248,18 +2402,21 @@ inline bool FIntersectPlanes3(FVector& I, const FPlane& P1, const FPlane& P2, co
  * Compute intersection point and direction of line joining two planes.
  * Returns true if valid, false if infinite.
  */
-inline UBOOL FIntersectPlanes2(FVector& I, FVector& D, const FPlane& P1, const FPlane& P2){
+inline UBOOL FIntersectPlanes2(FVector& I, FVector& D, const FPlane& P1, const FPlane& P2)
+{
 	guard(FIntersectPlanes2);
 
 	// Compute line direction, perpendicular to both plane normals.
 	D = P1 ^ P2;
 	FLOAT DD = D.SizeSquared();
-	if(DD < Square(0.001f)){
+	if(DD < Square(0.001f))
+	{
 		// Parallel or nearly parallel planes.
 		D = I = FVector(0,0,0);
 		return false;
 	}
-	else{
+	else
+	{
 		// Compute intersection.
 		I = (P1.W*(P2^D) + P2.W*(D^P1)) / DD;
 		D.Normalize();
@@ -2273,7 +2430,8 @@ inline UBOOL FIntersectPlanes2(FVector& I, FVector& D, const FPlane& P1, const F
 -----------------------------------------------------------------------------*/
 
 // Convert a rotation into a vector facing in its direction.
-inline FVector FRotator::Vector(){
+inline FVector FRotator::Vector()
+{
 	return (GMath.UnitCoords / *this).XAxis;
 }
 
@@ -2328,10 +2486,12 @@ class CORE_API FQuat {
 		return X!=Q.X || Y!=Q.Y || Z!=Q.Z || W!=Q.W;
 	}
 
-	UBOOL Normalize(){
+	UBOOL Normalize()
+	{
 		//
 		FLOAT SquareSum = (FLOAT)(X*X+Y*Y+Z*Z+W*W);
-		if(SquareSum >= DELTA){
+		if(SquareSum >= DELTA)
+		{
 			FLOAT Scale = 1.0f/(FLOAT)appSqrt(SquareSum);
 			X *= Scale;
 			Y *= Scale;
@@ -2349,16 +2509,19 @@ class CORE_API FQuat {
 	}
 
 	//Serializer.
-	friend FArchive& operator<<(FArchive& Ar, FQuat& F){
+	friend FArchive& operator<<(FArchive& Ar, FQuat& F)
+	{
 		return Ar << F.X << F.Y << F.Z << F.W;
 	}
 
 	//Warning : assumes normalized quaternions.
-	FQuat FQuatToAngAxis(){
+	FQuat FQuatToAngAxis()
+	{
 		FLOAT scale = (FLOAT)appSin(W);
 		FQuat A;
 
-		if (scale >= DELTA){
+		if (scale >= DELTA)
+		{
 			A.X = Z / scale;
 			A.Y = Y / scale;
 			A.Z = Z / scale;
@@ -2376,18 +2539,21 @@ class CORE_API FQuat {
 	};
 
 	//Angle-Axis to Quaternion. No normalized axis assumed.
-	FQuat AngAxisToFQuat(){
+	FQuat AngAxisToFQuat()
+	{
 		FLOAT scale = X*X + Y*Y + Z*Z;
 		FQuat Q;
 
-		if (scale >= DELTA){
+		if (scale >= DELTA)
+		{
 			FLOAT invscale = 1.0f /(FLOAT)appSqrt(scale);
 			Q.X = X * invscale;
 			Q.Y = Y * invscale;
 			Q.Z = Z * invscale;
 			Q.W = appCos(W * 0.5f); //Radians assumed.
 		}
-		else{
+		else
+		{
 			Q.X = 0.0f;
 			Q.Y = 0.0f;
 			Q.Z = 1.0f;
@@ -2396,7 +2562,8 @@ class CORE_API FQuat {
 		return Q;
 	}
 
-	FVector RotateVector(FVector v){
+	FVector RotateVector(FVector v)
+	{
 		// (q.W*q.W-qv.qv)v + 2(qv.v)qv + 2 q.W (qv x v)
 
 		FVector qv(X, Y, Z);
@@ -2409,12 +2576,14 @@ class CORE_API FQuat {
 };
 
 // Dot product of axes to get cos of angle  #Warning some people use .W component here too !
-inline FLOAT FQuatDot(const FQuat& Q1,const FQuat& Q2){
+inline FLOAT FQuatDot(const FQuat& Q1,const FQuat& Q2)
+{
 	return(Q1.X*Q2.X + Q1.Y*Q2.Y + Q1.Z*Q2.Z);
 };
 
 // Error measure (angle) between two quaternions, ranged [0..1]
-inline FLOAT FQuatError(FQuat& Q1,FQuat& Q2){
+inline FLOAT FQuatError(FQuat& Q1,FQuat& Q2)
+{
 	// Returns the hypersphere-angle between two quaternions; alignment shouldn't matter, though
 	// normalized input is expected.
 	FLOAT cosom = Q1.X*Q2.X + Q1.Y*Q2.Y + Q1.Z*Q2.Z + Q1.W*Q2.W;
@@ -2422,11 +2591,13 @@ inline FLOAT FQuatError(FQuat& Q1,FQuat& Q2){
 }
 
 // Ensure quat1 points to same side of the hypersphere as quat2
-inline void AlignFQuatWith(FQuat &quat1, const FQuat &quat2){
+inline void AlignFQuatWith(FQuat &quat1, const FQuat &quat2)
+{
 	FLOAT Minus  = Square(quat1.X-quat2.X) + Square(quat1.Y-quat2.Y) + Square(quat1.Z-quat2.Z) + Square(quat1.W-quat2.W);
 	FLOAT Plus   = Square(quat1.X+quat2.X) + Square(quat1.Y+quat2.Y) + Square(quat1.Z+quat2.Z) + Square(quat1.W+quat2.W);
 
-	if (Minus > Plus){
+	if (Minus > Plus)
+	{
 		quat1.X = - quat1.X;
 		quat1.Y = - quat1.Y;
 		quat1.Z = - quat1.Z;
@@ -2435,7 +2606,8 @@ inline void AlignFQuatWith(FQuat &quat1, const FQuat &quat2){
 }
 
 // No-frills spherical interpolation. Assumes aligned quaternions, and the output is not normalized.
-inline FQuat SlerpQuat(const FQuat &quat1,const FQuat &quat2, float slerp){
+inline FQuat SlerpQuat(const FQuat &quat1,const FQuat &quat2, float slerp)
+{
 	FQuat result;
 	float omega,cosom,sininv,scale0,scale1;
 
@@ -2445,7 +2617,8 @@ inline FQuat SlerpQuat(const FQuat &quat1,const FQuat &quat2, float slerp){
 			quat1.Z * quat2.Z +
 			quat1.W * quat2.W;
 
-	if(cosom < 0.99999999f){
+	if(cosom < 0.99999999f)
+	{
 		omega = appAcos(cosom);
 		sininv = 1.0f/appSin(omega);
 		scale0 = appSin((1.0f - slerp) * omega) * sininv;
@@ -2457,7 +2630,8 @@ inline FQuat SlerpQuat(const FQuat &quat1,const FQuat &quat2, float slerp){
 		result.W = scale0 * quat1.W + scale1 * quat2.W;
 		return result;
 	}
-	else{
+	else
+	{
 		return quat1;
 	}
 
@@ -2482,7 +2656,8 @@ public:
 
 	FMatrix(){}
 
-	FMatrix(FPlane InX, FPlane InY, FPlane InZ, FPlane InW){
+	FMatrix(FPlane InX, FPlane InY, FPlane InZ, FPlane InW)
+	{
 		M[0][0] = InX.X; M[0][1] = InX.Y;  M[0][2] = InX.Z;  M[0][3] = InX.W;
 		M[1][0] = InY.X; M[1][1] = InY.Y;  M[1][2] = InY.Z;  M[1][3] = InY.W;
 		M[2][0] = InZ.X; M[2][1] = InZ.Y;  M[2][2] = InZ.Z;  M[2][3] = InZ.W;
@@ -2493,14 +2668,16 @@ public:
 
 	~FMatrix(){}
 
-	void SetIdentity(){
+	void SetIdentity()
+	{
 		M[0][0] = 1; M[0][1] = 0;  M[0][2] = 0;  M[0][3] = 0;
 		M[1][0] = 0; M[1][1] = 1;  M[1][2] = 0;  M[1][3] = 0;
 		M[2][0] = 0; M[2][1] = 0;  M[2][2] = 1;  M[2][3] = 0;
 		M[3][0] = 0; M[3][1] = 0;  M[3][2] = 0;  M[3][3] = 1;
 	}
 
-	FPlane* Rows(){
+	FPlane* Rows()
+	{
 		return reinterpret_cast<FPlane*>(M);
 	}
 
@@ -2531,7 +2708,8 @@ public:
 		return Result;
 	}
 
-	void operator*=(FMatrix Other){
+	void operator*=(FMatrix Other)
+	{
 		FMatrix Result;
 		Result.M[0][0] = M[0][0] * Other.M[0][0] + M[0][1] * Other.M[1][0] + M[0][2] * Other.M[2][0] + M[0][3] * Other.M[3][0];
 		Result.M[0][1] = M[0][0] * Other.M[0][1] + M[0][1] * Other.M[1][1] + M[0][2] * Other.M[2][1] + M[0][3] * Other.M[3][1];
@@ -2716,7 +2894,8 @@ public:
 	}
 
 	//Inverse.
-	FMatrix Inverse(){
+	FMatrix Inverse()
+	{
 		FMatrix Result;
 		FLOAT	Det = Determinant();
 
@@ -2840,7 +3019,8 @@ public:
 
 	// Conversions.
 
-	FCoords Coords(){
+	FCoords Coords()
+	{
 		FCoords	Result;
 
 		Result.XAxis = FVector(M[0][0],M[1][0],M[2][0]);
@@ -2852,7 +3032,8 @@ public:
 	}
 
 	//Serializer.
-	friend FArchive& operator<<(FArchive& Ar,FMatrix& M){
+	friend FArchive& operator<<(FArchive& Ar,FMatrix& M)
+	{
 		return Ar <<
 			M.M[0][0] << M.M[0][1] << M.M[0][2] << M.M[0][3] <<
 			M.M[1][0] << M.M[1][1] << M.M[1][2] << M.M[1][3] <<
@@ -2871,7 +3052,8 @@ public:
 			FPlane(MultFOVX / appTan(FOVX),		0.0f,							0.0f,							0.0f),
 			FPlane(0.0f,						MultFOVY / appTan(FOVY),		0.0f,							0.0f),
 			FPlane(0.0f,						0.0f,							MaxZ / (MaxZ - MinZ),			1.0f),
-			FPlane(0.0f,						0.0f,							-MinZ * (MaxZ / (MaxZ - MinZ)),	0.0f)){
+			FPlane(0.0f,						0.0f,							-MinZ * (MaxZ / (MaxZ - MinZ)),	0.0f))
+			{
 	}
 
 	FPerspectiveMatrix(float FOV, float Width, float Height, float MinZ, float MaxZ) :
@@ -2879,7 +3061,8 @@ public:
 			FPlane(1.0f / appTan(FOV),	0.0f,							0.0f,							0.0f),
 			FPlane(0.0f,				Width / appTan(FOV) / Height,	0.0f,							0.0f),
 			FPlane(0.0f,				0.0f,							MaxZ / (MaxZ - MinZ),			1.0f),
-			FPlane(0.0f,				0.0f,							-MinZ * (MaxZ / (MaxZ - MinZ)),	0.0f)){
+			FPlane(0.0f,				0.0f,							-MinZ * (MaxZ / (MaxZ - MinZ)),	0.0f))
+			{
 	}
 };
 
@@ -2891,7 +3074,8 @@ public:
 			FPlane(1.0f / Width,	0.0f,			0.0f,				0.0f),
 			FPlane(0.0f,			1.0f / Height,	0.0f,				0.0f),
 			FPlane(0.0f,			0.0f,			ZScale,				0.0f),
-			FPlane(0.0f,			0.0f,			ZOffset * ZScale,	1.0f)){
+			FPlane(0.0f,			0.0f,			ZOffset * ZScale,	1.0f))
+			{
 	}
 };
 
@@ -2903,7 +3087,8 @@ public:
 			FPlane(1.0f,	0.0f,	0.0f,	0.0f),
 			FPlane(0.0f,	1.0f,	0.0f,	0.0f),
 			FPlane(0.0f,	0.0f,	1.0f,	0.0f),
-			FPlane(Delta.X,	Delta.Y,Delta.Z,1.0f)){
+			FPlane(Delta.X,	Delta.Y,Delta.Z,1.0f))
+			{
 	}
 };
 
@@ -2932,7 +3117,8 @@ public:
 	  {
 	  }
 #else
-	FRotationMatrix(FRotator Rot){
+	FRotationMatrix(FRotator Rot)
+	{
 		FLOAT	SR	= GMath.SinTab(Rot.Roll),
 				SP	= GMath.SinTab(Rot.Pitch),
 				SY	= GMath.SinTab(Rot.Yaw),
@@ -2983,14 +3169,16 @@ public:
 				FPlane(0.0f,					+GMath.CosTab(-Rot.Roll),-GMath.SinTab(-Rot.Roll),	0.0f),
 				FPlane(0.0f,					+GMath.SinTab(-Rot.Roll),+GMath.CosTab(-Rot.Roll),	0.0f),
 				FPlane(0.0f,					0.0f,					0.0f,						1.0f))
-			){
+			)
+		{
 	}
 };
 
 class FQuaternionMatrix : public FMatrix{
 public:
 
-	FQuaternionMatrix(FQuat Q){
+	FQuaternionMatrix(FQuat Q)
+	{
 		FLOAT wx, wy, wz, xx, yy, yz, xy, xz, zz, x2, y2, z2;
 
 		x2 = Q.X + Q.X;  y2 = Q.Y + Q.Y;  z2 = Q.Z + Q.Z;
@@ -3028,7 +3216,8 @@ public:
 			FPlane(Scale.X,	0.0f,		0.0f,		0.0f),
 			FPlane(0.0f,	Scale.Y,	0.0f,		0.0f),
 			FPlane(0.0f,	0.0f,		Scale.Z,	0.0f),
-			FPlane(0.0f,	0.0f,		0.0f,		1.0f)){
+			FPlane(0.0f,	0.0f,		0.0f,		1.0f))
+			{
 	}
 };
 
@@ -3038,11 +3227,13 @@ public:
  */
 class FMatrixQuaternion : public FQuat{
 public:
-	FMatrixQuaternion(FMatrix M){
+	FMatrixQuaternion(FMatrix M)
+	{
 		// Trace.
 		FLOAT Trace = M.M[0][0] + M.M[1][1] + M.M[2][2] + 1.0f;
 		// Calculate directly for positive trace.
-		if(Trace > 0.0f){
+		if(Trace > 0.0f)
+		{
 			 FLOAT S = 0.5f / appSqrt(Trace);
 			 W = 0.25f / S;
 			 X = (M.M[1][2] - M.M[2][1]) * S;
@@ -3051,14 +3242,16 @@ public:
 			 return;
 		}
 		// Or determine the major diagonal element.
-		if((M.M[0][0] > M.M[1][1]) &&  (M.M[0][0] > M.M[2][2])){
+		if((M.M[0][0] > M.M[1][1]) &&  (M.M[0][0] > M.M[2][2]))
+		{
 			FLOAT SZ = 0.5f/appSqrt(1.0f + M.M[0][0] - M.M[1][1] - M.M[2][2]);
 			X = 0.5f * SZ;
 			Y = (M.M[1][0] + M.M[0][1]) * SZ;
 			Z = (M.M[2][0] + M.M[0][2]) * SZ;
 			W = (M.M[2][1] + M.M[1][2]) * SZ;
 		}
-		else if(M.M[1][1] > M.M[2][2]){
+		else if(M.M[1][1] > M.M[2][2])
+		{
 			FLOAT SZ = 0.5f/appSqrt(1.0f + M.M[1][1] - M.M[0][0] - M.M[2][2]);
 			X = (M.M[1][0] + M.M[0][1]) * SZ;
 			Y = 0.5f * SZ;
@@ -3080,11 +3273,13 @@ public:
  */
 class FCoordsQuaternion : public FQuat{
 public:
-	FCoordsQuaternion(FCoords C){
+	FCoordsQuaternion(FCoords C)
+	{
 		// Trace.
 		FLOAT Trace = C.XAxis.X + C.YAxis.Y + C.ZAxis.Z + 1.0f;
 		// Calculate directly for positive trace.
-		if(Trace > 0.0f){
+		if(Trace > 0.0f)
+		{
 			 FLOAT S = 0.5f / appSqrt(Trace);
 			 W = 0.25f / S;
 			 X = (C.ZAxis.Y - C.YAxis.Z) * S;
@@ -3093,14 +3288,16 @@ public:
 			 return;
 		}
 		// Or determine the major diagonal element.
-		if((C.XAxis.X > C.YAxis.Y) &&  (C.XAxis.X > C.ZAxis.Z)){
+		if((C.XAxis.X > C.YAxis.Y) &&  (C.XAxis.X > C.ZAxis.Z))
+		{
 			FLOAT SZ = 0.5f/appSqrt(1.0f + C.XAxis.X - C.YAxis.Y - C.ZAxis.Z);
 			X = 0.5f * SZ;
 			Y = (C.XAxis.Y + C.YAxis.X) * SZ;
 			Z = (C.XAxis.Z + C.ZAxis.X) * SZ;
 			W = (C.YAxis.Z + C.ZAxis.Y) * SZ;
 		}
-		else if(C.YAxis.Y > C.ZAxis.Z){
+		else if(C.YAxis.Y > C.ZAxis.Z)
+		{
 			FLOAT SZ = 0.5f/appSqrt(1.0f + C.YAxis.Y - C.XAxis.X - C.ZAxis.Z);
 			X = (C.XAxis.Y + C.YAxis.X) * SZ;
 			Y = 0.5f * SZ;
@@ -3120,7 +3317,8 @@ public:
 
 class FQuaternionCoords : public FCoords{
 public:
-	FQuaternionCoords(FQuat Q){
+	FQuaternionCoords(FQuat Q)
+	{
 		FLOAT wx, wy, wz, xx, yy, yz, xy, xz, zz, x2, y2, z2;
 
 		x2 = Q.X + Q.X;  y2 = Q.Y + Q.Y;  z2 = Q.Z + Q.Z;

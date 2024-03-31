@@ -1,5 +1,5 @@
 /*=============================================================================
-	UnAnim.h: 
+	UnAnim.h:
 
 	Revision history:
 		* Created by Erik de Neve

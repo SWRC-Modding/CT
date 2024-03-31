@@ -267,35 +267,43 @@ CORE_API const TCHAR* appTimestamp(bool IncludeDate = true, bool IncludeTime = t
 	Character type functions.
 -----------------------------------------------------------------------------*/
 
-inline TCHAR appToUpper(TCHAR c){
+inline TCHAR appToUpper(TCHAR c)
+{
 	return (c < 'a' || c > 'z') ? (c) : (c + 'A' - 'a');
 }
 
-inline TCHAR appToLower(TCHAR c){
+inline TCHAR appToLower(TCHAR c)
+{
 	return (c < 'A' || c > 'Z') ? (c) : (c + 'a' - 'A');
 }
 
-inline bool appIsUpper(TCHAR c){
+inline bool appIsUpper(TCHAR c)
+{
 	return c >= 'A' && c <= 'Z';
 }
 
-inline bool appIsLower(TCHAR c){
+inline bool appIsLower(TCHAR c)
+{
 	return c >= 'a' && c <= 'z';
 }
 
-inline bool appIsAlpha(TCHAR c){
+inline bool appIsAlpha(TCHAR c)
+{
 	return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z');
 }
 
-inline bool appIsDigit(TCHAR c){
+inline bool appIsDigit(TCHAR c)
+{
 	return c >= '0' && c <= '9';
 }
 
-inline bool appIsAlnum(TCHAR c){
+inline bool appIsAlnum(TCHAR c)
+{
 	return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9');
 }
 
-inline UBOOL appIsSpace(TCHAR c){
+inline UBOOL appIsSpace(TCHAR c)
+{
 	return c == ' ' || (c >= '\t' && c <= '\r');
 }
 
@@ -344,10 +352,12 @@ CORE_API void __cdecl appQsort(void* Base, INT Num, INT Width, QSORT_COMPARE Com
 //
 // Case insensitive string hash function.
 //
-inline DWORD appStrihash(const TCHAR* Data){
+inline DWORD appStrihash(const TCHAR* Data)
+{
 	DWORD Hash = 0;
 
-	while(*Data){
+	while(*Data)
+	{
 		TCHAR Ch = appToUpper(*Data++);
 		BYTE  B  = Ch;
 		Hash     = ((Hash >> 8) & 0x00FFFFFF) ^ GCRCTable[(Hash ^ B) & 0x000000FF];
@@ -359,10 +369,12 @@ inline DWORD appStrihash(const TCHAR* Data){
 //
 // Memory hash function
 //
-inline DWORD appMemhash(const void* Data, DWORD Size, DWORD HashBase = 0){
+inline DWORD appMemhash(const void* Data, DWORD Size, DWORD HashBase = 0)
+{
 	DWORD Hash = HashBase;
 
-	while(Size){
+	while(Size)
+	{
 		BYTE B = ((BYTE*)Data)[--Size];
 		Hash   = ((Hash >> 8) & 0x00FFFFFF) ^ GCRCTable[(Hash ^ B) & 0x000000FF];
 	}
@@ -412,11 +424,13 @@ CORE_API UBOOL appSaveStringToFile(const FString& String, const TCHAR* Filename,
 	Memory functions.
 -----------------------------------------------------------------------------*/
 
-FORCEINLINE void* appMemmove(void* Dest, const void* Src, INT Count){
+FORCEINLINE void* appMemmove(void* Dest, const void* Src, INT Count)
+{
 	return memmove(Dest, Src, Count);
 }
 
-FORCEINLINE INT appMemcmp(const void* Buf1, const void* Buf2, INT Count){
+FORCEINLINE INT appMemcmp(const void* Buf1, const void* Buf2, INT Count)
+{
 	return memcmp(Buf1, Buf2, Count);
 }
 
@@ -436,37 +450,43 @@ CORE_API void appMemswap(void* Ptr1, void* Ptr2, DWORD Size);
 //
 // C++ style memory allocation.
 //
-inline void* __cdecl operator new(size_t Size, const TCHAR* Tag){
+inline void* __cdecl operator new(size_t Size, const TCHAR* Tag)
+{
 	guardSlow(new);
 	return appMalloc(Size);
 	unguardSlow;
 }
 
-inline void* __cdecl operator new(size_t Size){
+inline void* __cdecl operator new(size_t Size)
+{
 	guardSlow(new);
 	return appMalloc(Size);
 	unguardSlow;
 }
 
-inline void __cdecl operator delete(void* Ptr){
+inline void __cdecl operator delete(void* Ptr)
+{
 	guardSlow(delete);
 	appFree(Ptr);
 	unguardSlow;
 }
 
-inline void* __cdecl operator new[](size_t Size, const TCHAR* Tag){
+inline void* __cdecl operator new[](size_t Size, const TCHAR* Tag)
+{
 	guardSlow(new);
 	return appMalloc(Size);
 	unguardSlow;
 }
 
-inline void* __cdecl operator new[](size_t Size){
+inline void* __cdecl operator new[](size_t Size)
+{
 	guardSlow(new);
 	return appMalloc(Size);
 	unguardSlow;
 }
 
-inline void __cdecl operator delete[](void* Ptr){
+inline void __cdecl operator delete[](void* Ptr)
+{
 	guardSlow(delete);
 	appFree(Ptr);
 	unguardSlow;
@@ -474,11 +494,13 @@ inline void __cdecl operator delete[](void* Ptr){
 
 // Placement-new
 
-inline void* __cdecl operator new(size_t, void* Ptr){
+inline void* __cdecl operator new(size_t, void* Ptr)
+{
 	return Ptr;
 }
 
-inline void* __cdecl operator new[](size_t, void* Ptr){
+inline void* __cdecl operator new[](size_t, void* Ptr)
+{
 	return Ptr;
 }
 

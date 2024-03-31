@@ -68,7 +68,8 @@ extern WINDOW_API NOTIFYICONDATA NID;
 	Window class definition macros.
 -----------------------------------------------------------------------------*/
 
-inline void MakeWindowClassName(TCHAR* Result, const TCHAR* Base){
+inline void MakeWindowClassName(TCHAR* Result, const TCHAR* Base)
+{
 	guard(MakeWindowClassName);
 	appSprintf(Result, "%sUnreal%s", appPackage(), Base);
 	unguard;
@@ -110,12 +111,14 @@ struct FPoint{
 	INT& operator[](INT i){ return (&X)[i]; }
 	UBOOL operator==(const FPoint& Other) const{ return X==Other.X && Y==Other.Y; }
 	UBOOL operator!=(const FPoint& Other) const{ return X!=Other.X || Y!=Other.Y; }
-	FPoint& operator+=(const FPoint& Other){
+	FPoint& operator+=(const FPoint& Other)
+	{
 		X += Other.X;
 		Y += Other.Y;
 		return *this;
 	}
-	FPoint& operator-=(const FPoint& Other){
+	FPoint& operator-=(const FPoint& Other)
+	{
 		X -= Other.X;
 		Y -= Other.Y;
 		return *this;
@@ -148,12 +151,14 @@ struct FRect{
 	FPoint Size(){ return FPoint(Max.X-Min.X, Max.Y-Min.Y); }
 	INT Width(){ return Max.X-Min.X; }
 	INT Height(){ return Max.Y-Min.Y; }
-	FRect& operator+=(const FPoint& P){
+	FRect& operator+=(const FPoint& P)
+	{
 		Min += P;
 		Max += P;
 		return *this;
 	}
-	FRect& operator-=(const FPoint& P){
+	FRect& operator-=(const FPoint& P)
+	{
 		Min -= P;
 		Max -= P;
 		return *this;
@@ -1297,7 +1302,8 @@ class WINDOW_API WItemBox : public WListBox{
 
 	// Constructors.
 	WItemBox(){}
-	WItemBox(WWindow* InOwner, INT InId = 0) : WListBox(InOwner, InId){
+	WItemBox(WWindow* InOwner, INT InId = 0) : WListBox(InOwner, InId)
+	{
 		check(OwnerWindow);
 	}
 

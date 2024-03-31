@@ -182,19 +182,22 @@ extern "C"{
 //
 // MSM: Converts to an integer with truncation towards zero.
 //
-inline INT appTrunc(FLOAT F){
+inline INT appTrunc(FLOAT F)
+{
 	__asm cvttss2si eax,[F]
 	// return value in eax.
 }
 
-inline FLOAT appFractional(FLOAT Value){
+inline FLOAT appFractional(FLOAT Value)
+{
 	return Value - appTrunc(Value);
 }
 
 //
 //  MSM: Round (to nearest) a floating point number to an integer.
 //
-inline INT appRound(FLOAT F){
+inline INT appRound(FLOAT F)
+{
 	__asm cvtss2si eax,[F]
 	// return value in eax.
 }
@@ -202,7 +205,8 @@ inline INT appRound(FLOAT F){
 //
 // MSM: Converts to integer equal to or less than.
 //
-inline INT appFloor(FLOAT F){
+inline INT appFloor(FLOAT F)
+{
 	const DWORD mxcsr_floor = 0x00003f80;
 	const DWORD mxcsr_default = 0x00001f80;
 
@@ -216,7 +220,8 @@ inline INT appFloor(FLOAT F){
 // MSM: Fast float inverse square root using SSE.
 // Accurate to within 1 LSB.
 //
-inline FLOAT appInvSqrt(FLOAT F){
+inline FLOAT appInvSqrt(FLOAT F)
+{
 	const FLOAT fThree = 3.0f;
 	const FLOAT fOneHalf = 0.5f;
 	FLOAT temp;
@@ -244,7 +249,8 @@ inline FLOAT appInvSqrt(FLOAT F){
 // MSM: Fast float square root using SSE.
 // Accurate to within 1 LSB.
 //
-inline FLOAT appSqrt(FLOAT F){
+inline FLOAT appSqrt(FLOAT F)
+{
 	const FLOAT fZero = 0.0f;
 	const FLOAT fThree = 3.0f;
 	const FLOAT fOneHalf = 0.5f;
@@ -282,7 +288,8 @@ inline FLOAT appSqrt(FLOAT F){
 #pragma warning (push)
 #pragma warning (disable : 4035)
 #pragma warning (disable : 4715)
-__forceinline DWORD appCycles(){
+__forceinline DWORD appCycles()
+{
 	__asm{
 		rdtsc				// RDTSC  -  Pentium+ time stamp register to EDX:EAX
 							// Use only 32 bits in EAX - a Ghz cpu has a 4+ sec period.
@@ -362,7 +369,8 @@ MEMCPY_AMD.CPP
 // getting maximum read bandwidth, especially in DDR memory systems.
 
 // Inline assembly syntax for use with Visual C++
-inline void appMemcpy(void* Dst, const void* Src, INT Count){
+inline void appMemcpy(void* Dst, const void* Src, INT Count)
+{
 	__asm{
 		mov		ecx, [Count]	; number of bytes to copy
 		mov		edi, [Dst]		; destination
@@ -567,7 +575,8 @@ inline void appMemcpy(void* Dst, const void* Src, INT Count){
 //
 // Memory zero.
 //
-inline void appMemzero(void* Dest, INT Count){
+inline void appMemzero(void* Dest, INT Count)
+{
 	__asm{
 		mov ecx, [Count]
 		mov edi, [Dest]
@@ -584,7 +593,8 @@ inline void appMemzero(void* Dest, INT Count){
 //
 // memset.
 //
-inline void appMemset(void* Dest, INT C, INT Count){
+inline void appMemset(void* Dest, INT C, INT Count)
+{
 	__asm{
 		mov ecx, [Count]
 		mov edi, [Dest]
@@ -611,7 +621,8 @@ inline void appMemset(void* Dest, INT C, INT Count){
 //
 // 4 byte memset.
 //
-inline void appMemset4(void* Dest, DWORD Value, INT Count){
+inline void appMemset4(void* Dest, DWORD Value, INT Count)
+{
 	__asm{
 		mov ecx, [Count]
 		mov edi, [Dest]

@@ -2,7 +2,8 @@
 #include "FOutputDeviceFile.h"
 #include "GameSpyMgr.h"
 
-APlayerController* GetLocalPlayerController(){
+APlayerController* GetLocalPlayerController()
+{
 	TObjectIterator<UViewport> It;
 
 	return It ? It->Actor : NULL;
@@ -27,14 +28,19 @@ static TArray<FString>                   PreviousGameAdminIDs;
 static TMap<FString, FPlayerStats>       CurrentGamePlayersByID;
 static TMap<APlayerController*, FString> PlayerIDsByController; // Only needed because PlayerController::Player is NULL when GameInfo::Logout is called
 
-static FStringTemp GetPlayerID(AController* C){
+static FStringTemp GetPlayerID(AController* C)
+{
 	APlayerController* PC = Cast<APlayerController>(C);
 
-	if(PC){
+	if(PC)
+	{
 		// IsA(UNetConnection::StaticClass()) returns false for TcpipConnection - WTF???
-		if(PC->Player->IsA<UViewport>()){
+		if(PC->Player->IsA<UViewport>())
+		{
 			return "__HOST__";
-		}else{ // Combine ip address with cd key hash to uniquely identify a player even in the same network
+		}
+		else
+		{ // Combine ip address with cd key hash to uniquely identify a player even in the same network
 			UNetConnection* Con = static_cast<UNetConnection*>(PC->Player);
 			FString IP = Con->LowLevelGetRemoteAddress();
 
@@ -45,7 +51,9 @@ static FStringTemp GetPlayerID(AController* C){
 
 			return IP + Con->CDKeyHash;
 		}
-	}else{
+	}
+	else
+	{
 		return FStringTemp("__BOT__") + (C->PlayerReplicationInfo ? *C->PlayerReplicationInfo->PlayerName : "");
 	}
 }
@@ -53,18 +61,23 @@ static FStringTemp GetPlayerID(AController* C){
 static struct FAdminControlExec : FExec{
 	FExec* OldExec;
 
-	virtual UBOOL Exec(const TCHAR* Cmd, FOutputDevice& Ar){
+	virtual UBOOL Exec(const TCHAR* Cmd, FOutputDevice& Ar)
+	{
 		UBOOL RecognizedCmd = 0;
 
 		if(GAdminControl)
 			RecognizedCmd = GAdminControl->ExecCmd(Cmd, NULL);
 
-		if(!RecognizedCmd){
-			if(ParseCommand(&Cmd, "CLEAREVENTLOG")){
+		if(!RecognizedCmd)
+		{
+			if(ParseCommand(&Cmd, "CLEAREVENTLOG"))
+			{
 				AdminControlEventLog.Close();
 				GFileManager->Delete(AdminControlEventLog.Filename);
 				RecognizedCmd = true;
-			}else{
+			}
+			else
+			{
 				RecognizedCmd = OldExec ? OldExec->Exec(Cmd, Ar) : 0;
 			}
 		}
@@ -73,21 +86,27 @@ static struct FAdminControlExec : FExec{
 	}
 } GAdminControlExec;
 
-void AAdminControl::Spawned(){
+void AAdminControl::Spawned()
+{
 	Super::Spawned();
 
 	GAdminControl = this;
 
-	if(GExec != &GAdminControlExec){
+	if(GExec != &GAdminControlExec)
+	{
 		GAdminControlExec.OldExec = GExec;
 		GExec = &GAdminControlExec;
 	}
 
-	if(!AdminControlEventLog.Opened){
-		if(AppendEventLog){ // Everything goes into the file that is specified in the ini
+	if(!AdminControlEventLog.Opened)
+	{
+		if(AppendEventLog) // Everything goes into the file that is specified in the ini
+		{
 			AdminControlEventLog.SetFilename(*EventLogFile);
 			AdminControlEventLog.Opened = 1; // Causes content to be appended to log file
-		}else{ // One log file per session
+		}
+		else
+		{ // One log file per session
 			FFilename Filename = EventLogFile;
 
 			if(Filename.GetExtension() == "")
@@ -119,13 +138,16 @@ void AAdminControl::Spawned(){
 	PlayerIDsByController.Empty();
 }
 
-void AAdminControl::Destroy(){
+void AAdminControl::Destroy()
+{
 	Super::Destroy();
 
-	if(GAdminControl == this){
+	if(GAdminControl == this)
+	{
 		PreviousGameAdminIDs.Empty();
 
-		for(TMap<FString, FPlayerStats>::TIterator It(CurrentGamePlayersByID); It; ++It){
+		for(TMap<FString, FPlayerStats>::TIterator It(CurrentGamePlayersByID); It; ++It)
+		{
 			if(It.Value().bAdmin)
 				PreviousGameAdminIDs.AddItem(It.Key());
 		}
@@ -133,18 +155,21 @@ void AAdminControl::Destroy(){
 		GAdminControl = NULL;
 	}
 
-	if(GExec == &GAdminControlExec){
+	if(GExec == &GAdminControlExec)
+	{
 		GExec = GAdminControlExec.OldExec;
 		GAdminControlExec.OldExec = NULL;
 	}
 }
 
-void AAdminControl::EventLog(const TCHAR* Msg, FName EventTag){
+void AAdminControl::EventLog(const TCHAR* Msg, FName EventTag)
+{
 	AdminControlEventLog.Log(static_cast<EName>(EventTag.GetIndex()), Msg);
 	GLog->Log(static_cast<EName>(EventTag.GetIndex()), Msg);
 }
 
-void AAdminControl::execEventLog(FFrame& Stack, void* Result){
+void AAdminControl::execEventLog(FFrame& Stack, void* Result)
+{
 	P_GET_STR(Msg);
 	P_GET_NAME(EventTag);
 	P_FINISH;
@@ -152,7 +177,8 @@ void AAdminControl::execEventLog(FFrame& Stack, void* Result){
 	EventLog(*Msg, EventTag);
 }
 
-void AAdminControl::execSaveStats(FFrame& Stack, void* Result){
+void AAdminControl::execSaveStats(FFrame& Stack, void* Result)
+{
 	P_GET_OBJECT(APlayerController, PC);
 	P_FINISH;
 
@@ -161,14 +187,17 @@ void AAdminControl::execSaveStats(FFrame& Stack, void* Result){
 
 	FString PlayerID;
 
-	if(PC->Player){
+	if(PC->Player)
+	{
 		// IsA(UNetConnection::StaticClass()) returns false for TcpipConnection - WTF???
 		if(PC->Player->IsA(UViewport::StaticClass()))
 			return;
 
 		PlayerID = GetPlayerID(PC);
 		PlayerIDsByController[PC] = PlayerID;
-	}else{ // PC->Player == NULL happens when a player leaves the server. In that case we need to look up the ID using the controller
+	}
+	else
+	{ // PC->Player == NULL happens when a player leaves the server. In that case we need to look up the ID using the controller
 		FString* Tmp = PlayerIDsByController.Find(PC);
 
 		if(!Tmp)
@@ -189,7 +218,8 @@ void AAdminControl::execSaveStats(FFrame& Stack, void* Result){
 	Stats.GoalsScored = PC->PlayerReplicationInfo->GoalsScored;
 }
 
-void AAdminControl::execRestoreStats(FFrame& Stack, void* Result){
+void AAdminControl::execRestoreStats(FFrame& Stack, void* Result)
+{
 	P_GET_OBJECT(APlayerController, PC);
 	P_FINISH;
 
@@ -198,10 +228,13 @@ void AAdminControl::execRestoreStats(FFrame& Stack, void* Result){
 
 	check(PC->Player);
 
-	if(PC->Player->IsA(UViewport::StaticClass())){
+	if(PC->Player->IsA(UViewport::StaticClass()))
+	{
 		PC->PlayerReplicationInfo->bAdmin = 1; // The host is always an admin
 		// It doesn't make sense to restore anything else here as the host cannot leave and rejoin without stopping the server
-	}else{
+	}
+	else
+	{
 		FString PlayerID = GetPlayerID(PC);
 		const FPlayerStats& Stats = CurrentGamePlayersByID[*PlayerID];
 
@@ -215,7 +248,8 @@ void AAdminControl::execRestoreStats(FFrame& Stack, void* Result){
 	}
 }
 
-void AAdminControl::execReleaseAllCDKeys(FFrame& Stack, void* Result){
+void AAdminControl::execReleaseAllCDKeys(FFrame& Stack, void* Result)
+{
 	P_FINISH;
 	((GameSpyMgr*)0x1072AF2C)->ReleaseAllCDKey();
 }
@@ -224,12 +258,15 @@ void AAdminControl::execReleaseAllCDKeys(FFrame& Stack, void* Result){
  * AdminService
  */
 
-void AAdminService::EventLog(const TCHAR* Msg){
+void AAdminService::EventLog(const TCHAR* Msg)
+{
 	GAdminControl->EventLog(Msg, GetClass()->GetFName());
 }
 
-bool AAdminService::CheckCommand(const TCHAR** Stream, const TCHAR* Match){
-	if(AdminControl && AdminControl->bPrintCommands){
+bool AAdminService::CheckCommand(const TCHAR** Stream, const TCHAR* Match)
+{
+	if(AdminControl && AdminControl->bPrintCommands)
+	{
 		AdminControl->CurrentCommands.AddItem(Match);
 
 		return false;
@@ -238,20 +275,23 @@ bool AAdminService::CheckCommand(const TCHAR** Stream, const TCHAR* Match){
 	return ParseCommand(Stream, Match) != 0;
 }
 
-void AAdminService::execParseCommand(FFrame& Stack, void* Result){
+void AAdminService::execParseCommand(FFrame& Stack, void* Result)
+{
 	P_GET_STR_REF(Stream);
 	P_GET_STR(Match);
 	P_FINISH;
 
 	const TCHAR* StreamData = **Stream;
 
-	if(CheckCommand(&StreamData, *Match)){
+	if(CheckCommand(&StreamData, *Match))
+	{
 		*Stream = StreamData;
 		*static_cast<UBOOL*>(Result) = 1;
 	}
 }
 
-void AAdminService::execParseToken(FFrame& Stack, void* Result){
+void AAdminService::execParseToken(FFrame& Stack, void* Result)
+{
 	P_GET_STR_REF(Stream);
 	P_FINISH;
 
@@ -265,7 +305,8 @@ void AAdminService::execParseToken(FFrame& Stack, void* Result){
 	*Stream = StreamData;
 }
 
-void AAdminService::execParseIntParam(FFrame& Stack, void* Result){
+void AAdminService::execParseIntParam(FFrame& Stack, void* Result)
+{
 	P_GET_STR(Stream);
 	P_GET_STR(Match);
 	P_GET_INT_REF(Value);
@@ -274,7 +315,8 @@ void AAdminService::execParseIntParam(FFrame& Stack, void* Result){
 	*static_cast<UBOOL*>(Result) = Parse(*Stream, *Match, *Value);
 }
 
-void AAdminService::execParseFloatParam(FFrame& Stack, void* Result){
+void AAdminService::execParseFloatParam(FFrame& Stack, void* Result)
+{
 	P_GET_STR(Stream);
 	P_GET_STR(Match);
 	P_GET_FLOAT_REF(Value);
@@ -283,7 +325,8 @@ void AAdminService::execParseFloatParam(FFrame& Stack, void* Result){
 	*static_cast<UBOOL*>(Result) = Parse(*Stream, *Match, *Value);
 }
 
-void AAdminService::execParseStringParam(FFrame& Stack, void* Result){
+void AAdminService::execParseStringParam(FFrame& Stack, void* Result)
+{
 	P_GET_STR(Stream);
 	P_GET_STR(Match);
 	P_GET_STR_REF(Value);
@@ -292,7 +335,8 @@ void AAdminService::execParseStringParam(FFrame& Stack, void* Result){
 	*static_cast<UBOOL*>(Result) = Parse(*Stream, *Match, *Value);
 }
 
-void AAdminService::execExecCmd(FFrame& Stack, void* Result){
+void AAdminService::execExecCmd(FFrame& Stack, void* Result)
+{
 	P_GET_STR(Cmd);
 	P_GET_OBJECT_OPTX(APlayerController, PC, NULL);
 	P_FINISH;
@@ -301,7 +345,8 @@ void AAdminService::execExecCmd(FFrame& Stack, void* Result){
 }
 
 
-void AAdminService::execEventLog(FFrame& Stack, void* Result){
+void AAdminService::execEventLog(FFrame& Stack, void* Result)
+{
 	P_GET_STR(Msg);
 	P_FINISH;
 
@@ -312,7 +357,8 @@ void AAdminService::execEventLog(FFrame& Stack, void* Result){
  * BotSupport
  */
 
-static FFilename GetPathFileName(const FString MapName){
+static FFilename GetPathFileName(const FString MapName)
+{
 	return GFileManager->GetDefaultDirectory() * ".." * "Maps" * "Paths" * FFilename(MapName).GetBaseFilename() + ".ctp";
 }
 
@@ -335,7 +381,8 @@ struct FNavPtInfo{
 	FVector Location;
 	FRotator Rotation;
 
-	friend FArchive& operator<<(FArchive& Ar, FNavPtInfo& N){
+	friend FArchive& operator<<(FArchive& Ar, FNavPtInfo& N)
+	{
 		int Type = N.Type;
 
 		Ar << Type << N.Location << N.Rotation;
@@ -349,7 +396,8 @@ struct FNavPtInfo{
  * ABotSupport::SpawnNavigationPoint
  * Spawns a navigation point at the specified position. Can be called during gameplay
  */
-void ABotSupport::SpawnNavigationPoint(UClass* NavigationPointClass, const FVector& Loc, const FRotator& Rot){
+void ABotSupport::SpawnNavigationPoint(UClass* NavigationPointClass, const FVector& Loc, const FRotator& Rot)
+{
 	guard(ABotSupport::SpawnNavigationPoint);
 	check(NavigationPointClass->IsChildOf(ANavigationPoint::StaticClass()));
 
@@ -359,8 +407,10 @@ void ABotSupport::SpawnNavigationPoint(UClass* NavigationPointClass, const FVect
 
 	ANavigationPoint* NavPt = Cast<ANavigationPoint>(XLevel->SpawnActor(NavigationPointClass, NAME_None, Loc, Rot));
 
-	if(NavPt){
-		if(XLevel->Actors.Last() == NavPt && !Level->bStartup){ // We shouldn't mess with the actor list if bStartup == true
+	if(NavPt)
+	{
+		if(XLevel->Actors.Last() == NavPt && !Level->bStartup) // We shouldn't mess with the actor list if bStartup == true
+		{
 			XLevel->Actors.Pop();
 			XLevel->Actors.Insert(XLevel->iFirstNetRelevantActor);
 			XLevel->Actors[XLevel->iFirstNetRelevantActor] = NavPt;
@@ -369,7 +419,9 @@ void ABotSupport::SpawnNavigationPoint(UClass* NavigationPointClass, const FVect
 		}
 
 		bPathsHaveChanged = 1;
-	}else{
+	}
+	else
+	{
 		GLog->Logf(NAME_Error, "Failed to spawn %s", *NavigationPointClass->FriendlyName);
 		NavPtFailLocations.AddItem(Loc);
 	}
@@ -379,10 +431,12 @@ void ABotSupport::SpawnNavigationPoint(UClass* NavigationPointClass, const FVect
 	unguard;
 }
 
-void ABotSupport::ImportPaths(){
+void ABotSupport::ImportPaths()
+{
 	guard(ABotSupport::ImportPaths);
 
-	if(bPathsImported){
+	if(bPathsImported)
+	{
 		GLog->Log(NAME_Error, "Paths have already been imported");
 
 		return;
@@ -391,14 +445,16 @@ void ABotSupport::ImportPaths(){
 	FFilename Filename = GetPathFileName(Level->GetOuter()->GetName());
 	FArchive* Ar = GFileManager->CreateFileReader(*Filename);
 
-	if(Ar){
+	if(Ar)
+	{
 		GLog->Logf("Importing paths from %s", *Filename.GetCleanFilename());
 
 		TArray<FNavPtInfo> NavPtInfo;
 
 		*Ar << NavPtInfo;
 
-		for(int i = 0; i < NavPtInfo.Num(); ++i){
+		for(int i = 0; i < NavPtInfo.Num(); ++i)
+		{
 			UClass* NavigationPointClass;
 
 			if(NavPtInfo[i].Type == NAVPT_CoverPoint)
@@ -418,7 +474,9 @@ void ABotSupport::ImportPaths(){
 		bPathsImported = 1;
 
 		delete Ar;
-	}else{
+	}
+	else
+	{
 		GLog->Logf(NAME_Error, "Cannot import paths from file '%s'", *Filename.GetCleanFilename());
 	}
 
@@ -433,12 +491,14 @@ void ABotSupport::ImportPaths(){
  * ABotSupport::ExportPaths
  * Exports all navigation points from the current map to a file
  */
-void ABotSupport::ExportPaths(){
+void ABotSupport::ExportPaths()
+{
 	guard(ABotSupport::ExportPaths);
 
 	TArray<FNavPtInfo> NavigationPoints;
 
-	foreach(StaticActors, ANavigationPoint, It, XLevel){
+	foreach(StaticActors, ANavigationPoint, It, XLevel)
+	{
 		if(It->IsA(APlayerStart::StaticClass()) || It->IsA(AInventorySpot::StaticClass()))
 			continue;
 
@@ -458,20 +518,26 @@ void ABotSupport::ExportPaths(){
 		NavigationPoints.AddItem(NavPtInfo);
 	}
 
-	if(NavigationPoints.Num() > 0){
+	if(NavigationPoints.Num() > 0)
+	{
 		FFilename Filename = GetPathFileName(Level->GetOuter()->GetName());
 		GFileManager->MakeDirectory(*Filename.GetPath(), 1);
 		FArchive* Ar = GFileManager->CreateFileWriter(*Filename);
 
-		if(Ar){
+		if(Ar)
+		{
 			GLog->Logf("Exporting paths to %s", *Filename.GetCleanFilename());
 			*Ar << NavigationPoints;
 
 			delete Ar;
-		}else{
+		}
+		else
+		{
 			GLog->Logf(NAME_Error, "Failed to open file '%s' for writing", *Filename.GetCleanFilename());
 		}
-	}else{
+	}
+	else
+	{
 		GLog->Log("Map does not contain any path nodes");
 	}
 
@@ -482,7 +548,8 @@ void ABotSupport::ExportPaths(){
  * ABotSupport::BuildPaths
  * Does the same as the build paths option in the editor
  */
-void ABotSupport::BuildPaths(){
+void ABotSupport::BuildPaths()
+{
 	guard(ABotSupport::BuildPaths);
 
 	UBOOL IsEd = GIsEditor;
@@ -508,25 +575,30 @@ void ABotSupport::BuildPaths(){
  * ABotSupport::ClearPaths
  * Removes all existing paths but keeps navigation points intact
  */
-void ABotSupport::ClearPaths(){
+void ABotSupport::ClearPaths()
+{
 	guard(ABotSupport::ClearPaths);
 	GPathBuilder.undefinePaths(XLevel);
 	unguard;
 }
 
-void ABotSupport::Spawned(){
+void ABotSupport::Spawned()
+{
 	guard(ABotSupport::Spawned);
 
-	if(!GIsEditor){
+	if(!GIsEditor)
+	{
 		DrawType = DT_None;  // Don't draw the Actor sprite during gameplay
 
 		// Spawn inventory spots for each pickup in the level
-		foreach(DynamicActors, APickup, It, XLevel){
+		foreach(DynamicActors, APickup, It, XLevel)
+		{
 			SpawnNavigationPoint(AInventorySpot::StaticClass(),
 			                     It->Location + FVector(0, 0, GetDefault<AScout>()->CollisionHeight));
 		}
 
-		if(bAutoImportPaths){
+		if(bAutoImportPaths)
+		{
 			ImportPaths();
 
 			if(bPathsImported && !bAutoBuildPaths) // Paths imported at startup are always built
@@ -537,7 +609,8 @@ void ABotSupport::Spawned(){
 	unguard;
 }
 
-UBOOL ABotSupport::Tick(FLOAT DeltaTime, ELevelTick TickType){
+UBOOL ABotSupport::Tick(FLOAT DeltaTime, ELevelTick TickType)
+{
 	guard(ABotSupport::Tick);
 
 	bHidden = !bShowPaths;
@@ -546,16 +619,21 @@ UBOOL ABotSupport::Tick(FLOAT DeltaTime, ELevelTick TickType){
 	 * Keeping the BotSupport Actor in the players view at all times so that it is always rendered
 	 * which is needed when the ShowPaths command was used
 	 */
-	if(!bHidden){
+	if(!bHidden)
+	{
 		APlayerController* Player = GetLocalPlayerController();
 
-		if(Player){
+		if(Player)
+		{
 			FVector Loc;
 
-			if(Player->Pawn){
+			if(Player->Pawn)
+			{
 				Loc = Player->Pawn->Location;
 				Loc.Z += Player->Pawn->EyeHeight;
-			}else{
+			}
+			else
+			{
 				Loc = Player->Location;
 			}
 
@@ -571,7 +649,8 @@ UBOOL ABotSupport::Tick(FLOAT DeltaTime, ELevelTick TickType){
 /*
  * ABotSupport::PostRender
  */
-void ABotSupport::PostRender(class FLevelSceneNode* SceneNode, class FRenderInterface* RI){
+void ABotSupport::PostRender(class FLevelSceneNode* SceneNode, class FRenderInterface* RI)
+{
 	guard(ABotSupport::PostRender);
 	Super::PostRender(SceneNode, RI);
 
@@ -581,8 +660,10 @@ void ABotSupport::PostRender(class FLevelSceneNode* SceneNode, class FRenderInte
 
 	// Drawing the collision cylinder for each bot
 	// Not terribly useful but can make it easier to see them when testing
-	for(int i = 0; i < Bots.Num(); ++i){
-		if(Bots[i]->Pawn){
+	for(int i = 0; i < Bots.Num(); ++i)
+	{
+		if(Bots[i]->Pawn)
+		{
 			LineBatcher.DrawCylinder(
 				Bots[i]->Pawn->Location,
 				FVector(0, 0, 1),
@@ -603,7 +684,8 @@ void ABotSupport::PostRender(class FLevelSceneNode* SceneNode, class FRenderInte
 		LineBatcher.DrawBox(FBox(NavPtFailLocations[i] - BoxSize, NavPtFailLocations[i] + BoxSize), FColor(255, 0, 0));
 
 	// All navigation points in the level are drawn as a colored box
-	foreach(StaticActors, ANavigationPoint, It, XLevel){
+	foreach(StaticActors, ANavigationPoint, It, XLevel)
+	{
 		if(It->bDeleteMe)
 			continue;
 
@@ -625,11 +707,14 @@ void ABotSupport::PostRender(class FLevelSceneNode* SceneNode, class FRenderInte
 	}
 
 	// Drawing connections between path nodes like in UnrealEd
-	for(ANavigationPoint* Nav = Level->NavigationPointList; Nav; Nav = Nav->nextNavigationPoint){
-		for(int i = 0; i < Nav->PathList.Num(); ++i){
+	for(ANavigationPoint* Nav = Level->NavigationPointList; Nav; Nav = Nav->nextNavigationPoint)
+	{
+		for(int i = 0; i < Nav->PathList.Num(); ++i)
+		{
 			UReachSpec* ReachSpec = Nav->PathList[i];
 
-			if(ReachSpec->Start && ReachSpec->End){
+			if(ReachSpec->Start && ReachSpec->End)
+			{
 				LineBatcher.DrawLine(
 					ReachSpec->Start->Location + FVector(0, 0, 8),
 					ReachSpec->End->Location,
@@ -664,22 +749,30 @@ void ABotSupport::PostRender(class FLevelSceneNode* SceneNode, class FRenderInte
 	unguard;
 }
 
-bool ABotSupport::ExecCmd(const char* Cmd, class APlayerController* PC){
+bool ABotSupport::ExecCmd(const char* Cmd, class APlayerController* PC)
+{
 	// Commands for importing, exporting or building paths
 
-	if(CheckCommand(&Cmd, "IMPORTPATHS")){
+	if(CheckCommand(&Cmd, "IMPORTPATHS"))
+	{
 		ImportPaths();
 
 		return true;
-	}else if(CheckCommand(&Cmd, "EXPORTPATHS")){
+	}
+	else if(CheckCommand(&Cmd, "EXPORTPATHS"))
+	{
 		ExportPaths();
 
 		return true;
-	}else if(CheckCommand(&Cmd, "BUILDPATHS")){
+	}
+	else if(CheckCommand(&Cmd, "BUILDPATHS"))
+	{
 		BuildPaths();
 
 		return true;
-	}else if(CheckCommand(&Cmd, "CLEARPATHS")){
+	}
+	else if(CheckCommand(&Cmd, "CLEARPATHS"))
+	{
 		ClearPaths();
 
 		return true;
@@ -695,14 +788,17 @@ bool ABotSupport::ExecCmd(const char* Cmd, class APlayerController* PC){
 
 	// Commands for removing navigation points
 
-	if(CheckCommand(&Cmd, "REMOVENAVIGATIONPOINT")){
+	if(CheckCommand(&Cmd, "REMOVENAVIGATIONPOINT"))
+	{
 		UBOOL IsEditor = GIsEditor;
 
 		GIsEditor = 1;
 
-		foreach(StaticActors, ANavigationPoint, It, XLevel){
+		foreach(StaticActors, ANavigationPoint, It, XLevel)
+		{
 			if(!It->IsA(APlayerStart::StaticClass()) &&
-			   ((PC->Pawn ? PC->Pawn->Location : PC->Location) - It->Location).SizeSquared() <= 40 * 40){
+			   ((PC->Pawn ? PC->Pawn->Location : PC->Location) - It->Location).SizeSquared() <= 40 * 40)
+			   {
 				XLevel->DestroyActor(*It);
 				BuildPaths();
 				bPathsHaveChanged = 1;
@@ -715,12 +811,15 @@ bool ABotSupport::ExecCmd(const char* Cmd, class APlayerController* PC){
 
 
 		return true;
-	}else if(CheckCommand(&Cmd, "REMOVEALLNAVIGATIONPOINTS")){
+	}
+	else if(CheckCommand(&Cmd, "REMOVEALLNAVIGATIONPOINTS"))
+	{
 		UBOOL IsEditor = GIsEditor;
 
 		GIsEditor = 1;
 
-		foreach(StaticActors, ANavigationPoint, It, XLevel){
+		foreach(StaticActors, ANavigationPoint, It, XLevel)
+		{
 			if(It->IsA(ANavigationPoint::StaticClass()) && !It->IsA(APlayerStart::StaticClass()))
 				XLevel->DestroyActor(*It);
 
@@ -746,14 +845,18 @@ bool ABotSupport::ExecCmd(const char* Cmd, class APlayerController* PC){
 	else if(CheckCommand(&Cmd, "PUTPATROLPOINT"))
 		PutNavPtClass = APatrolPoint::StaticClass();
 
-	if(PutNavPtClass){
+	if(PutNavPtClass)
+	{
 		FVector Loc;
 		FRotator Rot(0, 0, 0);
 
-		if(PC->Pawn){
+		if(PC->Pawn)
+		{
 			Loc = PC->Pawn->Location;
 			Rot.Yaw = PC->Pawn->Rotation.Yaw;
-		}else{
+		}
+		else
+		{
 			Loc = PC->Location;
 			Rot.Yaw = PC->Rotation.Yaw;
 		}
@@ -768,12 +871,16 @@ bool ABotSupport::ExecCmd(const char* Cmd, class APlayerController* PC){
 
 	// Commands only available for the host of a non-dedicated server
 
-	if(GIsClient){
-		if(CheckCommand(&Cmd, "SHOWPATHS")){
+	if(GIsClient)
+	{
+		if(CheckCommand(&Cmd, "SHOWPATHS"))
+		{
 			bShowPaths = 1;
 
 			return true;
-		}else if(CheckCommand(&Cmd, "HIDEPATHS")){
+		}
+		else if(CheckCommand(&Cmd, "HIDEPATHS"))
+		{
 			bShowPaths = 0;
 
 			return true;
@@ -790,7 +897,8 @@ struct FBotInfo{
 
 static TArray<FBotInfo> BotInfo;
 
-void ABotSupport::execStoreBotInfo(FFrame& Stack, void* Result){
+void ABotSupport::execStoreBotInfo(FFrame& Stack, void* Result)
+{
 	P_GET_OBJECT(AMPBot, Bot);
 	P_FINISH;
 
@@ -805,16 +913,20 @@ void ABotSupport::execStoreBotInfo(FFrame& Stack, void* Result){
 	BotInfo.AddItem(Info);
 }
 
-void ABotSupport::execGetBotInfo(FFrame& Stack, void* Result){
+void ABotSupport::execGetBotInfo(FFrame& Stack, void* Result)
+{
 	P_GET_STR_REF(DisplayName);
 	P_GET_INT_REF(ChosenSkin);
 	P_FINISH;
 
-	if(Level->Game->NumBots < BotInfo.Num()){
+	if(Level->Game->NumBots < BotInfo.Num())
+	{
 		*DisplayName = BotInfo[Level->Game->NumBots].DisplayName;
 		*ChosenSkin = BotInfo[Level->Game->NumBots].ChosenSkin;
 		*static_cast<UBOOL*>(Result) = 1;
-	}else{
+	}
+	else
+	{
 		*static_cast<UBOOL*>(Result) = 0;
 	}
 }
@@ -823,7 +935,8 @@ void ABotSupport::execGetBotInfo(FFrame& Stack, void* Result){
  * MPBot
  */
 
-int AMPBot::Tick(FLOAT DeltaTime, ELevelTick TickType){
+int AMPBot::Tick(FLOAT DeltaTime, ELevelTick TickType)
+{
 	/*
 	 * This is really stupid but for some reason the movement code
 	 * only updates the Pawn's rotation in single player.
@@ -833,7 +946,8 @@ int AMPBot::Tick(FLOAT DeltaTime, ELevelTick TickType){
 	   Pawn &&
 	   !Pawn->bInterpolating &&
 	   Pawn->bPhysicsAnimUpdate &&
-	   Pawn->Mesh){
+	   Pawn->Mesh)
+	   {
 		BYTE Nm = Level->NetMode;
 
 		Level->NetMode = NM_Standalone;
@@ -844,7 +958,8 @@ int AMPBot::Tick(FLOAT DeltaTime, ELevelTick TickType){
 	return Super::Tick(DeltaTime, TickType);
 }
 
-void AMPBot::execUpdatePawnAccuracy(FFrame& Stack, void* Result){
+void AMPBot::execUpdatePawnAccuracy(FFrame& Stack, void* Result)
+{
 	P_FINISH;
 
 	if(Pawn)
@@ -857,7 +972,8 @@ void AMPBot::execUpdatePawnAccuracy(FFrame& Stack, void* Result){
 class UExportPathsCommandlet : public UCommandlet{
 	DECLARE_CLASS(UExportPathsCommandlet, UCommandlet, 0, ModMPGame);
 
-	void StaticConstructor(){
+	void StaticConstructor()
+	{
 		LogToStdout = 1;
 		IsServer = 1;
 		IsClient = 1;
@@ -867,32 +983,41 @@ class UExportPathsCommandlet : public UCommandlet{
 		ShowBanner = 0;
 	}
 
-	virtual INT Main(const TCHAR* Parms){
+	virtual INT Main(const TCHAR* Parms)
+	{
 		FString MapName;
 
-		if(Parse(Parms, "map=", MapName)){
+		if(Parse(Parms, "map=", MapName))
+		{
 			UPackage* Package = UObject::LoadPackage(NULL, *MapName, LOAD_NoFail);
 			ULevel* Level = NULL;
 
-			foreachobj(ULevel, It){
-				if(It->IsIn(Package)){
+			foreachobj(ULevel, It)
+			{
+				if(It->IsIn(Package))
+				{
 					Level = *It;
 
 					break;
 				}
 			}
 
-			if(Level){
+			if(Level)
+			{
 				ABotSupport* BotSupport = Cast<ABotSupport>(Level->SpawnActor(ABotSupport::StaticClass()));
 
 				if(BotSupport)
 					BotSupport->ExportPaths();
 				else
 					GWarn->Log(NAME_Error, "Unable to export paths");
-			}else{
+			}
+			else
+			{
 				GWarn->Logf(NAME_Error, "Package '%s' is not a map", *MapName);
 			}
-		}else{
+		}
+		else
+		{
 			GWarn->Log(NAME_Error, "Map to export paths from must be specified with 'map=<MapName>'");
 		}
 

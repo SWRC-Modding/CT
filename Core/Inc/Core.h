@@ -455,14 +455,19 @@ struct CORE_API FStatRecord{
 	static FStatRecord& Main();
 };
 
-inline void RemoveStatRecordFromChildList(FStatRecord& Record, FStatRecord& Parent){
+inline void RemoveStatRecordFromChildList(FStatRecord& Record, FStatRecord& Parent)
+{
 	FStatRecord** Child = &Parent.Children;
 
-	while(*Child){
-		if(*Child == &Record || (*Child)->Parent == &Record){
+	while(*Child)
+	{
+		if(*Child == &Record || (*Child)->Parent == &Record)
+		{
 			*Child = (*Child)->NextChild;
 			continue;
-		}else{
+		}
+		else
+		{
 			RemoveStatRecordFromChildList(Record, **Child);
 		}
 
@@ -679,11 +684,13 @@ public:
  * NOTE: This changes the vtable for all objects of the same class.
  * Returns the function pointer that was at Index previously. NULL if there was an error.
  */
-inline void* PatchVTable(void* Object, INT Index, void* NewFunc){
+inline void* PatchVTable(void* Object, INT Index, void* NewFunc)
+{
 	DWORD OldProtect;
 	void** VTable = *reinterpret_cast<void***>(Object);
 
-	if(!VirtualProtect(VTable + Index, sizeof(void*), PAGE_EXECUTE_READWRITE, &OldProtect)){
+	if(!VirtualProtect(VTable + Index, sizeof(void*), PAGE_EXECUTE_READWRITE, &OldProtect))
+	{
 		debugf(NAME_Error, "Unable to patch vtable: VirtualProtect failed with error code %i", GetLastError());
 
 		return NULL;
@@ -700,10 +707,12 @@ inline void* PatchVTable(void* Object, INT Index, void* NewFunc){
  * Patches the vtable for a class that is exported from a dll.
  * VTableName is the name of the particular vtable to patch in case of multiple virtual inheritance.
  */
-inline void* PatchDllClassVTable(const TCHAR* DllName, const TCHAR* ClassName, const TCHAR* VTableName, INT Index, void* NewFunc){
+inline void* PatchDllClassVTable(const TCHAR* DllName, const TCHAR* ClassName, const TCHAR* VTableName, INT Index, void* NewFunc)
+{
 	void* Handle = appGetDllHandle(DllName);
 
-	if(!Handle){
+	if(!Handle)
+	{
 		debugf(NAME_Error, "Unable to patch vtable for class '%s': Failed to load library '%s'", ClassName, DllName);
 
 		return NULL;
@@ -712,7 +721,8 @@ inline void* PatchDllClassVTable(const TCHAR* DllName, const TCHAR* ClassName, c
 	FString DllExportName = (FStringTemp("??_7") + ClassName + "@@6B" + (VTableName ? FString(VTableName) + "@@@" : "@"));
 	void** VTable = static_cast<void**>(appGetDllExport(Handle, *DllExportName));
 
-	if(!VTable){
+	if(!VTable)
+	{
 		debugf(NAME_Error, "Unable to patch vtable for class '%s': Dll export for vtable '%s' not found", ClassName, VTableName);
 
 		return NULL;

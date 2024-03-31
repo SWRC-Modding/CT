@@ -7,30 +7,35 @@
  * FOpenGLVertexArrayObject
  */
 
-FOpenGLVertexArrayObject::~FOpenGLVertexArrayObject(){
+FOpenGLVertexArrayObject::~FOpenGLVertexArrayObject()
+{
 	checkSlow(VAO);
 	RenDev->glDeleteVertexArrays(1, &VAO);
 }
 
-void FOpenGLVertexArrayObject::Init(UOpenGLRenderDevice* InRenDev, const FStreamDeclaration* Declarations, INT NumStreams){
+void FOpenGLVertexArrayObject::Init(UOpenGLRenderDevice* InRenDev, const FStreamDeclaration* Declarations, INT NumStreams)
+{
 	checkSlow(VAO == GL_NONE);
 	checkSlow(!RenDev);
 
 	RenDev = InRenDev;
 	RenDev->glCreateVertexArrays(1, &VAO);
 
-	for(INT StreamIndex = 0; StreamIndex < NumStreams; ++StreamIndex){
+	for(INT StreamIndex = 0; StreamIndex < NumStreams; ++StreamIndex)
+	{
 		const FStreamDeclaration& Decl = Declarations[StreamIndex];
 		GLuint Offset = 0;
 
-		for(INT i = 0; i < Decl.NumComponents; ++i){
+		for(INT i = 0; i < Decl.NumComponents; ++i)
+		{
 			BYTE Function = Decl.Components[i].Function; // EFixedVertexFunction
 			BYTE Type     = Decl.Components[i].Type;     // EComponentType
 
 			checkSlow(Function < FVF_MAX);
 			checkSlow(Type < CT_MAX);
 
-			switch(Type){
+			switch(Type)
+			{
 			case CT_Float4:
 				RenDev->glVertexArrayAttribFormat(VAO, Function, 4, GL_FLOAT, GL_FALSE, Offset);
 				Offset += sizeof(FLOAT) * 4;
@@ -61,17 +66,21 @@ void FOpenGLVertexArrayObject::Init(UOpenGLRenderDevice* InRenDev, const FStream
 	}
 }
 
-void FOpenGLVertexArrayObject::Bind(){
+void FOpenGLVertexArrayObject::Bind()
+{
 	checkSlow(VAO);
 	RenDev->glBindVertexArray(VAO);
 }
 
-void FOpenGLVertexArrayObject::BindVertexStreams(FOpenGLVertexStream** Streams, INT NumStreams){
-	for(INT i = 0; i < NumStreams; ++i){
+void FOpenGLVertexArrayObject::BindVertexStreams(FOpenGLVertexStream** Streams, INT NumStreams)
+{
+	for(INT i = 0; i < NumStreams; ++i)
+	{
 		GLuint VBO = Streams[i]->VBO;
 		GLuint Stride = Streams[i]->Stride;
 
-		if(VBOs[i] != VBO || Strides[i] != Stride){
+		if(VBOs[i] != VBO || Strides[i] != Stride)
+		{
 			VBOs[i] = VBO;
 			Strides[i] = Stride;
 			RenDev->glVertexArrayVertexBuffer(VAO, i, VBO, 0, Stride);
@@ -79,8 +88,10 @@ void FOpenGLVertexArrayObject::BindVertexStreams(FOpenGLVertexStream** Streams, 
 	}
 }
 
-void FOpenGLVertexArrayObject::BindIndexBuffer(FOpenGLIndexBuffer* IndexBuffer){
-	if(EBO != IndexBuffer->EBO){
+void FOpenGLVertexArrayObject::BindIndexBuffer(FOpenGLIndexBuffer* IndexBuffer)
+{
+	if(EBO != IndexBuffer->EBO)
+	{
 		EBO = IndexBuffer->EBO;
 		RenDev->glVertexArrayElementBuffer(VAO, EBO);
 	}
@@ -90,8 +101,10 @@ void FOpenGLVertexArrayObject::BindIndexBuffer(FOpenGLIndexBuffer* IndexBuffer){
  * Helpers
  */
 
-static GLenum GetStencilFunc(/*ECompareFunction*/BYTE Test){
-	switch(Test){
+static GLenum GetStencilFunc(/*ECompareFunction*/BYTE Test)
+{
+	switch(Test)
+	{
 	case CF_Never:
 		return GL_NEVER;
 	case CF_Less:
@@ -111,10 +124,12 @@ static GLenum GetStencilFunc(/*ECompareFunction*/BYTE Test){
 	}
 
 	return GL_NEVER;
-};
+}
 
-static GLenum GetStencilOp(/*EStencilOp*/BYTE StencilOp){
-	switch(StencilOp){
+static GLenum GetStencilOp(/*EStencilOp*/BYTE StencilOp)
+{
+	switch(StencilOp)
+	{
 	case SO_Keep:
 		return GL_KEEP;
 	case SO_Zero:
@@ -136,8 +151,10 @@ static GLenum GetStencilOp(/*EStencilOp*/BYTE StencilOp){
 	return GL_KEEP;
 }
 
-static GLenum GetBlendFunc(/*ED3DBLEND*/BYTE D3DBlend){
-	switch(D3DBlend){
+static GLenum GetBlendFunc(/*ED3DBLEND*/BYTE D3DBlend)
+{
+	switch(D3DBlend)
+	{
 	case NOBLEND:
 		return GL_ONE;
 	case ZERO:
@@ -172,7 +189,8 @@ static GLenum GetBlendFunc(/*ED3DBLEND*/BYTE D3DBlend){
 	return GL_ONE;
 }
 
-static GLint GetTextureWrapMode(/*ETexClampMode*/BYTE Mode){
+static GLint GetTextureWrapMode(/*ETexClampMode*/BYTE Mode)
+{
 	if(Mode == TC_Clamp)
 		return GL_CLAMP_TO_EDGE;
 
@@ -183,34 +201,38 @@ static GLint GetTextureWrapMode(/*ETexClampMode*/BYTE Mode){
  * FOpenGLRenderInterface
  */
 
-FOpenGLRenderInterface::FOpenGLRenderInterface(UOpenGLRenderDevice* InRenDev) : RenDev(InRenDev),
-                                                                                PrecacheMode(PRECACHE_All),
-																				CurrentState(&SavedStates[0]),
-                                                                                LightingOnlyShader(InRenDev),
-                                                                                LightingOnlyShader2X(InRenDev),
-                                                                                LightingOnlyShaderLightmap(InRenDev),
-                                                                                LightingOnlyShaderLightmap2X(InRenDev),
-                                                                                BitmapShader(InRenDev),
-                                                                                BitmapShaderDetail(InRenDev),
-                                                                                BitmapShaderStaticLighting(InRenDev),
-                                                                                BitmapShaderStaticLightingDetail(InRenDev),
-                                                                                BitmapShaderLightmap(InRenDev),
-                                                                                BitmapShaderLightmapDetail(InRenDev),
-                                                                                BitmapShaderLightmapStaticLighting(InRenDev),
-                                                                                BitmapShaderLightmapStaticLightingDetail(InRenDev),
-                                                                                BitmapShaderLightmap2X(InRenDev),
-                                                                                BitmapShaderLightmap2XDetail(InRenDev),
-                                                                                ParticleShader(InRenDev),
-                                                                                ParticleShaderTFactor(InRenDev),
-                                                                                ParticleShaderSpecialBlend(InRenDev),
-                                                                                ParticleShaderSpecialBlendTFactor(InRenDev),
-                                                                                ParticleShaderBlendSubdivisions(InRenDev),
-                                                                                TerrainShaderAlphaMap(InRenDev),
-                                                                                TerrainShaderAlphaMapStaticLighting(InRenDev),
-                                                                                TerrainShader3Layers(InRenDev),
-                                                                                TerrainShader4Layers(InRenDev){}
+FOpenGLRenderInterface::FOpenGLRenderInterface(UOpenGLRenderDevice* InRenDev)
+	: RenDev(InRenDev),
+	  PrecacheMode(PRECACHE_All),
+	  CurrentState(&SavedStates[0]),
+	  LightingOnlyShader(InRenDev),
+	  LightingOnlyShader2X(InRenDev),
+	  LightingOnlyShaderLightmap(InRenDev),
+	  LightingOnlyShaderLightmap2X(InRenDev),
+	  BitmapShader(InRenDev),
+	  BitmapShaderDetail(InRenDev),
+	  BitmapShaderStaticLighting(InRenDev),
+	  BitmapShaderStaticLightingDetail(InRenDev),
+	  BitmapShaderLightmap(InRenDev),
+	  BitmapShaderLightmapDetail(InRenDev),
+	  BitmapShaderLightmapStaticLighting(InRenDev),
+	  BitmapShaderLightmapStaticLightingDetail(InRenDev),
+	  BitmapShaderLightmap2X(InRenDev),
+	  BitmapShaderLightmap2XDetail(InRenDev),
+	  ParticleShader(InRenDev),
+	  ParticleShaderTFactor(InRenDev),
+	  ParticleShaderSpecialBlend(InRenDev),
+	  ParticleShaderSpecialBlendTFactor(InRenDev),
+	  ParticleShaderBlendSubdivisions(InRenDev),
+	  TerrainShaderAlphaMap(InRenDev),
+	  TerrainShaderAlphaMapStaticLighting(InRenDev),
+	  TerrainShader3Layers(InRenDev),
+	  TerrainShader4Layers(InRenDev)
+{
+}
 
-void FOpenGLRenderInterface::Init(INT ViewportWidth, INT ViewportHeight){
+void FOpenGLRenderInterface::Init(INT ViewportWidth, INT ViewportHeight)
+{
 	checkSlow(RenDev->IsCurrent());
 
 	// Setup initial state
@@ -287,7 +309,8 @@ void FOpenGLRenderInterface::Init(INT ViewportWidth, INT ViewportHeight){
 
 	SetTextureFilter(RenDev->TextureFilter);
 
-	for(int i = 0; i < MAX_TEXTURES; ++i){
+	for(int i = 0; i < MAX_TEXTURES; ++i)
+	{
 		RenDev->glSamplerParameteri(Samplers[i], GL_TEXTURE_WRAP_S, GL_REPEAT);
 		RenDev->glSamplerParameteri(Samplers[i], GL_TEXTURE_WRAP_T, GL_REPEAT);
 		RenDev->glSamplerParameteri(Samplers[i], GL_TEXTURE_WRAP_R, GL_REPEAT);
@@ -413,7 +436,8 @@ void FOpenGLRenderInterface::Init(INT ViewportWidth, INT ViewportHeight){
 	TerrainShader4Layers.Compile(*ShaderGenerator.GetShaderText(true), "Terrain4Layers");
 }
 
-void FOpenGLRenderInterface::Flush(){
+void FOpenGLRenderInterface::Flush()
+{
 	checkSlow(CurrentState == &SavedStates[0]);
 
 	CurrentVAO = NULL;
@@ -429,7 +453,8 @@ void FOpenGLRenderInterface::Flush(){
 	RenDev->glUseProgram(GL_NONE);
 }
 
-void FOpenGLRenderInterface::Exit(){
+void FOpenGLRenderInterface::Exit()
+{
 	VAOsByDeclId.Empty();
 	RenDev->glDeleteBuffers(1, &GlobalUBO);
 	GlobalUBO = GL_NONE;
@@ -462,16 +487,20 @@ void FOpenGLRenderInterface::Exit(){
 	TerrainShader4Layers.Free();
 }
 
-void FOpenGLRenderInterface::CommitRenderState(){
+void FOpenGLRenderInterface::CommitRenderState()
+{
 	checkSlow(CurrentVAO);
 
-	if(CurrentState->FillMode != RenderState.FillMode){
+	if(CurrentState->FillMode != RenderState.FillMode)
+	{
 		RenDev->glPolygonMode(GL_FRONT_AND_BACK, CurrentState->FillMode == FM_Wireframe ? GL_LINE : GL_FILL);
 		RenderState.FillMode = CurrentState->FillMode;
 	}
 
-	if(RenderState.CullMode != CurrentState->CullMode){
-		if(CurrentState->CullMode != CM_None){
+	if(RenderState.CullMode != CurrentState->CullMode)
+	{
+		if(CurrentState->CullMode != CM_None)
+		{
 			GLenum NewCullMode;
 
 			if(CurrentState->CullMode == CM_CCW)
@@ -486,25 +515,31 @@ void FOpenGLRenderInterface::CommitRenderState(){
 				RenDev->glCullFace(NewCullMode);
 
 			LastCullMode = NewCullMode;
-		}else{
+		}
+		else
+		{
 			RenDev->glDisable(GL_CULL_FACE);
 		}
 
 		RenderState.CullMode = CurrentState->CullMode;
 	}
 
-	if(RenderState.bZTest != CurrentState->bZTest){
+	if(RenderState.bZTest != CurrentState->bZTest)
+	{
 		RenDev->glDepthFunc(CurrentState->bZTest ? GL_LEQUAL : GL_ALWAYS);
 		RenderState.bZTest = CurrentState->bZTest;
 	}
 
-	if(RenderState.bZWrite != CurrentState->bZWrite){
+	if(RenderState.bZWrite != CurrentState->bZWrite)
+	{
 		RenDev->glDepthMask(CurrentState->bZWrite ? GL_TRUE : GL_FALSE);
 		RenderState.bZWrite = CurrentState->bZWrite;
 	}
 
-	if(bStencilEnabled){
-		if(RenderState.bStencilTest != CurrentState->bStencilTest){
+	if(bStencilEnabled)
+	{
+		if(RenderState.bStencilTest != CurrentState->bStencilTest)
+		{
 			CurrentState->StencilCompare = CF_Always;
 			CurrentState->StencilFailOp = SO_Keep;
 			CurrentState->StencilZFailOp = SO_Keep;
@@ -520,7 +555,8 @@ void FOpenGLRenderInterface::CommitRenderState(){
 
 		if(RenderState.StencilFailOp != CurrentState->StencilFailOp ||
 		   RenderState.StencilZFailOp != CurrentState->StencilZFailOp ||
-		   RenderState.StencilPassOp != CurrentState->StencilPassOp){
+		   RenderState.StencilPassOp != CurrentState->StencilPassOp)
+		   {
 			RenDev->glStencilOp(GetStencilOp(CurrentState->StencilFailOp), GetStencilOp(CurrentState->StencilZFailOp), GetStencilOp(CurrentState->StencilPassOp));
 			RenderState.StencilFailOp = CurrentState->StencilFailOp;
 			RenderState.StencilZFailOp = CurrentState->StencilZFailOp;
@@ -529,20 +565,23 @@ void FOpenGLRenderInterface::CommitRenderState(){
 
 		if(RenderState.StencilCompare != CurrentState->StencilCompare ||
 		   RenderState.StencilRef != CurrentState->StencilRef ||
-		   RenderState.StencilMask != CurrentState->StencilMask){
+		   RenderState.StencilMask != CurrentState->StencilMask)
+		   {
 			RenDev->glStencilFunc(GetStencilFunc(CurrentState->StencilCompare), CurrentState->StencilRef, CurrentState->StencilMask);
 			RenderState.StencilCompare = CurrentState->StencilCompare;
 			RenderState.StencilRef = CurrentState->StencilRef;
 			RenderState.StencilMask = CurrentState->StencilMask;
 		}
 
-		if(RenderState.StencilWriteMask != CurrentState->StencilWriteMask){
+		if(RenderState.StencilWriteMask != CurrentState->StencilWriteMask)
+		{
 			RenDev->glStencilMask(CurrentState->StencilWriteMask);
 			RenderState.StencilWriteMask = CurrentState->StencilWriteMask;
 		}
 	}
 
-	if(RenderState.ZBias != CurrentState->ZBias){
+	if(RenderState.ZBias != CurrentState->ZBias)
+	{
 		RenDev->glPolygonOffset(-CurrentState->ZBias, -CurrentState->ZBias);
 		RenderState.ZBias = CurrentState->ZBias;
 	}
@@ -550,7 +589,8 @@ void FOpenGLRenderInterface::CommitRenderState(){
 	if(RenderState.ViewportX != CurrentState->ViewportX ||
 	   RenderState.ViewportY != CurrentState->ViewportY ||
 	   RenderState.ViewportWidth != CurrentState->ViewportWidth ||
-	   RenderState.ViewportHeight != CurrentState->ViewportHeight){
+	   RenderState.ViewportHeight != CurrentState->ViewportHeight)
+	   {
 		RenDev->glViewport(CurrentState->ViewportX, CurrentState->ViewportY, CurrentState->ViewportWidth, CurrentState->ViewportHeight);
 
 		RenderState.ViewportX = CurrentState->ViewportX;
@@ -559,27 +599,32 @@ void FOpenGLRenderInterface::CommitRenderState(){
 		RenderState.ViewportHeight = CurrentState->ViewportHeight;
 	}
 
-	if(RenderState.SrcBlend != CurrentState->SrcBlend || RenderState.DstBlend != CurrentState->DstBlend){
+	if(RenderState.SrcBlend != CurrentState->SrcBlend || RenderState.DstBlend != CurrentState->DstBlend)
+	{
 		RenDev->glBlendFunc(CurrentState->SrcBlend, CurrentState->DstBlend);
 		RenderState.SrcBlend = CurrentState->SrcBlend;
 		RenderState.DstBlend = CurrentState->DstBlend;
 	}
 
-	for(INT i = 0; i < CurrentState->NumTextures; ++i){
+	for(INT i = 0; i < CurrentState->NumTextures; ++i)
+	{
 		if(!CurrentState->TextureUnits[i].Texture) // Texture might not be set if the current material is a hardware shader
 			continue;
 
-		if(RenderState.TextureUnits[i].Texture != CurrentState->TextureUnits[i].Texture){
+		if(RenderState.TextureUnits[i].Texture != CurrentState->TextureUnits[i].Texture)
+		{
 			CurrentState->TextureUnits[i].Texture->BindTexture(i + CurrentState->TextureInfos[i].IsCubemap * MAX_TEXTURES);
 			RenderState.TextureUnits[i].Texture = CurrentState->TextureUnits[i].Texture;
 		}
 
-		if(RenderState.TextureUnits[i].ClampU != CurrentState->TextureUnits[i].ClampU){
+		if(RenderState.TextureUnits[i].ClampU != CurrentState->TextureUnits[i].ClampU)
+		{
 			RenDev->glSamplerParameteri(Samplers[i], GL_TEXTURE_WRAP_S, GetTextureWrapMode(CurrentState->TextureUnits[i].ClampU));
 			RenderState.TextureUnits[i].ClampU = CurrentState->TextureUnits[i].ClampU;
 		}
 
-		if(RenderState.TextureUnits[i].ClampV != CurrentState->TextureUnits[i].ClampV){
+		if(RenderState.TextureUnits[i].ClampV != CurrentState->TextureUnits[i].ClampV)
+		{
 			RenDev->glSamplerParameteri(Samplers[i], GL_TEXTURE_WRAP_T, GetTextureWrapMode(CurrentState->TextureUnits[i].ClampV));
 			RenderState.TextureUnits[i].ClampV = CurrentState->TextureUnits[i].ClampV;
 		}
@@ -588,7 +633,8 @@ void FOpenGLRenderInterface::CommitRenderState(){
 	if(CurrentIndexBuffer)
 		CurrentVAO->BindIndexBuffer(CurrentIndexBuffer);
 
-	if(LastUniformRevision != CurrentState->UniformRevision){
+	if(LastUniformRevision != CurrentState->UniformRevision)
+	{
 		if(CurrentState->MatricesChanged)
 			UpdateMatrices();
 
@@ -598,7 +644,8 @@ void FOpenGLRenderInterface::CommitRenderState(){
 	}
 }
 
-void FOpenGLRenderInterface::Locked(UViewport* Viewport){
+void FOpenGLRenderInterface::Locked(UViewport* Viewport)
+{
 	checkSlow(RenDev->IsCurrent());
 	checkSlow(CurrentState == &SavedStates[0]);
 	checkSlow(!LockedViewport);
@@ -610,20 +657,26 @@ void FOpenGLRenderInterface::Locked(UViewport* Viewport){
 	if(TextureFilter != RenDev->TextureFilter)
 		SetTextureFilter(RenDev->TextureFilter);
 
-	if(TextureAnisotropy != RenDev->TextureAnisotropy){
+	if(TextureAnisotropy != RenDev->TextureAnisotropy)
+	{
 		TextureAnisotropy = RenDev->TextureAnisotropy;
 
-		if(RenDev->SupportsEXTFilterAnisotropic){
+		if(RenDev->SupportsEXTFilterAnisotropic)
+		{
 			for(INT i = 0; i < MAX_TEXTURES; ++i)
 				RenDev->glSamplerParameterf(Samplers[i], GL_TEXTURE_MAX_ANISOTROPY, Clamp<FLOAT>(TextureAnisotropy, 1, 16));
 		}
 	}
 
-	if(bStencilEnabled != !!RenDev->UseStencil){
-		if(RenDev->UseStencil){
+	if(bStencilEnabled != !!RenDev->UseStencil)
+	{
+		if(RenDev->UseStencil)
+		{
 			RenDev->glEnable(GL_STENCIL_TEST);
 			bStencilEnabled = true;
-		}else{
+		}
+		else
+		{
 			RenDev->glDisable(GL_STENCIL_TEST);
 			bStencilEnabled = false;
 		}
@@ -639,12 +692,14 @@ void FOpenGLRenderInterface::Locked(UViewport* Viewport){
 	CurrentState->TanTime = appTan(Time);
 }
 
-void FOpenGLRenderInterface::Unlocked(){
+void FOpenGLRenderInterface::Unlocked()
+{
 	checkSlow(CurrentState == &SavedStates[0]);
 	LockedViewport = NULL;
 }
 
-void FOpenGLRenderInterface::UpdateMatrices(){
+void FOpenGLRenderInterface::UpdateMatrices()
+{
 	CurrentState->LocalToCamera = CurrentState->LocalToWorld * CurrentState->WorldToCamera;
 	CurrentState->LocalToScreen = CurrentState->LocalToCamera * CurrentState->CameraToScreen;
 	CurrentState->WorldToLocal = CurrentState->LocalToWorld.Inverse();
@@ -653,8 +708,10 @@ void FOpenGLRenderInterface::UpdateMatrices(){
 	CurrentState->MatricesChanged = false;
 }
 
-void FOpenGLRenderInterface::SetFramebufferBlending(EFrameBufferBlending Mode){
-	switch(Mode){
+void FOpenGLRenderInterface::SetFramebufferBlending(EFrameBufferBlending Mode)
+{
+	switch(Mode)
+	{
 	case FB_Overwrite:
 		CurrentState->SrcBlend = GL_ONE;
 		CurrentState->DstBlend = GL_ZERO;
@@ -698,11 +755,13 @@ void FOpenGLRenderInterface::SetFramebufferBlending(EFrameBufferBlending Mode){
 
 }
 
-void FOpenGLRenderInterface::SetTextureFilter(BYTE Filter){
+void FOpenGLRenderInterface::SetTextureFilter(BYTE Filter)
+{
 	GLint MinFilter;
 	GLint MagFilter;
 
-	switch(Filter){
+	switch(Filter)
+	{
 	case TF_Nearest:
 		MinFilter = GL_NEAREST_MIPMAP_NEAREST;
 		MagFilter = GL_NEAREST;
@@ -719,7 +778,8 @@ void FOpenGLRenderInterface::SetTextureFilter(BYTE Filter){
 		return;
 	}
 
-	for(INT i = 0; i < MAX_TEXTURES; ++i){
+	for(INT i = 0; i < MAX_TEXTURES; ++i)
+	{
 		RenDev->glSamplerParameteri(Samplers[i], GL_TEXTURE_MIN_FILTER, MinFilter);
 		RenDev->glSamplerParameteri(Samplers[i], GL_TEXTURE_MAG_FILTER, MagFilter);
 	}
@@ -727,40 +787,48 @@ void FOpenGLRenderInterface::SetTextureFilter(BYTE Filter){
 	TextureFilter = Filter;
 }
 
-void FOpenGLRenderInterface::SetShader(const FOpenGLShader& Shader){
-	if(CurrentShader != &Shader){
+void FOpenGLRenderInterface::SetShader(const FOpenGLShader& Shader)
+{
+	if(CurrentShader != &Shader)
+	{
 		Shader.Bind();
 		CurrentShader = &Shader;
 	}
 }
 
-void FOpenGLRenderInterface::PushState(DWORD Flags){
+void FOpenGLRenderInterface::PushState(DWORD Flags)
+{
 	++CurrentState;
 
 	checkSlow(CurrentState <= &SavedStates[MAX_STATESTACKDEPTH] && "PushState overflow");
 	appMemcpy(CurrentState, CurrentState - 1, sizeof(FOpenGLSavedState));
 }
 
-void FOpenGLRenderInterface::PopState(DWORD Flags){
+void FOpenGLRenderInterface::PopState(DWORD Flags)
+{
 	FOpenGLSavedState* PoppedState = CurrentState;
 
 	--CurrentState;
 
 	checkSlow(CurrentState >= &SavedStates[0] && "PopState underflow");
 
-	if((Flags & DONT_RESTORE_RENDER_TARGET) != 0){
+	if((Flags & DONT_RESTORE_RENDER_TARGET) != 0)
+	{
 		CurrentState->RenderTarget = PoppedState->RenderTarget;
 		CurrentState->RenderTargetOwnDepthBuffer = PoppedState->RenderTargetOwnDepthBuffer;
-	}else if((Flags & FORCE_RESTORE_RENDER_TARGET) != 0 ||
+	}
+	else if((Flags & FORCE_RESTORE_RENDER_TARGET) != 0 ||
 	         (CurrentState->RenderTarget != PoppedState->RenderTarget ||
-	          CurrentState->RenderTargetOwnDepthBuffer != PoppedState->RenderTargetOwnDepthBuffer)){
+	          CurrentState->RenderTargetOwnDepthBuffer != PoppedState->RenderTargetOwnDepthBuffer))
+	          {
 		SetGLRenderTarget(CurrentState->RenderTarget, CurrentState->RenderTargetOwnDepthBuffer);
 	}
 
 	CurrentState->UniformRevision = PoppedState->UniformRevision + 1;
 }
 
-UBOOL FOpenGLRenderInterface::SetRenderTarget(FRenderTarget* RenderTarget, bool bOwnDepthBuffer){
+UBOOL FOpenGLRenderInterface::SetRenderTarget(FRenderTarget* RenderTarget, bool bOwnDepthBuffer)
+{
 	guardFuncSlow;
 
 	checkSlow(RenderTarget);
@@ -773,7 +841,8 @@ UBOOL FOpenGLRenderInterface::SetRenderTarget(FRenderTarget* RenderTarget, bool 
 
 	bool NeedsUpdate = false;
 
-	if(GLRenderTarget->Revision != RenderTarget->GetRevision()){
+	if(GLRenderTarget->Revision != RenderTarget->GetRevision())
+	{
 		GLRenderTarget->Cache(RenderTarget, bOwnDepthBuffer);
 		NeedsUpdate = true;
 	}
@@ -786,18 +855,22 @@ UBOOL FOpenGLRenderInterface::SetRenderTarget(FRenderTarget* RenderTarget, bool 
 	unguardSlow;
 }
 
-void FOpenGLRenderInterface::SetViewport(INT X, INT Y, INT Width, INT Height){
+void FOpenGLRenderInterface::SetViewport(INT X, INT Y, INT Width, INT Height)
+{
 	CurrentState->ViewportX = X;
 	CurrentState->ViewportY = Y;
 	CurrentState->ViewportWidth = Width;
 	CurrentState->ViewportHeight = Height;
 }
 
-void FOpenGLRenderInterface::Clear(UBOOL UseColor, FColor Color, UBOOL UseDepth, FLOAT Depth, UBOOL UseStencil, DWORD Stencil){
+void FOpenGLRenderInterface::Clear(UBOOL UseColor, FColor Color, UBOOL UseDepth, FLOAT Depth, UBOOL UseStencil, DWORD Stencil)
+{
 	GLbitfield Flags = 0;
 
-	if(UseColor){
-		if(RenderState.ClearColor != Color){
+	if(UseColor)
+	{
+		if(RenderState.ClearColor != Color)
+		{
 			RenDev->glClearColor(Color.R / 255.0f, Color.G / 255.0f, Color.B / 255.0f, Color.A / 255.0f);
 			RenderState.ClearColor = Color;
 		}
@@ -805,14 +878,17 @@ void FOpenGLRenderInterface::Clear(UBOOL UseColor, FColor Color, UBOOL UseDepth,
 		Flags |= GL_COLOR_BUFFER_BIT;
 	}
 
-	if(UseDepth){
+	if(UseDepth)
+	{
 		// If ZWrite is disabled, we need to enable it or clearing will have no effect
-		if(!RenderState.bZWrite){
+		if(!RenderState.bZWrite)
+		{
 			RenDev->glDepthMask(GL_TRUE);
 			RenderState.bZWrite = true;
 		}
 
-		if(RenderState.ClearDepth != Depth){
+		if(RenderState.ClearDepth != Depth)
+		{
 			RenDev->glClearDepth(Depth);
 			RenderState.ClearDepth = Depth;
 		}
@@ -820,14 +896,17 @@ void FOpenGLRenderInterface::Clear(UBOOL UseColor, FColor Color, UBOOL UseDepth,
 		Flags |= GL_DEPTH_BUFFER_BIT;
 	}
 
-	if(UseStencil && bStencilEnabled){
+	if(UseStencil && bStencilEnabled)
+	{
 		// Same thing as with depth
-		if(RenderState.StencilWriteMask != 0xFF){
+		if(RenderState.StencilWriteMask != 0xFF)
+		{
 			RenDev->glStencilMask(0xFF);
 			RenderState.StencilWriteMask = 0xFF;
 		}
 
-		if(RenderState.ClearStencil != Stencil){
+		if(RenderState.ClearStencil != Stencil)
+		{
 			RenDev->glClearStencil(Stencil);
 			RenderState.ClearStencil = Stencil;
 		}
@@ -838,16 +917,19 @@ void FOpenGLRenderInterface::Clear(UBOOL UseColor, FColor Color, UBOOL UseDepth,
 	RenDev->glClear(Flags);
 }
 
-void FOpenGLRenderInterface::SetCullMode(ECullMode CullMode){
+void FOpenGLRenderInterface::SetCullMode(ECullMode CullMode)
+{
 	CurrentState->CullMode = CullMode;
 }
 
-void FOpenGLRenderInterface::SetAmbientLight(FColor Color){
+void FOpenGLRenderInterface::SetAmbientLight(FColor Color)
+{
 	CurrentState->AmbientLightColor = Color;
 	++CurrentState->UniformRevision;
 }
 
-void FOpenGLRenderInterface::EnableLighting(UBOOL UseDynamic, UBOOL UseStatic, UBOOL Modulate2X, FBaseTexture* Lightmap, UBOOL LightingOnly, const FSphere& LitSphere, int){
+void FOpenGLRenderInterface::EnableLighting(UBOOL UseDynamic, UBOOL UseStatic, UBOOL Modulate2X, FBaseTexture* Lightmap, UBOOL LightingOnly, const FSphere& LitSphere, int)
+{
 	CurrentState->UseDynamicLighting = UseDynamic != 0;
 	CurrentState->UseStaticLighting = UseStatic != 0;
 	CurrentState->LightFactor = Modulate2X ? 2.0f : 1.0f;
@@ -858,8 +940,10 @@ void FOpenGLRenderInterface::EnableLighting(UBOOL UseDynamic, UBOOL UseStatic, U
 	++CurrentState->UniformRevision;
 }
 
-static FLOAT UnrealAttenuation(FLOAT Distance,FLOAT Radius){
-	if(Distance <= Radius){
+static FLOAT UnrealAttenuation(FLOAT Distance,FLOAT Radius)
+{
+	if(Distance <= Radius)
+	{
 		FLOAT A = Distance / Radius;
 		FLOAT B = (2 * A * A * A - 3 * A * A + 1);
 
@@ -869,19 +953,24 @@ static FLOAT UnrealAttenuation(FLOAT Distance,FLOAT Radius){
 	return 0.0f;
 }
 
-void FOpenGLRenderInterface::SetLight(INT LightIndex, FDynamicLight* Light, FLOAT Scale){
+void FOpenGLRenderInterface::SetLight(INT LightIndex, FDynamicLight* Light, FLOAT Scale)
+{
 	checkSlow(LightIndex < MAX_SHADER_LIGHTS);
 
 	CurrentState->HardwareShaderLights[LightIndex] = Light;
 
 	GLSL_Light* ShaderLight = &CurrentState->Lights[LightIndex];
 
-	if(Light){
-		if(Light->Actor && Light->Actor->LightEffect == LE_Sunlight){
+	if(Light)
+	{
+		if(Light->Actor && Light->Actor->LightEffect == LE_Sunlight)
+		{
 			ShaderLight->Type = SL_Directional;
 			ShaderLight->Direction = Light->Direction;
 			ShaderLight->Color = Light->Color * 1.75f * Light->Alpha * Scale;
-		}else if((Light->Actor && Light->Actor->LightEffect == LE_QuadraticNonIncidence) || CurrentState->LitSphere.W == -1.0f ){
+		}
+		else if((Light->Actor && Light->Actor->LightEffect == LE_QuadraticNonIncidence) || CurrentState->LitSphere.W == -1.0f )
+		{
 			ShaderLight->Type = SL_Point;
 			ShaderLight->Position = Light->Position;
 			ShaderLight->Constant = 0.0f;
@@ -889,11 +978,14 @@ void FOpenGLRenderInterface::SetLight(INT LightIndex, FDynamicLight* Light, FLOA
 			ShaderLight->Quadratic = 8.0f / Square(Light->Radius);
 			ShaderLight->Color = Light->Color * Light->Alpha * Scale;
 			ShaderLight->Color.W = 1.0f;
-		}else{
+		}
+		else
+		{
 			ShaderLight->Position = Light->Position;
 
 			// Spotlights.
-			if(Light->Actor && Light->Actor->LightCone > 0){
+			if(Light->Actor && Light->Actor->LightCone > 0)
+			{
 				ShaderLight->Type = SL_Spot;
 				ShaderLight->Direction = Light->Direction;
 				ShaderLight->Cone = appCos(Light->Actor->LightCone / 256.0f * (float)HALF_PI);
@@ -904,16 +996,21 @@ void FOpenGLRenderInterface::SetLight(INT LightIndex, FDynamicLight* Light, FLOA
 				FLOAT MinAttenuation = 1.0f / UnrealAttenuation(MinDistance, Light->Radius);
 				FLOAT MaxAttenuation = 1.0f / UnrealAttenuation(MaxDistance, Light->Radius);
 
-				if(Abs(MinAttenuation - MaxAttenuation) < SMALL_NUMBER){
+				if(Abs(MinAttenuation - MaxAttenuation) < SMALL_NUMBER)
+				{
 					ShaderLight->Constant = MinAttenuation;
 					ShaderLight->Linear = 0.0f;
-				}else{
+				}
+				else
+				{
 					ShaderLight->Constant = Max(0.01f, MinAttenuation - (MaxAttenuation - MinAttenuation) / (MaxDistance - MinDistance) * MinDistance);
 					ShaderLight->Linear = Max(0.0f, (MinAttenuation - ShaderLight->Constant) / MinDistance);
 				}
 
 				ShaderLight->Quadratic = 0.0f;
-			}else{ // Point lights.
+			}
+			else
+			{ // Point lights.
 				ShaderLight->Type = SL_Point;
 
 				FLOAT CenterDistance = Max(0.1f, (CurrentState->LitSphere - Light->Position).Size());
@@ -922,10 +1019,13 @@ void FOpenGLRenderInterface::SetLight(INT LightIndex, FDynamicLight* Light, FLOA
 				FLOAT MinAttenuation = 1.0f / UnrealAttenuation(MinDistance, Light->Radius);
 				FLOAT MaxAttenuation = 1.0f / UnrealAttenuation(MaxDistance, Light->Radius);
 
-				if(Abs(MinAttenuation - MaxAttenuation) < SMALL_NUMBER){
+				if(Abs(MinAttenuation - MaxAttenuation) < SMALL_NUMBER)
+				{
 					ShaderLight->Constant = MinAttenuation;
 					ShaderLight->Linear = 0.0f;
-				}else{
+				}
+				else
+				{
 					ShaderLight->Constant= Max(0.01f, MinAttenuation - (MaxAttenuation - MinAttenuation) / (MaxDistance - MinDistance) * MinDistance);
 					ShaderLight->Linear= Max(0.0f, (MinAttenuation - ShaderLight->Constant) / MinDistance);
 				}
@@ -943,7 +1043,9 @@ void FOpenGLRenderInterface::SetLight(INT LightIndex, FDynamicLight* Light, FLOA
 
 		if(CurrentState->LightingModulate2X)
 			ShaderLight->Color *= 0.5f;
-	}else{
+	}
+	else
+	{
 		appMemzero(ShaderLight, sizeof(*ShaderLight));
 		ShaderLight->Position = FVector(10000000.0f);
 	}
@@ -951,7 +1053,8 @@ void FOpenGLRenderInterface::SetLight(INT LightIndex, FDynamicLight* Light, FLOA
 	++CurrentState->UniformRevision;
 }
 
-void FOpenGLRenderInterface::SetDistanceFog(UBOOL Enable, FLOAT FogStart, FLOAT FogEnd, FColor Color){
+void FOpenGLRenderInterface::SetDistanceFog(UBOOL Enable, FLOAT FogStart, FLOAT FogEnd, FColor Color)
+{
 	CurrentState->FogEnabled = Enable;
 	CurrentState->FogStart = FogStart;
 	CurrentState->FogEnd = FogEnd;
@@ -964,36 +1067,42 @@ void FOpenGLRenderInterface::SetDistanceFog(UBOOL Enable, FLOAT FogStart, FLOAT 
 	++CurrentState->UniformRevision;
 }
 
-UBOOL FOpenGLRenderInterface::EnableFog(UBOOL Enable){
+UBOOL FOpenGLRenderInterface::EnableFog(UBOOL Enable)
+{
 	CurrentState->FogEnabled = Enable != 0;
 	++CurrentState->UniformRevision;
 
 	return Enable;
 }
 
-UBOOL FOpenGLRenderInterface::IsFogEnabled(){
+UBOOL FOpenGLRenderInterface::IsFogEnabled()
+{
 	return CurrentState->FogEnabled;
 }
 
-void FOpenGLRenderInterface::SetGlobalColor(FColor Color){
+void FOpenGLRenderInterface::SetGlobalColor(FColor Color)
+{
 	CurrentState->GlobalColor = Color;
 	++CurrentState->UniformRevision;
 }
 
-void FOpenGLRenderInterface::SetTransform(ETransformType Type, const FMatrix& Matrix){
+void FOpenGLRenderInterface::SetTransform(ETransformType Type, const FMatrix& Matrix)
+{
 	/*
 	 * HACK:
 	 * GIsOpenGL needs to be set to 0. However, it is checked for in UCanvas::Update which applies a 0.5 pixel offset for d3d.
 	 * Here we check if the given matrix belongs to the viewport's canvas and remove the offset.
 	 */
-	if(&Matrix == &LockedViewport->Canvas->pCanvasUtil->CanvasToScreen){
+	if(&Matrix == &LockedViewport->Canvas->pCanvasUtil->CanvasToScreen)
+	{
 		FMatrix& Mat = const_cast<FMatrix&>(Matrix);
 
 		Mat.M[3][0] = static_cast<INT>(Mat.M[3][0]);
 		Mat.M[3][1] = static_cast<INT>(Mat.M[3][1]);
 	}
 
-	switch(Type){
+	switch(Type)
+	{
 	case TT_LocalToWorld:
 		CurrentState->LocalToWorld = Matrix;
 		break;
@@ -1009,7 +1118,8 @@ void FOpenGLRenderInterface::SetTransform(ETransformType Type, const FMatrix& Ma
 }
 
 FMatrix FOpenGLRenderInterface::GetTransform(ETransformType Type) const{
-	switch(Type){
+	switch(Type)
+	{
 	case TT_LocalToWorld:
 		return CurrentState->LocalToWorld;
 	case TT_WorldToCamera:
@@ -1021,7 +1131,8 @@ FMatrix FOpenGLRenderInterface::GetTransform(ETransformType Type) const{
 	return FMatrix::Identity;
 }
 
-void FOpenGLRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorString, UMaterial** ErrorMaterial, INT* NumPasses){
+void FOpenGLRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorString, UMaterial** ErrorMaterial, INT* NumPasses)
+{
 	guardFuncSlow;
 
 	// Use default material if precaching geometry
@@ -1038,7 +1149,8 @@ void FOpenGLRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorStri
 	if((FrameFX && (Material == FrameFX->ShaderDraw ||
 	                Material == FrameFX->ShaderGlow ||
 	                Material == FrameFX->ShaderBlur ||
-	                (FrameFX->VisionMode && Material == FrameFX->VisionMode->VisionShader)))){
+	                (FrameFX->VisionMode && Material == FrameFX->VisionMode->VisionShader))))
+	                {
 		// Remove offset by truncating float to int.
 		// This works because the x/y values will only ever be -1 or 1 (plus fractional offset) for fullscreen quads or 0 for FFrameGrid
 		CurrentState->CameraToScreen.M[3][0] = static_cast<INT>(CurrentState->CameraToScreen.M[3][0]);
@@ -1048,11 +1160,14 @@ void FOpenGLRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorStri
 #if 0
 	// Check for circular references
 
-	if(GIsEditor){
+	if(GIsEditor)
+	{
 		TArray<UMaterial*> History;
 
-		if(!Material->CheckCircularReferences(History)){
-			if(History.Num() >= 0){
+		if(!Material->CheckCircularReferences(History))
+		{
+			if(History.Num() >= 0)
+			{
 				if(ErrorString)
 					*ErrorString = FString::Printf("Circular material reference in '%s'", History.Last()->GetName());
 
@@ -1076,14 +1191,16 @@ void FOpenGLRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorStri
 	CurrentState->DstBlend = GL_ZERO;
 	CurrentState->NumTextures = 0;
 
-	if(CurrentState->AlphaRef >= 0.0f || CurrentState->ModifyColor){
+	if(CurrentState->AlphaRef >= 0.0f || CurrentState->ModifyColor)
+	{
 		CurrentState->AlphaRef = -1.0f;
 		CurrentState->ModifyColor = 0;
 		CurrentState->ColorFactor = FPlane(1.0f, 1.0f, 1.0f, 1.0f);
 		++CurrentState->UniformRevision;
 	}
 
-	if(CurrentState->OverrideFogColor){
+	if(CurrentState->OverrideFogColor)
+	{
 		CurrentState->FogColor = CurrentState->SavedFogColor;
 		CurrentState->OverrideFogColor = false;
 		++CurrentState->UniformRevision;
@@ -1098,10 +1215,12 @@ void FOpenGLRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorStri
 	UModifier* Modifier = Cast<UModifier>(Material);
 	FModifierInfo ModifierInfo;
 
-	if(Modifier){
+	if(Modifier)
+	{
 		Material = RemoveModifiers(Cast<UModifier>(Material), ModifierInfo);
 
-		if(!Material){
+		if(!Material)
+		{
 			SetShader(RenDev->ErrorShader);
 
 			if(ErrorString)
@@ -1114,17 +1233,21 @@ void FOpenGLRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorStri
 		}
 	}
 
-	if(CurrentState->LightingOnly){
+	if(CurrentState->LightingOnly)
+	{
 		FOpenGLShader* Shader;
 
-		if(CurrentState->Lightmap){
+		if(CurrentState->Lightmap)
+		{
 			SetTexture(CurrentState->Lightmap, 0);
 
 			if(CurrentState->LightingModulate2X)
 				Shader = &LightingOnlyShaderLightmap2X;
 			else
 				Shader = &LightingOnlyShaderLightmap;
-		}else{
+		}
+		else
+		{
 			if(CurrentState->LightingModulate2X)
 				Shader = &LightingOnlyShader2X;
 			else
@@ -1138,13 +1261,20 @@ void FOpenGLRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorStri
 
 	bool Result = false;
 
-	if(Material->IsA<UHardwareShaderWrapper>()){
+	if(Material->IsA<UHardwareShaderWrapper>())
+	{
 		Result = static_cast<UHardwareShaderWrapper*>(Material)->SetupShaderWrapper(this) != 0;
-	}else if(Material->IsA<UHardwareShader>()){
+	}
+	else if(Material->IsA<UHardwareShader>())
+	{
 		Result = SetHardwareShaderMaterial(static_cast<UHardwareShader*>(Material), ErrorString, ErrorMaterial) != 0;
-	}else if(Material->IsA<UProjectorMultiMaterial>()){
+	}
+	else if(Material->IsA<UProjectorMultiMaterial>())
+	{
 		Result = SetProjectorMultiMaterial(static_cast<UProjectorMultiMaterial*>(Material));
-	}else{
+	}
+	else
+	{
 		const FOpenGLShader* Shader = NULL;
 
 		if(Modifier)
@@ -1168,7 +1298,8 @@ void FOpenGLRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorStri
 		else
 			Result = SetSimpleMaterial(Material, ModifierInfo);
 
-		if(Shader){
+		if(Shader)
+		{
 			if(Shader->IsValid())
 				SetShader(*Shader);
 			else
@@ -1182,7 +1313,8 @@ void FOpenGLRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorStri
 	unguardSlow;
 }
 
-static INT GetShaderConstantNumSlots(BYTE ConstantType){
+static INT GetShaderConstantNumSlots(BYTE ConstantType)
+{
 	if((ConstantType >= EVC_WorldToScreenMatrix && ConstantType <= EVC_WorldToObjectMatrix) || ConstantType == EVC_ObjectToCameraMatrix)
 		return 4;
 
@@ -1192,12 +1324,14 @@ static INT GetShaderConstantNumSlots(BYTE ConstantType){
 	return 1;
 }
 
-UBOOL FOpenGLRenderInterface::SetHardwareShaderMaterial(UHardwareShader* HardwareShader, FString* ErrorString, UMaterial** ErrorMaterial){
+UBOOL FOpenGLRenderInterface::SetHardwareShaderMaterial(UHardwareShader* HardwareShader, FString* ErrorString, UMaterial** ErrorMaterial)
+{
 	guardFuncSlow;
 
 	const FOpenGLShader* Shader = RenDev->GetShaderForMaterial(HardwareShader);
 
-	if(Shader && Shader->IsValid()){
+	if(Shader && Shader->IsValid())
+	{
 		SetShader(*Shader);
 
 		CurrentState->bZTest = HardwareShader->ZTest != 0;
@@ -1206,30 +1340,38 @@ UBOOL FOpenGLRenderInterface::SetHardwareShaderMaterial(UHardwareShader* Hardwar
 		if(HardwareShader->AlphaTest)
 			CurrentState->AlphaRef = HardwareShader->AlphaRef / 255.0f;
 
-		if(HardwareShader->AlphaBlending){
+		if(HardwareShader->AlphaBlending)
+		{
 			CurrentState->SrcBlend = GetBlendFunc(HardwareShader->SrcBlend);
 			CurrentState->DstBlend = GetBlendFunc(HardwareShader->DestBlend);
 		}
 
-		for(INT i = 0; i < MAX_TEXTURES; ++i){
+		for(INT i = 0; i < MAX_TEXTURES; ++i)
+		{
 			if(HardwareShader->Textures[i])
 				SetBitmapTexture(HardwareShader->Textures[i], i, 1.0f, TCO_UseTextureMode, TCO_UseTextureMode, HardwareShader->BumpSettings[i].BumpSize);
 		}
 
 		// Cache number of vertex and pixel shader constants
 
-		if(HardwareShader->NumVSConstants <= 0){
-			for(INT i = MAX_VERTEX_SHADER_CONSTANTS - 1; i >= 0; --i){
-				if(HardwareShader->VSConstants[i].Type != EVC_Unused){
+		if(HardwareShader->NumVSConstants <= 0)
+		{
+			for(INT i = MAX_VERTEX_SHADER_CONSTANTS - 1; i >= 0; --i)
+			{
+				if(HardwareShader->VSConstants[i].Type != EVC_Unused)
+				{
 					HardwareShader->NumVSConstants = i + GetShaderConstantNumSlots(HardwareShader->VSConstants[i].Type);
 					break;
 				}
 			}
 		}
 
-		if(HardwareShader->NumPSConstants <= 0){
-			for(INT i = MAX_PIXEL_SHADER_CONSTANTS - 1; i >= 0; --i){
-				if(HardwareShader->PSConstants[i].Type != EVC_Unused){
+		if(HardwareShader->NumPSConstants <= 0)
+		{
+			for(INT i = MAX_PIXEL_SHADER_CONSTANTS - 1; i >= 0; --i)
+			{
+				if(HardwareShader->PSConstants[i].Type != EVC_Unused)
+				{
 					HardwareShader->NumPSConstants = i + GetShaderConstantNumSlots(HardwareShader->PSConstants[i].Type);
 					break;
 				}
@@ -1249,7 +1391,8 @@ UBOOL FOpenGLRenderInterface::SetHardwareShaderMaterial(UHardwareShader* Hardwar
 	unguardSlow;
 }
 
-void FOpenGLRenderInterface::SetGLRenderTarget(FOpenGLTexture* GLRenderTarget, bool bOwnDepthBuffer){
+void FOpenGLRenderInterface::SetGLRenderTarget(FOpenGLTexture* GLRenderTarget, bool bOwnDepthBuffer)
+{
 	checkSlow(GLRenderTarget);
 
 	GLRenderTarget->BindRenderTarget();
@@ -1259,7 +1402,8 @@ void FOpenGLRenderInterface::SetGLRenderTarget(FOpenGLTexture* GLRenderTarget, b
 	CurrentState->RenderTargetOwnDepthBuffer = bOwnDepthBuffer;
 }
 
-void FOpenGLRenderInterface::CopyBackBufferToTarget(FAuxRenderTarget* Target){
+void FOpenGLRenderInterface::CopyBackBufferToTarget(FAuxRenderTarget* Target)
+{
 	FOpenGLTexture* GLTarget = static_cast<FOpenGLTexture*>(RenDev->GetCachedResource(Target->GetCacheId()));
 	FOpenGLTexture* Backbuffer = static_cast<FOpenGLTexture*>(RenDev->GetCachedResource(RenDev->Backbuffer.GetCacheId()));
 
@@ -1279,7 +1423,8 @@ void FOpenGLRenderInterface::CopyBackBufferToTarget(FAuxRenderTarget* Target){
 	                               GL_NEAREST);
 }
 
-void FOpenGLRenderInterface::SetStencilOp(ECompareFunction Test, DWORD Ref, DWORD Mask, EStencilOp FailOp, EStencilOp ZFailOp, EStencilOp PassOp, DWORD WriteMask){
+void FOpenGLRenderInterface::SetStencilOp(ECompareFunction Test, DWORD Ref, DWORD Mask, EStencilOp FailOp, EStencilOp ZFailOp, EStencilOp PassOp, DWORD WriteMask)
+{
 	CurrentState->StencilCompare = Test;
 	CurrentState->StencilRef = static_cast<BYTE>(Ref);
 	CurrentState->StencilMask = static_cast<BYTE>(Mask);
@@ -1289,25 +1434,32 @@ void FOpenGLRenderInterface::SetStencilOp(ECompareFunction Test, DWORD Ref, DWOR
 	CurrentState->StencilWriteMask = static_cast<BYTE>(WriteMask);
 }
 
-void FOpenGLRenderInterface::EnableStencil(UBOOL Enable){
+void FOpenGLRenderInterface::EnableStencil(UBOOL Enable)
+{
 	CurrentState->bStencilTest = Enable != 0;
 }
 
-void FOpenGLRenderInterface::EnableDepth(UBOOL Enable){
-	if(Enable){
+void FOpenGLRenderInterface::EnableDepth(UBOOL Enable)
+{
+	if(Enable)
+	{
 		CurrentState->bZWrite = true;
 		CurrentState->bZTest = true;
-	}else{
+	}
+	else
+	{
 		CurrentState->bZWrite = false;
 		CurrentState->bZTest = false;
 	}
 }
 
-void FOpenGLRenderInterface::SetZBias(INT ZBias){
+void FOpenGLRenderInterface::SetZBias(INT ZBias)
+{
 	CurrentState->ZBias = ZBias;
 }
 
-INT FOpenGLRenderInterface::SetVertexStreams(EVertexShader Shader, FVertexStream** Streams, INT NumStreams){
+INT FOpenGLRenderInterface::SetVertexStreams(EVertexShader Shader, FVertexStream** Streams, INT NumStreams)
+{
 	guardFuncSlow;
 
 	FStreamDeclaration VertexStreamDeclarations[MAX_VERTEX_STREAMS];
@@ -1318,7 +1470,8 @@ INT FOpenGLRenderInterface::SetVertexStreams(EVertexShader Shader, FVertexStream
 
 	INT Size = 0;
 
-	for(INT i = 0; i < NumStreams; ++i){
+	for(INT i = 0; i < NumStreams; ++i)
+	{
 		QWORD CacheId = Streams[i]->GetCacheId();
 		FOpenGLVertexStream* Stream;
 
@@ -1327,7 +1480,8 @@ INT FOpenGLRenderInterface::SetVertexStreams(EVertexShader Shader, FVertexStream
 		if(!Stream)
 			Stream = new FOpenGLVertexStream(RenDev, CacheId);
 
-		if(Stream->Revision != Streams[i]->GetRevision()){
+		if(Stream->Revision != Streams[i]->GetRevision())
+		{
 			Stream->Cache(Streams[i]);
 			Size += Stream->BufferSize;
 		}
@@ -1345,7 +1499,8 @@ INT FOpenGLRenderInterface::SetVertexStreams(EVertexShader Shader, FVertexStream
 
 	VAO.BindVertexStreams(OpenGLStreams, NumStreams);
 
-	if(&VAO != CurrentVAO){
+	if(&VAO != CurrentVAO)
+	{
 		VAO.Bind();
 		CurrentVAO = &VAO;
 	}
@@ -1357,7 +1512,8 @@ INT FOpenGLRenderInterface::SetVertexStreams(EVertexShader Shader, FVertexStream
 	unguardSlow;
 }
 
-INT FOpenGLRenderInterface::SetDynamicStream(EVertexShader Shader, FVertexStream* Stream){
+INT FOpenGLRenderInterface::SetDynamicStream(EVertexShader Shader, FVertexStream* Stream)
+{
 	guardFuncSlow;
 
 	FOpenGLVertexStream* OpenGLStream = RenDev->GetDynamicVertexStream();
@@ -1378,7 +1534,8 @@ INT FOpenGLRenderInterface::SetDynamicStream(EVertexShader Shader, FVertexStream
 
 	VAO.BindVertexStreams(&OpenGLStream, 1);
 
-	if(&VAO != CurrentVAO){
+	if(&VAO != CurrentVAO)
+	{
 		VAO.Bind();
 		CurrentVAO = &VAO;
 	}
@@ -1388,12 +1545,14 @@ INT FOpenGLRenderInterface::SetDynamicStream(EVertexShader Shader, FVertexStream
 	unguardSlow;
 }
 
-INT FOpenGLRenderInterface::SetIndexBuffer(FIndexBuffer* IndexBuffer, INT BaseIndex){
+INT FOpenGLRenderInterface::SetIndexBuffer(FIndexBuffer* IndexBuffer, INT BaseIndex)
+{
 	guardFuncSlow;
 
 	bool RequiresCaching = false;
 
-	if(IndexBuffer){
+	if(IndexBuffer)
+	{
 		FOpenGLIndexBuffer* Buffer;
 		INT IndexSize = IndexBuffer->GetIndexSize();
 
@@ -1406,14 +1565,17 @@ INT FOpenGLRenderInterface::SetIndexBuffer(FIndexBuffer* IndexBuffer, INT BaseIn
 		if(!Buffer)
 			Buffer = new FOpenGLIndexBuffer(RenDev, CacheId);
 
-		if(Buffer->Revision != IndexBuffer->GetRevision() || Buffer->IndexSize != IndexSize){
+		if(Buffer->Revision != IndexBuffer->GetRevision() || Buffer->IndexSize != IndexSize)
+		{
 			RequiresCaching = true;
 			Buffer->Cache(IndexBuffer);
 		}
 
 		IndexBufferBase = BaseIndex;
 		CurrentIndexBuffer = Buffer;
-	}else{
+	}
+	else
+	{
 		IndexBufferBase = 0;
 		CurrentIndexBuffer = NULL;
 	}
@@ -1423,7 +1585,8 @@ INT FOpenGLRenderInterface::SetIndexBuffer(FIndexBuffer* IndexBuffer, INT BaseIn
 	unguardSlow;
 }
 
-INT FOpenGLRenderInterface::SetDynamicIndexBuffer(FIndexBuffer* IndexBuffer, INT BaseIndex){
+INT FOpenGLRenderInterface::SetDynamicIndexBuffer(FIndexBuffer* IndexBuffer, INT BaseIndex)
+{
 	guardFuncSlow;
 
 	FOpenGLIndexBuffer* Buffer = RenDev->GetDynamicIndexBuffer(IndexBuffer->GetIndexSize());
@@ -1436,7 +1599,8 @@ INT FOpenGLRenderInterface::SetDynamicIndexBuffer(FIndexBuffer* IndexBuffer, INT
 	unguardSlow;
 }
 
-void FOpenGLRenderInterface::DrawPrimitive(EPrimitiveType PrimitiveType, INT FirstIndex, INT NumPrimitives, INT MinIndex, INT MaxIndex){
+void FOpenGLRenderInterface::DrawPrimitive(EPrimitiveType PrimitiveType, INT FirstIndex, INT NumPrimitives, INT MinIndex, INT MaxIndex)
+{
 	guardFuncSlow;
 
 	CommitRenderState();
@@ -1444,7 +1608,8 @@ void FOpenGLRenderInterface::DrawPrimitive(EPrimitiveType PrimitiveType, INT Fir
 	GLenum Mode  = 0;
 	INT    Count = NumPrimitives;
 
-	switch(PrimitiveType){
+	switch(PrimitiveType)
+	{
 	case PT_PointList:
 		Mode = GL_POINTS;
 		break;
@@ -1468,7 +1633,8 @@ void FOpenGLRenderInterface::DrawPrimitive(EPrimitiveType PrimitiveType, INT Fir
 		appErrorf("Invalid primitive type for FOpenGLRenderInterface::DrawPrimitive: %i", PrimitiveType);
 	};
 
-	if(CurrentIndexBuffer){
+	if(CurrentIndexBuffer)
+	{
 		INT IndexSize = CurrentIndexBuffer->IndexSize;
 
 		RenDev->glDrawRangeElementsBaseVertex(Mode,
@@ -1478,13 +1644,16 @@ void FOpenGLRenderInterface::DrawPrimitive(EPrimitiveType PrimitiveType, INT Fir
 		                                      IndexSize == sizeof(_WORD) ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT,
 		                                      reinterpret_cast<void*>((FirstIndex + IndexBufferBase) * IndexSize),
 		                                      VertexBufferBase);
-	}else{
+	}
+	else
+	{
 		RenDev->glDrawArrays(Mode, VertexBufferBase + FirstIndex, Count);
 	}
 
 	unguardSlow;
 }
 
-void FOpenGLRenderInterface::SetFillMode(EFillMode FillMode){
+void FOpenGLRenderInterface::SetFillMode(EFillMode FillMode)
+{
 	CurrentState->FillMode = FillMode;
 }

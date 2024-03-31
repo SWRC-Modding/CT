@@ -6,7 +6,8 @@
 
 INT UServerCommandletMain(); // Defined in ServerCommandlet.cpp
 
-static void ShowBanner(FOutputDevice& Out){
+static void ShowBanner(FOutputDevice& Out)
+{
 	Out.Log("=======================================");
 	Out.Log("ucc.exe for Star Wars Republic Commando");
 	Out.Log("made by Leon0628");
@@ -14,21 +15,25 @@ static void ShowBanner(FOutputDevice& Out){
 	Out.Log("");
 }
 
-static void ShowCommandletHelp(UCommandlet* Commandlet, FOutputDevice& Out){
+static void ShowCommandletHelp(UCommandlet* Commandlet, FOutputDevice& Out)
+{
 	Commandlet->LoadLocalized();
 	Out.Log(Commandlet->HelpOneLiner);
 
-	if(Commandlet->HelpUsage.Len() > 0){
+	if(Commandlet->HelpUsage.Len() > 0)
+	{
 		Out.Log("");
 		Out.Log("Usage:");
 		Out.Logf("    ucc %s", *Commandlet->HelpUsage);
 	}
 
-	if(Commandlet->HelpParm[0].Len() > 0){
+	if(Commandlet->HelpParm[0].Len() > 0)
+	{
 		Out.Log("");
 		Out.Log("Parameters:");
 
-		for(INT i = 0; i < ARRAY_COUNT(Commandlet->HelpParm); ++i){
+		for(INT i = 0; i < ARRAY_COUNT(Commandlet->HelpParm); ++i)
+		{
 			if(Commandlet->HelpParm[i].Len() > 0 || Commandlet->HelpDesc[i].Len() > 0)
 				Out.Logf("    %-20s %s", *Commandlet->HelpParm[i], *Commandlet->HelpDesc[i]);
 			else
@@ -36,15 +41,18 @@ static void ShowCommandletHelp(UCommandlet* Commandlet, FOutputDevice& Out){
 		}
 	}
 
-	if(Commandlet->HelpWebLink.Len() > 0){
+	if(Commandlet->HelpWebLink.Len() > 0)
+	{
 		Out.Log("");
 		Out.Log("For more info, see");
 		Out.Logf("    %s", *Commandlet->HelpWebLink);
 	}
 }
 
-static FString ResolveCommandletClassName(const FString& ClassName, const TArray<FRegistryObjectInfo>& List){
-	for(int i = 0; i < List.Num(); ++i){ // Look Token up in list and autocomplete class name if found
+static FString ResolveCommandletClassName(const FString& ClassName, const TArray<FRegistryObjectInfo>& List)
+{
+	for(int i = 0; i < List.Num(); ++i) // Look Token up in list and autocomplete class name if found
+	{
 		FString FullName = List[i].Object;
 		FString ShortName = FullName;
 
@@ -52,7 +60,8 @@ static FString ResolveCommandletClassName(const FString& ClassName, const TArray
 			ShortName = ShortName.Mid(ShortName.InStr(".") + 1);
 
 		if(ClassName == FullName || ClassName + "Commandlet" == FullName ||  // Check against "PackageName.ClassName (+ Commandlet)"
-		   ClassName == ShortName || ClassName + "Commandlet" == ShortName){ // Check against "ClassName (+ Commandlet)"
+		   ClassName == ShortName || ClassName + "Commandlet" == ShortName) // Check against "ClassName (+ Commandlet)"
+		   {
 			return List[i].Object;
 		}
 	}
@@ -60,7 +69,8 @@ static FString ResolveCommandletClassName(const FString& ClassName, const TArray
 	return ClassName;
 }
 
-int __cdecl main(int argc, char** argv){
+int __cdecl main(int argc, char** argv)
+{
 	GIsStarted = 1;
 	int ExitCode = EXIT_SUCCESS;
 	FOutputDeviceFile Log;
@@ -80,7 +90,8 @@ int __cdecl main(int argc, char** argv){
 		// Initialize global state
 		GIsUCC = GIsClient = GIsServer = GIsEditor = GIsScriptable = GLazyLoad = 1;
 
-		if(argc > 1){
+		if(argc > 1)
+		{
 			bool ShowHelp = appStricmp(argv[1], "help") == 0;
 			FString ClassName = ShowHelp ? (argc > 2 ? argv[2] : "") : argv[1];
 			TArray<FRegistryObjectInfo> List;
@@ -88,21 +99,26 @@ int __cdecl main(int argc, char** argv){
 
 			UObject::GetRegistryObjects(List, UClass::StaticClass(), UCommandlet::StaticClass(), 0); // Load list of commandlets declared in .int files
 
-			if(ShowHelp){
+			if(ShowHelp)
+			{
 				// To allow loading localizations GIsEditor must be set to false and the Core package must be loaded to register the localizable properties
 				GIsEditor = 0;
 				UObject::LoadPackage(NULL, "Core", LOAD_NoFail);
 
 				bool ShowSpecializedHelp = ClassName.Len() > 0;
 
-				if(ShowSpecializedHelp){ // Show detailed help for a specific commandlet
+				if(ShowSpecializedHelp) // Show detailed help for a specific commandlet
+				{
 					bool FoundSpecializedHelp = false;
 
-					for(TArray<FRegistryObjectInfo>::TIterator It(List); It; ++It){
-						if(It->Object == ResolveCommandletClassName(ClassName, List)){
+					for(TArray<FRegistryObjectInfo>::TIterator It(List); It; ++It)
+					{
+						if(It->Object == ResolveCommandletClassName(ClassName, List))
+						{
 							UClass* Class = LoadClass<UCommandlet>(NULL, *It->Object, NULL, LoadFlags, NULL);
 
-							if(Class){
+							if(Class)
+							{
 								ShowCommandletHelp(static_cast<UCommandlet*>(Class->GetDefaultObject()), Warn);
 								FoundSpecializedHelp = true;
 							}
@@ -111,7 +127,8 @@ int __cdecl main(int argc, char** argv){
 						}
 					}
 
-					if(!FoundSpecializedHelp){
+					if(!FoundSpecializedHelp)
+					{
 						// Show help for a commandlet that is not in the registry objects list
 						UClass* Class = LoadClass<UCommandlet>(NULL, *ClassName, NULL, LoadFlags, NULL);
 
@@ -123,17 +140,21 @@ int __cdecl main(int argc, char** argv){
 						else
 							Warn.Logf("    Unable to show help: Commandlet %s not found", *ClassName);
 					}
-				}else{ // Show general help for all commandlets
+				}
+				else
+				{ // Show general help for all commandlets
 					ShowBanner(Warn);
 					Warn.Log("Usage:");
 					Warn.Log("    ucc <command> <parameters>");
 					Warn.Log("");
 					Warn.Log("Registered commands:");
 
-					for(TArray<FRegistryObjectInfo>::TIterator It(List); It; ++It){
+					for(TArray<FRegistryObjectInfo>::TIterator It(List); It; ++It)
+					{
 						UClass* Class = LoadClass<UCommandlet>(NULL, *It->Object, NULL, LoadFlags, NULL);
 
-						if(Class){
+						if(Class)
+						{
 							UCommandlet* Default = static_cast<UCommandlet*>(Class->GetDefaultObject());
 							Default->LoadLocalized();
 							Warn.Logf("    %-20s %s", *Default->HelpCmd, *Default->HelpOneLiner);
@@ -142,7 +163,9 @@ int __cdecl main(int argc, char** argv){
 
 					Warn.Log("    help <command>       Get help on a command");
 				}
-			}else{ // Execute commandlet
+			}
+			else
+			{ // Execute commandlet
 				ClassName = ResolveCommandletClassName(ClassName, List);
 
 				if(ClassName == "Editor.Make" || ClassName == "Editor.MakeCommandlet")
@@ -153,7 +176,8 @@ int __cdecl main(int argc, char** argv){
 				if(!Class) // If class failed to load append "Commandlet" and try again
 					Class = LoadClass<UCommandlet>(NULL, *(ClassName + "Commandlet"), NULL, LoadFlags, NULL);
 
-				if(Class){
+				if(Class)
+				{
 					UCommandlet* Default = Cast<UCommandlet>(Class->GetDefaultObject());
 
 					if(Default->ShowBanner)
@@ -167,7 +191,8 @@ int __cdecl main(int argc, char** argv){
 					GIsServer = Default->IsServer;
 					GLazyLoad = Default->LazyLoad;
 
-					if(GIsEditor){
+					if(GIsEditor)
+					{
 						List.Empty();
 						UObject::GetRegistryObjects(List, UClass::StaticClass(), UExporter::StaticClass(), 0);
 
@@ -191,27 +216,32 @@ int __cdecl main(int argc, char** argv){
 					Commandlet->InitExecution();
 					Commandlet->ParseParms(*CommandletCmdLine);
 
-					if(Default->LogToStdout){ // Redirect commandlet output to console
+					if(Default->LogToStdout) // Redirect commandlet output to console
+					{
 						Warn.AuxOut = GLog;
 						GLog = &Warn;
 					}
 
-					if(ClassName == "Editor.Make" || ClassName == "Editor.MakeCommandlet"){
+					if(ClassName == "Editor.Make" || ClassName == "Editor.MakeCommandlet")
+					{
 						// Print full path of source files in error messages
 						if(ParseParam(appCmdLine(), "FullSourcePath") && (GSys->SourcePath.Len() < 2 || GSys->SourcePath[1] != ':'))
 							GSys->SourcePath = FStringTemp(appBaseDir()) * GSys->SourcePath;
 
-						if(ParseParam(appCmdLine(), "NoIncremental") || ParseParam(appCmdLine(), "All")){
+						if(ParseParam(appCmdLine(), "NoIncremental") || ParseParam(appCmdLine(), "All"))
+						{
 							Warn.Log("Full rebuild");
 
 							FConfigSection* ConfigSection = GConfig->GetSectionPrivate("Editor.EditorEngine", 0, 0);
 
-							if(ConfigSection){
+							if(ConfigSection)
+							{
 								TArray<FConfigString> Packages;
 
 								ConfigSection->MultiFind("EditPackages", Packages);
 
-								for(TArray<FConfigString>::TIterator It(Packages); It; ++It){
+								for(TArray<FConfigString>::TIterator It(Packages); It; ++It)
+								{
 									FFilename Filename = *(FStringTemp(appBaseDir()) * *It + ".u");
 
 									GLog->Logf("Deleting %s", *Filename.GetCleanFilename());
@@ -223,11 +253,13 @@ int __cdecl main(int argc, char** argv){
 						// Load classes that are specified in the config to avoid 'Superclass not found' errors
 						FConfigSection* Section = GConfig->GetSectionPrivate("UCC.Make", 0, 1);
 
-						if(Section){
+						if(Section)
+						{
 							TArray<FConfigString> Values;
 							Section->MultiFind(NAME_AutoLoad, Values);
 
-							for(INT i = 0; i < Values.Num(); ++i){
+							for(INT i = 0; i < Values.Num(); ++i)
+							{
 								Warn.Logf("AutoLoad: %s", *Values[i]);
 
 								if(!LoadObject<UObject>(NULL, *Values[i], NULL, LOAD_NoWarn | LOAD_Quiet, NULL))
@@ -241,7 +273,8 @@ int __cdecl main(int argc, char** argv){
 					else
 						ExitCode = CommandletMain(Commandlet, CommandletCmdLine);
 
-					if(Default->ShowErrorCount){
+					if(Default->ShowErrorCount)
+					{
 						Warn.Log("");
 						Warn.Logf("%s - %i error(s), %i warning(s)", Warn.ErrorCount == 0 ? "Success" : "Failure", Warn.ErrorCount, Warn.WarningCount);
 					}
@@ -249,16 +282,21 @@ int __cdecl main(int argc, char** argv){
 					if(Warn.ErrorCount > 0 || Warn.WarningCount > 0)
 						ExitCode = EXIT_FAILURE;
 
-					if(Default->LogToStdout){
+					if(Default->LogToStdout)
+					{
 						Warn.AuxOut = NULL;
 						GLog = &Log;
 					}
-				}else{
+				}
+				else
+				{
 					ShowBanner(Warn);
 					Warn.Logf("Commandlet %s not found", argv[1]);
 				}
 			}
-		}else{
+		}
+		else
+		{
 			ShowBanner(Warn);
 			Warn.Log("Use ucc help for a list of commands");
 		}
@@ -266,7 +304,8 @@ int __cdecl main(int argc, char** argv){
 		appPreExit();
 
 		GIsGuarded = 0;
-	}catch(...){
+	}catch(...)
+	{
 		GIsGuarded = 0;
 		GLog = &Log;
 		ExitCode = EXIT_FAILURE;

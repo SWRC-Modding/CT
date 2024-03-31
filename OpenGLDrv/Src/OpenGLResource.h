@@ -3,7 +3,8 @@
 #include "Engine.h"
 #include "opengl.h"
 
-inline INT GetResourceHashIndex(QWORD CacheId){
+inline INT GetResourceHashIndex(QWORD CacheId)
+{
 	return ((DWORD)CacheId & 0xfff) ^ (((DWORD)CacheId & 0xff00) >> 4) + (((DWORD)CacheId & 0xf0000) >> 16);
 }
 

@@ -373,6 +373,34 @@ class WINDOW_API WWindow : public FCommandTarget{
 	operator HWND() const{ return hWnd; }
 };
 
+
+/*-----------------------------------------------------------------------------
+	WDebugObject.
+-----------------------------------------------------------------------------*/
+
+class WINDOW_API WDebugObject : public WWindow{
+	W_DECLARE_CLASS(WDebugObject,WWindow,CLASS_Transient);
+	DECLARE_WINDOWCLASS(WDebugObject,WWindow,Window)
+
+	UObject*            TargetObject;
+	INT                 Padding;
+	FStringOutputDevice OutputDevice;
+	INT                 param1;
+
+	WDebugObject();
+	WDebugObject(UObject* Object, WWindow* Owner);
+	WDebugObject(INT param1, UObject* Object, WWindow* Owner);
+
+	void OpenWindow(HWND hWndParent = NULL);
+	void Refresh();
+	const UObject* GetTargetObject() const{ return TargetObject; }
+
+	// WWindow interface
+	void OnDestroy();
+
+	static TArray<WDebugObject*> DebugWindows;
+};
+
 /*-----------------------------------------------------------------------------
 	WControl.
 -----------------------------------------------------------------------------*/

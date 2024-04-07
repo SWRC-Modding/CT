@@ -4,11 +4,72 @@
 #include "FFeedbackContextCmd.h"
 #include "FConfigCacheIni.h"
 #include "Engine.h"
+#include "Editor.h"
 #include "Window.h"
 #include "GameSpyMgr.h"
 #include "../Res/resource.h"
 
 #pragma comment(lib, "Winmm.lib") // timeBeginPeriod, timeEndPeriod
+
+static void EndFullscreen()
+{
+	if(GEngine && GEngine->Client && GEngine->Client->Viewports.Num() > 0 && GEngine->Client->Viewports[0])
+		GEngine->Client->Viewports[0]->EndFullscreen();
+}
+
+static bool SwitchRenderDevice(UClass* Class)
+{
+	if(!Class || GEngine->GRenDev->GetClass() == Class)
+		return false;
+
+	check(Class->IsChildOf(URenderDevice::StaticClass()));
+
+	// Apparently the FStatRecord destructor does not clean up properly and there is still a reference to the old stat record stored in the linked list of child records.
+	// So we need to find the records belonging to the old render device and clean them up.
+	// This is only done once the render device has successfully been changed but the pointer to the record needs to be acquired here.
+	// TODO: Also do the same for OpenGL once/if FStatRecord is used there
+	FStatRecord* OldStatRecord = FStatRecord::Main().FindStat("D3D", true);
+
+	// UViewport::TryRenderDevice only works if GEngine->GRenDev is not the same as the current render device
+	GEngine->GRenDev = ConstructObject<URenderDevice>(Class);
+	GEngine->GRenDev->Init();
+
+	// We need to reset all FCanvasUtils since they still reference the old render interface
+	foreachobj(UCanvas, It)
+	{
+		if(It->pCanvasUtil)
+		{
+			delete It->pCanvasUtil;
+			It->pCanvasUtil = NULL;
+		}
+	}
+
+	UViewport* Viewport = GEngine->Client->Viewports[0];
+	Viewport->TryRenderDevice(Class->GetPathName(), Viewport->SizeX, Viewport->SizeY, Viewport->IsFullscreen());
+
+	if(GEngine->GRenDev && GEngine->GRenDev->GetClass() == Class)
+	{
+		GConfig->SetString("Engine.Engine", "RenderDevice", Class->GetPathName());
+
+		if(OldStatRecord)
+			RemoveStatRecordFromChildList(*OldStatRecord, FStatRecord::Main());
+
+		return true;
+	}
+
+	return false;
+}
+
+static ULevel* GetLevel()
+{
+	if(GEngine->IsA<UGameEngine>())
+		return static_cast<UGameEngine*>(GEngine)->GLevel;
+
+	if(GEngine->IsA<UEditorEngine>())
+		return static_cast<UEditorEngine*>(GEngine)->Level;
+
+	return NULL;
+}
 
 static struct FExecHook : public FExec, FNotifyHook{
 	WConfigProperties* Preferences;
@@ -46,20 +107,91 @@ static struct FExecHook : public FExec, FNotifyHook{
 		}
 	}
 
+	AActor* FindActor(const TCHAR* Cmd, FOutputDevice& Ar)
+	{
+		ULevel* Level = GetLevel();
+
+		if(!Level)
+		{
+			Ar.Log("No level loaded");
+			return NULL;
+		}
+
+		UClass* Class = NULL;
+
+		if(appStrfind(Cmd, "Class="))
+		{
+			if(!ParseObject<UClass>(Cmd, "Class=", Class, ANY_PACKAGE))
+			{
+				Ar.Log("Invalid class name");
+				return NULL;
+			}
+
+			if(!Class->IsChildOf(AActor::StaticClass()))
+			{
+				Ar.Log("Not a subclass of Actor");
+				return NULL;
+			}
+		}
+
+		FName ActorName = NAME_None;
+		UBOOL HaveName = Parse(Cmd, "Name=", ActorName);
+
+		AActor* Found = NULL;
+		APlayerController* Player = GIsClient ? GEngine->Client->Viewports[0]->Actor : NULL;
+
+		if(Class)
+		{
+			// Find the closest Actor with the given class and optional name
+			FLOAT MinDist = 999999.0f;
+
+			foreach(AllActors, AActor, It, Level)
+			{
+				FLOAT Dist = Player ? FDist(It->Location, Player->Pawn ? Player->Pawn->Location : Player->Location) : 0.0f;
+
+				if(!It->bDeleteMe && It->IsA(Class) && Dist < MinDist && (!HaveName || It->GetFName() == ActorName))
+				{
+					MinDist = Dist;
+					Found   = *It;
+				}
+			}
+		}
+		else
+		{
+			if(HaveName) // Find the first actor with the given name
+			{
+				foreach(AllActors, AActor, It, Level)
+				{
+					if(!It->bDeleteMe && It->GetFName() == ActorName)
+					{
+						Found = *It;
+						break;
+					}
+				}
+			}
+			else
+			{
+				if(Player)
+					Found = Player->Target;
+			}
+		}
+
+		if(!Found)
+			Ar.Logf("Target not found");
+
+		return Found;
+	}
+
 	virtual UBOOL Exec(const TCHAR* Cmd, FOutputDevice& Ar)
 	{
-		guard(FExecHook::Exec);
+		guardFunc;
 
-		HWND ParentWindow = NULL;
-
-		if(GLogWindow)
-			ParentWindow = GLogWindow->hWnd;
-		else if(GEngine->Client && GEngine->Client->Viewports.Num() > 0)
-			ParentWindow = static_cast<HWND>(GEngine->Client->Viewports[0]->GetWindow());
+		if(ParseCommand(&Cmd, "XLIVE"))
+			return 0;
 
 		if(ParseCommand(&Cmd, "SHOWLOG"))
 		{
-			GEngine->Client->Viewports[0]->EndFullscreen();
+			EndFullscreen();
 			GLogWindow->Show(1);
 			SetFocus(*GLogWindow);
 			GLogWindow->Display.ScrollCaret();
@@ -69,6 +201,31 @@ static struct FExecHook : public FExec, FNotifyHook{
 		else if(ParseCommand(&Cmd, "HIDELOG"))
 		{
 			GLogWindow->Show(0);
+			return 1;
+		}
+		else if(ParseCommand(&Cmd, "EDITDEFAULT"))
+		{
+			UClass* Class;
+
+			if(ParseObject<UClass>(Cmd, "Class=", Class, ANY_PACKAGE))
+			{
+				UObject* Object = Class->GetDefaultObject();
+
+				// HACK:
+				// This command crashes with the original exe because the returned default object does not contain a vtable.
+				// Calling the internal constructor initializes it. It's safe to do this each time since the default constructor performs no other initialization.
+				UObject::InternalConstructor(Object);
+
+				WObjectProperties* P = new WObjectProperties("EditDefault", 0, "", NULL, 1);
+				P->OpenWindow(GLogWindow->hWnd);
+				P->Root.SetObjects(&Object, 1);
+				P->Show(1);
+			}
+			else
+			{
+				Ar.Log("Missing class");
+			}
+
 			return 1;
 		}
 		else if(ParseCommand(&Cmd, "EDITOBJ"))
@@ -114,27 +271,33 @@ static struct FExecHook : public FExec, FNotifyHook{
 
 			if(Objects.Num() > 0)
 			{
-				GEngine->Client->Viewports[0]->EndFullscreen();
+				EndFullscreen();
 
 				if(ShowAll)
 				{
 					for(INT i = 0; i < Objects.Num(); ++i)
 					{
 						WObjectProperties* P = new WObjectProperties("EditObj", 0, "", NULL, 1);
-						P->SetNotifyHook(this);
-						P->OpenWindow(ParentWindow);
+						P->OpenWindow(GLogWindow->hWnd);
 						P->Root.SetObjects(&Objects[i], 1);
 						P->Show(1);
 					}
 				}
 				else
 				{
-					static INT Count = 0; // Used to cycle through objects when reentering the same command
+					// Cycle through objects when entering the same command again
+					static INT     Index     = 0;
+					static UClass* PrevClass = NULL;
+
+					if(PrevClass != Class)
+					{
+						Index = 0;
+						PrevClass = Class;
+					}
 
 					WObjectProperties* P = new WObjectProperties("EditObj", 0, "", NULL, 1);
-					P->SetNotifyHook(this);
-					P->OpenWindow(ParentWindow);
-					P->Root.SetObjects(&Objects[Count++ % Objects.Num()], 1);
+					P->OpenWindow(GLogWindow->hWnd);
+					P->Root.SetObjects(&Objects[Index++ % Objects.Num()], 1);
 					P->Show(1);
 				}
 			}
@@ -147,110 +310,87 @@ static struct FExecHook : public FExec, FNotifyHook{
 		}
 		else if(ParseCommand(&Cmd, "EDITACTOR"))
 		{
-			ULevel* Level = NULL;
+			AActor* Actor = FindActor(Cmd, Ar);
 
-			if(GEngine->IsA<UGameEngine>())
-				Level = static_cast<UGameEngine*>(GEngine)->GLevel;
-
-			if(!Level)
+			if(Actor)
 			{
-				Ar.Log("No Level loaded");
-				return 1;
-			}
-
-			UClass* Class = NULL;
-
-			if(appStrfind(Cmd, "Class="))
-			{
-				if(!ParseObject<UClass>(Cmd, "Class=", Class, ANY_PACKAGE))
-				{
-					Ar.Log("Invalid class name");
-					return 1;
-				}
-			}
-
-			FName ActorName = NAME_None;
-			UBOOL HaveName = Parse(Cmd, "Name=", ActorName);
-
-			AActor* Found = NULL;
-			APlayerController* Player = GIsClient ? GEngine->Client->Viewports[0]->Actor : NULL;
-
-			if(Class) // Find the closest Actor with the given class and optional name
-			{
-				FLOAT MinDist = 999999.0f;
-
-				foreach(AllActors, AActor, It, Level)
-				{
-					FLOAT Dist = Player ? FDist(It->Location, Player->Pawn ? Player->Pawn->Location : Player->Location) : 0.0f;
-
-					if(!It->bDeleteMe && It->IsA(Class) && Dist < MinDist && (!HaveName || It->GetFName() == ActorName))
-					{
-						MinDist = Dist;
-						Found   = *It;
-					}
-				}
-			}
-			else if(HaveName) // Find the first actor with the given name
-			{
-				foreach(AllActors, AActor, It, Level)
-				{
-					if(!It->bDeleteMe && It->GetFName() == ActorName)
-					{
-						Found = *It;
-						break;
-					}
-				}
-			}
-			else
-			{
-				if(Player)
-					Found = Player->Target;
-			}
-
-			if(Found)
-			{
-				GEngine->Client->Viewports[0]->EndFullscreen();
+				EndFullscreen();
 				WObjectProperties* P = new WObjectProperties("EditActor", 0, "", NULL, 1);
 				P->SetNotifyHook(this);
-				P->OpenWindow(ParentWindow);
-				P->Root.SetObjects((UObject**)&Found, 1);
+				P->OpenWindow(GLogWindow->hWnd);
+				P->Root.SetObjects((UObject**)&Actor, 1);
 				P->Show(1);
 
-				foreach(AllActors, AActor, It, Level)
+				foreach(AllActors, AActor, It, Actor->XLevel)
 					It->bSelected = 0;
 
-				Found->bSelected = 1;
+				Actor->bSelected = 1;
+			}
+
+			return 1;
+		}
+		else if(ParseCommand(&Cmd, "ACTORINFO"))
+		{
+			INT Anim = 0;
+			Parse(Cmd, "Anim=", Anim);
+
+			AActor* Actor = FindActor(Cmd, Ar);
+
+			if(Actor)
+			{
+				EndFullscreen();
+				WDebugObject* P = new WDebugObject(Anim, Actor, NULL);
+				P->OpenWindow(GLogWindow->hWnd);
+				P->Show(1);
+			}
+
+			return 1;
+
+		}
+		else if(ParseCommand(&Cmd, "COPYACTOR"))
+		{
+			AActor* Actor = FindActor(Cmd, Ar);
+
+			if(Actor)
+			{
+				FStringOutputDevice Out;
+				UExporter::ExportToOutputDevice(Actor, NULL, Out, "T3D", 0);
+				appClipboardCopy(*Out);
+			}
+
+			return 1;
+		}
+		else if(ParseCommand(&Cmd, "COPYLEVEL"))
+		{
+			ULevel* Level = GetLevel();
+
+			if(Level)
+			{
+				FStringOutputDevice Out;
+				UExporter::ExportToOutputDevice(Level, NULL, Out, "T3D", 0);
+				appClipboardCopy(*Out);
 			}
 			else
 			{
-				Ar.Logf("Target not found");
+				Ar.Log("No level loaded");
 			}
 
 			return 1;
 		}
 		else if(ParseCommand(&Cmd, "PREFERENCES"))
 		{
-			GEngine->Client->Viewports[0]->EndFullscreen();
+			EndFullscreen();
 
 			if(!Preferences)
 			{
 				Preferences = new WConfigProperties("Preferences", LocalizeGeneral("AdvancedOptionsTitle", "Window"));
 				Preferences->SetNotifyHook(this);
-				Preferences->OpenWindow(ParentWindow);
+				Preferences->OpenWindow(GLogWindow->hWnd);
 				Preferences->ForceRefresh();
 			}
 
 			Preferences->Show(1);
 			SetFocus(Preferences->hWnd);
-
-			return 1;
-		}
-		else if(ParseCommand(&Cmd, "GETRENDEV"))
-		{
-			if(GEngine && GEngine->GRenDev)
-				Ar.Log(GEngine->GRenDev->GetClass()->GetPathName());
-			else
-				Ar.Logf("No render device in use");
 
 			return 1;
 		}
@@ -269,47 +409,12 @@ static struct FExecHook : public FExec, FNotifyHook{
 
 			if(Class)
 			{
-				if(GEngine->GRenDev && GEngine->GRenDev->GetClass() != Class)
-				{
-					// Apparently the FStatRecord destructor does not clean up properly and there is still a reference to the old stat record stored in the linked list of child records.
-					// So we need to find the records belonging to the old render device and clean them up.
-					// This is only done once the render device has successfully been changed but the pointer to the record needs to be acquired here.
-					// TODO: Also do the same for OpenGL once/if FStatRecord is used there
-					FStatRecord* OldStatRecord = FStatRecord::Main().FindStat("D3D", true);
-
-					// UViewport::TryRenderDevice only works if GEngine->GRenDev is not the same as the current render device
-					GEngine->GRenDev = ConstructObject<URenderDevice>(Class);
-					GEngine->GRenDev->Init();
-
-					// We need to reset all FCanvasUtils since they still reference the old render interface
-					foreachobj(UCanvas, It)
-					{
-						if(It->pCanvasUtil)
-						{
-							delete It->pCanvasUtil;
-							It->pCanvasUtil = NULL;
-						}
-					}
-
-					UViewport* Viewport = GEngine->Client->Viewports[0];
-					Viewport->TryRenderDevice(*RenderDeviceClass, Viewport->SizeX, Viewport->SizeY, Viewport->IsFullscreen());
-
-					if(GEngine->GRenDev && GEngine->GRenDev->GetClass() == Class)
-					{
-						GConfig->SetString("Engine.Engine", "RenderDevice", *RenderDeviceClass);
-
-						if(OldStatRecord)
-							RemoveStatRecordFromChildList(*OldStatRecord, FStatRecord::Main());
-					}
-					else
-					{
-						Ar.Logf("Failed to set render device with class %s", *RenderDeviceClass);
-					}
-				}
+				if(!SwitchRenderDevice(Class))
+					Ar.Log("Failed to switch render device");
 			}
 			else
 			{
-				Ar.Logf("Unable to find render device class '%s'", *RenderDeviceClass);
+				Ar.Logf("Failed to find render device '%s'", *RenderDeviceClass);
 			}
 
 			return 1;
@@ -331,7 +436,7 @@ static bool RenDevSetOnCommandLine = false;
 
 static void InitEngine()
 {
-	guard(InitEngine);
+	guardFunc;
 	check(!GEngine);
 
 	DOUBLE LoadTime = appSeconds();
@@ -505,6 +610,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		GIsClient = ParseParam(appCmdLine(), "SERVER") == 0;
 		GIsServer = 1;
 		GIsEditor = 0;
+		GIsUCC = 1;
 		GIsScriptable = 1;
 		GLazyLoad = ParseParam(appCmdLine(), "LAZY");
 		GUseFrontEnd = ParseParam(appCmdLine(), "NOUI") == 0;
@@ -544,8 +650,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 				if(!RenDevSetOnCommandLine && GEngine->GRenDev && appStricmp(GEngine->GRenDev->GetClass()->GetPathName(), "D3DDrv.D3DRenderDevice") == 0)
 				{
-					GEngine->Client->Viewports[0]->Exec("ENDFULLSCREEN", *GLog); // D3D doesn't like being created while already in fullscreen
-					LauncherExecHook.Exec("USERENDEV MOD", *GLog);
+					EndFullscreen(); // D3D doesn't like being created while already in fullscreen
+					/* SwitchRenderDevice(LoadClass<URenderDevice>(NULL, "Mod.ModRenderDevice", NULL, LOAD_NoWarn | LOAD_Quiet, NULL)); */
 				}
 			}
 		}

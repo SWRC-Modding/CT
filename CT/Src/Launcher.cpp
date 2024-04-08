@@ -610,7 +610,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		GIsClient = ParseParam(appCmdLine(), "SERVER") == 0;
 		GIsServer = 1;
 		GIsEditor = 0;
-		GIsUCC = 1;
 		GIsScriptable = 1;
 		GLazyLoad = ParseParam(appCmdLine(), "LAZY");
 		GUseFrontEnd = ParseParam(appCmdLine(), "NOUI") == 0;

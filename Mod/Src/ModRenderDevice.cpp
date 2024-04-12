@@ -1,4 +1,5 @@
 #include "ModRenderDevice.h"
+#include "Engine.h"
 #include "Editor.h"
 
 /*
@@ -396,7 +397,7 @@ static D3D_CREATEDEVICE(D3D8CreateDeviceOverride)
  * FModRenderInterface
  */
 
-FModRenderInterface::FModRenderInterface(UModRenderDevice* InRenDev)
+FSelectionRenderInterface::FSelectionRenderInterface(UModRenderDevice* InRenDev)
 {
 	RenDev = InRenDev;
 
@@ -408,7 +409,7 @@ FModRenderInterface::FModRenderInterface(UModRenderDevice* InRenDev)
  * Converts a color value read from the frame buffer to an index that is stored in OutIndex.
  * If this function returns true, it means that a 'preferred' selection type was found which should be used if there are more than one possible selections.
  */
-bool FModRenderInterface::ProcessHitColor(FColor HitColor, INT* OutIndex)
+bool FSelectionRenderInterface::ProcessHitColor(FColor HitColor, INT* OutIndex)
 {
 	INT Index = HitColor.R | HitColor.G << 8 | HitColor.B << 16;
 
@@ -430,7 +431,7 @@ bool FModRenderInterface::ProcessHitColor(FColor HitColor, INT* OutIndex)
 	return false;
 }
 
-void FModRenderInterface::ProcessHit(INT HitProxyIndex)
+void FSelectionRenderInterface::ProcessHit(INT HitProxyIndex)
 {
 	if(HitProxyIndex >= 0 && HitProxyIndex < AllHitData.Num() - (INT)sizeof(HHitProxy))
 	{
@@ -480,14 +481,8 @@ void FModRenderInterface::ProcessHit(INT HitProxyIndex)
 	HitData = NULL;
 }
 
-void FModRenderInterface::PushHit(const BYTE* Data, INT Count)
+void FSelectionRenderInterface::PushHit(const BYTE* Data, INT Count)
 {
-	checkSlow(GIsEditor);
-	checkSlow(UModRenderDevice::SolidSelectionShader);
-	checkSlow(UModRenderDevice::AlphaSelectionShader);
-	checkSlow(HitData);
-	checkSlow(HitSize);
-
 	const TCHAR* Name = reinterpret_cast<const HHitProxy*>(Data)->GetName();
 	UBOOL IsPreferredSelection = appStricmp(Name, "HGizmoAxis") == 0 ||
 	                             appStricmp(Name, "HBrushVertex") == 0 ||
@@ -501,12 +496,12 @@ void FModRenderInterface::PushHit(const BYTE* Data, INT Count)
 	HitStack.AddItem(HitDataIndex);
 }
 
-void FModRenderInterface::PopHit(INT Count, UBOOL Force)
+void FSelectionRenderInterface::PopHit(INT Count, UBOOL Force)
 {
 	HitStack.Pop();
 }
 
-void FModRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorString, UMaterial** ErrorMaterial, INT* NumPasses)
+void FSelectionRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorString, UMaterial** ErrorMaterial, INT* NumPasses)
 {
 	Impl->SetMaterial(Material, ErrorString, ErrorMaterial, NumPasses);
 
@@ -538,16 +533,53 @@ void FModRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorString,
 	CurrentTexture = NULL;
 }
 
-UBOOL FModRenderInterface::SetHardwareShaderMaterial(UHardwareShader* Material, FString* ErrorString, UMaterial** ErrorMaterial)
+UBOOL FSelectionRenderInterface::SetHardwareShaderMaterial(UHardwareShader* Material, FString* ErrorString, UMaterial** ErrorMaterial)
 {
 	CurrentTexture = NULL;
 
 	return Impl->SetHardwareShaderMaterial(Material, ErrorString, ErrorMaterial);
 }
 
-void FModRenderInterface::DrawPrimitive(EPrimitiveType PrimitiveType, INT FirstIndex, INT NumPrimitives, INT MinIndex, INT MaxIndex)
+void FSelectionRenderInterface::DrawPrimitive(EPrimitiveType PrimitiveType, INT FirstIndex, INT NumPrimitives, INT MinIndex, INT MaxIndex)
 {
 	UHardwareShader* Shader;
+
+	DECLARE_STATIC_UOBJECT(UHardwareShader, SolidSelectionShader, {
+		// Initialize shader used for selection in the editor
+		SolidSelectionShader = new UHardwareShader();
+
+		SolidSelectionShader->VertexShaderText = "vs.1.1\n"
+																						 "m4x4 r0, v0, c0\n"
+																						 "mov oPos, r0\n";
+		SolidSelectionShader->PixelShaderText = "ps.1.1\n"
+																						"mov r0, c0\n";
+		SolidSelectionShader->VSConstants[0].Type = EVC_ObjectToScreenMatrix;
+		SolidSelectionShader->PSConstants[0].Type = EVC_MaterialDefined;
+		SolidSelectionShader->ZTest = 1;
+		SolidSelectionShader->ZWrite = 1;
+	});
+	DECLARE_STATIC_UOBJECT(UHardwareShader, AlphaSelectionShader, {
+		// Initialize shader used for selection of objects with alpha channel in the editor
+		AlphaSelectionShader = new UHardwareShader();
+
+		AlphaSelectionShader->VertexShaderText = "vs.1.1\n"
+																						 "m4x4 r0, v0, c0\n"
+																						 "mov oPos, r0\n"
+																						 "mov oT0, v1\n";
+		AlphaSelectionShader->PixelShaderText = "ps.1.1\n"
+																						"tex t0\n"
+																						"mov r0, c0\n"
+																						"mad r0, t0, c1, r0\n";
+		AlphaSelectionShader->StreamMapping.AddItem(FVF_Position);
+		AlphaSelectionShader->StreamMapping.AddItem(FVF_TexCoord0);
+		AlphaSelectionShader->VSConstants[0].Type = EVC_ObjectToScreenMatrix;
+		AlphaSelectionShader->PSConstants[0].Type = EVC_MaterialDefined;
+		AlphaSelectionShader->PSConstants[1].Type = EVC_MaterialDefined;
+		AlphaSelectionShader->PSConstants[1].Value = FPlane(0.0f, 0.0f, 0.0f, 1.0f);
+		AlphaSelectionShader->ZTest = 1;
+		AlphaSelectionShader->ZWrite = 1;
+		AlphaSelectionShader->AlphaTest = 1;
+	});
 
 	if(HitStack.Num() > 0)
 	{
@@ -558,7 +590,7 @@ void FModRenderInterface::DrawPrimitive(EPrimitiveType PrimitiveType, INT FirstI
 		// Sprites are drawn with alpha regardless of whether UTexture::bAlphaTexture is set or not so we need to check for it
 		if(HitActor && (HitActor->DrawType == DT_Sprite || HitActor->DrawType == DT_Particle))
 		{
-			Shader = UModRenderDevice::AlphaSelectionShader;
+			Shader = AlphaSelectionShader;
 			Shader->Textures[0] = Cast<UBitmapMaterial>(HitActor->Texture);
 		}
 		else
@@ -567,12 +599,13 @@ void FModRenderInterface::DrawPrimitive(EPrimitiveType PrimitiveType, INT FirstI
 			if(CurrentTexture &&
 			   appStricmp(reinterpret_cast<HHitProxy*>(&AllHitData[HitStack.Last() + sizeof(FHitProxyInfo)])->GetName(), "HBrowserMaterial") != 0)
 			   {
-				Shader = UModRenderDevice::AlphaSelectionShader;
+				Shader = AlphaSelectionShader;
 				Shader->Textures[0] = CurrentTexture;
 			}
 			else
 			{
-				Shader = UModRenderDevice::SolidSelectionShader;
+
+				Shader = SolidSelectionShader;
 				Shader->ZTest = !(HitActor && (HitActor->DrawType == DT_Brush || HitActor->DrawType == DT_AntiPortal)); // Disable ZTest for brushes since they are rendered on top of everything else
 			}
 		}
@@ -589,7 +622,7 @@ void FModRenderInterface::DrawPrimitive(EPrimitiveType PrimitiveType, INT FirstI
 	}
 	else
 	{
-		Shader = UModRenderDevice::SolidSelectionShader;
+		Shader = SolidSelectionShader;
 		Shader->PSConstants[0].Value = FPlane(0.0f, 0.0f, 0.0f, 0.0f);
 	}
 
@@ -610,49 +643,7 @@ UBOOL UModRenderDevice::Init()
 	UBOOL Result = Super::Init();
 
 	if(Result)
-	{
 		MaybePatchVTable(&D3D8CreateDevice, Direct3D8, D3DVTIdx_D3D8CreateDevice, D3D8CreateDeviceOverride);
-
-		if(!SolidSelectionShader)
-		{
-			// Initialize shader used for selection in the editor
-			SolidSelectionShader = new UHardwareShader();
-
-			SolidSelectionShader->VertexShaderText = "vs.1.1\n"
-			                                         "m4x4 r0, v0, c0\n"
-			                                         "mov oPos, r0\n";
-			SolidSelectionShader->PixelShaderText = "ps.1.1\n"
-			                                        "mov r0, c0\n";
-			SolidSelectionShader->VSConstants[0].Type = EVC_ObjectToScreenMatrix;
-			SolidSelectionShader->PSConstants[0].Type = EVC_MaterialDefined;
-			SolidSelectionShader->ZTest = 1;
-			SolidSelectionShader->ZWrite = 1;
-		}
-
-		if(!AlphaSelectionShader)
-		{
-			// Initialize shader used for selection of objects with alpha channel in the editor
-			AlphaSelectionShader = new UHardwareShader();
-
-			AlphaSelectionShader->VertexShaderText = "vs.1.1\n"
-			                                         "m4x4 r0, v0, c0\n"
-			                                         "mov oPos, r0\n"
-			                                         "mov oT0, v1\n";
-			AlphaSelectionShader->PixelShaderText = "ps.1.1\n"
-			                                        "tex t0\n"
-			                                        "mov r0, c0\n"
-			                                        "mad r0, t0, c1, r0\n";
-			AlphaSelectionShader->StreamMapping.AddItem(FVF_Position);
-			AlphaSelectionShader->StreamMapping.AddItem(FVF_TexCoord0);
-			AlphaSelectionShader->VSConstants[0].Type = EVC_ObjectToScreenMatrix;
-			AlphaSelectionShader->PSConstants[0].Type = EVC_MaterialDefined;
-			AlphaSelectionShader->PSConstants[1].Type = EVC_MaterialDefined;
-			AlphaSelectionShader->PSConstants[1].Value = FPlane(0.0f, 0.0f, 0.0f, 1.0f);
-			AlphaSelectionShader->ZTest = 1;
-			AlphaSelectionShader->ZWrite = 1;
-			AlphaSelectionShader->AlphaTest = 1;
-		}
-	}
 
 	return Result;
 }
@@ -691,14 +682,14 @@ FRenderInterface* UModRenderDevice::Lock(UViewport* Viewport, BYTE* HitData, INT
 	{
 		LockedViewport = Viewport;
 		RI->EnableFog(0); // No fog in the selection buffer or else there will be wrong color values.
-		RenderInterface.Impl = RI;
-		RenderInterface.HitData = HitData;
-		RenderInterface.HitSize = HitSize;
+		SelectionRI.Impl = RI;
+		SelectionRI.HitData = HitData;
+		SelectionRI.HitSize = HitSize;
 		// Storing color values
 		C_ActorArrow = GEngine->C_ActorArrow;
 		GEngine->C_ActorArrow = FColor(0x00000000);
 
-		return &RenderInterface;
+		return &SelectionRI;
 	}
 
 	return RI;
@@ -706,11 +697,11 @@ FRenderInterface* UModRenderDevice::Lock(UViewport* Viewport, BYTE* HitData, INT
 
 void UModRenderDevice::Unlock(FRenderInterface* RI)
 {
-	if(RI == &RenderInterface)
+	if(RI == &SelectionRI)
 	{
 		checkSlow(LockedViewport);
-		checkSlow(RenderInterface.HitData);
-		checkSlow(RenderInterface.HitSize);
+		checkSlow(SelectionRI.HitData);
+		checkSlow(SelectionRI.HitSize);
 
 		IDirect3DSurface8* RenderTarget = NULL;
 
@@ -752,7 +743,7 @@ void UModRenderDevice::Unlock(FRenderInterface* RI)
 					INT Index = INDEX_NONE;
 					FLOAT Dist = FVector(X, Y, 0.0f).Size2D(); // Distance of the hit from the center of the hit area. The closer it is, the higher the priority over other hits.
 
-					if(RenderInterface.ProcessHitColor(HitColor, &Index))
+					if(SelectionRI.ProcessHitColor(HitColor, &Index))
 					{
 						if(Dist < PreferredHitDist)
 						{
@@ -776,8 +767,8 @@ void UModRenderDevice::Unlock(FRenderInterface* RI)
 		}
 
 		D3DSurfaceUnlockRect(RenderTarget);
-		Super::Unlock(RenderInterface.Impl);
-		RenderInterface.ProcessHit(HitProxyIndex);
+		Super::Unlock(SelectionRI.Impl);
+		SelectionRI.ProcessHit(HitProxyIndex);
 
 		// Restoring color values
 		GEngine->C_ActorArrow = C_ActorArrow;
@@ -795,8 +786,5 @@ void UModRenderDevice::Unlock(FRenderInterface* RI)
 
 	LockedViewport = NULL;
 }
-
-UHardwareShader* UModRenderDevice::SolidSelectionShader = NULL;
-UHardwareShader* UModRenderDevice::AlphaSelectionShader = NULL;
 
 IMPLEMENT_CLASS(UModRenderDevice)

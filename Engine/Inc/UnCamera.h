@@ -427,21 +427,21 @@ public:
 	TArray<UViewport*>  Viewports;
 
 	// Configurable.
-	BOOL                CaptureMouse;
-	BOOL                ScreenFlashes;
-	BOOL                NoLighting;
-	BOOL                Decals;
-	BOOL                NoDynamicLights;
-	BOOL                NoFractalAnim;
-	BOOL                Coronas;
-	BOOL                DecoLayers;
-	BOOL                Projectors;
-	BOOL                ReportDynamicUploads;
-	BOOL                Shadows;
-	BOOL                FrameFXDisabled;
-	BOOL                NoHud;
-	BOOL                NoDistort;
-	BOOL                BlurEnabled;
+	UBOOL               CaptureMouse;
+	UBOOL               ScreenFlashes;
+	UBOOL               NoLighting;
+	UBOOL               Decals;
+	UBOOL               NoDynamicLights;
+	UBOOL               NoFractalAnim;
+	UBOOL               Coronas;
+	UBOOL               DecoLayers;
+	UBOOL               Projectors;
+	UBOOL               ReportDynamicUploads;
+	UBOOL               Shadows;
+	UBOOL               FrameFXDisabled;
+	UBOOL               NoHud;
+	UBOOL               NoDistort;
+	UBOOL               BlurEnabled;
 	BYTE                BloomQuality;
 	BYTE                BumpmappingQuality;
 	INT                 Bloom;

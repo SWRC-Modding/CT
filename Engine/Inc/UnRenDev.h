@@ -169,10 +169,12 @@ struct FRenderCaps{
 	INT   PixelShaderVersion;
 	UBOOL HardwareTL;
 
-	FRenderCaps(INT InMaxSimultaneousTerrainLayers = 1, INT InPixelShaderVersion = 0, INT InHardwareTL = 0)
-	: MaxSimultaneousTerrainLayers(InMaxSimultaneousTerrainLayers),
-	  PixelShaderVersion(InPixelShaderVersion),
-	  HardwareTL(InHardwareTL){}
+	FRenderCaps(INT InMaxSimultaneousTerrainLayers, INT InPixelShaderVersion, INT InHardwareTL)
+		: MaxSimultaneousTerrainLayers(InMaxSimultaneousTerrainLayers),
+		  PixelShaderVersion(InPixelShaderVersion),
+		  HardwareTL(InHardwareTL)
+	{
+	}
 };
 
 //
@@ -182,25 +184,25 @@ class ENGINE_API URenderDevice : public USubsystem{
 	DECLARE_ABSTRACT_CLASS(URenderDevice,USubsystem,CLASS_Config,Engine)
 public:
 	// Variables.
-	BYTE     DecompFormat;
-	INT      RecommendedLOD;
-	INT      TerrainLOD;
-	BITFIELD HighDetailActors;
-	BITFIELD SuperHighDetailActors;
-	BITFIELD DetailTextures;
-	BITFIELD PrecacheOnFlip;
-	BITFIELD SupportsCubemaps;
-	BITFIELD SupportsZBIAS;
-	BITFIELD UseCompressedLightmaps;
-	BITFIELD UseStencil;
-	BITFIELD Use16bit;
-	BITFIELD Use16bitTextures;
-	BITFIELD CanDoDistortionEffects;
-	BITFIELD Is3dfx;
-	BITFIELD LowQualityTerrain;
-	BITFIELD SkyboxHack;
-	BITFIELD Pad1[8];
-	DWORD    Pad0[8];
+	BYTE  DecompFormat;
+	INT   RecommendedLOD;
+	INT   TerrainLOD;
+	UBOOL HighDetailActors;
+	UBOOL SuperHighDetailActors;
+	UBOOL DetailTextures;
+	UBOOL PrecacheOnFlip;
+	UBOOL SupportsCubemaps;
+	UBOOL SupportsZBIAS;
+	UBOOL UseCompressedLightmaps;
+	UBOOL UseStencil;
+	UBOOL Use16bit;
+	UBOOL Use16bitTextures;
+	UBOOL CanDoDistortionEffects;
+	UBOOL Is3dfx;
+	UBOOL LowQualityTerrain;
+	UBOOL SkyboxHack;
+	DWORD Pad1[8];
+	DWORD Pad0[8];
 
 	// Constructors.
 	void StaticConstructor();

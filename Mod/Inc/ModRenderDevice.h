@@ -1,5 +1,4 @@
 #include "Mod.h"
-
 #include "../../D3DDrv/Inc/D3DDrv.h"
 
 class UModRenderDevice;
@@ -15,7 +14,7 @@ struct FHitProxyInfo{
 /*
  * ModRenderInterface
  */
-class FModRenderInterface : public FRenderInterface{
+class FSelectionRenderInterface : public FRenderInterface{
 public:
 	UModRenderDevice* RenDev;
 	FRenderInterface* Impl;
@@ -25,7 +24,7 @@ public:
 	INT*              HitSize;
 	UBitmapMaterial*  CurrentTexture;
 
-	FModRenderInterface(UModRenderDevice* InRenDev);
+	FSelectionRenderInterface(UModRenderDevice* InRenDev);
 
 	bool ProcessHitColor(FColor HitColor, INT* OutIndex);
 	void ProcessHit(INT HitProxyIndex);
@@ -48,8 +47,8 @@ public:
 	virtual FMatrix GetTransform(ETransformType Type) const{ return Impl->GetTransform(Type); }
 	virtual void SetMaterial(UMaterial* Material, FString* ErrorString, UMaterial** ErrorMaterial, INT* NumPasses);
 	virtual UBOOL SetHardwareShaderMaterial(UHardwareShader* Material, FString* ErrorString, UMaterial** ErrorMaterial);
-	virtual void SetStencilOp(ECompareFunction Test, DWORD Ref, DWORD Mask, EStencilOp FailOp, EStencilOp ZFailOp, EStencilOp PassOp, DWORD WriteMask){}
-	virtual void EnableStencil(UBOOL Enable){}
+	virtual void SetStencilOp(ECompareFunction Test, DWORD Ref, DWORD Mask, EStencilOp FailOp, EStencilOp ZFailOp, EStencilOp PassOp, DWORD WriteMask){ Impl->SetStencilOp(Test, Ref, Mask, FailOp, ZFailOp, PassOp, WriteMask); }
+	virtual void EnableStencil(UBOOL Enable){ Impl->EnableStencil(Enable); }
 	virtual void EnableDepth(UBOOL Enable){ Impl->EnableDepth(Enable); }
 	virtual void SetPrecacheMode(EPrecacheMode PrecacheMode){ Impl->SetPrecacheMode(PrecacheMode); }
 	virtual void SetZBias(INT ZBias){ Impl->SetZBias(ZBias); }
@@ -59,11 +58,6 @@ public:
 	virtual INT SetDynamicIndexBuffer(FIndexBuffer* IndexBuffer, INT BaseIndex){ return Impl->SetDynamicIndexBuffer(IndexBuffer, BaseIndex); }
 	virtual void DrawPrimitive(EPrimitiveType PrimitiveType, INT FirstIndex, INT NumPrimitives, INT MinIndex, INT MaxIndex);
 	virtual void SetFillMode(EFillMode FillMode){ Impl->SetFillMode(FillMode); }
-
-	// Additional virtual functions from FD3DRenderInterface must be implemented to avoid crashes.
-	virtual int d3d1(int a, int b){ return 0; }
-	virtual int d3d2(int a){ return 0; }
-	virtual int d3d3(int a){ return 0; }
 };
 
 /*
@@ -74,25 +68,16 @@ public:
 class MOD_API UModRenderDevice : public UD3DRenderDevice{
 	DECLARE_CLASS(UModRenderDevice, UD3DRenderDevice, 0, Mod)
 public:
-	static UHardwareShader* SolidSelectionShader;
-	static UHardwareShader* AlphaSelectionShader;
-
-	UViewport*          LockedViewport;
-	FModRenderInterface RenderInterface;
-	UBOOL               bEnableSelectionFix;
-	UBOOL               bDebugSelectionBuffer; // Shows the selection buffer for five seconds after a click
+	UViewport*                LockedViewport;
+	FSelectionRenderInterface SelectionRI;
+	UBOOL                     bEnableSelectionFix;
+	UBOOL                     bDebugSelectionBuffer; // Shows the selection buffer for five seconds after a click
 
 	// Saved color values from UEngine
 	FColor C_ActorArrow;
 
-	UModRenderDevice() : RenderInterface(this){}
+	UModRenderDevice() : SelectionRI(this){}
 	void StaticConstructor(){ bEnableSelectionFix = 1; }
-
-	virtual void Serialize(FArchive& Ar)
-	{
-		Super::Serialize(Ar);
-		Ar << SolidSelectionShader << AlphaSelectionShader;
-	}
 
 	virtual UBOOL Init();
 	virtual UBOOL Exec(const TCHAR* Cmd, FOutputDevice& Ar);

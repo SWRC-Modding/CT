@@ -9,7 +9,7 @@
 
 static TMap<UFunction*, UFunctionOverride*> FunctionOverrides;
 
-static void __fastcall ScriptFunctionHook(UObject* Self, int, FFrame& Stack, void* Result)
+static void __fastcall ScriptFunctionHook(UObject* Self, DWORD, FFrame& Stack, void* Result)
 {
 	/*
 	 * The stack doesn't contain any information about the called function at this point.
@@ -70,6 +70,40 @@ static void __fastcall ScriptFunctionHook(UObject* Self, int, FFrame& Stack, voi
 	Function->FunctionFlags |= FUNC_Native;
 }
 
+struct FNativeFinalOverride{
+	Native     NativeFunc;
+	UFunction* ScriptFunc;
+
+	FNativeFinalOverride(Native InNativeFunc, UFunction* InScriptFunc)
+		: NativeFunc(InNativeFunc),
+		  ScriptFunc(InScriptFunc)
+	{
+	}
+};
+
+static TMap<INT, FNativeFinalOverride> NativeFinalFunctionOverrides;
+
+static void __fastcall NativeFinalFunctionHook(UObject* Self, DWORD, FFrame& Stack, void* Result)
+{
+	INT Index = *(Stack.Code - 1);
+
+	if(*reinterpret_cast<void**>(&GNatives[Index]) != NativeFinalFunctionHook)
+	{
+		Index = *(_WORD*)(Stack.Code - 1);
+
+		if(*reinterpret_cast<void**>(&GNatives[Index]) == NativeFinalFunctionHook)
+			++Stack.Code;
+		else
+			appErrorf("NativeFinalFunctionHook called with invalid function index");
+	}
+
+	const FNativeFinalOverride& Override = NativeFinalFunctionOverrides[Index];
+	GNatives[Index] = Override.NativeFunc;
+	Self->CallFunction(Stack, Result, Override.ScriptFunc);
+	void* Temp = NativeFinalFunctionHook;
+	appMemcpy(&GNatives[Index], &Temp, sizeof(Temp));
+}
+
 void UFunctionOverride::execInit(FFrame& Stack, void* Result)
 {
 	P_GET_OBJECT(UObject, InTargetObject);
@@ -87,20 +121,21 @@ void UFunctionOverride::execInit(FFrame& Stack, void* Result)
 	OverrideObject = InOverrideObject;
 	OverrideFunction = OverrideObject->FindFunctionChecked(OverrideFuncName);
 
-	if(TargetFunction->iNative != 0) // TODO: Allow this in the future
+	if(TargetFunction->iNative != 0)
 	{
-		appErrorf("Cannot override native final function '%s' in '%s'",
-				  *TargetFunction->FriendlyName,
-				  OverrideForAllObjects ? InTargetObject->GetName() : InTargetObject->GetClass()->GetName());
+		NativeFinalFunctionOverrides[TargetFunction->iNative] = FNativeFinalOverride(GNatives[TargetFunction->iNative], OverrideFunction);
+		void* Temp = NativeFinalFunctionHook;
+		appMemcpy(&GNatives[TargetFunction->iNative], &Temp, sizeof(Temp));
 	}
-
-	OriginalFunctionFlags = TargetFunction->FunctionFlags;
-	TargetFunction->FunctionFlags |= FUNC_Native;
-	OriginalNative = TargetFunction->Func;
-	void* Temp = ScriptFunctionHook;
-	appMemcpy(&TargetFunction->Func, &Temp, sizeof(Temp));
-
-	FunctionOverrides[TargetFunction] = this;
+	else
+	{
+		OriginalFunctionFlags = TargetFunction->FunctionFlags;
+		TargetFunction->FunctionFlags |= FUNC_Native;
+		OriginalNative = TargetFunction->Func;
+		void* Temp = ScriptFunctionHook;
+		appMemcpy(&TargetFunction->Func, &Temp, sizeof(Temp));
+		FunctionOverrides[TargetFunction] = this;
+	}
 }
 
 void UFunctionOverride::execDeinit(FFrame& Stack, void* Result)
@@ -117,7 +152,12 @@ void UFunctionOverride::Destroy()
 
 void UFunctionOverride::Deinit()
 {
-	if(TargetFunction && FunctionOverrides.Find(TargetFunction) && FunctionOverrides[TargetFunction] == this)
+	if(TargetFunction && TargetFunction->iNative)
+	{
+		GNatives[TargetFunction->iNative] = NativeFinalFunctionOverrides[TargetFunction->iNative].NativeFunc;
+		NativeFinalFunctionOverrides.Remove(TargetFunction->iNative);
+	}
+	else if(TargetFunction && FunctionOverrides.Find(TargetFunction) && FunctionOverrides[TargetFunction] == this)
 	{
 		TargetFunction->FunctionFlags = OriginalFunctionFlags;
 		TargetFunction->Func = OriginalNative;

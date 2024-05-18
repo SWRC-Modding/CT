@@ -73,6 +73,7 @@ public:
 
 	FRtxRenderInterface RenderInterface;
 
+	virtual UBOOL Init();
 	virtual FRenderInterface* Lock(UViewport* Viewport, BYTE* HitData, INT* HitSize);
 	virtual void Unlock(FRenderInterface* RI);
 };

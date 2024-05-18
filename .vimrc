@@ -3,13 +3,10 @@ set errorformat^=%f(%l):\ %m,%f(%l)\ :\ %m,%f\ :\ error\ %m,LINK\ :\ fatal\ erro
 
 map <silent> <F3> :wa <bar> let &makeprg='..\GameData\System\UCC.exe' <bar> make! make "ini=../../Code/UCC/UCC.ini" -noprompt -fullsourcepath -noincremental <bar> :cwindow<CR>
 map <silent> <F4> :wa <bar> let &makeprg='build.bat' <bar> make! debug <bar> :cwindow<CR>
-<<<<<<< Updated upstream
-map <F5> :!start "../GameData/System/CT.exe" dm_canyon?game=mpgame.dmgame?maxplayers=32?Listen -windowed -log -nosaveconfig -rendev=opengl<CR>
+
+" map <F5> :!start "../GameData/System/CT.exe" dm_canyon?game=mpgame.dmgame?maxplayers=32?Listen -windowed -log -nosaveconfig -rendev=rtx<CR>
+map <F5> :!start "../GameData/System/CT.exe" geo_01a -windowed -log -nosaveconfig -rendev=rtx<CR>
 map <F6> :!start "../GameData/System/CTEditor.exe"<CR>
-=======
-map <F5> :!start "../GameData/System/CT.exe" dm_canyon?game=mpgame.dmgame?maxplayers=32?Listen -windowed -log -nosaveconfig -rendev=rtx<CR>
-map <F6> :!start "../GameData/System/ModEd.exe"<CR>
->>>>>>> Stashed changes
 
 augroup customhighlight
 	autocmd!

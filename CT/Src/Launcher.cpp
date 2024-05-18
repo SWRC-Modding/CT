@@ -675,7 +675,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		appPreExit();
 
 		GIsGuarded = 0;
-	}catch(...)
+	}
+	catch(...)
 	{
 		GIsGuarded = 0;
 		ExitCode = EXIT_FAILURE;

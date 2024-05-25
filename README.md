@@ -40,4 +40,4 @@ Everything was tested to work with Visual Studio 2022 without any issues.
   
 Follow this [guide](https://wiki.swrc-modding.net/index.php?title=Writing_Native_Code) on how to create C++ based mods.  
 
-Join our modding [Discord](https://discord.gg/3u69jMa) and check out the [Wiki](https://wiki.swrc-modding.net/index.php?title=Star_Wars_Republic_Commando_Wiki)!  
+Join our modding [Discord](https://discord.gg/3u69jMa) and check out the [Wiki](https://wiki.swrc-modding.net/index.php?title=Main_Page)!  

@@ -66,7 +66,7 @@ public:
  * - Adds alternative selection mechanism for much better performance in the Editor
  */
 class MOD_API UModRenderDevice : public UD3DRenderDevice{
-	DECLARE_CLASS(UModRenderDevice, UD3DRenderDevice, 0, Mod)
+	DECLARE_CLASS(UModRenderDevice,UD3DRenderDevice,0,Mod)
 public:
 	UViewport*                LockedViewport;
 	FSelectionRenderInterface SelectionRI;

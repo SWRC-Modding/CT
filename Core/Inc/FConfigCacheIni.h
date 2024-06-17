@@ -248,7 +248,7 @@ public:
 		UBOOL&			Value,
 		const TCHAR*	Filename
 	)
-{
+	{
 		guard(FConfigCacheIni::GetBool);
 
 		const TCHAR* Text = GetStr(Section, Key, Filename);
@@ -274,7 +274,7 @@ public:
 		INT&			Value,
 		const TCHAR*	Filename
 	)
-{
+	{
 		guard(FConfigCacheIni::GetInt);
 
 		const TCHAR* Text = GetStr(Section, Key, Filename);
@@ -297,7 +297,7 @@ public:
 		FLOAT&			Value,
 		const TCHAR*	Filename
 	)
-{
+	{
 		guard(FConfigCacheIni::GetFloat);
 
 		const TCHAR* Text = GetStr(Section, Key, Filename);
@@ -457,7 +457,7 @@ public:
 		UBOOL		 Value,
 		const TCHAR* Filename
 	)
-{
+	{
 		guard(FConfigCacheIni::SetBool);
 
 		SetString(Section, Key, Value ? "True" : "False", Filename);
@@ -471,7 +471,7 @@ public:
 		INT			 Value,
 		const TCHAR* Filename
 	)
-{
+	{
 		guard(FConfigCacheIni::SetInt);
 
 		TCHAR Text[30];
@@ -487,7 +487,7 @@ public:
 		FLOAT			Value,
 		const TCHAR*	Filename
 	)
-{
+	{
 		guard(FConfigCacheIni::SetFloat);
 
 		TCHAR Text[30];

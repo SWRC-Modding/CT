@@ -220,26 +220,62 @@ public:
 	ULodMesh.
 -----------------------------------------------------------------------------*/
 
+struct FImpostorProps{
+	UMaterial* Material;
+	FVector    Scale3D;
+	FRotator   RelativeRotation;
+	FVector    RelativeLocation;
+	FColor     ImpColor;
+	INT        ImpSpaceMode;
+	INT        ImpDrawMode;
+	INT        ImpLightMode;
+};
+
 class ENGINE_API ULodMesh : public UMesh{
 	DECLARE_CLASS(ULodMesh,UMesh,CLASS_SafeReplace,Engine)
 public:
-	INT                InternalVersion;
+	INT                   InternalVersion;
 	// General LOD mesh data
-	INT                ModelVerts;
-	TArray<FMeshVert>  Verts;
-	TArray<UMaterial*> Materials;
+	INT                   ModelVerts;
+	TArray<FMeshVert>     Verts;
+	TArray<UMaterial*>    Materials;
 
 	// Scaling.
-	FVector            Scale; // Mesh scaling.
-	FVector            Origin; // Origin in original coordinate system.
-	FRotator           RotOrigin; // Amount to rotate when importing (mostly for yawing).
+	FVector               Scale; // Mesh scaling.
+	FVector               Origin; // Origin in original coordinate system.
+	FRotator              RotOrigin; // Amount to rotate when importing (mostly for yawing).
 
 	// LOD-specific objects.
-	TArray<FMeshFace>  Faces; // Faces
+	TArray<_WORD>         FaceLevel;          // Minimum lod-level indicator for each face.
+	TArray<FMeshFace>     Faces;              // Faces
+	TArray<_WORD>         CollapseWedgeThus;  // Lod-collapse single-linked list for the wedges.
+	TArray<FMeshWedge>    Wedges;             // 'Hoppe-style' textured vertices.
+	TArray<FMeshMaterial> MeshMaterials;      // Materials
 
-	// TODO: Variables
-	char Padding[140];
-	// TODO: Virtual functions
+	// Max of x/y/z mesh scale for LOD gauging (works on top of drawscale).
+	FLOAT                 MeshScaleMax;
+
+	// Script-settable LOD controlling parameters.
+	FLOAT                 LODStrength;    // Scales the (not necessarily linear) falloff of vertices with distance.
+	INT                   LODMinVerts;    // Minimum number of vertices with which to draw a model.
+	FLOAT                 LODMorph;       // >0.0 = allow morphing ; 0.0-1.0 = range of vertices to morph.
+	FLOAT                 LODZDisplace;   // Z displacement for LOD distance-dependency tweaking.
+	FLOAT                 LODHysteresis;  // Controls LOD-level change delay and morphing.
+
+	FLOAT                 FadeSpecNear;
+	FLOAT                 FadeSpecFar;
+	FLOAT                 FadeDiffNear;
+	FLOAT                 FadeDiffFar;
+
+	// Impostor support.
+	UBOOL                 bImpostorPresent;
+	FImpostorProps        ImpostorProps;
+
+	// Hardware specific.
+	FLOAT                 SkinTesselationFactor; // Hardware triangle subdivision factor ( <=1.0 means inactive )
+
+	// Multi-purpose content authentication key.
+	DWORD                 AuthenticationKey;
 };
 
 /*----------------------------------------------------------------------------

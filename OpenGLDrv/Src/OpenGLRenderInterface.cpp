@@ -1150,7 +1150,7 @@ void FOpenGLRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorStri
 	                Material == FrameFX->ShaderGlow ||
 	                Material == FrameFX->ShaderBlur ||
 	                (FrameFX->VisionMode && Material == FrameFX->VisionMode->VisionShader))))
-	                {
+	{
 		// Remove offset by truncating float to int.
 		// This works because the x/y values will only ever be -1 or 1 (plus fractional offset) for fullscreen quads or 0 for FFrameGrid
 		CurrentState->CameraToScreen.M[3][0] = static_cast<INT>(CurrentState->CameraToScreen.M[3][0]);

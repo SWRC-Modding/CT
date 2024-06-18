@@ -30,7 +30,7 @@ UBOOL URtxRenderDevice::Init()
 	RenderInterface.RenDev = this;
 	RenderInterface.Impl = NULL;
 
-	UMaterial::ClearFallbacks();
+	ClearMaterialFlags();
 	UClient* Client = UTexture::__Client;
 	Client->Shadows = 0;
 	Client->FrameFXDisabled = 1;
@@ -45,6 +45,7 @@ UBOOL URtxRenderDevice::Init()
 
 void URtxRenderDevice::Flush(UViewport* Viewport)
 {
+	ClearMaterialFlags();
 	Super::Flush(Viewport);
 }
 
@@ -89,6 +90,7 @@ void FRtxRenderInterface::SetTransform(ETransformType Type, const FMatrix& Matri
 
 void FRtxRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorString, UMaterial** ErrorMaterial, INT* NumPasses)
 {
+	guardFunc;
 	CurrentMaterial = Material;
 
 	UMaterial* ActualMaterial = Material;
@@ -101,9 +103,11 @@ void FRtxRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorString,
 
 	CurrentActualMaterial = ActualMaterial;
 
-	if(ActualMaterial && !ActualMaterial->UseFallback)
+	INT Mask = (reinterpret_cast<INT*>(ActualMaterial)[24] & 0x3) >> 2;
+
+	if(ActualMaterial && (Mask & 0x1) == 0)
 	{
-		ActualMaterial->UseFallback = 1;
+		Mask |= 0x1;
 
 		if(ActualMaterial->GetFName() != NAME_InGameTempName)
 		{
@@ -112,16 +116,19 @@ void FRtxRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorString,
 			{
 				if(RenDev->MaterialIdsByPath[i].Path == Path)
 				{
-					reinterpret_cast<INT*>(ActualMaterial)[24] = (reinterpret_cast<INT*>(ActualMaterial)[24] & 0x3) | ((i + 1) << 3);
+					Mask |= (i + 1) << 1;
 					break;
 				}
 			}
 		}
+
+		reinterpret_cast<INT*>(ActualMaterial)[24] = (reinterpret_cast<INT*>(ActualMaterial)[24] & 0x3) | (Mask << 2);
 	}
 
 	DrawParticleTriangles = ActualMaterial && (reinterpret_cast<INT*>(ActualMaterial)[24] >> 3) != 0;
 
 	Impl->SetMaterial(Material, ErrorString, ErrorMaterial, NumPasses);
+	unguardf(("%s", Material->GetPathName()))
 }
 
 void FRtxRenderInterface::DrawPrimitive(EPrimitiveType PrimitiveType, INT FirstIndex, INT NumPrimitives, INT MinIndex, INT MaxIndex)
@@ -155,4 +162,12 @@ FRenderCaps* URtxRenderDevice::GetRenderCaps()
 	static FRenderCaps RenderCaps(1, 14, 1);
 
 	return &RenderCaps;
+}
+
+void URtxRenderDevice::ClearMaterialFlags()
+{
+	foreachobj(UMaterial, Material)
+	{
+		reinterpret_cast<INT*>(*Material)[24] = (reinterpret_cast<INT*>(*Material)[24] & 0x3);
+	}
 }

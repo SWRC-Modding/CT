@@ -129,6 +129,9 @@ public:
 	};
 
 	TArray<TestDraw> MaterialIdsByPath;
+
+private:
+	void ClearMaterialFlags();
 };
 
 #endif // RTXDRV_NATIVE_DEFS

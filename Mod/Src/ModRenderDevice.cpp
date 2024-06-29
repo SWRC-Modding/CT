@@ -413,8 +413,6 @@ bool FSelectionRenderInterface::ProcessHitColor(FColor HitColor, INT* OutIndex)
 {
 	INT Index = HitColor.R | HitColor.G << 8 | HitColor.B << 16;
 
-	--Index; // Index was incremented before drawing so that a value of 0 means 'no selection'. Here it is decremented again to get the actual array index.
-
 	if(Index >= 0 && Index < AllHitData.Num() - (INT)sizeof(HHitProxy))
 	{
 		FHitProxyInfo* Info = reinterpret_cast<FHitProxyInfo*>(&AllHitData[Index]);
@@ -442,7 +440,7 @@ void FSelectionRenderInterface::ProcessHit(INT HitProxyIndex)
 		for(INT ParentIndex = reinterpret_cast<FHitProxyInfo*>(&AllHitData[HitProxyIndex])->ParentIndex;
 			ParentIndex != INDEX_NONE;
 			ParentIndex = reinterpret_cast<FHitProxyInfo*>(&AllHitData[ParentIndex])->ParentIndex)
-			{
+		{
 
 			ParentIndices[NumParents] = ParentIndex;
 			++NumParents;
@@ -465,15 +463,6 @@ void FSelectionRenderInterface::ProcessHit(INT HitProxyIndex)
 
 		appMemcpy(HitData + HitCount, Hit, Hit->Size);
 		*HitSize = HitCount + Hit->Size;
-	}
-	else
-	{
-		// Select nothing
-		UEditorEngine* Editor = CastChecked<UEditorEngine>(GEngine);
-
-		Editor->Trans->Begin("Select None");
-		Editor->SelectNone(Editor->Level, 1, 1);
-		Editor->Trans->End();
 	}
 
 	HitStack.Empty();
@@ -608,8 +597,6 @@ void FSelectionRenderInterface::DrawPrimitive(EPrimitiveType PrimitiveType, INT 
 
 		// Convert index to shader color
 
-		++HitDataIndex; // Adding 1 because 0 means no hit. This is subtracted again later.
-
 		checkSlow(RenDev->LockedViewport->ColorBytes == 3 || RenDev->LockedViewport->ColorBytes == 4);
 
 		Shader->PSConstants[0].Value.X = static_cast<BYTE>(HitDataIndex) / 255.0f;
@@ -733,7 +720,7 @@ void UModRenderDevice::Unlock(FRenderInterface* RI)
 		{
 			for(INT X = -LockedViewport->HitXL; X < LockedViewport->HitXL + 1; X++)
 			{
-				if(src + X >= LockedRect.pBits && src[X] != 0x0)
+				if(src + X >= LockedRect.pBits)
 				{
 					FColor HitColor = FColor((src[X] >> 16) & 0xff, (src[X] >> 8) & 0xff, (src[X]) & 0xff);
 					INT Index = INDEX_NONE;

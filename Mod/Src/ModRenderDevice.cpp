@@ -546,13 +546,11 @@ void FSelectionRenderInterface::DrawPrimitive(EPrimitiveType PrimitiveType, INT 
 
 	DECLARE_STATIC_UOBJECT(UHardwareShader, SolidSelectionShader, {
 		// Initialize shader used for selection in the editor
-		SolidSelectionShader = new UHardwareShader();
-
 		SolidSelectionShader->VertexShaderText = "vs.1.1\n"
-																						 "m4x4 r0, v0, c0\n"
-																						 "mov oPos, r0\n";
+		                                         "m4x4 r0, v0, c0\n"
+		                                         "mov oPos, r0\n";
 		SolidSelectionShader->PixelShaderText = "ps.1.1\n"
-																						"mov r0, c0\n";
+		                                        "mov r0, c0\n";
 		SolidSelectionShader->VSConstants[0].Type = EVC_ObjectToScreenMatrix;
 		SolidSelectionShader->PSConstants[0].Type = EVC_MaterialDefined;
 		SolidSelectionShader->ZTest = 1;
@@ -560,16 +558,14 @@ void FSelectionRenderInterface::DrawPrimitive(EPrimitiveType PrimitiveType, INT 
 	});
 	DECLARE_STATIC_UOBJECT(UHardwareShader, AlphaSelectionShader, {
 		// Initialize shader used for selection of objects with alpha channel in the editor
-		AlphaSelectionShader = new UHardwareShader();
-
 		AlphaSelectionShader->VertexShaderText = "vs.1.1\n"
-																						 "m4x4 r0, v0, c0\n"
-																						 "mov oPos, r0\n"
-																						 "mov oT0, v1\n";
+		                                         "m4x4 r0, v0, c0\n"
+		                                         "mov oPos, r0\n"
+		                                         "mov oT0, v1\n";
 		AlphaSelectionShader->PixelShaderText = "ps.1.1\n"
-																						"tex t0\n"
-																						"mov r0, c0\n"
-																						"mad r0, t0, c1, r0\n";
+		                                        "tex t0\n"
+		                                        "mov r0, c0\n"
+		                                        "mad r0, t0, c1, r0\n";
 		AlphaSelectionShader->StreamMapping.AddItem(FVF_Position);
 		AlphaSelectionShader->StreamMapping.AddItem(FVF_TexCoord0);
 		AlphaSelectionShader->VSConstants[0].Type = EVC_ObjectToScreenMatrix;
@@ -598,7 +594,7 @@ void FSelectionRenderInterface::DrawPrimitive(EPrimitiveType PrimitiveType, INT 
 			// Alpha is ignored in the texture browser since there it should be possible to click anywhere on a texture to select it
 			if(CurrentTexture &&
 			   appStricmp(reinterpret_cast<HHitProxy*>(&AllHitData[HitStack.Last() + sizeof(FHitProxyInfo)])->GetName(), "HBrowserMaterial") != 0)
-			   {
+			{
 				Shader = AlphaSelectionShader;
 				Shader->Textures[0] = CurrentTexture;
 			}

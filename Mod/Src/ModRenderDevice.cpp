@@ -492,6 +492,7 @@ void FSelectionRenderInterface::PopHit(INT Count, UBOOL Force)
 
 void FSelectionRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorString, UMaterial** ErrorMaterial, INT* NumPasses)
 {
+	CurrentTexture = NULL;
 	Impl->SetMaterial(Material, ErrorString, ErrorMaterial, NumPasses);
 
 	// Checking whether the current material has a texture with an alpha channel somewhere down the hierarchy.
@@ -507,7 +508,7 @@ void FSelectionRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorS
 			else
 				CurrentTexture = NULL;
 
-			return;
+			break;
 		}
 		else if(Material->IsA<UShader>())
 		{
@@ -518,15 +519,6 @@ void FSelectionRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorS
 			Material = NULL;
 		}
 	}
-
-	CurrentTexture = NULL;
-}
-
-UBOOL FSelectionRenderInterface::SetHardwareShaderMaterial(UHardwareShader* Material, FString* ErrorString, UMaterial** ErrorMaterial)
-{
-	CurrentTexture = NULL;
-
-	return Impl->SetHardwareShaderMaterial(Material, ErrorString, ErrorMaterial);
 }
 
 void FSelectionRenderInterface::DrawPrimitive(EPrimitiveType PrimitiveType, INT FirstIndex, INT NumPrimitives, INT MinIndex, INT MaxIndex)
@@ -569,8 +561,9 @@ void FSelectionRenderInterface::DrawPrimitive(EPrimitiveType PrimitiveType, INT 
 	if(HitStack.Num() > 0)
 	{
 		INT            HitDataIndex = HitStack.Last();
-		FHitProxyInfo* Info = reinterpret_cast<FHitProxyInfo*>(&AllHitData[HitDataIndex]);
-		AActor*        HitActor = reinterpret_cast<HHitProxy*>(reinterpret_cast<BYTE*>(Info) + sizeof(FHitProxyInfo))->GetActor();
+		FHitProxyInfo* Info         = reinterpret_cast<FHitProxyInfo*>(&AllHitData[HitDataIndex]);
+		HHitProxy*     HitProxy     = reinterpret_cast<HHitProxy*>(Info + 1);
+		AActor*        HitActor     = HitProxy->GetActor();
 
 		// Sprites are drawn with alpha regardless of whether UTexture::bAlphaTexture is set or not so we need to check for it
 		if(HitActor && (HitActor->DrawType == DT_Sprite || HitActor->DrawType == DT_Particle))
@@ -580,15 +573,31 @@ void FSelectionRenderInterface::DrawPrimitive(EPrimitiveType PrimitiveType, INT 
 		}
 		else
 		{
+			const bool IsTextureBrowserMaterial = appStricmp(HitProxy->GetName(), "HBrowserMaterial") == 0;
+
 			// Alpha is ignored in the texture browser since there it should be possible to click anywhere on a texture to select it
-			if(CurrentTexture &&
-			   appStricmp(reinterpret_cast<HHitProxy*>(&AllHitData[HitStack.Last() + sizeof(FHitProxyInfo)])->GetName(), "HBrowserMaterial") != 0)
+			if(CurrentTexture && !IsTextureBrowserMaterial)
 			{
 				Shader = AlphaSelectionShader;
 				Shader->Textures[0] = CurrentTexture;
 			}
 			else
 			{
+				/*
+				 * There's a bug in the texture browser where clicking on the name of a material will not select the material under the cursor but the one after it.
+				 * Since it can't be fixed at the source (UnrealEd.exe) here's a workaround that checks if a material name is rendered in which case the previous
+				 * hit data index is used which causes the correct material to be selected.
+				 */
+				if(IsTextureBrowserMaterial)
+				{
+					static INT PrevHitDataIndex = 0;
+
+					// NumPrimitives > 2 means the material name is being drawn. Everything else in the texture browser is drawn as a single quad (2 tris)
+					if(NumPrimitives > 2)
+						HitDataIndex = PrevHitDataIndex; // use the previous index for the current selection
+					else
+						PrevHitDataIndex = HitDataIndex;
+				}
 
 				Shader = SolidSelectionShader;
 				Shader->ZTest = !(HitActor && (HitActor->DrawType == DT_Brush || HitActor->DrawType == DT_AntiPortal)); // Disable ZTest for brushes since they are rendered on top of everything else
@@ -609,7 +618,7 @@ void FSelectionRenderInterface::DrawPrimitive(EPrimitiveType PrimitiveType, INT 
 		Shader->PSConstants[0].Value = FPlane(0.0f, 0.0f, 0.0f, 0.0f);
 	}
 
-	SetHardwareShaderMaterial(Shader, NULL, NULL);
+	Impl->SetHardwareShaderMaterial(Shader, NULL, NULL);
 	Impl->DrawPrimitive(PrimitiveType, FirstIndex, NumPrimitives, MinIndex, MaxIndex);
 }
 

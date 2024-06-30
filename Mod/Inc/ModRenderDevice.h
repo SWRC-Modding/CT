@@ -46,7 +46,7 @@ public:
 	virtual void SetTransform(ETransformType Type, const FMatrix& Matrix){ Impl->SetTransform(Type, Matrix); }
 	virtual FMatrix GetTransform(ETransformType Type) const{ return Impl->GetTransform(Type); }
 	virtual void SetMaterial(UMaterial* Material, FString* ErrorString, UMaterial** ErrorMaterial, INT* NumPasses);
-	virtual UBOOL SetHardwareShaderMaterial(UHardwareShader* Material, FString* ErrorString, UMaterial** ErrorMaterial);
+	virtual UBOOL SetHardwareShaderMaterial(UHardwareShader* Material, FString* ErrorString, UMaterial** ErrorMaterial){ return Impl->SetHardwareShaderMaterial(Material, ErrorString, ErrorMaterial); }
 	virtual void SetStencilOp(ECompareFunction Test, DWORD Ref, DWORD Mask, EStencilOp FailOp, EStencilOp ZFailOp, EStencilOp PassOp, DWORD WriteMask){ Impl->SetStencilOp(Test, Ref, Mask, FailOp, ZFailOp, PassOp, WriteMask); }
 	virtual void EnableStencil(UBOOL Enable){ Impl->EnableStencil(Enable); }
 	virtual void EnableDepth(UBOOL Enable){ Impl->EnableDepth(Enable); }

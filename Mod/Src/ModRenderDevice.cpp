@@ -413,8 +413,6 @@ bool FSelectionRenderInterface::ProcessHitColor(FColor HitColor, INT* OutIndex)
 {
 	INT Index = HitColor.R | HitColor.G << 8 | HitColor.B << 16;
 
-	--Index; // Index was incremented before drawing so that a value of 0 means 'no selection'. Here it is decremented again to get the actual array index.
-
 	if(Index >= 0 && Index < AllHitData.Num() - (INT)sizeof(HHitProxy))
 	{
 		FHitProxyInfo* Info = reinterpret_cast<FHitProxyInfo*>(&AllHitData[Index]);
@@ -442,7 +440,7 @@ void FSelectionRenderInterface::ProcessHit(INT HitProxyIndex)
 		for(INT ParentIndex = reinterpret_cast<FHitProxyInfo*>(&AllHitData[HitProxyIndex])->ParentIndex;
 			ParentIndex != INDEX_NONE;
 			ParentIndex = reinterpret_cast<FHitProxyInfo*>(&AllHitData[ParentIndex])->ParentIndex)
-			{
+		{
 
 			ParentIndices[NumParents] = ParentIndex;
 			++NumParents;
@@ -465,15 +463,6 @@ void FSelectionRenderInterface::ProcessHit(INT HitProxyIndex)
 
 		appMemcpy(HitData + HitCount, Hit, Hit->Size);
 		*HitSize = HitCount + Hit->Size;
-	}
-	else
-	{
-		// Select nothing
-		UEditorEngine* Editor = CastChecked<UEditorEngine>(GEngine);
-
-		Editor->Trans->Begin("Select None");
-		Editor->SelectNone(Editor->Level, 1, 1);
-		Editor->Trans->End();
 	}
 
 	HitStack.Empty();
@@ -546,13 +535,11 @@ void FSelectionRenderInterface::DrawPrimitive(EPrimitiveType PrimitiveType, INT 
 
 	DECLARE_STATIC_UOBJECT(UHardwareShader, SolidSelectionShader, {
 		// Initialize shader used for selection in the editor
-		SolidSelectionShader = new UHardwareShader();
-
 		SolidSelectionShader->VertexShaderText = "vs.1.1\n"
-																						 "m4x4 r0, v0, c0\n"
-																						 "mov oPos, r0\n";
+		                                         "m4x4 r0, v0, c0\n"
+		                                         "mov oPos, r0\n";
 		SolidSelectionShader->PixelShaderText = "ps.1.1\n"
-																						"mov r0, c0\n";
+		                                        "mov r0, c0\n";
 		SolidSelectionShader->VSConstants[0].Type = EVC_ObjectToScreenMatrix;
 		SolidSelectionShader->PSConstants[0].Type = EVC_MaterialDefined;
 		SolidSelectionShader->ZTest = 1;
@@ -560,16 +547,14 @@ void FSelectionRenderInterface::DrawPrimitive(EPrimitiveType PrimitiveType, INT 
 	});
 	DECLARE_STATIC_UOBJECT(UHardwareShader, AlphaSelectionShader, {
 		// Initialize shader used for selection of objects with alpha channel in the editor
-		AlphaSelectionShader = new UHardwareShader();
-
 		AlphaSelectionShader->VertexShaderText = "vs.1.1\n"
-																						 "m4x4 r0, v0, c0\n"
-																						 "mov oPos, r0\n"
-																						 "mov oT0, v1\n";
+		                                         "m4x4 r0, v0, c0\n"
+		                                         "mov oPos, r0\n"
+		                                         "mov oT0, v1\n";
 		AlphaSelectionShader->PixelShaderText = "ps.1.1\n"
-																						"tex t0\n"
-																						"mov r0, c0\n"
-																						"mad r0, t0, c1, r0\n";
+		                                        "tex t0\n"
+		                                        "mov r0, c0\n"
+		                                        "mad r0, t0, c1, r0\n";
 		AlphaSelectionShader->StreamMapping.AddItem(FVF_Position);
 		AlphaSelectionShader->StreamMapping.AddItem(FVF_TexCoord0);
 		AlphaSelectionShader->VSConstants[0].Type = EVC_ObjectToScreenMatrix;
@@ -598,7 +583,7 @@ void FSelectionRenderInterface::DrawPrimitive(EPrimitiveType PrimitiveType, INT 
 			// Alpha is ignored in the texture browser since there it should be possible to click anywhere on a texture to select it
 			if(CurrentTexture &&
 			   appStricmp(reinterpret_cast<HHitProxy*>(&AllHitData[HitStack.Last() + sizeof(FHitProxyInfo)])->GetName(), "HBrowserMaterial") != 0)
-			   {
+			{
 				Shader = AlphaSelectionShader;
 				Shader->Textures[0] = CurrentTexture;
 			}
@@ -611,8 +596,6 @@ void FSelectionRenderInterface::DrawPrimitive(EPrimitiveType PrimitiveType, INT 
 		}
 
 		// Convert index to shader color
-
-		++HitDataIndex; // Adding 1 because 0 means no hit. This is subtracted again later.
 
 		checkSlow(RenDev->LockedViewport->ColorBytes == 3 || RenDev->LockedViewport->ColorBytes == 4);
 
@@ -737,7 +720,7 @@ void UModRenderDevice::Unlock(FRenderInterface* RI)
 		{
 			for(INT X = -LockedViewport->HitXL; X < LockedViewport->HitXL + 1; X++)
 			{
-				if(src + X >= LockedRect.pBits && src[X] != 0x0)
+				if(src + X >= LockedRect.pBits)
 				{
 					FColor HitColor = FColor((src[X] >> 16) & 0xff, (src[X] >> 8) & 0xff, (src[X]) & 0xff);
 					INT Index = INDEX_NONE;

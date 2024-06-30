@@ -409,6 +409,8 @@ void ABotSupport::SpawnNavigationPoint(UClass* NavigationPointClass, const FVect
 
 	if(NavPt)
 	{
+		NavPt->FindBase();
+
 		if(XLevel->Actors.Last() == NavPt && !Level->bStartup) // We shouldn't mess with the actor list if bStartup == true
 		{
 			XLevel->Actors.Pop();
@@ -556,7 +558,13 @@ void ABotSupport::BuildPaths()
 	UBOOL BegunPlay = Level->bBegunPlay;
 
 	Level->bBegunPlay = 0;
-	GIsEditor = 1;
+
+	/*
+	 * If GIsEditor is set to 0 paths on terrain are not generated.
+	 * However, setting it to 1 gives slightly higher quality paths otherwise.
+	 * So just set it to 1 if the level does not have terrain.
+	 */
+	GIsEditor = !TActorIterator<ATerrainInfo>(XLevel);
 
 	GPathBuilder.definePaths(XLevel);
 	bPathsHaveChanged = 1;
@@ -594,7 +602,7 @@ void ABotSupport::Spawned()
 		foreach(DynamicActors, APickup, It, XLevel)
 		{
 			SpawnNavigationPoint(AInventorySpot::StaticClass(),
-			                     It->Location + FVector(0, 0, GetDefault<AScout>()->CollisionHeight));
+			                     It->Location + FVector(0, 0, GetDefault<ANavigationPoint>()->CollisionHeight));
 		}
 
 		if(bAutoImportPaths)
@@ -798,7 +806,7 @@ bool ABotSupport::ExecCmd(const char* Cmd, class APlayerController* PC)
 		{
 			if(!It->IsA(APlayerStart::StaticClass()) &&
 			   ((PC->Pawn ? PC->Pawn->Location : PC->Location) - It->Location).SizeSquared() <= 40 * 40)
-			   {
+			{
 				XLevel->DestroyActor(*It);
 				BuildPaths();
 				bPathsHaveChanged = 1;

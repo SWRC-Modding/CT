@@ -487,6 +487,9 @@ void FSelectionRenderInterface::PushHit(const BYTE* Data, INT Count)
 
 void FSelectionRenderInterface::PopHit(INT Count, UBOOL Force)
 {
+	if(RenDev->LockedViewport->Canvas && RenDev->LockedViewport->Canvas->pCanvasUtil)
+		RenDev->LockedViewport->Canvas->pCanvasUtil->Flush(); // Fixes the incorrect selection in the texture browser when clicking on a material name
+
 	HitStack.Pop();
 }
 
@@ -573,32 +576,14 @@ void FSelectionRenderInterface::DrawPrimitive(EPrimitiveType PrimitiveType, INT 
 		}
 		else
 		{
-			const bool IsTextureBrowserMaterial = appStricmp(HitProxy->GetName(), "HBrowserMaterial") == 0;
-
 			// Alpha is ignored in the texture browser since there it should be possible to click anywhere on a texture to select it
-			if(CurrentTexture && !IsTextureBrowserMaterial)
+			if(CurrentTexture && appStricmp(HitProxy->GetName(), "HBrowserMaterial") != 0)
 			{
 				Shader = AlphaSelectionShader;
 				Shader->Textures[0] = CurrentTexture;
 			}
 			else
 			{
-				/*
-				 * There's a bug in the texture browser where clicking on the name of a material will not select the material under the cursor but the one after it.
-				 * Since it can't be fixed at the source (UnrealEd.exe) here's a workaround that checks if a material name is rendered in which case the previous
-				 * hit data index is used which causes the correct material to be selected.
-				 */
-				if(IsTextureBrowserMaterial)
-				{
-					static INT PrevHitDataIndex = 0;
-
-					// NumPrimitives > 2 means the material name is being drawn. Everything else in the texture browser is drawn as a single quad (2 tris)
-					if(NumPrimitives > 2)
-						HitDataIndex = PrevHitDataIndex; // use the previous index for the current selection
-					else
-						PrevHitDataIndex = HitDataIndex;
-				}
-
 				Shader = SolidSelectionShader;
 				Shader->ZTest = !(HitActor && (HitActor->DrawType == DT_Brush || HitActor->DrawType == DT_AntiPortal)); // Disable ZTest for brushes since they are rendered on top of everything else
 			}

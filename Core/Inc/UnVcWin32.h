@@ -3,6 +3,8 @@
 	Copyright 1997-1999 Epic Games, Inc. All Rights Reserved.
 =============================================================================*/
 
+#pragma once
+
 /*----------------------------------------------------------------------------
 	Platform compiler definitions.
 ----------------------------------------------------------------------------*/
@@ -15,6 +17,8 @@
 	Platform specifics types and defines.
 ----------------------------------------------------------------------------*/
 
+#define WINVER       0x501
+#define _WIN32_WINNT 0x501
 #include <Windows.h>
 
 #include <stdlib.h>

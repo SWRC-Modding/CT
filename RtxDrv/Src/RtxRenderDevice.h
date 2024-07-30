@@ -1,7 +1,7 @@
-#ifndef RTXDRV_NATIVE_DEFS
-#define RTXDRV_NATIVE_DEFS
+#pragma once
 
 #include "../../D3DDrv/Inc/D3DDrv.h"
+#include "bridge_c.h"
 
 #ifndef RTXDRV_API
 #define RTXDRV_API DLL_IMPORT
@@ -43,28 +43,23 @@ public:
 	URtxRenderDevice* RenDev;
 	FRenderInterface* Impl;
 
-	UBOOL      DrawParticleTriangles;
-	UMaterial* CurrentMaterial;
-	UMaterial* CurrentActualMaterial;
-
 	virtual void PushState(DWORD Flags = 0){ Impl->PushState(Flags); }
 	virtual void PopState(DWORD Flags = 0){ Impl->PopState(Flags); }
-	virtual UBOOL SetRenderTarget(FRenderTarget* RenderTarget, bool bOwnDepthBuffer){
-		return Impl->SetRenderTarget(RenderTarget, bOwnDepthBuffer);
-	}
+	virtual UBOOL SetRenderTarget(FRenderTarget* RenderTarget, bool bOwnDepthBuffer);
 	virtual UBOOL SetCubeRenderTarget(class FDynamicCubemap* Target, int A, int B){ return Impl->SetCubeRenderTarget(Target, A, B); }
 	virtual void SetViewport(INT X, INT Y, INT Width, INT Height){ Impl->SetViewport(X, Y, Width, Height); }
-	virtual void Clear(UBOOL UseColor = 1, FColor Color = FColor(0, 0, 0), UBOOL UseDepth = 1, FLOAT Depth = 1.0f, UBOOL UseStencil = 1, DWORD Stencil = 0){
-		Impl->Clear(UseColor, Color, UseDepth, Depth, UseStencil, Stencil);
-	}
+	virtual void Clear(UBOOL UseColor = 1, FColor Color = FColor(0, 0, 0), UBOOL UseDepth = 1, FLOAT Depth = 1.0f, UBOOL UseStencil = 1, DWORD Stencil = 0);
 	virtual void PushHit(const BYTE* Data, INT Count){ Impl->PushHit(Data, Count); }
 	virtual void PopHit(INT Count, UBOOL Force){ Impl->PopHit(Count, Force); }
 	virtual void SetCullMode(ECullMode CullMode){ Impl->SetCullMode(CullMode); }
-	virtual void SetAmbientLight(FColor Color){ Impl->SetAmbientLight(Color); }
+	virtual void SetAmbientLight(FColor Color){}
 	virtual void EnableLighting(UBOOL UseDynamic, UBOOL UseStatic = 1, UBOOL Modulate2X = 0, FBaseTexture* Lightmap = NULL, UBOOL LightingOnly = 0, const FSphere& LitSphere = FSphere(FVector(0, 0, 0), 0), int IntValue = 0){
+		UseDynamic = 0;
+		Lightmap = NULL;
+		Modulate2X = 0;
 		Impl->EnableLighting(UseDynamic, UseStatic, Modulate2X, Lightmap, LightingOnly, LitSphere, IntValue);
 	}
-	virtual void SetLight(INT LightIndex, FDynamicLight* Light, FLOAT Scale = 1.0f){ Impl->SetLight(LightIndex, Light, Scale); }
+	virtual void SetLight(INT LightIndex, FDynamicLight* Light, FLOAT Scale = 1.0f){}
 	virtual void SetShaderLight(INT LightIndex, FDynamicLight* Light, FLOAT Scale = 1.0f){ Impl->SetShaderLight(LightIndex, Light, Scale); }
 	virtual void SetNPatchTesselation(FLOAT Tesselation){ Impl->SetNPatchTesselation(Tesselation); }
 	virtual void SetDistanceFog(UBOOL Enable, FLOAT FogStart, FLOAT FogEnd, FColor Color){ Impl->SetDistanceFog(Enable, FogStart, FogEnd, Color); }
@@ -92,26 +87,13 @@ public:
 	virtual INT SetDynamicIndexBuffer(FIndexBuffer* IndexBuffer, INT BaseIndex){ return Impl->SetDynamicIndexBuffer(IndexBuffer, BaseIndex); }
 	virtual void DrawPrimitive(EPrimitiveType PrimitiveType, INT FirstIndex, INT NumPrimitives, INT MinIndex = INDEX_NONE, INT MaxIndex = INDEX_NONE);
 	virtual void SetFillMode(EFillMode FillMode){ Impl->SetFillMode(FillMode); }
-};
 
-class RTXDRV_API URtxRenderDevice : public UD3DRenderDevice{
-	DECLARE_CLASS(URtxRenderDevice,UD3DRenderDevice,CLASS_Config,RtxDrv)
-	static const TCHAR* StaticConfigName(){ return "RtxDrv"; }
-public:
-	FRtxRenderInterface RenderInterface;
-
-	virtual UBOOL Init();
-	virtual void Flush(UViewport* Viewport);
-	virtual FRenderInterface* Lock(UViewport* Viewport, BYTE* HitData, INT* HitSize);
-	virtual void Unlock(FRenderInterface* RI);
-	virtual FRenderCaps* GetRenderCaps();
-
-	struct TestDraw{
-		INT Id;
+	struct MaterialId{
+		INT                         Id;
 		FSingleTriangleVertexStream Stream;
-		FString Path;
+		FString                     Path;
 
-		TestDraw(INT InId = 0, const TCHAR* InPath = NULL)
+		MaterialId(INT InId = 0, const TCHAR* InPath = NULL)
 			: Id(InId),
 			  Stream(InId + 32, InId + 32),
 			  Path(InPath)
@@ -128,10 +110,26 @@ public:
 		}
 	};
 
-	TArray<TestDraw> MaterialIdsByPath;
-
-private:
-	void ClearMaterialFlags();
+	TArray<MaterialId> MaterialIdsByPath;
 };
 
-#endif // RTXDRV_NATIVE_DEFS
+class RTXDRV_API URtxRenderDevice : public UD3DRenderDevice{
+	DECLARE_CLASS(URtxRenderDevice,UD3DRenderDevice,CLASS_Config,RtxDrv)
+	static const TCHAR* StaticConfigName(){ return "RtxDrv"; }
+public:
+	FRtxRenderInterface RenderInterface;
+
+	virtual UBOOL Exec(const TCHAR* Cmd, FOutputDevice& Ar);
+	virtual UBOOL Init();
+	virtual UBOOL SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL Fullscreen, INT ColorBytes = 0, UBOOL bSaveSize = true);
+	virtual void Flush(UViewport* Viewport);
+	virtual FRenderInterface* Lock(UViewport* Viewport, BYTE* HitData, INT* HitSize);
+	virtual void Unlock(FRenderInterface* RI);
+	virtual void Present(UViewport* Viewport);
+	virtual FRenderCaps* GetRenderCaps();
+
+private:
+	bridgeapi_Interface BridgeInterface;
+
+	void ClearMaterialFlags();
+};

@@ -95,16 +95,25 @@
 		<Filter
 			Name="Inc"
 			Filter="h;hpp;hxx;hm;inl;inc;xsd">
+			<File
+				RelativePath=".\Src\RtxDrvClasses.h">
+			</File>
 		</Filter>
 		<Filter
 			Name="Src"
 			Filter="cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx"
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}">
 			<File
-				RelativePath=".\Src\RtxDrv.h">
+				RelativePath=".\Src\RtxDrvPrivate.h">
 			</File>
 			<File
-				RelativePath=".\Src\RtxDrv.cpp">
+				RelativePath=".\Src\RtxRenderDevice.h">
+			</File>
+			<File
+				RelativePath=".\Src\RtxRenderDevice.cpp">
+			</File>
+			<File
+				RelativePath=".\Src\RtxDrvClasses.cpp">
 			</File>
 		</Filter>
 	</Files>

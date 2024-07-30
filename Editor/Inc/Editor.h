@@ -690,4 +690,8 @@ public:
 #pragma pack (pop)
 #endif
 
+extern EDITOR_API UEditorEngine* GEditor;
+
+EDITOR_API const TCHAR* ImportProperties(UClass* ObjectClass, BYTE* Object, ULevel* Level, const TCHAR* Data, UObject* InParent, FFeedbackContext* Warn, INT Depth);
+
 #endif // EDITOR_NATIVE_DEFS

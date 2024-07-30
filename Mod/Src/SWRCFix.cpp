@@ -1,4 +1,5 @@
 #include "Mod.h"
+#include "Editor.h"
 
 USWRCFix* USWRCFix::Instance = NULL;
 UBOOL USWRCFix::RenderingReady = 0;
@@ -213,9 +214,60 @@ static UBOOL __fastcall UnrealEdEngineExecOverride(UEngine* Self, DWORD Edx, con
  * Fix initialization
  */
 
+void ImportPropertyOverrides()
+{
+	guardFunc;
+
+	TArray<FString> Files = GFileManager->FindFiles("PropertyOverrides\\*.txt", 1, 0);
+	FString FileContent;
+	FileContent.GetCharArray().SetNoShrink(true);
+
+	// HACK: ImportProperties needs GEditor to be set. It only uses it for UEditorEngine::bBootstrapping so a zero object is ok to use.
+	DWORD EditorEngineDummy[sizeof(UEditorEngine) / sizeof(DWORD)];
+
+	if(!GEditor)
+	{
+		appMemzero(EditorEngineDummy, sizeof(EditorEngineDummy));
+		GEditor = reinterpret_cast<UEditorEngine*>(EditorEngineDummy);
+	}
+
+	for(TArray<FString>::TIterator It(Files); It; ++It)
+	{
+		FFilename FileName  = FStringTemp("PropertyOverrides") * *It;
+
+		if(!appLoadFileToString(FileContent, *FileName))
+		{
+			debugf(NAME_Warning, "Failed to load property override file %s", *FileName);
+			continue;
+		}
+
+		FString   ClassName = FileName.GetBaseFilename();
+		debugf("Loading property overrides for %s", *ClassName);
+
+		UClass* Class = LoadClass<UObject>(NULL, *ClassName, NULL, LOAD_Throw, NULL);
+
+		if(!Class)
+		{
+			debugf("Class not found: %s", *ClassName);
+			continue;
+		}
+
+		ImportProperties(Class, Class->GetDefaults(), NULL, *FileContent, Class->GetOuter(), GWarn, 0);
+	}
+
+	if((void*)GEditor == (void*)EditorEngineDummy)
+		GEditor = NULL;
+
+	unguard;
+}
+
 void USWRCFix::Init()
 {
 	guardFunc;
+
+	// Import property overrides at the beginning
+
+	ImportPropertyOverrides();
 
 	// Common fixes
 
@@ -226,7 +278,8 @@ void USWRCFix::Init()
 	 * Placing a FluidSurfaceInfo crashes because the constructor for FDynamicActor accesses its 'Skins' array which is empty by default.
 	 * To fix this we simply resize the property in the default actor so that it contains an element.
 	 */
-	GetDefault<AFluidSurfaceInfo>()->Skins.Set(1);
+	if(GetDefault<AFluidSurfaceInfo>()->Skins.Num() == 0)
+		GetDefault<AFluidSurfaceInfo>()->Skins.Set(1);
 
 	/*
 	 * Fix 2:
@@ -244,8 +297,12 @@ void USWRCFix::Init()
 	 * To fix it, we simply add a dummy shader implementation.
 	 */
 	UHardwareShader* DefaultHardwareShader = GetDefault<UHardwareShader>();
-	DefaultHardwareShader->VertexShaderText = "vs.1.1\n\nmov oPos, v0\n";
-	DefaultHardwareShader->PixelShaderText  = "ps.1.1\n\nmov r0, c0\n";
+
+	if(DefaultHardwareShader->VertexShaderText.Len() == 0)
+		DefaultHardwareShader->VertexShaderText = "vs.1.1\n\nmov oPos, v0\n";
+
+	if(DefaultHardwareShader->PixelShaderText.Len() == 0)
+		DefaultHardwareShader->PixelShaderText  = "ps.1.1\n\nmov r0, c0\n";
 
 	/*
 	 * Detect whether the game or editor is running

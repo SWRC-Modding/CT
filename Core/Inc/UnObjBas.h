@@ -646,9 +646,10 @@ T* GetDefault()
  */
 class FObjectIterator{
 public:
-	FObjectIterator(UClass* InClass = UObject::StaticClass()) : Class(InClass),
-                                                                Index(-1)
-                                                                {
+	FObjectIterator(UClass* InClass = UObject::StaticClass())
+		: Class(InClass),
+		  Index(-1)
+	{
 		check(Class);
 		++*this;
 	}

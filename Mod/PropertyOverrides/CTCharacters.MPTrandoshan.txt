@@ -1,0 +1,1 @@
+AudioTable=Class'CTAudio.MPTranAudio'

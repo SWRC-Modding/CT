@@ -137,4 +137,3 @@ void UExportBumpMapsCommandlet::ExportTga(FTexture* Texture, const FString& File
 
 	appSaveArrayToFile(Archive, *Filename);
 }
-

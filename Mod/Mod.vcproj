@@ -42,7 +42,8 @@
 				Name="VCMIDLTool"/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="copy &quot;$(ProjectDir)\Mod.int&quot; &quot;$(OutDir)\Mod.int&quot;"/>
+				CommandLine="copy /Y &quot;$(ProjectDir)\Mod.int&quot; &quot;$(OutDir)\Mod.int&quot;
+xcopy /E /I /Y &quot;$(ProjectDir)\PropertyOverrides&quot; &quot;$(OutDir)\PropertyOverrides&quot;"/>
 			<Tool
 				Name="VCPreBuildEventTool"/>
 			<Tool
@@ -82,7 +83,8 @@
 				Name="VCMIDLTool"/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="copy &quot;$(ProjectDir)\Mod.int&quot; &quot;$(OutDir)\Mod.int&quot;"/>
+				CommandLine="copy /Y &quot;$(ProjectDir)\Mod.int&quot; &quot;$(OutDir)\Mod.int&quot;
+xcopy /E /I /Y &quot;$(ProjectDir)\PropertyOverrides&quot; &quot;$(OutDir)\PropertyOverrides&quot;"/>
 			<Tool
 				Name="VCPreBuildEventTool"/>
 			<Tool
@@ -112,7 +114,7 @@
 			Filter="cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx"
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}">
 			<File
-				RelativePath=".\Src\Mod.cpp">
+				RelativePath=".\Src\FunctionOverride.cpp">
 			</File>
 			<File
 				RelativePath=".\Src\ModClasses.cpp">
@@ -127,7 +129,7 @@
 				RelativePath=".\Src\SWRCFix.cpp">
 			</File>
 			<File
-				RelativePath=".\Src\BumpmapExport.cpp">
+				RelativePath=".\Src\ExportBumpMapsCommandlet.cpp">
 			</File>
 		</Filter>
 	</Files>

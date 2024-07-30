@@ -1,0 +1,5 @@
+	MPSkins(0)=Shader'CloneTextures.CloneTextures.CloneCommandoWhite_Shader'
+	MPSkins(1)=Shader'CloneTextures.CloneTextures.MP_CloneCommandoD_Shader'
+	MPSkins(2)=Shader'CloneTextures.CloneTextures.MP_CloneCommandoB_Shader'
+	MPSkins(3)=Shader'CloneTextures.CloneTextures.MP_CloneCommandoC_Shader'
+	MPSkins(4)=Shader'CloneTextures.CloneTextures.MP_CloneCommandoA_Shader'

@@ -244,7 +244,7 @@ void ImportPropertyOverrides()
 		FString   ClassName = FileName.GetBaseFilename();
 		debugf("Loading property overrides for %s", *ClassName);
 
-		UClass* Class = LoadClass<UObject>(NULL, *ClassName, NULL, LOAD_Throw, NULL);
+		UClass* Class = LoadClass<UObject>(NULL, *ClassName, NULL, 0, NULL);
 
 		if(!Class)
 		{

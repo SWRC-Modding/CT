@@ -48,8 +48,7 @@ struct MOD_API FMPPawnHudArmsShaderPair
 class MOD_API USWRCFix : public UObject
 {
 public:
-    BITFIELD OverrideMPSkins:1 GCC_PACK(4);
-    TArrayNoInit<FMPPawnHudArmsShaderPair> MPCloneHudArmsShaders GCC_PACK(4);
+    TArrayNoInit<FMPPawnHudArmsShaderPair> MPCloneHudArmsShaders;
     TArrayNoInit<FMPPawnHudArmsShaderPair> MPTrandoHudArmsShaders;
     FLOAT ViewShake;
     FLOAT BaseFOV;

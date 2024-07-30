@@ -9,7 +9,6 @@ struct MPPawnHudArmsShaderPair{
 	var Material HudArms;
 };
 
-var() config bool OverrideMPSkins; // Override the default MP skins with the ones that are in the game but unused
 var() config array<MPPawnHudArmsShaderPair> MPCloneHudArmsShaders;
 var() config array<MPPawnHudArmsShaderPair> MPTrandoHudArmsShaders;
 
@@ -39,8 +38,6 @@ var FunctionOverride MPPawnSetHudArmTextureOverride;
 
 event InitScript()
 {
-	local int i;
-
 	// Hook necessary functions
 
 	// CTPlayer
@@ -68,12 +65,6 @@ event InitScript()
 
 	MPPawnSetHudArmTextureOverride = new class'FunctionOverride';
 	MPPawnSetHudArmTextureOverride.Init(class'MPPawn', 'SetHudArmTexture', self, 'MPPawnSetHudArmTexture');
-
-	if(OverrideMPSkins)
-	{
-		for(i = 0; i < MPCloneHudArmsShaders.Length && i < arraycount(class'CTCharacters.MPClone'.default.MPSkins); ++i)
-			class'CTCharacters.MPClone'.default.MPSkins[i] = MPCloneHudArmsShaders[i].Pawn;
-	}
 }
 
 simulated function MPPawnSetHudArmTexture(Weapon Weapon)
@@ -309,7 +300,6 @@ defaultproperties
 	AutoFOV=True
 	EnableCustomMenu=True
 	EnableEditorSelectionFix=True
-	OverrideMPSkins=True
 	MPCloneHudArmsShaders(0)=(Pawn=Shader'CloneTextures.CloneTextures.CloneCommandoWhite_Shader',HudArms=Shader'HudArmsTextures.HudArms.HudArmsWhite_Shader')
 	MPCloneHudArmsShaders(1)=(Pawn=Shader'CloneTextures.CloneTextures.MP_CloneCommandoD_Shader',HudArms=Shader'HudArmsTextures.HudArms.MP_HudArmsD_Shader')
 	MPCloneHudArmsShaders(2)=(Pawn=Shader'CloneTextures.CloneTextures.MP_CloneCommandoB_Shader',HudArms=Shader'HudArmsTextures.HudArms.MP_HudArmsB_Shader')

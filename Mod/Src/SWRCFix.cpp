@@ -241,18 +241,14 @@ void ImportPropertyOverrides()
 			continue;
 		}
 
-		FString   ClassName = FileName.GetBaseFilename();
-		debugf("Loading property overrides for %s", *ClassName);
+		FString ClassName = FileName.GetBaseFilename();
+		UClass* Class     = LoadClass<UObject>(NULL, *ClassName, NULL, 0, NULL);
 
-		UClass* Class = LoadClass<UObject>(NULL, *ClassName, NULL, 0, NULL);
-
-		if(!Class)
+		if(Class)
 		{
-			debugf("Class not found: %s", *ClassName);
-			continue;
+			debugf("Importing property overrides for %s", *ClassName);
+			ImportProperties(Class, Class->GetDefaults(), NULL, *FileContent, Class->GetOuter(), GWarn, 0);
 		}
-
-		ImportProperties(Class, Class->GetDefaults(), NULL, *FileContent, Class->GetOuter(), GWarn, 0);
 	}
 
 	if((void*)GEditor == (void*)EditorEngineDummy)

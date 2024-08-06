@@ -62,8 +62,8 @@ public:
 	virtual void SetLight(INT LightIndex, FDynamicLight* Light, FLOAT Scale = 1.0f){}
 	virtual void SetShaderLight(INT LightIndex, FDynamicLight* Light, FLOAT Scale = 1.0f){ Impl->SetShaderLight(LightIndex, Light, Scale); }
 	virtual void SetNPatchTesselation(FLOAT Tesselation){ Impl->SetNPatchTesselation(Tesselation); }
-	virtual void SetDistanceFog(UBOOL Enable, FLOAT FogStart, FLOAT FogEnd, FColor Color){ Impl->SetDistanceFog(Enable, FogStart, FogEnd, Color); }
-	virtual UBOOL EnableFog(UBOOL Enable){ return Impl->EnableFog(Enable); }
+	virtual void SetDistanceFog(UBOOL Enable, FLOAT FogStart, FLOAT FogEnd, FColor Color){ Impl->SetDistanceFog(0, 0.0f, 0.0f, FColor()); }
+	virtual UBOOL EnableFog(UBOOL Enable){ return Impl->EnableFog(0); }
 	virtual UBOOL IsFogEnabled(){ return Impl->IsFogEnabled(); }
 	virtual void SetGlobalColor(FColor Color){ Impl->SetGlobalColor(Color); }
 	virtual void SetTransform(ETransformType Type, const FMatrix& Matrix);
@@ -87,37 +87,13 @@ public:
 	virtual INT SetDynamicIndexBuffer(FIndexBuffer* IndexBuffer, INT BaseIndex){ return Impl->SetDynamicIndexBuffer(IndexBuffer, BaseIndex); }
 	virtual void DrawPrimitive(EPrimitiveType PrimitiveType, INT FirstIndex, INT NumPrimitives, INT MinIndex = INDEX_NONE, INT MaxIndex = INDEX_NONE);
 	virtual void SetFillMode(EFillMode FillMode){ Impl->SetFillMode(FillMode); }
-
-	struct MaterialId{
-		INT                         Id;
-		FSingleTriangleVertexStream Stream;
-		FString                     Path;
-
-		MaterialId(INT InId = 0, const TCHAR* InPath = NULL)
-			: Id(InId),
-			  Stream(InId + 32, InId + 32),
-			  Path(InPath)
-		{
-			++Stream.Revision;
-		}
-
-		void UpdateId(INT InId)
-		{
-			Id = InId,
-			Stream.HalfWidth = (InId + 32) / 2.0f;
-			Stream.HalfHeight = Stream.HalfWidth;
-			++Stream.Revision;
-		}
-	};
-
-	TArray<MaterialId> MaterialIdsByPath;
 };
 
 class RTXDRV_API URtxRenderDevice : public UD3DRenderDevice{
 	DECLARE_CLASS(URtxRenderDevice,UD3DRenderDevice,CLASS_Config,RtxDrv)
 	static const TCHAR* StaticConfigName(){ return "RtxDrv"; }
 public:
-	FRtxRenderInterface RenderInterface;
+	URtxRenderDevice() : AnchorTriangle(512, 512){}
 
 	virtual UBOOL Exec(const TCHAR* Cmd, FOutputDevice& Ar);
 	virtual UBOOL Init();
@@ -129,7 +105,10 @@ public:
 	virtual FRenderCaps* GetRenderCaps();
 
 private:
-	bridgeapi_Interface BridgeInterface;
+	UViewport*                  LockedViewport;
+	bridgeapi_Interface         BridgeInterface;
+	FSingleTriangleVertexStream AnchorTriangle;
+	FRtxRenderInterface         RenderInterface;
 
 	void ClearMaterialFlags();
 };

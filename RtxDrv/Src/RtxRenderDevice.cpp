@@ -3,6 +3,13 @@
 
 IMPLEMENT_CLASS(URtxRenderDevice)
 
+class USolidColorMaterial : public UConstantMaterial{
+	DECLARE_CLASS(USolidColorMaterial,UConstantMaterial,0,RtxDrv)
+public:
+	virtual FColor GetColor(FLOAT TimeSeconds){ return FColor(255,255,0,255); }
+};
+IMPLEMENT_CLASS(USolidColorMaterial)
+
 UBOOL URtxRenderDevice::Exec(const TCHAR* Cmd, FOutputDevice& Ar)
 {
 	return Super::Exec(Cmd, Ar);
@@ -19,17 +26,6 @@ UBOOL URtxRenderDevice::Init()
 
 		if(InitSWRCFix)
 			InitSWRCFix();
-	}
-
-	FConfigSection* Section = GConfig->GetSectionPrivate("RtxMaterialIds", 0, 1, StaticConfigName());
-
-	if(Section)
-	{
-		for(FConfigSection::TIterator It(*Section); It; ++It)
-		{
-			const INT Id = appAtoi(*It.Value());
-			RenderInterface.MaterialIdsByPath.AddItem(FRtxRenderInterface::MaterialId(Id, *It.Key()));
-		}
 	}
 
 	RenderInterface.RenDev = this;
@@ -73,16 +69,16 @@ void URtxRenderDevice::Flush(UViewport* Viewport)
 	Super::Flush(Viewport);
 }
 
-UBOOL GFirstClear = 0;
 FRenderInterface* URtxRenderDevice::Lock(UViewport* Viewport, BYTE* HitData, INT* HitSize)
 {
+	LockedViewport = Viewport;
+
 	if(Viewport->Actor)
 	{
 		Viewport->Actor->bVisor = 0;
 		Viewport->Actor->VisorModeDefault = 1;
 	}
 
-	GFirstClear = 0;
 	RenderInterface.Impl = Super::Lock(Viewport, HitData, HitSize);
 	return RenderInterface.Impl ? &RenderInterface : NULL;
 }
@@ -100,22 +96,6 @@ IMPLEMENT_CLASS(UConstantColorMaterial)
 
 void URtxRenderDevice::Unlock(FRenderInterface* RI)
 {
-	static bool Exited = false;
-
-	if(!Exited && GIsRequestingExit)
-	{
-		Exited = true;
-		FConfigSection* Section = GConfig->GetSectionPrivate("RtxMaterialIds", 1, 0, StaticConfigName());
-		check(Section);
-
-		for(TArray<FRtxRenderInterface::MaterialId>::TIterator It(RenderInterface.MaterialIdsByPath); It; ++It)
-		{
-			FConfigString& Value = (*Section)[It->Path];
-			Value = appItoa(It->Id);
-			Value.Dirty = true;
-		}
-	}
-
 	typedef TMap<AProjectile*, FLightHandle> FHandleMap;
 	static FHandleMap HandleMap;
 
@@ -144,7 +124,7 @@ void URtxRenderDevice::Unlock(FRenderInterface* RI)
 		s.position.x = Loc.X;
 		s.position.y = Loc.Y;
 		s.position.z = Loc.Z;
-		s.radius = 5.0f;
+		s.radius = 2.5f;
 		s.shaping_hasvalue = FALSE;
 		s.shaping_value.direction.x = 0.0f;
 		s.shaping_value.direction.y = 1.0f;
@@ -165,6 +145,86 @@ void URtxRenderDevice::Unlock(FRenderInterface* RI)
 		else
 			It->bUsed = 0;
 	}
+
+	DECLARE_STATIC_UOBJECT(USolidColorMaterial, Material, {});
+	DECLARE_STATIC_UOBJECT(UFinalBlend, FinalBlend,
+	{
+		FinalBlend->Material = Material;
+		FinalBlend->FrameBufferBlending = FB_Overwrite;
+		FinalBlend->ColorWriteEnable = 1;
+	});
+
+	// Draw anchor triangle at world center to parent stuff to in remix
+	if(LockedViewport && LockedViewport->Actor)
+	{
+		AActor*  ViewActor      = LockedViewport->Actor;
+		FVector  CameraLocation = ViewActor->Location;
+		FRotator CameraRotation = ViewActor->Rotation;
+		LockedViewport->Actor->PlayerCalcView(ViewActor, CameraLocation, CameraRotation);
+
+		// Initialize the view matrix.
+		FMatrix WorldToCamera = FTranslationMatrix(-CameraLocation);
+
+		if(!LockedViewport->IsOrtho())
+		{
+			WorldToCamera = WorldToCamera * FInverseRotationMatrix(CameraRotation);
+			WorldToCamera = WorldToCamera * FMatrix(
+				FPlane(0, 0, 1, 0),
+				FPlane(LockedViewport->ScaleX, 0, 0, 0),
+				FPlane(0, LockedViewport->ScaleY, 0, 0),
+				FPlane(0, 0, 0, 1));
+		}
+		else if(LockedViewport->Actor->RendMap == REN_OrthXY)
+		{
+			WorldToCamera = WorldToCamera * FMatrix(
+				FPlane(LockedViewport->ScaleX, 0, 0, 0),
+				FPlane(0, -LockedViewport->ScaleY, 0, 0),
+				FPlane(0, 0, -1, 0),
+				FPlane(0, 0, -CameraLocation.Z, 1));
+		}
+		else if(LockedViewport->Actor->RendMap == REN_OrthXZ)
+		{
+			WorldToCamera = WorldToCamera * FMatrix(
+				FPlane(LockedViewport->ScaleX, 0, 0, 0),
+				FPlane(0, 0, -1, 0),
+				FPlane(0, LockedViewport->ScaleY, 0, 0),
+				FPlane(0, 0, -CameraLocation.Y, 1));
+		}
+		else if(LockedViewport->Actor->RendMap == REN_OrthYZ)
+		{
+			WorldToCamera = WorldToCamera * FMatrix(
+				FPlane(0, 0, 1, 0),
+				FPlane(LockedViewport->ScaleX, 0, 0, 0),
+				FPlane(0, LockedViewport->ScaleY, 0, 0),
+				FPlane(0, 0, CameraLocation.X, 1));
+		}
+
+		// Initialize the projection matrix.
+		FMatrix CameraToScreen;
+		if(LockedViewport->IsOrtho())
+		{
+			const FLOAT Zoom = LockedViewport->Actor->OrthoZoom / (LockedViewport->SizeX * 15.0f);
+			CameraToScreen = FOrthoMatrix(Zoom * LockedViewport->SizeX / 2,Zoom * LockedViewport->SizeY / 2, 0.5f / HALF_WORLD_MAX, HALF_WORLD_MAX);
+		}
+		else
+		{
+			const FLOAT FOV = LockedViewport->Actor->FovAngle * PI / 360.0f;
+			CameraToScreen = FPerspectiveMatrix(FOV, FOV, 1.0f, (FLOAT)LockedViewport->SizeX / LockedViewport->SizeY, NEAR_CLIPPING_PLANE, FAR_CLIPPING_PLANE);
+		}
+
+		RenderInterface.PushState();
+		RenderInterface.SetTransform(TT_LocalToWorld, FMatrix::Identity);
+		RenderInterface.SetTransform(TT_WorldToCamera, WorldToCamera);
+		RenderInterface.SetTransform(TT_CameraToScreen, CameraToScreen);
+		RenderInterface.SetMaterial(FinalBlend);
+		RenderInterface.SetIndexBuffer(NULL, 0);
+		FVertexStream* Stream = &AnchorTriangle;
+		RenderInterface.SetVertexStreams(VS_FixedFunction, &Stream, 1);
+		RenderInterface.DrawPrimitive(PT_TriangleList, 0, 1);
+		RenderInterface.PopState();
+	}
+
+	LockedViewport = NULL;
 
 	Super::Unlock(static_cast<FRtxRenderInterface*>(RI)->Impl);
 }

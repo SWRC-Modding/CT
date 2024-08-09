@@ -36,6 +36,7 @@ public:
 
 #define AUTO_INITIALIZE_REGISTRANTS_RTXDRV \
 	UConstantColorMaterial::StaticClass(); \
+	USolidColorMaterial::StaticClass(); \
 	URtx::StaticClass(); \
 	URtxRenderDevice::StaticClass(); \
 

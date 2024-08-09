@@ -12,7 +12,22 @@ IMPLEMENT_CLASS(USolidColorMaterial)
 
 UBOOL URtxRenderDevice::Exec(const TCHAR* Cmd, FOutputDevice& Ar)
 {
+	if(ParseCommand(&Cmd, "RTX"))
+	{
+		if(ParseCommand(&Cmd, "TOGGLEANCHOR"))
+		{
+			bShowAnchorTriangle = !bShowAnchorTriangle;
+			return 1;
+		}
+	}
+
 	return Super::Exec(Cmd, Ar);
+}
+
+void URtxRenderDevice::StaticConstructor()
+{
+	new(GetClass(), "ShowAnchor",      RF_Public) UBoolProperty(CPP_PROPERTY(bShowAnchorTriangle), "RtxRenderDevice", CPF_Config);
+	new(GetClass(), "EnableD3DLights", RF_Public) UBoolProperty(CPP_PROPERTY(bEnableD3DLights),    "RtxRenderDevice", CPF_Config);
 }
 
 UBOOL URtxRenderDevice::Init()
@@ -38,6 +53,7 @@ UBOOL URtxRenderDevice::Init()
 	Client->BloomQuality = 0;
 	Client->BlurEnabled = 0;
 	Client->BumpmappingQuality = 0;
+	// Client->Projectors = 0;
 	GetDefault<APlayerController>()->bVisor = 0;
 	GetDefault<APlayerController>()->VisorModeDefault = 1;
 	UseStencil = 0;
@@ -51,6 +67,7 @@ UBOOL URtxRenderDevice::SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL Fu
 
 	if(Result && !BridgeInterface.initialized)
 	{
+		debugf("Initializing remix bridge API");
 		if(bridgeapi_initialize(&BridgeInterface) != BRIDGEAPI_ERROR_CODE_SUCCESS || !BridgeInterface.initialized)
 		{
 			appErrorf("Failed to initialize remix bridge API");
@@ -104,38 +121,65 @@ void URtxRenderDevice::Unlock(FRenderInterface* RI)
 		FLightHandle* HandlePtr = HandleMap.Find(*Proj);
 
 		if(HandlePtr)
-			BridgeInterface.DestroyLight(HandlePtr->Handle);
+		{
+			if(HandlePtr->Handle)
+				BridgeInterface.DestroyLight(HandlePtr->Handle);
+		}
 		else
+		{
 			HandlePtr = &HandleMap[*Proj];
+		}
 
 		x86::remixapi_LightInfo l;
 		l.sType = REMIXAPI_STRUCT_TYPE_LIGHT_INFO;
 		l.hash = reinterpret_cast<uint32_t>(*Proj);
 
-		FPlane Col = FGetHSV(Proj->LightHue, Proj->LightSaturation, Proj->LightBrightness) * 10000;
+		FPlane Col = FGetHSV(Proj->LightHue, Proj->LightSaturation, Proj->LightBrightness) * 1000;
 
 		l.radiance.x = Col.X;
 		l.radiance.y = Col.Y;
 		l.radiance.z = Col.Z;
 
 		FVector Loc = Proj->Location;
-		x86::remixapi_LightInfoSphereEXT s;
-		s.sType = REMIXAPI_STRUCT_TYPE_LIGHT_INFO_SPHERE_EXT;
-		s.position.x = Loc.X;
-		s.position.y = Loc.Y;
-		s.position.z = Loc.Z;
-		s.radius = 2.5f;
-		s.shaping_hasvalue = FALSE;
-		s.shaping_value.direction.x = 0.0f;
-		s.shaping_value.direction.y = 1.0f;
-		s.shaping_value.direction.z = 0.0f;
-		s.shaping_value.coneAngleDegrees = 80.0f;
-		s.shaping_value.coneSoftness = 1.0f;
-		s.shaping_value.focusExponent = 0.0f;
+
+		DECLARE_NAME(GrenadeProj);
+		if(Proj->IsA(NGrenadeProj))
+		{
+			x86::remixapi_LightInfoSphereEXT s;
+			s.sType = REMIXAPI_STRUCT_TYPE_LIGHT_INFO_SPHERE_EXT;
+			s.position.x = Loc.X;
+			s.position.y = Loc.Y;
+			s.position.z = Loc.Z;
+			s.radius = 32.0f;
+			s.shaping_hasvalue = FALSE;
+			s.shaping_value.direction.x = 0.0f;
+			s.shaping_value.direction.y = 0.0f;
+			s.shaping_value.direction.z = 1.0f;
+			s.shaping_value.coneAngleDegrees = 80.0f;
+			s.shaping_value.coneSoftness = 1.0f;
+			s.shaping_value.focusExponent = 0.0f;
+			HandlePtr->Handle = BridgeInterface.CreateSphereLight(&l, &s);
+		}
+		else
+		{
+			x86::remixapi_LightInfoCylinderEXT s;
+			FVector Dir = Proj->Rotation.Vector().GetNormalized();
+			s.sType = REMIXAPI_STRUCT_TYPE_LIGHT_INFO_CYLINDER_EXT;
+			s.position.x = Loc.X;
+			s.position.y = Loc.Y;
+			s.position.z = Loc.Z;
+			s.axis.x = Dir.X;
+			s.axis.y = Dir.Y;
+			s.axis.z = Dir.Z;
+			s.axisLength = 200.0f;
+			s.radius = 2.5f;
+			HandlePtr->Handle = BridgeInterface.CreateCylinderLight(&l, &s);
+		}
 
 		HandlePtr->bUsed = 1;
-		HandlePtr->Handle = BridgeInterface.CreateSphereLight(&l, &s);
-		BridgeInterface.DrawLightInstance(HandlePtr->Handle);
+
+		if(HandlePtr->Handle)
+			BridgeInterface.DrawLightInstance(HandlePtr->Handle);
 	}
 
 	for(FHandleMap::TIterator It(HandleMap); It; ++It)
@@ -151,8 +195,8 @@ void URtxRenderDevice::Unlock(FRenderInterface* RI)
 	{
 		FinalBlend->Material = Material;
 		FinalBlend->FrameBufferBlending = FB_Overwrite;
-		FinalBlend->ColorWriteEnable = 1;
 	});
+	FinalBlend->ColorWriteEnable = bShowAnchorTriangle;
 
 	// Draw anchor triangle at world center to parent stuff to in remix
 	if(LockedViewport && LockedViewport->Actor)
@@ -236,10 +280,10 @@ void URtxRenderDevice::Present(UViewport* Viewport)
 
 FRenderCaps* URtxRenderDevice::GetRenderCaps()
 {
-	/* return Super::GetRenderCaps(); */
-	static FRenderCaps RenderCaps(1, 14, 1);
+	return Super::GetRenderCaps();
+	// static FRenderCaps RenderCaps(1, 14, 1);
 
-	return &RenderCaps;
+	// return &RenderCaps;
 }
 
 UBOOL FRtxRenderInterface::SetRenderTarget(FRenderTarget* RenderTarget, bool bOwnDepthBuffer)
@@ -251,6 +295,19 @@ UBOOL FRtxRenderInterface::SetRenderTarget(FRenderTarget* RenderTarget, bool bOw
 void FRtxRenderInterface::Clear(UBOOL UseColor, FColor Color, UBOOL UseDepth, FLOAT Depth, UBOOL UseStencil, DWORD Stencil)
 {
 	Impl->Clear(UseColor, Color, UseDepth, Depth, UseStencil, Stencil);
+}
+
+void FRtxRenderInterface::EnableLighting(UBOOL UseDynamic, UBOOL UseStatic, UBOOL Modulate2X, FBaseTexture* Lightmap, UBOOL LightingOnly, const FSphere& LitSphere, int IntValue){
+	UseDynamic = 0;
+	Lightmap = NULL;
+	Modulate2X = 0;
+	Impl->EnableLighting(UseDynamic, UseStatic, Modulate2X, Lightmap, LightingOnly, LitSphere, IntValue);
+}
+
+void FRtxRenderInterface::SetLight(INT LightIndex, FDynamicLight* Light, FLOAT Scale)
+{
+	if(RenDev->bEnableD3DLights)
+		Impl->SetLight(LightIndex, Light, Scale);
 }
 
 void FRtxRenderInterface::SetTransform(ETransformType Type, const FMatrix& Matrix)

@@ -46,21 +46,15 @@ public:
 	virtual void PushState(DWORD Flags = 0){ Impl->PushState(Flags); }
 	virtual void PopState(DWORD Flags = 0){ Impl->PopState(Flags); }
 	virtual UBOOL SetRenderTarget(FRenderTarget* RenderTarget, bool bOwnDepthBuffer);
-	virtual UBOOL SetCubeRenderTarget(class FDynamicCubemap* Target, int A, int B){ return Impl->SetCubeRenderTarget(Target, A, B); }
 	virtual void SetViewport(INT X, INT Y, INT Width, INT Height){ Impl->SetViewport(X, Y, Width, Height); }
 	virtual void Clear(UBOOL UseColor = 1, FColor Color = FColor(0, 0, 0), UBOOL UseDepth = 1, FLOAT Depth = 1.0f, UBOOL UseStencil = 1, DWORD Stencil = 0);
 	virtual void PushHit(const BYTE* Data, INT Count){ Impl->PushHit(Data, Count); }
 	virtual void PopHit(INT Count, UBOOL Force){ Impl->PopHit(Count, Force); }
 	virtual void SetCullMode(ECullMode CullMode){ Impl->SetCullMode(CullMode); }
 	virtual void SetAmbientLight(FColor Color){}
-	virtual void EnableLighting(UBOOL UseDynamic, UBOOL UseStatic = 1, UBOOL Modulate2X = 0, FBaseTexture* Lightmap = NULL, UBOOL LightingOnly = 0, const FSphere& LitSphere = FSphere(FVector(0, 0, 0), 0), int IntValue = 0){
-		UseDynamic = 0;
-		Lightmap = NULL;
-		Modulate2X = 0;
-		Impl->EnableLighting(UseDynamic, UseStatic, Modulate2X, Lightmap, LightingOnly, LitSphere, IntValue);
-	}
-	virtual void SetLight(INT LightIndex, FDynamicLight* Light, FLOAT Scale = 1.0f){}
-	virtual void SetShaderLight(INT LightIndex, FDynamicLight* Light, FLOAT Scale = 1.0f){ Impl->SetShaderLight(LightIndex, Light, Scale); }
+	virtual void EnableLighting(UBOOL UseDynamic, UBOOL UseStatic, UBOOL Modulate2X, FBaseTexture* Lightmap, UBOOL LightingOnly, const FSphere& LitSphere, int IntValue);
+	virtual void SetLight(INT LightIndex, FDynamicLight* Light, FLOAT Scale = 1.0f);
+	virtual void SetShaderLight(INT LightIndex, FDynamicLight* Light, FLOAT Scale = 1.0f){}
 	virtual void SetNPatchTesselation(FLOAT Tesselation){ Impl->SetNPatchTesselation(Tesselation); }
 	virtual void SetDistanceFog(UBOOL Enable, FLOAT FogStart, FLOAT FogEnd, FColor Color){ Impl->SetDistanceFog(0, 0.0f, 0.0f, FColor()); }
 	virtual UBOOL EnableFog(UBOOL Enable){ return Impl->EnableFog(0); }
@@ -71,13 +65,13 @@ public:
 	virtual void SetMaterial(UMaterial* Material, FString* ErrorString = NULL, UMaterial** ErrorMaterial = NULL, INT* NumPasses = NULL);
 	virtual UBOOL SetHardwareShaderMaterial(UHardwareShader* Material, FString* ErrorString = NULL, UMaterial** ErrorMaterial = NULL){ return Impl->SetHardwareShaderMaterial(Material, ErrorString, ErrorMaterial); }
 	virtual UBOOL ShowAlpha(UMaterial* Material){ return Impl->ShowAlpha(Material); }
-	virtual UBOOL IsShadowInterface(){ return Impl->IsShadowInterface(); }
-	virtual void SetAntiAliasing(INT Level){ Impl->SetAntiAliasing(Level); }
+	virtual UBOOL IsShadowInterface(){ return 0; }
+	virtual void SetAntiAliasing(INT Level){}
 	virtual void CopyBackBufferToTarget(FAuxRenderTarget* Target){ Impl->CopyBackBufferToTarget(Target); }
 	virtual void SetLODDiffuseFade(FLOAT Distance){ Impl->SetLODDiffuseFade(Distance); }
 	virtual void SetLODSpecularFade(FLOAT Distance){ Impl->SetLODSpecularFade(Distance); }
-	virtual void SetStencilOp(ECompareFunction Test, DWORD Ref, DWORD Mask, EStencilOp FailOp, EStencilOp ZFailOp, EStencilOp PassOp, DWORD WriteMask){ Impl->SetStencilOp(Test, Ref, Mask, FailOp, ZFailOp, PassOp, WriteMask); }
-	virtual void EnableStencil(UBOOL Enable){ Impl->EnableStencil(Enable); }
+	virtual void SetStencilOp(ECompareFunction Test, DWORD Ref, DWORD Mask, EStencilOp FailOp, EStencilOp ZFailOp, EStencilOp PassOp, DWORD WriteMask){}
+	virtual void EnableStencil(UBOOL Enable){}
 	virtual void EnableDepth(UBOOL Enable){ Impl->EnableDepth(Enable); }
 	virtual void SetPrecacheMode(EPrecacheMode PrecacheMode){ Impl->SetPrecacheMode(PrecacheMode); }
 	virtual void SetZBias(INT ZBias){ Impl->SetZBias(ZBias); }
@@ -94,6 +88,10 @@ class RTXDRV_API URtxRenderDevice : public UD3DRenderDevice{
 	static const TCHAR* StaticConfigName(){ return "RtxDrv"; }
 public:
 	URtxRenderDevice() : AnchorTriangle(512, 512){}
+	void StaticConstructor();
+
+	UBOOL bShowAnchorTriangle;
+	UBOOL bEnableD3DLights;
 
 	virtual UBOOL Exec(const TCHAR* Cmd, FOutputDevice& Ar);
 	virtual UBOOL Init();

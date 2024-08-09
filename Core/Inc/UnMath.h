@@ -189,7 +189,7 @@ public:
 
 	// Constructors.
 	FVector(){}
-	FVector(FLOAT In) : X(In), Y(In), Z(In){}
+	explicit FVector(FLOAT In) : X(In), Y(In), Z(In){}
 	FVector(FLOAT InX, FLOAT InY, FLOAT InZ)
 	:	X(InX), Y(InY), Z(InZ){}
 

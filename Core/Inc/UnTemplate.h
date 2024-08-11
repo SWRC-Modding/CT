@@ -459,11 +459,9 @@ public:
 
 	T Pop()
 	{
-		T Result = (*this)[Num() - 1];
-
-		Remove(Num() - 1);
-
-		return Result;
+		checkSlow(ArrayNum > 0);
+		--ArrayNum;
+		return GetData()[ArrayNum];
 	}
 
 	INT AddItem(const T& Item)

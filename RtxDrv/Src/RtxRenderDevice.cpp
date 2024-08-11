@@ -1,14 +1,15 @@
-#include "RtxDrvPrivate.h"
 #include "RtxRenderDevice.h"
+#include "RtxDrvPrivate.h"
+#include "Window.h"
 
 IMPLEMENT_CLASS(URtxRenderDevice)
 
-class USolidColorMaterial : public UConstantMaterial{
-	DECLARE_CLASS(USolidColorMaterial,UConstantMaterial,0,RtxDrv)
-public:
-	virtual FColor GetColor(FLOAT TimeSeconds){ return FColor(255,255,0,255); }
-};
-IMPLEMENT_CLASS(USolidColorMaterial)
+void URtxRenderDevice::Serialize(FArchive& Ar)
+{
+	Super::Serialize(Ar);
+	if(Ar.IsGarbageCollecting())
+		Ar << Rtx;
+}
 
 UBOOL URtxRenderDevice::Exec(const TCHAR* Cmd, FOutputDevice& Ar)
 {
@@ -16,7 +17,31 @@ UBOOL URtxRenderDevice::Exec(const TCHAR* Cmd, FOutputDevice& Ar)
 	{
 		if(ParseCommand(&Cmd, "TOGGLEANCHOR"))
 		{
-			bShowAnchorTriangle = !bShowAnchorTriangle;
+			Rtx->bShowAnchorTriangle = !Rtx->bShowAnchorTriangle;
+			return 1;
+		}
+		else if(ParseCommand(&Cmd, "PREFERENCES"))
+		{
+			GEngine->Client->GetLastCurrent()->EndFullscreen();
+			WObjectProperties* P = new WObjectProperties("EditObj", 0, "", NULL, 1);
+			P->OpenWindow(GLogWindow->hWnd);
+			UObject* Obj = Rtx;
+			P->Root.SetObjects(&Obj, 1);
+			P->Show(1);
+		}
+		else if(ParseCommand(&Cmd, "CREATELIGHT"))
+		{
+			UObject* Light = Rtx->CreateLight(true);
+
+			if(!ParseCommand(&Cmd, "!"))
+			{
+				GEngine->Client->GetLastCurrent()->EndFullscreen();
+				WObjectProperties* P = new WObjectProperties("EditObj", 0, "", NULL, 1);
+				P->OpenWindow(GLogWindow->hWnd);
+				P->Root.SetObjects(&Light, 1);
+				P->Show(1);
+			}
+
 			return 1;
 		}
 	}
@@ -26,8 +51,8 @@ UBOOL URtxRenderDevice::Exec(const TCHAR* Cmd, FOutputDevice& Ar)
 
 void URtxRenderDevice::StaticConstructor()
 {
-	new(GetClass(), "ShowAnchor",      RF_Public) UBoolProperty(CPP_PROPERTY(bShowAnchorTriangle), "RtxRenderDevice", CPF_Config);
-	new(GetClass(), "EnableD3DLights", RF_Public) UBoolProperty(CPP_PROPERTY(bEnableD3DLights),    "RtxRenderDevice", CPF_Config);
+	UseStencil             = 0;
+	CanDoDistortionEffects = 0;
 }
 
 UBOOL URtxRenderDevice::Init()
@@ -43,9 +68,6 @@ UBOOL URtxRenderDevice::Init()
 			InitSWRCFix();
 	}
 
-	RenderInterface.RenDev = this;
-	RenderInterface.Impl = NULL;
-
 	ClearMaterialFlags();
 	UClient* Client = UTexture::__Client;
 	Client->Shadows = 0;
@@ -53,29 +75,28 @@ UBOOL URtxRenderDevice::Init()
 	Client->BloomQuality = 0;
 	Client->BlurEnabled = 0;
 	Client->BumpmappingQuality = 0;
-	// Client->Projectors = 0;
 	GetDefault<APlayerController>()->bVisor = 0;
 	GetDefault<APlayerController>()->VisorModeDefault = 1;
-	UseStencil = 0;
+
+	Rtx = new(this) URtxInterface;
 
 	return Super::Init();
+}
+
+void URtxRenderDevice::Exit(UViewport* Viewport)
+{
+	Rtx->Exit();
+	delete Rtx;
+	Rtx = NULL;
+	Super::Exit(Viewport);
 }
 
 UBOOL URtxRenderDevice::SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL Fullscreen, INT ColorBytes, UBOOL bSaveSize)
 {
 	UBOOL Result = Super::SetRes(Viewport, NewX, NewY, Fullscreen, ColorBytes, bSaveSize);
 
-	if(Result && !BridgeInterface.initialized)
-	{
-		debugf("Initializing remix bridge API");
-		if(bridgeapi_initialize(&BridgeInterface) != BRIDGEAPI_ERROR_CODE_SUCCESS || !BridgeInterface.initialized)
-		{
-			appErrorf("Failed to initialize remix bridge API");
-			return 0;
-		}
-
-		BridgeInterface.RegisterDevice();
-	}
+	if(Result)
+		Rtx->Init();
 
 	return Result;
 }
@@ -96,233 +117,74 @@ FRenderInterface* URtxRenderDevice::Lock(UViewport* Viewport, BYTE* HitData, INT
 		Viewport->Actor->VisorModeDefault = 1;
 	}
 
-	RenderInterface.Impl = Super::Lock(Viewport, HitData, HitSize);
-	return RenderInterface.Impl ? &RenderInterface : NULL;
+	FRenderInterface* RI = Super::Lock(Viewport, HitData, HitSize);
+
+	if(!RI)
+		return NULL;
+
+	D3D = RI;
+
+	return this;
 }
 
-struct FLightHandle{
-	uint64_t Handle;
-	UBOOL    bUsed;
+struct FProjectileLight{
+	URtxLight* Light;
+	UBOOL      bUsed;
 };
-class RTXDRV_API UConstantColorMaterial : public UConstantMaterial{
-public:
-	DECLARE_CLASS(UConstantColorMaterial,UConstantMaterial,0,RtxDrv)
-	virtual FColor GetColor(FLOAT TimeSeconds){ return FColor(255,255,0); }
-};
-IMPLEMENT_CLASS(UConstantColorMaterial)
 
 void URtxRenderDevice::Unlock(FRenderInterface* RI)
 {
-	typedef TMap<AProjectile*, FLightHandle> FHandleMap;
-	static FHandleMap HandleMap;
+	typedef TMap<AProjectile*, FProjectileLight> FProjLightMap;
+	static FProjLightMap ProjLights;
 
 	foreach(AllActors, AProjectile, Proj, static_cast<UGameEngine*>(GEngine)->GLevel)
 	{
-		FLightHandle* HandlePtr = HandleMap.Find(*Proj);
+		FProjectileLight* ProjLight = ProjLights.Find(*Proj);
 
-		if(HandlePtr)
-		{
-			if(HandlePtr->Handle)
-				BridgeInterface.DestroyLight(HandlePtr->Handle);
-		}
-		else
-		{
-			HandlePtr = &HandleMap[*Proj];
-		}
+		if(!ProjLight)
+			ProjLight = &ProjLights[*Proj];
 
-		x86::remixapi_LightInfo l;
-		l.sType = REMIXAPI_STRUCT_TYPE_LIGHT_INFO;
-		l.hash = reinterpret_cast<uint32_t>(*Proj);
-
-		FPlane Col = FGetHSV(Proj->LightHue, Proj->LightSaturation, Proj->LightBrightness) * 1000;
-
-		l.radiance.x = Col.X;
-		l.radiance.y = Col.Y;
-		l.radiance.z = Col.Z;
-
+		FPlane Col = FGetHSV(Proj->LightHue, Proj->LightSaturation, Proj->LightBrightness) * 10000;
 		FVector Loc = Proj->Location;
 
-		DECLARE_NAME(GrenadeProj);
-		if(Proj->IsA(NGrenadeProj))
-		{
-			x86::remixapi_LightInfoSphereEXT s;
-			s.sType = REMIXAPI_STRUCT_TYPE_LIGHT_INFO_SPHERE_EXT;
-			s.position.x = Loc.X;
-			s.position.y = Loc.Y;
-			s.position.z = Loc.Z;
-			s.radius = 32.0f;
-			s.shaping_hasvalue = FALSE;
-			s.shaping_value.direction.x = 0.0f;
-			s.shaping_value.direction.y = 0.0f;
-			s.shaping_value.direction.z = 1.0f;
-			s.shaping_value.coneAngleDegrees = 80.0f;
-			s.shaping_value.coneSoftness = 1.0f;
-			s.shaping_value.focusExponent = 0.0f;
-			HandlePtr->Handle = BridgeInterface.CreateSphereLight(&l, &s);
-		}
-		else
-		{
-			x86::remixapi_LightInfoCylinderEXT s;
-			FVector Dir = Proj->Rotation.Vector().GetNormalized();
-			s.sType = REMIXAPI_STRUCT_TYPE_LIGHT_INFO_CYLINDER_EXT;
-			s.position.x = Loc.X;
-			s.position.y = Loc.Y;
-			s.position.z = Loc.Z;
-			s.axis.x = Dir.X;
-			s.axis.y = Dir.Y;
-			s.axis.z = Dir.Z;
-			s.axisLength = 200.0f;
-			s.radius = 2.5f;
-			HandlePtr->Handle = BridgeInterface.CreateCylinderLight(&l, &s);
-		}
+		if(!ProjLight->Light)
+			ProjLight->Light = Rtx->CreateLight();
 
-		HandlePtr->bUsed = 1;
+		URtxLight* Light = ProjLight->Light;
+		Light->Type = RTXLIGHT_Sphere;
+		Light->Position = Loc;
+		Light->Radiance = Col;
+		Light->Sphere.Radius = 2.5f;
+		Light->Update();
 
-		if(HandlePtr->Handle)
-			BridgeInterface.DrawLightInstance(HandlePtr->Handle);
+		ProjLight->bUsed = 1;
 	}
 
-	for(FHandleMap::TIterator It(HandleMap); It; ++It)
+	for(FProjLightMap::TIterator It(ProjLights); It; ++It)
 	{
 		if(!It->bUsed)
-			HandleMap.Remove(It.Key());
+		{
+			Rtx->DestroyLight(It.Value().Light);
+			ProjLights.Remove(It.Key());
+		}
 		else
+		{
 			It->bUsed = 0;
+		}
 	}
 
-	DECLARE_STATIC_UOBJECT(USolidColorMaterial, Material, {});
-	DECLARE_STATIC_UOBJECT(UFinalBlend, FinalBlend,
-	{
-		FinalBlend->Material = Material;
-		FinalBlend->FrameBufferBlending = FB_Overwrite;
-	});
-	FinalBlend->ColorWriteEnable = bShowAnchorTriangle;
+	Rtx->RenderLights();
 
-	// Draw anchor triangle at world center to parent stuff to in remix
-	if(LockedViewport && LockedViewport->Actor)
-	{
-		AActor*  ViewActor      = LockedViewport->Actor;
-		FVector  CameraLocation = ViewActor->Location;
-		FRotator CameraRotation = ViewActor->Rotation;
-		LockedViewport->Actor->PlayerCalcView(ViewActor, CameraLocation, CameraRotation);
-
-		// Initialize the view matrix.
-		FMatrix WorldToCamera = FTranslationMatrix(-CameraLocation);
-
-		if(!LockedViewport->IsOrtho())
-		{
-			WorldToCamera = WorldToCamera * FInverseRotationMatrix(CameraRotation);
-			WorldToCamera = WorldToCamera * FMatrix(
-				FPlane(0, 0, 1, 0),
-				FPlane(LockedViewport->ScaleX, 0, 0, 0),
-				FPlane(0, LockedViewport->ScaleY, 0, 0),
-				FPlane(0, 0, 0, 1));
-		}
-		else if(LockedViewport->Actor->RendMap == REN_OrthXY)
-		{
-			WorldToCamera = WorldToCamera * FMatrix(
-				FPlane(LockedViewport->ScaleX, 0, 0, 0),
-				FPlane(0, -LockedViewport->ScaleY, 0, 0),
-				FPlane(0, 0, -1, 0),
-				FPlane(0, 0, -CameraLocation.Z, 1));
-		}
-		else if(LockedViewport->Actor->RendMap == REN_OrthXZ)
-		{
-			WorldToCamera = WorldToCamera * FMatrix(
-				FPlane(LockedViewport->ScaleX, 0, 0, 0),
-				FPlane(0, 0, -1, 0),
-				FPlane(0, LockedViewport->ScaleY, 0, 0),
-				FPlane(0, 0, -CameraLocation.Y, 1));
-		}
-		else if(LockedViewport->Actor->RendMap == REN_OrthYZ)
-		{
-			WorldToCamera = WorldToCamera * FMatrix(
-				FPlane(0, 0, 1, 0),
-				FPlane(LockedViewport->ScaleX, 0, 0, 0),
-				FPlane(0, LockedViewport->ScaleY, 0, 0),
-				FPlane(0, 0, CameraLocation.X, 1));
-		}
-
-		// Initialize the projection matrix.
-		FMatrix CameraToScreen;
-		if(LockedViewport->IsOrtho())
-		{
-			const FLOAT Zoom = LockedViewport->Actor->OrthoZoom / (LockedViewport->SizeX * 15.0f);
-			CameraToScreen = FOrthoMatrix(Zoom * LockedViewport->SizeX / 2,Zoom * LockedViewport->SizeY / 2, 0.5f / HALF_WORLD_MAX, HALF_WORLD_MAX);
-		}
-		else
-		{
-			const FLOAT FOV = LockedViewport->Actor->FovAngle * PI / 360.0f;
-			CameraToScreen = FPerspectiveMatrix(FOV, FOV, 1.0f, (FLOAT)LockedViewport->SizeX / LockedViewport->SizeY, NEAR_CLIPPING_PLANE, FAR_CLIPPING_PLANE);
-		}
-
-		RenderInterface.PushState();
-		RenderInterface.SetTransform(TT_LocalToWorld, FMatrix::Identity);
-		RenderInterface.SetTransform(TT_WorldToCamera, WorldToCamera);
-		RenderInterface.SetTransform(TT_CameraToScreen, CameraToScreen);
-		RenderInterface.SetMaterial(FinalBlend);
-		RenderInterface.SetIndexBuffer(NULL, 0);
-		FVertexStream* Stream = &AnchorTriangle;
-		RenderInterface.SetVertexStreams(VS_FixedFunction, &Stream, 1);
-		RenderInterface.DrawPrimitive(PT_TriangleList, 0, 1);
-		RenderInterface.PopState();
-	}
-
+	DrawAnchorTriangle();
 	LockedViewport = NULL;
+	D3D = NULL;
 
-	Super::Unlock(static_cast<FRtxRenderInterface*>(RI)->Impl);
+	Super::Unlock(static_cast<URtxRenderDevice*>(RI)->D3D);
 }
 
 void URtxRenderDevice::Present(UViewport* Viewport)
 {
 	Super::Present(Viewport);
-}
-
-FRenderCaps* URtxRenderDevice::GetRenderCaps()
-{
-	return Super::GetRenderCaps();
-	// static FRenderCaps RenderCaps(1, 14, 1);
-
-	// return &RenderCaps;
-}
-
-UBOOL FRtxRenderInterface::SetRenderTarget(FRenderTarget* RenderTarget, bool bOwnDepthBuffer)
-{
-	debugf("SETRENDERTARGET: %p", RenderTarget);
-	return Impl->SetRenderTarget(RenderTarget, bOwnDepthBuffer);
-}
-
-void FRtxRenderInterface::Clear(UBOOL UseColor, FColor Color, UBOOL UseDepth, FLOAT Depth, UBOOL UseStencil, DWORD Stencil)
-{
-	Impl->Clear(UseColor, Color, UseDepth, Depth, UseStencil, Stencil);
-}
-
-void FRtxRenderInterface::EnableLighting(UBOOL UseDynamic, UBOOL UseStatic, UBOOL Modulate2X, FBaseTexture* Lightmap, UBOOL LightingOnly, const FSphere& LitSphere, int IntValue){
-	UseDynamic = 0;
-	Lightmap = NULL;
-	Modulate2X = 0;
-	Impl->EnableLighting(UseDynamic, UseStatic, Modulate2X, Lightmap, LightingOnly, LitSphere, IntValue);
-}
-
-void FRtxRenderInterface::SetLight(INT LightIndex, FDynamicLight* Light, FLOAT Scale)
-{
-	if(RenDev->bEnableD3DLights)
-		Impl->SetLight(LightIndex, Light, Scale);
-}
-
-void FRtxRenderInterface::SetTransform(ETransformType Type, const FMatrix& Matrix)
-{
-	Impl->SetTransform(Type, Matrix);
-}
-
-void FRtxRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorString, UMaterial** ErrorMaterial, INT* NumPasses)
-{
-	Impl->SetMaterial(Material, ErrorString, ErrorMaterial, NumPasses);
-}
-
-void FRtxRenderInterface::DrawPrimitive(EPrimitiveType PrimitiveType, INT FirstIndex, INT NumPrimitives, INT MinIndex, INT MaxIndex)
-{
-	Impl->DrawPrimitive(PrimitiveType, FirstIndex, NumPrimitives, MinIndex, MaxIndex);
 }
 
 void URtxRenderDevice::ClearMaterialFlags()
@@ -331,7 +193,165 @@ void URtxRenderDevice::ClearMaterialFlags()
 		reinterpret_cast<INT*>(*Material)[24] = (reinterpret_cast<INT*>(*Material)[24] & 0x3);
 }
 
-void URtx::execTestFunc(FFrame& Stack, void* Result)
-{
+/*
+ * Draw anchor triangle at world center to parent assets to in remix
+ */
 
+class FSingleTriangleVertexStream : public FVertexStream{
+public:
+	FSingleTriangleVertexStream(FLOAT Width, FLOAT Height) : HalfWidth(Width / 2), HalfHeight(Height / 2)
+	{
+		CacheId = MakeCacheID(CID_RenderVertices);
+	}
+
+	FLOAT HalfWidth;
+	FLOAT HalfHeight;
+
+	virtual INT GetStride(){ return sizeof(FVector); }
+	virtual INT GetSize(){ return sizeof(FVector) * 3; }
+
+	virtual INT GetComponents(FVertexComponent* Components)
+	{
+		Components->Type     = CT_Float3;
+		Components->Function = FVF_Position;
+		return 1;
+	}
+
+	virtual void GetStreamData(void* Dest)
+	{
+		FVector* D = static_cast<FVector*>(Dest);
+		D[0] = FVector(-HalfWidth, -HalfHeight, 0);
+		D[1] = FVector(HalfHeight, -HalfHeight, 0);
+		D[2] = FVector(0, HalfHeight, 0);
+	}
+};
+
+class USolidColorMaterial : public UConstantMaterial{
+	DECLARE_CLASS(USolidColorMaterial,UConstantMaterial,0,RtxDrv)
+public:
+	virtual FColor GetColor(FLOAT TimeSeconds){ return FColor(255,255,0,255); }
+};
+IMPLEMENT_CLASS(USolidColorMaterial)
+
+void URtxRenderDevice::DrawAnchorTriangle()
+{
+	if(!LockedViewport || !LockedViewport->Actor)
+		return;
+
+	AActor*  ViewActor      = LockedViewport->Actor;
+	FVector  CameraLocation = ViewActor->Location;
+	FRotator CameraRotation = ViewActor->Rotation;
+	LockedViewport->Actor->PlayerCalcView(ViewActor, CameraLocation, CameraRotation);
+
+	// Initialize the view matrix.
+	FMatrix WorldToCamera = FTranslationMatrix(-CameraLocation);
+
+	if(!LockedViewport->IsOrtho())
+	{
+		WorldToCamera = WorldToCamera * FInverseRotationMatrix(CameraRotation);
+		WorldToCamera = WorldToCamera * FMatrix(
+			FPlane(0, 0, 1, 0),
+			FPlane(LockedViewport->ScaleX, 0, 0, 0),
+			FPlane(0, LockedViewport->ScaleY, 0, 0),
+			FPlane(0, 0, 0, 1));
+	}
+	else if(LockedViewport->Actor->RendMap == REN_OrthXY)
+	{
+		WorldToCamera = WorldToCamera * FMatrix(
+			FPlane(LockedViewport->ScaleX, 0, 0, 0),
+			FPlane(0, -LockedViewport->ScaleY, 0, 0),
+			FPlane(0, 0, -1, 0),
+			FPlane(0, 0, -CameraLocation.Z, 1));
+	}
+	else if(LockedViewport->Actor->RendMap == REN_OrthXZ)
+	{
+		WorldToCamera = WorldToCamera * FMatrix(
+			FPlane(LockedViewport->ScaleX, 0, 0, 0),
+			FPlane(0, 0, -1, 0),
+			FPlane(0, LockedViewport->ScaleY, 0, 0),
+			FPlane(0, 0, -CameraLocation.Y, 1));
+	}
+	else if(LockedViewport->Actor->RendMap == REN_OrthYZ)
+	{
+		WorldToCamera = WorldToCamera * FMatrix(
+			FPlane(0, 0, 1, 0),
+			FPlane(LockedViewport->ScaleX, 0, 0, 0),
+			FPlane(0, LockedViewport->ScaleY, 0, 0),
+			FPlane(0, 0, CameraLocation.X, 1));
+	}
+
+	// Initialize the projection matrix.
+	FMatrix CameraToScreen;
+	if(LockedViewport->IsOrtho())
+	{
+		const FLOAT Zoom = LockedViewport->Actor->OrthoZoom / (LockedViewport->SizeX * 15.0f);
+		CameraToScreen = FOrthoMatrix(Zoom * LockedViewport->SizeX / 2,Zoom * LockedViewport->SizeY / 2, 0.5f / HALF_WORLD_MAX, HALF_WORLD_MAX);
+	}
+	else
+	{
+		const FLOAT FOV = LockedViewport->Actor->FovAngle * PI / 360.0f;
+		CameraToScreen = FPerspectiveMatrix(FOV, FOV, 1.0f, (FLOAT)LockedViewport->SizeX / LockedViewport->SizeY, NEAR_CLIPPING_PLANE, FAR_CLIPPING_PLANE);
+	}
+
+	// Material
+	DECLARE_STATIC_UOBJECT(USolidColorMaterial, Material, {});
+	DECLARE_STATIC_UOBJECT(UFinalBlend, FinalBlend,
+	{
+		FinalBlend->Material = Material;
+		FinalBlend->FrameBufferBlending = FB_Overwrite;
+	});
+	FinalBlend->ColorWriteEnable = Rtx->bShowAnchorTriangle;
+
+	PushState();
+	SetTransform(TT_LocalToWorld, FMatrix::Identity);
+	SetTransform(TT_WorldToCamera, WorldToCamera);
+	SetTransform(TT_CameraToScreen, CameraToScreen);
+	SetMaterial(FinalBlend);
+	SetIndexBuffer(NULL, 0);
+	static FSingleTriangleVertexStream AnchorTriangle(512, 512);
+	FVertexStream* Stream = &AnchorTriangle;
+	SetVertexStreams(VS_FixedFunction, &Stream, 1);
+	DrawPrimitive(PT_TriangleList, 0, 1);
+	PopState();
+}
+
+/*
+ * FRenderInterface
+ */
+
+UBOOL URtxRenderDevice::SetRenderTarget(FRenderTarget* RenderTarget, bool bOwnDepthBuffer)
+{
+	return D3D->SetRenderTarget(RenderTarget, bOwnDepthBuffer);
+}
+
+void URtxRenderDevice::Clear(UBOOL UseColor, FColor Color, UBOOL UseDepth, FLOAT Depth, UBOOL UseStencil, DWORD Stencil)
+{
+	D3D->Clear(UseColor, Color, UseDepth, Depth, UseStencil, Stencil);
+}
+
+void URtxRenderDevice::EnableLighting(UBOOL UseDynamic, UBOOL UseStatic, UBOOL Modulate2X, FBaseTexture* Lightmap, UBOOL LightingOnly, const FSphere& LitSphere, int IntValue){
+	UseDynamic = 0;
+	Lightmap = NULL;
+	Modulate2X = 0;
+	D3D->EnableLighting(UseDynamic, UseStatic, Modulate2X, Lightmap, LightingOnly, LitSphere, IntValue);
+}
+
+void URtxRenderDevice::SetLight(INT LightIndex, FDynamicLight* Light, FLOAT Scale)
+{
+	// Impl->SetLight(LightIndex, Light, Scale);
+}
+
+void URtxRenderDevice::SetTransform(ETransformType Type, const FMatrix& Matrix)
+{
+	D3D->SetTransform(Type, Matrix);
+}
+
+void URtxRenderDevice::SetMaterial(UMaterial* Material, FString* ErrorString, UMaterial** ErrorMaterial, INT* NumPasses)
+{
+	D3D->SetMaterial(Material, ErrorString, ErrorMaterial, NumPasses);
+}
+
+void URtxRenderDevice::DrawPrimitive(EPrimitiveType PrimitiveType, INT FirstIndex, INT NumPrimitives, INT MinIndex, INT MaxIndex)
+{
+	D3D->DrawPrimitive(PrimitiveType, FirstIndex, NumPrimitives, MinIndex, MaxIndex);
 }

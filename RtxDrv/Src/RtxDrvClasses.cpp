@@ -10,9 +10,19 @@ IMPLEMENT_PACKAGE(RtxDrv)
 
 
 
-IMPLEMENT_CLASS(URtx);
-FNativeEntry<URtx> URtx::StaticNativeMap[] = {
-	MAP_NATIVE(TestFunc,0)
+IMPLEMENT_CLASS(URtxInterface);
+FNativeEntry<URtxInterface> URtxInterface::StaticNativeMap[] = {
+	MAP_NATIVE(CreateLight,0)
+	MAP_NATIVE(DestroyLight,0)
+	MAP_NATIVE(DestroyAllLights,0)
+	MAP_NATIVE(GetInstance,0)
 	{NULL,NULL}
 };
-LINK_NATIVES(URtx);
+LINK_NATIVES(URtxInterface);
+
+IMPLEMENT_CLASS(URtxLight);
+FNativeEntry<URtxLight> URtxLight::StaticNativeMap[] = {
+	MAP_NATIVE(Update,0)
+	{NULL,NULL}
+};
+LINK_NATIVES(URtxLight);

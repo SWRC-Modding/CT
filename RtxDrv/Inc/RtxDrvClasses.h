@@ -17,13 +17,103 @@
 
 
 
-class RTXDRV_API URtx : public UObject
+class RTXDRV_API URtxInterface : public UObject
 {
 public:
-    void execTestFunc(FFrame& Stack, void* Result);
-    DECLARE_CLASS(URtx,UObject,0,RtxDrv)
-    NO_DEFAULT_CONSTRUCTOR(URtx)
-    DECLARE_NATIVES(URtx)
+    BITFIELD bShowAnchorTriangle:1 GCC_PACK(4);
+    TArrayNoInit<class URtxLight*> Lights GCC_PACK(4);
+    TArrayNoInit<class URtxLight*> DestroyedLights;
+    void execCreateLight(FFrame& Stack, void* Result);
+    void execDestroyLight(FFrame& Stack, void* Result);
+    void execDestroyAllLights(FFrame& Stack, void* Result);
+    void execGetInstance(FFrame& Stack, void* Result);
+    DECLARE_CLASS(URtxInterface,UObject,0|CLASS_Transient|CLASS_Config,RtxDrv)
+    void Init();
+    void Exit();
+		URtxLight* CreateLight(bool ForceDefaultConstructed = false);
+		void DestroyLight(URtxLight* Light);
+		void DestroyAllLights();
+		void RenderLights();
+
+    static bridgeapi_Interface BridgeInterface;
+    DECLARE_NATIVES(URtxInterface)
+};
+
+enum ERtxLightType
+{
+    RTXLIGHT_Sphere,
+    RTXLIGHT_Rect,
+    RTXLIGHT_Disk,
+    RTXLIGHT_Cylinder,
+    RTXLIGHT_Distant,
+    RTXLIGHT_MAX
+};
+struct RTXDRV_API FRtxLightShaping
+{
+    FVector Direction;
+    FLOAT ConeAngleDegrees;
+    FLOAT ConeSoftness;
+    FLOAT FocusExponent;
+};
+
+struct RTXDRV_API FRtxSphereLight
+{
+    FLOAT Radius;
+};
+
+struct RTXDRV_API FRtxRectLight
+{
+    FVector XAxis;
+    FVector YAxis;
+    FLOAT XSize;
+    FLOAT YSize;
+    FVector Direction;
+};
+
+struct RTXDRV_API FRtxDiskLight
+{
+    FVector XAxis;
+    FVector YAxis;
+    FLOAT XRadius;
+    FLOAT YRadius;
+    FVector Direction;
+};
+
+struct RTXDRV_API FRtxCylinderLight
+{
+    FVector Axis;
+    FLOAT Length;
+    FLOAT Radius;
+};
+
+struct RTXDRV_API FRtxDistantLight
+{
+    FVector Direction;
+    FLOAT AngularDiameterDegrees;
+};
+
+
+class RTXDRV_API URtxLight : public UObject
+{
+public:
+    FRtxHandle Handle;
+    BYTE Type;
+    BITFIELD bEnabled:1 GCC_PACK(4);
+    BITFIELD bUseShaping:1;
+    FVector Position GCC_PACK(4);
+    FVector Radiance;
+    FRtxLightShaping Shaping;
+    FRtxSphereLight Sphere;
+    FRtxRectLight Rect;
+    FRtxDiskLight Disk;
+    FRtxCylinderLight Cylinder;
+    FRtxDistantLight Distant;
+    void execUpdate(FFrame& Stack, void* Result);
+    DECLARE_CLASS(URtxLight,UObject,0|CLASS_Transient,RtxDrv)
+    virtual void Destroy();
+    virtual void PostEditChange(){ Super::PostEditChange(); Update(); }
+    void Update();
+    DECLARE_NATIVES(URtxLight)
 };
 
 
@@ -35,9 +125,9 @@ public:
 #if __STATIC_LINK
 
 #define AUTO_INITIALIZE_REGISTRANTS_RTXDRV \
-	UConstantColorMaterial::StaticClass(); \
 	USolidColorMaterial::StaticClass(); \
-	URtx::StaticClass(); \
+	URtxInterface::StaticClass(); \
+	URtxLight::StaticClass(); \
 	URtxRenderDevice::StaticClass(); \
 
 #endif // __STATIC_LINK

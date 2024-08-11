@@ -113,6 +113,9 @@
 				RelativePath=".\Src\RtxRenderDevice.cpp">
 			</File>
 			<File
+				RelativePath=".\Src\Rtx.cpp">
+			</File>
+			<File
 				RelativePath=".\Src\RtxDrvClasses.cpp">
 			</File>
 		</Filter>

@@ -146,16 +146,14 @@ void URtxRenderDevice::Unlock(FRenderInterface* RI)
 		if(!ProjLight)
 			ProjLight = &ProjLights[*Proj];
 
-		FPlane Col = FGetHSV(Proj->LightHue, Proj->LightSaturation, Proj->LightBrightness) * 10000;
-		FVector Loc = Proj->Location;
-
 		if(!ProjLight->Light)
 			ProjLight->Light = Rtx->CreateLight();
 
 		URtxLight* Light = ProjLight->Light;
 		Light->Type = RTXLIGHT_Sphere;
-		Light->Position = Loc;
-		Light->Radiance = Col;
+		Light->Position = Proj->Location;
+		Light->Radiance = 10000.0f;
+		Light->Color = FGetHSV(Proj->LightHue, Proj->LightSaturation, Proj->LightBrightness);
 		Light->Sphere.Radius = 2.5f;
 		Light->Update();
 

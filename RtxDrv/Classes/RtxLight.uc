@@ -13,7 +13,8 @@ var(Common) enum ERtxLightType{
 var(Common) bool   bEnabled;
 var(Common) bool   bUseShaping;
 var(Common) vector Position;
-var(Common) vector Radiance;
+var(Common) color  Color;
+var(Common) float  Radiance;
 
 // Used by sphere, rect and disc if bUseShaping
 var(Common) struct RtxLightShaping{
@@ -66,6 +67,7 @@ cpptext
 defaultproperties
 {
 	bEnabled=True
-	Radiance=(X=1000,Y=1000,Z=1000)
+	Color=(R=255,G=255,B=255,A=255)
+	Radiance=10000
 	Sphere=(Radius=2.5)
 }

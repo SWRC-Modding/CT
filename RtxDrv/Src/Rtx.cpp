@@ -152,7 +152,7 @@ void URtxLight::Update()
 	x86::remixapi_LightInfo LightInfo;
 	LightInfo.sType = REMIXAPI_STRUCT_TYPE_LIGHT_INFO;
 	LightInfo.hash = reinterpret_cast<DWORD>(this);
-	InitFloat3D(LightInfo.radiance, Radiance);
+	InitFloat3D(LightInfo.radiance, Color.Plane() * Radiance);
 
 	switch(Type)
 	{

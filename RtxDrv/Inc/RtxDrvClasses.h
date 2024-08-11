@@ -102,7 +102,8 @@ public:
     BITFIELD bEnabled:1 GCC_PACK(4);
     BITFIELD bUseShaping:1;
     FVector Position GCC_PACK(4);
-    FVector Radiance;
+    FColor Color;
+    FLOAT Radiance;
     FRtxLightShaping Shaping;
     FRtxSphereLight Sphere;
     FRtxRectLight Rect;

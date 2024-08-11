@@ -23,10 +23,10 @@ cpptext
 {
     void Init();
     void Exit();
-		URtxLight* CreateLight(bool ForceDefaultConstructed = false);
-		void DestroyLight(URtxLight* Light);
-		void DestroyAllLights();
-		void RenderLights();
+    URtxLight* CreateLight(bool ForceDefaultConstructed = false);
+    void DestroyLight(URtxLight* Light);
+    void DestroyAllLights();
+    void RenderLights();
 
     static bridgeapi_Interface BridgeInterface;
 }

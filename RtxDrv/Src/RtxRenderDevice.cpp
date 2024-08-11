@@ -28,6 +28,7 @@ UBOOL URtxRenderDevice::Exec(const TCHAR* Cmd, FOutputDevice& Ar)
 			UObject* Obj = Rtx;
 			P->Root.SetObjects(&Obj, 1);
 			P->Show(1);
+			return 1;
 		}
 		else if(ParseCommand(&Cmd, "CREATELIGHT"))
 		{

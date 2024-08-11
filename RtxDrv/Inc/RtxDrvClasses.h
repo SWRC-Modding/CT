@@ -99,7 +99,8 @@ class RTXDRV_API URtxLight : public UObject
 public:
     FRtxHandle Handle;
     BYTE Type;
-    BITFIELD bEnabled:1 GCC_PACK(4);
+    BITFIELD bShouldBeDestroyed:1 GCC_PACK(4);
+    BITFIELD bEnabled:1;
     BITFIELD bUseShaping:1;
     FVector Position GCC_PACK(4);
     FColor Color;

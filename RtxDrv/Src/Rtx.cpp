@@ -14,6 +14,9 @@ void URtxInterface::Init()
 
 		BridgeInterface.RegisterDevice();
 	}
+
+	Lights.SetNoShrink(true);
+	DestroyedLights.SetNoShrink(true);
 }
 
 void URtxInterface::Exit()
@@ -30,6 +33,7 @@ URtxLight* URtxInterface::CreateLight(bool ForceDefaultConstructed)
 	else
 		Light = ConstructObject<URtxLight>(URtxLight::StaticClass(), this);
 
+	Light->bShouldBeDestroyed = 0;
 	Light->bEnabled = 1;
 	Lights.AddItem(Light);
 	return Light;
@@ -38,10 +42,7 @@ URtxLight* URtxInterface::CreateLight(bool ForceDefaultConstructed)
 void URtxInterface::DestroyLight(URtxLight* Light)
 {
 	if(Light)
-	{
-		Lights.RemoveItem(Light);
-		DestroyedLights.AddItem(Light);
-	}
+		Light->bShouldBeDestroyed = 1;
 }
 
 void URtxInterface::DestroyAllLights()
@@ -63,6 +64,21 @@ void URtxInterface::RenderLights()
 		{
 			Light = ConstructObject<URtxLight>(URtxLight::StaticClass(), this);
 			Lights[i] = Light;
+		}
+
+		if(Light->bShouldBeDestroyed)
+		{
+			URtxLight* Last = Lights.Pop();
+
+			if(i == Lights.Num())
+			{
+				DestroyedLights.AddItem(Last);
+				break;
+			}
+
+			DestroyedLights.AddItem(Light);
+			Lights[i] = Last;
+			Light     = Last;
 		}
 
 		if(Light->bEnabled)

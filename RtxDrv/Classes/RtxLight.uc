@@ -10,6 +10,7 @@ var(Common) enum ERtxLightType{
 	RTXLIGHT_Distant
 } Type;
 
+var         bool   bShouldBeDestroyed;
 var(Common) bool   bEnabled;
 var(Common) bool   bUseShaping;
 var(Common) vector Position;

@@ -21,6 +21,7 @@ class RTXDRV_API URtxInterface : public UObject
 {
 public:
     BITFIELD bShowAnchorTriangle:1 GCC_PACK(4);
+    BITFIELD bEnableLights:1;
     TArrayNoInit<class URtxLight*> Lights GCC_PACK(4);
     TArrayNoInit<class URtxLight*> DestroyedLights;
     void execCreateLight(FFrame& Stack, void* Result);

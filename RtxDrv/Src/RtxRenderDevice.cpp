@@ -31,14 +31,16 @@ UBOOL URtxRenderDevice::Exec(const TCHAR* Cmd, FOutputDevice& Ar)
 		}
 		else if(ParseCommand(&Cmd, "CREATELIGHT"))
 		{
-			UObject* Light = Rtx->CreateLight(true);
+			URtxLight* Light = Rtx->CreateLight(true);
+			Light->Position = GEngine->Client->Viewports[0]->Actor->Location;
 
 			if(!ParseCommand(&Cmd, "!"))
 			{
 				GEngine->Client->GetLastCurrent()->EndFullscreen();
 				WObjectProperties* P = new WObjectProperties("EditObj", 0, "", NULL, 1);
 				P->OpenWindow(GLogWindow->hWnd);
-				P->Root.SetObjects(&Light, 1);
+				UObject* Obj = Light;
+				P->Root.SetObjects(&Obj, 1);
 				P->Show(1);
 			}
 
@@ -69,7 +71,7 @@ UBOOL URtxRenderDevice::Init()
 	}
 
 	ClearMaterialFlags();
-	UClient* Client = UTexture::__Client;
+	UClient* Client = GEngine->Client;
 	Client->Shadows = 0;
 	Client->FrameFXDisabled = 1;
 	Client->BloomQuality = 0;

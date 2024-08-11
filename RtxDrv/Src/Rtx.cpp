@@ -52,6 +52,9 @@ void URtxInterface::DestroyAllLights()
 
 void URtxInterface::RenderLights()
 {
+	if(!bEnableLights)
+		return;
+
 	for(INT i = 0; i < Lights.Num(); ++i)
 	{
 		URtxLight* Light = Lights[i];
@@ -60,10 +63,6 @@ void URtxInterface::RenderLights()
 		{
 			Light = ConstructObject<URtxLight>(URtxLight::StaticClass(), this);
 			Lights[i] = Light;
-
-			TObjectIterator<UViewport> It;
-			if(It && It->Actor)
-				Lights[i]->Position = It->Actor->Location;
 		}
 
 		if(Light->bEnabled)

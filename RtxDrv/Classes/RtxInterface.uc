@@ -7,7 +7,10 @@ struct noexport RtxHandle{
 };
 
 var(General)  config     bool            bShowAnchorTriangle;
+
+var(Lighting)            bool            bEnableLights;
 var(Lighting) editinline array<RtxLight> Lights;
+
 var                      array<RtxLight> DestroyedLights; // Keep destroyed lights around to reduce overhead of creating/destroying short lived lights
 
 native final function RtxLight CreateLight();
@@ -26,4 +29,9 @@ cpptext
 		void RenderLights();
 
     static bridgeapi_Interface BridgeInterface;
+}
+
+defaultproperties
+{
+	bEnableLights=True
 }

@@ -483,7 +483,7 @@ inline UBOOL UObject::IsIn(UObject* SomeOuter) const{
 -----------------------------------------------------------------------------*/
 
 #define CPP_PROPERTY(name) \
-	EC_CppProperty, (BYTE*)&((ThisClass*)NULL)->name - (BYTE*)NULL
+	EC_CppProperty, STRUCT_OFFSET(ThisClass, name)
 
 /*-----------------------------------------------------------------------------
 	The End.

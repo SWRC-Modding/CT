@@ -6,7 +6,7 @@ The project is called `CT` because that was the name used for the original proje
 ## Projects contained in this repository
 The following projects are part of the Visual Studio solution and built by default:
 * __UCC__  
-	An command line tool to compile UnrealScript code, run a dedicated server and more.
+	A command line tool to compile UnrealScript code, run a dedicated server and more.
 * __CT__  
 	A custom game executable that adds some useful functionality like changing render devices at runtime and an improved EditActor command.  
 	It also loads the Republic Commando Fix at startup if it is installed.  

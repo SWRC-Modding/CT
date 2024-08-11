@@ -322,14 +322,13 @@ public:
 		}
 		else return 0;
 	}
-	FVector GetNormalized()
+	FVector GetNormalized() const
 	{
 		FLOAT SquareSum = X*X+Y*Y+Z*Z;
 		if(SquareSum >= SMALL_NUMBER)
 		{
 			FLOAT Scale = 1.0f/appSqrt(SquareSum);
-			X *= Scale; Y *= Scale; Z *= Scale;
-			return *this;
+			return FVector(X * Scale, Y * Scale, Z * Scale);
 		}
 
 		return FVector(0,0,0);

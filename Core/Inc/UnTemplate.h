@@ -149,17 +149,8 @@ public:
 	TArray() : FArray(){}
 	//TArray(T* Src, INT Count) : FArray(Src, Count){} // Should not be used due to a memory leak in Core.dll
 	TArray(ENoInit) : FArray(E_NoInit){}
-
-	TArray(INT Size, bool NoShrink = false) : FArray(NoShrink)
-	{
-		Set(Size);
-	}
-
-	TArray(const TArray<T>& other, bool NoShrink = false)
-	{
-		bNoShrink = NoShrink;
-		*this = other;
-	}
+	TArray(INT Size, bool NoShrink = false) : FArray(NoShrink){ Set(Size); }
+	TArray(const TArray<T>& other, bool NoShrink = false){ bNoShrink = NoShrink; *this = other; }
 
 	~TArray()
 	{
@@ -173,30 +164,29 @@ public:
 		ArrayNum = 0;
 	}
 
+	T* GetData(){ return static_cast<T*>(Data); }
+	const T* GetData() const{ return static_cast<T*>(Data); }
+	INT Num() const{ return ArrayNum; }
+	bool IsAllocated() const{ return Data != NULL && !bIsReference; }
+	INT GetMaxSize() const{ return Capacity(); }
+
+	/*
+	 * Create/Copy
+	 */
+
 	TArray<T>& operator=(const TArray<T>& Other)
 	{
-		if(this != &Other)
-		{
-			if(Other.bIsReference || Other.bIsTemporary)
-			{
-				Transfer(const_cast<TArray<T>&>(Other));
-			}
-			else
-			{
-				Empty(Other.ArrayNum);
+		if(this == &Other)
+			return *this;
 
-				// It is assumed that a type is not trivially copyable if it needs a destructor which should be true in pretty much any case
-				if(TTypeInfo<T>::NeedsDestructor())
-				{
-					for(INT i = 0; i < Other.ArrayNum; ++i)
-						new(*this)T(Other[i]);
-				}
-				else
-				{
-					appMemcpy(Data, Other.Data, Other.ArrayNum * sizeof(T));
-					ArrayNum = Other.ArrayNum;
-				}
-			}
+		if(Other.bIsReference || Other.bIsTemporary)
+		{
+			Transfer(const_cast<TArray<T>&>(Other));
+		}
+		else
+		{
+			Empty(Other.ArrayNum);
+			*this += Other;
 		}
 
 		return *this;
@@ -205,103 +195,80 @@ public:
 	TArray<T> operator+(const TArray<T>& Other)
 	{
 		TArray<T> Result(*this);
-
-		Result.Reserve(Result.Num() + Other.Num());
-
-		if(TTypeInfo<T>::NeedsDestructor())
-		{
-			for(INT i = 0; i < Other.ArrayNum; ++i)
-				new(Result)T(Other[i]);
-		}
-		else
-		{
-			appMemcpy(static_cast<T*>(Result.Data) + Result.Num(), Other.Data, Other.ArrayNum * sizeof(T));
-			Result.ArrayNum += Other.ArrayNum;
-		}
-
-		Result.bIsTemporary |= 1;
-
+		Result += Other;
+		Result.bIsTemporary = 1;
 		return Result;
 	}
 
 	TArray<T>& operator+=(const TArray<T>& Other)
 	{
-		Reserve(Num() + Other.Num());
-
+		// It is assumed that a type is not trivially copyable if it needs a destructor which should be true in pretty much any case
 		if(TTypeInfo<T>::NeedsDestructor())
 		{
+			const INT Idx = AddZeroed(Other.Num());
 			for(INT i = 0; i < Other.ArrayNum; ++i)
-				new(*this)T(Other[i]);
+				new(GetData() + Idx + i) T(Other[i]);
 		}
 		else
 		{
-			appMemcpy(GetData() + Num(), Other.Data, Other.ArrayNum * sizeof(T));
+			const INT RequiredCapacity = Num() + Other.Num();
+			if(Capacity() < RequiredCapacity)
+				Reserve(RequiredCapacity);
+
+			appMemcpy(GetData() + Num(), Other.GetData(), Other.Num() * sizeof(T));
 			ArrayNum += Other.ArrayNum;
 		}
 
 		return *this;
 	}
 
-	T& operator[](INT Index)
-	{
-		checkSlow(IsValidIndex(Index));
-		return GetData()[Index];
-	}
-
-	const T& operator[](INT Index) const{
-		checkSlow(IsValidIndex(Index));
-		return GetData()[Index];
-	}
-
 	void Transfer(TArray<T>& Src)
 	{
 		Empty();
-
 		Data = Src.Data;
 		ArrayNum = Src.ArrayNum;
 		bIsReference = Src.bIsReference;
 		bNoShrink = Src.bNoShrink;
-
 		Src.Unreference();
 	}
 
-	void Set(T* Src, INT Count)
+	TArray<T> Segment(INT Index, INT Count)
 	{
-		Data = Src;
-		ArrayNum = Count;
+		TArray<T> Result;
+		Result.Data = &At(Index);
+		Result.ArrayNum = Count;
+		Result.Unreference();
+		return Result;
 	}
 
-	void Set(INT NewSize, INT Slack)
-	{
-		INT OldNum = Num();
+	/*
+	 * Access items
+	 */
 
-		if(NewSize >= Num())
-		{
-			Realloc(NewSize, Slack);
-
-			if(Num() > OldNum)
-				appMemzero(static_cast<BYTE*>(Data) + OldNum, (Num() - OldNum) * sizeof(T));
-		}
-		else
-		{
-			Remove(NewSize, Num() - NewSize);
-		}
-	}
-
-	void Set(INT NewSize){ Set(NewSize, NewSize); }
-	T* GetData(){ return static_cast<T*>(Data); }
-	const T* GetData() const{ return static_cast<T*>(Data); }
 	bool IsValidIndex(INT Index) const{ return Index >= 0 && Index < Num(); }
-	INT Num() const{ return ArrayNum; }
-	INT Size() const{ return Num(); }
-	bool IsAllocated() const{ return Data != NULL && !bIsReference; }
-	T& Last(INT c = 0){ return (*this)[Num() - c - 1]; }
-	const T& Last(INT c = 0) const{ return (*this)[Num() - c - 1]; }
+
+	T& At(INT Index)
+	{
+		checkSlow(IsValidIndex(Index));
+		return GetData()[Index];
+	}
+
+	const T& At(INT Index) const
+	{
+		checkSlow(IsValidIndex(Index));
+		return GetData()[Index];
+	}
+
+	T& operator[](INT Index){ return At(Index); }
+	const T& operator[](INT Index) const{ return At(Index); }
+
+	T& Last(INT c = 0){ return At(Num() - c - 1); }
+	const T& Last(INT c = 0) const{ return At(Num() - c - 1); }
 
 	bool FindItem(const T& Item, INT& Index) const{
 		for(Index = 0; Index < Num(); ++Index)
 		{
-			if((*this)[Index] == Item)
+			if(GetData()[Index] == Item)
 				return true;
 		}
 
@@ -317,16 +284,155 @@ public:
 		return INDEX_NONE;
 	}
 
-	void SetNoShrink(bool NoShrink)
+	/*
+	 * Grow/Shrink/Clear
+	 */
+
+	void Set(T* Src, INT Count)
 	{
-		if(NoShrink)
-			bNoShrink |= 1;
-		else
-			bNoShrink = 0;
+		Data = Src;
+		ArrayNum = Count;
 	}
 
+	void Set(INT NewSize, INT Slack)
+	{
+		if(NewSize > Num())
+		{
+			Reserve(Max(NewSize, Slack));
+			AddZeroed(NewSize - Num());
+		}
+		else
+		{
+			Deinit(NewSize, Num() - NewSize);
+			Realloc(NewSize, Slack);
+		}
+	}
+
+	void Set(INT NewSize){ Set(NewSize, NewSize); }
+	void SetNoShrink(bool NoShrink){ bNoShrink = NoShrink; }
+	void Shrink(){ Realloc(Num(), Num()); }
+
+	void Empty(INT Slack = 0)
+	{
+		Deinit(0, ArrayNum);
+		Realloc(0, Slack);
+	}
+
+	void Reserve(INT Size)
+	{
+		if(Capacity() < Size)
+			Realloc(Num(), Size);
+	}
+
+	/*
+	 * Add
+	 */
+
+	INT Add(INT Count, bool bInit = true)
+	{
+		const INT FirstIdx = Num();
+		Realloc(Num() + Count, 0);
+
+		if(bInit)
+			Init(FirstIdx, Count);
+
+		return FirstIdx;
+	}
+
+	INT AddZeroed(INT Count = 1)
+	{
+		const INT FirstIdx = Num();
+		Realloc(Num() + Count, 0);
+		appMemzero(GetData() + FirstIdx, Count * sizeof(T));
+		return FirstIdx;
+	}
+
+	INT AddItem(const T& Item)
+	{
+		Add(1, false);
+		new(&Last()) T(Item);
+		return Num() - 1;
+	}
+
+	INT AddUniqueItem(const T& Item)
+	{
+		const INT Index = FindItemIndex(Item);
+
+		if(Index != INDEX_NONE)
+			return Index;
+
+		return AddItem(Item);
+	}
+
+	/*
+	 * Insert
+	 */
+
+	void Insert(INT Index, INT Count = 1, bool bInit = true)
+	{
+		const INT MoveCount = Num() - Index;
+		Realloc(Num() + Count, 0);
+		appMemmove(
+			GetData() + Index + Count,
+			GetData() + Index,
+			MoveCount * sizeof(T)
+		);
+
+		if(bInit)
+			Init(Index, Count);
+	}
+
+	void InsertZeroed(INT Index, INT Count)
+	{
+		Insert(Index, Count, false);
+		appMemzero(GetData() + Index, Count * sizeof(T));
+	}
+
+	void InsertItem(INT Index, const T& Item)
+	{
+		Insert(Index, 1, false);
+		new(GetData() + Index) T(Item);
+	}
+
+	/*
+	 * Remove
+	 */
+
+	void Remove(INT Index, INT Count = 1)
+	{
+		const INT MoveCount = Num() - Index - Count;
+		Deinit(Index, Count);
+		appMemmove(
+			GetData() + Index,
+			GetData() + Index + Count,
+			MoveCount * sizeof(T)
+		);
+		Realloc(Num() - Count, 0);
+	}
+
+	INT RemoveItem(const T& Item)
+	{
+		INT OldNum = Num();
+		INT Index = FindItemIndex(Item);
+
+		if(Index != INDEX_NONE)
+			Remove(Index);
+
+		return OldNum - Num();
+	}
+
+	T Pop()
+	{
+		checkSlow(ArrayNum > 0);
+		--ArrayNum;
+		return GetData()[ArrayNum];
+	}
+
+	/*
+	 * Serialize
+	 */
+
 	void CountBytes(FArchive& Ar){ Ar.CountBytes(Data, Num() * sizeof(T)); }
-	INT GetMaxSize() const{ return Capacity(); }
 
 	void Serialize(FArchive& Ar)
 	{
@@ -348,7 +454,7 @@ public:
 				Ar << AR_INDEX(TempNum);
 			}
 
-			Ar.Serialize(&(*this)[0], Num());
+			Ar.Serialize(GetData(), Num());
 		}
 		else if(Ar.IsLoading())
 		{
@@ -357,9 +463,10 @@ public:
 			Ar << AR_INDEX(TempNum);
 
 			Empty(TempNum);
+			AddZeroed(TempNum);
 
 			for(INT i = 0; i < TempNum; ++i)
-				Ar << *new(*this)T;
+				Ar << GetData()[i];
 		}
 		else
 		{
@@ -367,127 +474,10 @@ public:
 			Ar << AR_INDEX(TempNum);
 
 			for(INT i = 0; i < Num(); ++i)
-				Ar << (*this)[i];
+				Ar << GetData()[i];
 		}
 
 		unguard;
-	}
-
-	void Reserve(INT Size)
-	{
-		INT CurrentSize = IsAllocated() ? 0 : Capacity();
-
-		Realloc(Num(), CurrentSize < Size ? Size : CurrentSize);
-	}
-
-	void Insert(INT Index, INT Count = 1, bool bInit = true)
-	{
-		Realloc(Num() + Count, 0);
-
-		appMemmove(
-			static_cast<BYTE*>(Data) + (Index + Count) * sizeof(T),
-			static_cast<BYTE*>(Data) + Index * sizeof(T),
-			(Num() - Index - Count) * sizeof(T)
-		);
-
-		if(bInit)
-			Init(Index, Count);
-	}
-
-	INT Add(INT Count, bool bInit = true)
-	{
-		Realloc(Num() + Count, 0);
-
-		if(bInit)
-			Init(Num() - Count, Count);
-
-		return Num() - Count;
-	}
-
-	void InsertZeroed(INT Index, INT Count)
-	{
-		Insert(Index, Count);
-		appMemzero(static_cast<BYTE*>(Data) + Index * sizeof(T), Count * sizeof(T));
-	}
-
-	INT AddZeroed(INT Count = 1)
-	{
-		INT Index = Add(Count);
-
-		appMemzero(static_cast<BYTE*>(Data) + Index * sizeof(T), Count * sizeof(T));
-
-		return Index;
-	}
-
-	void Shrink()
-	{
-		Realloc(Num(), Num());
-	}
-
-	void Empty(INT Slack = 0)
-	{
-		Deinit(0, ArrayNum);
-		Realloc(0, Slack);
-	}
-
-	void Remove(INT Index, INT Count = 1)
-	{
-		Deinit(Index, Count);
-
-		if(Count)
-		{
-			appMemmove(
-				static_cast<BYTE*>(Data) + Index * sizeof(T),
-				static_cast<BYTE*>(Data) + (Index + Count) * sizeof(T),
-				(Num() - Index - Count) * sizeof(T)
-			);
-
-			Realloc(Num() - Count, 0);
-		}
-	}
-
-	INT RemoveItem(const T& Item)
-	{
-		INT OldNum = Num();
-		INT Index = FindItemIndex(Item);
-
-		if(Index != INDEX_NONE)
-			Remove(Index);
-
-		return OldNum - Num();
-	}
-
-	T Pop()
-	{
-		checkSlow(ArrayNum > 0);
-		--ArrayNum;
-		return GetData()[ArrayNum];
-	}
-
-	INT AddItem(const T& Item)
-	{
-		new(*this) T(Item);
-
-		return Num() - 1;
-	}
-
-	INT AddUniqueItem(const T& Item)
-	{
-		INT Index = FindItemIndex(Item);
-
-		return Index != INDEX_NONE ? Index : AddItem(Item);
-	}
-
-	TArray<T> Segment(INT Index, INT Count)
-	{
-		TArray<T> Result;
-
-		Result.Data = &(*this)[Index];
-		Result.ArrayNum = Count;
-
-		Result.Unreference();
-
-		return Result;
 	}
 
 	// Iterator
@@ -534,7 +524,7 @@ protected:
 		if(TTypeInfo<T>::NeedsDestructor())
 		{
 			for(INT i = Index; i < Index + Count; ++i)
-				(&(*this)[i])->~T();
+				(&(GetData()[i]))->~T();
 		}
 	}
 
@@ -549,7 +539,7 @@ protected:
 				if(!bNoShrink && ArrayNum >= 0 && Align(NewSize * sizeof(T), 32) < Align(Num() * sizeof(T), 32))
 					Data = appRealloc(Data, NewSize * sizeof(T), Max(NewSize, Slack) * sizeof(T));
 			}
-			else
+			else if(Capacity() < Max(NewSize, Slack))
 			{
 				Data = appRealloc(Data, NewSize * sizeof(T), Slack * sizeof(T));
 			}
@@ -586,6 +576,23 @@ protected:
 	}
 };
 
+//
+// Array operator news.
+//
+template<typename T>
+void* operator new(size_t Size, TArray<T>& Array)
+{
+	const INT Index = Array.Add(1, false);
+	return &Array[Index];
+}
+
+template<typename T>
+void* operator new(size_t Size, TArray<T>& Array, INT Index)
+{
+	Array.Insert(Index, 1, false);
+	return &Array[Index];
+}
+
 template<typename T>
 class TArrayNoInit : public TArray<T>{
 public:
@@ -597,25 +604,6 @@ public:
 		return *this;
 	}
 };
-
-//
-// Array operator news.
-//
-template<typename T>
-void* operator new(size_t Size, TArray<T>& Array)
-{
-	INT Index = Array.Add(1);
-
-	return &Array[Index];
-}
-
-template<typename T>
-void* operator new(size_t Size, TArray<T>& Array, INT Index)
-{
-	Array.Insert(Index);
-
-	return &Array[Index];
-}
 
 //
 // Array exchanger.
@@ -636,17 +624,9 @@ template<typename T>
 class TTransArray : public TArray<T>{
 public:
 	// Constructors.
-	TTransArray(UObject* InOwner, INT InNum = 0) : TArray<T>(InNum),
-												   Owner(InOwner){}
-
-	TTransArray(UObject* InOwner, const TArray<T>& Other) : TArray<T>(Other),
-															Owner(InOwner){}
-
-	TTransArray& operator=(const TTransArray& Other)
-	{
-		operator=((const TArray<T>&)Other);
-		return *this;
-	}
+	TTransArray(UObject* InOwner, INT InNum = 0) : TArray<T>(InNum), Owner(InOwner){}
+	TTransArray(UObject* InOwner, const TArray<T>& Other) : TArray<T>(Other), Owner(InOwner){}
+	TTransArray& operator=(const TTransArray& Other){ operator=((const TArray<T>&)Other); return *this; }
 
 	// Add, Insert, Remove, Empty interface.
 
@@ -685,52 +665,12 @@ public:
 	// Functions dependent on Add, Remove.
 	TTransArray& operator=(const TArray<T>& Other)
 	{
-		if(this != &Other)
-		{
-			Empty(Other.Num());
-
-			for(INT i = 0; i<Other.Num(); i++)
-				new(*this)T(Other(i));
-		}
-
+		TArray<T>::operator=(other);
 		return *this;
 	}
 
-	INT AddItem(const T& Item)
-	{
-		new(*this) T(Item);
-		return Num() - 1;
-	}
-
-	INT AddZeroed(INT n = 1)
-	{
-		INT Index = Add(n);
-		appMemzero(&(*this)[Index], n*sizeof(T));
-		return Index;
-	}
-
-	INT AddUniqueItem(const T& Item)
-	{
-		for(INT Index = 0; Index<ArrayNum; Index++)
-			if((*this)[Index]==Item)
-				return Index;
-		return AddItem(Item);
-	}
-
-	INT RemoveItem(const T& Item)
-	{
-		INT OriginalNum=ArrayNum;
-		for(INT Index = 0; Index<ArrayNum; Index++)
-			if((*this)[Index]==Item)
-				Remove(Index--);
-		return OriginalNum - ArrayNum;
-	}
-
 	// TTransArray interface.
-	UObject* GetOwner()
-	{
-		return Owner;
-	}
+	UObject* GetOwner(){ return Owner; }
 
 	void ModifyItem(INT Index)
 	{
@@ -750,21 +690,14 @@ public:
 			Ar << (TArray<T>&)A;
 		return Ar;
 	}
+
 protected:
-	static void SerializeItem(FArchive& Ar, void* TPtr)
-	{
-		Ar << *(T*)TPtr;
-	}
-
-	static void DestructItem(void* TPtr)
-	{
-		((T*)TPtr)->~T();
-	}
-
 	UObject* Owner;
 
-private:
+	static void SerializeItem(FArchive& Ar, void* TPtr){ Ar << *(T*)TPtr; }
+	static void DestructItem(void* TPtr){ ((T*)TPtr)->~T(); }
 
+private:
 	// Disallow the copy constructor.
 	TTransArray(const TArray<T>& Other){}
 };
@@ -802,10 +735,7 @@ public:
 template<typename T>
 class TLazyArray : public TArray<T>, public FLazyLoader{
 public:
-	TLazyArray(INT InNum = 0)
-	: TArray<T>(InNum)
-	, FLazyLoader()
-	{}
+	TLazyArray(INT InNum = 0) : TArray<T>(InNum), FLazyLoader(){}
 	~TLazyArray()
 	{
 		if(SavedAr)
@@ -1224,30 +1154,33 @@ protected:
 
 	TI& Add(typename TTypeInfo<TK>::ConstInitType InKey, typename TTypeInfo<TI>::ConstInitType InValue)
 	{
-		TPair& Pair   = *new(Pairs)TPair(InKey, InValue);
-		INT    iHash  = (GetTypeHash(Pair.Key) & (HashCount-1));
+		TPair&    Pair  = *(new(Pairs) TPair(InKey, InValue));
+		const INT iHash = (GetTypeHash(Pair.Key) & (HashCount - 1));
+		Pair.HashNext   = Hash[iHash];
+		Hash[iHash]     = Pairs.Num() - 1;
 
-		Pair.HashNext = Hash[iHash];
-		Hash[iHash]   = Pairs.Num()-1;
 		if(HashCount * 2 + 8 < Pairs.Num())
 		{
 			HashCount *= 2;
 			Rehash();
 		}
+
 		return Pair.Value;
 	}
 
 public:
-	TMapBase() : Hash(NULL),
-	             HashCount(8)
-	             {
+	TMapBase()
+	: Hash(NULL),
+	  HashCount(8)
+	{
 		Rehash();
 	}
 
-	TMapBase(const TMapBase& Other) : Pairs(Other.Pairs),
-	                                  HashCount(Other.HashCount),
-	                                  Hash(NULL)
-	                                  {
+	TMapBase(const TMapBase& Other)
+	: Pairs(Other.Pairs),
+	  HashCount(Other.HashCount),
+	  Hash(NULL)
+	{
 		if(HashCount < 8) // Need to check this in case the other map was zero initialized without the constructor being called
 			HashCount = 8;
 
@@ -1438,7 +1371,7 @@ public:
 		for(INT i = Hash[(GetTypeHash(Key) & (HashCount - 1))]; i != INDEX_NONE; i = Pairs[i].HashNext)
 		{
 			if(Pairs[i].Key == Key)
-				new(Values, 0) TI(Pairs[i].Value);
+				Values.InsertItem(0, Pairs[i].Value);
 		}
 	}
 

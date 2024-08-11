@@ -46,8 +46,7 @@ void URtxInterface::DestroyLight(URtxLight* Light)
 
 void URtxInterface::DestroyAllLights()
 {
-	INT Index = DestroyedLights.Add(Lights.Num(), false);
-	appMemcpy(&DestroyedLights[Index], &Lights[0], Lights.Num() * sizeof(URtxLight*));
+	DestroyedLights += Lights;
 	Lights.Empty();
 }
 

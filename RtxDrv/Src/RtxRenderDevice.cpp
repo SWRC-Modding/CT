@@ -124,6 +124,11 @@ void URtxRenderDevice::Flush(UViewport* Viewport)
 
 FRenderInterface* URtxRenderDevice::Lock(UViewport* Viewport, BYTE* HitData, INT* HitSize)
 {
+	D3D = Super::Lock(Viewport, HitData, HitSize);
+
+	if(!D3D)
+		return NULL;
+
 	ULevel* Level = GetLevel();
 
 	if(Level != CurrentLevel)
@@ -140,13 +145,6 @@ FRenderInterface* URtxRenderDevice::Lock(UViewport* Viewport, BYTE* HitData, INT
 		Viewport->Actor->bVisor = 0;
 		Viewport->Actor->VisorModeDefault = 1;
 	}
-
-	FRenderInterface* RI = Super::Lock(Viewport, HitData, HitSize);
-
-	if(!RI)
-		return NULL;
-
-	D3D = RI;
 
 	return this;
 }
@@ -199,7 +197,6 @@ void URtxRenderDevice::Unlock(FRenderInterface* RI)
 
 	DrawAnchorTriangle();
 	LockedViewport = NULL;
-	D3D = NULL;
 
 	Super::Unlock(static_cast<URtxRenderDevice*>(RI)->D3D);
 }

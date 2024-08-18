@@ -42,13 +42,14 @@ LINK_LIB(Core)
 #endif
 
 // Global constants.
-enum{ MAXBYTE       = 0xff        };
-enum{ MAXWORD       = 0xffffU     };
-enum{ MAXDWORD      = 0xffffffffU };
-enum{ MAXSBYTE      = 0x7f        };
-enum{ MAXSWORD      = 0x7fff      };
-enum{ MAXINT        = 0x7fffffff  };
-enum{ INDEX_NONE    = -1          };
+#define MAXBYTE    ((BYTE)0xff)
+#define MAXWORD    ((_WORD)0xffffU)
+#define MAXDWORD   ((DWORD)0xffffffffU)
+#define MAXSBYTE   ((SBYTE)0x7f)
+#define MAXSWORD   ((SWORD)0x7fff)
+#define MAXINT     ((INT)0x7fffffff)
+#define INDEX_NONE (-1)
+
 enum ENoInit{ E_NoInit = 0 };
 
 enum ERunningOS{

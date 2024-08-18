@@ -60,13 +60,7 @@ void URtxInterface::RenderLights()
 	{
 		URtxLight* Light = Lights[i];
 
-		if(!Light) // NULL entry can happen if a light was added via the property window UI. In that case just create it
-		{
-			Light = ConstructObject<URtxLight>(URtxLight::StaticClass(), this);
-			Lights[i] = Light;
-		}
-
-		if(Light->bShouldBeDestroyed)
+		if(Light && Light->bShouldBeDestroyed)
 		{
 			URtxLight* Last = Lights.Pop();
 
@@ -79,6 +73,12 @@ void URtxInterface::RenderLights()
 			DestroyedLights.AddItem(Light);
 			Lights[i] = Last;
 			Light     = Last;
+		}
+
+		if(!Light) // NULL entry can happen if a light was added via the property window UI. In that case just create it
+		{
+			Light = ConstructObject<URtxLight>(URtxLight::StaticClass(), this);
+			Lights[i] = Light;
 		}
 
 		if(Light->bEnabled)

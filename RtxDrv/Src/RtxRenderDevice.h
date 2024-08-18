@@ -4,6 +4,42 @@
 
 class URtxInterface;
 
+class FAnchorTriangleVertexStream : public FVertexStream{
+public:
+	FAnchorTriangleVertexStream()
+	{
+		CacheId = MakeCacheID(CID_RenderVertices);
+		Update(0.0f);
+	}
+
+	void Update(FLOAT InZOffset)
+	{
+		ZOffset = InZOffset;
+		++Revision;
+	}
+
+	virtual INT GetStride(){ return sizeof(FVector); }
+	virtual INT GetSize(){ return sizeof(FVector) * 3; }
+
+	virtual INT GetComponents(FVertexComponent* Components)
+	{
+		Components->Type     = CT_Float3;
+		Components->Function = FVF_Position;
+		return 1;
+	}
+
+	virtual void GetStreamData(void* Dest)
+	{
+		FVector* D = static_cast<FVector*>(Dest);
+		D[0] = FVector(-1.0f, -1.0f, ZOffset);
+		D[1] = FVector(1.0f, -1.0f, ZOffset);
+		D[2] = FVector(0, 1.0f, ZOffset);
+	}
+
+private:
+	FLOAT ZOffset;
+};
+
 class URtxRenderDevice : public UD3DRenderDevice, FRenderInterface{
 	DECLARE_CLASS(URtxRenderDevice,UD3DRenderDevice,CLASS_Config,RtxDrv)
 	static const TCHAR* StaticConfigName(){ return "RtxDrv"; }
@@ -64,9 +100,11 @@ public:
 	virtual void SetFillMode(EFillMode FillMode){ D3D->SetFillMode(FillMode); }
 
 private:
-	UViewport*        LockedViewport;
-	FRenderInterface* D3D;
-	URtxInterface*    Rtx;
+	UViewport*                  LockedViewport;
+	ULevel*                     CurrentLevel;
+	FAnchorTriangleVertexStream AnchorTriangleStream;
+	FRenderInterface*           D3D;
+	URtxInterface*              Rtx;
 
 	void ClearMaterialFlags();
 	void DrawAnchorTriangle();

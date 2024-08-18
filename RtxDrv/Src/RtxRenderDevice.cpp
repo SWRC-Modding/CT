@@ -1,8 +1,20 @@
 #include "RtxRenderDevice.h"
 #include "RtxDrvPrivate.h"
 #include "Window.h"
+#include "Editor.h"
 
 IMPLEMENT_CLASS(URtxRenderDevice)
+
+static ULevel* GetLevel()
+{
+	if(GEngine->IsA<UGameEngine>())
+		return static_cast<UGameEngine*>(GEngine)->GLevel;
+
+	if(GEngine->IsA<UEditorEngine>())
+		return static_cast<UEditorEngine*>(GEngine)->Level;
+
+	return NULL;
+}
 
 void URtxRenderDevice::Serialize(FArchive& Ar)
 {
@@ -112,6 +124,15 @@ void URtxRenderDevice::Flush(UViewport* Viewport)
 
 FRenderInterface* URtxRenderDevice::Lock(UViewport* Viewport, BYTE* HitData, INT* HitSize)
 {
+	ULevel* Level = GetLevel();
+
+	if(Level != CurrentLevel)
+	{
+		CurrentLevel = Level;
+		AnchorTriangleStream.Update(CurrentLevel ? (FLOAT)appStrihash(CurrentLevel->GetPathName()) : 0.0f);
+		Rtx->DestroyAllLights();
+	}
+
 	LockedViewport = Viewport;
 
 	if(Viewport->Actor)
@@ -198,39 +219,11 @@ void URtxRenderDevice::ClearMaterialFlags()
  * Draw anchor triangle at world center to parent assets to in remix
  */
 
-class FSingleTriangleVertexStream : public FVertexStream{
-public:
-	FSingleTriangleVertexStream(FLOAT Width, FLOAT Height) : HalfWidth(Width / 2), HalfHeight(Height / 2)
-	{
-		CacheId = MakeCacheID(CID_RenderVertices);
-	}
-
-	FLOAT HalfWidth;
-	FLOAT HalfHeight;
-
-	virtual INT GetStride(){ return sizeof(FVector); }
-	virtual INT GetSize(){ return sizeof(FVector) * 3; }
-
-	virtual INT GetComponents(FVertexComponent* Components)
-	{
-		Components->Type     = CT_Float3;
-		Components->Function = FVF_Position;
-		return 1;
-	}
-
-	virtual void GetStreamData(void* Dest)
-	{
-		FVector* D = static_cast<FVector*>(Dest);
-		D[0] = FVector(-HalfWidth, -HalfHeight, 0);
-		D[1] = FVector(HalfHeight, -HalfHeight, 0);
-		D[2] = FVector(0, HalfHeight, 0);
-	}
-};
-
 class USolidColorMaterial : public UConstantMaterial{
 	DECLARE_CLASS(USolidColorMaterial,UConstantMaterial,0,RtxDrv)
 public:
-	virtual FColor GetColor(FLOAT TimeSeconds){ return FColor(255,255,0,255); }
+	FColor Color;
+	virtual FColor GetColor(FLOAT TimeSeconds){ return Color; }
 };
 IMPLEMENT_CLASS(USolidColorMaterial)
 
@@ -301,16 +294,16 @@ void URtxRenderDevice::DrawAnchorTriangle()
 		FinalBlend->Material = Material;
 		FinalBlend->FrameBufferBlending = FB_Overwrite;
 	});
+	Material->Color = Rtx->AnchorTriangleColor;
 	FinalBlend->ColorWriteEnable = Rtx->bShowAnchorTriangle;
 
 	PushState();
-	SetTransform(TT_LocalToWorld, FMatrix::Identity);
+	SetTransform(TT_LocalToWorld, FScaleMatrix(FVector(Rtx->AnchorTriangleSize, Rtx->AnchorTriangleSize, 0.0f)));
 	SetTransform(TT_WorldToCamera, WorldToCamera);
 	SetTransform(TT_CameraToScreen, CameraToScreen);
 	SetMaterial(FinalBlend);
 	SetIndexBuffer(NULL, 0);
-	static FSingleTriangleVertexStream AnchorTriangle(512, 512);
-	FVertexStream* Stream = &AnchorTriangle;
+	FVertexStream* Stream = &AnchorTriangleStream;
 	SetVertexStreams(VS_FixedFunction, &Stream, 1);
 	DrawPrimitive(PT_TriangleList, 0, 1);
 	PopState();

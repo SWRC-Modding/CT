@@ -20,6 +20,8 @@
 class RTXDRV_API URtxInterface : public UObject
 {
 public:
+    FLOAT AnchorTriangleSize;
+    FColor AnchorTriangleColor;
     BITFIELD bShowAnchorTriangle:1 GCC_PACK(4);
     BITFIELD bEnableLights:1;
     TArrayNoInit<class URtxLight*> Lights GCC_PACK(4);
@@ -31,10 +33,10 @@ public:
     DECLARE_CLASS(URtxInterface,UObject,0|CLASS_Transient|CLASS_Config,RtxDrv)
     void Init();
     void Exit();
-		URtxLight* CreateLight(bool ForceDefaultConstructed = false);
-		void DestroyLight(URtxLight* Light);
-		void DestroyAllLights();
-		void RenderLights();
+    URtxLight* CreateLight(bool ForceDefaultConstructed = false);
+    void DestroyLight(URtxLight* Light);
+    void DestroyAllLights();
+    void RenderLights();
 
     static bridgeapi_Interface BridgeInterface;
     DECLARE_NATIVES(URtxInterface)

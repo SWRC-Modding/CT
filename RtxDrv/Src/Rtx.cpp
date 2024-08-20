@@ -1,18 +1,18 @@
 #include "RtxDrvPrivate.h"
 #include "RtxRenderDevice.h"
 
-bridgeapi_Interface URtxInterface::BridgeInterface;
+static bridgeapi_Interface GBridgeInterface;
 
 void URtxInterface::Init()
 {
-	if(!BridgeInterface.initialized)
+	if(!GBridgeInterface.initialized)
 	{
 		debugf("Initializing remix bridge API");
 
-		if(bridgeapi_initialize(&BridgeInterface) != BRIDGEAPI_ERROR_CODE_SUCCESS || !BridgeInterface.initialized)
+		if(bridgeapi_initialize(&GBridgeInterface) != BRIDGEAPI_ERROR_CODE_SUCCESS || !GBridgeInterface.initialized)
 			appErrorf("Failed to initialize remix bridge API");
 
-		BridgeInterface.RegisterDevice();
+		GBridgeInterface.RegisterDevice();
 	}
 
 	Lights.SetNoShrink(true);
@@ -21,7 +21,7 @@ void URtxInterface::Init()
 
 void URtxInterface::Exit()
 {
-	BridgeInterface.initialized = false;
+	GBridgeInterface.initialized = false;
 }
 
 URtxLight* URtxInterface::CreateLight(bool ForceDefaultConstructed)
@@ -62,15 +62,13 @@ void URtxInterface::RenderLights()
 
 		if(Light && Light->bShouldBeDestroyed)
 		{
+			Light->DestroyHandle();
 			URtxLight* Last = Lights.Pop();
-
-			if(i == Lights.Num())
-			{
-				DestroyedLights.AddItem(Last);
-				break;
-			}
-
 			DestroyedLights.AddItem(Light);
+
+			if(Light == Last)
+				break;
+
 			Lights[i] = Last;
 			Light     = Last;
 		}
@@ -87,7 +85,7 @@ void URtxInterface::RenderLights()
 				Light->Update();
 
 			if(Light->Handle)
-				BridgeInterface.DrawLightInstance(Light->Handle);
+				GBridgeInterface.DrawLightInstance(Light->Handle);
 		}
 	}
 }
@@ -130,14 +128,7 @@ void URtxLight::execUpdate(FFrame& Stack, void* Result)
 
 void URtxLight::Destroy()
 {
-	if(Handle)
-	{
-		if(URtxInterface::BridgeInterface.initialized)
-			URtxInterface::BridgeInterface.DestroyLight(Handle);
-
-		Handle = 0;
-	}
-
+	DestroyHandle();
 	Super::Destroy();
 }
 
@@ -157,13 +148,7 @@ static void InitShaping(x86::remixapi_LightInfoLightShaping& Dest, const FRtxLig
 
 void URtxLight::Update()
 {
-	const bridgeapi_Interface& Bridge = URtxInterface::BridgeInterface;
-
-	if(Handle)
-	{
-		Bridge.DestroyLight(Handle);
-		Handle = 0;
-	}
+	DestroyHandle();
 
 	x86::remixapi_LightInfo LightInfo;
 	LightInfo.sType = REMIXAPI_STRUCT_TYPE_LIGHT_INFO;
@@ -183,7 +168,7 @@ void URtxLight::Update()
 			if(SphereInfo.shaping_hasvalue)
 				InitShaping(SphereInfo.shaping_value, Shaping);
 
-			Handle = Bridge.CreateSphereLight(&LightInfo, &SphereInfo);
+			Handle = GBridgeInterface.CreateSphereLight(&LightInfo, &SphereInfo);
 			break;
 		}
 	case RTXLIGHT_Rect:
@@ -200,7 +185,7 @@ void URtxLight::Update()
 			if(RectInfo.shaping_hasvalue)
 				InitShaping(RectInfo.shaping_value, Shaping);
 
-			Handle = Bridge.CreateRectLight(&LightInfo, &RectInfo);
+			Handle = GBridgeInterface.CreateRectLight(&LightInfo, &RectInfo);
 			break;
 		}
 	case RTXLIGHT_Disk:
@@ -217,7 +202,7 @@ void URtxLight::Update()
 			if(DiskInfo.shaping_hasvalue)
 				InitShaping(DiskInfo.shaping_value, Shaping);
 
-			Handle = Bridge.CreateDiskLight(&LightInfo, &DiskInfo);
+			Handle = GBridgeInterface.CreateDiskLight(&LightInfo, &DiskInfo);
 			break;
 		}
 	case RTXLIGHT_Cylinder:
@@ -228,7 +213,7 @@ void URtxLight::Update()
 			InitFloat3D(CylinderInfo.axis, Cylinder.Axis.GetNormalized());
 			CylinderInfo.radius = Cylinder.Radius;
 			CylinderInfo.axisLength = Cylinder.Length;
-			Handle = Bridge.CreateCylinderLight(&LightInfo, &CylinderInfo);
+			Handle = GBridgeInterface.CreateCylinderLight(&LightInfo, &CylinderInfo);
 			break;
 		}
 	case RTXLIGHT_Distant:
@@ -237,8 +222,19 @@ void URtxLight::Update()
 			DistantInfo.sType = REMIXAPI_STRUCT_TYPE_LIGHT_INFO_DISTANT_EXT;
 			InitFloat3D(DistantInfo.direction, Distant.Direction.GetNormalized());
 			DistantInfo.angularDiameterDegrees = Distant.AngularDiameterDegrees;
-			Handle = Bridge.CreateDistantLight(&LightInfo, &DistantInfo);
+			Handle = GBridgeInterface.CreateDistantLight(&LightInfo, &DistantInfo);
 			break;
 		}
+	}
+}
+
+void URtxLight::DestroyHandle()
+{
+	if(Handle)
+	{
+		if(GBridgeInterface.initialized)
+			GBridgeInterface.DestroyLight(Handle);
+
+		Handle = 0;
 	}
 }

@@ -37,8 +37,6 @@ public:
     void DestroyLight(URtxLight* Light);
     void DestroyAllLights();
     void RenderLights();
-
-    static bridgeapi_Interface BridgeInterface;
     DECLARE_NATIVES(URtxInterface)
 };
 
@@ -118,6 +116,7 @@ public:
     virtual void Destroy();
     virtual void PostEditChange(){ Super::PostEditChange(); Update(); }
     void Update();
+    void DestroyHandle();
     DECLARE_NATIVES(URtxLight)
 };
 

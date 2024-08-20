@@ -29,8 +29,6 @@ cpptext
     void DestroyLight(URtxLight* Light);
     void DestroyAllLights();
     void RenderLights();
-
-    static bridgeapi_Interface BridgeInterface;
 }
 
 defaultproperties

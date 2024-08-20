@@ -63,6 +63,7 @@ cpptext
     virtual void Destroy();
     virtual void PostEditChange(){ Super::PostEditChange(); Update(); }
     void Update();
+    void DestroyHandle();
 }
 
 defaultproperties

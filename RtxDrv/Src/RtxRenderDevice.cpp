@@ -291,8 +291,23 @@ void URtxRenderDevice::DrawAnchorTriangle()
 		FinalBlend->Material = Material;
 		FinalBlend->FrameBufferBlending = FB_Overwrite;
 	});
-	Material->Color = Rtx->AnchorTriangleColor;
-	FinalBlend->ColorWriteEnable = Rtx->bShowAnchorTriangle;
+
+	bool Reset = false;
+
+	if(Material->Color != Rtx->AnchorTriangleColor)
+	{
+		Material->Color = Rtx->AnchorTriangleColor;
+		Reset = true;
+	}
+
+	if(FinalBlend->ColorWriteEnable != Rtx->bShowAnchorTriangle)
+	{
+		FinalBlend->ColorWriteEnable = Rtx->bShowAnchorTriangle;
+		Reset = true;
+	}
+
+	if(Reset)
+		FinalBlend->ResetCachedStates();
 
 	PushState();
 	SetTransform(TT_LocalToWorld, FScaleMatrix(FVector(Rtx->AnchorTriangleSize, Rtx->AnchorTriangleSize, 0.0f)));

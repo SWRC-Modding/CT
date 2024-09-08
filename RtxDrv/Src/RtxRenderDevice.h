@@ -105,6 +105,7 @@ private:
 	FAnchorTriangleVertexStream AnchorTriangleStream;
 	FRenderInterface*           D3D;
 	URtxInterface*              Rtx;
+	UBOOL                       DepthCleared;
 
 	void ClearMaterialFlags();
 	void DrawAnchorTriangle();

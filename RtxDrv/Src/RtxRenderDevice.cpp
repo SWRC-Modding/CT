@@ -59,6 +59,11 @@ UBOOL URtxRenderDevice::Exec(const TCHAR* Cmd, FOutputDevice& Ar)
 
 			return 1;
 		}
+		else if(ParseCommand(&Cmd, "SAVECONFIG"))
+		{
+			Rtx->SaveConfig();
+			return 1;
+		}
 	}
 
 	return Super::Exec(Cmd, Ar);
@@ -124,6 +129,8 @@ void URtxRenderDevice::Flush(UViewport* Viewport)
 
 FRenderInterface* URtxRenderDevice::Lock(UViewport* Viewport, BYTE* HitData, INT* HitSize)
 {
+	DepthCleared = 0;
+
 	D3D = Super::Lock(Viewport, HitData, HitSize);
 
 	if(!D3D)
@@ -194,8 +201,6 @@ void URtxRenderDevice::Unlock(FRenderInterface* RI)
 	}
 
 	Rtx->RenderLights();
-
-	DrawAnchorTriangle();
 	LockedViewport = NULL;
 
 	Super::Unlock(static_cast<URtxRenderDevice*>(RI)->D3D);
@@ -290,6 +295,7 @@ void URtxRenderDevice::DrawAnchorTriangle()
 	{
 		FinalBlend->Material = Material;
 		FinalBlend->FrameBufferBlending = FB_Overwrite;
+		FinalBlend->ZWrite = 1;
 	});
 
 	bool Reset = false;
@@ -333,6 +339,12 @@ UBOOL URtxRenderDevice::SetRenderTarget(FRenderTarget* RenderTarget, bool bOwnDe
 void URtxRenderDevice::Clear(UBOOL UseColor, FColor Color, UBOOL UseDepth, FLOAT Depth, UBOOL UseStencil, DWORD Stencil)
 {
 	D3D->Clear(UseColor, Color, UseDepth, Depth, UseStencil, Stencil);
+
+	if(UseDepth && !DepthCleared)
+	{
+		DepthCleared = 1;
+		DrawAnchorTriangle();
+	}
 }
 
 void URtxRenderDevice::EnableLighting(UBOOL UseDynamic, UBOOL UseStatic, UBOOL Modulate2X, FBaseTexture* Lightmap, UBOOL LightingOnly, const FSphere& LitSphere, int IntValue){

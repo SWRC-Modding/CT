@@ -6,9 +6,8 @@ struct noexport RtxHandle{
 	var const int hi;
 };
 
-var(General)  config     float           AnchorTriangleSize;
 var(General)  config     color           AnchorTriangleColor;
-var(General)  config     bool            bShowAnchorTriangle;
+var(General)  config     bool            bDrawAnchorTriangle;
 
 var(Lighting)            bool            bEnableLights;
 var(Lighting) editinline array<RtxLight> Lights;
@@ -33,7 +32,7 @@ cpptext
 
 defaultproperties
 {
-	AnchorTriangleSize=512
 	AnchorTriangleColor=(R=255,G=255,B=0,A=255)
+	bDrawAnchorTriangle=True
 	bEnableLights=True
 }

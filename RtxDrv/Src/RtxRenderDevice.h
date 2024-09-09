@@ -31,9 +31,10 @@ public:
 	virtual void GetStreamData(void* Dest)
 	{
 		FVector* D = static_cast<FVector*>(Dest);
-		D[0] = FVector(-1.0f, -1.0f, ZOffset);
-		D[1] = FVector(1.0f, -1.0f, ZOffset);
-		D[2] = FVector(0, 1.0f, ZOffset);
+		const FLOAT Size = 512.0f;
+		D[0] = FVector(-Size, -Size, ZOffset);
+		D[1] = FVector( Size, -Size, ZOffset);
+		D[2] = FVector( 0.0f,  Size, ZOffset);
 	}
 
 private:

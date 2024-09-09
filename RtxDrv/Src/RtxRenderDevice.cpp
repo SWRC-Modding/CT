@@ -29,7 +29,7 @@ UBOOL URtxRenderDevice::Exec(const TCHAR* Cmd, FOutputDevice& Ar)
 	{
 		if(ParseCommand(&Cmd, "TOGGLEANCHOR"))
 		{
-			Rtx->bShowAnchorTriangle = !Rtx->bShowAnchorTriangle;
+			Rtx->bDrawAnchorTriangle = !Rtx->bDrawAnchorTriangle;
 			return 1;
 		}
 		else if(ParseCommand(&Cmd, "PREFERENCES"))
@@ -89,13 +89,13 @@ UBOOL URtxRenderDevice::Init()
 	}
 
 	ClearMaterialFlags();
-	UClient* Client = GEngine->Client;
-	Client->Shadows = 0;
-	Client->FrameFXDisabled = 1;
-	Client->BloomQuality = 0;
-	Client->BlurEnabled = 0;
-	Client->BumpmappingQuality = 0;
-	GetDefault<APlayerController>()->bVisor = 0;
+	UClient* Client                                   = GEngine->Client;
+	Client->Shadows                                   = 0;
+	Client->FrameFXDisabled                           = 1;
+	Client->BloomQuality                              = 0;
+	Client->BlurEnabled                               = 0;
+	Client->BumpmappingQuality                        = 0;
+	GetDefault<APlayerController>()->bVisor           = 0;
 	GetDefault<APlayerController>()->VisorModeDefault = 1;
 
 	Rtx = new(this) URtxInterface;
@@ -141,7 +141,7 @@ FRenderInterface* URtxRenderDevice::Lock(UViewport* Viewport, BYTE* HitData, INT
 	if(Level != CurrentLevel)
 	{
 		CurrentLevel = Level;
-		AnchorTriangleStream.Update(CurrentLevel ? (FLOAT)appStrihash(CurrentLevel->GetPathName()) : 0.0f);
+		AnchorTriangleStream.Update(CurrentLevel ? (appStrihash(CurrentLevel->GetPathName()) / (FLOAT)MAXDWORD) : 0.0f);
 		Rtx->DestroyAllLights();
 	}
 
@@ -231,7 +231,7 @@ IMPLEMENT_CLASS(USolidColorMaterial)
 
 void URtxRenderDevice::DrawAnchorTriangle()
 {
-	if(!LockedViewport || !LockedViewport->Actor)
+	if(!Rtx->bDrawAnchorTriangle || !LockedViewport || !LockedViewport->Actor)
 		return;
 
 	AActor*  ViewActor      = LockedViewport->Actor;
@@ -298,25 +298,14 @@ void URtxRenderDevice::DrawAnchorTriangle()
 		FinalBlend->ZWrite = 1;
 	});
 
-	bool Reset = false;
-
 	if(Material->Color != Rtx->AnchorTriangleColor)
 	{
 		Material->Color = Rtx->AnchorTriangleColor;
-		Reset = true;
-	}
-
-	if(FinalBlend->ColorWriteEnable != Rtx->bShowAnchorTriangle)
-	{
-		FinalBlend->ColorWriteEnable = Rtx->bShowAnchorTriangle;
-		Reset = true;
-	}
-
-	if(Reset)
 		FinalBlend->ResetCachedStates();
+	}
 
 	PushState();
-	SetTransform(TT_LocalToWorld, FScaleMatrix(FVector(Rtx->AnchorTriangleSize, Rtx->AnchorTriangleSize, 0.0f)));
+	SetTransform(TT_LocalToWorld, FMatrix::Identity);
 	SetTransform(TT_WorldToCamera, WorldToCamera);
 	SetTransform(TT_CameraToScreen, CameraToScreen);
 	SetMaterial(FinalBlend);
@@ -347,7 +336,8 @@ void URtxRenderDevice::Clear(UBOOL UseColor, FColor Color, UBOOL UseDepth, FLOAT
 	}
 }
 
-void URtxRenderDevice::EnableLighting(UBOOL UseDynamic, UBOOL UseStatic, UBOOL Modulate2X, FBaseTexture* Lightmap, UBOOL LightingOnly, const FSphere& LitSphere, int IntValue){
+void URtxRenderDevice::EnableLighting(UBOOL UseDynamic, UBOOL UseStatic, UBOOL Modulate2X, FBaseTexture* Lightmap, UBOOL LightingOnly, const FSphere& LitSphere, int IntValue)
+{
 	UseDynamic = 0;
 	Lightmap = NULL;
 	Modulate2X = 0;

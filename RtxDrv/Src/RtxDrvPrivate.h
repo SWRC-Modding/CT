@@ -1,4 +1,3 @@
 #include "Engine.h"
-#include "bridge_c.h"
-typedef uint64_t FRtxHandle;
+#include "remix_c.h"
 #include "../Inc/RtxDrvClasses.h"

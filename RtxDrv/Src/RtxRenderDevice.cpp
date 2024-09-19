@@ -44,8 +44,13 @@ UBOOL URtxRenderDevice::Exec(const TCHAR* Cmd, FOutputDevice& Ar)
 		}
 		else if(ParseCommand(&Cmd, "CREATELIGHT"))
 		{
-			URtxLight* Light = Rtx->CreateLight(true);
-			Light->Position = GEngine->Client->Viewports[0]->Actor->Location;
+			APlayerController* PC    = GEngine->Client->Viewports[0]->Actor;
+			URtxLight*         Light = Rtx->CreateLight(true);
+
+			if(PC->Pawn)
+				Light->Position = PC->Pawn->Location;
+			else
+				Light->Position = PC->Location;
 
 			if(!ParseCommand(&Cmd, "!"))
 			{
@@ -346,7 +351,7 @@ void URtxRenderDevice::EnableLighting(UBOOL UseDynamic, UBOOL UseStatic, UBOOL M
 
 void URtxRenderDevice::SetLight(INT LightIndex, FDynamicLight* Light, FLOAT Scale)
 {
-	// Impl->SetLight(LightIndex, Light, Scale);
+	// D3D->SetLight(LightIndex, Light, Scale);
 }
 
 void URtxRenderDevice::SetTransform(ETransformType Type, const FMatrix& Matrix)

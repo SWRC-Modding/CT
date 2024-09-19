@@ -1,18 +1,22 @@
 #include "RtxDrvPrivate.h"
 #include "RtxRenderDevice.h"
 
-static bridgeapi_Interface GBridgeInterface;
+static remixapi_Interface GRemixInterface;
 
 void URtxInterface::Init()
 {
-	if(!GBridgeInterface.initialized)
+	if(!GRemixInterface.Startup)
 	{
 		debugf("Initializing remix bridge API");
 
-		if(bridgeapi_initialize(&GBridgeInterface) != BRIDGEAPI_ERROR_CODE_SUCCESS || !GBridgeInterface.initialized)
-			appErrorf("Failed to initialize remix bridge API");
+		wchar_t DllPathBuffer[MAX_PATH];
+		FString DllPath = FStringTemp(appBaseDir()) * "d3d9.dll";
+		HMODULE DllHandle;
+		MultiByteToWideChar(CP_ACP, 0, *DllPath, -1, DllPathBuffer, ARRAY_COUNT(DllPathBuffer));
 
-		GBridgeInterface.RegisterDevice();
+		remixapi_ErrorCode Error = remixapi_lib_loadRemixDllAndInitialize(DllPathBuffer, &GRemixInterface, &DllHandle) ;
+		if(Error != REMIXAPI_ERROR_CODE_SUCCESS)
+			appErrorf("Failed to initialize remix API: %i", Error);
 	}
 
 	Lights.SetNoShrink(true);
@@ -21,7 +25,7 @@ void URtxInterface::Init()
 
 void URtxInterface::Exit()
 {
-	GBridgeInterface.initialized = false;
+	appMemzero(&GRemixInterface, sizeof(GRemixInterface));
 }
 
 URtxLight* URtxInterface::CreateLight(bool ForceDefaultConstructed)
@@ -85,7 +89,7 @@ void URtxInterface::RenderLights()
 				Light->Update();
 
 			if(Light->Handle)
-				GBridgeInterface.DrawLightInstance(Light->Handle);
+				GRemixInterface.DrawLightInstance(Light->Handle);
 		}
 	}
 }
@@ -132,14 +136,14 @@ void URtxLight::Destroy()
 	Super::Destroy();
 }
 
-static void InitFloat3D(x86::remixapi_Float3D& Dest, const FVector& Src)
+static void InitFloat3D(remixapi_Float3D& Dest, const FVector& Src)
 {
 	Dest.x = Src.X;
 	Dest.y = Src.Y;
 	Dest.z = Src.Z;
 }
 
-static void InitShaping(x86::remixapi_LightInfoLightShaping& Dest, const FRtxLightShaping& Src)
+static void InitShaping(remixapi_LightInfoLightShaping& Dest, const FRtxLightShaping& Src)
 {
 	Dest.coneAngleDegrees = Src.ConeAngleDegrees;
 	Dest.coneSoftness     = Src.ConeSoftness;
@@ -150,8 +154,7 @@ void URtxLight::Update()
 {
 	DestroyHandle();
 
-	x86::remixapi_LightInfo LightInfo;
-	LightInfo.sType = REMIXAPI_STRUCT_TYPE_LIGHT_INFO;
+	remixapi_LightInfo LightInfo = {REMIXAPI_STRUCT_TYPE_LIGHT_INFO};
 	LightInfo.hash = reinterpret_cast<DWORD>(this);
 	InitFloat3D(LightInfo.radiance, Color.Plane() * Radiance);
 
@@ -159,8 +162,7 @@ void URtxLight::Update()
 	{
 	case RTXLIGHT_Sphere:
 		{
-			x86::remixapi_LightInfoSphereEXT SphereInfo;
-			SphereInfo.sType = REMIXAPI_STRUCT_TYPE_LIGHT_INFO_SPHERE_EXT;
+			remixapi_LightInfoSphereEXT SphereInfo = {REMIXAPI_STRUCT_TYPE_LIGHT_INFO_SPHERE_EXT};
 			InitFloat3D(SphereInfo.position, Position);
 			SphereInfo.radius = Sphere.Radius;
 			SphereInfo.shaping_hasvalue = bUseShaping;
@@ -168,13 +170,13 @@ void URtxLight::Update()
 			if(SphereInfo.shaping_hasvalue)
 				InitShaping(SphereInfo.shaping_value, Shaping);
 
-			Handle = GBridgeInterface.CreateSphereLight(&LightInfo, &SphereInfo);
+			LightInfo.pNext = &SphereInfo;
+			GRemixInterface.CreateLight(&LightInfo, &Handle);
 			break;
 		}
 	case RTXLIGHT_Rect:
 		{
-			x86::remixapi_LightInfoRectEXT RectInfo;
-			RectInfo.sType = REMIXAPI_STRUCT_TYPE_LIGHT_INFO_RECT_EXT;
+			remixapi_LightInfoRectEXT RectInfo = {REMIXAPI_STRUCT_TYPE_LIGHT_INFO_RECT_EXT};
 			InitFloat3D(RectInfo.position, Position);
 			InitFloat3D(RectInfo.xAxis, Rect.XAxis.GetNormalized());
 			RectInfo.xSize = Rect.XSize;
@@ -185,13 +187,13 @@ void URtxLight::Update()
 			if(RectInfo.shaping_hasvalue)
 				InitShaping(RectInfo.shaping_value, Shaping);
 
-			Handle = GBridgeInterface.CreateRectLight(&LightInfo, &RectInfo);
+			LightInfo.pNext = &RectInfo;
+			GRemixInterface.CreateLight(&LightInfo, &Handle);
 			break;
 		}
 	case RTXLIGHT_Disk:
 		{
-			x86::remixapi_LightInfoDiskEXT DiskInfo;
-			DiskInfo.sType = REMIXAPI_STRUCT_TYPE_LIGHT_INFO_DISK_EXT;
+			remixapi_LightInfoDiskEXT DiskInfo = {REMIXAPI_STRUCT_TYPE_LIGHT_INFO_DISK_EXT};
 			InitFloat3D(DiskInfo.position, Position);
 			InitFloat3D(DiskInfo.xAxis, Disk.XAxis.GetNormalized());
 			DiskInfo.xRadius = Disk.XRadius;
@@ -202,27 +204,28 @@ void URtxLight::Update()
 			if(DiskInfo.shaping_hasvalue)
 				InitShaping(DiskInfo.shaping_value, Shaping);
 
-			Handle = GBridgeInterface.CreateDiskLight(&LightInfo, &DiskInfo);
+			LightInfo.pNext = &DiskInfo;
+			GRemixInterface.CreateLight(&LightInfo, &Handle);
 			break;
 		}
 	case RTXLIGHT_Cylinder:
 		{
-			x86::remixapi_LightInfoCylinderEXT CylinderInfo;
-			CylinderInfo.sType = REMIXAPI_STRUCT_TYPE_LIGHT_INFO_CYLINDER_EXT;
+			remixapi_LightInfoCylinderEXT CylinderInfo = {REMIXAPI_STRUCT_TYPE_LIGHT_INFO_CYLINDER_EXT};
 			InitFloat3D(CylinderInfo.position, Position);
 			InitFloat3D(CylinderInfo.axis, Cylinder.Axis.GetNormalized());
 			CylinderInfo.radius = Cylinder.Radius;
 			CylinderInfo.axisLength = Cylinder.Length;
-			Handle = GBridgeInterface.CreateCylinderLight(&LightInfo, &CylinderInfo);
+			LightInfo.pNext = &CylinderInfo;
+			GRemixInterface.CreateLight(&LightInfo, &Handle);
 			break;
 		}
 	case RTXLIGHT_Distant:
 		{
-			x86::remixapi_LightInfoDistantEXT DistantInfo;
-			DistantInfo.sType = REMIXAPI_STRUCT_TYPE_LIGHT_INFO_DISTANT_EXT;
+			remixapi_LightInfoDistantEXT DistantInfo = {REMIXAPI_STRUCT_TYPE_LIGHT_INFO_DISTANT_EXT};
 			InitFloat3D(DistantInfo.direction, Distant.Direction.GetNormalized());
 			DistantInfo.angularDiameterDegrees = Distant.AngularDiameterDegrees;
-			Handle = GBridgeInterface.CreateDistantLight(&LightInfo, &DistantInfo);
+			LightInfo.pNext = &DistantInfo;
+			GRemixInterface.CreateLight(&LightInfo, &Handle);
 			break;
 		}
 	}
@@ -232,9 +235,9 @@ void URtxLight::DestroyHandle()
 {
 	if(Handle)
 	{
-		if(GBridgeInterface.initialized)
-			GBridgeInterface.DestroyLight(Handle);
+		if(GRemixInterface.DestroyLight)
+			GRemixInterface.DestroyLight(Handle);
 
-		Handle = 0;
+		Handle = NULL;
 	}
 }

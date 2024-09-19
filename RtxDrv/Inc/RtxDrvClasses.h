@@ -96,7 +96,6 @@ struct RTXDRV_API FRtxDistantLight
 class RTXDRV_API URtxLight : public UObject
 {
 public:
-    FRtxHandle Handle;
     BYTE Type;
     BITFIELD bShouldBeDestroyed:1 GCC_PACK(4);
     BITFIELD bEnabled:1;
@@ -112,6 +111,8 @@ public:
     FRtxDistantLight Distant;
     void execUpdate(FFrame& Stack, void* Result);
     DECLARE_CLASS(URtxLight,UObject,0|CLASS_Transient,RtxDrv)
+    remixapi_LightHandle_T* Handle;
+
     virtual void Destroy();
     virtual void PostEditChange(){ Super::PostEditChange(); Update(); }
     void Update();

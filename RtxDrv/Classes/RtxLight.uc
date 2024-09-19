@@ -1,7 +1,5 @@
 class RtxLight extends Object within RtxInterface native transient hidecategories(Object, None);
 
-var editconst RtxInterface.RtxHandle Handle;
-
 var(Common) enum ERtxLightType{
 	RTXLIGHT_Sphere,
 	RTXLIGHT_Rect,
@@ -56,10 +54,14 @@ var(DistantLight) struct RtxDistantLight{
 	var() float  AngularDiameterDegrees;
 } Distant;
 
+var const editconst noexport int Handle;
+
 native final function Update(); // Must be called whenever a property value has changed
 
 cpptext
 {
+    remixapi_LightHandle_T* Handle;
+
     virtual void Destroy();
     virtual void PostEditChange(){ Super::PostEditChange(); Update(); }
     void Update();

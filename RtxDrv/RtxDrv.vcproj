@@ -107,6 +107,9 @@
 				RelativePath=".\Src\RtxDrvPrivate.h">
 			</File>
 			<File
+				RelativePath=".\Src\remix_c.h">
+			</File>
+			<File
 				RelativePath=".\Src\RtxRenderDevice.h">
 			</File>
 			<File

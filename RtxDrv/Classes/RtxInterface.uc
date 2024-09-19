@@ -1,11 +1,5 @@
 class RtxInterface extends Object within RtxRenderDevice native transient config(RtxDrv) hidecategories(Object, None);
 
-// uint64_t
-struct noexport RtxHandle{
-	var const int lo;
-	var const int hi;
-};
-
 var(General)  config     color           AnchorTriangleColor;
 var(General)  config     bool            bDrawAnchorTriangle;
 

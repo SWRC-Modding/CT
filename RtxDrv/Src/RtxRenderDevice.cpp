@@ -134,6 +134,9 @@ void URtxRenderDevice::Flush(UViewport* Viewport)
 
 FRenderInterface* URtxRenderDevice::Lock(UViewport* Viewport, BYTE* HitData, INT* HitSize)
 {
+	if(Rtx->bCaptureMode)
+		Viewport->Precaching = 1;
+
 	DepthCleared = 0;
 
 	D3D = Super::Lock(Viewport, HitData, HitSize);
@@ -206,6 +209,10 @@ void URtxRenderDevice::Unlock(FRenderInterface* RI)
 	}
 
 	Rtx->RenderLights();
+
+	if(Rtx->bCaptureMode)
+		LockedViewport->Precaching = 0;
+
 	LockedViewport = NULL;
 
 	Super::Unlock(static_cast<URtxRenderDevice*>(RI)->D3D);

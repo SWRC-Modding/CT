@@ -22,6 +22,7 @@ class RTXDRV_API URtxInterface : public UObject
 public:
     FColor AnchorTriangleColor;
     BITFIELD bDrawAnchorTriangle:1 GCC_PACK(4);
+    BITFIELD bCaptureMode:1;
     BITFIELD bEnableLights:1;
     TArrayNoInit<class URtxLight*> Lights GCC_PACK(4);
     TArrayNoInit<class URtxLight*> DestroyedLights;

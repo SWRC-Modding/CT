@@ -2,6 +2,7 @@ class RtxInterface extends Object within RtxRenderDevice native transient config
 
 var(General)  config     color           AnchorTriangleColor;
 var(General)  config     bool            bDrawAnchorTriangle;
+var(General)  config     bool            bCaptureMode;
 
 var(Lighting)            bool            bEnableLights;
 var(Lighting) editinline array<RtxLight> Lights;

@@ -1,11 +1,12 @@
 #include "RtxDrvPrivate.h"
 #include "RtxRenderDevice.h"
 
-static remixapi_Interface GRemixInterface;
+static bool               GRemixApiInitialized = false;
+static remixapi_Interface GRemixApi;
 
 void URtx::Init()
 {
-	if(!GRemixInterface.Startup)
+	if(!GRemixApiInitialized)
 	{
 		debugf("Initializing remix bridge API");
 
@@ -14,9 +15,11 @@ void URtx::Init()
 		HMODULE DllHandle;
 		MultiByteToWideChar(CP_ACP, 0, *DllPath, -1, DllPathBuffer, ARRAY_COUNT(DllPathBuffer));
 
-		remixapi_ErrorCode Error = remixapi_lib_loadRemixDllAndInitialize(DllPathBuffer, &GRemixInterface, &DllHandle) ;
-		if(Error != REMIXAPI_ERROR_CODE_SUCCESS)
-			appErrorf("Failed to initialize remix API: %i", Error);
+		remixapi_ErrorCode Error = remixapi_lib_loadRemixDllAndInitialize(DllPathBuffer, &GRemixApi, &DllHandle) ;
+		GRemixApiInitialized     = Error == REMIXAPI_ERROR_CODE_SUCCESS;
+
+		if(!GRemixApiInitialized)
+			debugf(NAME_Error, "Failed to initialize remix API: %i", Error);
 	}
 
 	Lights.SetNoShrink(true);
@@ -25,7 +28,8 @@ void URtx::Init()
 
 void URtx::Exit()
 {
-	appMemzero(&GRemixInterface, sizeof(GRemixInterface));
+	GRemixApiInitialized = false;
+	appMemzero(&GRemixApi, sizeof(GRemixApi));
 }
 
 URtxLight* URtx::CreateLight(bool ForceDefaultConstructed)
@@ -89,7 +93,7 @@ void URtx::RenderLights()
 				Light->Update();
 
 			if(Light->Handle)
-				GRemixInterface.DrawLightInstance(Light->Handle);
+				GRemixApi.DrawLightInstance(Light->Handle);
 		}
 	}
 }
@@ -152,6 +156,9 @@ static void InitShaping(remixapi_LightInfoLightShaping& Dest, const FRtxLightSha
 
 void URtxLight::Update()
 {
+	if(!GRemixApiInitialized)
+		return;
+
 	DestroyHandle();
 
 	remixapi_LightInfo LightInfo = {REMIXAPI_STRUCT_TYPE_LIGHT_INFO};
@@ -171,7 +178,7 @@ void URtxLight::Update()
 				InitShaping(SphereInfo.shaping_value, Shaping);
 
 			LightInfo.pNext = &SphereInfo;
-			GRemixInterface.CreateLight(&LightInfo, &Handle);
+			GRemixApi.CreateLight(&LightInfo, &Handle);
 			break;
 		}
 	case RTXLIGHT_Rect:
@@ -188,7 +195,7 @@ void URtxLight::Update()
 				InitShaping(RectInfo.shaping_value, Shaping);
 
 			LightInfo.pNext = &RectInfo;
-			GRemixInterface.CreateLight(&LightInfo, &Handle);
+			GRemixApi.CreateLight(&LightInfo, &Handle);
 			break;
 		}
 	case RTXLIGHT_Disk:
@@ -205,7 +212,7 @@ void URtxLight::Update()
 				InitShaping(DiskInfo.shaping_value, Shaping);
 
 			LightInfo.pNext = &DiskInfo;
-			GRemixInterface.CreateLight(&LightInfo, &Handle);
+			GRemixApi.CreateLight(&LightInfo, &Handle);
 			break;
 		}
 	case RTXLIGHT_Cylinder:
@@ -216,7 +223,7 @@ void URtxLight::Update()
 			CylinderInfo.radius = Cylinder.Radius;
 			CylinderInfo.axisLength = Cylinder.Length;
 			LightInfo.pNext = &CylinderInfo;
-			GRemixInterface.CreateLight(&LightInfo, &Handle);
+			GRemixApi.CreateLight(&LightInfo, &Handle);
 			break;
 		}
 	case RTXLIGHT_Distant:
@@ -225,7 +232,7 @@ void URtxLight::Update()
 			InitFloat3D(DistantInfo.direction, Distant.Direction.GetNormalized());
 			DistantInfo.angularDiameterDegrees = Distant.AngularDiameterDegrees;
 			LightInfo.pNext = &DistantInfo;
-			GRemixInterface.CreateLight(&LightInfo, &Handle);
+			GRemixApi.CreateLight(&LightInfo, &Handle);
 			break;
 		}
 	}
@@ -233,11 +240,9 @@ void URtxLight::Update()
 
 void URtxLight::DestroyHandle()
 {
-	if(Handle)
+	if(GRemixApiInitialized && Handle)
 	{
-		if(GRemixInterface.DestroyLight)
-			GRemixInterface.DestroyLight(Handle);
-
+		GRemixApi.DestroyLight(Handle);
 		Handle = NULL;
 	}
 }

@@ -103,7 +103,7 @@ UBOOL URtxRenderDevice::Init()
 	GetDefault<APlayerController>()->bVisor           = 0;
 	GetDefault<APlayerController>()->VisorModeDefault = 1;
 
-	Rtx = new(this) URtxInterface;
+	Rtx = new(this) URtx;
 
 	return Super::Init();
 }

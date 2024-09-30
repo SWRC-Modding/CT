@@ -1,4 +1,4 @@
-class RtxLight extends Object within RtxInterface native transient hidecategories(Object, None);
+class RtxLight extends Object within Rtx native transient hidecategories(Object, None);
 
 var(Common) enum ERtxLightType{
 	RTXLIGHT_Sphere,

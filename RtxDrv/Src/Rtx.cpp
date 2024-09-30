@@ -3,7 +3,7 @@
 
 static remixapi_Interface GRemixInterface;
 
-void URtxInterface::Init()
+void URtx::Init()
 {
 	if(!GRemixInterface.Startup)
 	{
@@ -23,19 +23,19 @@ void URtxInterface::Init()
 	DestroyedLights.SetNoShrink(true);
 }
 
-void URtxInterface::Exit()
+void URtx::Exit()
 {
 	appMemzero(&GRemixInterface, sizeof(GRemixInterface));
 }
 
-URtxLight* URtxInterface::CreateLight(bool ForceDefaultConstructed)
+URtxLight* URtx::CreateLight(bool ForceDefaultConstructed)
 {
 	URtxLight* Light;
 
 	if(!ForceDefaultConstructed && DestroyedLights.Num() > 0)
 		Light = DestroyedLights.Pop();
 	else
-		Light = ConstructObject<URtxLight>(URtxLight::StaticClass(), this);
+		Light = new(this) URtxLight;
 
 	Light->bShouldBeDestroyed = 0;
 	Light->bEnabled = 1;
@@ -43,19 +43,19 @@ URtxLight* URtxInterface::CreateLight(bool ForceDefaultConstructed)
 	return Light;
 }
 
-void URtxInterface::DestroyLight(URtxLight* Light)
+void URtx::DestroyLight(URtxLight* Light)
 {
 	if(Light)
 		Light->bShouldBeDestroyed = 1;
 }
 
-void URtxInterface::DestroyAllLights()
+void URtx::DestroyAllLights()
 {
 	DestroyedLights += Lights;
 	Lights.Empty();
 }
 
-void URtxInterface::RenderLights()
+void URtx::RenderLights()
 {
 	if(!bEnableLights)
 		return;
@@ -79,7 +79,7 @@ void URtxInterface::RenderLights()
 
 		if(!Light) // NULL entry can happen if a light was added via the property window UI. In that case just create it
 		{
-			Light = ConstructObject<URtxLight>(URtxLight::StaticClass(), this);
+			Light = new(this) URtxLight;
 			Lights[i] = Light;
 		}
 
@@ -94,33 +94,33 @@ void URtxInterface::RenderLights()
 	}
 }
 
-void URtxInterface::execCreateLight(FFrame& Stack, void* Result)
+void URtx::execCreateLight(FFrame& Stack, void* Result)
 {
 	P_FINISH;
 	*static_cast<URtxLight**>(Result) = CreateLight();
 }
 
-void URtxInterface::execDestroyLight(FFrame& Stack, void* Result)
+void URtx::execDestroyLight(FFrame& Stack, void* Result)
 {
 	P_GET_OBJECT(URtxLight, Light);
 	P_FINISH;
 	DestroyLight(Light);
 }
 
-void URtxInterface::execDestroyAllLights(FFrame& Stack, void* Result)
+void URtx::execDestroyAllLights(FFrame& Stack, void* Result)
 {
 	P_FINISH;
 	DestroyAllLights();
 }
 
-void URtxInterface::execGetInstance(FFrame& Stack, void* Result)
+void URtx::execGetInstance(FFrame& Stack, void* Result)
 {
 	P_FINISH;
 
 	URtxRenderDevice* RenDev = Cast<URtxRenderDevice>(GEngine->GRenDev);
 
 	if(RenDev)
-		*static_cast<URtxInterface**>(Result) = RenDev->GetRtxInterface();
+		*static_cast<URtx**>(Result) = RenDev->GetRtxInterface();
 }
 
 

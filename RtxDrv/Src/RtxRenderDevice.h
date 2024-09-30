@@ -2,7 +2,7 @@
 
 #include "../../D3DDrv/Inc/D3DDrv.h"
 
-class URtxInterface;
+class URtx;
 
 class FAnchorTriangleVertexStream : public FVertexStream{
 public:
@@ -57,7 +57,7 @@ public:
 	virtual void Unlock(FRenderInterface* RI);
 	virtual void Present(UViewport* Viewport);
 
-	URtxInterface* GetRtxInterface(){ return Rtx; }
+	URtx* GetRtxInterface(){ return Rtx; }
 
 	// FRenderInterface
 
@@ -105,7 +105,7 @@ private:
 	ULevel*                     CurrentLevel;
 	FAnchorTriangleVertexStream AnchorTriangleStream;
 	FRenderInterface*           D3D;
-	URtxInterface*              Rtx;
+	URtx*                       Rtx;
 	UBOOL                       DepthCleared;
 
 	void ClearMaterialFlags();

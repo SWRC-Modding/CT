@@ -1,4 +1,4 @@
-class RtxInterface extends Object within RtxRenderDevice native transient config(RtxDrv) hidecategories(Object, None);
+class Rtx extends Object within RtxRenderDevice native transient config(RtxDrv) hidecategories(Object, None);
 
 var(General)  config     color           AnchorTriangleColor;
 var(General)  config     bool            bDrawAnchorTriangle;
@@ -7,13 +7,13 @@ var(General)  config     bool            bCaptureMode;
 var(Lighting)            bool            bEnableLights;
 var(Lighting) editinline array<RtxLight> Lights;
 
-var                      array<RtxLight> DestroyedLights; // Keep destroyed lights around to reduce overhead of creating/destroying short lived lights
+var const editconst      array<RtxLight> DestroyedLights; // Keep destroyed lights around to reduce overhead of creating/destroying short lived lights
 
 native final function RtxLight CreateLight();
 native final function DestroyLight(RtxLight Light);
 native final function DestroyAllLights();
 
-native static final function RtxInterface GetInstance();
+native static final function Rtx GetInstance();
 
 cpptext
 {

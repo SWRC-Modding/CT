@@ -17,7 +17,7 @@
 
 
 
-class RTXDRV_API URtxInterface : public UObject
+class RTXDRV_API URtx : public UObject
 {
 public:
     FColor AnchorTriangleColor;
@@ -30,14 +30,14 @@ public:
     void execDestroyLight(FFrame& Stack, void* Result);
     void execDestroyAllLights(FFrame& Stack, void* Result);
     void execGetInstance(FFrame& Stack, void* Result);
-    DECLARE_CLASS(URtxInterface,UObject,0|CLASS_Transient|CLASS_Config,RtxDrv)
+    DECLARE_CLASS(URtx,UObject,0|CLASS_Transient|CLASS_Config,RtxDrv)
     void Init();
     void Exit();
     URtxLight* CreateLight(bool ForceDefaultConstructed = false);
     void DestroyLight(URtxLight* Light);
     void DestroyAllLights();
     void RenderLights();
-    DECLARE_NATIVES(URtxInterface)
+    DECLARE_NATIVES(URtx)
 };
 
 enum ERtxLightType
@@ -131,7 +131,7 @@ public:
 
 #define AUTO_INITIALIZE_REGISTRANTS_RTXDRV \
 	USolidColorMaterial::StaticClass(); \
-	URtxInterface::StaticClass(); \
+	URtx::StaticClass(); \
 	URtxLight::StaticClass(); \
 	URtxRenderDevice::StaticClass(); \
 

@@ -5973,6 +5973,105 @@ public:
 };
 
 /*
+ * HsBumpDiffBlend
+ */
+
+class ENGINE_API UHsBumpDiffBlend : public UHardwareShaderWrapper{
+public:
+	class UTexture* DiffuseTexture;
+	class UTexture* BlendTexture;
+	class UTexture* NormalMap;
+	FLOAT DiffUVScale;
+	FLOAT BlendUVScale;
+	FLOAT BumpUVScale;
+
+	DECLARE_CLASS(UHsBumpDiffBlend,UHardwareShaderWrapper,0,Engine)
+	// Make sure to implement this function in UnHardwareShaderWrapper.cpp
+	virtual INT SetupShaderWrapper(class FRenderInterface* RI);
+};
+
+/*
+ * HsBumpDiffBlendMask
+ */
+
+class ENGINE_API UHsBumpDiffBlendMask : public UHardwareShaderWrapper{
+public:
+	class UTexture* DiffuseTexture;
+	class UTexture* BlendTexture;
+	class UTexture* NormalMap;
+	FLOAT DiffUVScale;
+	FLOAT BlendUVScale;
+	FLOAT BumpUVScale;
+	BYTE VertexToTextureBlend;
+
+	DECLARE_CLASS(UHsBumpDiffBlendMask,UHardwareShaderWrapper,0,Engine)
+	// Make sure to implement this function in UnHardwareShaderWrapper.cpp
+	virtual INT SetupShaderWrapper(class FRenderInterface* RI);
+};
+
+/*
+ * HsBumpDiffBlendMaskIllum
+ */
+
+class ENGINE_API UHsBumpDiffBlendMaskIllum : public UHardwareShaderWrapper{
+public:
+	class UTexture* DiffuseTexture;
+	class UTexture* BlendTexture;
+	class UTexture* NormalMap;
+	FLOAT DiffUVScale;
+	FLOAT BlendUVScale;
+	FLOAT BumpUVScale;
+	BYTE VertexToTextureBlend;
+
+	DECLARE_CLASS(UHsBumpDiffBlendMaskIllum,UHardwareShaderWrapper,0,Engine)
+	// Make sure to implement this function in UnHardwareShaderWrapper.cpp
+	virtual INT SetupShaderWrapper(class FRenderInterface* RI);
+};
+
+/*
+ * HsBumpDiffSpec
+ */
+
+class ENGINE_API UHsBumpDiffSpec : public UHardwareShaderWrapper{
+public:
+	class UTexture* DiffuseTexture;
+	class UTexture* NormalMap;
+	FLOAT DiffUVScale;
+	FLOAT BumpUVScale;
+	BYTE Specularity;
+	FColor SpecularTint;
+
+	DECLARE_CLASS(UHsBumpDiffSpec,UHardwareShaderWrapper,0,Engine)
+	// Make sure to implement this function in UnHardwareShaderWrapper.cpp
+	virtual INT SetupShaderWrapper(class FRenderInterface* RI);
+};
+
+/*
+ * HsFalloff
+ */
+
+class ENGINE_API UHsFalloff : public UHardwareShaderWrapper{
+public:
+	class UTexture* DiffuseTexture;
+	class UTexture* FalloffGradient;
+	FLOAT UPanRate;
+	FLOAT VPanRate;
+	FLOAT UOscilationRate;
+	FLOAT VOscilationRate;
+	FLOAT GradientBlendMode;
+	FColor DiffuseTint;
+	FColor GradientTint;
+	BYTE SrcBlend;
+	BYTE DestBlend;
+	BITFIELD ZTest:1;
+	BITFIELD ZWrite:1;
+
+	DECLARE_CLASS(UHsFalloff,UHardwareShaderWrapper,0,Engine)
+	// Make sure to implement this function in UnHardwareShaderWrapper.cpp
+	virtual INT SetupShaderWrapper(class FRenderInterface* RI);
+};
+
+/*
  * HsHologram
  */
 
@@ -5983,6 +6082,26 @@ public:
 	BITFIELD UseMarkerColorInstead:1;
 
 	DECLARE_CLASS(UHsHologram,UHardwareShaderWrapper,0,Engine)
+	// Make sure to implement this function in UnHardwareShaderWrapper.cpp
+	virtual INT SetupShaderWrapper(class FRenderInterface* RI);
+};
+
+/*
+ * HsWorldDistortion
+ */
+
+class ENGINE_API UHsWorldDistortion : public UHardwareShaderWrapper{
+public:
+	FColor ColorAdd;
+	FColor ColorVariation;
+	float WorldDistortion;
+	FLOAT WobbleScale;
+	FLOAT WobbleSpeed;
+	FLOAT WobbleAmplitute;
+	BITFIELD VortexEffect:1;
+	BYTE Alpha;
+
+	DECLARE_CLASS(UHsWorldDistortion,UHardwareShaderWrapper,0,Engine)
 	// Make sure to implement this function in UnHardwareShaderWrapper.cpp
 	virtual INT SetupShaderWrapper(class FRenderInterface* RI);
 };

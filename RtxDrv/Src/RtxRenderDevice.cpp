@@ -358,7 +358,8 @@ void URtxRenderDevice::EnableLighting(UBOOL UseDynamic, UBOOL UseStatic, UBOOL M
 
 void URtxRenderDevice::SetLight(INT LightIndex, FDynamicLight* Light, FLOAT Scale)
 {
-	// D3D->SetLight(LightIndex, Light, Scale);
+	if(Rtx->bEnableD3DLights)
+		D3D->SetLight(LightIndex, Light, Scale);
 }
 
 void URtxRenderDevice::SetTransform(ETransformType Type, const FMatrix& Matrix)
@@ -368,6 +369,35 @@ void URtxRenderDevice::SetTransform(ETransformType Type, const FMatrix& Matrix)
 
 void URtxRenderDevice::SetMaterial(UMaterial* Material, FString* ErrorString, UMaterial** ErrorMaterial, INT* NumPasses)
 {
+	UMaterial** ActualMaterial = &Material;
+
+	while(*ActualMaterial && (*ActualMaterial)->IsA<UModifier>())
+		ActualMaterial = &((UModifier*)*ActualMaterial)->Material;
+
+	if(*ActualMaterial)
+	{
+		if(Rtx->bReplaceHardwareShaderMaterials && (*ActualMaterial)->IsA<UHardwareShaderWrapper>())
+		{
+			UClass* Class = (*ActualMaterial)->GetClass();
+
+			if(Class->IsChildOf<UHsBumpDiffSpec>())
+				*ActualMaterial = static_cast<UHsBumpDiffSpec*>(*ActualMaterial)->DiffuseTexture;
+			else if(Class == UHsBumpDiffBlend::StaticClass())
+				*ActualMaterial = static_cast<UHsBumpDiffBlend*>(*ActualMaterial)->DiffuseTexture;
+			else if(Class == UHsBumpDiffBlendMask::StaticClass())
+				*ActualMaterial = static_cast<UHsBumpDiffBlendMask*>(*ActualMaterial)->DiffuseTexture;
+			else if(Class == UHsBumpDiffBlendMaskIllum::StaticClass())
+				*ActualMaterial = static_cast<UHsBumpDiffBlendMaskIllum*>(*ActualMaterial)->DiffuseTexture;
+			else if(Class == UHsFalloff::StaticClass())
+				*ActualMaterial = static_cast<UHsFalloff*>(*ActualMaterial)->DiffuseTexture;
+			else if(Class == UHsHologram::StaticClass())
+				*ActualMaterial = static_cast<UHsHologram*>(*ActualMaterial)->DiffuseTexture;
+		}
+	}
+
+	if(!*ActualMaterial)
+		*ActualMaterial = GetDefault<UMaterial>()->DefaultMaterial;
+
 	D3D->SetMaterial(Material, ErrorString, ErrorMaterial, NumPasses);
 }
 

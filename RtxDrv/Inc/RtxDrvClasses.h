@@ -23,6 +23,8 @@ public:
     FColor AnchorTriangleColor;
     BITFIELD bDrawAnchorTriangle:1 GCC_PACK(4);
     BITFIELD bCaptureMode:1;
+    BITFIELD bReplaceHardwareShaderMaterials:1;
+    BITFIELD bEnableD3DLights:1;
     BITFIELD bEnableLights:1;
     TArrayNoInit<class URtxLight*> Lights GCC_PACK(4);
     TArrayNoInit<class URtxLight*> DestroyedLights;

@@ -240,6 +240,12 @@ class CORE_API UStruct : public UField{
 	UStruct* GetSuperStruct() const;
 	bool StructCompare(const void* A, const void* B);
 
+	template<typename T>
+	bool IsChildOf()
+	{
+		return IsChildOf(T::StaticClass());
+	}
+
 protected:
 	// Cheat Protection
 	BYTE FunctionMD5Digest[16]; // Holds a MD5 digest for this function

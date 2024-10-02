@@ -3,8 +3,10 @@ class Rtx extends Object within RtxRenderDevice native transient config(RtxDrv) 
 var(General)  config     color           AnchorTriangleColor;
 var(General)  config     bool            bDrawAnchorTriangle;
 var(General)  config     bool            bCaptureMode;
+var(General)  config     bool            bReplaceHardwareShaderMaterials;
 
-var(Lighting)            bool            bEnableLights;
+var(Lighting) config     bool            bEnableD3DLights;
+var(Lighting) config     bool            bEnableLights;
 var(Lighting) editinline array<RtxLight> Lights;
 
 var const editconst      array<RtxLight> DestroyedLights; // Keep destroyed lights around to reduce overhead of creating/destroying short lived lights
@@ -29,5 +31,7 @@ defaultproperties
 {
 	AnchorTriangleColor=(R=255,G=255,B=0,A=255)
 	bDrawAnchorTriangle=True
+	bReplaceHardwareShaderMaterials=True
+	bEnableD3DLights=True
 	bEnableLights=True
 }

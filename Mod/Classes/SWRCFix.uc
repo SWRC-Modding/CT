@@ -22,6 +22,7 @@ var() config bool    LimitHudArmsFOV;
 var() config bool    AutoFOV;
 var() config bool    EnableCustomMenu;
 var() config bool    EnableEditorSelectionFix;
+var() config bool    DisableWindowPositionVerification;
 
 var FunctionOverride CTPlayerEndZoomOverride;
 var FunctionOverride CTPlayerResetFOVOverride;
@@ -283,10 +284,10 @@ simulated function MenuBaseGotoMenuClass(String MenuClassName, optional String A
 
 cpptext
 {
-	void Init();
+    void Init();
 
-	static USWRCFix* Instance;
-	static UBOOL     RenderingReady; // Used by ModRenderDevice to only render once everything is started up. This avoids loading tons of textures for no reason.
+    static USWRCFix* Instance;
+    static UBOOL     RenderingReady; // Used by ModRenderDevice to only render once everything is started up. This avoids loading tons of textures for no reason.
 }
 
 defaultproperties
@@ -300,6 +301,7 @@ defaultproperties
 	AutoFOV=True
 	EnableCustomMenu=True
 	EnableEditorSelectionFix=True
+	DisableWindowPositionVerification=True
 	MPCloneHudArmsShaders(0)=(Pawn=Shader'CloneTextures.CloneTextures.CloneCommandoWhite_Shader',HudArms=Shader'HudArmsTextures.HudArms.HudArmsWhite_Shader')
 	MPCloneHudArmsShaders(1)=(Pawn=Shader'CloneTextures.CloneTextures.MP_CloneCommandoD_Shader',HudArms=Shader'HudArmsTextures.HudArms.MP_HudArmsD_Shader')
 	MPCloneHudArmsShaders(2)=(Pawn=Shader'CloneTextures.CloneTextures.MP_CloneCommandoB_Shader',HudArms=Shader'HudArmsTextures.HudArms.MP_HudArmsB_Shader')

@@ -301,6 +301,37 @@ void USWRCFix::Init()
 		DefaultHardwareShader->PixelShaderText  = "ps.1.1\n\nmov r0, c0\n";
 
 	/*
+	 * Fix 4:
+	 * It is not possible to have the UnrealEd window on a secondary monitor. It will always move back to the main monitor as soon as the mouse is clicked.
+	 * In addition, the window is offset by a couple pixels both horizontally and vertically if maximized.
+	 * This is caused by the "WWindow::VerifyPosition" function whose purpose it is to make sure the window is visible in case it is somewhere off-screen.
+	 * But due to its broken behavior it is rather annoying.
+	 * The fix is to patch the function to simply return immediatly so it does not change the window position.
+	 */
+	if(DisableWindowPositionVerification)
+	{
+		HMODULE WindowModule = GetModuleHandleA("Window.dll");
+
+		if(WindowModule)
+		{
+			BYTE* FuncAddress = reinterpret_cast<BYTE*>(GetProcAddress(WindowModule, "?VerifyPosition@WWindow@@QAEXXZ"));
+
+			if(FuncAddress)
+			{
+				DWORD OldProtect;
+				if(VirtualProtect(FuncAddress, 2, PAGE_EXECUTE_READWRITE, &OldProtect))
+				{
+					// RETN
+					FuncAddress[0] = 0xC3;
+					// NOP
+					FuncAddress[1] = 0x90;
+					VirtualProtect(FuncAddress, 2, PAGE_EXECUTE, &OldProtect);
+				}
+			}
+		}
+	}
+
+	/*
 	 * Detect whether the game or editor is running
 	 */
 	HMODULE ExeModule = GetModuleHandleA(NULL);
@@ -310,7 +341,7 @@ void USWRCFix::Init()
 	{
 		debugf("Applying game fixes");
 		/*
-		 * Fix 4:
+		 * Fix 5:
 		 * VSync doesn't seem to work for most people with the d3d8 renderer. A very high frame rate causes the mouse pointer in the menu to be super
 		 * fast and the helmet shake caused by explosions is way stronger as well.
 		 * The engine has a mechanism to limit the fps to a specific value that is returned from UGameEngine::GetMaxTickRate.
@@ -320,7 +351,7 @@ void USWRCFix::Init()
 		OriginalUEngineGetMaxTickRate = static_cast<FLOAT(__fastcall*)(UEngine*, DWORD)>(PatchDllClassVTable("Engine.dll", "UGameEngine", "UObject", 49, EngineGetMaxTickRateOverride));
 
 		/*
-		 * Fix 5:
+		 * Fix 6:
 		 * By default RC only has a fixed set of screen resolutions.
 		 * To support any available resolution, EnumDisplaySettings is used and a list of supported resolutions is created and written to the config file.
 		 */
@@ -351,7 +382,7 @@ void USWRCFix::Init()
 		}
 
 		/*
-		 * Fix 6:
+		 * Fix 7:
 		 * This mods FOV options revealed an issue with how the game draws the weapon's reticles. It basically checks if the current FOV is lower than the default one
 		 * and only then draws the reticle. This way it is hidden when zoomed in. However if you set a very high custom FOV, this check will always fail and the reticle is always drawn.
 		 * To fix it, we hook the UEngine::Draw function and set the current weapon's reticle property to NULL if zoomed in which causes it to be hidden.
@@ -364,7 +395,7 @@ void USWRCFix::Init()
 		debugf("Applying editor fixes");
 
 		/*
-		 * Fix 7:
+		 * Fix 8:
 		 * The editor loads all textures at startup which can consume a significant amount of memory.
 		 * It does so because initially there is no package selected for the texture browser and thus all textures are shown.
 		 * This is fixed by overriding the Exec function and checking for the command that intiializes the texture browser and providing a single package to be initially loaded.

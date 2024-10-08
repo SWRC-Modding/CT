@@ -31,11 +31,11 @@ native final function Deinit();
 
 cpptext
 {
-	Native OriginalNative;
-	DWORD  OriginalFunctionFlags;
+    Native OriginalNative;
+    DWORD  OriginalFunctionFlags;
 
-	void Deinit();
+    void Deinit();
 
-	// Overrides
-	virtual void Destroy();
+    // Overrides
+    virtual void Destroy();
 }

@@ -28,13 +28,13 @@ public:
     void execInit(FFrame& Stack, void* Result);
     void execDeinit(FFrame& Stack, void* Result);
     DECLARE_CLASS(UFunctionOverride,UObject,0,Mod)
-	Native OriginalNative;
-	DWORD  OriginalFunctionFlags;
+    Native OriginalNative;
+    DWORD  OriginalFunctionFlags;
 
-	void Deinit();
+    void Deinit();
 
-	// Overrides
-	virtual void Destroy();
+    // Overrides
+    virtual void Destroy();
     DECLARE_NATIVES(UFunctionOverride)
 };
 
@@ -60,6 +60,7 @@ public:
     BITFIELD AutoFOV:1;
     BITFIELD EnableCustomMenu:1;
     BITFIELD EnableEditorSelectionFix:1;
+    BITFIELD DisableWindowPositionVerification:1;
     class UFunctionOverride* CTPlayerEndZoomOverride GCC_PACK(4);
     class UFunctionOverride* CTPlayerResetFOVOverride;
     class UFunctionOverride* PlayerControllerShakeViewOverride;
@@ -95,10 +96,10 @@ public:
         ProcessEvent(NSetFOV, &Parms);
     }
     DECLARE_CLASS(USWRCFix,UObject,0|CLASS_Transient|CLASS_Config,Mod)
-	void Init();
+    void Init();
 
-	static USWRCFix* Instance;
-	static UBOOL     RenderingReady; // Used by ModRenderDevice to only render once everything is started up. This avoids loading tons of textures for no reason.
+    static USWRCFix* Instance;
+    static UBOOL     RenderingReady; // Used by ModRenderDevice to only render once everything is started up. This avoids loading tons of textures for no reason.
 };
 
 

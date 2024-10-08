@@ -172,14 +172,13 @@ void URtxLight::Update()
 		{
 			remixapi_LightInfoSphereEXT SphereInfo = {REMIXAPI_STRUCT_TYPE_LIGHT_INFO_SPHERE_EXT};
 			InitFloat3D(SphereInfo.position, Position);
-			SphereInfo.radius = Sphere.Radius;
+			SphereInfo.radius           = Sphere.Radius;
 			SphereInfo.shaping_hasvalue = bUseShaping;
 
 			if(SphereInfo.shaping_hasvalue)
 				InitShaping(SphereInfo.shaping_value, Shaping);
 
 			LightInfo.pNext = &SphereInfo;
-			GRemixApi.CreateLight(&LightInfo, &Handle);
 			break;
 		}
 	case RTXLIGHT_Rect:
@@ -197,7 +196,6 @@ void URtxLight::Update()
 				InitShaping(RectInfo.shaping_value, Shaping);
 
 			LightInfo.pNext = &RectInfo;
-			GRemixApi.CreateLight(&LightInfo, &Handle);
 			break;
 		}
 	case RTXLIGHT_Disk:
@@ -215,7 +213,6 @@ void URtxLight::Update()
 				InitShaping(DiskInfo.shaping_value, Shaping);
 
 			LightInfo.pNext = &DiskInfo;
-			GRemixApi.CreateLight(&LightInfo, &Handle);
 			break;
 		}
 	case RTXLIGHT_Cylinder:
@@ -223,10 +220,9 @@ void URtxLight::Update()
 			remixapi_LightInfoCylinderEXT CylinderInfo = {REMIXAPI_STRUCT_TYPE_LIGHT_INFO_CYLINDER_EXT};
 			InitFloat3D(CylinderInfo.position, Position);
 			InitFloat3D(CylinderInfo.axis, Cylinder.Axis.GetNormalized());
-			CylinderInfo.radius = Cylinder.Radius;
+			CylinderInfo.radius     = Cylinder.Radius;
 			CylinderInfo.axisLength = Cylinder.Length;
-			LightInfo.pNext = &CylinderInfo;
-			GRemixApi.CreateLight(&LightInfo, &Handle);
+			LightInfo.pNext         = &CylinderInfo;
 			break;
 		}
 	case RTXLIGHT_Distant:
@@ -235,10 +231,11 @@ void URtxLight::Update()
 			InitFloat3D(DistantInfo.direction, Distant.Direction.GetNormalized());
 			DistantInfo.angularDiameterDegrees = Distant.AngularDiameterDegrees;
 			LightInfo.pNext = &DistantInfo;
-			GRemixApi.CreateLight(&LightInfo, &Handle);
 			break;
 		}
 	}
+
+	GRemixApi.CreateLight(&LightInfo, &Handle);
 }
 
 void URtxLight::DestroyHandle()

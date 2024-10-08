@@ -149,7 +149,7 @@ static void InitFloat3D(remixapi_Float3D& Dest, const FVector& Src)
 
 static void InitShaping(remixapi_LightInfoLightShaping& Dest, const FRtxLightShaping& Src)
 {
-	InitFloat3D(Dest.direction, Src.Direction);
+	InitFloat3D(Dest.direction, Src.Direction.GetNormalized());
 	Dest.coneAngleDegrees = Src.ConeAngleDegrees;
 	Dest.coneSoftness     = Src.ConeSoftness;
 	Dest.focusExponent    = Src.FocusExponent;

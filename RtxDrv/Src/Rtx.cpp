@@ -149,6 +149,7 @@ static void InitFloat3D(remixapi_Float3D& Dest, const FVector& Src)
 
 static void InitShaping(remixapi_LightInfoLightShaping& Dest, const FRtxLightShaping& Src)
 {
+	InitFloat3D(Dest.direction, Src.Direction);
 	Dest.coneAngleDegrees = Src.ConeAngleDegrees;
 	Dest.coneSoftness     = Src.ConeSoftness;
 	Dest.focusExponent    = Src.FocusExponent;
@@ -190,6 +191,7 @@ void URtxLight::Update()
 			InitFloat3D(RectInfo.yAxis, Rect.YAxis.GetNormalized());
 			RectInfo.ySize = Rect.YSize;
 			InitFloat3D(RectInfo.direction, Rect.Direction.GetNormalized());
+			RectInfo.shaping_hasvalue = bUseShaping;
 
 			if(RectInfo.shaping_hasvalue)
 				InitShaping(RectInfo.shaping_value, Shaping);
@@ -207,6 +209,7 @@ void URtxLight::Update()
 			InitFloat3D(DiskInfo.yAxis, Disk.YAxis.GetNormalized());
 			DiskInfo.yRadius = Disk.YRadius;
 			InitFloat3D(DiskInfo.direction, Disk.Direction.GetNormalized());
+			DiskInfo.shaping_hasvalue = bUseShaping;
 
 			if(DiskInfo.shaping_hasvalue)
 				InitShaping(DiskInfo.shaping_value, Shaping);

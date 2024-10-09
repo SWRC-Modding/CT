@@ -11,6 +11,21 @@
 
 #pragma comment(lib, "Winmm.lib") // timeBeginPeriod, timeEndPeriod
 
+// Allow short form of known render devices.
+static FStringTemp GetFullRenderDeviceClassName(const FString& RenderDeviceClass)
+{
+	if(RenderDeviceClass == "D3D")
+		return "D3DDrv.D3DRenderDevice";
+	else if(RenderDeviceClass == "OpenGL")
+		return "OpenGLDrv.OpenGLRenderDevice";
+	else if(RenderDeviceClass == "Mod")
+		return "Mod.ModRenderDevice";
+	else if(RenderDeviceClass == "Rtx")
+		return "RtxDrv.RtxRenderDevice";
+
+	return RenderDeviceClass;
+}
+
 static void EndFullscreen()
 {
 	if(GEngine && GEngine->Client && GEngine->Client->Viewports.Num() > 0 && GEngine->Client->Viewports[0])
@@ -393,18 +408,18 @@ static struct FExecHook : public FExec, FNotifyHook{
 			SetFocus(Preferences->hWnd);
 
 			return 1;
-		}
-		else if(!GIsEditor && GIsClient && ParseCommand(&Cmd, "USERENDEV"))
-		{
-			FString RenderDeviceClass = Cmd;
+		}else if(GIsClient && ParseCommand(&Cmd, "GETRES")){
+			Ar.Logf("%ix%i", GEngine->Client->Viewports[0]->SizeX, GEngine->Client->Viewports[0]->SizeY);
+			return 1;
+		}else if(ParseCommand(&Cmd, "GETRENDEV")){
+			if(GEngine && GEngine->GRenDev)
+				Ar.Log(GEngine->GRenDev->GetClass()->GetPathName());
+			else
+				Ar.Logf("No render device in use");
 
-			if(RenderDeviceClass == "D3D")
-				RenderDeviceClass = "D3DDrv.D3DRenderDevice";
-			else if(RenderDeviceClass == "OpenGL")
-				RenderDeviceClass = "OpenGLDrv.OpenGLRenderDevice";
-			else if(RenderDeviceClass == "Mod")
-				RenderDeviceClass = "Mod.ModRenderDevice";
-
+			return 1;
+		}else if(!GIsEditor && GIsClient && ParseCommand(&Cmd, "USERENDEV")){
+			FString RenderDeviceClass = GetFullRenderDeviceClassName(Cmd);
 			UClass* Class = LoadClass<URenderDevice>(NULL, *RenderDeviceClass, NULL, LOAD_NoWarn | LOAD_Quiet, NULL);
 
 			if(Class)
@@ -459,16 +474,8 @@ static void InitEngine()
 
 	FString RenderDeviceClass;
 
-	if(Parse(appCmdLine(), "RenDev=", RenderDeviceClass))
-	{
-		// Allow short form of known render devices.
-		if(RenderDeviceClass == "D3D")
-			RenderDeviceClass = "D3DDrv.D3DRenderDevice";
-		else if(RenderDeviceClass == "OpenGL")
-			RenderDeviceClass = "OpenGLDrv.OpenGLRenderDevice";
-		else if(RenderDeviceClass == "Mod")
-			RenderDeviceClass = "Mod.ModRenderDevice";
-
+	if(Parse(appCmdLine(), "RenDev=", RenderDeviceClass)){
+		RenderDeviceClass = GetFullRenderDeviceClassName(RenderDeviceClass);
 		debugf("RenderDevice set on command line: %s", *RenderDeviceClass);
 		GConfig->SetString("Engine.Engine", "RenderDevice", *RenderDeviceClass);
 		RenDevSetOnCommandLine = true;
@@ -668,7 +675,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		appPreExit();
 
 		GIsGuarded = 0;
-	}catch(...)
+	}
+	catch(...)
 	{
 		GIsGuarded = 0;
 		ExitCode = EXIT_FAILURE;

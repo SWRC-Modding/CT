@@ -532,7 +532,7 @@ protected:
 	{
 		guard(TArray::Realloc);
 
-		const INT AllocNum = Max(NewSize, Slack) * sizeof(T);
+		const INT AllocNum = Max(NewSize, Slack);
 
 		if(IsAllocated())
 		{

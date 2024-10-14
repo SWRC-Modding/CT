@@ -212,9 +212,7 @@ public:
 		else
 		{
 			const INT RequiredCapacity = Num() + Other.Num();
-			if(Capacity() < RequiredCapacity)
-				Reserve(RequiredCapacity);
-
+			Reserve(RequiredCapacity);
 			appMemcpy(GetData() + Num(), Other.GetData(), Other.Num() * sizeof(T));
 			ArrayNum += Other.ArrayNum;
 		}
@@ -436,7 +434,7 @@ public:
 
 	void Serialize(FArchive& Ar)
 	{
-		guard(MyTArray::Serialize);
+		guardFunc;
 		CountBytes(Ar);
 
 		INT TempNum = Num();
@@ -530,15 +528,15 @@ protected:
 
 	void Realloc(INT NewSize, INT Slack)
 	{
-		guard(TArray::Realloc);
+		guardFunc;
 
 		const INT AllocNum = Max(NewSize, Slack);
 
 		if(IsAllocated())
 		{
-			if(NewSize <= ArrayNum)
+			if(AllocNum <= ArrayNum)
 			{
-				if(!bNoShrink && ArrayNum >= 0 && Align(NewSize * sizeof(T), 32) < Align(Num() * sizeof(T), 32))
+				if(!bNoShrink && ArrayNum >= 0 && Align(AllocNum * sizeof(T), 32) < Align(ArrayNum * sizeof(T), 32))
 					Data = appRealloc(Data, AllocNum * sizeof(T));
 			}
 			else if(Capacity() < AllocNum)
@@ -613,7 +611,7 @@ public:
 template<typename T>
 inline void ExchangeArray(TArray<T>& A, TArray<T>& B)
 {
-	guardSlow(ExchangeTArray);
+	guardFuncSlow;
 	appMemswap(&A, &B, sizeof(FArray));
 	unguardSlow;
 }
@@ -982,7 +980,7 @@ struct TTypeInfo<FConfigString> : public TTypeInfo<FString>{};
 //
 inline void ExchangeString(FString& A, FString& B)
 {
-	guardSlow(ExchangeTArray);
+	guardFuncSlow;
 	appMemswap(&A, &B, sizeof(FString));
 	unguardSlow;
 }
@@ -1319,7 +1317,7 @@ public:
 
 	void Dump(FOutputDevice& Ar)
 	{
-		guard(TMapBase::Dump);
+		guardFunc;
 
 		Ar.Logf("TMapBase: %i items, %i hash slots", Pairs.Num(), HashCount);
 
@@ -1459,7 +1457,7 @@ INT Compare(const T& T1, const T& T2)
 template<typename T>
 void Sort(T* First, INT Num)
 {
-	guard(Sort);
+	guardFunc;
 
 	if(Num < 2)
 		return;

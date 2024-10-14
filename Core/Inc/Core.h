@@ -183,12 +183,19 @@ public:
 
 // Memory allocator.
 class CORE_API FMalloc{
+private:
+	// To prevent using the second DWORD param to Realloc which should always be 0
+	struct FZero{
+		FZero() : Val(0){}
+		DWORD Val;
+	};
+
 public:
 	void AddStat(FMemCount& Count, void* Ptr, DWORD Size, UBOOL IsUsed);
 
 	virtual void Init(){}
 	virtual void* Malloc(DWORD Size) = 0;
-	virtual void* Realloc(void* Ptr, DWORD Size, DWORD Slack) = 0;
+	virtual void* Realloc(void* Ptr, DWORD Size, FZero Zero = FZero()) = 0;
 	virtual void Free(void* Ptr) = 0;
 	virtual DWORD GetAllocationSize(void* Ptr) = 0;
 	virtual void TrackMemory(bool){}

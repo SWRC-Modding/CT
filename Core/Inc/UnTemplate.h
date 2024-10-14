@@ -519,7 +519,7 @@ protected:
 
 	void Deinit(INT Index, INT Count)
 	{
-		check(ArrayNum == 0 || IsAllocated());
+		checkSlow(ArrayNum == 0 || IsAllocated());
 
 		if(TTypeInfo<T>::NeedsDestructor())
 		{
@@ -532,23 +532,25 @@ protected:
 	{
 		guard(TArray::Realloc);
 
+		const INT AllocNum = Max(NewSize, Slack) * sizeof(T);
+
 		if(IsAllocated())
 		{
 			if(NewSize <= ArrayNum)
 			{
 				if(!bNoShrink && ArrayNum >= 0 && Align(NewSize * sizeof(T), 32) < Align(Num() * sizeof(T), 32))
-					Data = appRealloc(Data, NewSize * sizeof(T), Max(NewSize, Slack) * sizeof(T));
+					Data = appRealloc(Data, AllocNum * sizeof(T));
 			}
-			else if(Capacity() < Max(NewSize, Slack))
+			else if(Capacity() < AllocNum)
 			{
-				Data = appRealloc(Data, NewSize * sizeof(T), Slack * sizeof(T));
+				Data = appRealloc(Data, AllocNum * sizeof(T));
 			}
 		}
 		else
 		{
 			if(NewSize > 0 || Slack > 0)
 			{
-				void* Temp = appMalloc(Max(NewSize, Slack) * sizeof(T));
+				void* Temp = appMalloc(AllocNum * sizeof(T));
 
 				if(Data)
 					appMemcpy(Temp, Data, Min(ArrayNum, NewSize) * sizeof(T));
@@ -947,12 +949,15 @@ public:
 class FConfigString : public FString{
 public:
 	FConfigString() : Dirty(false){}
-	FConfigString(const TCHAR* Src) : FString(Src),
-	                                  Dirty(false){}
-	FConfigString(const FString& Src) : FString(Src),
-	                                    Dirty(false){}
-	FConfigString(const FConfigString& Src) : FString(Src),
-	                                          Dirty(Src.Dirty){}
+	FConfigString(const TCHAR* Src)
+		: FString(Src)
+		, Dirty(false){}
+	FConfigString(const FString& Src)
+		: FString(Src)
+		, Dirty(false){}
+	FConfigString(const FConfigString& Src)
+		: FString(Src)
+		, Dirty(Src.Dirty){}
 
 	bool Dirty;
 };
@@ -1113,8 +1118,9 @@ protected:
 		TK  Key;
 		TI  Value;
 
-		TPair(typename TTypeInfo<TK>::ConstInitType InKey, typename TTypeInfo<TI>::ConstInitType InValue) : Key(InKey),
-		                                                                                                    Value(InValue){}
+		TPair(typename TTypeInfo<TK>::ConstInitType InKey, typename TTypeInfo<TI>::ConstInitType InValue)
+			: Key(InKey)
+			, Value(InValue){}
 		TPair(){}
 
 		friend FArchive& operator<<(FArchive& Ar, TPair& F)
@@ -1129,7 +1135,7 @@ protected:
 
 	void Rehash()
 	{
-		Hash = static_cast<INT*>(appRealloc(Hash, HashCount * sizeof(INT), 0));
+		Hash = static_cast<INT*>(appRealloc(Hash, HashCount * sizeof(INT)));
 
 		for(INT i = 0; i < HashCount; ++i)
 			Hash[i] = INDEX_NONE;
@@ -1170,8 +1176,8 @@ protected:
 
 public:
 	TMapBase()
-	: Hash(NULL),
-	  HashCount(8)
+		: Hash(NULL)
+		, HashCount(8)
 	{
 		Rehash();
 	}

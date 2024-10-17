@@ -108,6 +108,13 @@ private:
 	URtx*                       Rtx;
 	UBOOL                       DepthCleared;
 
+	enum EIgnoreDrawCallFlags{
+		IgnoreDrawCall_Lightmap = 0x1,
+		IgnoreDrawCall_Material = 0x2,
+	};
+
+	BITFIELD                    IgnoreDrawCall;
+
 	void ClearMaterialFlags();
 	void DrawAnchorTriangle();
 };

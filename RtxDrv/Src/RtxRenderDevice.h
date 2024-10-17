@@ -43,7 +43,7 @@ private:
 
 class URtxRenderDevice : public UD3DRenderDevice, FRenderInterface{
 	DECLARE_CLASS(URtxRenderDevice,UD3DRenderDevice,CLASS_Config,RtxDrv)
-	static const TCHAR* StaticConfigName(){ return "RtxDrv"; }
+	static const TCHAR* StaticConfigName(){ return "Rtx"; }
 public:
 	void StaticConstructor();
 

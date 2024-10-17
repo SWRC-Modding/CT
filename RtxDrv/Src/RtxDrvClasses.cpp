@@ -10,11 +10,12 @@ IMPLEMENT_PACKAGE(RtxDrv)
 
 
 
+IMPLEMENT_CLASS(ARtxComponent);
+
 IMPLEMENT_CLASS(URtx);
 FNativeEntry<URtx> URtx::StaticNativeMap[] = {
 	MAP_NATIVE(CreateLight,0)
 	MAP_NATIVE(DestroyLight,0)
-	MAP_NATIVE(DestroyAllLights,0)
 	MAP_NATIVE(GetInstance,0)
 	{NULL,NULL}
 };

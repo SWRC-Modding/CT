@@ -67,6 +67,16 @@ UBOOL URtxRenderDevice::Exec(const TCHAR* Cmd, FOutputDevice& Ar)
 		else if(ParseCommand(&Cmd, "SAVECONFIG"))
 		{
 			Rtx->SaveConfig();
+
+			for(INT i = 0; i < Rtx->Components.Num(); ++i)
+			{
+				if(Rtx->Components[i])
+				{
+					Rtx->Components[i]->SaveConfig();
+					Rtx->Components[i]->OnSaveConfig();
+				}
+			}
+
 			return 1;
 		}
 	}
@@ -150,7 +160,7 @@ FRenderInterface* URtxRenderDevice::Lock(UViewport* Viewport, BYTE* HitData, INT
 	{
 		CurrentLevel = Level;
 		AnchorTriangleStream.Update(CurrentLevel ? (appStrihash(CurrentLevel->GetPathName()) / (FLOAT)MAXDWORD) : 0.0f);
-		Rtx->DestroyAllLights();
+		Rtx->LevelChanged(CurrentLevel);
 	}
 
 	LockedViewport = Viewport;

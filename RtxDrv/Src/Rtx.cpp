@@ -53,10 +53,24 @@ void URtx::DestroyLight(URtxLight* Light)
 		Light->bShouldBeDestroyed = 1;
 }
 
-void URtx::DestroyAllLights()
+void URtx::LevelChanged(ULevel* Level)
 {
 	DestroyedLights += Lights;
 	Lights.Empty();
+	Components.Empty();
+
+	for(INT i = 0; i < ComponentClasses.Num(); ++i)
+	{
+		UClass* ComponentClass = ComponentClasses[i];
+		if(ComponentClass)
+		{
+			ARtxComponent* Actor = static_cast<ARtxComponent*>(Level->SpawnActor(ComponentClass));
+			if(Actor)
+				Components.AddItem(Actor);
+			else
+				debugf("Failed to spawn Rtx component of class %s", ComponentClass->GetName());
+		}
+	}
 }
 
 void URtx::RenderLights()
@@ -109,12 +123,6 @@ void URtx::execDestroyLight(FFrame& Stack, void* Result)
 	P_GET_OBJECT(URtxLight, Light);
 	P_FINISH;
 	DestroyLight(Light);
-}
-
-void URtx::execDestroyAllLights(FFrame& Stack, void* Result)
-{
-	P_FINISH;
-	DestroyAllLights();
 }
 
 void URtx::execGetInstance(FFrame& Stack, void* Result)

@@ -17,9 +17,25 @@
 
 
 
+class RTXDRV_API ARtxComponent : public AActor
+{
+public:
+    class URtx* Rtx;
+    void OnSaveConfig()
+    {
+        DECLARE_NAME(OnSaveConfig);
+        ProcessEvent(NOnSaveConfig, NULL);
+    }
+    DECLARE_CLASS(ARtxComponent,AActor,0|CLASS_Transient,RtxDrv)
+    NO_DEFAULT_CONSTRUCTOR(ARtxComponent)
+};
+
+
 class RTXDRV_API URtx : public UObject
 {
 public:
+    TArrayNoInit<class UClass*> ComponentClasses;
+    TArrayNoInit<class ARtxComponent*> Components;
     FColor AnchorTriangleColor;
     BITFIELD bDrawAnchorTriangle:1 GCC_PACK(4);
     BITFIELD bCaptureMode:1;
@@ -30,14 +46,13 @@ public:
     TArrayNoInit<class URtxLight*> DestroyedLights;
     void execCreateLight(FFrame& Stack, void* Result);
     void execDestroyLight(FFrame& Stack, void* Result);
-    void execDestroyAllLights(FFrame& Stack, void* Result);
     void execGetInstance(FFrame& Stack, void* Result);
     DECLARE_CLASS(URtx,UObject,0|CLASS_Transient|CLASS_Config,RtxDrv)
     void Init();
     void Exit();
     URtxLight* CreateLight(bool ForceDefaultConstructed = false);
     void DestroyLight(URtxLight* Light);
-    void DestroyAllLights();
+    void LevelChanged(class ULevel* Level);
     void RenderLights();
     DECLARE_NATIVES(URtx)
 };
@@ -132,6 +147,7 @@ public:
 #if __STATIC_LINK
 
 #define AUTO_INITIALIZE_REGISTRANTS_RTXDRV \
+	ARtxComponent::StaticClass(); \
 	USolidColorMaterial::StaticClass(); \
 	URtx::StaticClass(); \
 	URtxLight::StaticClass(); \

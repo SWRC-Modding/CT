@@ -1,6 +1,6 @@
 class RtxFlashlight extends Object config(Rtx) hidecategories(Object);
 
-var() bool   bIsOn;
+var() bool bIsOn;
 
 struct FlashlightCone{
 	var() config float Angle;
@@ -73,13 +73,13 @@ function Init()
 
 	MainLight              = Rtx.CreateLight();
 	MainLight.Type         = RTXLIGHT_Sphere;
-	OuterLight.bEnabled    = false;
+	MainLight.bEnabled     = false;
 	MainLight.bUseShaping  = true;
 	MainLight.Update();
 
 	InnerLight             = Rtx.CreateLight();
 	InnerLight.Type        = RTXLIGHT_Sphere;
-	OuterLight.bEnabled    = false;
+	InnerLight.bEnabled    = false;
 	InnerLight.bUseShaping = true;
 	InnerLight.Update();
 }

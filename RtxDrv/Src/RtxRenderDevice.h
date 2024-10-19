@@ -115,6 +115,5 @@ private:
 
 	BITFIELD                    IgnoreDrawCall;
 
-	void ClearMaterialFlags();
 	void DrawAnchorTriangle();
 };

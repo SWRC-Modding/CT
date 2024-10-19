@@ -57,7 +57,7 @@ void URtx::LevelChanged(ULevel* Level)
 {
 	DestroyedLights += Lights;
 	Lights.Empty();
-	Components.Empty();
+	Components.Empty(); // Component actors aren't valid anymore now that the level has changed so just clear the old ones
 
 	for(INT i = 0; i < ComponentClasses.Num(); ++i)
 	{

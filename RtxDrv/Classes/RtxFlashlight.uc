@@ -1,6 +1,6 @@
 class RtxFlashlight extends Object config(Rtx) hidecategories(Object);
 
-var() bool bIsOn;
+var bool bIsOn;
 
 struct FlashlightCone{
 	var() config float Angle;

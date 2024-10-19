@@ -233,7 +233,17 @@ void URtxRenderDevice::Present(UViewport* Viewport)
 	Super::Present(Viewport);
 }
 
-void URtxRenderDevice::ClearMaterialFlags()
+static INT GetMaterialFlags(UMaterial* Material)
+{
+	return reinterpret_cast<INT*>(Material)[24] >> 2;
+}
+
+static INT SetMaterialFlags(UMaterial* Material, INT Flags)
+{
+	reinterpret_cast<INT*>(Material)[24] = (Flags << 2) | (reinterpret_cast<INT*>(Material)[24] & 0x3);
+}
+
+void ClearMaterialFlags()
 {
 	foreachobj(UMaterial, Material)
 		reinterpret_cast<INT*>(*Material)[24] = (reinterpret_cast<INT*>(*Material)[24] & 0x3);

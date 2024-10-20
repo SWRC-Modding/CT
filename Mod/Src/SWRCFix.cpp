@@ -1,5 +1,7 @@
 #include "Mod.h"
 #include "Editor.h"
+#include "Window.h"
+#include "CodeInjection.h"
 
 USWRCFix* USWRCFix::Instance = NULL;
 UBOOL USWRCFix::RenderingReady = 0;
@@ -172,7 +174,7 @@ static UBOOL __fastcall UnrealEdEngineExecOverride(UEngine* Self, DWORD Edx, con
 	{
 		TCHAR ClassName[NAME_SIZE];
 
-		if(Parse( Cmd, "NAME=", ClassName, NAME_SIZE ))
+		if(Parse(Cmd, "NAME=", ClassName, NAME_SIZE))
 		{
 			UClass* Class = NULL;
 
@@ -184,8 +186,8 @@ static UBOOL __fastcall UnrealEdEngineExecOverride(UEngine* Self, DWORD Edx, con
 					TCHAR PackageName[NAME_SIZE];
 
 					if(ParseObject<UClass>(Cmd, "PARENT=", Parent, ANY_PACKAGE) &&
-						 Parse( Cmd, "PACKAGE=", PackageName, NAME_SIZE))
-						 {
+						 Parse(Cmd, "PACKAGE=", PackageName, NAME_SIZE))
+					{
 						UPackage* Package = UObject::CreatePackage(NULL, PackageName);
 						Class = FindObject<UClass>(Package, ClassName, 1);
 
@@ -213,6 +215,43 @@ static UBOOL __fastcall UnrealEdEngineExecOverride(UEngine* Self, DWORD Edx, con
 /*
  * Fix initialization
  */
+
+void __fastcall VerifyWindowPosition(WWindow* Self, DWORD Edx)
+{
+	RECT WindowRect;
+
+	if(Self->hWnd && GetWindowRect(Self->hWnd, &WindowRect))
+	{
+		HMONITOR    Monitor     = MonitorFromRect(&WindowRect, MONITOR_DEFAULTTONEAREST);
+		MONITORINFO MonitorInfo = {sizeof(MONITORINFO)};
+
+		if(Monitor && GetMonitorInfoA(Monitor, &MonitorInfo))
+		{
+			const int MinimumVisible = GetSystemMetrics(SM_CYSIZE) + GetSystemMetrics(SM_CYEDGE) * 2;
+			const RECT& MonitorRect  = MonitorInfo.rcWork;
+
+			if(WindowRect.left > MonitorRect.right - MinimumVisible * 2)
+				WindowRect.left = MonitorRect.right - MinimumVisible * 2;
+			else if(WindowRect.right < MonitorRect.left)
+				WindowRect.left = MonitorRect.left;
+
+			if(WindowRect.top > MonitorRect.bottom - MinimumVisible)
+				WindowRect.top = MonitorRect.bottom - MinimumVisible;
+			else if(WindowRect.top < MonitorRect.top)
+				WindowRect.top = MonitorRect.top;
+
+			SetWindowPos(Self->hWnd, HWND_TOP, WindowRect.left, WindowRect.top, WindowRect.right, WindowRect.bottom, SWP_NOSENDCHANGING | SWP_NOZORDER | SWP_NOSIZE);
+		}
+		else
+		{
+			debugf("Failed to get monitor info");
+		}
+	}
+	else
+	{
+		debugf("Failed to get window rect");
+	}
+}
 
 void ImportPropertyOverrides()
 {
@@ -314,20 +353,10 @@ void USWRCFix::Init()
 
 		if(WindowModule)
 		{
-			BYTE* FuncAddress = reinterpret_cast<BYTE*>(GetProcAddress(WindowModule, "?VerifyPosition@WWindow@@QAEXXZ"));
+			void* FuncAddress = GetProcAddress(WindowModule, "?VerifyPosition@WWindow@@QAEXXZ");
 
 			if(FuncAddress)
-			{
-				DWORD OldProtect;
-				if(VirtualProtect(FuncAddress, 2, PAGE_EXECUTE_READWRITE, &OldProtect))
-				{
-					// RETN
-					FuncAddress[0] = 0xC3;
-					// NOP
-					FuncAddress[1] = 0x90;
-					VirtualProtect(FuncAddress, 2, PAGE_EXECUTE, &OldProtect);
-				}
-			}
+				RedirectFunction(FuncAddress, VerifyWindowPosition);
 		}
 	}
 

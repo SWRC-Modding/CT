@@ -21,7 +21,7 @@ public:
 	char              Padding1[16412]; // Padding
 	UBOOL             UsePrecaching;
 	UBOOL             UseTrilinear;
-	char              Padding2; // Padding
+	INT               Padding2; // Padding
 	UBOOL             UseVSync;
 	UBOOL             UseHardwareTL;
 	UBOOL             UseHardwareVS;
@@ -36,9 +36,9 @@ public:
 	UBOOL             DecompressTextures;
 	UBOOL             AvoidHitches;
 	UBOOL             OverrideDesktopRefreshRate;
-	char              Padding5[4]; // Padding
+	INT               Padding5; // Padding
 	INT               AdapterNumber;
-	char              Padding6[4]; // Padding
+	INT               Padding6; // Padding
 	INT               MaxPixelShaderVersion;
 	INT               LevelOfAnisotropy;
 	FLOAT             DetailTexMipBias;

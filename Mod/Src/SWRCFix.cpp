@@ -1,6 +1,7 @@
 #include "Mod.h"
 #include "Editor.h"
 #include "Window.h"
+#include "IpDrv.h"
 #include "CodeInjection.h"
 
 USWRCFix* USWRCFix::Instance = NULL;
@@ -300,24 +301,11 @@ void USWRCFix::Init()
 {
 	guardFunc;
 
-	// Import property overrides at the beginning
-
 	ImportPropertyOverrides();
-
-	// Common fixes
-
 	debugf("Applying common fixes");
 
 	/*
 	 * Fix 1:
-	 * Placing a FluidSurfaceInfo crashes because the constructor for FDynamicActor accesses its 'Skins' array which is empty by default.
-	 * To fix this we simply resize the property in the default actor so that it contains an element.
-	 */
-	if(GetDefault<AFluidSurfaceInfo>()->Skins.Num() == 0)
-		GetDefault<AFluidSurfaceInfo>()->Skins.Set(1);
-
-	/*
-	 * Fix 2:
 	 * Expanding a struct that contains a string property in an object property window causes a crash while the editor is checking for modified values
 	 * in order to highlight them.
 	 * This is fixed here by simply checking if there is a nested string property and not calling the original code if there is.
@@ -327,20 +315,7 @@ void USWRCFix::Init()
 	OriginalUClassIsDefaultValue = static_cast<bool(__fastcall*)(UObject*, DWORD, const FPropertyInstance&)>(PatchVTable(UClass::StaticClass(), 29, UClassIsDefaultValueOverride));
 
 	/*
-	 * Fix 3:
-	 * Creating a new HardwareShader via the texture browser crashes because the vertex and pixel shader variables are empty by default which causes the compilation to fail.
-	 * To fix it, we simply add a dummy shader implementation.
-	 */
-	UHardwareShader* DefaultHardwareShader = GetDefault<UHardwareShader>();
-
-	if(DefaultHardwareShader->VertexShaderText.Len() == 0)
-		DefaultHardwareShader->VertexShaderText = "vs.1.1\n\nmov oPos, v0\n";
-
-	if(DefaultHardwareShader->PixelShaderText.Len() == 0)
-		DefaultHardwareShader->PixelShaderText  = "ps.1.1\n\nmov r0, c0\n";
-
-	/*
-	 * Fix 4:
+	 * Fix 2:
 	 * It is not possible to have the UnrealEd window on a secondary monitor. It will always move back to the main monitor as soon as the mouse is clicked.
 	 * In addition, the window is offset by a couple pixels both horizontally and vertically if maximized.
 	 * This is caused by the "WWindow::VerifyPosition" function whose purpose it is to make sure the window is visible in case it is somewhere off-screen.
@@ -360,17 +335,13 @@ void USWRCFix::Init()
 		}
 	}
 
-	/*
-	 * Detect whether the game or editor is running
-	 */
-	HMODULE ExeModule = GetModuleHandleA(NULL);
-	bool IsUnrealEd = ExeModule && GetProcAddress(ExeModule, "autoclassUUnrealEdEngine") != NULL;
+	const bool IsUnrealEd = GetProcAddress(GetModuleHandleA(NULL), "autoclassUUnrealEdEngine") != NULL;
 
 	if(!IsUnrealEd) // Game specific fixes
 	{
 		debugf("Applying game fixes");
 		/*
-		 * Fix 5:
+		 * Fix 3:
 		 * VSync doesn't seem to work for most people with the d3d8 renderer. A very high frame rate causes the mouse pointer in the menu to be super
 		 * fast and the helmet shake caused by explosions is way stronger as well.
 		 * The engine has a mechanism to limit the fps to a specific value that is returned from UGameEngine::GetMaxTickRate.
@@ -380,7 +351,7 @@ void USWRCFix::Init()
 		OriginalUEngineGetMaxTickRate = static_cast<FLOAT(__fastcall*)(UEngine*, DWORD)>(PatchDllClassVTable("Engine.dll", "UGameEngine", "UObject", 49, EngineGetMaxTickRateOverride));
 
 		/*
-		 * Fix 6:
+		 * Fix 4:
 		 * By default RC only has a fixed set of screen resolutions.
 		 * To support any available resolution, EnumDisplaySettings is used and a list of supported resolutions is created and written to the config file.
 		 */
@@ -411,20 +382,26 @@ void USWRCFix::Init()
 		}
 
 		/*
-		 * Fix 7:
+		 * Fix 5:
 		 * This mods FOV options revealed an issue with how the game draws the weapon's reticles. It basically checks if the current FOV is lower than the default one
 		 * and only then draws the reticle. This way it is hidden when zoomed in. However if you set a very high custom FOV, this check will always fail and the reticle is always drawn.
 		 * To fix it, we hook the UEngine::Draw function and set the current weapon's reticle property to NULL if zoomed in which causes it to be hidden.
 		 * Here we also calculate the current FOV based on the aspect ratio.
 		 */
 		OriginalUEngineDraw = static_cast<void(__fastcall*)(UEngine*, DWORD, UViewport*, UBOOL, BYTE*, INT*)>(PatchDllClassVTable("Engine.dll", "UGameEngine", "UObject", 41, EngineDrawOverride));
+
+		/*
+		 * Fix 6:
+		 * The GameSpy master server is not available anymore so an option is added to provide an alternate master server address in the config.
+		 */
+		SetDefaultMasterServerAddress();
 	}
-	else
-	{ // Editor specific fixes
+	else // Editor specific fixes
+	{
 		debugf("Applying editor fixes");
 
 		/*
-		 * Fix 8:
+		 * Fix 7:
 		 * The editor loads all textures at startup which can consume a significant amount of memory.
 		 * It does so because initially there is no package selected for the texture browser and thus all textures are shown.
 		 * This is fixed by overriding the Exec function and checking for the command that intiializes the texture browser and providing a single package to be initially loaded.

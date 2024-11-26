@@ -63,7 +63,7 @@ inline GameSpyMgr* GetGameSpyMgr()
 {
 	const DWORD IpDrvBase = (DWORD)GetModuleHandleA("IpDrv.dll");
 	if(IpDrvBase)
-		return (GameSpyMgr*)(IpDrvBase + 0x1002AF2C);
+		return (GameSpyMgr*)(IpDrvBase + 0x0002AF2C);
 
 	return NULL;
 }

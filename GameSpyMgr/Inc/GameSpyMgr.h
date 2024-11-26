@@ -84,21 +84,20 @@ inline void SetGameSpyMasterServerAddress(const TCHAR* Address)
 	guardFunc;
 	check(Address);
 
-	static TCHAR Buffer[64]; // Max size of the buffer in GameSpyMgr.dll
+	const INT BufferSize = 64; // Max size of the buffer in GameSpyMgr.dll
 	const INT Len = appStrlen(Address);
 
-	if(Len >= ARRAY_COUNT(Buffer))
-		appErrorf("Master server address must not be longer than %d characters", ARRAY_COUNT(Buffer));
-
-	appStrcpy(Buffer, Address);
+	if(Len >= BufferSize)
+		appErrorf("Master server address must not be longer than %d characters", BufferSize);
 
 	const DWORD GameSpyMgrDllBase = (DWORD)GetModuleHandleA("GameSpyMgr.dll");
 	check(GameSpyMgrDllBase);
 
-	// SBOverrideMasterServer: Used by the client to fetch the server list
+	// char qr2_hostname[64]: Used by the server to register itself
+	char* Buffer = reinterpret_cast<char*>(GameSpyMgrDllBase + 0x0011F60);
+	appStrcpy(Buffer, Address);
+	// const char* SBOverrideMasterServer: Used by the client to fetch the server list
 	*reinterpret_cast<const char**>(GameSpyMgrDllBase + 0x00011F58) = Buffer;
-	// qr2_hostname: Used by the server to register itself
-	appStrcpy(reinterpret_cast<char*>(GameSpyMgrDllBase + 0x0011F60), Buffer);
 
 	unguard;
 }

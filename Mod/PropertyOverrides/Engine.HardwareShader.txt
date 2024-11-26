@@ -1,0 +1,2 @@
+VertexShaderText="vs.1.1  mov oPos, v0"
+PixelShaderText="ps.1.1  mov r0, c0"

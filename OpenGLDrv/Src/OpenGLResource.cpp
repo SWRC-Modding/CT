@@ -92,6 +92,10 @@ INT FOpenGLIndexBuffer::AddIndices(FIndexBuffer* IndexBuffer)
 		IndexBufferOffset = 0;
 		MapFlags |= GL_MAP_INVALIDATE_BUFFER_BIT;
 	}
+	else
+	{
+		MapFlags |= GL_MAP_INVALIDATE_RANGE_BIT;
+	}
 
 	void* Data = RenDev->glMapNamedBufferRange(EBO, IndexBufferOffset, AdditionalSize, MapFlags);
 
@@ -186,6 +190,10 @@ INT FOpenGLVertexStream::AddVertices(FVertexStream* VertexStream)
 	{
 		VertexBufferOffset = 0;
 		MapFlags |= GL_MAP_INVALIDATE_BUFFER_BIT;
+	}
+	else
+	{
+		MapFlags |= GL_MAP_INVALIDATE_RANGE_BIT;
 	}
 
 	void* Data = RenDev->glMapNamedBufferRange(VBO, VertexBufferOffset, AdditionalSize, MapFlags);

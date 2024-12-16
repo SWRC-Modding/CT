@@ -42,6 +42,13 @@ end:
 
 function PostBeginPlay()
 {
+	local VisionModeSniper VisionMode;
+
+	VisionMode = VisionModeSniper'FrameFx.VisionModes.VisionNight';
+	VisionMode.VisionShader = HardwareShader'FrameFX.VisionShaders.VisionShaderNormal';
+	VisionMode.TargetedOrganicShader = None;
+	VisionMode.TargetedMechanicalShader = None;
+
 	Super.PostBeginPlay();
 
 	if(PlayerFlashlight == None)

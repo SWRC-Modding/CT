@@ -72,7 +72,7 @@ public:
 			GWarn->Log(NAME_Critical, GErrorHist);
 			GLog->Flush();
 
-			if(GIsClient || GIsEditor)
+			if(!GIsUCC && (GIsClient || GIsEditor))
 				MessageBoxA(NULL, GErrorHist, "Critical Error", MB_OK | MB_ICONERROR | MB_APPLMODAL);
 		}catch(...){}
 	}

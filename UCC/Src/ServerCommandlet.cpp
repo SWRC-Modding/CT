@@ -1,4 +1,5 @@
 #include "Engine.h"
+#include "IpDrv.h"
 
 // Variables for ServerCommandlet
 
@@ -60,6 +61,8 @@ static DWORD WINAPI UpdateServerConsoleInput(PVOID)
 // Replacement for UServerCommandlet::Main since the one from Engine.dll crashes because it doesn't assign a value to GEngine
 INT UServerCommandletMain()
 {
+	SetDefaultMasterServerAddress();
+
 	FString Language;
 
 	if(GConfig->GetFString("Engine.Engine", "Language", Language, "System.ini"))

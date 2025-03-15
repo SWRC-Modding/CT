@@ -1,6 +1,6 @@
 #include "ModMPGame.h"
 #include "FOutputDeviceFile.h"
-#include "GameSpyMgr.h"
+#include "IpDrv.h"
 
 APlayerController* GetLocalPlayerController()
 {
@@ -251,7 +251,10 @@ void AAdminControl::execRestoreStats(FFrame& Stack, void* Result)
 void AAdminControl::execReleaseAllCDKeys(FFrame& Stack, void* Result)
 {
 	P_FINISH;
-	((GameSpyMgr*)0x1072AF2C)->ReleaseAllCDKey();
+
+	GameSpyMgr* GameSpy = GetGameSpyMgr();
+	if(GameSpy)
+		GameSpy->ReleaseAllCDKey();
 }
 
 /*

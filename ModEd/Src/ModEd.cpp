@@ -1,5 +1,6 @@
 #include "Editor.h"
 #include "Window.h"
+#include "CodeInjection.h"
 #include "FOutputDeviceWindowsError.h"
 #include "FOutputDeviceFile.h"
 #include "FConfigCacheIni.h"

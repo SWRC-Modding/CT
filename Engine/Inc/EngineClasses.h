@@ -3134,10 +3134,6 @@ public:
  * LineOfSightTrigger
  */
 
-struct ALineOfSightTrigger_eventPlayerSeesMe_Parms{
-	class APlayerController* P;
-};
-
 class ENGINE_API ALineOfSightTrigger : public ATriggers{
 public:
 	FLOAT MaxViewDist;

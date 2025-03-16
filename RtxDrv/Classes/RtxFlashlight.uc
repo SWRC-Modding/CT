@@ -47,15 +47,16 @@ function CalcLightPositionAndDirection(Pawn Pawn, out vector Position, out vecto
 		Direction = vector(ViewRotation);
 }
 
-function UpdateLight(Pawn Pawn, RtxLight Light, FlashlightCone Cone)
+function UpdateLight(Pawn Pawn, RtxLight Light, vector Position, vector Direction, FlashlightCone Cone)
 {
+	Light.Position                 = Position;
+	Light.Shaping.Direction        = Direction;
 	Light.Color                    = Cone.Color;
 	Light.Radiance                 = Cone.Radiance;
 	Light.Sphere.Radius            = Cone.Radius;
 	Light.Shaping.ConeAngleDegrees = Cone.Angle;
 	Light.Shaping.ConeSoftness     = Cone.Softness;
 
-	CalcLightPositionAndDirection(Pawn, Light.Position, Light.Shaping.Direction);
 	Light.Update();
 }
 
@@ -97,6 +98,9 @@ function Exit()
 
 function Update(Pawn Pawn, bool bOn)
 {
+	local vector LightPosition;
+	local vector LightDirection;
+
 	if(bOn != bIsOn)
 	{
 		OuterLight.bEnabled = bOn;
@@ -107,9 +111,10 @@ function Update(Pawn Pawn, bool bOn)
 
 	if(bIsOn && Pawn != None)
 	{
-		UpdateLight(Pawn, OuterLight, OuterCone);
-		UpdateLight(Pawn, MainLight, MainCone);
-		UpdateLight(Pawn, InnerLight, InnerCone);
+		CalcLightPositionAndDirection(Pawn, LightPosition, LightDirection);
+		UpdateLight(Pawn, OuterLight, LightPosition, LightDirection, OuterCone);
+		UpdateLight(Pawn, MainLight, LightPosition, LightDirection, MainCone);
+		UpdateLight(Pawn, InnerLight, LightPosition, LightDirection, InnerCone);
 	}
 }
 

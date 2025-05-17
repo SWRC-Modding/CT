@@ -104,95 +104,70 @@ simulated function EnableOption( int i )
 	OptionRightArrows[i].Blurred.DrawColor.B = 255;
 }
 
-simulated function int SensitivityToScale( float Sensitivity )
-{
-	local int Scale;
-
-	Scale = int(Sensitivity / 0.5);
-
-	return Scale;
-}
-
-simulated function float ScaleToSensitivity( int Scale )
-{
-	local float Sensitivity;
-
-	Sensitivity = float(Scale) * 0.5;
-
-	return Sensitivity;
-}
-
-simulated function Refresh()
+// Display custom values in the menu by inserting them into the option's Items array.
+// If value is represented by an existing option it is not inserted.
+simulated function SetOptionCurrentCustomFloat(out MenuButtonEnum Option, float value)
 {
 	local int i;
 	local float diff;
 	local float prevDiff;
-	local float fpsLimit;
 
-	i = SensitivityToScale( GetPlayerOwner().GetMouseSensitivity() );
-	Options[0].Current = i - 1;
+	for(i = 0; i < Option.Items.Length; ++i)
+	{
+		diff = float(Option.Items[i]) - value;
 
-	if ( GetPlayerOwner().GetInvertLook() )
-		Options[1].Current = 0;
-	else
-		Options[1].Current = 1;
-
-	// Look for current fps limit in list and get the index. If it is a custom one set via ini or console insert it into the options array.
-	// There will never be more than one custom value in the list at a time as this is only done to display the correct one even if it is not one of the default options.
-
-	fpsLimit = SWRCFix.FpsLimit;
-
-	for(i = 0; i < Options[9].Items.Length;  ++i){
-		diff = float(Options[9].Items[i]) - fpsLimit;
-
-		if(Abs(diff) <= 0.1) // Tolerance to deal with floating point precision
+		if(Abs(diff) <= 0.1)
 			break;
 
-		if(diff > 0.0 && prevDiff <= 0.0){
-			Options[9].Items.Insert(i, 1);
-			Options[9].Items[i] = string(fpsLimit);
-
+		if(diff > 0.0 && prevDiff <= 0.0)
+		{
+			Option.Items.Insert(i, 1);
+			Option.Items[i] = string(value) @ "(CUSTOM)";
 			break;
 		}
 
 		prevDiff = diff;
 	}
 
-	if(i == Options[9].Items.Length)
-		Options[9].Items[Options[9].Items.Length] = string(fpsLimit);
+	if(i == Option.Items.Length)
+		Option.Items[Option.Items.Length] = string(value) @ "(CUSTOM)";
 
-	Options[9].Current = i;
+	Option.Current = i;
+}
 
-	if(!SWRCFix.AutoFOV){
-		// Same procedure for FOV
-		for(i = 0; i < Options[10].Items.Length;  ++i){
-			diff = float(Options[10].Items[i]) - class'SWRCFix'.default.FOV;
+simulated function Refresh()
+{
+	// Mouse sensitivity
 
-			if(Abs(diff) <= 0.1) // Tolerance to deal with floating point precision
-				break;
+	SetOptionCurrentCustomFloat(Options[0], GetPlayerOwner().GetMouseSensitivity());
 
-			if(diff > 0.0 && prevDiff <= 0.0){
-				Options[10].Items.Insert(i, 1);
-				Options[10].Items[i] = string(class'SWRCFix'.default.FOV);
+	// Invert look
 
-				break;
-			}
+	if ( GetPlayerOwner().GetInvertLook() )
+		Options[1].Current = 0;
+	else
+		Options[1].Current = 1;
 
-			prevDiff = diff;
-		}
+	// Fps limit
 
-		if(i == Options[10].Items.Length){
-			SWRCFix.AutoFOV = true;
-			Options[10].Current = 0;
-		}else{
-			Options[10].Current = i;
-		}
-	}else{
+	SetOptionCurrentCustomFloat(Options[9], SWRCFix.FpsLimit);
+
+	// FOV
+
+	if(!SWRCFix.AutoFOV)
+		SetOptionCurrentCustomFloat(Options[10], SWRCFix.FOV);
+	else
 		Options[10].Current = 0;
-	}
+
+	// HudArms FOV Factor
 
 	Options[11].Current = SWRCFix.HudArmsFOVFactor * 10;
+
+	// View Shake
+
 	Options[12].Current = SWRCFix.ViewShake * 10;
+
+	// Single/Multi player dependent options
 
 	if ( !bInMultiplayer )
 	{
@@ -288,7 +263,7 @@ simulated function ChangeOption( int i, int Delta )
     switch( i )
     {
 		case 0:
-			GetPlayerOwner().SetMouseSensitivity( ScaleToSensitivity(Options[i].Current + 1) );
+			GetPlayerOwner().SetMouseSensitivity( float(Options[i].Items[Options[i].Current]) );
 			GetPlayerOwner().SavePlayerInputConfig();
 			break;
 
@@ -360,10 +335,13 @@ simulated function ChangeOption( int i, int Delta )
 			break;
 
 		case 10:
-			if(Options[10].Current != 0){
-				SWRCFix.FOV = float(Options[10].Items[Options[10].Current]); // The FOV is automatically set if it changed
+			if(Options[10].Current != 0)
+			{
+				SWRCFix.FOV = float(Options[10].Items[Options[10].Current]);
 				SWRCFix.AutoFOV = false;
-			}else{
+			}
+			else
+			{
 				SWRCFix.AutoFOV = true;
 			}
 			break;
@@ -457,7 +435,7 @@ defaultproperties
      OptionLabels(10)=(Text="FIELD OF VIEW")
      OptionLabels(11)=(Text="WEAPON FOV FACTOR")
      OptionLabels(12)=(Text="VIEW SHAKE")
-     Options(0)=(Items=("1","2","3","4","5","6","7","8","9","10"),Blurred=(PosX=0.77375,PosY=0.12,ScaleX=0.6,ScaleY=0.6),BackgroundBlurred=(PosX=0.77375,PosY=0.12,ScaleX=0.26,ScaleY=0.02666),OnLeft="OnLeft",OnRight="OnRight",Pass=2,Style="ButtonEnumStyle1")
+     Options(0)=(Items=("0.1","0.2","0.3","0.4","0.5","0.6","0.7","0.8","0.9","1.0","1.1","1.2","1.3","1.4","1.5","1.6","1.7","1.8","1.9","2.0"),Blurred=(PosX=0.77375,PosY=0.12,ScaleX=0.6,ScaleY=0.6),BackgroundBlurred=(PosX=0.77375,PosY=0.12,ScaleX=0.26,ScaleY=0.02666),OnLeft="OnLeft",OnRight="OnRight",Pass=2,Style="ButtonEnumStyle1")
      Options(1)=(Items=("YES","NO"),Blurred=(PosY=0.16),BackgroundBlurred=(PosY=0.16))
      Options(2)=(Items=("ON","OFF"))
      Options(3)=(Items=("ON","OFF"))

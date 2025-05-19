@@ -32,6 +32,12 @@ void URtx::Exit()
 	appMemzero(&GRemixApi, sizeof(GRemixApi));
 }
 
+void URtx::SetConfigVariable(const TCHAR* Key, const TCHAR* Value)
+{
+	if(GRemixApiInitialized)
+		GRemixApi.SetConfigVariable(Key, Value);
+}
+
 URtxLight* URtx::CreateLight(bool ForceDefaultConstructed)
 {
 	URtxLight* Light;
@@ -135,6 +141,13 @@ void URtx::execGetInstance(FFrame& Stack, void* Result)
 		*static_cast<URtx**>(Result) = RenDev->GetRtxInterface();
 }
 
+void URtx::execSetConfigVariable(FFrame& Stack, void* Result)
+{
+	P_GET_STR(Key);
+	P_GET_STR(Value);
+	P_FINISH;
+	SetConfigVariable(*Key, *Value);
+}
 
 void URtxLight::execUpdate(FFrame& Stack, void* Result)
 {

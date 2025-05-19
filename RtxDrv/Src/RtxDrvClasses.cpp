@@ -16,6 +16,7 @@ IMPLEMENT_CLASS(URtx);
 FNativeEntry<URtx> URtx::StaticNativeMap[] = {
 	MAP_NATIVE(CreateLight,0)
 	MAP_NATIVE(DestroyLight,0)
+	MAP_NATIVE(SetConfigVariable,0)
 	MAP_NATIVE(GetInstance,0)
 	{NULL,NULL}
 };

@@ -46,10 +46,12 @@ public:
     TArrayNoInit<class URtxLight*> DestroyedLights;
     void execCreateLight(FFrame& Stack, void* Result);
     void execDestroyLight(FFrame& Stack, void* Result);
+    void execSetConfigVariable(FFrame& Stack, void* Result);
     void execGetInstance(FFrame& Stack, void* Result);
     DECLARE_CLASS(URtx,UObject,0|CLASS_Transient|CLASS_Config,RtxDrv)
     void Init();
     void Exit();
+    void SetConfigVariable(const TCHAR* Key, const TCHAR* Value);
     URtxLight* CreateLight(bool ForceDefaultConstructed = false);
     void DestroyLight(URtxLight* Light);
     void LevelChanged(class ULevel* Level);

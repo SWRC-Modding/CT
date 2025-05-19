@@ -16,6 +16,7 @@ var const editconst      array<RtxLight> DestroyedLights; // Keep destroyed ligh
 
 native final function RtxLight CreateLight();
 native final function DestroyLight(RtxLight Light);
+native final function SetConfigVariable(string Key, string Value);
 
 native static final function Rtx GetInstance();
 
@@ -23,6 +24,7 @@ cpptext
 {
     void Init();
     void Exit();
+    void SetConfigVariable(const TCHAR* Key, const TCHAR* Value);
     URtxLight* CreateLight(bool ForceDefaultConstructed = false);
     void DestroyLight(URtxLight* Light);
     void LevelChanged(class ULevel* Level);

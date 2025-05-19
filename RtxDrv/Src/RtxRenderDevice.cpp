@@ -58,6 +58,20 @@ UBOOL URtxRenderDevice::Exec(const TCHAR* Cmd, FOutputDevice& Ar)
 			P->Show(1);
 			return 1;
 		}
+		else if(ParseCommand(&Cmd, "SET"))
+		{
+			FString Key = ParseToken(Cmd, 0);
+			FString Value = ParseToken(Cmd, 0);
+
+			if(Key.Len() == 0)
+				Ar.Log("Missing variable name");
+			else if(Value.Len() == 0)
+				Ar.Log("Missing value");
+			else
+				Rtx->SetConfigVariable(*Key, *Value);
+
+			return 1;
+		}
 		else if(ParseCommand(&Cmd, "CREATELIGHT"))
 		{
 			APlayerController* PC    = GEngine->Client->Viewports[0]->Actor;

@@ -18,10 +18,39 @@ struct IDirect3DDevice8;
 class D3DDRV_API UD3DRenderDevice : public URenderDevice{
 	DECLARE_CLASS(UD3DRenderDevice,URenderDevice,CLASS_Config,D3DDrv);
 public:
-	char Padding1[17920];
+	char              Padding1[16412]; // Padding
+	UBOOL             UsePrecaching;
+	UBOOL             UseTrilinear;
+	INT               Padding2; // Padding
+	UBOOL             UseVSync;
+	UBOOL             UseHardwareTL;
+	UBOOL             UseHardwareVS;
+	UBOOL             UseCubemaps;
+	char              PADDING3[16]; // Padding
+	UBOOL             UseTripleBuffering;
+	UBOOL             ReduceMouseLag;
+	UBOOL             UseXBoxFSAA;
+	char              Padding4[16]; // Padding
+	UBOOL             CheckForOverflow;
+	UBOOL             UseNPatches;
+	UBOOL             DecompressTextures;
+	UBOOL             AvoidHitches;
+	UBOOL             OverrideDesktopRefreshRate;
+	INT               Padding5; // Padding
+	INT               AdapterNumber;
+	INT               Padding6; // Padding
+	INT               MaxPixelShaderVersion;
+	INT               LevelOfAnisotropy;
+	FLOAT             DetailTexMipBias;
+	FLOAT             DefaultTexMipBias;
+	FLOAT             TesselationFactor;
+	FLOAT             DesiredRefreshRate;
+	INT               VideoResetAttempts;
+	UBOOL             StateCachingDisabled;
+	char              Padding7[1370]; // Padding
 	IDirect3D8*       Direct3D8;
 	IDirect3DDevice8* Direct3DDevice8;
-	char Padding2[47868];
+	char              Padding8[47868]; // Padding
 
 	//Overrides
 	virtual UBOOL Exec(const TCHAR* Cmd, FOutputDevice& Ar);

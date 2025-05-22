@@ -2,7 +2,8 @@
 #include "RtxRenderDevice.h"
 
 static bool               GRemixApiInitialized = false;
-static remixapi_Interface GRemixApi;
+static remixapi_Interface GRemixApi            = {0};
+static HMODULE            GRemixDllHandle      = NULL;
 
 void URtx::Init()
 {
@@ -12,10 +13,9 @@ void URtx::Init()
 
 		wchar_t DllPathBuffer[MAX_PATH];
 		FString DllPath = FStringTemp(appBaseDir()) * "d3d9.dll";
-		HMODULE DllHandle;
 		MultiByteToWideChar(CP_ACP, 0, *DllPath, -1, DllPathBuffer, ARRAY_COUNT(DllPathBuffer));
 
-		remixapi_ErrorCode Error = remixapi_lib_loadRemixDllAndInitialize(DllPathBuffer, &GRemixApi, &DllHandle) ;
+		remixapi_ErrorCode Error = remixapi_lib_loadRemixDllAndInitialize(DllPathBuffer, &GRemixApi, &GRemixDllHandle) ;
 		GRemixApiInitialized     = Error == REMIXAPI_ERROR_CODE_SUCCESS;
 
 		if(!GRemixApiInitialized)
@@ -28,8 +28,12 @@ void URtx::Init()
 
 void URtx::Exit()
 {
-	GRemixApiInitialized = false;
-	appMemzero(&GRemixApi, sizeof(GRemixApi));
+	if(GRemixApiInitialized)
+	{
+		remixapi_lib_shutdownAndUnloadRemixDll(&GRemixApi, GRemixDllHandle);
+		GRemixApiInitialized = false;
+		GRemixDllHandle = NULL;
+	}
 }
 
 void URtx::SetConfigVariable(const TCHAR* Key, const TCHAR* Value)

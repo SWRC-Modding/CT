@@ -72,6 +72,33 @@ static WWindow* GetMainWindow()
 	return *reinterpret_cast<WWindow**>(0x10FE39D4);
 }
 
+static WNDPROC OriginalMainWindowProc = NULL;
+
+LRESULT CALLBACK MainWindowProcOverride(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)
+{
+	if(Msg == WM_INPUT)
+	{
+		RAWINPUT RawInput;
+		UINT RawInputSize = sizeof(RawInput);
+
+		if(GET_RAWINPUT_CODE_WPARAM(wParam) != RIM_INPUT)
+			return 0;
+
+		if(GetRawInputData((HRAWINPUT)(lParam), RID_INPUT, &RawInput, &RawInputSize, sizeof(RAWINPUTHEADER)) != (UINT)-1)
+		{
+			if(RawInput.header.dwType == RIM_TYPEMOUSE)
+			{
+
+			}
+		}
+
+		DefWindowProcA(hWnd, Msg, wParam, lParam);
+		return 0;
+	}
+
+	return OriginalMainWindowProc(hWnd, Msg, wParam, lParam);
+}
+
 static void(__fastcall*OriginalUUnrealEdEngineTick)(UEditorEngine*, DWORD, FLOAT) = NULL;
 
 /*
@@ -112,6 +139,22 @@ static void __fastcall UnrealEdEngineTickOverride(UEditorEngine* Self, DWORD Edx
 		SendMessageA(GetMainWindow()->hWnd, WM_SETICON, ICON_SMALL, (LPARAM)hIcon);
 		SendMessageA(GetMainWindow()->hWnd, WM_SETICON, ICON_BIG, (LPARAM)hIcon);
 	}
+
+	OriginalMainWindowProc = reinterpret_cast<WNDPROC>(GetWindowLongA(GetMainWindow()->hWnd, GWLP_WNDPROC));
+	SetWindowLongA(GetMainWindow()->hWnd, GWLP_WNDPROC, reinterpret_cast<LONG>(MainWindowProcOverride));
+
+#ifndef HID_USAGE_PAGE_GENERIC
+#define HID_USAGE_PAGE_GENERIC  ((USHORT)0x01)
+#define HID_USAGE_GENERIC_MOUSE ((USHORT)0x02)
+#endif
+
+	RAWINPUTDEVICE RawInput;
+	RawInput.usUsagePage = HID_USAGE_PAGE_GENERIC;
+	RawInput.usUsage     = HID_USAGE_GENERIC_MOUSE;
+	RawInput.dwFlags     = 0;
+	RawInput.hwndTarget  = GetMainWindow()->hWnd;
+
+	RegisterRawInputDevices(&RawInput, 1, sizeof(RAWINPUTDEVICE));
 
 	// Restore original tick function now that the initial setup is done.
 	PatchVTable(Self, 32, OriginalUUnrealEdEngineTick);
@@ -168,5 +211,6 @@ DLL_EXPORT void ModEdInit(const TCHAR* InPackage, const TCHAR* InCmdLine, FOutpu
 
 	InitSWRCFix();
 
+	// Hook UUnrealEdEngine::Tick for initialization
 	OriginalUUnrealEdEngineTick = static_cast<void(__fastcall*)(UEditorEngine*, DWORD, FLOAT)>(PatchDllClassVTable(*(FString(appPackage()) + ".exe"), "UUnrealEdEngine", "UObject", 32, UnrealEdEngineTickOverride));
 }

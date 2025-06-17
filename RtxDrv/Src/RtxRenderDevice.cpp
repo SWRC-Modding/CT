@@ -2,8 +2,11 @@
 #include "RtxDrvPrivate.h"
 #include "Window.h"
 #include "Editor.h"
+#include "CodeInjection.h"
 
 IMPLEMENT_CLASS(URtxRenderDevice)
+
+static URtxRenderDevice* GRtxRenDev = NULL;
 
 static ULevel* GetLevel()
 {
@@ -14,6 +17,23 @@ static ULevel* GetLevel()
 		return static_cast<UEditorEngine*>(GEngine)->Level;
 
 	return NULL;
+}
+
+typedef FConvexVolume&(__fastcall*FPlayerSceneNodeGetViewFrustum)(FLevelSceneNode* Self, DWORD Edx, FConvexVolume& Result);
+
+static FPlayerSceneNodeGetViewFrustum OriginalFPlayerSceneNodeGetViewFrustum = NULL;
+
+static FConvexVolume& __fastcall FPlayerSceneNodeGetViewFrustumOverride(FPlayerSceneNode* Self, DWORD Edx, FConvexVolume& Result)
+{
+	OriginalFPlayerSceneNodeGetViewFrustum(Self, Edx, Result);
+
+	if(GRtxRenDev && GRtxRenDev->GetRtxInterface()->bDisableFrustumCulling)
+	{
+		for(INT i = 0; i < 5; i++)
+			Result.BoundingPlanes[i].W += 10000.0f;
+	}
+
+	return Result;
 }
 
 // static INT GetMaterialFlags(UMaterial* Material)
@@ -122,6 +142,8 @@ void URtxRenderDevice::StaticConstructor()
 
 UBOOL URtxRenderDevice::Init()
 {
+	GRtxRenDev = this;
+
 	// Init SWRCFix if it exists. Hacky but RenderDevice is always loaded at startup...
 	HMODULE ModDLL = LoadLibraryA("Mod.dll");
 
@@ -131,6 +153,14 @@ UBOOL URtxRenderDevice::Init()
 
 		if(InitSWRCFix)
 			InitSWRCFix();
+	}
+
+	static bool bCodeInjected = false;
+	if(!bCodeInjected)
+	{
+		OriginalFPlayerSceneNodeGetViewFrustum = reinterpret_cast<FPlayerSceneNodeGetViewFrustum>(
+			PatchDllClassVTable("Engine.dll", "FPlayerSceneNode", NULL, 10, FPlayerSceneNodeGetViewFrustumOverride));
+		bCodeInjected = true;
 	}
 
 	ClearMaterialFlags();
@@ -154,6 +184,7 @@ void URtxRenderDevice::Exit(UViewport* Viewport)
 	delete Rtx;
 	Rtx = NULL;
 	Super::Exit(Viewport);
+	GRtxRenDev = NULL;
 }
 
 UBOOL URtxRenderDevice::SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL Fullscreen, INT ColorBytes, UBOOL bSaveSize)
@@ -190,6 +221,16 @@ FRenderInterface* URtxRenderDevice::Lock(UViewport* Viewport, BYTE* HitData, INT
 	{
 		CurrentLevel = Level;
 		AnchorTriangleStream.Update(CurrentLevel ? (appStrihash(CurrentLevel->GetPathName()) / (FLOAT)MAXDWORD) : 0.0f);
+
+		if(Rtx->bDisableSkyZones)
+		{
+			foreach(AllActors, AZoneInfo, Info, CurrentLevel)
+			{
+				Info->SkyZone = NULL;
+				Info->bUseSkyDome = 0;
+			}
+		}
+
 		Rtx->LevelChanged(CurrentLevel);
 	}
 

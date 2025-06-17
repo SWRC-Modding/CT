@@ -7,6 +7,8 @@ var(General)  config     color                         AnchorTriangleColor;
 var(General)  config     bool                          bDrawAnchorTriangle;
 var(General)  config     bool                          bCaptureMode;
 var(General)  config     bool                          bReplaceHardwareShaderMaterials;
+var(General)  config     bool                          bDisableFrustumCulling;
+var(General)  config     bool                          bDisableSkyZones;
 
 var(Lighting) config     bool                          bEnableD3DLights;
 var(Lighting) config     bool                          bEnableLights;
@@ -36,6 +38,8 @@ defaultproperties
 	AnchorTriangleColor=(R=255,G=255,B=0,A=255)
 	bDrawAnchorTriangle=True
 	bReplaceHardwareShaderMaterials=True
+	bDisableFrustumCulling=True
+	bDisableSkyZones=True
 	bEnableD3DLights=False
 	bEnableLights=True
 	ComponentClasses(0)=class'RtxFlashlightComponent'

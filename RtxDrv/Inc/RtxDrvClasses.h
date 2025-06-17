@@ -40,6 +40,8 @@ public:
     BITFIELD bDrawAnchorTriangle:1 GCC_PACK(4);
     BITFIELD bCaptureMode:1;
     BITFIELD bReplaceHardwareShaderMaterials:1;
+    BITFIELD bDisableFrustumCulling:1;
+    BITFIELD bDisableSkyZones:1;
     BITFIELD bEnableD3DLights:1;
     BITFIELD bEnableLights:1;
     TArrayNoInit<class URtxLight*> Lights GCC_PACK(4);

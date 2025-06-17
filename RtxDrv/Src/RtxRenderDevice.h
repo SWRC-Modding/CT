@@ -57,7 +57,7 @@ public:
 	virtual void Unlock(FRenderInterface* RI);
 	virtual void Present(UViewport* Viewport);
 
-	URtx* GetRtxInterface(){ return Rtx; }
+	URtx* GetRtxInterface(){ checkSlow(Rtx); return Rtx; }
 
 	// FRenderInterface
 

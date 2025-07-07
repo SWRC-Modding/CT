@@ -554,7 +554,7 @@ public:
 	FORCEINLINE FStateFrame* GetStateFrame(){ return _StateFrame; }
 };
 
-#define DECLARE_NAME(name) static FName N##name(#name)
+#define DECLARE_NAME(name) static FName N##name(#name, FNAME_Intrinsic)
 
 /*----------------------------------------------------------------------------
 	Core templates.

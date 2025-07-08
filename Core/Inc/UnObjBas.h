@@ -43,11 +43,9 @@ enum EPackageFlags{
 //
 // Internal enums.
 //
-enum ENativeConstructor  { EC_NativeConstructor };
-enum EStaticConstructor  { EC_StaticConstructor };
-enum EInternal           { EC_Internal };
-enum ECppProperty        { EC_CppProperty };
-enum EInPlaceConstructor { EC_InPlaceConstructor };
+enum ENativeConstructor{ EC_NativeConstructor };
+enum EInternal         { EC_Internal };
+enum ECppProperty      { EC_CppProperty };
 
 /*
  * Result of GotoState.
@@ -419,8 +417,6 @@ public:
 	UObject();
 	UObject(const UObject& Src);
 	UObject(ENativeConstructor, UClass* InClass, const TCHAR* InName, const TCHAR* InPackageName, DWORD InFlags);
-	UObject(EStaticConstructor, const TCHAR* InName, const TCHAR* InPackageName, DWORD InFlags);
-	UObject(EInPlaceConstructor, UClass* InClass, UObject* InOuter, FName InName, DWORD InFlags);
 	UObject& operator=(const UObject&);
 	void StaticConstructor();
 	static void InternalConstructor(void* X);

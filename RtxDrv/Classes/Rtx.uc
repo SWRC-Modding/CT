@@ -3,18 +3,21 @@ class Rtx extends Object native transient config(Rtx) hidecategories(Object, Non
 var(Components)  config                      array<class<RtxComponent> > ComponentClasses;
 var(Components)  native editconst editinline array<RtxComponent>         Components; // Must be native so the property is excluded from gc. The array is cleared in native code when the level changes.
 
-var(General)  config     color                         AnchorTriangleColor;
-var(General)  config     bool                          bDrawAnchorTriangle;
-var(General)  config     bool                          bCaptureMode;
-var(General)  config     bool                          bReplaceHardwareShaderMaterials;
-var(General)  config     bool                          bDisableFrustumCulling;
-var(General)  config     bool                          bDisableSkyZones;
+// Most of these properties actually belong in RtxRenderDevice but can't be added there because the class is too large for 16 bit property offsets
 
-var(Lighting) config     bool                          bEnableD3DLights;
-var(Lighting) config     bool                          bEnableLights;
-var(Lighting) const editinline array<RtxLight>         Lights;
+var(General)  config           color           AnchorTriangleColor;
+var(General)  config           bool            bDrawAnchorTriangle;
+var(General)  config           bool            bCaptureMode;
+var(General)  config           bool            bReplaceHardwareShaderMaterials;
+var(General)  config           bool            bDisableFrustumCulling;
+var(General)  config           bool            bDisableSkyZones;
 
-var const editconst      array<RtxLight> DestroyedLights; // Keep destroyed lights around to reduce overhead of creating/destroying short lived lights
+var(Lighting) config           bool            bEnableD3DLights;
+var(Lighting) config           bool            bEnableLights;
+var(Lighting) const editinline array<RtxLight> Lights;
+
+// Keep destroyed lights around to reduce overhead of creating/destroying short lived lights
+var const editconst array<RtxLight> DestroyedLights;
 
 native final function RtxLight CreateLight();
 native final function DestroyLight(RtxLight Light);
@@ -43,4 +46,5 @@ defaultproperties
 	bEnableD3DLights=False
 	bEnableLights=True
 	ComponentClasses(0)=class'RtxFlashlightComponent'
+	ComponentClasses(1)=class'RtxParticleComponent'
 }

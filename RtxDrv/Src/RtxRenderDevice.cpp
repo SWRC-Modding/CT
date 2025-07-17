@@ -203,8 +203,44 @@ void URtxRenderDevice::Flush(UViewport* Viewport)
 	Super::Flush(Viewport);
 }
 
+/*
+ * Check for a level change and notify the RTX interface so it can recreate the components.
+ * This is the most reliable way to do it that I've been able to find.
+ * UGameEngine::GLevel does not always change when restarting the level so the additional check for a non-empty travel URL is also needed.
+ */
+void URtxRenderDevice::CheckForLevelChange(UViewport* Viewport)
+{
+	static bool    bPendingLevel = false;
+	static ULevel* Level         = NULL;
+
+	if(Viewport && Viewport->TravelURL.Len() > 0)
+	{
+		bPendingLevel = true;
+	}
+	else if(bPendingLevel || Level != GetLevel())
+	{
+		bPendingLevel = false;
+		Level = GetLevel();
+
+		AnchorTriangleStream.Update(appStrihash(Level->GetPathName()) / (FLOAT)MAXDWORD);
+
+		if(Rtx->bDisableSkyZones)
+		{
+			foreach(AllActors, AZoneInfo, Info, Level)
+			{
+				Info->SkyZone = NULL;
+				Info->bUseSkyDome = 0;
+			}
+		}
+
+		Rtx->LevelChanged(Level);
+	}
+}
+
 FRenderInterface* URtxRenderDevice::Lock(UViewport* Viewport, BYTE* HitData, INT* HitSize)
 {
+	CheckForLevelChange(Viewport);
+
 	if(Rtx->bCaptureMode)
 		Viewport->Precaching = 1;
 
@@ -214,25 +250,6 @@ FRenderInterface* URtxRenderDevice::Lock(UViewport* Viewport, BYTE* HitData, INT
 
 	if(!D3D)
 		return NULL;
-
-	ULevel* Level = GetLevel();
-
-	if(Level != CurrentLevel)
-	{
-		CurrentLevel = Level;
-		AnchorTriangleStream.Update(CurrentLevel ? (appStrihash(CurrentLevel->GetPathName()) / (FLOAT)MAXDWORD) : 0.0f);
-
-		if(Rtx->bDisableSkyZones)
-		{
-			foreach(AllActors, AZoneInfo, Info, CurrentLevel)
-			{
-				Info->SkyZone = NULL;
-				Info->bUseSkyDome = 0;
-			}
-		}
-
-		Rtx->LevelChanged(CurrentLevel);
-	}
 
 	LockedViewport = Viewport;
 

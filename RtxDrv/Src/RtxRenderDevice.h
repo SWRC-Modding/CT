@@ -102,7 +102,6 @@ public:
 
 private:
 	UViewport*                  LockedViewport;
-	ULevel*                     CurrentLevel;
 	FAnchorTriangleVertexStream AnchorTriangleStream;
 	FRenderInterface*           D3D;
 	URtx*                       Rtx;
@@ -115,5 +114,6 @@ private:
 
 	BITFIELD                    IgnoreDrawCall;
 
+	void CheckForLevelChange(UViewport* Viewport);
 	void DrawAnchorTriangle();
 };

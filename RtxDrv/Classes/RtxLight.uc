@@ -1,4 +1,4 @@
-class RtxLight extends Object within Rtx native transient hidecategories(Object, None);
+class RtxLight extends Object native transient hidecategories(Object, None);
 
 var(Common) enum ERtxLightType{
 	RTXLIGHT_Sphere,
@@ -57,6 +57,7 @@ var(DistantLight) struct RtxDistantLight{
 var const editconst noexport int Handle;
 
 native final function Update(); // Must be called whenever a property value has changed
+native final function Render(); // Only needs to be called manually for lights that were not created with Rtx::CreateLight
 
 cpptext
 {
@@ -65,6 +66,7 @@ cpptext
     virtual void Destroy();
     virtual void PostEditChange(){ Super::PostEditChange(); Update(); }
     void Update();
+    void Render();
     void DestroyHandle();
 }
 

@@ -25,6 +25,7 @@ LINK_NATIVES(URtx);
 IMPLEMENT_CLASS(URtxLight);
 FNativeEntry<URtxLight> URtxLight::StaticNativeMap[] = {
 	MAP_NATIVE(Update,0)
+	MAP_NATIVE(Render,0)
 	{NULL,NULL}
 };
 LINK_NATIVES(URtxLight);

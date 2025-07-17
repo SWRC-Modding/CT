@@ -13,7 +13,6 @@ var(General)  config           bool            bDisableFrustumCulling;
 var(General)  config           bool            bDisableSkyZones;
 
 var(Lighting) config           bool            bEnableD3DLights;
-var(Lighting) config           bool            bEnableLights;
 var(Lighting) const editinline array<RtxLight> Lights;
 
 // Keep destroyed lights around to reduce overhead of creating/destroying short lived lights
@@ -44,7 +43,6 @@ defaultproperties
 	bDisableFrustumCulling=True
 	bDisableSkyZones=True
 	bEnableD3DLights=False
-	bEnableLights=True
 	ComponentClasses(0)=class'RtxFlashlightComponent'
 	ComponentClasses(1)=class'RtxParticleComponent'
 }

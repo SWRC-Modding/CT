@@ -65,6 +65,8 @@ void URtx::DestroyLight(URtxLight* Light)
 
 void URtx::LevelChanged(ULevel* Level)
 {
+	debugf("Level changed - Initializing RTX components");
+
 	DestroyedLights += Lights;
 	Lights.Empty();
 	Components.Empty(); // Component actors aren't valid anymore now that the level has changed so just clear the old ones
@@ -74,20 +76,20 @@ void URtx::LevelChanged(ULevel* Level)
 		UClass* ComponentClass = ComponentClasses[i];
 		if(ComponentClass)
 		{
+			debugf("Spawning RTX component: %s", ComponentClass->GetName());
+
 			ARtxComponent* Actor = static_cast<ARtxComponent*>(Level->SpawnActor(ComponentClass));
+
 			if(Actor)
 				Components.AddItem(Actor);
 			else
-				debugf("Failed to spawn Rtx component of class %s", ComponentClass->GetName());
+				debugf("Failed to spawn RTX component of class %s", ComponentClass->GetName());
 		}
 	}
 }
 
 void URtx::RenderLights()
 {
-	if(!bEnableLights)
-		return;
-
 	for(INT i = 0; i < Lights.Num(); ++i)
 	{
 		URtxLight* Light = Lights[i];
@@ -107,18 +109,11 @@ void URtx::RenderLights()
 
 		if(!Light) // NULL entry can happen if a light was added via the property window UI. In that case just create it
 		{
-			Light = new(this) URtxLight;
+			Light = CreateLight(true);
 			Lights[i] = Light;
 		}
 
-		if(Light->bEnabled)
-		{
-			if(!Light->Handle)
-				Light->Update();
-
-			if(Light->Handle)
-				GRemixApi.DrawLightInstance(Light->Handle);
-		}
+		Light->Render();
 	}
 }
 
@@ -159,6 +154,12 @@ void URtxLight::execUpdate(FFrame& Stack, void* Result)
 	Update();
 }
 
+void URtxLight::execRender(FFrame& Stack, void* Result)
+{
+	P_FINISH;
+	Render();
+}
+
 void URtxLight::Destroy()
 {
 	DestroyHandle();
@@ -195,7 +196,7 @@ void URtxLight::Update()
 	{
 	case RTXLIGHT_Sphere:
 		{
-			remixapi_LightInfoSphereEXT SphereInfo = {REMIXAPI_STRUCT_TYPE_LIGHT_INFO_SPHERE_EXT};
+			static remixapi_LightInfoSphereEXT SphereInfo = {REMIXAPI_STRUCT_TYPE_LIGHT_INFO_SPHERE_EXT};
 			InitFloat3D(SphereInfo.position, Position);
 			SphereInfo.radius           = Sphere.Radius;
 			SphereInfo.shaping_hasvalue = bUseShaping;
@@ -208,7 +209,7 @@ void URtxLight::Update()
 		}
 	case RTXLIGHT_Rect:
 		{
-			remixapi_LightInfoRectEXT RectInfo = {REMIXAPI_STRUCT_TYPE_LIGHT_INFO_RECT_EXT};
+			static remixapi_LightInfoRectEXT RectInfo = {REMIXAPI_STRUCT_TYPE_LIGHT_INFO_RECT_EXT};
 			InitFloat3D(RectInfo.position, Position);
 			InitFloat3D(RectInfo.xAxis, Rect.XAxis.GetNormalized());
 			RectInfo.xSize = Rect.XSize;
@@ -225,7 +226,7 @@ void URtxLight::Update()
 		}
 	case RTXLIGHT_Disk:
 		{
-			remixapi_LightInfoDiskEXT DiskInfo = {REMIXAPI_STRUCT_TYPE_LIGHT_INFO_DISK_EXT};
+			static remixapi_LightInfoDiskEXT DiskInfo = {REMIXAPI_STRUCT_TYPE_LIGHT_INFO_DISK_EXT};
 			InitFloat3D(DiskInfo.position, Position);
 			InitFloat3D(DiskInfo.xAxis, Disk.XAxis.GetNormalized());
 			DiskInfo.xRadius = Disk.XRadius;
@@ -242,7 +243,7 @@ void URtxLight::Update()
 		}
 	case RTXLIGHT_Cylinder:
 		{
-			remixapi_LightInfoCylinderEXT CylinderInfo = {REMIXAPI_STRUCT_TYPE_LIGHT_INFO_CYLINDER_EXT};
+			static remixapi_LightInfoCylinderEXT CylinderInfo = {REMIXAPI_STRUCT_TYPE_LIGHT_INFO_CYLINDER_EXT};
 			InitFloat3D(CylinderInfo.position, Position);
 			InitFloat3D(CylinderInfo.axis, Cylinder.Axis.GetNormalized());
 			CylinderInfo.radius     = Cylinder.Radius;
@@ -252,7 +253,7 @@ void URtxLight::Update()
 		}
 	case RTXLIGHT_Distant:
 		{
-			remixapi_LightInfoDistantEXT DistantInfo = {REMIXAPI_STRUCT_TYPE_LIGHT_INFO_DISTANT_EXT};
+			static remixapi_LightInfoDistantEXT DistantInfo = {REMIXAPI_STRUCT_TYPE_LIGHT_INFO_DISTANT_EXT};
 			InitFloat3D(DistantInfo.direction, Distant.Direction.GetNormalized());
 			DistantInfo.angularDiameterDegrees = Distant.AngularDiameterDegrees;
 			LightInfo.pNext = &DistantInfo;
@@ -261,6 +262,21 @@ void URtxLight::Update()
 	}
 
 	GRemixApi.CreateLight(&LightInfo, &Handle);
+}
+
+void URtxLight::Render()
+{
+	if(GRemixApiInitialized && Handle)
+	{
+		if(bEnabled)
+		{
+			if(!Handle)
+				Update();
+
+			if(Handle)
+				GRemixApi.DrawLightInstance(Handle);
+		}
+	}
 }
 
 void URtxLight::DestroyHandle()

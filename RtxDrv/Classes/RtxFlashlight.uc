@@ -47,7 +47,7 @@ function CalcLightPositionAndDirection(Pawn Pawn, out vector Position, out vecto
 		Direction = vector(ViewRotation);
 }
 
-function UpdateLight(Pawn Pawn, RtxLight Light, vector Position, vector Direction, FlashlightCone Cone)
+function UpdateAndRenderLight(Pawn Pawn, RtxLight Light, vector Position, vector Direction, FlashlightCone Cone)
 {
 	Light.Position                 = Position;
 	Light.Shaping.Direction        = Direction;
@@ -58,42 +58,29 @@ function UpdateLight(Pawn Pawn, RtxLight Light, vector Position, vector Directio
 	Light.Shaping.ConeSoftness     = Cone.Softness;
 
 	Light.Update();
+	Light.Render();
 }
 
 function Init()
 {
-	local Rtx Rtx;
-
-	Rtx = class'Rtx'.static.GetInstance();
-
-	OuterLight             = Rtx.CreateLight();
+	OuterLight             = new class'RtxLight';
 	OuterLight.Type        = RTXLIGHT_Sphere;
-	OuterLight.bEnabled    = false;
 	OuterLight.bUseShaping = true;
-	OuterLight.Update();
 
-	MainLight              = Rtx.CreateLight();
+	MainLight              = new class'RtxLight';
 	MainLight.Type         = RTXLIGHT_Sphere;
-	MainLight.bEnabled     = false;
 	MainLight.bUseShaping  = true;
-	MainLight.Update();
 
-	InnerLight             = Rtx.CreateLight();
+	InnerLight             = new class'RtxLight';
 	InnerLight.Type        = RTXLIGHT_Sphere;
-	InnerLight.bEnabled    = false;
 	InnerLight.bUseShaping = true;
-	InnerLight.Update();
 }
 
 function Exit()
 {
-	local Rtx Rtx;
-
-	Rtx = class'Rtx'.static.GetInstance();
-
-	Rtx.DestroyLight(OuterLight);
-	Rtx.DestroyLight(MainLight);
-	Rtx.DestroyLight(InnerLight);
+	OuterLight = None;
+	MainLight  = None;
+	InnerLight = None;
 }
 
 function Update(Pawn Pawn, bool bOn)
@@ -101,20 +88,14 @@ function Update(Pawn Pawn, bool bOn)
 	local vector LightPosition;
 	local vector LightDirection;
 
-	if(bOn != bIsOn)
-	{
-		OuterLight.bEnabled = bOn;
-		MainLight.bEnabled  = bOn;
-		InnerLight.bEnabled = bOn;
-		bIsOn               = bOn;
-	}
+	bIsOn = bOn;
 
 	if(bIsOn && Pawn != None)
 	{
 		CalcLightPositionAndDirection(Pawn, LightPosition, LightDirection);
-		UpdateLight(Pawn, OuterLight, LightPosition, LightDirection, OuterCone);
-		UpdateLight(Pawn, MainLight, LightPosition, LightDirection, MainCone);
-		UpdateLight(Pawn, InnerLight, LightPosition, LightDirection, InnerCone);
+		UpdateAndRenderLight(Pawn, OuterLight, LightPosition, LightDirection, OuterCone);
+		UpdateAndRenderLight(Pawn, MainLight, LightPosition, LightDirection, MainCone);
+		UpdateAndRenderLight(Pawn, InnerLight, LightPosition, LightDirection, InnerCone);
 	}
 }
 

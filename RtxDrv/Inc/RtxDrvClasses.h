@@ -43,7 +43,6 @@ public:
     BITFIELD bDisableFrustumCulling:1;
     BITFIELD bDisableSkyZones:1;
     BITFIELD bEnableD3DLights:1;
-    BITFIELD bEnableLights:1;
     TArrayNoInit<class URtxLight*> Lights GCC_PACK(4);
     TArrayNoInit<class URtxLight*> DestroyedLights;
     void execCreateLight(FFrame& Stack, void* Result);
@@ -132,12 +131,14 @@ public:
     FRtxCylinderLight Cylinder;
     FRtxDistantLight Distant;
     void execUpdate(FFrame& Stack, void* Result);
+    void execRender(FFrame& Stack, void* Result);
     DECLARE_CLASS(URtxLight,UObject,0|CLASS_Transient,RtxDrv)
     remixapi_LightHandle_T* Handle;
 
     virtual void Destroy();
     virtual void PostEditChange(){ Super::PostEditChange(); Update(); }
     void Update();
+    void Render();
     void DestroyHandle();
     DECLARE_NATIVES(URtxLight)
 };

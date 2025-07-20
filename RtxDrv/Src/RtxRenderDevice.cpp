@@ -165,7 +165,6 @@ UBOOL URtxRenderDevice::Init()
 
 	ClearMaterialFlags();
 	UClient* Client                                   = GEngine->Client;
-	Client->Shadows                                   = 0;
 	Client->FrameFXDisabled                           = 1;
 	Client->BloomQuality                              = 0;
 	Client->BlurEnabled                               = 0;
@@ -240,6 +239,11 @@ void URtxRenderDevice::CheckForLevelChange(UViewport* Viewport)
 FRenderInterface* URtxRenderDevice::Lock(UViewport* Viewport, BYTE* HitData, INT* HitSize)
 {
 	CheckForLevelChange(Viewport);
+
+	// Make sure relevant graphics options are set to the correct values
+	UClient* Client = GEngine->Client;
+	appMemzero(Client->TextureLODSet, sizeof(Client->TextureLODSet));
+	Client->Shadows = 0;
 
 	if(Rtx->bCaptureMode)
 		Viewport->Precaching = 1;

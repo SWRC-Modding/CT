@@ -25,6 +25,7 @@ enum ELoadFlags{
 	LOAD_Forgiving     = 0x1000, // Forgive missing imports (set them to NULL).
 	LOAD_Quiet         = 0x2000, // No log warnings.
 	LOAD_NoRemap       = 0x4000, // No remapping of packages.
+	LOAD_UNKNOWN       = 0x8000, // Unknown load flag used inside of UClass::EditDefaultProps
 	LOAD_Propagate     = 0
 };
 
@@ -37,7 +38,7 @@ enum EPackageFlags{
 	PKG_ServerSideOnly = 0x0004, // Only needed on the server side.
 	PKG_BrokenLinks    = 0x0008, // Loaded from linker with broken import links.
 	PKG_Unsecure       = 0x0010, // Not trusted.
-	PKG_Need           = 0x8000  // Client needs to download this package.
+	PKG_Need           = 0x8000, // Client needs to download this package.
 };
 
 //
@@ -549,6 +550,10 @@ public:
 	FORCEINLINE ULinkerLoad* GetLinker(){ return _Linker; }
 	FORCEINLINE INT GetLinkerIndex(){ return _LinkerIndex; }
 	FORCEINLINE FStateFrame* GetStateFrame(){ return _StateFrame; }
+
+	// Gets the outermost object if it is a UPackage
+	UPackage* GetPackage();
+	const UPackage* GetPackage() const;
 };
 
 #define DECLARE_NAME(name) static FName N##name(#name, FNAME_Intrinsic)

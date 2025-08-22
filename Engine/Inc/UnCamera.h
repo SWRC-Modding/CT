@@ -281,7 +281,7 @@ public:
 	UBOOL           bShowBlockingVolumes;
 	UBOOL           bShowPhysicsVolumes;
 	char            Padding5[12];         //! Padding
-	UBOOL           bShowHudArms;         // Not sure about that one. HudArms become visible again when reloading or switching weapons
+	UBOOL           bShowHudArms;
 
 	// Cinematics.
 	UBOOL           bRenderCinematics;

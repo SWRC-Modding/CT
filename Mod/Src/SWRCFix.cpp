@@ -165,9 +165,15 @@ static UBOOL __fastcall UnrealEdEngineExecOverride(UEngine* Self, DWORD Edx, con
 	{
 		// Fixes the progress indicator that won't disappear sometimes in the editor when compiling scripts.
 		// No guarantee this doesn't break anything else...
-		INT* TaskCount = reinterpret_cast<INT*>(GWarn) + 3;
+		INT* TaskCount     = reinterpret_cast<INT*>(GWarn) + 3;
+		INT  PrevTaskCount = *TaskCount;
 		while(*TaskCount > 0)
+		{
 			GWarn->EndSlowTask();
+
+			if(*TaskCount == PrevTaskCount)
+				break; // TaskCount does not change when calling EndSlowTask. This means that a custom FFeedbackContext is used or something else is broken so just stop.
+		}
 
 		return 1;
 	}

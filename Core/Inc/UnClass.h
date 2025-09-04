@@ -381,7 +381,7 @@ class CORE_API UClass : public UState{
 	TArray<BYTE>           Defaults;
 	TArray<FName>          HideCategories;
 	TArray<FName>          DependentOn;
-	FString                ClassHeaderFilename; // Just a guess, but it fits here... (Can't verify since it's always empty)
+	TArray<UClass*>        Subclasses; // Only set temporarily when exporting the header file for native classes
 	FNativeEntry<UObject>* NativeFunctions;
 	Constructor            ClassConstructor;
 	StaticConstructor      ClassStaticConstructor;

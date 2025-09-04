@@ -304,7 +304,8 @@ int __cdecl main(int argc, char** argv)
 		appPreExit();
 
 		GIsGuarded = 0;
-	}catch(...)
+	}
+	catch(...)
 	{
 		GIsGuarded = 0;
 		GLog = &Log;

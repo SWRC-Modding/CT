@@ -131,6 +131,9 @@ xcopy /E /I /Y &quot;$(ProjectDir)\PropertyOverrides&quot; &quot;$(OutDir)\Prope
 			<File
 				RelativePath=".\Src\ExportBumpMapsCommandlet.cpp">
 			</File>
+			<File
+				RelativePath=".\Src\CJKText.cpp">
+			</File>
 		</Filter>
 	</Files>
 	<Globals>

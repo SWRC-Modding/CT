@@ -19,6 +19,12 @@ void CDECL InitSWRCFix(void)
 		                                               FName("SWRCFixInstance"));
 		USWRCFix::Instance->AddToRoot(); // This object should never be garbage collected
 		USWRCFix::Instance->Init();
+
+		if(USWRCFix::Instance->EnableCJKText)
+		{
+			extern void InitCJKText(void);
+			InitCJKText();
+		}
 	}
 
 	USWRCFix::RenderingReady = !GIsEditor;

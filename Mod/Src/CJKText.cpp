@@ -1,4 +1,4 @@
-﻿#include "Mod.h"
+#include "Mod.h"
 #include "CodeInjection.h"
 
 /*
@@ -48,12 +48,6 @@ struct FRawFont{ // UFont
 	INT NumTextures() const{ return NumTexturesBits & 0x1FFFFFFF; }
 };
 
-typedef void(__thiscall* FDrawTileFunc)(UCanvas* Canvas, UMaterial* Material,
-                                        FLOAT X, FLOAT Y, FLOAT XL, FLOAT YL,
-                                        FLOAT U, FLOAT V, FLOAT UL, FLOAT VL,
-                                        FLOAT Z, const FPlane& Color, const FPlane& Fog);
-#define CANVAS_DRAWTILE_VTABLE_INDEX 32 // glyph emitter calls vtable offset 128
-
 static inline bool IsDBCSLead(BYTE B) { return B >= 0x81 && B <= 0xFE; }
 static inline bool IsDBCSTrail(BYTE B){ return B >= 0x40 && B <= 0xFE && B != 0x7F; }
 
@@ -88,7 +82,6 @@ static INT DrawGlyphRun(UCanvas* C, const FRawFont* F, FLOAT ScaleX, FLOAT Scale
 	if(!C->pCanvasUtil)
 		return 0;
 
-	FDrawTileFunc DrawTile = (*reinterpret_cast<FDrawTileFunc**>(C))[CANVAS_DRAWTILE_VTABLE_INDEX];
 	FPlane Fog(0.0f, 0.0f, 0.0f, 0.0f);
 	INT Width = 0;
 
@@ -121,12 +114,12 @@ static INT DrawGlyphRun(UCanvas* C, const FRawFont* F, FLOAT ScaleX, FLOAT Scale
 					}
 
 					if(UL > 0.0f && VL > 0.0f){
-						DrawTile(C, Material,
-						         static_cast<FLOAT>(appFloor((FLOAT)GX + C->OrgX)),
-						         static_cast<FLOAT>(appFloor((FLOAT)Y + C->OrgY)),
-						         UL * ScaleX, VL * ScaleY,
-						         U, V, UL, VL,
-						         1.0f, Color, Fog);
+						C->DrawTile(Material,
+						            static_cast<FLOAT>(appFloor((FLOAT)GX + C->OrgX)),
+						            static_cast<FLOAT>(appFloor((FLOAT)Y + C->OrgY)),
+						            UL * ScaleX, VL * ScaleY,
+						            U, V, UL, VL,
+						            1.0f, Color, Fog);
 					}
 				}
 			}
@@ -256,14 +249,14 @@ static void __fastcall WrappedPrintOverride(UCanvas* C, DWORD, INT Style, INT* X
 
 /*
  * Replacement for FCanvasUtil::DrawString(INT X, INT Y, const TCHAR* Text, UFont*,
- * FColor, FLOAT ScaleX, FLOAT ScaleY, UBOOL Center) — the menu/util text path
+ * FColor, FLOAT ScaleX, FLOAT ScaleY, UBOOL Center) - the menu/util text path
  * (reference: @104C9A50 in the decompilation). Glyphs are emitted through the
  * original exported FCanvasUtil::DrawTile. Returns the final X advance.
  *
  * '&' marks a shortcut character: the following character is drawn with an
  * underscore glyph overlaid ("&&" is a literal '&').
  */
-typedef void(__thiscall* FCUDrawTileFunc)(void* CanvasUtil,
+typedef void(__fastcall* FCUDrawTileFunc)(void* CanvasUtil, DWORD Edx,
                                           FLOAT X1, FLOAT Y1, FLOAT X2, FLOAT Y2,
                                           FLOAT U1, FLOAT V1, FLOAT U2, FLOAT V2,
                                           FLOAT Z, UMaterial* Material, FColor Color);
@@ -358,7 +351,7 @@ static INT __fastcall DrawStringOverride(void* U, DWORD, INT StartX, INT StartY,
 					W = CharW;
 			}
 
-			OriginalFCUDrawTile(U,
+			OriginalFCUDrawTile(U, 0,
 			                    (FLOAT)(X + StartX), (FLOAT)(Y + StartY),
 			                    (FLOAT)(X + StartX + W), (FLOAT)(Y + StartY + H),
 			                    (FLOAT)G->StartU, (FLOAT)G->StartV,
@@ -388,7 +381,7 @@ static INT __fastcall DrawStringOverride(void* U, DWORD, INT StartX, INT StartY,
 
 /*
  * Replacement for UCanvas::ClippedPrint(UFont*, FLOAT ScaleX, FLOAT ScaleY,
- * UBOOL CheckHotKey, const TCHAR* Text) — single-line print at CurX/CurY with
+ * UBOOL CheckHotKey, const TCHAR* Text) - single-line print at CurX/CurY with
  * clipping (@103EA170: thin wrapper around the glyph emitter with bClip=1;
  * the CheckHotKey argument is ignored by the original as well).
  */
@@ -409,7 +402,7 @@ static void __fastcall ClippedPrintOverride(UCanvas* C, DWORD, UFont* InFont, FL
 
 /*
  * Replacement for UCanvas::ClippedStrLen(UFont*, FLOAT ScaleX, FLOAT ScaleY,
- * INT& XL, INT& YL, const TCHAR* Text) — single-line measurement (@103E9EB0).
+ * INT& XL, INT& YL, const TCHAR* Text) - single-line measurement (@103E9EB0).
  * Kerning+SpaceX is added after every character except the last, as in the
  * original.
  */

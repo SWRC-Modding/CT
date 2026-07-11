@@ -20,7 +20,9 @@ void CDECL InitSWRCFix(void)
 		USWRCFix::Instance->AddToRoot(); // This object should never be garbage collected
 		USWRCFix::Instance->Init();
 
-		if(USWRCFix::Instance->EnableCJKText)
+		const TCHAR* Lang = UObject::GetLanguage();
+
+		if(!appStricmp(Lang, "cht") || !appStricmp(Lang, "jpt"))
 		{
 			extern void InitCJKText(void);
 			InitCJKText();

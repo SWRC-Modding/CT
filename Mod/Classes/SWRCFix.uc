@@ -23,7 +23,6 @@ var() config bool    AutoFOV;
 var() config bool    EnableCustomMenu;
 var() config bool    EnableEditorSelectionFix;
 var() config bool    DisableWindowPositionVerification;
-var() config bool    EnableCJKText;
 
 var FunctionOverride CTPlayerEndZoomOverride;
 var FunctionOverride CTPlayerResetFOVOverride;

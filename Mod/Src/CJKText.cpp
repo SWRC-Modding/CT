@@ -439,6 +439,50 @@ static void __fastcall ClippedStrLenOverride(UCanvas* C, DWORD, UFont* InFont, F
 	}
 }
 
+/*
+ * DBCS-aware replacement for FString::Caps (Core.dll).
+ *
+ * The original applies Windows-1252 toupper byte-by-byte, which corrupts GBK
+ * characters whose second byte falls in a convertible range (0xE0-0xEF,
+ * 0xF1-0xF6, 0xF8-0xFD, 0x61-0x7A).  For example, GBK B3 F6 becomes B3 D6
+ * when byte F6 is uppercased.  This override skips the trail byte of every
+ * valid DBCS pair while preserving the original single-byte mappings.
+ */
+static FStringTemp* __fastcall CapsOverride(const FString* Self, DWORD, FStringTemp* Result){
+	new(Result) FStringTemp(*Self);
+
+	INT Len = Result->Len();
+
+	if(Len == 0)
+		return Result;
+
+	BYTE* Buf = reinterpret_cast<BYTE*>(&(*Result)[0]);
+
+	for(INT i = 0; i < Len; i++){
+		BYTE B = Buf[i];
+
+		if(IsDBCSLead(B) && i + 1 < Len && IsDBCSTrail(Buf[i + 1])){
+			i++;
+			continue;
+		}
+
+		if((B >= 'a' && B <= 'z') ||
+		   (B >= 0xE0 && B <= 0xEF) ||
+		   (B >= 0xF1 && B <= 0xF6) ||
+		   (B >= 0xF8 && B <= 0xFD)){
+			Buf[i] = (BYTE)(B - 32);
+		}
+		else if(B == 0x9A || B == 0x9E){
+			Buf[i] = (BYTE)(B - 16);
+		}
+		else if(B == 0xDE){
+			Buf[i] = 0xFE;
+		}
+	}
+
+	return Result;
+}
+
 void InitCJKText(void){
 	void* Handle = appGetDllHandle("Engine.dll");
 
@@ -469,4 +513,20 @@ void InitCJKText(void){
 	RedirectFunction(ClippedPrint, ClippedPrintOverride);
 	RedirectFunction(ClippedStrLen, ClippedStrLenOverride);
 	debugf(NAME_Init, "CJKText: WrappedPrint/DrawString/ClippedPrint/ClippedStrLen hooked (DBCS pairing enabled)");
+
+	void* CoreHandle = appGetDllHandle("Core.dll");
+
+	if(CoreHandle){
+		void* Caps = appGetDllExport(CoreHandle, "?Caps@FString@@QBE?AVFStringTemp@@XZ");
+
+		appFreeDllHandle(CoreHandle);
+
+		if(Caps){
+			RedirectFunction(Caps, CapsOverride);
+			debugf(NAME_Init, "CJKText: FString::Caps hooked (DBCS-aware toupper)");
+		}
+		else{
+			debugf(NAME_Warning, "CJKText: FString::Caps export not found, Caps() may corrupt DBCS text");
+		}
+	}
 }

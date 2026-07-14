@@ -51,6 +51,31 @@ struct FRawFont{ // UFont
 static inline bool IsDBCSLead(BYTE B) { return B >= 0x81 && B <= 0xFE; }
 static inline bool IsDBCSTrail(BYTE B){ return B >= 0x40 && B <= 0xFE && B != 0x7F; }
 
+// GBK punctuation that must not appear at the start of a line.
+static bool IsNoBreakBeforePunct(WORD Key){
+	switch(Key){
+	case 0xA1A2: // ideographic comma
+	case 0xA1A3: // ideographic full stop
+	case 0xA1A4: // middle dot
+	case 0xA1AA: // em dash
+	case 0xA1AD: // horizontal ellipsis
+	case 0xA1AF: // right single quotation mark
+	case 0xA1B1: // right double quotation mark
+	case 0xA1B7: // right double angle bracket
+	case 0xA1B9: // right corner bracket
+	case 0xA1BB: // right white corner bracket
+	case 0xA3A1: // fullwidth exclamation mark
+	case 0xA3A9: // fullwidth right parenthesis
+	case 0xA3AC: // fullwidth comma
+	case 0xA3BA: // fullwidth colon
+	case 0xA3BB: // fullwidth semicolon
+	case 0xA3BF: // fullwidth question mark
+		return true;
+	default:
+		return false;
+	}
+}
+
 // Reads the next character, pairing DBCS lead+trail bytes into a 16-bit key
 static WORD NextCharKey(const BYTE* S, INT& i){
 	BYTE B = S[i++];
@@ -193,7 +218,14 @@ static void __fastcall WrappedPrintOverride(UCanvas* C, DWORD, INT Style, INT* X
 			i = j;
 
 			BYTE Next = S[i];
-			bool Breakable = Key > 0xFF || Next == 0 || Next == 10 || IsDBCSLead(Next) ||
+
+			// Keep ASCII periods (including "...") with the preceding CJK text.
+			bool NextIsNoBreak = Next == '.';
+			if(IsDBCSLead(Next) && IsDBCSTrail(S[i + 1]))
+				NextIsNoBreak = IsNoBreakBeforePunct((Next << 8) | S[i + 1]);
+
+			bool Breakable = (Key > 0xFF && !NextIsNoBreak) || Next == 0 || Next == 10 ||
+			                 (IsDBCSLead(Next) && !NextIsNoBreak) ||
 			                 (Next == 32 && !(S[i + 1] == '!' || S[i + 1] == '?' || S[i + 1] == ':'));
 
 			if(Breakable || !HaveBreak){

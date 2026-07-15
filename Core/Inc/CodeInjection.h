@@ -69,6 +69,7 @@ inline void RedirectFunction(void* Src, void* Target)
 		*(BYTE*)Src = 0xE9; // JMP
 		*((DWORD*)((BYTE*)Src + 1)) = (DWORD)Target - (DWORD)Src - 5;
 		VirtualProtect(Src, 5, OldProtect, &OldProtect);
+		FlushInstructionCache(GetCurrentProcess(), Src, 5);
 	}
 	else
 	{

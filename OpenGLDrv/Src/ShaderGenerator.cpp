@@ -1,6 +1,4 @@
 #include "ShaderGenerator.h"
-#include "OpenGLResource.h"
-#include "OpenGLRenderDevice.h"
 
 FStringTemp FShaderGenerator::GetShaderText(bool UseStaticLighting)
 {
@@ -35,9 +33,10 @@ FStringTemp FShaderGenerator::GetShaderText(bool UseStaticLighting)
 		{
 			VertexShaderText += FString::Printf("\tTexCoord%i = ", TexCoordIndex);
 
-			FString TexCoord;
+			FString    TexCoord;
+			const BYTE TexCoordSrc = Textures[i].TexCoordSrc;
 
-			switch(Textures[i].TexCoordSrc)
+			switch(TexCoordSrc)
 			{
 			case TCS_Stream0:
 			case TCS_Stream1:
@@ -93,7 +92,11 @@ FStringTemp FShaderGenerator::GetShaderText(bool UseStaticLighting)
 
 			if(Textures[i].Matrix >= 0)
 			{
-				if(Textures[i].TexCoordCount < TCN_4DCoords)
+				const BYTE TexCoordCount = Textures[i].TexCoordCount;
+
+				if(TexCoordCount == TCN_2DCoords && TexCoordSrc <= TCS_Stream7)
+					TexCoord = "vec4(" + TexCoord + ".xy" + ", 1.0, 1.0)";
+				else if(TexCoordCount < TCN_4DCoords)
 					TexCoord = "vec4(" + TexCoord + ".xyz" + ", 1.0)";
 
 				TexCoord += FString::Printf(" * TexMatrices[%i]", Textures[i].Matrix);

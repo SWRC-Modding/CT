@@ -367,7 +367,7 @@ void USWRCFix::Init()
 
 		TArray<DWORD> AvailableResolutions;
 
-		for(int i = 0; EnumDisplaySettings(NULL, i, &dm) != 0; ++i)
+		for(int i = 0; EnumDisplaySettingsA(NULL, i, &dm) != 0; ++i)
 			AvailableResolutions.AddUniqueItem(MAKELONG(dm.dmPelsWidth, dm.dmPelsHeight));
 
 		if(AvailableResolutions.Num() > 1)

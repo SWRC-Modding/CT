@@ -15,7 +15,6 @@ inline void* PatchVTable(void* Object, INT Index, void* NewFunc)
 	if(!VirtualProtect(VTable + Index, sizeof(void*), PAGE_READWRITE, &OldProtect))
 	{
 		debugf(NAME_Error, "Failed to patch vtable: VirtualProtect failed with error code %i", GetLastError());
-
 		return NULL;
 	}
 
@@ -33,26 +32,24 @@ inline void* PatchVTable(void* Object, INT Index, void* NewFunc)
  */
 inline void* PatchDllClassVTable(const TCHAR* DllName, const TCHAR* ClassName, const TCHAR* VTableName, INT Index, void* NewFunc)
 {
-	void* Handle = appGetDllHandle(DllName);
+	HMODULE Handle = LoadLibraryA(DllName);
 
 	if(!Handle)
 	{
 		debugf(NAME_Error, "Failed to patch vtable for class '%s': Failed to load library '%s'", ClassName, DllName);
-
 		return NULL;
 	}
 
 	FString DllExportName = (FStringTemp("??_7") + ClassName + "@@6B" + (VTableName ? FString(VTableName) + "@@@" : "@"));
-	void** VTable = static_cast<void**>(appGetDllExport(Handle, *DllExportName));
+	void**  VTable        = reinterpret_cast<void**>(GetProcAddress(Handle, *DllExportName));
 
 	if(!VTable)
 	{
 		debugf(NAME_Error, "Failed to patch vtable for class '%s': Dll export for vtable '%s' not found", ClassName, VTableName);
-
 		return NULL;
 	}
 
-	appFreeDllHandle(Handle); // Decrementing reference count just in case. This might cause a crash later if the dll wasn't already loaded which is required.
+	FreeLibrary(Handle); // Decrementing reference count just in case. This might cause a crash later if the dll wasn't already loaded which is required.
 
 	return PatchVTable(&VTable, Index, NewFunc);
 }

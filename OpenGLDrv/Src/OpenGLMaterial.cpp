@@ -1488,23 +1488,6 @@ bool FOpenGLRenderInterface::SetTerrainMaterial(UTerrainMaterial* TerrainMateria
 				NumTexMatrices = 3;
 			}
 
-			// HACK:
-			// WTF??? Terrain code _sometimes_ produces a matrix where the first three rows are exchanged (2,3,1 instead of 1,2,3)
-			// M[0][0] == 0.0f is a reliable way to check for that and correct the error.
-			for(INT i = 0; i < NumTexMatrices; ++i)
-			{
-				if(TexMatrices[i].M[0][0] == 0.0f)
-				{
-					FPlane Row0 = TexMatrices[i].Rows()[0];
-					FPlane Row1 = TexMatrices[i].Rows()[1];
-					FPlane Row2 = TexMatrices[i].Rows()[2];
-
-					TexMatrices[i].Rows()[0] = Row2;
-					TexMatrices[i].Rows()[1] = Row0;
-					TexMatrices[i].Rows()[2] = Row1;
-				}
-			}
-
 			const FOpenGLShader& Shader = Layer4 ? TerrainShader4Layers : TerrainShader3Layers;
 
 			RenDev->glProgramUniformMatrix4fv(Shader.Program, 0, NumTexMatrices, GL_TRUE, reinterpret_cast<const GLfloat*>(TexMatrices));

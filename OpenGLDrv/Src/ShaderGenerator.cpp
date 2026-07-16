@@ -93,14 +93,8 @@ FStringTemp FShaderGenerator::GetShaderText(bool UseStaticLighting)
 
 			if(Textures[i].Matrix >= 0)
 			{
-				switch(Textures[i].TexCoordCount)
-				{
-				case TCN_2DCoords:
-					TexCoord = "vec4(" + TexCoord + ".xy" + ", 1.0, 1.0)";
-					break;
-				case TCN_3DCoords:
+				if(Textures[i].TexCoordCount < TCN_4DCoords)
 					TexCoord = "vec4(" + TexCoord + ".xyz" + ", 1.0)";
-				}
 
 				TexCoord += FString::Printf(" * TexMatrices[%i]", Textures[i].Matrix);
 				NumTexMatrices = Max(NumTexMatrices, Textures[i].Matrix + 1);

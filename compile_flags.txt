@@ -18,6 +18,7 @@
 -DXGAME_API=
 -DXINTERFACE_API=
 -fms-compatibility-version=13
+--target=i386-pc-windows-msvc
 -m32
 -xc++
 -Wall

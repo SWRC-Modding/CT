@@ -1635,7 +1635,7 @@ void FOpenGLRenderInterface::DrawPrimitive(EPrimitiveType PrimitiveType, INT Fir
 
 	if(CurrentIndexBuffer)
 	{
-		INT IndexSize = CurrentIndexBuffer->IndexSize;
+		const INT IndexSize = CurrentIndexBuffer->IndexSize;
 
 		RenDev->glDrawRangeElementsBaseVertex(Mode,
 		                                      MinIndex,

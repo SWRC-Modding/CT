@@ -129,7 +129,8 @@ public:
 		return static_cast<EColorArg>(CA_R2 + --TempRegister);
 	}
 
-	DWORD GetShaderId(bool UseStaticLighting) const{
+	DWORD GetShaderId(bool UseStaticLighting) const
+	{
 		return appMemhash(ColorOps, NumColorOps * sizeof(ColorOps[0]), appMemhash(Textures, NumTextures * sizeof(Textures[0]), UseStaticLighting));
 	}
 

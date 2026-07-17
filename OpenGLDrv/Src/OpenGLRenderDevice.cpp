@@ -22,21 +22,21 @@ void UOpenGLRenderDevice::StaticConstructor()
 	bFirstRun              = 1;
 	ShaderDir              = "OpenGLShaders";
 
-	new(GetClass(), "DistortionEffects",      RF_Public) UBoolProperty(CPP_PROPERTY(CanDoDistortionEffects),  "Options", CPF_Config);
-	new(GetClass(), "UseDesktopResolution",   RF_Public) UBoolProperty(CPP_PROPERTY(bUseDesktopResolution),   "Options", CPF_Config);
-	new(GetClass(), "KeepAspectRatio",        RF_Public) UBoolProperty(CPP_PROPERTY(bKeepAspectRatio),        "Options", CPF_Config);
-	new(GetClass(), "BilinearFramebuffer",    RF_Public) UBoolProperty(CPP_PROPERTY(bBilinearFramebuffer),    "Options", CPF_Config);
-	new(GetClass(), "SaveShadersToDisk",      RF_Public) UBoolProperty(CPP_PROPERTY(bSaveShadersToDisk),      "Options", CPF_Config);
-	new(GetClass(), "AutoReloadShaders",      RF_Public) UBoolProperty(CPP_PROPERTY(bAutoReloadShaders),      "Options", CPF_Config);
-	new(GetClass(), "UseTrilinear",           RF_Public) UBoolProperty(CPP_PROPERTY(bUseTrilinear),           "Options", CPF_Config);
-	new(GetClass(), "TextureFilter",          RF_Public) UByteProperty(CPP_PROPERTY(TextureFilter),           "Options", CPF_Config);
-	new(GetClass(), "TextureAnisotropy",      RF_Public) UIntProperty (CPP_PROPERTY(TextureAnisotropy),       "Options", CPF_Config);
-	new(GetClass(), "VSync",                  RF_Public) UBoolProperty(CPP_PROPERTY(bVSync),                  "Options", CPF_Config);
-	new(GetClass(), "AdaptiveVSync",          RF_Public) UBoolProperty(CPP_PROPERTY(bAdaptiveVSync),          "Options", CPF_Config);
-	new(GetClass(), "FirstRun",               RF_Public) UBoolProperty(CPP_PROPERTY(bFirstRun),               "",        CPF_Config);
-	new(GetClass(), "DebugOpenGL",            RF_Public) UBoolProperty(CPP_PROPERTY(bDebugOpenGL),            "",        CPF_Config);
-	new(GetClass(), "ShowDebugNotifications", RF_Public) UBoolProperty(CPP_PROPERTY(bShowDebugNotifications), "",        CPF_Config);
-	new(GetClass(), "ShaderDir",              RF_Public) UStrProperty (CPP_PROPERTY(ShaderDir),               "",        CPF_Config);
+	new(GetClass(), "DistortionEffects",    RF_Public) UBoolProperty(CPP_PROPERTY(CanDoDistortionEffects),  "Options", CPF_Config);
+	new(GetClass(), "UseDesktopResolution", RF_Public) UBoolProperty(CPP_PROPERTY(bUseDesktopResolution),   "Options", CPF_Config);
+	new(GetClass(), "KeepAspectRatio",      RF_Public) UBoolProperty(CPP_PROPERTY(bKeepAspectRatio),        "Options", CPF_Config);
+	new(GetClass(), "BilinearFramebuffer",  RF_Public) UBoolProperty(CPP_PROPERTY(bBilinearFramebuffer),    "Options", CPF_Config);
+	new(GetClass(), "SaveShadersToDisk",    RF_Public) UBoolProperty(CPP_PROPERTY(bSaveShadersToDisk),      "Options", CPF_Config);
+	new(GetClass(), "AutoReloadShaders",    RF_Public) UBoolProperty(CPP_PROPERTY(bAutoReloadShaders),      "Options", CPF_Config);
+	new(GetClass(), "UseTrilinear",         RF_Public) UBoolProperty(CPP_PROPERTY(bUseTrilinear),           "Options", CPF_Config);
+	new(GetClass(), "TextureFilter",        RF_Public) UByteProperty(CPP_PROPERTY(TextureFilter),           "Options", CPF_Config);
+	new(GetClass(), "TextureAnisotropy",    RF_Public) UIntProperty (CPP_PROPERTY(TextureAnisotropy),       "Options", CPF_Config);
+	new(GetClass(), "VSync",                RF_Public) UBoolProperty(CPP_PROPERTY(bVSync),                  "Options", CPF_Config);
+	new(GetClass(), "AdaptiveVSync",        RF_Public) UBoolProperty(CPP_PROPERTY(bAdaptiveVSync),          "Options", CPF_Config);
+	new(GetClass(), "FirstRun",             RF_Public) UBoolProperty(CPP_PROPERTY(bFirstRun),               "",        CPF_Config);
+	new(GetClass(), "DebugOpenGL",          RF_Public) UBoolProperty(CPP_PROPERTY(bDebugOpenGL),            "",        CPF_Config);
+	new(GetClass(), "LogDebugMessages",     RF_Public) UBoolProperty(CPP_PROPERTY(bLogDebugMessages), "",        CPF_Config);
+	new(GetClass(), "ShaderDir",            RF_Public) UStrProperty (CPP_PROPERTY(ShaderDir),               "",        CPF_Config);
 }
 
 bool UOpenGLRenderDevice::IsCurrent()
@@ -321,7 +321,7 @@ static OPENGL_MESSAGE_CALLBACK(OpenGLMessageCallback)
 		SeverityStr = "unknown";
 	}
 
-	if(Severity != GL_DEBUG_SEVERITY_NOTIFICATION || ((UOpenGLRenderDevice*)UserParam)->bShowDebugNotifications)
+	if(Severity != GL_DEBUG_SEVERITY_NOTIFICATION || ((UOpenGLRenderDevice*)UserParam)->bLogDebugMessages)
 		debugf("GL CALLBACK: source=%s, type=%s, severity=%s - %s", SourceStr, TypeStr, SeverityStr, Message);
 
 	if(Type == GL_DEBUG_TYPE_ERROR)

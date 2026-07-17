@@ -137,7 +137,7 @@ public:
 	// Virtual functions
 	virtual FConvexVolume GetViewFrustum();
 	virtual UBOOL FilterActor(AActor* Actor);
-    virtual UBOOL FilterAttachment(AActor* AttachedActor){ return 1; }
+	virtual UBOOL FilterAttachment(AActor* AttachedActor){ return 1; }
 	virtual UBOOL FilterProjector(AProjector* Actor);
 };
 

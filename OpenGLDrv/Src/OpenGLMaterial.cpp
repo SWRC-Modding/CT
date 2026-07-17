@@ -360,7 +360,7 @@ void FOpenGLRenderInterface::SetTexture(FBaseTexture* Texture,
                                         FLOAT BumpSize,
                                         FLOAT BumpLumaScale,
                                         FLOAT BumpLumaOffset)
-                                        {
+{
 	checkSlow(Texture);
 	checkSlow(TextureIndex < MAX_TEXTURES);
 
@@ -422,13 +422,13 @@ void FOpenGLRenderInterface::SetTexture(FBaseTexture* Texture,
 
 void FOpenGLRenderInterface::SetBitmapTexture(UBitmapMaterial* Bitmap,
                                               INT TextureIndex,
-																							FLOAT UVScale,
+                                              FLOAT UVScale,
                                               ETexClampModeOverride UClamp,
                                               ETexClampModeOverride VClamp,
                                               FLOAT BumpSize,
                                               FLOAT BumpLumaScale,
                                               FLOAT BumpLumaOffset)
-                                              {
+{
 	FBaseTexture* Texture = Bitmap->Get(LockedViewport->CurrentTime, LockedViewport)->GetRenderInterface();
 	SetTexture(Texture, TextureIndex, UVScale, UClamp, VClamp, BumpSize, BumpLumaScale, BumpLumaOffset);
 }

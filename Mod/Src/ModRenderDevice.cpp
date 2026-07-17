@@ -309,64 +309,46 @@ static D3DDeviceCreateTextureFunc* D3DDeviceCreateTexture = NULL;
 
 static D3DDEVICE_CREATETEXTURE(D3DDeviceCreateTextureOverride)
 {
-	// X8L8V8U8 is used as the first fallback format because no information is lost in the conversion
-	D3DFORMAT FallbackFormat = Format == D3DFMT_L6V5U5 ? D3DFMT_X8L8V8U8 : Format;
-	HRESULT Result = D3DDeviceCreateTexture(D3DDevice,
-	                                        Width,
-	                                        Height,
-	                                        Levels,
-	                                        Usage,
-	                                        FallbackFormat,
-	                                        Pool,
-	                                        ppTexture);
+	const D3DFORMAT FormatTryList[] = {
+		Format,          // Try the actually requested format first.
+		D3DFMT_X8L8V8U8, // Usually still works if L6V5U5 doesn't. No loss in precision.
+		D3DFMT_V8U8,     // Missing luminance.
+		D3DFMT_A8R8G8B8  // Fallback if everything else fails.
+	};
 
-	if(SUCCEEDED(Result)  && FallbackFormat == Format)
-		return Result; // No fallback format was needed so just return
-
-	if(FAILED(Result) && Format < D3DFMT_V8U8 && Format > D3DFMT_X8L8V8U8) // CreateTexture failed with a non-bumpmap format
-		appErrorf("CreateTexture failed (Format: %i)", Format);            // Should never happen but this is a better error than the engine produces
-
-	if(FAILED(Result)) // If X8L8V8U8 is not supported V8U8 might still be so try that. Visually the same except for missing luminance
+	for(INT i = 0; i < ARRAY_COUNT(FormatTryList); ++i)
 	{
-		FallbackFormat = D3DFMT_V8U8;
-		Result = D3DDeviceCreateTexture(D3DDevice,
-		                                Width,
-		                                Height,
-		                                Levels,
-		                                Usage,
-		                                FallbackFormat,
-		                                Pool,
-		                                ppTexture);
+		const D3DFORMAT ActualFormat = FormatTryList[i];
+		const HRESULT   Result       = D3DDeviceCreateTexture(D3DDevice,
+		                                                      Width,
+		                                                      Height,
+		                                                      Levels,
+		                                                      Usage,
+		                                                      ActualFormat,
+		                                                      Pool,
+		                                                      ppTexture);
+
+		if(SUCCEEDED(Result))
+		{
+			if(Format != ActualFormat)
+			{
+				CurrentD3D8Texture             = *ppTexture;
+				CurrentD3D8TextureSourceFormat = Format;
+				CurrentD3D8TextureTargetFormat = ActualFormat;
+				CurrentD3D8TextureNumMipLevels = Levels;
+				MaybePatchVTable(&D3DTextureLockRect, *ppTexture, D3DVTIdx_TextureLockRect, D3DTextureLockRectOverride);
+				MaybePatchVTable(&D3DTextureUnlockRect, *ppTexture, D3DVTIdx_TextureUnlockRect, D3DTextureUnlockRectOverride);
+			}
+
+			return Result;
+		}
+
+		// Non-bumpmap format failed: fatal error - should never actually happen with the formats the engine uses...
+		if(Format < D3DFMT_V8U8 || Format > D3DFMT_X8L8V8U8)
+			appErrorf("CreateTexture failed (Format: %i)", Format);
 	}
 
-	if(FAILED(Result)) // If no bumpmap format is available we fall back to ARGB. Looks fine visually and should always be supported
-	{
-		FallbackFormat = D3DFMT_A8R8G8B8;
-		Result = D3DDeviceCreateTexture(D3DDevice,
-		                                Width,
-		                                Height,
-		                                Levels,
-		                                Usage,
-		                                FallbackFormat,
-		                                Pool,
-		                                ppTexture);
-	}
-
-	if(FAILED(Result))
-		appErrorf("CreateTexture failed even with fallback format (Format: %i)", FallbackFormat);
-
-	// Patching vtables if it wasn't done already
-
-	MaybePatchVTable(&D3DTextureLockRect, *ppTexture, D3DVTIdx_TextureLockRect, D3DTextureLockRectOverride);
-	MaybePatchVTable(&D3DTextureUnlockRect, *ppTexture, D3DVTIdx_TextureUnlockRect, D3DTextureUnlockRectOverride);
-
-	// Updating the current texture with the newly created one
-	CurrentD3D8Texture = *ppTexture;
-	CurrentD3D8TextureSourceFormat = Format;
-	CurrentD3D8TextureTargetFormat = FallbackFormat;
-	CurrentD3D8TextureNumMipLevels = Levels;
-
-	return Result;
+	return -1; // Unreachable
 }
 
 /*

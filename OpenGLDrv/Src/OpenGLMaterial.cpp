@@ -455,13 +455,13 @@ bool FOpenGLRenderInterface::SetBitmapMaterial(UBitmapMaterial* Material, const 
 
 	if(Material->IsA<UTexture>())
 	{
-		Detail = Cast<UBitmapMaterial>(static_cast<UTexture*>(Material)->Detail);
+		UTexture* Texture = static_cast<UTexture*>(Material);
+
+		Detail = Cast<UBitmapMaterial>(Texture->Detail);
 
 		// If the material is a simple texture, use it to get the blending options
 		if(!ModifyFramebufferBlending)
 		{
-			UTexture* Texture = static_cast<UTexture*>(Material);
-
 			if(Texture->bMasked)
 			{
 				ModifyFramebufferBlending = true;
@@ -481,6 +481,9 @@ bool FOpenGLRenderInterface::SetBitmapMaterial(UBitmapMaterial* Material, const 
 				CurrentState->CullMode = CM_None;
 		}
 	}
+
+	if(ModifierInfo.bModifiesTextureCoordinates)
+		return SetSimpleMaterial(Material, ModifierInfo);
 
 	SetBitmapTexture(Material, 0, 1.0f, ModifierInfo.TexUClamp, ModifierInfo.TexVClamp);
 
@@ -624,30 +627,6 @@ bool FOpenGLRenderInterface::HandleSimpleMaterial(UMaterial* Material, FShaderGe
 
 	if(Material->IsA<UBitmapMaterial>())
 	{
-		if(!ModifyFramebufferBlending && Material->IsA<UTexture>())
-		{
-			// If the material is a simple texture, use it to get the blending options
-			UTexture* Texture = static_cast<UTexture*>(Material);
-
-			if(Texture->bMasked)
-			{
-				ModifyFramebufferBlending = true;
-				CurrentState->UniformRevision += CurrentState->AlphaRef != 0.5f;
-				CurrentState->AlphaRef = 0.5f;
-				SetFramebufferBlending(FB_Overwrite);
-			}
-			else if(Texture->bAlphaTexture)
-			{
-				ModifyFramebufferBlending = true;
-				CurrentState->UniformRevision += CurrentState->AlphaRef != 0.0f;
-				CurrentState->AlphaRef = 0.0f;
-				SetFramebufferBlending(FB_AlphaBlend);
-			}
-
-			if(Texture->bTwoSided)
-				CurrentState->CullMode = CM_None;
-		}
-
 		INT Index = CurrentState->NumTextures++;
 
 		SetBitmapTexture(static_cast<UBitmapMaterial*>(Material), Index, 1.0f, ModifierInfo.TexUClamp, ModifierInfo.TexVClamp);
@@ -849,7 +828,7 @@ bool FOpenGLRenderInterface::HandleShaderMaterial(UShader* Shader, FShaderGenera
 		if(Shader->BumpMapType != BMT_Static_Specular && Shader->BumpMapType != BMT_Specular)
 		{
 			if(Shader->DiffuseEnvMap)
-				DiffuseEnvMap = CastChecked<UBitmapMaterial>(Shader->DiffuseEnvMap);
+				DiffuseEnvMap = Cast<UBitmapMaterial>(Shader->DiffuseEnvMap);
 
 			if(!DiffuseEnvMap && BumpmapIndex != INDEX_NONE)
 				DiffuseEnvMap = GCubemapManager->StaticDiffuse;

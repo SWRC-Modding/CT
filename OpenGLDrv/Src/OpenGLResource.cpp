@@ -226,16 +226,31 @@ FOpenGLTexture::~FOpenGLTexture()
 	Free();
 }
 
+static GLuint GetGLFormat(ETextureFormat Format, UBOOL Use16bitTextures)
+{
+	switch(Format)
+	{
+	case TEXF_V8U8:
+		return GL_RG8_SNORM;
+	case TEXF_L6V5U5:
+	case TEXF_X8L8V8U8:
+		return GL_RGBA8_SNORM;
+	default:
+		return Use16bitTextures ? GL_RGBA4 : GL_RGBA8;
+	}
+}
+
 void FOpenGLTexture::Cache(FBaseTexture* BaseTexture, bool bOwnDepthBuffer)
 {
+	guardFunc
 	Free();
 
-	FRenderTarget* RenderTarget = BaseTexture->GetRenderTargetInterface();
-	FCubemap* Cubemap = BaseTexture->GetCubemapInterface();
-	FCompositeTexture* CompositeTexture = BaseTexture->GetCompositeTextureInterface();
-	FTexture* Texture = BaseTexture->GetTextureInterface();
-	ETextureFormat SrcFormat = BaseTexture->GetFormat();
-	ETextureFormat DestFormat = IsDXTC(SrcFormat) ? SrcFormat : TEXF_RGBA8;
+	FRenderTarget*       RenderTarget     = BaseTexture->GetRenderTargetInterface();
+	FCubemap*            Cubemap          = BaseTexture->GetCubemapInterface();
+	FCompositeTexture*   CompositeTexture = BaseTexture->GetCompositeTextureInterface();
+	FTexture*            Texture          = BaseTexture->GetTextureInterface();
+	const ETextureFormat SrcFormat        = BaseTexture->GetFormat();
+	const ETextureFormat DestFormat       = IsDXTC(SrcFormat) || IsBumpmap(SrcFormat) ? SrcFormat : TEXF_RGBA8;
 
 	Width = BaseTexture->GetWidth();
 	Height = BaseTexture->GetHeight();
@@ -296,7 +311,7 @@ void FOpenGLTexture::Cache(FBaseTexture* BaseTexture, bool bOwnDepthBuffer)
 			RenDev->glCreateTextures(GL_TEXTURE_CUBE_MAP, 1, &TextureHandle);
 
 			if(!IsDXTC(DestFormat))
-				RenDev->glTextureStorage2D(TextureHandle, CubemapNumMips, RenDev->Use16bitTextures ? GL_RGBA4 : GL_RGBA8, Width, Height);
+				RenDev->glTextureStorage2D(TextureHandle, CubemapNumMips, GetGLFormat(DestFormat, RenDev->Use16bitTextures), Width, Height);
 
 			INT MaxLevel = -1;
 
@@ -313,7 +328,7 @@ void FOpenGLTexture::Cache(FBaseTexture* BaseTexture, bool bOwnDepthBuffer)
 
 				for(INT MipIndex = 0; MipIndex < NumMips; ++MipIndex)
 				{
-					void* Data = ConvertTextureData(CubemapFace, MipWidth, MipHeight, MipIndex + FirstMip, DestFormat);
+					void* Data = GetTextureData(CubemapFace, MipWidth, MipHeight, MipIndex + FirstMip);
 					UploadTextureData(DestFormat, Data, MipWidth, MipHeight, MipIndex, FaceIndex);
 
 					if(RenDev->bUnloadTextureData)
@@ -344,7 +359,7 @@ void FOpenGLTexture::Cache(FBaseTexture* BaseTexture, bool bOwnDepthBuffer)
 		RenDev->glCreateTextures(GL_TEXTURE_2D, 1, &TextureHandle);
 
 		if(!IsDXTC(DestFormat))
-			RenDev->glTextureStorage2D(TextureHandle, 1, RenDev->Use16bitTextures ? GL_RGBA4 : GL_RGBA8, Width, Height);
+			RenDev->glTextureStorage2D(TextureHandle, 1, GetGLFormat(DestFormat, RenDev->Use16bitTextures), Width, Height);
 
 		for(INT ChildIndex = 0; ChildIndex < NumChildren; ++ChildIndex)
 		{
@@ -379,13 +394,13 @@ void FOpenGLTexture::Cache(FBaseTexture* BaseTexture, bool bOwnDepthBuffer)
 			RenDev->glCreateTextures(GL_TEXTURE_2D, 1, &TextureHandle);
 
 			if(!IsDXTC(DestFormat))
-				RenDev->glTextureStorage2D(TextureHandle, NumMips, RenDev->Use16bitTextures ? GL_RGBA4 : GL_RGBA8, MipWidth, MipHeight);
+				RenDev->glTextureStorage2D(TextureHandle, NumMips, GetGLFormat(DestFormat, RenDev->Use16bitTextures), MipWidth, MipHeight);
 
 			INT MaxLevel = -1;
 
 			for(INT MipIndex = 0; MipIndex < NumMips; ++MipIndex)
 			{
-				void* Data = ConvertTextureData(Texture, MipWidth, MipHeight, MipIndex + FirstMip, DestFormat);
+				void* Data = GetTextureData(Texture, MipWidth, MipHeight, MipIndex + FirstMip);
 				UploadTextureData(DestFormat, Data, MipWidth, MipHeight, MipIndex);
 
 				if(RenDev->bUnloadTextureData)
@@ -408,6 +423,7 @@ void FOpenGLTexture::Cache(FBaseTexture* BaseTexture, bool bOwnDepthBuffer)
 	}
 
 	Revision = BaseTexture->GetRevision();
+	unguard
 }
 
 void FOpenGLTexture::Free()
@@ -446,6 +462,7 @@ void FOpenGLTexture::BindRenderTarget()
 
 void FOpenGLTexture::UploadTextureData(ETextureFormat Format, void* Data, INT MipWidth, INT MipHeight, INT MipIndex, INT CubemapFace)
 {
+	guardFunc
 	checkSlow(Data);
 	checkSlow(MipWidth > 0);
 	checkSlow(MipHeight > 0);
@@ -476,14 +493,24 @@ void FOpenGLTexture::UploadTextureData(ETextureFormat Format, void* Data, INT Mi
 		GLenum GLFormat = GL_NONE;
 		GLenum GLType = GL_NONE;
 
-		if(Format == TEXF_RGBA8)
+		switch(Format)
 		{
+		case TEXF_RGBA8:
 			GLFormat = GL_BGRA;
 			GLType = GL_UNSIGNED_BYTE;
-		}
-		else
-		{
-			appErrorf("Invalid texture format '%i'", Format);
+			break;
+		case TEXF_V8U8:
+			GLFormat = GL_RG;
+			GLType = GL_BYTE;
+			RenDev->glTextureParameteri(TextureHandle, GL_TEXTURE_SWIZZLE_B, GL_ONE);
+			break;
+		case TEXF_L6V5U5:
+		case TEXF_X8L8V8U8:
+			GLFormat = GL_RGBA;
+			GLType = GL_BYTE;
+			break;
+		default:
+			appErrorf("Unsupported texture format (%i)", Format);
 		}
 
 		if(CubemapFace < 0)
@@ -491,87 +518,95 @@ void FOpenGLTexture::UploadTextureData(ETextureFormat Format, void* Data, INT Mi
 		else
 			RenDev->glTextureSubImage3D(TextureHandle, MipIndex, 0, 0, CubemapFace, MipWidth, MipHeight, 1, GLFormat, GLType, Data);
 	}
+	unguard
 }
 
-void* FOpenGLTexture::ConvertTextureData(FTexture* Texture, INT MipWidth, INT MipHeight, INT MipIndex, ETextureFormat DestFormat)
+void* FOpenGLTexture::GetTextureData(FTexture* Texture, INT MipWidth, INT MipHeight, INT MipIndex)
 {
-	void* Result;
-	ETextureFormat SrcFormat = Texture->GetFormat();
-	INT NumPixels = MipWidth * MipHeight;
-	INT SrcBufferSize = GetBytesPerPixel(SrcFormat, NumPixels);
-	INT DestBufferSize = GetBytesPerPixel(DestFormat, NumPixels);
-	void* TextureData = Texture->GetRawTextureData(MipIndex);
+	guardFunc
+	const ETextureFormat SrcFormat      = Texture->GetFormat();
+	const INT            NumPixels      = MipWidth * MipHeight;
+	const INT            SrcBufferSize  = GetBytesPerPixel(SrcFormat, NumPixels);
+	const INT            DestBufferSize = MipWidth * MipHeight * 4; // Worst-case scenario: 4 bytes per pixel
+	void*                RawTextureData = Texture->GetRawTextureData(MipIndex);
+	void*                Result;
 
-	if(TextureData)
+	if(RawTextureData)
 	{
 		Result = RenDev->GetScratchBuffer(DestBufferSize);
 	}
 	else
 	{
-		TextureData = RenDev->GetScratchBuffer(SrcBufferSize + DestBufferSize);
-		Result = static_cast<BYTE*>(TextureData) + SrcBufferSize;
-		Texture->GetTextureData(MipIndex, TextureData, 0, SrcFormat);
+		RawTextureData = RenDev->GetScratchBuffer(SrcBufferSize + DestBufferSize);
+		Result = static_cast<BYTE*>(RawTextureData) + SrcBufferSize;
+		Texture->GetTextureData(MipIndex, RawTextureData, 0, SrcFormat);
 	}
 
-	if(SrcFormat == DestFormat)
-		return TextureData;
+	if(IsDXTC(SrcFormat) || SrcFormat == TEXF_RGBA8 || SrcFormat == TEXF_V8U8 || SrcFormat == TEXF_X8L8V8U8)
+		return RawTextureData;
 
-	if(DestFormat == TEXF_RGBA8)
+	switch(SrcFormat)
 	{
-		if(SrcFormat == TEXF_P8)
+	case TEXF_P8:
 		{
 			UTexture* Tex = Texture->GetUTexture();
 			check(Tex && Tex->Palette);
 			const TArray<FColor>& Palette = Tex->Palette->Colors;
 
 			for(INT i = 0; i < NumPixels; ++i)
-				static_cast<FColor*>(Result)[i] = Palette[static_cast<BYTE*>(TextureData)[i]];
+				static_cast<FColor*>(Result)[i] = Palette[static_cast<BYTE*>(RawTextureData)[i]];
+
+			break;
 		}
-		else if(SrcFormat == TEXF_RGB8)
+	case TEXF_RGB8:
 		{
 			for(INT i = 0; i < NumPixels; ++i)
 			{
-				BYTE* RGB = static_cast<BYTE*>(TextureData) + i * 3;
+				BYTE* RGB = static_cast<BYTE*>(RawTextureData) + i * 3;
 				static_cast<FColor*>(Result)[i] = FColor(RGB[0], RGB[1], RGB[2]);
 			}
+
+			break;
 		}
-		else if(SrcFormat == TEXF_L8)
+	case TEXF_L8:
 		{
 			for(INT i = 0; i < NumPixels; ++i)
 			{
-				BYTE Value = static_cast<BYTE*>(TextureData)[i];
+				BYTE Value = static_cast<BYTE*>(RawTextureData)[i];
 				static_cast<FColor*>(Result)[i] = FColor(Value, Value, Value);
 			}
+
+			break;
 		}
-		else if(SrcFormat == TEXF_G16)
+	case TEXF_G16:
 		{
 			for(INT i = 0; i < NumPixels; ++i)
 			{
-				BYTE Intensity = static_cast<_WORD*>(TextureData)[i] >> 8;
+				BYTE Intensity = static_cast<_WORD*>(RawTextureData)[i] >> 8;
 				static_cast<FColor*>(Result)[i] = FColor(Intensity, Intensity, Intensity);
 			}
+
+			break;
 		}
-		else if(SrcFormat == TEXF_V8U8)
+	case TEXF_L6V5U5:
 		{
-			ConvertV8U8ToBGRA8(Result, TextureData, MipWidth, MipHeight);
+			for(INT i = 0; i < NumPixels; ++i)
+			{
+				FL6V5U5Pixel    P1 = static_cast<FL6V5U5Pixel*>(RawTextureData)[i];
+				FX8L8V8U8Pixel& P2 = static_cast<FX8L8V8U8Pixel*>(Result)[i];
+
+				P2.U = Map5BitSignedTo8BitSigned(P1.U);
+				P2.V = Map5BitSignedTo8BitSigned(P1.V);
+				P2.L = (SBYTE)(Map6BitUnsignedTo8BitUnsigned(P1.L) - 128);
+				P2.X = P2.L;
+			}
+
+			break;
 		}
-		else if(SrcFormat == TEXF_L6V5U5)
-		{
-			ConvertL6V5U5ToBGRA8(Result, TextureData, MipWidth, MipHeight);
-		}
-		else if(SrcFormat == TEXF_X8L8V8U8)
-		{
-			ConvertX8L8V8U8ToBGRA8(Result, TextureData, MipWidth, MipHeight);
-		}
-		else
-		{
-			Result = NULL;
-		}
-	}
-	else
-	{
-		Result = NULL;
+	default:
+		appErrorf("Unsupported texture format (%i)", SrcFormat);
 	}
 
 	return Result;
+	unguard
 }

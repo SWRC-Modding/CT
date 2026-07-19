@@ -1246,7 +1246,7 @@ SHADER_HEADER
 "\t\telse \\\n"
 "\t\t\tResult = texture(Cubemap ## n, Coords.xyz * TextureInfos[n].UVScale); \\\n"
 "\t\tif(TextureInfos[n].IsBumpmap) \\\n"
-"\t\t\tResult.rg = (Result.rg - 0.5) * 2; \\\n"
+"\t\t\tResult.ba = Result.ba * 0.5 + 0.5; \\\n"
 "\t\treturn Result; \\\n"
 "\t}\n\n"
 "SAMPLE_TEX_FUNC(0)\n"

@@ -2,12 +2,13 @@
 #include "OpenGLRenderDevice.h"
 #include "opengl.h"
 
-FOpenGLResource::FOpenGLResource(UOpenGLRenderDevice* InRenDev, QWORD InCacheId) : RenDev(InRenDev),
-                                                                                   HashNext(NULL),
-                                                                                   CacheId(InCacheId),
-                                                                                   Revision(-1),
-                                                                                   HashIndex(INDEX_NONE)
-                                                                                   {
+FOpenGLResource::FOpenGLResource(UOpenGLRenderDevice* InRenDev, QWORD InCacheId)
+	: RenDev(InRenDev)
+	, HashNext(NULL)
+	, CacheId(InCacheId)
+	, Revision(-1)
+	, HashIndex(INDEX_NONE)
+{
 	RenDev->AddResource(this);
 }
 
@@ -20,11 +21,14 @@ FOpenGLResource::~FOpenGLResource()
 
 #define INITIAL_DYNAMIC_INDEX_BUFFER_SIZE 32768
 
-FOpenGLIndexBuffer::FOpenGLIndexBuffer(UOpenGLRenderDevice* InRenDev, QWORD InCacheId, bool InIsDynamic) : FOpenGLResource(InRenDev, InCacheId),
-                                                                                                           EBO(GL_NONE),
-                                                                                                           IndexSize(0),
-                                                                                                           BufferSize(0),
-                                                                                                           IsDynamic(InIsDynamic){}
+FOpenGLIndexBuffer::FOpenGLIndexBuffer(UOpenGLRenderDevice* InRenDev, QWORD InCacheId, bool InIsDynamic)
+	: FOpenGLResource(InRenDev, InCacheId)
+	, EBO(GL_NONE)
+	, IndexSize(0)
+	, BufferSize(0)
+	, IsDynamic(InIsDynamic)
+{
+}
 
 FOpenGLIndexBuffer::~FOpenGLIndexBuffer()
 {
@@ -311,7 +315,10 @@ void FOpenGLTexture::Cache(FBaseTexture* BaseTexture, bool bOwnDepthBuffer)
 				{
 					void* Data = ConvertTextureData(CubemapFace, MipWidth, MipHeight, MipIndex + FirstMip, DestFormat);
 					UploadTextureData(DestFormat, Data, MipWidth, MipHeight, MipIndex, FaceIndex);
-					//CubemapFace->UnloadRawTextureData(MipIndex + FirstMip);
+
+					if(RenDev->bUnloadTextureData)
+						CubemapFace->UnloadRawTextureData(MipIndex + FirstMip);
+
 					MipWidth >>= 1;
 					MipHeight >>= 1;
 					MaxLevel += FaceIndex == 0;
@@ -351,7 +358,9 @@ void FOpenGLTexture::Cache(FBaseTexture* BaseTexture, bool bOwnDepthBuffer)
 			                      DestFormat,
 			                      0,
 			                      1);
-			//Child->UnloadRawTextureData(0);
+
+			if(RenDev->bUnloadTextureData)
+				Child->UnloadRawTextureData(0);
 		}
 
 		UploadTextureData(DestFormat, Data, Width, Height, 0);
@@ -378,7 +387,10 @@ void FOpenGLTexture::Cache(FBaseTexture* BaseTexture, bool bOwnDepthBuffer)
 			{
 				void* Data = ConvertTextureData(Texture, MipWidth, MipHeight, MipIndex + FirstMip, DestFormat);
 				UploadTextureData(DestFormat, Data, MipWidth, MipHeight, MipIndex);
-				//Texture->UnloadRawTextureData(MipIndex + FirstMip);
+
+				if(RenDev->bUnloadTextureData)
+					Texture->UnloadRawTextureData(MipIndex + FirstMip);
+
 				MipWidth >>= 1;
 				MipHeight >>= 1;
 				++MaxLevel;

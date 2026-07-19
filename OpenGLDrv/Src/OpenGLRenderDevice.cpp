@@ -17,6 +17,7 @@ void UOpenGLRenderDevice::StaticConstructor()
 	SupportsZBIAS          = 1;
 	CanDoDistortionEffects = 1;
 	bBilinearFramebuffer   = 1;
+	bUnloadTextureData     = 1;
 	TextureFilter          = TF_Trilinear;
 	TextureAnisotropy      = 16;
 	bFirstRun              = 1;
@@ -28,6 +29,7 @@ void UOpenGLRenderDevice::StaticConstructor()
 	new(GetClass(), "BilinearFramebuffer",  RF_Public) UBoolProperty(CPP_PROPERTY(bBilinearFramebuffer),    "Options", CPF_Config);
 	new(GetClass(), "SaveShadersToDisk",    RF_Public) UBoolProperty(CPP_PROPERTY(bSaveShadersToDisk),      "Options", CPF_Config);
 	new(GetClass(), "AutoReloadShaders",    RF_Public) UBoolProperty(CPP_PROPERTY(bAutoReloadShaders),      "Options", CPF_Config);
+	new(GetClass(), "UnloadTextureData",    RF_Public) UBoolProperty(CPP_PROPERTY(bUnloadTextureData),      "Options", CPF_Config);
 	new(GetClass(), "UseTrilinear",         RF_Public) UBoolProperty(CPP_PROPERTY(bUseTrilinear),           "Options", CPF_Config);
 	new(GetClass(), "TextureFilter",        RF_Public) UByteProperty(CPP_PROPERTY(TextureFilter),           "Options", CPF_Config);
 	new(GetClass(), "TextureAnisotropy",    RF_Public) UIntProperty (CPP_PROPERTY(TextureAnisotropy),       "Options", CPF_Config);

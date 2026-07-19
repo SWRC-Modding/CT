@@ -26,6 +26,7 @@ public:
 	UBOOL          bBilinearFramebuffer;
 	UBOOL          bSaveShadersToDisk;
 	UBOOL          bAutoReloadShaders;
+	UBOOL          bUnloadTextureData;
 	UBOOL          bLogDebugMessages;
 	ETextureFilter TextureFilter;
 	INT            TextureAnisotropy;

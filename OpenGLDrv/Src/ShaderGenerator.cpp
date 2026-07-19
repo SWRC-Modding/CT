@@ -31,7 +31,7 @@ FStringTemp FShaderGenerator::GetShaderText(bool UseStaticLighting)
 
 		if(!HaveTexCoord)
 		{
-			VertexShaderText += FString::Printf("\tTexCoord%i = ", TexCoordIndex);
+			VertexShaderText += FString::Printf("  TexCoord%i = ", TexCoordIndex);
 
 			FString    TexCoord;
 			const BYTE TexCoordSrc = Textures[i].TexCoordSrc;
@@ -110,10 +110,10 @@ FStringTemp FShaderGenerator::GetShaderText(bool UseStaticLighting)
 				switch(Textures[i].TexCoordCount)
 				{
 				case TCN_3DCoords:
-					VertexShaderText += FString::Printf("\tTexCoord%i.xy /= TexCoord%i.z;\n", TexCoordIndex, TexCoordIndex);
+					VertexShaderText += FString::Printf("  TexCoord%i.xy /= TexCoord%i.z;\n", TexCoordIndex, TexCoordIndex);
 					break;
 				case TCN_4DCoords:
-					VertexShaderText += FString::Printf("\tTexCoord%i.xyz /= TexCoord%i.w;\n", TexCoordIndex, TexCoordIndex);
+					VertexShaderText += FString::Printf("  TexCoord%i.xyz /= TexCoord%i.w;\n", TexCoordIndex, TexCoordIndex);
 				}
 			}
 		}
@@ -135,11 +135,11 @@ FStringTemp FShaderGenerator::GetShaderText(bool UseStaticLighting)
 
 			check(BumpIndex >= 0 && BumpIndex < i);
 
-			FragmentShaderText += FString::Printf("\tconst vec4 t%i = sample_texture%i(TexCoord%i + t%i * TextureInfos[%i].BumpSize) * vec4(vec3(saturate(t%i.a * TextureInfos[%i].BumpLumaScale + TextureInfos[%i].BumpLumaOffset)), 1.0);\n", i, TexIndex, TexCoordIndex, BumpIndex, TexIndex, BumpIndex, TexIndex, TexIndex);
+			FragmentShaderText += FString::Printf("  const vec4 t%i = sample_texture%i(TexCoord%i + t%i * TextureInfos[%i].BumpSize) * vec4(vec3(saturate(t%i.a * TextureInfos[%i].BumpLumaScale + TextureInfos[%i].BumpLumaOffset)), 1.0);\n", i, TexIndex, TexCoordIndex, BumpIndex, TexIndex, BumpIndex, TexIndex, TexIndex);
 		}
 		else
 		{
-			FragmentShaderText += FString::Printf("\tconst vec4 t%i = sample_texture%i(TexCoord%i);\n", i, Textures[i].Index, TexCoordIndex);
+			FragmentShaderText += FString::Printf("  const vec4 t%i = sample_texture%i(TexCoord%i);\n", i, Textures[i].Index, TexCoordIndex);
 		}
 	}
 
@@ -159,7 +159,7 @@ FStringTemp FShaderGenerator::GetShaderText(bool UseStaticLighting)
 			DestSwizzle = ".a";
 		}
 
-		FragmentShaderText += FString::Printf("\tr%i%s = ", ColorOps[i].Dest, DestSwizzle);
+		FragmentShaderText += FString::Printf("  r%i%s = ", ColorOps[i].Dest, DestSwizzle);
 
 		FString Arg1RGBA = GetArgString(ColorOps[i].Arg1);
 		FString Arg1 = Arg1RGBA + SrcSwizzle;
@@ -223,51 +223,51 @@ FStringTemp FShaderGenerator::GetShaderText(bool UseStaticLighting)
 		"#ifdef VERTEX_SHADER\n" +
 			(NumTexMatrices > 0 ? FString::Printf("layout(location = 0) uniform mat4 TexMatrices[%i];\n\n", NumTexMatrices) : "") +
 		"void main(void){\n"
-		"\tPosition = (LocalToWorld * vec4(InPosition.xyz, 1.0)).xyz;\n"
-		"\tNormal = normalize((LocalToWorld * vec4(InNormal.xyz, 0.0)).xyz);\n"
-		"\tDiffuse = InDiffuse;\n"
-		"\tSpecular = InSpecular;\n"
-		"\tFog = calculate_fog((LocalToCamera * vec4(InPosition.xyz, 1.0)).z);\n"
-		"\tgl_Position = LocalToScreen * vec4(InPosition.xyz, 1.0);\n" +
+		"  Position = (LocalToWorld * vec4(InPosition.xyz, 1.0)).xyz;\n"
+		"  Normal = normalize((LocalToWorld * vec4(InNormal.xyz, 0.0)).xyz);\n"
+		"  Diffuse = InDiffuse;\n"
+		"  Specular = InSpecular;\n"
+		"  Fog = calculate_fog((LocalToCamera * vec4(InPosition.xyz, 1.0)).z);\n"
+		"  gl_Position = LocalToScreen * vec4(InPosition.xyz, 1.0);\n" +
 			VertexShaderText +
 		"}\n"
 		"#elif defined(FRAGMENT_SHADER)\n"
 		"vec3 light_color(void){\n"
-		"\tvec3 DiffuseLight = " + (UseStaticLighting ? "Diffuse.rgb" : "vec3(0)") + ";\n"
-		"\tvec3 NormalizedNormal = normalize(Normal);\n"
-		"\tfor(int i = 0; i < 4; ++i){\n"
-		"\t\tfloat DiffuseFactor;\n"
-		"\t\tif(Lights[i].Type == SL_Directional){\n"
-		"\t\t\tDiffuseFactor = saturate(dot(-Lights[i].Direction.xyz, NormalizedNormal));\n"
-		"\t\t}else{\n"
-		"\t\t\tvec3 Dir = Lights[i].Position.xyz - Position;\n"
-		"\t\t\tvec3 NormalizedDir = normalize(Dir);\n"
-		"\t\t\tfloat Dist = length(Dir);\n"
-		"\t\t\tDiffuseFactor = saturate(dot(NormalizedDir, NormalizedNormal));\n"
-		"\t\t\tif(Lights[i].Type == SL_Spot)\n"
-		"\t\t\t\tDiffuseFactor *= saturate((dot(NormalizedDir, normalize(-Lights[i].Direction.xyz)) - Lights[i].Cone * 0.9) / 0.03); // Values hand-tuned to match d3d\n"
-		"\t\t\t// Attenuation\n"
-		"\t\t\tDiffuseFactor *= 1.0 / (Lights[i].Constant + Lights[i].Linear * Dist + Lights[i].Quadratic * (Dist * Dist));\n"
-		"\t\t}\n"
-		"\t\tDiffuseLight += Lights[i].Color.rgb * DiffuseFactor;\n"
-		"\t}\n"
-		"\treturn AmbientLightColor.rgb " + (UseStaticLighting ? " * Specular.rgb" : "") + " + DiffuseLight;\n"
+		"  vec3 DiffuseLight = " + (UseStaticLighting ? "Diffuse.rgb" : "vec3(0)") + ";\n"
+		"  vec3 NormalizedNormal = normalize(Normal);\n"
+		"  for(int i = 0; i < 4; ++i){\n"
+		"    float DiffuseFactor;\n"
+		"    if(Lights[i].Type == SL_Directional){\n"
+		"      DiffuseFactor = saturate(dot(-Lights[i].Direction.xyz, NormalizedNormal));\n"
+		"    }else{\n"
+		"      vec3 Dir = Lights[i].Position.xyz - Position;\n"
+		"      vec3 NormalizedDir = normalize(Dir);\n"
+		"      float Dist = length(Dir);\n"
+		"      DiffuseFactor = saturate(dot(NormalizedDir, NormalizedNormal));\n"
+		"      if(Lights[i].Type == SL_Spot)\n"
+		"        DiffuseFactor *= saturate((dot(NormalizedDir, normalize(-Lights[i].Direction.xyz)) - Lights[i].Cone * 0.9) / 0.03); // Values hand-tuned to match d3d\n"
+		"      // Attenuation\n"
+		"      DiffuseFactor *= 1.0 / (Lights[i].Constant + Lights[i].Linear * Dist + Lights[i].Quadratic * (Dist * Dist));\n"
+		"    }\n"
+		"    DiffuseLight += Lights[i].Color.rgb * DiffuseFactor;\n"
+		"  }\n"
+		"  return AmbientLightColor.rgb " + (UseStaticLighting ? " * Specular.rgb" : "") + " + DiffuseLight;\n"
 		"}\n"
 		"void main(void){\n"
-		"\tvec4 r0 = Specular;\n"
-		"\tvec4 r1;\n"
-		"\tvec4 r2;\n"
-		"\tvec4 r3;\n"
-		"\tvec4 r4;\n"
-		"\tvec4 r5;\n"
-		"\tvec4 r6 = vec4(0.0); // EmissionFactor\n" +
+		"  vec4 r0 = Specular;\n"
+		"  vec4 r1;\n"
+		"  vec4 r2;\n"
+		"  vec4 r3;\n"
+		"  vec4 r4;\n"
+		"  vec4 r5;\n"
+		"  vec4 r6 = vec4(0.0); // EmissionFactor\n" +
 			FragmentShaderText +
-		"\tr0.rgb *= ColorFactor.rgb;\n"
-		"\tif(UseDynamicLighting)\n"
-		"\t\tr0.rgb = mix(r0.rgb * light_color() * LightFactor, r0.rgb, r6.rgb);\n" +
-		(UseStaticLighting ? "\telse\n\t\tr0 = mix(r0 * Diffuse, r0, r6);\n" : "") +
-		"\talpha_test(r0);\n"
-		"\tFragColor = FogEnabled ? apply_fog(r0) : r0;\n"
+		"  r0.rgb *= ColorFactor.rgb;\n"
+		"  if(UseDynamicLighting)\n"
+		"    r0.rgb = mix(r0.rgb * light_color() * LightFactor, r0.rgb, r6.rgb);\n" +
+		(UseStaticLighting ? "  else\n    r0 = mix(r0 * Diffuse, r0, r6);\n" : "") +
+		"  alpha_test(r0);\n"
+		"  FragColor = FogEnabled ? apply_fog(r0) : r0;\n"
 		"}\n"
 		"#else\n"
 		"#error Unsupported shader type\n"

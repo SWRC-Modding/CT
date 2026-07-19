@@ -84,8 +84,8 @@ public:
 	void Reset()
 	{
 		TempRegister = 0;
-		NumTextures = 0;
-		NumColorOps = 0;
+		NumTextures  = 0;
+		NumColorOps  = 0;
 	}
 
 	EColorArg AddTexture(INT Index, ETexCoordSrc TexCoordSrc, ETexCoordCount TexCoordCount = TCN_2DCoords, SBYTE Matrix = INDEX_NONE, bool bTexCoordProjected = false, INT Bumpmap = INDEX_NONE)
@@ -155,11 +155,11 @@ private:
 		BYTE Modifier;
 	};
 
-	INT                  TempRegister;
-	INT                  NumTextures;
-	INT                  NumColorOps;
-	FTextureRegister     Textures[MAX_SHADER_TEXTURE_REGISTERS];
-	FColorOp             ColorOps[MAX_SHADER_COLOR_OPERATIONS];
+	INT              TempRegister;
+	INT              NumTextures;
+	INT              NumColorOps;
+	FTextureRegister Textures[MAX_SHADER_TEXTURE_REGISTERS];
+	FColorOp         ColorOps[MAX_SHADER_COLOR_OPERATIONS];
 
 	FStringTemp GetArgString(BYTE Arg);
 };

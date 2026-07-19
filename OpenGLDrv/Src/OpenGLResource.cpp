@@ -41,6 +41,7 @@ FOpenGLIndexBuffer::~FOpenGLIndexBuffer()
 
 void FOpenGLIndexBuffer::Cache(FIndexBuffer* IndexBuffer, INT DynamicBufferSize)
 {
+	guardFunc
 	GLuint OldEBO = EBO;
 	RenDev->glCreateBuffers(1, &EBO);
 
@@ -71,6 +72,8 @@ void FOpenGLIndexBuffer::Cache(FIndexBuffer* IndexBuffer, INT DynamicBufferSize)
 
 	if(OldEBO)
 		RenDev->glDeleteBuffers(1, &OldEBO);
+
+	unguard
 }
 
 INT FOpenGLIndexBuffer::AddIndices(FIndexBuffer* IndexBuffer)
@@ -115,11 +118,14 @@ INT FOpenGLIndexBuffer::AddIndices(FIndexBuffer* IndexBuffer)
 
 #define INITIAL_DYNAMIC_VERTEX_BUFFER_SIZE 131072
 
-FOpenGLVertexStream::FOpenGLVertexStream(UOpenGLRenderDevice* InRenDev, QWORD InCacheId, bool InIsDynamic) : FOpenGLResource(InRenDev, InCacheId),
-                                                                                                             VBO(GL_NONE),
-                                                                                                             Stride(0),
-                                                                                                             BufferSize(0),
-                                                                                                             IsDynamic(InIsDynamic){}
+FOpenGLVertexStream::FOpenGLVertexStream(UOpenGLRenderDevice* InRenDev, QWORD InCacheId, bool InIsDynamic)
+	: FOpenGLResource(InRenDev, InCacheId)
+	, VBO(GL_NONE)
+	, Stride(0)
+	, BufferSize(0)
+	, IsDynamic(InIsDynamic)
+{
+}
 
 FOpenGLVertexStream::~FOpenGLVertexStream()
 {
@@ -132,6 +138,7 @@ FOpenGLVertexStream::~FOpenGLVertexStream()
 
 void FOpenGLVertexStream::Cache(FVertexStream* VertexStream, INT DynamicBufferSize)
 {
+	guardFunc
 	GLuint OldVBO = VBO;
 	RenDev->glCreateBuffers(1, &VBO);
 
@@ -170,10 +177,13 @@ void FOpenGLVertexStream::Cache(FVertexStream* VertexStream, INT DynamicBufferSi
 
 	if(OldVBO)
 		RenDev->glDeleteBuffers(1, &OldVBO);
+
+	unguard
 }
 
 INT FOpenGLVertexStream::AddVertices(FVertexStream* VertexStream)
 {
+	guardFunc
 	checkSlow(IsDynamic);
 
 	INT AdditionalSize = VertexStream->GetSize();
@@ -208,6 +218,7 @@ INT FOpenGLVertexStream::AddVertices(FVertexStream* VertexStream)
 	Tail = VertexBufferOffset + AdditionalSize;
 
 	return VertexBufferOffset / Stride;
+	unguard
 }
 
 // FOpenGLTexture
@@ -353,7 +364,7 @@ void FOpenGLTexture::Cache(FBaseTexture* BaseTexture, bool bOwnDepthBuffer)
 	}
 	else if(CompositeTexture)
 	{
-		check(TextureFormat == Texture->GetFormat());
+		checkSlow(TextureFormat == BaseTexture->GetFormat());
 		checkSlow(CompositeTexture->GetNumMips() == 1);
 		checkSlow(Width > 0 && Height > 0);
 
@@ -368,16 +379,18 @@ void FOpenGLTexture::Cache(FBaseTexture* BaseTexture, bool bOwnDepthBuffer)
 
 		for(INT ChildIndex = 0; ChildIndex < NumChildren; ++ChildIndex)
 		{
-			INT ChildX = 0;
-			INT ChildY = 0;
-			FTexture* Child = CompositeTexture->GetChild(ChildIndex, &ChildX, &ChildY);
+			INT       ChildX = 0;
+			INT       ChildY = 0;
+			FTexture* Child  = CompositeTexture->GetChild(ChildIndex, &ChildX, &ChildY);
 
-			Child->GetTextureData(0,
-			                      CalculateTexelPointer(static_cast<BYTE*>(Data), TextureFormat, Pitch, ChildX, ChildY),
-			                      Pitch,
-			                      TextureFormat,
-			                      0,
-			                      1);
+			Child->GetTextureData(
+				0,
+				CalculateTexelPointer(static_cast<BYTE*>(Data), TextureFormat, Pitch, ChildX, ChildY),
+				Pitch,
+				TextureFormat,
+				0,
+				1
+			);
 
 			if(RenDev->bUnloadTextureData)
 				Child->UnloadRawTextureData(0);
@@ -495,8 +508,8 @@ void FOpenGLTexture::UploadTextureData(ETextureFormat Format, void* Data, INT Mi
 	}
 	else
 	{
-		GLenum GLFormat;
-		GLenum GLType;
+		GLenum GLFormat = GL_NONE;
+		GLenum GLType   = GL_NONE;
 
 		switch(Format)
 		{

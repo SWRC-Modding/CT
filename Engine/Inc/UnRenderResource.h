@@ -494,7 +494,7 @@ inline void ConvertL6V5U5ToBGRA8(void* Dest, const void* Src, INT Width, INT Hei
 		P2[0] = Map6BitUnsignedTo8BitUnsigned(P1->L);
 		P2[1] = Map8BitSignedTo8BitUnsigned(Map5BitSignedTo8BitSigned(P1->V));
 		P2[2] = Map8BitSignedTo8BitUnsigned(Map5BitSignedTo8BitSigned(P1->U));
-		P2[3] = P2[0];
+		P2[3] = 0xFF;
 	}
 }
 
@@ -512,7 +512,7 @@ inline void ConvertX8L8V8U8ToBGRA8(void* Dest, const void* Src, INT Width, INT H
 		P2[0] = P1->L;
 		P2[1] = Map8BitSignedTo8BitUnsigned(P1->V);
 		P2[2] = Map8BitSignedTo8BitUnsigned(P1->U);
-		P2[3] = P1->X;
+		P2[3] = 0xFF;
 	}
 }
 

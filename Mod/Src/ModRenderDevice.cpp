@@ -207,7 +207,7 @@ static void ConvertL6V5U5ToX8L8V8U8(void* Dest, const void* Src, INT Width, INT 
 		P2->V = Map5BitSignedTo8BitSigned(P1->V);
 		P2->U = Map5BitSignedTo8BitSigned(P1->U);
 		P2->L = Map6BitUnsignedTo8BitUnsigned(P1->L);
-		P2->X = P2->L; // L6V5U5 only has one luminance value so we can just reuse it
+		P2->X = 0xFF;
 	}
 }
 

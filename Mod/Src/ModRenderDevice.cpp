@@ -139,8 +139,60 @@ static void*              CurrentD3D8MipLevelPixels;
 
 // Conversion from one bumpmap format to another
 
+static BYTE Map8BitUnsignedTo6BitUnsigned(BYTE U8)
+{
+	return (BYTE)(U8 * 63 / 255);
+}
+
+static SBYTE Map8BitSignedTo5BitSigned(SBYTE S8)
+{
+	const int Min8 = -128;
+	const int Max8 = 127;
+	const int Range8 = Max8 - Min8;   // 255
+
+	const int Min5 = -16;
+	const int Max5 = 15;
+	const int Range5 = Max5 - Min5;   // 31
+
+	return (SBYTE)((S8 - Min8) * Range5 / Range8 + Min5);
+}
+
 /*
- * L6V5U5 format conversion
+ * V8U8
+ */
+
+static void ConvertV8U8ToL6V5U5(void* Dest, const void* Src, INT Width, INT Height)
+{
+	INT NumPixels = Width * Height;
+
+	for(INT i = 0; i < NumPixels; ++i)
+	{
+		const FV8U8Pixel* P1 = static_cast<const FV8U8Pixel*>(Src) + i;
+		FL6V5U5Pixel* P2 = static_cast<FL6V5U5Pixel*>(Dest) + i;
+
+		P2->V = Map8BitSignedTo5BitSigned(P1->V);
+		P2->U = Map8BitSignedTo5BitSigned(P1->U);
+		P2->L = Map8BitUnsignedTo6BitUnsigned(0xFF);
+	}
+}
+
+static void ConvertV8U8ToX8L8V8U8(void* Dest, const void* Src, INT Width, INT Height)
+{
+	INT NumPixels = Width * Height;
+
+	for(INT i = 0; i < NumPixels; ++i)
+	{
+		const FV8U8Pixel* P1 = static_cast<const FV8U8Pixel*>(Src) + i;
+		FX8L8V8U8Pixel* P2 = static_cast<FX8L8V8U8Pixel*>(Dest) + i;
+
+		P2->V = P1->V;
+		P2->U = P1->U;
+		P2->L = 0xFF;
+		P2->X = 0xFF;
+	}
+}
+/*
+ * L6V5U5
  */
 
 static void ConvertL6V5U5ToX8L8V8U8(void* Dest, const void* Src, INT Width, INT Height)
@@ -175,26 +227,8 @@ static void ConvertL6V5U5ToV8U8(void* Dest, const void* Src, INT Width, INT Heig
 }
 
 /*
- * X8L8V8U8 format conversion
+ * X8L8V8U8
  */
-
-static BYTE Map8BitUnsignedTo6BitUnsigned(BYTE U8)
-{
-	return (BYTE)(U8 * 63 / 255);
-}
-
-static SBYTE Map8BitSignedTo5BitSigned(SBYTE S8)
-{
-	const int Min8 = -128;
-	const int Max8 = 127;
-	const int Range8 = Max8 - Min8;   // 255
-
-	const int Min5 = -16;
-	const int Max5 = 15;
-	const int Range5 = Max5 - Min5;   // 31
-
-	return (SBYTE)((S8 - Min8) * Range5 / Range8 + Min5);
-}
 
 static void ConvertX8L8V8U8ToL6V5U5(void* Dest, const void* Src, INT Width, INT Height)
 {
@@ -298,7 +332,12 @@ static D3DTEXTURE_UNLOCKRECT(D3DTextureUnlockRectOverride)
 	{
 		if(CurrentD3D8TextureSourceFormat == D3DFMT_V8U8)
 		{
-			ConvertV8U8ToBGRA8(LockedRect.pBits, CurrentD3D8MipLevelPixels, CurrentD3D8MipLevelWidth, CurrentD3D8MipLevelHeight);
+			if(CurrentD3D8TextureTargetFormat == D3DFMT_L6V5U5)
+				ConvertV8U8ToL6V5U5(LockedRect.pBits, CurrentD3D8MipLevelPixels, CurrentD3D8MipLevelWidth, CurrentD3D8MipLevelHeight);
+			else if(CurrentD3D8TextureTargetFormat == D3DFMT_X8L8V8U8)
+				ConvertV8U8ToX8L8V8U8(LockedRect.pBits, CurrentD3D8MipLevelPixels, CurrentD3D8MipLevelWidth, CurrentD3D8MipLevelHeight);
+			else if(CurrentD3D8TextureTargetFormat == D3DFMT_A8R8G8B8)
+				ConvertV8U8ToBGRA8(LockedRect.pBits, CurrentD3D8MipLevelPixels, CurrentD3D8MipLevelWidth, CurrentD3D8MipLevelHeight);
 		}
 		else if(CurrentD3D8TextureSourceFormat == D3DFMT_L6V5U5)
 		{
@@ -352,7 +391,7 @@ static D3DDEVICE_CREATETEXTURE(D3DDeviceCreateTextureOverride)
 	const D3DFORMAT FormatTryList[] = {
 		Format,          // Try the actually requested format first.
 		D3DFMT_X8L8V8U8, // Usually still works if L6V5U5 doesn't. No loss in precision.
-		D3DFMT_L6V5U5,   // On intel this strangely still works but X8L8V8U8 doesn't so convert down to keep luminance
+		D3DFMT_L6V5U5,   // On intel this still works but X8L8V8U8 doesn't so try it before V8U8 to keep luminance.
 		D3DFMT_V8U8,     // Missing luminance.
 		D3DFMT_A8R8G8B8  // Fallback if everything else fails.
 	};
@@ -360,14 +399,19 @@ static D3DDEVICE_CREATETEXTURE(D3DDeviceCreateTextureOverride)
 	for(INT i = 0; i < ARRAY_COUNT(FormatTryList); ++i)
 	{
 		const D3DFORMAT ActualFormat = FormatTryList[i];
-		const HRESULT   Result       = D3DDeviceCreateTexture(D3DDevice,
-		                                                      Width,
-		                                                      Height,
-		                                                      Levels,
-		                                                      Usage,
-		                                                      ActualFormat,
-		                                                      Pool,
-		                                                      ppTexture);
+
+		// Skip CreateTexture call if it already failed
+		if(i > 0 && ActualFormat == Format)
+			continue;
+
+		const HRESULT Result = D3DDeviceCreateTexture(D3DDevice,
+		                                              Width,
+		                                              Height,
+		                                              Levels,
+		                                              Usage,
+		                                              ActualFormat,
+		                                              Pool,
+		                                              ppTexture);
 
 		if(FAILED(Result))
 		{

@@ -1397,8 +1397,8 @@ bool FOpenGLRenderInterface::SetTerrainMaterial(UTerrainMaterial* TerrainMateria
 
 			CurrentState->NumTextures = 2;
 
-			bool UseLighting = CurrentState->UseStaticLighting || CurrentState->UseDynamicLighting;
-			const FOpenGLShader& Shader = UseLighting ? TerrainShaderAlphaMapStaticLighting : TerrainShaderAlphaMap;
+			const bool           UseLighting = CurrentState->UseStaticLighting || CurrentState->UseDynamicLighting;
+			const FOpenGLShader& Shader      = UseLighting ? TerrainShaderAlphaMapStaticLighting : TerrainShaderAlphaMap;
 
 			RenDev->glProgramUniformMatrix4fv(Shader.Program, 0, 1, GL_TRUE, reinterpret_cast<const GLfloat*>(&Layer.TextureMatrix));
 			SetShader(Shader);
@@ -1429,16 +1429,16 @@ bool FOpenGLRenderInterface::SetTerrainMaterial(UTerrainMaterial* TerrainMateria
 	}
 	else
 	{
+		if(!TerrainMaterial->FirstPass)
+		{
+			SetFramebufferBlending(FB_Translucent);
+			CurrentState->bZWrite = false;
+			CurrentState->FogColor = FPlane(0.0f, 0.0f, 0.0f, 0.0f);
+			CurrentState->OverrideFogColor = true;
+		}
+
 		if(TerrainMaterial->RenderMethod == RM_CombinedWeightMap)
 		{
-			if(!TerrainMaterial->FirstPass)
-			{
-				SetFramebufferBlending(FB_Translucent);
-				CurrentState->bZWrite = false;
-				CurrentState->FogColor = FPlane(0.0f, 0.0f, 0.0f, 0.0f);
-				CurrentState->OverrideFogColor = true;
-			}
-
 			const TArray<FTerrainMaterialLayer>& Layers = TerrainMaterial->Layers;
 			checkSlow(Layers.Num() == 3 || Layers.Num() == 4);
 			checkSlow(Layers[0].Texture->IsA<UBitmapMaterial>());
@@ -1454,23 +1454,23 @@ bool FOpenGLRenderInterface::SetTerrainMaterial(UTerrainMaterial* TerrainMateria
 			TexMatrices[1] = Layers[1].TextureMatrix;
 			TexMatrices[2] = Layers[2].TextureMatrix;
 
-			bool Layer4 = Layers.Num() > 3;
+			FOpenGLShader* Shader;
 
-			if(Layer4)
+			if(Layers.Num() > 3)
 			{
 				SetBitmapTexture(static_cast<UBitmapMaterial*>(Layers[3].Texture), 4, 1.0f, TCO_Wrap, TCO_Wrap);
 				TexMatrices[3] = Layers[3].TextureMatrix;
 				NumTexMatrices = 4;
+				Shader = &TerrainShader4Layers;
 			}
 			else
 			{
 				NumTexMatrices = 3;
+				Shader = &TerrainShader3Layers;
 			}
 
-			const FOpenGLShader& Shader = Layer4 ? TerrainShader4Layers : TerrainShader3Layers;
-
-			RenDev->glProgramUniformMatrix4fv(Shader.Program, 0, NumTexMatrices, GL_TRUE, reinterpret_cast<const GLfloat*>(TexMatrices));
-			SetShader(Shader);
+			RenDev->glProgramUniformMatrix4fv(Shader->Program, 0, NumTexMatrices, GL_TRUE, reinterpret_cast<const GLfloat*>(TexMatrices));
+			SetShader(*Shader);
 		}
 		else
 		{

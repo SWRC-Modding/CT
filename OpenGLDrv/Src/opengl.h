@@ -305,8 +305,11 @@ typedef OPENGL_MESSAGE_CALLBACK(opengl_message_callback);
 	GL_FUNC(BindTextureUnit, void, (GLuint Unit, GLuint Texture)) \
 	GL_FUNC(TextureParameteri, void, (GLuint Texture, GLenum Name, GLint Param)) \
 	GL_FUNC(TextureStorage2D, void, (GLuint Texture, GLsizei Levels, GLenum InternalFormat, GLsizei Width, GLsizei Height)) \
+	GL_FUNC(TextureStorage3D, void, (GLuint Texture, GLsizei Levels, GLenum InternalFormat, GLsizei Width, GLsizei Height, GLsizei Depth)) \
 	GL_FUNC(TextureSubImage2D, void, (GLuint Texture, GLint Level, GLint XOffset, GLint YOffset, GLsizei Width, GLsizei Height, GLenum Format, GLenum Type, const void* Pixels)) \
 	GL_FUNC(TextureSubImage3D, void, (GLuint Texture, GLint Level, GLint XOffset, GLint YOffset, GLint ZOffset, GLsizei Width, GLsizei Height, GLsizei Depth, GLenum Format, GLenum Type, const void* Pixels)) \
+	GL_FUNC(CompressedTextureSubImage2D, void, (GLuint Texture, GLint Level, GLint XOffset, GLint YOffset, GLsizei Width, GLsizei Height, GLenum Format, GLsizei ImageSize, const void* Data)) \
+	GL_FUNC(CompressedTextureSubImage3D, void, (GLuint Texture, GLint Level, GLint XOffset, GLint YOffset, GLint ZOffset, GLsizei Width, GLsizei Height, GLsizei Depth, GLenum Format, GLsizei ImageSize, const void* Data)) \
 	GL_FUNC(GenerateTextureMipmap, void, (GLuint Texture)) \
 	GL_FUNC(CreateFramebuffers, void, (GLsizei Num, GLuint* Framebuffers)) \
 	GL_FUNC(DeleteFramebuffers, void, (GLsizei Num, const GLuint* Framebuffers)) \
@@ -336,6 +339,3 @@ typedef OPENGL_MESSAGE_CALLBACK(opengl_message_callback);
 	GL_FUNC(DrawElementsInstanced, void, (GLenum Mode, GLsizei Count, GLenum Type, const void* Indices, GLsizei PrimCount)) \
 	GL_FUNC(DrawRangeElements, void, (GLenum Mode, GLuint Start, GLuint End, GLsizei Count, GLenum Type, const void* Indices)) \
 	GL_FUNC(DrawRangeElementsBaseVertex, void, (GLenum Mode, GLuint Start, GLuint End, GLsizei Count, GLenum Type, const void* Indices, GLint BaseVertex))
-
-#define GL_EXT_FUNCS \
-	GL_FUNC(CompressedTextureImage2DEXT, void, (GLuint Texture, GLenum Target, GLint Level, GLenum InternalFormat, GLsizei Width, GLsizei Height, GLint Border, GLsizei ImageSize, const void* Data))

@@ -244,6 +244,12 @@ static GLuint GetGLFormat(ETextureFormat Format, UBOOL Use16bitTextures)
 {
 	switch(Format)
 	{
+	case TEXF_DXT1:
+		return GL_COMPRESSED_RGBA_S3TC_DXT1_EXT;
+	case TEXF_DXT3:
+		return GL_COMPRESSED_RGBA_S3TC_DXT3_EXT;
+	case TEXF_DXT5:
+		return GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
 	case TEXF_V8U8:
 		return GL_RG8_SNORM;
 	case TEXF_L6V5U5:
@@ -320,14 +326,12 @@ void FOpenGLTexture::Cache(FBaseTexture* BaseTexture, bool bOwnDepthBuffer)
 	{
 		IsCubemap = true;
 
-		INT CubemapNumMips = Cubemap->GetNumMips() - Cubemap->GetFirstMip();
+		const INT CubemapNumMips = Cubemap->GetNumMips() - Cubemap->GetFirstMip();
 
 		if(CubemapNumMips > 0)
 		{
 			RenDev->glCreateTextures(GL_TEXTURE_CUBE_MAP, 1, &TextureHandle);
-
-			if(!IsDXTC(TextureFormat))
-				RenDev->glTextureStorage2D(TextureHandle, CubemapNumMips, GetGLFormat(TextureFormat, RenDev->Use16bitTextures), Width, Height);
+			RenDev->glTextureStorage2D(TextureHandle, CubemapNumMips, GetGLFormat(TextureFormat, RenDev->Use16bitTextures), Width, Height);
 
 			INT MaxLevel = -1;
 
@@ -373,9 +377,7 @@ void FOpenGLTexture::Cache(FBaseTexture* BaseTexture, bool bOwnDepthBuffer)
 		void* Data      = RenDev->GetScratchBuffer(GetBytesPerPixel(TextureFormat, Width * Height));
 
 		RenDev->glCreateTextures(GL_TEXTURE_2D, 1, &TextureHandle);
-
-		if(!IsDXTC(TextureFormat))
-			RenDev->glTextureStorage2D(TextureHandle, 1, GetGLFormat(TextureFormat, RenDev->Use16bitTextures), Width, Height);
+		RenDev->glTextureStorage2D(TextureHandle, 1, GetGLFormat(TextureFormat, RenDev->Use16bitTextures), Width, Height);
 
 		for(INT ChildIndex = 0; ChildIndex < NumChildren; ++ChildIndex)
 		{
@@ -410,9 +412,7 @@ void FOpenGLTexture::Cache(FBaseTexture* BaseTexture, bool bOwnDepthBuffer)
 		{
 			checkSlow(Width > 0 && Height > 0);
 			RenDev->glCreateTextures(GL_TEXTURE_2D, 1, &TextureHandle);
-
-			if(!IsDXTC(TextureFormat))
-				RenDev->glTextureStorage2D(TextureHandle, NumMips, GetGLFormat(TextureFormat, RenDev->Use16bitTextures), MipWidth, MipHeight);
+			RenDev->glTextureStorage2D(TextureHandle, NumMips, GetGLFormat(TextureFormat, RenDev->Use16bitTextures), MipWidth, MipHeight);
 
 			INT MaxLevel = -1;
 
@@ -487,24 +487,29 @@ void FOpenGLTexture::UploadTextureData(ETextureFormat Format, void* Data, INT Mi
 
 	if(IsDXTC(Format))
 	{
-		GLenum GLFormat;
+		GLenum GLFormat = GL_NONE;
 
-		if(Format == TEXF_DXT1)
-			GLFormat = GL_COMPRESSED_RGBA_S3TC_DXT1_EXT;
-		else if(Format == TEXF_DXT3)
-			GLFormat = GL_COMPRESSED_RGBA_S3TC_DXT3_EXT;
-		else
-			GLFormat = GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
-
-		GLenum Target = GL_TEXTURE_2D;
-
-		if(CubemapFace >= 0)
+		switch(Format)
 		{
-			checkSlow(CubemapFace < 6);
-			Target = GL_TEXTURE_CUBE_MAP_POSITIVE_X + CubemapFace;
+		case TEXF_DXT1:
+			GLFormat = GL_COMPRESSED_RGBA_S3TC_DXT1_EXT;
+			break;
+		case TEXF_DXT3:
+			GLFormat = GL_COMPRESSED_RGBA_S3TC_DXT3_EXT;
+			break;
+		case TEXF_DXT5:
+			GLFormat = GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
+			break;
+		default:
+			appErrorf("Unsupported DXT texture format (%i)", Format);
 		}
 
-		RenDev->glCompressedTextureImage2DEXT(TextureHandle, Target, MipIndex, GLFormat, MipWidth, MipHeight, 0, GetBytesPerPixel(Format, MipWidth * MipHeight), Data);
+		const GLsizei ImageSize = GetBytesPerPixel(Format, MipWidth * MipHeight);
+
+		if(CubemapFace < 0)
+			RenDev->glCompressedTextureSubImage2D(TextureHandle, MipIndex, 0, 0, MipWidth, MipHeight, GLFormat, ImageSize, Data);
+		else
+			RenDev->glCompressedTextureSubImage3D(TextureHandle, MipIndex, 0, 0, CubemapFace, MipWidth, MipHeight, 1, GLFormat, ImageSize, Data);
 	}
 	else
 	{

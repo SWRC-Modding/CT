@@ -593,8 +593,6 @@ UBOOL UOpenGLRenderDevice::SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL
 		if(!SupportsDXTCompression)
 			appErrorf("OpenGL driver does not support required extension for DXT compression: GL_EXT_texture_compression_s3tc");
 
-		LoadGLExtFuncs();
-
 		// Initialize render interface
 
 		RenderInterface.Init(NewX, NewY);
@@ -1152,14 +1150,6 @@ void UOpenGLRenderDevice::LoadGLFuncs()
 	if(!gl ## name) \
 		appErrorf("Unable to load required opengl function '%s'", "gl" # name);
 	GL_FUNCS
-#undef GL_FUNC
-}
-
-void UOpenGLRenderDevice::LoadGLExtFuncs()
-{
-#define GL_FUNC(name, ret, args) \
-	gl ## name = reinterpret_cast<ret(OPENGL_CALL*)args>(wglGetProcAddress("gl" #name));
-	GL_EXT_FUNCS
 #undef GL_FUNC
 }
 

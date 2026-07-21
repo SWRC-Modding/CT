@@ -22,6 +22,11 @@ enum D3DFORMAT{
 	D3DFMT_FORCE_DWORD = 0x7fffffff
 };
 
+static bool IsD3DBumpmapFormat(D3DFORMAT Format)
+{
+	return Format >= D3DFMT_V8U8 && Format <= D3DFMT_X8L8V8U8;
+}
+
 typedef DWORD D3DRESOURCETYPE;
 typedef DWORD D3DPOOL;
 typedef DWORD D3DMULTISAMPLE_TYPE;
@@ -173,6 +178,39 @@ static void ConvertL6V5U5ToV8U8(void* Dest, const void* Src, INT Width, INT Heig
  * X8L8V8U8 format conversion
  */
 
+static BYTE Map8BitUnsignedTo6BitUnsigned(BYTE U8)
+{
+	return (BYTE)(U8 * 63 / 255);
+}
+
+static SBYTE Map8BitSignedTo5BitSigned(SBYTE S8)
+{
+	const int Min8 = -128;
+	const int Max8 = 127;
+	const int Range8 = Max8 - Min8;   // 255
+
+	const int Min5 = -16;
+	const int Max5 = 15;
+	const int Range5 = Max5 - Min5;   // 31
+
+	return (SBYTE)((S8 - Min8) * Range5 / Range8 + Min5);
+}
+
+static void ConvertX8L8V8U8ToL6V5U5(void* Dest, const void* Src, INT Width, INT Height)
+{
+	INT NumPixels = Width * Height;
+
+	for(INT i = 0; i < NumPixels; ++i)
+	{
+		const FX8L8V8U8Pixel* P1 = static_cast<const FX8L8V8U8Pixel*>(Src) + i;
+		FL6V5U5Pixel* P2 = static_cast<FL6V5U5Pixel*>(Dest) + i;
+
+		P2->V = Map8BitSignedTo5BitSigned(P1->V);
+		P2->U = Map8BitSignedTo5BitSigned(P1->U);
+		P2->L = Map8BitUnsignedTo6BitUnsigned(P1->L);
+	}
+}
+
 static void ConvertX8L8V8U8ToV8U8(void* Dest, const void* Src, INT Width, INT Height)
 {
 	INT NumPixels = Width * Height;
@@ -182,8 +220,8 @@ static void ConvertX8L8V8U8ToV8U8(void* Dest, const void* Src, INT Width, INT He
 		const FX8L8V8U8Pixel* P1 = static_cast<const FX8L8V8U8Pixel*>(Src) + i;
 		FV8U8Pixel* P2 = static_cast<FV8U8Pixel*>(Dest) + i;
 
-		P2->V = Map5BitSignedTo8BitSigned(P1->V);
-		P2->U = Map5BitSignedTo8BitSigned(P1->U);
+		P2->V = P1->V;
+		P2->U = P1->U;
 		// No luminance
 	}
 }
@@ -203,15 +241,10 @@ static D3DTEXTURE_LOCKRECT(D3DTextureLockRectOverride)
 		return D3DTextureLockRect(D3DTexture, Level, pLockedRect, pRect, Flags);
 
 	D3DSURFACE_DESC SurfaceDesc;
-	HRESULT GetLevelDescResult = D3DTextureGetLevelDesc(D3DTexture, Level, &SurfaceDesc);
+	const HRESULT   GetLevelDescResult = D3DTextureGetLevelDesc(D3DTexture, Level, &SurfaceDesc);
 
 	if(FAILED(GetLevelDescResult))
 		return GetLevelDescResult;
-
-	CurrentD3D8MipLevelWidth = SurfaceDesc.Width;
-	CurrentD3D8MipLevelHeight = SurfaceDesc.Height;
-	check(CurrentD3D8MipLevelPixels == NULL);
-	CurrentD3D8MipLevelPixels = appMalloc(SurfaceDesc.Size);
 
 	INT BytesPerPixel = 0;
 
@@ -232,6 +265,11 @@ static D3DTEXTURE_LOCKRECT(D3DTextureLockRectOverride)
 	default:
 		appErrorf("Unexpected texture format (%i)", CurrentD3D8TextureSourceFormat);
 	}
+
+	check(CurrentD3D8MipLevelPixels == NULL);
+	CurrentD3D8MipLevelPixels = appMalloc(SurfaceDesc.Width * SurfaceDesc.Height * BytesPerPixel);
+	CurrentD3D8MipLevelWidth  = SurfaceDesc.Width;
+	CurrentD3D8MipLevelHeight = SurfaceDesc.Height;
 
 	pLockedRect->Pitch = CurrentD3D8MipLevelWidth * BytesPerPixel;
 	pLockedRect->pBits = CurrentD3D8MipLevelPixels;
@@ -275,6 +313,8 @@ static D3DTEXTURE_UNLOCKRECT(D3DTextureUnlockRectOverride)
 		{
 			if(CurrentD3D8TextureTargetFormat == D3DFMT_V8U8)
 				ConvertX8L8V8U8ToV8U8(LockedRect.pBits, CurrentD3D8MipLevelPixels, CurrentD3D8MipLevelWidth, CurrentD3D8MipLevelHeight);
+			else if(CurrentD3D8TextureTargetFormat == D3DFMT_L6V5U5)
+				ConvertX8L8V8U8ToL6V5U5(LockedRect.pBits, CurrentD3D8MipLevelPixels, CurrentD3D8MipLevelWidth, CurrentD3D8MipLevelHeight);
 			else if(CurrentD3D8TextureTargetFormat == D3DFMT_A8R8G8B8)
 				ConvertX8L8V8U8ToBGRA8(LockedRect.pBits, CurrentD3D8MipLevelPixels, CurrentD3D8MipLevelWidth, CurrentD3D8MipLevelHeight);
 		}
@@ -312,6 +352,7 @@ static D3DDEVICE_CREATETEXTURE(D3DDeviceCreateTextureOverride)
 	const D3DFORMAT FormatTryList[] = {
 		Format,          // Try the actually requested format first.
 		D3DFMT_X8L8V8U8, // Usually still works if L6V5U5 doesn't. No loss in precision.
+		D3DFMT_L6V5U5,   // On intel this strangely still works but X8L8V8U8 doesn't so convert down to keep luminance
 		D3DFMT_V8U8,     // Missing luminance.
 		D3DFMT_A8R8G8B8  // Fallback if everything else fails.
 	};
@@ -328,24 +369,25 @@ static D3DDEVICE_CREATETEXTURE(D3DDeviceCreateTextureOverride)
 		                                                      Pool,
 		                                                      ppTexture);
 
-		if(SUCCEEDED(Result))
+		if(FAILED(Result))
 		{
-			if(Format != ActualFormat)
-			{
-				CurrentD3D8Texture             = *ppTexture;
-				CurrentD3D8TextureSourceFormat = Format;
-				CurrentD3D8TextureTargetFormat = ActualFormat;
-				CurrentD3D8TextureNumMipLevels = Levels;
-				MaybePatchVTable(&D3DTextureLockRect, *ppTexture, D3DVTIdx_TextureLockRect, D3DTextureLockRectOverride);
-				MaybePatchVTable(&D3DTextureUnlockRect, *ppTexture, D3DVTIdx_TextureUnlockRect, D3DTextureUnlockRectOverride);
-			}
+			if(IsD3DBumpmapFormat(Format))
+				continue;
 
-			return Result;
+			appErrorf("CreateTexture failed (Format: %i)", Format);
 		}
 
-		// Non-bumpmap format failed: fatal error - should never actually happen with the formats the engine uses...
-		if(Format < D3DFMT_V8U8 || Format > D3DFMT_X8L8V8U8)
-			appErrorf("CreateTexture failed (Format: %i)", Format);
+		if(Format != ActualFormat)
+		{
+			CurrentD3D8Texture             = *ppTexture;
+			CurrentD3D8TextureSourceFormat = Format;
+			CurrentD3D8TextureTargetFormat = ActualFormat;
+			CurrentD3D8TextureNumMipLevels = Levels;
+			MaybePatchVTable(&D3DTextureLockRect, *ppTexture, D3DVTIdx_TextureLockRect, D3DTextureLockRectOverride);
+			MaybePatchVTable(&D3DTextureUnlockRect, *ppTexture, D3DVTIdx_TextureUnlockRect, D3DTextureUnlockRectOverride);
+		}
+
+		return Result;
 	}
 
 	return -1; // Unreachable

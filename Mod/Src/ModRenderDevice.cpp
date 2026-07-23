@@ -795,8 +795,9 @@ void UModRenderDevice::Unlock(FRenderInterface* RI)
 {
 	if(RI != &SelectionRI || !static_cast<FSelectionRenderInterface*>(RI)->HitData)
 	{
-		Super::Unlock(SelectionRI.Impl);
-		LockedViewport = NULL;
+		Super::Unlock(SelectionRI.Impl ? SelectionRI.Impl : RI);
+		LockedViewport   = NULL;
+		SelectionRI.Impl = NULL;
 		return;
 	}
 
@@ -818,7 +819,7 @@ void UModRenderDevice::Unlock(FRenderInterface* RI)
 	INT          HitProxyIndex          = INDEX_NONE;
 	FLOAT        PreferredHitDist       = 999999.0f;
 	FLOAT        HitDist                = 999999.0f;
-	const BYTE*  PixelData                 = (BYTE*)LockedRect.pBits + HitX * 4 + (HitY - LockedViewport->HitYL) * LockedRect.Pitch;
+	const BYTE*  PixelData              = (BYTE*)LockedRect.pBits + HitX * 4 + (HitY - LockedViewport->HitYL) * LockedRect.Pitch;
 
 	/*
 	 * Hits are checked in a square area to make it easier to select stuff that is only a few pixels in size.
@@ -829,28 +830,29 @@ void UModRenderDevice::Unlock(FRenderInterface* RI)
 	{
 		for(INT X = -LockedViewport->HitXL; X < LockedViewport->HitXL + 1; X++)
 		{
-			if(PixelData + X >= LockedRect.pBits)
-			{
-				const BYTE*  Pixel    = PixelData + X * 4;
-				const FColor HitColor = FColor(Pixel[2], Pixel[1], Pixel[0]);
-				const FLOAT  Dist     = FVector(X, Y, 0.0f).Size2D(); // Distance of the hit from the center of the hit area. The closer it is, the higher the priority over other hits.
-				INT          Index    = INDEX_NONE;
+			const BYTE* Pixel = PixelData + X * 4;
 
-				if(SelectionRI.ProcessHitColor(HitColor, &Index))
+			if(Pixel < LockedRect.pBits || Pixel >= (BYTE*)LockedRect.pBits + LockedViewport->SizeY * LockedRect.Pitch )
+				continue;
+
+			const FColor HitColor = FColor(Pixel[2], Pixel[1], Pixel[0]);
+			const FLOAT  Dist     = FVector(X, Y, 0.0f).Size2D(); // Distance of the hit from the center of the hit area. The closer it is, the higher the priority over other hits.
+			INT          Index    = INDEX_NONE;
+
+			if(SelectionRI.ProcessHitColor(HitColor, &Index))
+			{
+				if(Dist < PreferredHitDist)
 				{
-					if(Dist < PreferredHitDist)
-					{
-						PreferredHitDist = Dist;
-						PreferredHitProxyIndex = Index;
-					}
+					PreferredHitDist = Dist;
+					PreferredHitProxyIndex = Index;
 				}
-				else if(Index >= 0)
+			}
+			else if(Index >= 0)
+			{
+				if(Dist < HitDist)
 				{
-					if(Dist < HitDist)
-					{
-						HitDist = Dist;
-						HitProxyIndex = Index;
-					}
+					HitDist = Dist;
+					HitProxyIndex = Index;
 				}
 			}
 		}

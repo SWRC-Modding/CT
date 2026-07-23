@@ -447,7 +447,7 @@ static D3D8CreateDeviceFunc* D3D8CreateDevice = NULL;
 
 static D3D_CREATEDEVICE(D3D8CreateDeviceOverride)
 {
-	HRESULT Result = D3D8CreateDevice(D3D8, Adapter, DeviceType, hFocusWindow, BehaviorFlags, pPresentationParameters, ppReturnedDeviceInterface);
+	const HRESULT Result = D3D8CreateDevice(D3D8, Adapter, DeviceType, hFocusWindow, BehaviorFlags, pPresentationParameters, ppReturnedDeviceInterface);
 
 	if(SUCCEEDED(Result))
 		MaybePatchVTable(&D3DDeviceCreateTexture, *ppReturnedDeviceInterface, D3DVTIdx_DeviceCreateTexture, D3DDeviceCreateTextureOverride);
@@ -473,7 +473,7 @@ FSelectionRenderInterface::FSelectionRenderInterface(UModRenderDevice* InRenDev)
  */
 bool FSelectionRenderInterface::ProcessHitColor(FColor HitColor, INT* OutIndex)
 {
-	INT Index = HitColor.R | HitColor.G << 8 | HitColor.B << 16;
+	const INT Index = HitColor.R | HitColor.G << 8 | HitColor.B << 16;
 
 	if(Index >= 0 && Index < AllHitData.Num() - (INT)sizeof(HHitProxy))
 	{
@@ -751,16 +751,14 @@ UBOOL UModRenderDevice::Exec(const TCHAR* Cmd, FOutputDevice& Ar)
 	{
 		if(ParseCommand(&Cmd, "DEBUGSELECT"))
 		{
-			bDebugSelectionBuffer = !bDebugSelectionBuffer;
-
+			bShowSelectionBuffer = !bShowSelectionBuffer;
+			debugf("Selection buffer display %s", bShowSelectionBuffer ? "enabled" : "disabled");
 			return 1;
 		}
 		else if(ParseCommand(&Cmd, "FIXSELECT"))
 		{
 			bEnableSelectionFix = !bEnableSelectionFix;
-
 			debugf("Selection fix %s", bEnableSelectionFix ? "enabled" : "disabled");
-
 			return 1;
 		}
 	}
@@ -775,9 +773,10 @@ FRenderInterface* UModRenderDevice::Lock(UViewport* Viewport, BYTE* HitData, INT
 
 	FRenderInterface* RI = Super::Lock(Viewport, HitData, HitSize);
 
-	if(bEnableSelectionFix && GIsEditor && RI && HitData && CastChecked<UEditorEngine>(GEngine)->Mode != EM_EyeDropper)
+	if(RI && GIsEditor && bEnableSelectionFix && ((HitData && CastChecked<UEditorEngine>(GEngine)->Mode != EM_EyeDropper) || bShowSelectionBuffer))
 	{
 		LockedViewport = Viewport;
+		Viewport->HitTesting = 1;
 		RI->EnableFog(0); // No fog in the selection buffer or else there will be wrong color values.
 		SelectionRI.Impl = RI;
 		SelectionRI.HitData = HitData;
@@ -794,9 +793,9 @@ FRenderInterface* UModRenderDevice::Lock(UViewport* Viewport, BYTE* HitData, INT
 
 void UModRenderDevice::Unlock(FRenderInterface* RI)
 {
-	if(RI != &SelectionRI)
+	if(RI != &SelectionRI || !static_cast<FSelectionRenderInterface*>(RI)->HitData)
 	{
-		Super::Unlock(RI);
+		Super::Unlock(SelectionRI.Impl);
 		LockedViewport = NULL;
 		return;
 	}
@@ -866,12 +865,6 @@ void UModRenderDevice::Unlock(FRenderInterface* RI)
 
 	// Restoring color values
 	GEngine->C_ActorArrow = C_ActorArrow;
-
-	if(bDebugSelectionBuffer)
-	{
-		LockedViewport->Present();
-		appSleep(3.0f);
-	}
 
 	LockedViewport = NULL;
 }

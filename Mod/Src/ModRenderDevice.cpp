@@ -74,13 +74,6 @@ static HRESULT D3DDeviceGetRenderTarget(IDirect3DDevice8* Self, IDirect3DSurface
 		VTable[D3DVTIdx_DeviceGetRenderTarget])(Self, ppRenderTarget);
 }
 
-static HRESULT D3DSurfaceGetDesc(IDirect3DSurface8* Self, D3DSURFACE_DESC *pDesc)
-{
-	void** VTable = *reinterpret_cast<void***>(Self);
-	return reinterpret_cast<HRESULT(__stdcall*)(IDirect3DSurface8*, D3DSURFACE_DESC*)>(
-		VTable[D3DVTIdx_SurfaceGetDesc])(Self, pDesc);
-}
-
 static HRESULT D3DSurfaceLockRect(IDirect3DSurface8* Self, D3DLOCKED_RECT* pLockedRect, const RECT* pRect, DWORD Flags)
 {
 	void** VTable = *reinterpret_cast<void***>(Self);
@@ -148,11 +141,11 @@ static SBYTE Map8BitSignedTo5BitSigned(SBYTE S8)
 {
 	const int Min8 = -128;
 	const int Max8 = 127;
-	const int Range8 = Max8 - Min8;   // 255
+	const int Range8 = Max8 - Min8;
 
 	const int Min5 = -16;
 	const int Max5 = 15;
-	const int Range5 = Max5 - Min5;   // 31
+	const int Range5 = Max5 - Min5;
 
 	return (SBYTE)((S8 - Min8) * Range5 / Range8 + Min5);
 }
@@ -484,9 +477,9 @@ bool FSelectionRenderInterface::ProcessHitColor(FColor HitColor, INT* OutIndex)
 
 	if(Index >= 0 && Index < AllHitData.Num() - (INT)sizeof(HHitProxy))
 	{
-		FHitProxyInfo* Info = reinterpret_cast<FHitProxyInfo*>(&AllHitData[Index]);
-		HHitProxy* HitProxy = reinterpret_cast<HHitProxy*>(&AllHitData[Index + sizeof(FHitProxyInfo)]);
-		AActor* HitActor = HitProxy->GetActor();
+		FHitProxyInfo* Info     = reinterpret_cast<FHitProxyInfo*>(&AllHitData[Index]);
+		HHitProxy*     HitProxy = reinterpret_cast<HHitProxy*>(&AllHitData[Index + sizeof(FHitProxyInfo)]);
+		AActor*        HitActor = HitProxy->GetActor();
 
 		*OutIndex = Index;
 
@@ -567,15 +560,19 @@ void FSelectionRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorS
 	CurrentTexture = NULL;
 	Impl->SetMaterial(Material, ErrorString, ErrorMaterial, NumPasses);
 
-	// Checking whether the current material has a texture with an alpha channel somewhere down the hierarchy.
+	// Check whether the current material has a texture with an alpha channel somewhere down the hierarchy.
 	// If it has, it is used to draw the selection buffer for more accuracy. If not, the polygons are completly filled.
+
+	bool            UseCombinerAlpha = false;
+	EOutputBlending OutputBlending   = OB_Masked; // Assume masked by default. If the material is a shader it will override this.
+
 	while(Material)
 	{
 		if(Material->IsA<UBitmapMaterial>())
 		{
-			UTexture* Tmp = Cast<UTexture>(Material);
+			UTexture* Texture = Cast<UTexture>(Material);
 
-			if(Tmp && Tmp->bAlphaTexture)
+			if(Texture && (Texture->bMasked || Texture->bAlphaTexture || (UseCombinerAlpha && OutputBlending != OB_Normal && OutputBlending != OB_Modulate)))
 				CurrentTexture = static_cast<UBitmapMaterial*>(Material);
 			else
 				CurrentTexture = NULL;
@@ -584,7 +581,42 @@ void FSelectionRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorS
 		}
 		else if(Material->IsA<UShader>())
 		{
-			Material = static_cast<UShader*>(Material)->Diffuse;
+			UShader* Shader  = static_cast<UShader*>(Material);
+			Material         = Shader->Diffuse;
+			OutputBlending   = static_cast<EOutputBlending>(Shader->OutputBlending);
+			UseCombinerAlpha = false;
+		}
+		else if(Material->IsA<UCombiner>())
+		{
+			UCombiner* Combiner = static_cast<UCombiner*>(Material);
+
+			switch(Combiner->AlphaOperation)
+			{
+			case AO_Use_Mask:
+				UseCombinerAlpha = true;
+				Material         = Combiner->Mask;
+
+				if(!Material)
+					Material = Combiner->Material1;
+
+				break;
+			case AO_Use_Alpha_From_Material1:
+				UseCombinerAlpha = true;
+				Material         = Combiner->Material1;
+				break;
+			case AO_Use_Alpha_From_Material2:
+				UseCombinerAlpha = true;
+				Material         = Combiner->Material2;
+				break;
+			default:
+				UseCombinerAlpha = true;
+				Material         = Combiner->Material1;
+				break;
+			}
+		}
+		else if(Material->IsA<UModifier>())
+		{
+			Material = static_cast<UModifier*>(Material)->Material;
 		}
 		else
 		{
@@ -640,8 +672,27 @@ void FSelectionRenderInterface::DrawPrimitive(EPrimitiveType PrimitiveType, INT 
 		// Sprites are drawn with alpha regardless of whether UTexture::bAlphaTexture is set or not so we need to check for it
 		if(HitActor && (HitActor->DrawType == DT_Sprite || HitActor->DrawType == DT_Particle))
 		{
+			// Skip light coronas. They just get in the way but are mostly transparent.
+			if(HitActor->IsA<ALight>() && HitActor->Skins.Num() > 0)
+			{
+				if(!CurrentTexture)
+					return; // Corona texture was already filtered out earlier because it is not bMasked or bAlphaTexture
+
+				UMaterial* Material = HitActor->Skins[0];
+
+				while(Material && Material->IsA<UModifier>())
+					Material = static_cast<UModifier*>(Material)->Material;
+
+				if(CurrentTexture == Material)
+					return;
+			}
+			else if(!CurrentTexture)
+			{
+				CurrentTexture = Cast<UBitmapMaterial>(HitActor->Texture);
+			}
+
 			Shader = AlphaSelectionShader;
-			Shader->Textures[0] = Cast<UBitmapMaterial>(HitActor->Texture);
+			Shader->Textures[0] = CurrentTexture;
 		}
 		else
 		{
@@ -743,91 +794,83 @@ FRenderInterface* UModRenderDevice::Lock(UViewport* Viewport, BYTE* HitData, INT
 
 void UModRenderDevice::Unlock(FRenderInterface* RI)
 {
-	if(RI == &SelectionRI)
+	if(RI != &SelectionRI)
 	{
-		checkSlow(LockedViewport);
-		checkSlow(SelectionRI.HitData);
-		checkSlow(SelectionRI.HitSize);
+		Super::Unlock(RI);
+		LockedViewport = NULL;
+		return;
+	}
 
-		IDirect3DSurface8* RenderTarget = NULL;
+	checkSlow(LockedViewport);
+	checkSlow(SelectionRI.HitData);
+	checkSlow(SelectionRI.HitSize);
 
-		D3DDeviceGetRenderTarget(Direct3DDevice8, &RenderTarget);
+	IDirect3DSurface8* RenderTarget = NULL;
+	D3DDeviceGetRenderTarget(Direct3DDevice8, &RenderTarget);
+	checkSlow(RenderTarget != NULL);
 
-		checkSlow(RenderTarget != NULL);
+	D3DLOCKED_RECT LockedRect;
+	D3DSurfaceLockRect(RenderTarget, &LockedRect, NULL, 0);
 
-		D3DSURFACE_DESC Desc;
+	// The actual hit test location is offset by two pixels so that it is at the center of the cross cursor.
+	const INT    HitX                   = LockedViewport->HitX + 2;
+	const INT    HitY                   = LockedViewport->HitY + 2;
+	INT          PreferredHitProxyIndex = INDEX_NONE;
+	INT          HitProxyIndex          = INDEX_NONE;
+	FLOAT        PreferredHitDist       = 999999.0f;
+	FLOAT        HitDist                = 999999.0f;
+	const BYTE*  PixelData                 = (BYTE*)LockedRect.pBits + HitX * 4 + (HitY - LockedViewport->HitYL) * LockedRect.Pitch;
 
-		D3DSurfaceGetDesc(RenderTarget, &Desc);
-
-		D3DLOCKED_RECT LockedRect;
-
-		D3DSurfaceLockRect(RenderTarget, &LockedRect, NULL, 0);
-
-		INT HitProxyIndex = INDEX_NONE;
-
-		// The actual hit test location is offset by two pixels so that it is at the center of the cross cursor.
-		INT HitX = LockedViewport->HitX + 2;
-		INT HitY = LockedViewport->HitY + 2;
-		INT PreferredHitProxyIndex = INDEX_NONE;
-		FLOAT PreferredHitDist = 999999.0f;
-		FLOAT HitDist = 999999.0f;
-		DWORD* src = (DWORD*)LockedRect.pBits;
-		src = (DWORD*)((BYTE*)src + HitX * 4 + (HitY - LockedViewport->HitYL) * LockedRect.Pitch);
-
-		/*
-		 * Hits are checked in a square area to make it easier to select stuff that is only a few pixels in size.
-		 * Some hit types are preferred over others. E.g the gizmo axes or wireframe brushes. If there is more than one possible selection, the preferred ones will be used.
-		 * If there is no preferred selection type, anything at the exact cursor position is also considered a preferred selection.
-		 */
-		for(INT Y = -LockedViewport->HitYL; Y < LockedViewport->HitYL + 1; Y++, src = (DWORD*)((BYTE*)src + LockedRect.Pitch))
+	/*
+	 * Hits are checked in a square area to make it easier to select stuff that is only a few pixels in size.
+	 * Some hit types are preferred over others. E.g the gizmo axes or wireframe brushes. If there is more than one possible selection, the preferred ones will be used.
+	 * If there is no preferred selection type, anything at the exact cursor position is also considered a preferred selection.
+	 */
+	for(INT Y = -LockedViewport->HitYL; Y < LockedViewport->HitYL + 1; Y++, PixelData += LockedRect.Pitch)
+	{
+		for(INT X = -LockedViewport->HitXL; X < LockedViewport->HitXL + 1; X++)
 		{
-			for(INT X = -LockedViewport->HitXL; X < LockedViewport->HitXL + 1; X++)
+			if(PixelData + X >= LockedRect.pBits)
 			{
-				if(src + X >= LockedRect.pBits)
-				{
-					FColor HitColor = FColor((src[X] >> 16) & 0xff, (src[X] >> 8) & 0xff, (src[X]) & 0xff);
-					INT Index = INDEX_NONE;
-					FLOAT Dist = FVector(X, Y, 0.0f).Size2D(); // Distance of the hit from the center of the hit area. The closer it is, the higher the priority over other hits.
+				const BYTE*  Pixel    = PixelData + X * 4;
+				const FColor HitColor = FColor(Pixel[2], Pixel[1], Pixel[0]);
+				const FLOAT  Dist     = FVector(X, Y, 0.0f).Size2D(); // Distance of the hit from the center of the hit area. The closer it is, the higher the priority over other hits.
+				INT          Index    = INDEX_NONE;
 
-					if(SelectionRI.ProcessHitColor(HitColor, &Index))
+				if(SelectionRI.ProcessHitColor(HitColor, &Index))
+				{
+					if(Dist < PreferredHitDist)
 					{
-						if(Dist < PreferredHitDist)
-						{
-							PreferredHitDist = Dist;
-							PreferredHitProxyIndex = Index;
-						}
+						PreferredHitDist = Dist;
+						PreferredHitProxyIndex = Index;
 					}
-					else if(Index >= 0)
+				}
+				else if(Index >= 0)
+				{
+					if(Dist < HitDist)
 					{
-						if(Dist < HitDist)
-						{
-							HitDist = Dist;
-							HitProxyIndex = Index;
-						}
+						HitDist = Dist;
+						HitProxyIndex = Index;
 					}
 				}
 			}
+		}
 
 		if(PreferredHitProxyIndex >= 0)
 			HitProxyIndex = PreferredHitProxyIndex;
-		}
-
-		D3DSurfaceUnlockRect(RenderTarget);
-		Super::Unlock(SelectionRI.Impl);
-		SelectionRI.ProcessHit(HitProxyIndex);
-
-		// Restoring color values
-		GEngine->C_ActorArrow = C_ActorArrow;
-
-		if(bDebugSelectionBuffer)
-		{
-			LockedViewport->Present();
-			appSleep(3.0f);
-		}
 	}
-	else
+
+	D3DSurfaceUnlockRect(RenderTarget);
+	Super::Unlock(SelectionRI.Impl);
+	SelectionRI.ProcessHit(HitProxyIndex);
+
+	// Restoring color values
+	GEngine->C_ActorArrow = C_ActorArrow;
+
+	if(bDebugSelectionBuffer)
 	{
-		Super::Unlock(RI);
+		LockedViewport->Present();
+		appSleep(3.0f);
 	}
 
 	LockedViewport = NULL;

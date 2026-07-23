@@ -33,7 +33,7 @@ public:
 	// Constructors.
 	FColor(){}
 	FColor(BYTE InR, BYTE InG, BYTE InB, BYTE InA = 255) : R(InR), G(InG), B(InB), A(InA){}
-	FColor(const FPlane& P) : R(Clamp(appFloor(P.X*255),0,255)),
+	FColor(const FPlane& P) : R(Clamp(appFloor(P.X * 255),  0,255)),
 	                          G(Clamp(appFloor(P.Y * 255), 0, 255)),
 	                          B(Clamp(appFloor(P.Z * 255), 0, 255)),
 	                          A(Clamp(appFloor(P.W * 255), 0, 255)){}

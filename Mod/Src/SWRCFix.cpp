@@ -260,6 +260,34 @@ void __fastcall VerifyWindowPosition(WWindow* Self, DWORD Edx)
 	}
 }
 
+static LRESULT CALLBACK ViewportMouseHookProc(int Code, WPARAM wParam, LPARAM lParam)
+{
+	static bool IgnoreNextMouseMove = false;
+
+	if(Code == HC_ACTION)
+	{
+		switch(wParam)
+		{
+		case WM_LBUTTONDOWN:
+		case WM_RBUTTONDOWN:
+		case WM_MBUTTONDOWN:
+			{
+				IgnoreNextMouseMove = true;
+				break;
+			}
+		case WM_MOUSEMOVE:
+			if(IgnoreNextMouseMove)
+			{
+				IgnoreNextMouseMove = false;
+				return 1;
+			}
+			break;
+		}
+	}
+
+	return CallNextHookEx(NULL, Code, wParam, lParam);
+}
+
 void ImportPropertyOverrides()
 {
 	guardFunc;
@@ -414,6 +442,14 @@ void USWRCFix::Init()
 		 * Additionally, a new command is added that alluws manually flushing resources if memory usage gets too high.
 		 */
 		OriginalUUnrealEdEngineExec = static_cast<UBOOL(__fastcall*)(UEngine*, DWORD, const TCHAR*, FOutputDevice&)>(PatchDllClassVTable(*(FString(appPackage()) + ".exe"), "UUnrealEdEngine", "FExec", 0, UnrealEdEngineExecOverride));
+
+		/*
+		 * Fix 8:
+		 * When clicking the mouse button to move the camera or to select an object it can happen that the camera immediately moves or rotates.
+		 * This happens when the mouse was moved a bit before clicking a button and is very irritating especially when the camera moves a large amount.
+		 * The fix is to ignore the next mouse move event after a button was clicked.
+		 */
+		SetWindowsHookExA(WH_MOUSE, ViewportMouseHookProc, NULL, GetCurrentThreadId());
 	}
 
 	// Initialize the UnrealScript part of the fix

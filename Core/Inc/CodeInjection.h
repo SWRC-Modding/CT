@@ -7,9 +7,10 @@
  * NOTE: This changes the vtable for all objects of the same class.
  * Returns the function pointer that was at Index previously. NULL if there was an error.
  */
-inline void* PatchVTable(void* Object, INT Index, void* NewFunc)
+template<typename F>
+F PatchVTable(void* Object, INT Index, F NewFunc)
 {
-	DWORD OldProtect;
+	DWORD  OldProtect;
 	void** VTable = *reinterpret_cast<void***>(Object);
 
 	if(!VirtualProtect(VTable + Index, sizeof(void*), PAGE_READWRITE, &OldProtect))
@@ -18,7 +19,7 @@ inline void* PatchVTable(void* Object, INT Index, void* NewFunc)
 		return NULL;
 	}
 
-	void* OldFunc = VTable[Index];
+	F OldFunc = reinterpret_cast<F>(VTable[Index]);
 	VTable[Index] = NewFunc;
 
 	VirtualProtect(VTable + Index, sizeof(void*), OldProtect, &OldProtect);
@@ -30,9 +31,10 @@ inline void* PatchVTable(void* Object, INT Index, void* NewFunc)
  * Patches the vtable for a class that is exported from a dll.
  * VTableName is the name of the particular vtable to patch in case of multiple virtual inheritance.
  */
-inline void* PatchDllClassVTable(const TCHAR* DllName, const TCHAR* ClassName, const TCHAR* VTableName, INT Index, void* NewFunc)
+template<typename F>
+F PatchDllClassVTable(const TCHAR* DllName, const TCHAR* ClassName, const TCHAR* VTableName, INT Index, F NewFunc)
 {
-	HMODULE Handle = LoadLibraryA(DllName);
+	const HMODULE Handle = LoadLibraryA(DllName);
 
 	if(!Handle)
 	{

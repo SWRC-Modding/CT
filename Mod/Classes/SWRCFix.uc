@@ -22,6 +22,7 @@ var() config bool    LimitHudArmsFOV;
 var() config bool    AutoFOV;
 var() config bool    EnableCustomMenu;
 var() config bool    EnableEditorSelectionFix;
+var() config bool    EditorLoadMRUOnStart;
 var() config bool    DisableWindowPositionVerification;
 
 var FunctionOverride CTPlayerEndZoomOverride;
@@ -301,6 +302,7 @@ defaultproperties
 	AutoFOV=True
 	EnableCustomMenu=True
 	EnableEditorSelectionFix=True
+	EditorLoadMRUOnStart=True
 	DisableWindowPositionVerification=True
 	MPCloneHudArmsShaders(0)=(Pawn=Shader'CloneTextures.CloneTextures.CloneCommandoWhite_Shader',HudArms=Shader'HudArmsTextures.HudArms.HudArmsWhite_Shader')
 	MPCloneHudArmsShaders(1)=(Pawn=Shader'CloneTextures.CloneTextures.MP_CloneCommandoD_Shader',HudArms=Shader'HudArmsTextures.HudArms.MP_HudArmsD_Shader')

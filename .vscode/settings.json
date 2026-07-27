@@ -1,8 +1,0 @@
-{
-	// Let intellisense ignore decompiled C code
-	"files.exclude": {
-		"**/.git": true,
-		"**/*.c" : true
-	},
-	"C_Cpp.exclusionPolicy": "checkFilesAndFolders"
-}

@@ -48,7 +48,7 @@ public:
 	const FOpenGLShader* GetShaderForMaterial(UMaterial* Material);
 
 	static void SetHardwareShaderMacros(UHardwareShaderMacros* Macros);
-	static void ExpandShaderMacros(FString* Text);
+	static void ExpandShaderMacros(FString& Text, TArray<FString>* ExpandedMacros = NULL);
 
 	// Overrides
 	virtual UBOOL Exec(const TCHAR* Cmd, FOutputDevice& Ar);
@@ -137,7 +137,6 @@ private:
 
 	static UHardwareShaderMacros* HardwareShaderMacros;
 	static TMap<FString, FString> ShaderMacros;
-	static TArray<FString>        ExpandedMacros; // Used to check for circular references in macros
 
 	static void ParseGLSLMacros(const FString& Text);
 	static FStringTemp GLSLShaderFromD3DHardwareShader(UHardwareShader* Shader);

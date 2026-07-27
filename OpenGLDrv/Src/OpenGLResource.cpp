@@ -80,7 +80,7 @@ INT FOpenGLIndexBuffer::AddIndices(FIndexBuffer* IndexBuffer)
 {
 	checkSlow(IsDynamic);
 
-	INT AdditionalSize = IndexBuffer->GetSize();
+	const INT AdditionalSize = IndexBuffer->GetSize();
 
 	if(EBO == GL_NONE || AdditionalSize > BufferSize)
 	{
@@ -91,8 +91,8 @@ INT FOpenGLIndexBuffer::AddIndices(FIndexBuffer* IndexBuffer)
 
 	IndexSize = IndexBuffer->GetIndexSize();
 
-	INT IndexBufferOffset = Align(Tail, IndexSize);
-	GLbitfield MapFlags = GL_MAP_WRITE_BIT | GL_MAP_UNSYNCHRONIZED_BIT;
+	INT        IndexBufferOffset = Align(Tail, IndexSize);
+	GLbitfield MapFlags          = GL_MAP_WRITE_BIT | GL_MAP_UNSYNCHRONIZED_BIT;
 
 	if(IndexBufferOffset + AdditionalSize > BufferSize)
 	{
@@ -186,7 +186,7 @@ INT FOpenGLVertexStream::AddVertices(FVertexStream* VertexStream)
 	guardFunc
 	checkSlow(IsDynamic);
 
-	INT AdditionalSize = VertexStream->GetSize();
+	const INT AdditionalSize = VertexStream->GetSize();
 
 	if(VBO == GL_NONE || AdditionalSize > BufferSize)
 	{
@@ -197,8 +197,8 @@ INT FOpenGLVertexStream::AddVertices(FVertexStream* VertexStream)
 
 	Stride = VertexStream->GetStride();
 
-	INT VertexBufferOffset = ((Tail + Stride - 1) / Stride) * Stride;
-	GLbitfield MapFlags = GL_MAP_WRITE_BIT | GL_MAP_UNSYNCHRONIZED_BIT;
+	INT        VertexBufferOffset = ((Tail + Stride - 1) / Stride) * Stride;
+	GLbitfield MapFlags           = GL_MAP_WRITE_BIT | GL_MAP_UNSYNCHRONIZED_BIT;
 
 	if(VertexBufferOffset + AdditionalSize > BufferSize)
 	{
@@ -487,23 +487,7 @@ void FOpenGLTexture::UploadTextureData(ETextureFormat Format, void* Data, INT Mi
 
 	if(IsDXTC(Format))
 	{
-		GLenum GLFormat = GL_NONE;
-
-		switch(Format)
-		{
-		case TEXF_DXT1:
-			GLFormat = GL_COMPRESSED_RGBA_S3TC_DXT1_EXT;
-			break;
-		case TEXF_DXT3:
-			GLFormat = GL_COMPRESSED_RGBA_S3TC_DXT3_EXT;
-			break;
-		case TEXF_DXT5:
-			GLFormat = GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
-			break;
-		default:
-			appErrorf("Unsupported DXT texture format (%i)", Format);
-		}
-
+		const GLenum  GLFormat  = GetGLFormat(Format, false);
 		const GLsizei ImageSize = GetBytesPerPixel(Format, MipWidth * MipHeight);
 
 		if(CubemapFace < 0)
@@ -585,7 +569,7 @@ void* FOpenGLTexture::GetTextureData(FTexture* Texture, INT MipWidth, INT MipHei
 		{
 			for(INT i = 0; i < NumPixels; ++i)
 			{
-				BYTE* RGB = static_cast<BYTE*>(RawTextureData) + i * 3;
+				const BYTE* RGB = static_cast<BYTE*>(RawTextureData) + i * 3;
 				static_cast<FColor*>(Result)[i] = FColor(RGB[0], RGB[1], RGB[2]);
 			}
 
@@ -595,7 +579,7 @@ void* FOpenGLTexture::GetTextureData(FTexture* Texture, INT MipWidth, INT MipHei
 		{
 			for(INT i = 0; i < NumPixels; ++i)
 			{
-				BYTE Value = static_cast<BYTE*>(RawTextureData)[i];
+				const BYTE Value = static_cast<BYTE*>(RawTextureData)[i];
 				static_cast<FColor*>(Result)[i] = FColor(Value, Value, Value);
 			}
 
@@ -605,7 +589,7 @@ void* FOpenGLTexture::GetTextureData(FTexture* Texture, INT MipWidth, INT MipHei
 		{
 			for(INT i = 0; i < NumPixels; ++i)
 			{
-				BYTE Intensity = static_cast<_WORD*>(RawTextureData)[i] >> 8;
+				const BYTE Intensity = static_cast<_WORD*>(RawTextureData)[i] >> 8;
 				static_cast<FColor*>(Result)[i] = FColor(Intensity, Intensity, Intensity);
 			}
 
@@ -615,13 +599,13 @@ void* FOpenGLTexture::GetTextureData(FTexture* Texture, INT MipWidth, INT MipHei
 		{
 			for(INT i = 0; i < NumPixels; ++i)
 			{
-				FL6V5U5Pixel    P1 = static_cast<FL6V5U5Pixel*>(RawTextureData)[i];
-				FX8L8V8U8Pixel& P2 = static_cast<FX8L8V8U8Pixel*>(Result)[i];
+				const FL6V5U5Pixel P1 = static_cast<FL6V5U5Pixel*>(RawTextureData)[i];
+				FX8L8V8U8Pixel&    P2 = static_cast<FX8L8V8U8Pixel*>(Result)[i];
 
 				P2.U = Map5BitSignedTo8BitSigned(P1.U);
 				P2.V = Map5BitSignedTo8BitSigned(P1.V);
 				P2.L = static_cast<SBYTE>(Map6BitUnsignedTo8BitUnsigned(P1.L) - 128);
-				P2.X = P2.L;
+				P2.X = 0xFF;
 			}
 
 			break;

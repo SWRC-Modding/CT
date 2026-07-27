@@ -28,8 +28,8 @@ void FOpenGLVertexArrayObject::Init(UOpenGLRenderDevice* InRenDev, const FStream
 
 		for(INT i = 0; i < Decl.NumComponents; ++i)
 		{
-			BYTE Function = Decl.Components[i].Function; // EFixedVertexFunction
-			BYTE Type     = Decl.Components[i].Type;     // EComponentType
+			const BYTE Function = Decl.Components[i].Function; // EFixedVertexFunction
+			const BYTE Type     = Decl.Components[i].Type;     // EComponentType
 
 			checkSlow(Function < FVF_MAX);
 			checkSlow(Type < CT_MAX);
@@ -76,12 +76,12 @@ void FOpenGLVertexArrayObject::BindVertexStreams(FOpenGLVertexStream** Streams, 
 {
 	for(INT i = 0; i < NumStreams; ++i)
 	{
-		GLuint VBO = Streams[i]->VBO;
-		GLuint Stride = Streams[i]->Stride;
+		const GLuint VBO    = Streams[i]->VBO;
+		const GLuint Stride = Streams[i]->Stride;
 
 		if(VBOs[i] != VBO || Strides[i] != Stride)
 		{
-			VBOs[i] = VBO;
+			VBOs[i]    = VBO;
 			Strides[i] = Stride;
 			RenDev->glVertexArrayVertexBuffer(VAO, i, VBO, 0, Stride);
 		}
@@ -202,32 +202,32 @@ static GLint GetTextureWrapMode(/*ETexClampMode*/BYTE Mode)
  */
 
 FOpenGLRenderInterface::FOpenGLRenderInterface(UOpenGLRenderDevice* InRenDev)
-	: RenDev(InRenDev),
-	  PrecacheMode(PRECACHE_All),
-	  CurrentState(&SavedStates[0]),
-	  LightingOnlyShader(InRenDev),
-	  LightingOnlyShader2X(InRenDev),
-	  LightingOnlyShaderLightmap(InRenDev),
-	  LightingOnlyShaderLightmap2X(InRenDev),
-	  BitmapShader(InRenDev),
-	  BitmapShaderDetail(InRenDev),
-	  BitmapShaderStaticLighting(InRenDev),
-	  BitmapShaderStaticLightingDetail(InRenDev),
-	  BitmapShaderLightmap(InRenDev),
-	  BitmapShaderLightmapDetail(InRenDev),
-	  BitmapShaderLightmapStaticLighting(InRenDev),
-	  BitmapShaderLightmapStaticLightingDetail(InRenDev),
-	  BitmapShaderLightmap2X(InRenDev),
-	  BitmapShaderLightmap2XDetail(InRenDev),
-	  ParticleShader(InRenDev),
-	  ParticleShaderTFactor(InRenDev),
-	  ParticleShaderSpecialBlend(InRenDev),
-	  ParticleShaderSpecialBlendTFactor(InRenDev),
-	  ParticleShaderBlendSubdivisions(InRenDev),
-	  TerrainShaderAlphaMap(InRenDev),
-	  TerrainShaderAlphaMapStaticLighting(InRenDev),
-	  TerrainShader3Layers(InRenDev),
-	  TerrainShader4Layers(InRenDev)
+	: RenDev(InRenDev)
+	, PrecacheMode(PRECACHE_All)
+	, CurrentState(&SavedStates[0])
+	, LightingOnlyShader(InRenDev)
+	, LightingOnlyShader2X(InRenDev)
+	, LightingOnlyShaderLightmap(InRenDev)
+	, LightingOnlyShaderLightmap2X(InRenDev)
+	, BitmapShader(InRenDev)
+	, BitmapShaderDetail(InRenDev)
+	, BitmapShaderStaticLighting(InRenDev)
+	, BitmapShaderStaticLightingDetail(InRenDev)
+	, BitmapShaderLightmap(InRenDev)
+	, BitmapShaderLightmapDetail(InRenDev)
+	, BitmapShaderLightmapStaticLighting(InRenDev)
+	, BitmapShaderLightmapStaticLightingDetail(InRenDev)
+	, BitmapShaderLightmap2X(InRenDev)
+	, BitmapShaderLightmap2XDetail(InRenDev)
+	, ParticleShader(InRenDev)
+	, ParticleShaderTFactor(InRenDev)
+	, ParticleShaderSpecialBlend(InRenDev)
+	, ParticleShaderSpecialBlendTFactor(InRenDev)
+	, ParticleShaderBlendSubdivisions(InRenDev)
+	, TerrainShaderAlphaMap(InRenDev)
+	, TerrainShaderAlphaMapStaticLighting(InRenDev)
+	, TerrainShader3Layers(InRenDev)
+	, TerrainShader4Layers(InRenDev)
 {
 }
 
@@ -250,9 +250,9 @@ void FOpenGLRenderInterface::Init(INT ViewportWidth, INT ViewportHeight)
 
 	// Viewport
 
-	RenderState.ViewportX = 0;
-	RenderState.ViewportY = 0;
-	RenderState.ViewportWidth = ViewportWidth;
+	RenderState.ViewportX      = 0;
+	RenderState.ViewportY      = 0;
+	RenderState.ViewportWidth  = ViewportWidth;
 	RenderState.ViewportHeight = ViewportHeight;
 	RenDev->glViewport(0, 0, ViewportWidth, ViewportHeight);
 
@@ -265,7 +265,7 @@ void FOpenGLRenderInterface::Init(INT ViewportWidth, INT ViewportHeight)
 
 	RenDev->glEnable(GL_CULL_FACE);
 	RenderState.CullMode = CM_CW;
-	LastCullMode = GL_BACK;
+	LastCullMode         = GL_BACK;
 	RenDev->glCullFace(LastCullMode);
 
 	// ZTest
@@ -285,13 +285,13 @@ void FOpenGLRenderInterface::Init(INT ViewportWidth, INT ViewportHeight)
 
 	bStencilEnabled = false;
 
-	RenderState.bStencilTest = false;
-	RenderState.StencilCompare = CF_Always;
-	RenderState.StencilRef = 0xF;
-	RenderState.StencilMask = 0xFF;
-	RenderState.StencilFailOp = SO_Keep;
-	RenderState.StencilZFailOp = SO_Keep;
-	RenderState.StencilPassOp = SO_Keep;
+	RenderState.bStencilTest     = false;
+	RenderState.StencilCompare   = CF_Always;
+	RenderState.StencilRef       = 0xF;
+	RenderState.StencilMask      = 0xFF;
+	RenderState.StencilFailOp    = SO_Keep;
+	RenderState.StencilZFailOp   = SO_Keep;
+	RenderState.StencilPassOp    = SO_Keep;
 	RenderState.StencilWriteMask = 0xFF;
 
 	RenDev->glStencilOp(GetStencilOp(RenderState.StencilFailOp), GetStencilOp(RenderState.StencilZFailOp), GetStencilOp(RenderState.StencilPassOp));
@@ -322,11 +322,11 @@ void FOpenGLRenderInterface::Init(INT ViewportWidth, INT ViewportHeight)
 
 	// Init uniform default values
 
-	CurrentState->LocalToWorld = FMatrix::Identity;
-	CurrentState->WorldToCamera = FMatrix::Identity;
+	CurrentState->LocalToWorld   = FMatrix::Identity;
+	CurrentState->WorldToCamera  = FMatrix::Identity;
 	CurrentState->CameraToScreen = FMatrix::Identity;
-	CurrentState->GlobalColor = FPlane(1.0, 1.0, 1.0, 1.0);
-	CurrentState->ColorFactor = FPlane(1.0, 1.0, 1.0, 1.0);
+	CurrentState->GlobalColor    = FPlane(1.0, 1.0, 1.0, 1.0);
+	CurrentState->ColorFactor    = FPlane(1.0, 1.0, 1.0, 1.0);
 
 	CurrentState->AlphaRef = -1.0f;
 
@@ -440,7 +440,7 @@ void FOpenGLRenderInterface::Flush()
 {
 	checkSlow(CurrentState == &SavedStates[0]);
 
-	CurrentVAO = NULL;
+	CurrentVAO         = NULL;
 	CurrentIndexBuffer = NULL;
 	RenDev->glBindVertexArray(GL_NONE);
 	VAOsByDeclId.Empty();
@@ -449,7 +449,7 @@ void FOpenGLRenderInterface::Flush()
 		CurrentState->TextureUnits[i].Texture = NULL;
 
 	CurrentState->NumTextures = 0;
-	CurrentShader = NULL;
+	CurrentShader             = NULL;
 	RenDev->glUseProgram(GL_NONE);
 }
 
@@ -541,9 +541,9 @@ void FOpenGLRenderInterface::CommitRenderState()
 		if(RenderState.bStencilTest != CurrentState->bStencilTest)
 		{
 			CurrentState->StencilCompare = CF_Always;
-			CurrentState->StencilFailOp = SO_Keep;
+			CurrentState->StencilFailOp  = SO_Keep;
 			CurrentState->StencilZFailOp = SO_Keep;
-			CurrentState->StencilPassOp = SO_Keep;
+			CurrentState->StencilPassOp  = SO_Keep;
 
 			if(CurrentState->bStencilTest)
 				CurrentState->StencilWriteMask = 0xFF;
@@ -556,11 +556,11 @@ void FOpenGLRenderInterface::CommitRenderState()
 		if(RenderState.StencilFailOp != CurrentState->StencilFailOp ||
 		   RenderState.StencilZFailOp != CurrentState->StencilZFailOp ||
 		   RenderState.StencilPassOp != CurrentState->StencilPassOp)
-		   {
+		{
 			RenDev->glStencilOp(GetStencilOp(CurrentState->StencilFailOp), GetStencilOp(CurrentState->StencilZFailOp), GetStencilOp(CurrentState->StencilPassOp));
-			RenderState.StencilFailOp = CurrentState->StencilFailOp;
+			RenderState.StencilFailOp  = CurrentState->StencilFailOp;
 			RenderState.StencilZFailOp = CurrentState->StencilZFailOp;
-			RenderState.StencilPassOp = CurrentState->StencilPassOp;
+			RenderState.StencilPassOp  = CurrentState->StencilPassOp;
 		}
 
 		if(RenderState.StencilCompare != CurrentState->StencilCompare ||
@@ -569,8 +569,8 @@ void FOpenGLRenderInterface::CommitRenderState()
 		   {
 			RenDev->glStencilFunc(GetStencilFunc(CurrentState->StencilCompare), CurrentState->StencilRef, CurrentState->StencilMask);
 			RenderState.StencilCompare = CurrentState->StencilCompare;
-			RenderState.StencilRef = CurrentState->StencilRef;
-			RenderState.StencilMask = CurrentState->StencilMask;
+			RenderState.StencilRef     = CurrentState->StencilRef;
+			RenderState.StencilMask    = CurrentState->StencilMask;
 		}
 
 		if(RenderState.StencilWriteMask != CurrentState->StencilWriteMask)
@@ -593,9 +593,9 @@ void FOpenGLRenderInterface::CommitRenderState()
 	   {
 		RenDev->glViewport(CurrentState->ViewportX, CurrentState->ViewportY, CurrentState->ViewportWidth, CurrentState->ViewportHeight);
 
-		RenderState.ViewportX = CurrentState->ViewportX;
-		RenderState.ViewportY = CurrentState->ViewportY;
-		RenderState.ViewportWidth = CurrentState->ViewportWidth;
+		RenderState.ViewportX      = CurrentState->ViewportX;
+		RenderState.ViewportY      = CurrentState->ViewportY;
+		RenderState.ViewportWidth  = CurrentState->ViewportWidth;
 		RenderState.ViewportHeight = CurrentState->ViewportHeight;
 	}
 
@@ -684,9 +684,9 @@ void FOpenGLRenderInterface::Locked(UViewport* Viewport)
 
 	// Setup per-frame shader constants
 
-	FLOAT Time = appFmod(GEngineTime, 120.0f);
+	const FLOAT Time = appFmod(GEngineTime, 120.0f);
 
-	CurrentState->Time = Time;
+	CurrentState->Time    = Time;
 	CurrentState->SinTime = appSin(Time);
 	CurrentState->CosTime = appCos(Time);
 	CurrentState->TanTime = appTan(Time);
@@ -700,11 +700,11 @@ void FOpenGLRenderInterface::Unlocked()
 
 void FOpenGLRenderInterface::UpdateMatrices()
 {
-	CurrentState->LocalToCamera = CurrentState->LocalToWorld * CurrentState->WorldToCamera;
-	CurrentState->LocalToScreen = CurrentState->LocalToCamera * CurrentState->CameraToScreen;
-	CurrentState->WorldToLocal = CurrentState->LocalToWorld.Inverse();
-	CurrentState->WorldToScreen = CurrentState->WorldToCamera * CurrentState->CameraToScreen;
-	CurrentState->CameraToWorld = CurrentState->WorldToCamera.Inverse();
+	CurrentState->LocalToCamera   = CurrentState->LocalToWorld * CurrentState->WorldToCamera;
+	CurrentState->LocalToScreen   = CurrentState->LocalToCamera * CurrentState->CameraToScreen;
+	CurrentState->WorldToLocal    = CurrentState->LocalToWorld.Inverse();
+	CurrentState->WorldToScreen   = CurrentState->WorldToCamera * CurrentState->CameraToScreen;
+	CurrentState->CameraToWorld   = CurrentState->WorldToCamera.Inverse();
 	CurrentState->MatricesChanged = false;
 }
 
@@ -806,7 +806,7 @@ void FOpenGLRenderInterface::PushState(DWORD Flags)
 
 void FOpenGLRenderInterface::PopState(DWORD Flags)
 {
-	FOpenGLSavedState* PoppedState = CurrentState;
+	const FOpenGLSavedState* PoppedState = CurrentState;
 
 	--CurrentState;
 
@@ -814,13 +814,13 @@ void FOpenGLRenderInterface::PopState(DWORD Flags)
 
 	if((Flags & DONT_RESTORE_RENDER_TARGET) != 0)
 	{
-		CurrentState->RenderTarget = PoppedState->RenderTarget;
+		CurrentState->RenderTarget               = PoppedState->RenderTarget;
 		CurrentState->RenderTargetOwnDepthBuffer = PoppedState->RenderTargetOwnDepthBuffer;
 	}
 	else if((Flags & FORCE_RESTORE_RENDER_TARGET) != 0 ||
 	         (CurrentState->RenderTarget != PoppedState->RenderTarget ||
 	          CurrentState->RenderTargetOwnDepthBuffer != PoppedState->RenderTargetOwnDepthBuffer))
-	          {
+	{
 		SetGLRenderTarget(CurrentState->RenderTarget, CurrentState->RenderTargetOwnDepthBuffer);
 	}
 
@@ -830,10 +830,9 @@ void FOpenGLRenderInterface::PopState(DWORD Flags)
 UBOOL FOpenGLRenderInterface::SetRenderTarget(FRenderTarget* RenderTarget, bool bOwnDepthBuffer)
 {
 	guardFuncSlow;
-
 	checkSlow(RenderTarget);
 
-	QWORD CacheId = RenderTarget->GetCacheId();
+	const QWORD     CacheId        = RenderTarget->GetCacheId();
 	FOpenGLTexture* GLRenderTarget = static_cast<FOpenGLTexture*>(RenDev->GetCachedResource(CacheId));
 
 	if(!GLRenderTarget)
@@ -931,12 +930,12 @@ void FOpenGLRenderInterface::SetAmbientLight(FColor Color)
 void FOpenGLRenderInterface::EnableLighting(UBOOL UseDynamic, UBOOL UseStatic, UBOOL Modulate2X, FBaseTexture* Lightmap, UBOOL LightingOnly, const FSphere& LitSphere, int)
 {
 	CurrentState->UseDynamicLighting = UseDynamic != 0;
-	CurrentState->UseStaticLighting = UseStatic != 0;
-	CurrentState->LightFactor = Modulate2X ? 2.0f : 1.0f;
+	CurrentState->UseStaticLighting  = UseStatic != 0;
+	CurrentState->LightFactor        = Modulate2X ? 2.0f : 1.0f;
 	CurrentState->LightingModulate2X = Modulate2X != 0;
-	CurrentState->LightingOnly = LightingOnly != 0;
-	CurrentState->LitSphere = LitSphere;
-	CurrentState->Lightmap = Lightmap;
+	CurrentState->LightingOnly       = LightingOnly != 0;
+	CurrentState->LitSphere          = LitSphere;
+	CurrentState->Lightmap           = Lightmap;
 	++CurrentState->UniformRevision;
 }
 
@@ -944,8 +943,8 @@ static FLOAT UnrealAttenuation(FLOAT Distance,FLOAT Radius)
 {
 	if(Distance <= Radius)
 	{
-		FLOAT A = Distance / Radius;
-		FLOAT B = (2 * A * A * A - 3 * A * A + 1);
+		const FLOAT A = Distance / Radius;
+		const FLOAT B = (2 * A * A * A - 3 * A * A + 1);
 
 		return B / A * A * 2.0f;
 	}
@@ -965,19 +964,19 @@ void FOpenGLRenderInterface::SetLight(INT LightIndex, FDynamicLight* Light, FLOA
 	{
 		if(Light->Actor && Light->Actor->LightEffect == LE_Sunlight)
 		{
-			ShaderLight->Type = SL_Directional;
+			ShaderLight->Type      = SL_Directional;
 			ShaderLight->Direction = Light->Direction;
-			ShaderLight->Color = Light->Color * 1.75f * Light->Alpha * Scale;
+			ShaderLight->Color     = Light->Color * 1.75f * Light->Alpha * Scale;
 		}
 		else if((Light->Actor && Light->Actor->LightEffect == LE_QuadraticNonIncidence) || CurrentState->LitSphere.W == -1.0f )
 		{
-			ShaderLight->Type = SL_Point;
-			ShaderLight->Position = Light->Position;
-			ShaderLight->Constant = 0.0f;
-			ShaderLight->Linear = 0.0f;
+			ShaderLight->Type      = SL_Point;
+			ShaderLight->Position  = Light->Position;
+			ShaderLight->Constant  = 0.0f;
+			ShaderLight->Linear    = 0.0f;
 			ShaderLight->Quadratic = 8.0f / Square(Light->Radius);
-			ShaderLight->Color = Light->Color * Light->Alpha * Scale;
-			ShaderLight->Color.W = 1.0f;
+			ShaderLight->Color     = Light->Color * Light->Alpha * Scale;
+			ShaderLight->Color.W   = 1.0f;
 		}
 		else
 		{
@@ -986,15 +985,15 @@ void FOpenGLRenderInterface::SetLight(INT LightIndex, FDynamicLight* Light, FLOA
 			// Spotlights.
 			if(Light->Actor && Light->Actor->LightCone > 0)
 			{
-				ShaderLight->Type = SL_Spot;
+				ShaderLight->Type      = SL_Spot;
 				ShaderLight->Direction = Light->Direction;
-				ShaderLight->Cone = appCos(Light->Actor->LightCone / 256.0f * (float)HALF_PI);
+				ShaderLight->Cone      = appCos(Light->Actor->LightCone / 256.0f * (float)HALF_PI);
 
-				FLOAT CenterDistance = Max(0.1f, (CurrentState->LitSphere - Light->Position).Size());
-				FLOAT MaxDistance = Clamp(CenterDistance + CurrentState->LitSphere.W, Light->Radius * 0.05f, Light->Radius * 0.9f);
-				FLOAT MinDistance = Clamp(CenterDistance - CurrentState->LitSphere.W, Light->Radius * 0.1f, Light->Radius * 0.95f);
-				FLOAT MinAttenuation = 1.0f / UnrealAttenuation(MinDistance, Light->Radius);
-				FLOAT MaxAttenuation = 1.0f / UnrealAttenuation(MaxDistance, Light->Radius);
+				const FLOAT CenterDistance = Max(0.1f, (CurrentState->LitSphere - Light->Position).Size());
+				const FLOAT MaxDistance    = Clamp(CenterDistance + CurrentState->LitSphere.W, Light->Radius * 0.05f, Light->Radius * 0.9f);
+				const FLOAT MinDistance    = Clamp(CenterDistance - CurrentState->LitSphere.W, Light->Radius * 0.1f, Light->Radius * 0.95f);
+				const FLOAT MinAttenuation = 1.0f / UnrealAttenuation(MinDistance, Light->Radius);
+				const FLOAT MaxAttenuation = 1.0f / UnrealAttenuation(MaxDistance, Light->Radius);
 
 				if(Abs(MinAttenuation - MaxAttenuation) < SMALL_NUMBER)
 				{
@@ -1004,7 +1003,7 @@ void FOpenGLRenderInterface::SetLight(INT LightIndex, FDynamicLight* Light, FLOA
 				else
 				{
 					ShaderLight->Constant = Max(0.01f, MinAttenuation - (MaxAttenuation - MinAttenuation) / (MaxDistance - MinDistance) * MinDistance);
-					ShaderLight->Linear = Max(0.0f, (MinAttenuation - ShaderLight->Constant) / MinDistance);
+					ShaderLight->Linear   = Max(0.0f, (MinAttenuation - ShaderLight->Constant) / MinDistance);
 				}
 
 				ShaderLight->Quadratic = 0.0f;
@@ -1013,32 +1012,32 @@ void FOpenGLRenderInterface::SetLight(INT LightIndex, FDynamicLight* Light, FLOA
 			{ // Point lights.
 				ShaderLight->Type = SL_Point;
 
-				FLOAT CenterDistance = Max(0.1f, (CurrentState->LitSphere - Light->Position).Size());
-				FLOAT MaxDistance = Clamp(CenterDistance + CurrentState->LitSphere.W, Light->Radius * 0.05f, Light->Radius * 0.9f);
-				FLOAT MinDistance = Clamp(CenterDistance - CurrentState->LitSphere.W, Light->Radius * 0.1f, Light->Radius * 0.95f);
-				FLOAT MinAttenuation = 1.0f / UnrealAttenuation(MinDistance, Light->Radius);
-				FLOAT MaxAttenuation = 1.0f / UnrealAttenuation(MaxDistance, Light->Radius);
+				const FLOAT CenterDistance = Max(0.1f, (CurrentState->LitSphere - Light->Position).Size());
+				const FLOAT MaxDistance    = Clamp(CenterDistance + CurrentState->LitSphere.W, Light->Radius * 0.05f, Light->Radius * 0.9f);
+				const FLOAT MinDistance    = Clamp(CenterDistance - CurrentState->LitSphere.W, Light->Radius * 0.1f, Light->Radius * 0.95f);
+				const FLOAT MinAttenuation = 1.0f / UnrealAttenuation(MinDistance, Light->Radius);
+				const FLOAT MaxAttenuation = 1.0f / UnrealAttenuation(MaxDistance, Light->Radius);
 
 				if(Abs(MinAttenuation - MaxAttenuation) < SMALL_NUMBER)
 				{
 					ShaderLight->Constant = MinAttenuation;
-					ShaderLight->Linear = 0.0f;
+					ShaderLight->Linear   = 0.0f;
 				}
 				else
 				{
-					ShaderLight->Constant= Max(0.01f, MinAttenuation - (MaxAttenuation - MinAttenuation) / (MaxDistance - MinDistance) * MinDistance);
-					ShaderLight->Linear= Max(0.0f, (MinAttenuation - ShaderLight->Constant) / MinDistance);
+					ShaderLight->Constant = Max(0.01f, MinAttenuation - (MaxAttenuation - MinAttenuation) / (MaxDistance - MinDistance) * MinDistance);
+					ShaderLight->Linear   = Max(0.0f, (MinAttenuation - ShaderLight->Constant) / MinDistance);
 				}
 
 				ShaderLight->Quadratic = 0.0f;
 			}
 
-			ShaderLight->Color = Light->Color * Light->Alpha * Scale;
+			ShaderLight->Color   = Light->Color * Light->Alpha * Scale;
 			ShaderLight->Color.W = 1.0f;
 		}
 
-		ShaderLight->Constant = Max(0.0f, ShaderLight->Constant);
-		ShaderLight->Linear = Max(0.0f, ShaderLight->Linear);
+		ShaderLight->Constant  = Max(0.0f, ShaderLight->Constant);
+		ShaderLight->Linear    = Max(0.0f, ShaderLight->Linear);
 		ShaderLight->Quadratic = Max(0.0f, ShaderLight->Quadratic);
 
 		if(CurrentState->LightingModulate2X)
@@ -1056,8 +1055,8 @@ void FOpenGLRenderInterface::SetLight(INT LightIndex, FDynamicLight* Light, FLOA
 void FOpenGLRenderInterface::SetDistanceFog(UBOOL Enable, FLOAT FogStart, FLOAT FogEnd, FColor Color)
 {
 	CurrentState->FogEnabled = Enable;
-	CurrentState->FogStart = FogStart;
-	CurrentState->FogEnd = FogEnd;
+	CurrentState->FogStart   = FogStart;
+	CurrentState->FogEnd     = FogEnd;
 
 	if(CurrentState->OverrideFogColor)
 		CurrentState->SavedFogColor = Color;
@@ -1157,43 +1156,17 @@ void FOpenGLRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorStri
 		CurrentState->CameraToScreen.M[3][1] = static_cast<INT>(CurrentState->CameraToScreen.M[3][1]);
 	}
 
-#if 0
-	// Check for circular references
-
-	if(GIsEditor)
-	{
-		TArray<UMaterial*> History;
-
-		if(!Material->CheckCircularReferences(History))
-		{
-			if(History.Num() >= 0)
-			{
-				if(ErrorString)
-					*ErrorString = FString::Printf("Circular material reference in '%s'", History.Last()->GetName());
-
-				if(ErrorMaterial)
-					*ErrorMaterial = History.Last();
-			}
-
-			return;
-		}
-	}
-
-	if(NumPasses)
-		*NumPasses = 1;
-#endif
-
 	// Restore default material state
 
-	CurrentState->bZTest = true;
-	CurrentState->bZWrite = true;
-	CurrentState->SrcBlend = GL_ONE;
-	CurrentState->DstBlend = GL_ZERO;
+	CurrentState->bZTest      = true;
+	CurrentState->bZWrite     = true;
+	CurrentState->SrcBlend    = GL_ONE;
+	CurrentState->DstBlend    = GL_ZERO;
 	CurrentState->NumTextures = 0;
 
 	if(CurrentState->AlphaRef >= 0.0f || CurrentState->ModifyColor)
 	{
-		CurrentState->AlphaRef = -1.0f;
+		CurrentState->AlphaRef    = -1.0f;
 		CurrentState->ModifyColor = 0;
 		CurrentState->ColorFactor = FPlane(1.0f, 1.0f, 1.0f, 1.0f);
 		++CurrentState->UniformRevision;
@@ -1201,14 +1174,14 @@ void FOpenGLRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorStri
 
 	if(CurrentState->OverrideFogColor)
 	{
-		CurrentState->FogColor = CurrentState->SavedFogColor;
+		CurrentState->FogColor         = CurrentState->SavedFogColor;
 		CurrentState->OverrideFogColor = false;
 		++CurrentState->UniformRevision;
 	}
 
 	ModifyFramebufferBlending = false;
-	UsingLightmap = false;
-	NumTexMatrices = 0;
+	UsingLightmap             = false;
+	NumTexMatrices            = 0;
 
 	Material->PreSetMaterial(GEngineTime);
 
@@ -1334,7 +1307,7 @@ UBOOL FOpenGLRenderInterface::SetHardwareShaderMaterial(UHardwareShader* Hardwar
 	{
 		SetShader(*Shader);
 
-		CurrentState->bZTest = HardwareShader->ZTest != 0;
+		CurrentState->bZTest  = HardwareShader->ZTest != 0;
 		CurrentState->bZWrite = HardwareShader->ZWrite != 0;
 
 		if(HardwareShader->AlphaTest)
@@ -1398,13 +1371,13 @@ void FOpenGLRenderInterface::SetGLRenderTarget(FOpenGLTexture* GLRenderTarget, b
 	GLRenderTarget->BindRenderTarget();
 	SetViewport(0, 0, GLRenderTarget->Width, GLRenderTarget->Height);
 
-	CurrentState->RenderTarget = GLRenderTarget;
+	CurrentState->RenderTarget               = GLRenderTarget;
 	CurrentState->RenderTargetOwnDepthBuffer = bOwnDepthBuffer;
 }
 
 void FOpenGLRenderInterface::CopyBackBufferToTarget(FAuxRenderTarget* Target)
 {
-	FOpenGLTexture* GLTarget = static_cast<FOpenGLTexture*>(RenDev->GetCachedResource(Target->GetCacheId()));
+	FOpenGLTexture* GLTarget   = static_cast<FOpenGLTexture*>(RenDev->GetCachedResource(Target->GetCacheId()));
 	FOpenGLTexture* Backbuffer = static_cast<FOpenGLTexture*>(RenDev->GetCachedResource(RenDev->Backbuffer.GetCacheId()));
 
 	if(!GLTarget || !Backbuffer)
@@ -1425,12 +1398,12 @@ void FOpenGLRenderInterface::CopyBackBufferToTarget(FAuxRenderTarget* Target)
 
 void FOpenGLRenderInterface::SetStencilOp(ECompareFunction Test, DWORD Ref, DWORD Mask, EStencilOp FailOp, EStencilOp ZFailOp, EStencilOp PassOp, DWORD WriteMask)
 {
-	CurrentState->StencilCompare = Test;
-	CurrentState->StencilRef = static_cast<BYTE>(Ref);
-	CurrentState->StencilMask = static_cast<BYTE>(Mask);
-	CurrentState->StencilFailOp = FailOp;
-	CurrentState->StencilZFailOp = ZFailOp;
-	CurrentState->StencilPassOp = PassOp;
+	CurrentState->StencilCompare   = Test;
+	CurrentState->StencilRef       = static_cast<BYTE>(Ref);
+	CurrentState->StencilMask      = static_cast<BYTE>(Mask);
+	CurrentState->StencilFailOp    = FailOp;
+	CurrentState->StencilZFailOp   = ZFailOp;
+	CurrentState->StencilPassOp    = PassOp;
 	CurrentState->StencilWriteMask = static_cast<BYTE>(WriteMask);
 }
 
@@ -1444,12 +1417,12 @@ void FOpenGLRenderInterface::EnableDepth(UBOOL Enable)
 	if(Enable)
 	{
 		CurrentState->bZWrite = true;
-		CurrentState->bZTest = true;
+		CurrentState->bZTest  = true;
 	}
 	else
 	{
 		CurrentState->bZWrite = false;
-		CurrentState->bZTest = false;
+		CurrentState->bZTest  = false;
 	}
 }
 
@@ -1462,7 +1435,7 @@ INT FOpenGLRenderInterface::SetVertexStreams(EVertexShader Shader, FVertexStream
 {
 	guardFuncSlow;
 
-	FStreamDeclaration VertexStreamDeclarations[MAX_VERTEX_STREAMS];
+	FStreamDeclaration   VertexStreamDeclarations[MAX_VERTEX_STREAMS];
 	FOpenGLVertexStream* OpenGLStreams[MAX_VERTEX_STREAMS];
 
 	// NOTE: Stream declarations must be completely zeroed to get consistent hash values when looking up the VAO later
@@ -1516,11 +1489,8 @@ INT FOpenGLRenderInterface::SetDynamicStream(EVertexShader Shader, FVertexStream
 {
 	guardFuncSlow;
 
-	FOpenGLVertexStream* OpenGLStream = RenDev->GetDynamicVertexStream();
-
 	FStreamDeclaration VertexStreamDeclaration;
 	appMemzero(&VertexStreamDeclaration, sizeof(VertexStreamDeclaration));
-
 	VertexStreamDeclaration.Init(Stream);
 
 	// Look up VAO by format
@@ -1530,6 +1500,7 @@ INT FOpenGLRenderInterface::SetDynamicStream(EVertexShader Shader, FVertexStream
 	if(!VAO.IsValid())
 		VAO.Init(RenDev, &VertexStreamDeclaration, 1);
 
+	FOpenGLVertexStream* OpenGLStream = RenDev->GetDynamicVertexStream();
 	VertexBufferBase = OpenGLStream->AddVertices(Stream);
 
 	VAO.BindVertexStreams(&OpenGLStream, 1);
@@ -1553,17 +1524,14 @@ INT FOpenGLRenderInterface::SetIndexBuffer(FIndexBuffer* IndexBuffer, INT BaseIn
 
 	if(IndexBuffer)
 	{
-		FOpenGLIndexBuffer* Buffer;
-		INT IndexSize = IndexBuffer->GetIndexSize();
-
-		checkSlow(IndexSize == sizeof(_WORD) || IndexSize == sizeof(DWORD));
-
-		QWORD CacheId = IndexBuffer->GetCacheId();
-
-		Buffer = static_cast<FOpenGLIndexBuffer*>(RenDev->GetCachedResource(CacheId));
+		const QWORD         CacheId = IndexBuffer->GetCacheId();
+		FOpenGLIndexBuffer* Buffer  = static_cast<FOpenGLIndexBuffer*>(RenDev->GetCachedResource(CacheId));
 
 		if(!Buffer)
 			Buffer = new FOpenGLIndexBuffer(RenDev, CacheId);
+
+		const INT IndexSize = IndexBuffer->GetIndexSize();
+		checkSlow(IndexSize == sizeof(_WORD) || IndexSize == sizeof(DWORD));
 
 		if(Buffer->Revision != IndexBuffer->GetRevision() || Buffer->IndexSize != IndexSize)
 		{
@@ -1571,12 +1539,12 @@ INT FOpenGLRenderInterface::SetIndexBuffer(FIndexBuffer* IndexBuffer, INT BaseIn
 			Buffer->Cache(IndexBuffer);
 		}
 
-		IndexBufferBase = BaseIndex;
+		IndexBufferBase    = BaseIndex;
 		CurrentIndexBuffer = Buffer;
 	}
 	else
 	{
-		IndexBufferBase = 0;
+		IndexBufferBase    = 0;
 		CurrentIndexBuffer = NULL;
 	}
 
@@ -1591,7 +1559,7 @@ INT FOpenGLRenderInterface::SetDynamicIndexBuffer(FIndexBuffer* IndexBuffer, INT
 
 	FOpenGLIndexBuffer* Buffer = RenDev->GetDynamicIndexBuffer(IndexBuffer->GetIndexSize());
 
-	IndexBufferBase = BaseIndex;
+	IndexBufferBase    = BaseIndex;
 	CurrentIndexBuffer = Buffer;
 
 	return Buffer->AddIndices(IndexBuffer);

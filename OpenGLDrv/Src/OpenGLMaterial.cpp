@@ -171,8 +171,8 @@ void FOpenGLRenderInterface::GetShaderConstants(FSConstantsInfo* Info, FPlane* C
 		case EVC_SpotlightCosCone:
 			{
 				FDynamicLight** ShaderLights = CurrentState->HardwareShaderLights;
-				FDynamicLight* Spotlight = ShaderLights[0];
-				BYTE ConstantType = Info[i].Type;
+				FDynamicLight*  Spotlight    = ShaderLights[0];
+				const BYTE      ConstantType = Info[i].Type;
 
 				if(ConstantType == EVC_SpotlightDirection)
 				{
@@ -197,7 +197,7 @@ void FOpenGLRenderInterface::GetShaderConstants(FSConstantsInfo* Info, FPlane* C
 				{
 					if(Spotlight && Spotlight->Actor && Spotlight->Actor->LightCone > 0)
 					{
-						FLOAT CosCone = Spotlight->Actor->LightCone * 0.00097659999f;
+						const FLOAT CosCone = Spotlight->Actor->LightCone * 0.00097659999f;
 
 						Constants[i].X = Square(1.0f - CosCone) * 1.075f;
 						Constants[i].Y = Constants[i].X * 0.1;
@@ -216,8 +216,8 @@ void FOpenGLRenderInterface::GetShaderConstants(FSConstantsInfo* Info, FPlane* C
 				}
 				else
 				{
-					FDynamicLight* Light = ShaderLights[(ConstantType - EVC_LightPos1) / 3];
-					BYTE LightConstant = (ConstantType - EVC_LightPos1) % 3; // 0 = Position, 1 = Color, 2 = InvRadius
+					FDynamicLight* Light         = ShaderLights[(ConstantType - EVC_LightPos1) / 3];
+					const BYTE     LightConstant = (ConstantType - EVC_LightPos1) % 3; // 0 = Position, 1 = Color, 2 = InvRadius
 
 					switch(LightConstant)
 					{
@@ -295,9 +295,9 @@ void FOpenGLRenderInterface::GetShaderConstants(FSConstantsInfo* Info, FPlane* C
 					Rand3 = appRand() / (float)RAND_MAX;
 				}
 
-				FLOAT X    = Info[i].Value.X;
-				FLOAT Y    = Info[i].Value.Y;
-				FLOAT YInv = 1.0f - Y;
+				const FLOAT X    = Info[i].Value.X;
+				const FLOAT Y    = Info[i].Value.Y;
+				const FLOAT YInv = 1.0f - Y;
 
 				Constants[i].X = Rand1 <= X ? 1.0f : Y * Rand3 + YInv;
 				Constants[i].Y = Rand2 <= X ? 1.0f : Y * Rand1 + YInv;
@@ -364,7 +364,7 @@ void FOpenGLRenderInterface::SetTexture(FBaseTexture* Texture,
 	checkSlow(Texture);
 	checkSlow(TextureIndex < MAX_TEXTURES);
 
-	QWORD CacheId = Texture->GetCacheId();
+	const QWORD     CacheId   = Texture->GetCacheId();
 	FOpenGLTexture* GLTexture = static_cast<FOpenGLTexture*>(RenDev->GetCachedResource(CacheId));
 
 	if(!GLTexture)
@@ -379,7 +379,7 @@ void FOpenGLRenderInterface::SetTexture(FBaseTexture* Texture,
 	TextureUnit.Texture = GLTexture;
 	CurrentState->NumTextures = Max(CurrentState->NumTextures, TextureIndex + 1);
 
-	UBOOL WasCubemap = TextureInfo.IsCubemap;
+	const UBOOL WasCubemap = TextureInfo.IsCubemap;
 
 	if(GLTexture->IsCubemap)
 	{
@@ -404,16 +404,16 @@ void FOpenGLRenderInterface::SetTexture(FBaseTexture* Texture,
 		}
 	}
 
-	UBOOL WasBumpmap = TextureInfo.IsBumpmap;
-	FLOAT OldUVScale = TextureInfo.UVScale;
-	FLOAT OldBumpSize = TextureInfo.BumpSize;
-	FLOAT OldBumpLumaScale = TextureInfo.BumpLumaScale;
-	FLOAT OldBumpLumaOffset = TextureInfo.BumpLumaOffset;
+	const UBOOL WasBumpmap        = TextureInfo.IsBumpmap;
+	const FLOAT OldUVScale        = TextureInfo.UVScale;
+	const FLOAT OldBumpSize       = TextureInfo.BumpSize;
+	const FLOAT OldBumpLumaScale  = TextureInfo.BumpLumaScale;
+	const FLOAT OldBumpLumaOffset = TextureInfo.BumpLumaOffset;
 
-	TextureInfo.IsBumpmap = IsBumpmap(Texture->GetFormat());
-	TextureInfo.UVScale = UVScale;
-	TextureInfo.BumpSize = BumpSize;
-	TextureInfo.BumpLumaScale = BumpLumaScale;
+	TextureInfo.IsBumpmap      = IsBumpmap(Texture->GetFormat());
+	TextureInfo.UVScale        = UVScale;
+	TextureInfo.BumpSize       = BumpSize;
+	TextureInfo.BumpLumaScale  = BumpLumaScale;
 	TextureInfo.BumpLumaOffset = BumpLumaOffset;
 
 	if(WasCubemap != TextureInfo.IsCubemap || WasBumpmap != TextureInfo.IsBumpmap || OldUVScale != UVScale || OldBumpSize != TextureInfo.BumpSize || OldBumpLumaScale != BumpLumaScale || OldBumpLumaOffset != BumpLumaOffset)
@@ -1038,8 +1038,8 @@ bool FOpenGLRenderInterface::HandleSpecular(UMaterial* Specular, UMaterial* Spec
 
 	if(SpecularMaterial->IsA<UBitmapMaterial>())
 	{
-		INT Index = CurrentState->NumTextures++;
-		SBYTE SpecularMatrix = INDEX_NONE;
+		const INT Index          = CurrentState->NumTextures++;
+		SBYTE     SpecularMatrix = INDEX_NONE;
 
 		if(SpecularModifier.bUseTexMatrix)
 		{
@@ -1048,7 +1048,7 @@ bool FOpenGLRenderInterface::HandleSpecular(UMaterial* Specular, UMaterial* Spec
 		}
 
 		SetBitmapTexture(static_cast<UBitmapMaterial*>(SpecularMaterial), Index, 1.0f, SpecularModifier.TexUClamp, SpecularModifier.TexVClamp, BumpSize, SpecularMaskStrength, SpecularStrength);
-		EColorArg SpecTex = ShaderGenerator.AddTexture(Index, SpecularModifier.TexCoordSrc, SpecularModifier.TexCoordCount, SpecularMatrix, false, BumpmapIndex);
+		const EColorArg SpecTex = ShaderGenerator.AddTexture(Index, SpecularModifier.TexCoordSrc, SpecularModifier.TexCoordCount, SpecularMatrix, false, BumpmapIndex);
 		ShaderGenerator.AddColorOp(SpecTex, SpecTex, COP_Arg1, CC_RGB, CR_0);
 	}
 	else
@@ -1083,9 +1083,9 @@ bool FOpenGLRenderInterface::HandleSpecular(UMaterial* Specular, UMaterial* Spec
 void FOpenGLRenderInterface::UseLightmap(FShaderGenerator& ShaderGenerator)
 {
 	checkSlow(CurrentState->Lightmap);
-	INT Index = CurrentState->NumTextures++;
+	const INT Index = CurrentState->NumTextures++;
 	SetTexture(CurrentState->Lightmap, Index);
-	EColorArg TextureArg = ShaderGenerator.AddTexture(Index, TCS_Stream1);
+	const EColorArg TextureArg = ShaderGenerator.AddTexture(Index, TCS_Stream1);
 	ShaderGenerator.AddColorOp(CA_R0, TextureArg, CurrentState->LightingModulate2X ? COP_Modulate2X : COP_Modulate, CC_RGB, CR_0);
 	UsingLightmap = true;
 }
@@ -1258,9 +1258,9 @@ bool FOpenGLRenderInterface::SetProjectorMaterial(UProjectorMaterial* ProjectorM
 			TexCoordSrc = TCS_WorldCoords;
 		}
 
-		INT TextureIndex = CurrentState->NumTextures++;
+		const INT TextureIndex = CurrentState->NumTextures++;
 		SetBitmapTexture(ProjectedBitmap, TextureIndex);
-		EColorArg TextureArg = ShaderGenerator.AddTexture(TextureIndex, TexCoordSrc, TCN_3DCoords, Matrix, true);
+		const EColorArg TextureArg = ShaderGenerator.AddTexture(TextureIndex, TexCoordSrc, TCN_3DCoords, Matrix, true);
 
 		switch(BaseMaterialBlending)
 		{
@@ -1412,8 +1412,8 @@ bool FOpenGLRenderInterface::SetTerrainMaterial(UTerrainMaterial* TerrainMateria
 				return false;
 
 			FShaderGenerator ShaderGenerator;
-			FModifierInfo ModifierInfo;
-			UMaterial* Opacity = ShaderMaterial->Opacity;
+			FModifierInfo    ModifierInfo;
+			UMaterial*       Opacity = ShaderMaterial->Opacity;
 
 			if(TerrainMaterial->FirstPass)
 				ModifierInfo.TexCoordSrc = TCS_WorldCoords;
@@ -1491,8 +1491,8 @@ bool FOpenGLRenderInterface::SetTerrainMaterial(UTerrainMaterial* TerrainMateria
 			for(INT i = 1; i < Layers.Num(); ++i)
 			{
 				checkSlow(Layers[i].Texture->IsA<UBitmapMaterial>());
-				INT TextureIndex = i * 2;
-				INT AlphaWeightIndex = TextureIndex + 1;
+				const INT TextureIndex = i * 2;
+				const INT AlphaWeightIndex = TextureIndex + 1;
 
 				SetBitmapTexture(static_cast<UBitmapMaterial*>(Layers[i].Texture), TextureIndex, 1.0f, TCO_Wrap, TCO_Wrap);
 				SetBitmapTexture(static_cast<UBitmapMaterial*>(Layers[i].AlphaWeight), AlphaWeightIndex);

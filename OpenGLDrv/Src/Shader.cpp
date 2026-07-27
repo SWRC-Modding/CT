@@ -3,8 +3,11 @@
 
 // FOpenGLShader
 
-FOpenGLShader::FOpenGLShader(UOpenGLRenderDevice* InRenDev) : RenDev(InRenDev),
-                                                              Program(GL_NONE){}
+FOpenGLShader::FOpenGLShader(UOpenGLRenderDevice* InRenDev)
+	: RenDev(InRenDev)
+	, Program(GL_NONE)
+{
+}
 
 FOpenGLShader::~FOpenGLShader()
 {
@@ -15,10 +18,10 @@ void FOpenGLShader::Compile(const TCHAR* InShaderCode, const TCHAR* ShaderName)
 {
 	FString ShaderCode = InShaderCode;
 
-	RenDev->ExpandShaderMacros(&ShaderCode);
+	RenDev->ExpandShaderMacros(ShaderCode);
 
-	GLuint VertexShader = CompileShader(GL_VERTEX_SHADER, *ShaderCode, *(FStringTemp(ShaderName) + SHADER_FILE_EXTENSION + " - vertex shader"));
-	GLuint FragmentShader = CompileShader(GL_FRAGMENT_SHADER, *ShaderCode, *(FStringTemp(ShaderName) + SHADER_FILE_EXTENSION + " - fragment shader"));
+	const GLuint VertexShader   = CompileShader(GL_VERTEX_SHADER, *ShaderCode, *(FStringTemp(ShaderName) + SHADER_FILE_EXTENSION + " - vertex shader"));
+	const GLuint FragmentShader = CompileShader(GL_FRAGMENT_SHADER, *ShaderCode, *(FStringTemp(ShaderName) + SHADER_FILE_EXTENSION + " - fragment shader"));
 
 	if(!VertexShader || !FragmentShader)
 	{
@@ -37,7 +40,7 @@ void FOpenGLShader::Compile(const TCHAR* InShaderCode, const TCHAR* ShaderName)
 		return;
 	}
 
-	if(!Program)
+	if(!IsValid())
 		Program = RenDev->glCreateProgram();
 
 	RenDev->glAttachShader(Program, VertexShader);
@@ -66,18 +69,16 @@ void FOpenGLShader::Compile(const TCHAR* InShaderCode, const TCHAR* ShaderName)
 void FOpenGLShader::Bind() const{
 	checkSlow(this != &RenDev->ErrorShader || Program);
 
-	if(Program)
+	if(IsValid())
 		RenDev->glUseProgram(Program);
 	else
 		RenDev->ErrorShader.Bind();
-
 }
 
 void FOpenGLShader::Free()
 {
-	if(RenDev->IsCurrent() && Program)
+	if(RenDev->IsCurrent() && IsValid())
 	{
-		checkSlow(RenDev->IsCurrent());
 		RenDev->glDeleteProgram(Program);
 		Program = GL_NONE;
 	}

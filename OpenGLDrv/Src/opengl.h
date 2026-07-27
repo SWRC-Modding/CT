@@ -62,14 +62,18 @@ typedef long GLsizeiptr;
 #define GL_STENCIL_TEST                              0x0B90
 #define GL_BLEND                                     0x0BE2
 #define GL_TEXTURE_2D                                0x0DE1
+#define GL_BYTE                                      0x1400
 #define GL_UNSIGNED_BYTE                             0x1401
+#define GL_SHORT                                     0x1402
 #define GL_UNSIGNED_SHORT                            0x1403
+#define GL_INT                                       0x1404
 #define GL_UNSIGNED_INT                              0x1405
 #define GL_FLOAT                                     0x1406
 #define GL_INVERT                                    0x150A
 #define GL_COLOR                                     0x1800
 #define GL_DEPTH                                     0x1801
 #define GL_STENCIL                                   0x1802
+#define GL_RGBA                                      0x1908
 #define GL_POINT                                     0x1B00
 #define GL_LINE                                      0x1B01
 #define GL_FILL                                      0x1B02
@@ -99,6 +103,9 @@ typedef long GLsizeiptr;
 #define GL_RGB8                                      0x8051
 #define GL_RGBA4                                     0x8056
 #define GL_RGBA8                                     0x8058
+#define GL_RG8_SNORM                                 0x8F95
+#define GL_RGB8_SNORM                                0x8F96
+#define GL_RGBA8_SNORM                               0x8F97
 #define GL_TEXTURE_WRAP_R                            0x8072
 #define GL_BGRA                                      0x80E1
 #define GL_CLAMP_TO_EDGE                             0x812F
@@ -107,6 +114,7 @@ typedef long GLsizeiptr;
 #define GL_MAJOR_VERSION                             0x821B
 #define GL_MINOR_VERSION                             0x821C
 #define GL_NUM_EXTENSIONS                            0x821D
+#define GL_RG                                        0x8227
 #define GL_DEBUG_OUTPUT_SYNCHRONOUS                  0x8242
 #define GL_DEBUG_SOURCE_API                          0x8246
 #define GL_DEBUG_SOURCE_WINDOW_SYSTEM                0x8247
@@ -124,6 +132,11 @@ typedef long GLsizeiptr;
 #define GL_DEBUG_TYPE_PUSH_GROUP                     0x8269
 #define GL_DEBUG_TYPE_POP_GROUP                      0x826A
 #define GL_DEBUG_SEVERITY_NOTIFICATION               0x826B
+#define GL_TEXTURE_SWIZZLE_R                         0x8E42
+#define GL_TEXTURE_SWIZZLE_G                         0x8E43
+#define GL_TEXTURE_SWIZZLE_B                         0x8E44
+#define GL_TEXTURE_SWIZZLE_A                         0x8E45
+#define GL_TEXTURE_SWIZZLE_RGBA                      0x8E46
 #define GL_COMPRESSED_RGB_S3TC_DXT1_EXT              0x83F0
 #define GL_COMPRESSED_RGBA_S3TC_DXT1_EXT             0x83F1
 #define GL_COMPRESSED_RGBA_S3TC_DXT3_EXT             0x83F2
@@ -292,8 +305,11 @@ typedef OPENGL_MESSAGE_CALLBACK(opengl_message_callback);
 	GL_FUNC(BindTextureUnit, void, (GLuint Unit, GLuint Texture)) \
 	GL_FUNC(TextureParameteri, void, (GLuint Texture, GLenum Name, GLint Param)) \
 	GL_FUNC(TextureStorage2D, void, (GLuint Texture, GLsizei Levels, GLenum InternalFormat, GLsizei Width, GLsizei Height)) \
+	GL_FUNC(TextureStorage3D, void, (GLuint Texture, GLsizei Levels, GLenum InternalFormat, GLsizei Width, GLsizei Height, GLsizei Depth)) \
 	GL_FUNC(TextureSubImage2D, void, (GLuint Texture, GLint Level, GLint XOffset, GLint YOffset, GLsizei Width, GLsizei Height, GLenum Format, GLenum Type, const void* Pixels)) \
 	GL_FUNC(TextureSubImage3D, void, (GLuint Texture, GLint Level, GLint XOffset, GLint YOffset, GLint ZOffset, GLsizei Width, GLsizei Height, GLsizei Depth, GLenum Format, GLenum Type, const void* Pixels)) \
+	GL_FUNC(CompressedTextureSubImage2D, void, (GLuint Texture, GLint Level, GLint XOffset, GLint YOffset, GLsizei Width, GLsizei Height, GLenum Format, GLsizei ImageSize, const void* Data)) \
+	GL_FUNC(CompressedTextureSubImage3D, void, (GLuint Texture, GLint Level, GLint XOffset, GLint YOffset, GLint ZOffset, GLsizei Width, GLsizei Height, GLsizei Depth, GLenum Format, GLsizei ImageSize, const void* Data)) \
 	GL_FUNC(GenerateTextureMipmap, void, (GLuint Texture)) \
 	GL_FUNC(CreateFramebuffers, void, (GLsizei Num, GLuint* Framebuffers)) \
 	GL_FUNC(DeleteFramebuffers, void, (GLsizei Num, const GLuint* Framebuffers)) \
@@ -323,6 +339,3 @@ typedef OPENGL_MESSAGE_CALLBACK(opengl_message_callback);
 	GL_FUNC(DrawElementsInstanced, void, (GLenum Mode, GLsizei Count, GLenum Type, const void* Indices, GLsizei PrimCount)) \
 	GL_FUNC(DrawRangeElements, void, (GLenum Mode, GLuint Start, GLuint End, GLsizei Count, GLenum Type, const void* Indices)) \
 	GL_FUNC(DrawRangeElementsBaseVertex, void, (GLenum Mode, GLuint Start, GLuint End, GLsizei Count, GLenum Type, const void* Indices, GLint BaseVertex))
-
-#define GL_EXT_FUNCS \
-	GL_FUNC(CompressedTextureImage2DEXT, void, (GLuint Texture, GLenum Target, GLint Level, GLenum InternalFormat, GLsizei Width, GLsizei Height, GLint Border, GLsizei ImageSize, const void* Data))

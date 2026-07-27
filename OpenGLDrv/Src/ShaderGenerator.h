@@ -84,8 +84,8 @@ public:
 	void Reset()
 	{
 		TempRegister = 0;
-		NumTextures = 0;
-		NumColorOps = 0;
+		NumTextures  = 0;
+		NumColorOps  = 0;
 	}
 
 	EColorArg AddTexture(INT Index, ETexCoordSrc TexCoordSrc, ETexCoordCount TexCoordCount = TCN_2DCoords, SBYTE Matrix = INDEX_NONE, bool bTexCoordProjected = false, INT Bumpmap = INDEX_NONE)
@@ -129,7 +129,8 @@ public:
 		return static_cast<EColorArg>(CA_R2 + --TempRegister);
 	}
 
-	DWORD GetShaderId(bool UseStaticLighting) const{
+	DWORD GetShaderId(bool UseStaticLighting) const
+	{
 		return appMemhash(ColorOps, NumColorOps * sizeof(ColorOps[0]), appMemhash(Textures, NumTextures * sizeof(Textures[0]), UseStaticLighting));
 	}
 
@@ -154,11 +155,11 @@ private:
 		BYTE Modifier;
 	};
 
-	INT                  TempRegister;
-	INT                  NumTextures;
-	INT                  NumColorOps;
-	FTextureRegister     Textures[MAX_SHADER_TEXTURE_REGISTERS];
-	FColorOp             ColorOps[MAX_SHADER_COLOR_OPERATIONS];
+	INT              TempRegister;
+	INT              NumTextures;
+	INT              NumColorOps;
+	FTextureRegister Textures[MAX_SHADER_TEXTURE_REGISTERS];
+	FColorOp         ColorOps[MAX_SHADER_COLOR_OPERATIONS];
 
 	FStringTemp GetArgString(BYTE Arg);
 };

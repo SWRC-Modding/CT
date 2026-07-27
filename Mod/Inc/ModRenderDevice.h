@@ -71,7 +71,7 @@ public:
 	UViewport*                LockedViewport;
 	FSelectionRenderInterface SelectionRI;
 	UBOOL                     bEnableSelectionFix;
-	UBOOL                     bDebugSelectionBuffer; // Shows the selection buffer for five seconds after a click
+	UBOOL                     bShowSelectionBuffer;
 
 	// Saved color values from UEngine
 	FColor C_ActorArrow;

@@ -91,9 +91,9 @@ void UExportBumpMapsCommandlet::ExportTga(FTexture* Texture, const FString& File
 {
 	check(sizeof(FTGAHeader) == 18);
 
-	ETextureFormat Format = Texture->GetFormat();
-	INT Width = Texture->GetWidth();
-	INT Height = Texture->GetHeight();
+	const ETextureFormat Format = Texture->GetFormat();
+	const INT            Width  = Texture->GetWidth();
+	const INT            Height = Texture->GetHeight();
 
 	FTGAHeader Header = {0};
 
@@ -109,7 +109,7 @@ void UExportBumpMapsCommandlet::ExportTga(FTexture* Texture, const FString& File
 	Archive.Add(Width * Height * 4, false);
 
 	BYTE* Dest = Archive.GetData() + Archive.Tell();
-	void* Src = Texture->GetRawTextureData(0);
+	void* Src  = Texture->GetRawTextureData(0);
 
 	switch(Format)
 	{
@@ -121,13 +121,14 @@ void UExportBumpMapsCommandlet::ExportTga(FTexture* Texture, const FString& File
 		break;
 	case TEXF_X8L8V8U8:
 		ConvertX8L8V8U8ToBGRA8(Dest, Src, Width, Height);
+		break;
 	default:
 		return;
 	}
 
 	// Convert bumpmap to original normal map by setting Z to 1 and exchanging X and Y
 
-	INT NumPixels = Width * Height;
+	const INT NumPixels = Width * Height;
 
 	for(INT i = 0; i < NumPixels; ++i)
 	{

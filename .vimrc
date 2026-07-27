@@ -2,11 +2,10 @@ set wildignore+=*.obj,*.lib,*.exp,*.pdb,*.idb
 set errorformat^=%f(%l):\ %m,%f(%l)\ :\ %m,%f\ :\ error\ %m,LINK\ :\ fatal\ error\ %m
 
 map <silent> <F3> :wa <bar> let &makeprg='..\GameData\System\UCC.exe' <bar> make! make "ini=../../Code/UCC/UCC.ini" -noprompt -fullsourcepath -noincremental <bar> :cwindow<CR>
-map <silent> <F4> :wa <bar> let &makeprg='build.bat' <bar> make! debug <bar> :cwindow<CR>
+map <silent> <F4> :wa <bar> let &makeprg='.\build.bat' <bar> make! debug <bar> :cwindow<CR>
 
-" map <F5> :!start "../GameData/System/CT.exe" dm_canyon?game=mpgame.dmgame?maxplayers=32?Listen -windowed -log -nosaveconfig -rendev=rtx<CR>
 map <F5> :!start "../GameData/System/CT.exe" geo_01a -windowed -log -nosaveconfig -rendev=rtx<CR>
-map <F6> :!start "../GameData/System/CTEditor.exe"<CR>
+map <F6> :!start "../GameData/System/UnrealEd.exe"<CR>
 
 augroup customhighlight
 	autocmd!

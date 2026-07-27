@@ -22,6 +22,11 @@ enum D3DFORMAT{
 	D3DFMT_FORCE_DWORD = 0x7fffffff
 };
 
+static bool IsD3DBumpmapFormat(D3DFORMAT Format)
+{
+	return Format >= D3DFMT_V8U8 && Format <= D3DFMT_X8L8V8U8;
+}
+
 typedef DWORD D3DRESOURCETYPE;
 typedef DWORD D3DPOOL;
 typedef DWORD D3DMULTISAMPLE_TYPE;
@@ -67,13 +72,6 @@ static HRESULT D3DDeviceGetRenderTarget(IDirect3DDevice8* Self, IDirect3DSurface
 	void** VTable = *reinterpret_cast<void***>(Self);
 	return reinterpret_cast<HRESULT(__stdcall*)(IDirect3DDevice8*, IDirect3DSurface8**)>(
 		VTable[D3DVTIdx_DeviceGetRenderTarget])(Self, ppRenderTarget);
-}
-
-static HRESULT D3DSurfaceGetDesc(IDirect3DSurface8* Self, D3DSURFACE_DESC *pDesc)
-{
-	void** VTable = *reinterpret_cast<void***>(Self);
-	return reinterpret_cast<HRESULT(__stdcall*)(IDirect3DSurface8*, D3DSURFACE_DESC*)>(
-		VTable[D3DVTIdx_SurfaceGetDesc])(Self, pDesc);
 }
 
 static HRESULT D3DSurfaceLockRect(IDirect3DSurface8* Self, D3DLOCKED_RECT* pLockedRect, const RECT* pRect, DWORD Flags)
@@ -134,8 +132,60 @@ static void*              CurrentD3D8MipLevelPixels;
 
 // Conversion from one bumpmap format to another
 
+static BYTE Map8BitUnsignedTo6BitUnsigned(BYTE U8)
+{
+	return (BYTE)(U8 * 63 / 255);
+}
+
+static SBYTE Map8BitSignedTo5BitSigned(SBYTE S8)
+{
+	const int Min8 = -128;
+	const int Max8 = 127;
+	const int Range8 = Max8 - Min8;
+
+	const int Min5 = -16;
+	const int Max5 = 15;
+	const int Range5 = Max5 - Min5;
+
+	return (SBYTE)((S8 - Min8) * Range5 / Range8 + Min5);
+}
+
 /*
- * L6V5U5 format conversion
+ * V8U8
+ */
+
+static void ConvertV8U8ToL6V5U5(void* Dest, const void* Src, INT Width, INT Height)
+{
+	INT NumPixels = Width * Height;
+
+	for(INT i = 0; i < NumPixels; ++i)
+	{
+		const FV8U8Pixel* P1 = static_cast<const FV8U8Pixel*>(Src) + i;
+		FL6V5U5Pixel* P2 = static_cast<FL6V5U5Pixel*>(Dest) + i;
+
+		P2->V = Map8BitSignedTo5BitSigned(P1->V);
+		P2->U = Map8BitSignedTo5BitSigned(P1->U);
+		P2->L = Map8BitUnsignedTo6BitUnsigned(0xFF);
+	}
+}
+
+static void ConvertV8U8ToX8L8V8U8(void* Dest, const void* Src, INT Width, INT Height)
+{
+	INT NumPixels = Width * Height;
+
+	for(INT i = 0; i < NumPixels; ++i)
+	{
+		const FV8U8Pixel* P1 = static_cast<const FV8U8Pixel*>(Src) + i;
+		FX8L8V8U8Pixel* P2 = static_cast<FX8L8V8U8Pixel*>(Dest) + i;
+
+		P2->V = P1->V;
+		P2->U = P1->U;
+		P2->L = 0xFF;
+		P2->X = 0xFF;
+	}
+}
+/*
+ * L6V5U5
  */
 
 static void ConvertL6V5U5ToX8L8V8U8(void* Dest, const void* Src, INT Width, INT Height)
@@ -150,7 +200,7 @@ static void ConvertL6V5U5ToX8L8V8U8(void* Dest, const void* Src, INT Width, INT 
 		P2->V = Map5BitSignedTo8BitSigned(P1->V);
 		P2->U = Map5BitSignedTo8BitSigned(P1->U);
 		P2->L = Map6BitUnsignedTo8BitUnsigned(P1->L);
-		P2->X = P2->L; // L6V5U5 only has one luminance value so we can just reuse it
+		P2->X = 0xFF;
 	}
 }
 
@@ -170,8 +220,23 @@ static void ConvertL6V5U5ToV8U8(void* Dest, const void* Src, INT Width, INT Heig
 }
 
 /*
- * X8L8V8U8 format conversion
+ * X8L8V8U8
  */
+
+static void ConvertX8L8V8U8ToL6V5U5(void* Dest, const void* Src, INT Width, INT Height)
+{
+	INT NumPixels = Width * Height;
+
+	for(INT i = 0; i < NumPixels; ++i)
+	{
+		const FX8L8V8U8Pixel* P1 = static_cast<const FX8L8V8U8Pixel*>(Src) + i;
+		FL6V5U5Pixel* P2 = static_cast<FL6V5U5Pixel*>(Dest) + i;
+
+		P2->V = Map8BitSignedTo5BitSigned(P1->V);
+		P2->U = Map8BitSignedTo5BitSigned(P1->U);
+		P2->L = Map8BitUnsignedTo6BitUnsigned(P1->L);
+	}
+}
 
 static void ConvertX8L8V8U8ToV8U8(void* Dest, const void* Src, INT Width, INT Height)
 {
@@ -182,8 +247,8 @@ static void ConvertX8L8V8U8ToV8U8(void* Dest, const void* Src, INT Width, INT He
 		const FX8L8V8U8Pixel* P1 = static_cast<const FX8L8V8U8Pixel*>(Src) + i;
 		FV8U8Pixel* P2 = static_cast<FV8U8Pixel*>(Dest) + i;
 
-		P2->V = Map5BitSignedTo8BitSigned(P1->V);
-		P2->U = Map5BitSignedTo8BitSigned(P1->U);
+		P2->V = P1->V;
+		P2->U = P1->U;
 		// No luminance
 	}
 }
@@ -203,15 +268,10 @@ static D3DTEXTURE_LOCKRECT(D3DTextureLockRectOverride)
 		return D3DTextureLockRect(D3DTexture, Level, pLockedRect, pRect, Flags);
 
 	D3DSURFACE_DESC SurfaceDesc;
-	HRESULT GetLevelDescResult = D3DTextureGetLevelDesc(D3DTexture, Level, &SurfaceDesc);
+	const HRESULT   GetLevelDescResult = D3DTextureGetLevelDesc(D3DTexture, Level, &SurfaceDesc);
 
 	if(FAILED(GetLevelDescResult))
 		return GetLevelDescResult;
-
-	CurrentD3D8MipLevelWidth = SurfaceDesc.Width;
-	CurrentD3D8MipLevelHeight = SurfaceDesc.Height;
-	check(CurrentD3D8MipLevelPixels == NULL);
-	CurrentD3D8MipLevelPixels = appMalloc(SurfaceDesc.Size);
 
 	INT BytesPerPixel = 0;
 
@@ -232,6 +292,11 @@ static D3DTEXTURE_LOCKRECT(D3DTextureLockRectOverride)
 	default:
 		appErrorf("Unexpected texture format (%i)", CurrentD3D8TextureSourceFormat);
 	}
+
+	check(CurrentD3D8MipLevelPixels == NULL);
+	CurrentD3D8MipLevelPixels = appMalloc(SurfaceDesc.Width * SurfaceDesc.Height * BytesPerPixel);
+	CurrentD3D8MipLevelWidth  = SurfaceDesc.Width;
+	CurrentD3D8MipLevelHeight = SurfaceDesc.Height;
 
 	pLockedRect->Pitch = CurrentD3D8MipLevelWidth * BytesPerPixel;
 	pLockedRect->pBits = CurrentD3D8MipLevelPixels;
@@ -260,7 +325,12 @@ static D3DTEXTURE_UNLOCKRECT(D3DTextureUnlockRectOverride)
 	{
 		if(CurrentD3D8TextureSourceFormat == D3DFMT_V8U8)
 		{
-			ConvertV8U8ToBGRA8(LockedRect.pBits, CurrentD3D8MipLevelPixels, CurrentD3D8MipLevelWidth, CurrentD3D8MipLevelHeight);
+			if(CurrentD3D8TextureTargetFormat == D3DFMT_L6V5U5)
+				ConvertV8U8ToL6V5U5(LockedRect.pBits, CurrentD3D8MipLevelPixels, CurrentD3D8MipLevelWidth, CurrentD3D8MipLevelHeight);
+			else if(CurrentD3D8TextureTargetFormat == D3DFMT_X8L8V8U8)
+				ConvertV8U8ToX8L8V8U8(LockedRect.pBits, CurrentD3D8MipLevelPixels, CurrentD3D8MipLevelWidth, CurrentD3D8MipLevelHeight);
+			else if(CurrentD3D8TextureTargetFormat == D3DFMT_A8R8G8B8)
+				ConvertV8U8ToBGRA8(LockedRect.pBits, CurrentD3D8MipLevelPixels, CurrentD3D8MipLevelWidth, CurrentD3D8MipLevelHeight);
 		}
 		else if(CurrentD3D8TextureSourceFormat == D3DFMT_L6V5U5)
 		{
@@ -275,6 +345,8 @@ static D3DTEXTURE_UNLOCKRECT(D3DTextureUnlockRectOverride)
 		{
 			if(CurrentD3D8TextureTargetFormat == D3DFMT_V8U8)
 				ConvertX8L8V8U8ToV8U8(LockedRect.pBits, CurrentD3D8MipLevelPixels, CurrentD3D8MipLevelWidth, CurrentD3D8MipLevelHeight);
+			else if(CurrentD3D8TextureTargetFormat == D3DFMT_L6V5U5)
+				ConvertX8L8V8U8ToL6V5U5(LockedRect.pBits, CurrentD3D8MipLevelPixels, CurrentD3D8MipLevelWidth, CurrentD3D8MipLevelHeight);
 			else if(CurrentD3D8TextureTargetFormat == D3DFMT_A8R8G8B8)
 				ConvertX8L8V8U8ToBGRA8(LockedRect.pBits, CurrentD3D8MipLevelPixels, CurrentD3D8MipLevelWidth, CurrentD3D8MipLevelHeight);
 		}
@@ -309,64 +381,53 @@ static D3DDeviceCreateTextureFunc* D3DDeviceCreateTexture = NULL;
 
 static D3DDEVICE_CREATETEXTURE(D3DDeviceCreateTextureOverride)
 {
-	// X8L8V8U8 is used as the first fallback format because no information is lost in the conversion
-	D3DFORMAT FallbackFormat = Format == D3DFMT_L6V5U5 ? D3DFMT_X8L8V8U8 : Format;
-	HRESULT Result = D3DDeviceCreateTexture(D3DDevice,
-	                                        Width,
-	                                        Height,
-	                                        Levels,
-	                                        Usage,
-	                                        FallbackFormat,
-	                                        Pool,
-	                                        ppTexture);
+	const D3DFORMAT FormatTryList[] = {
+		Format,          // Try the actually requested format first.
+		D3DFMT_X8L8V8U8, // Usually still works if L6V5U5 doesn't. No loss in precision.
+		D3DFMT_L6V5U5,   // On intel this still works but X8L8V8U8 doesn't so try it before V8U8 to keep luminance.
+		D3DFMT_V8U8,     // Missing luminance.
+		D3DFMT_A8R8G8B8  // Fallback if everything else fails.
+	};
 
-	if(SUCCEEDED(Result)  && FallbackFormat == Format)
-		return Result; // No fallback format was needed so just return
-
-	if(FAILED(Result) && Format < D3DFMT_V8U8 && Format > D3DFMT_X8L8V8U8) // CreateTexture failed with a non-bumpmap format
-		appErrorf("CreateTexture failed (Format: %i)", Format);            // Should never happen but this is a better error than the engine produces
-
-	if(FAILED(Result)) // If X8L8V8U8 is not supported V8U8 might still be so try that. Visually the same except for missing luminance
+	for(INT i = 0; i < ARRAY_COUNT(FormatTryList); ++i)
 	{
-		FallbackFormat = D3DFMT_V8U8;
-		Result = D3DDeviceCreateTexture(D3DDevice,
-		                                Width,
-		                                Height,
-		                                Levels,
-		                                Usage,
-		                                FallbackFormat,
-		                                Pool,
-		                                ppTexture);
+		const D3DFORMAT ActualFormat = FormatTryList[i];
+
+		// Skip CreateTexture call if it already failed
+		if(i > 0 && ActualFormat == Format)
+			continue;
+
+		const HRESULT Result = D3DDeviceCreateTexture(D3DDevice,
+		                                              Width,
+		                                              Height,
+		                                              Levels,
+		                                              Usage,
+		                                              ActualFormat,
+		                                              Pool,
+		                                              ppTexture);
+
+		if(FAILED(Result))
+		{
+			if(IsD3DBumpmapFormat(Format))
+				continue;
+
+			appErrorf("CreateTexture failed (Format: %i)", Format);
+		}
+
+		if(Format != ActualFormat)
+		{
+			CurrentD3D8Texture             = *ppTexture;
+			CurrentD3D8TextureSourceFormat = Format;
+			CurrentD3D8TextureTargetFormat = ActualFormat;
+			CurrentD3D8TextureNumMipLevels = Levels;
+			MaybePatchVTable(&D3DTextureLockRect, *ppTexture, D3DVTIdx_TextureLockRect, D3DTextureLockRectOverride);
+			MaybePatchVTable(&D3DTextureUnlockRect, *ppTexture, D3DVTIdx_TextureUnlockRect, D3DTextureUnlockRectOverride);
+		}
+
+		return Result;
 	}
 
-	if(FAILED(Result)) // If no bumpmap format is available we fall back to ARGB. Looks fine visually and should always be supported
-	{
-		FallbackFormat = D3DFMT_A8R8G8B8;
-		Result = D3DDeviceCreateTexture(D3DDevice,
-		                                Width,
-		                                Height,
-		                                Levels,
-		                                Usage,
-		                                FallbackFormat,
-		                                Pool,
-		                                ppTexture);
-	}
-
-	if(FAILED(Result))
-		appErrorf("CreateTexture failed even with fallback format (Format: %i)", FallbackFormat);
-
-	// Patching vtables if it wasn't done already
-
-	MaybePatchVTable(&D3DTextureLockRect, *ppTexture, D3DVTIdx_TextureLockRect, D3DTextureLockRectOverride);
-	MaybePatchVTable(&D3DTextureUnlockRect, *ppTexture, D3DVTIdx_TextureUnlockRect, D3DTextureUnlockRectOverride);
-
-	// Updating the current texture with the newly created one
-	CurrentD3D8Texture = *ppTexture;
-	CurrentD3D8TextureSourceFormat = Format;
-	CurrentD3D8TextureTargetFormat = FallbackFormat;
-	CurrentD3D8TextureNumMipLevels = Levels;
-
-	return Result;
+	return -1; // Unreachable
 }
 
 /*
@@ -386,7 +447,7 @@ static D3D8CreateDeviceFunc* D3D8CreateDevice = NULL;
 
 static D3D_CREATEDEVICE(D3D8CreateDeviceOverride)
 {
-	HRESULT Result = D3D8CreateDevice(D3D8, Adapter, DeviceType, hFocusWindow, BehaviorFlags, pPresentationParameters, ppReturnedDeviceInterface);
+	const HRESULT Result = D3D8CreateDevice(D3D8, Adapter, DeviceType, hFocusWindow, BehaviorFlags, pPresentationParameters, ppReturnedDeviceInterface);
 
 	if(SUCCEEDED(Result))
 		MaybePatchVTable(&D3DDeviceCreateTexture, *ppReturnedDeviceInterface, D3DVTIdx_DeviceCreateTexture, D3DDeviceCreateTextureOverride);
@@ -412,13 +473,13 @@ FSelectionRenderInterface::FSelectionRenderInterface(UModRenderDevice* InRenDev)
  */
 bool FSelectionRenderInterface::ProcessHitColor(FColor HitColor, INT* OutIndex)
 {
-	INT Index = HitColor.R | HitColor.G << 8 | HitColor.B << 16;
+	const INT Index = HitColor.R | HitColor.G << 8 | HitColor.B << 16;
 
 	if(Index >= 0 && Index < AllHitData.Num() - (INT)sizeof(HHitProxy))
 	{
-		FHitProxyInfo* Info = reinterpret_cast<FHitProxyInfo*>(&AllHitData[Index]);
-		HHitProxy* HitProxy = reinterpret_cast<HHitProxy*>(&AllHitData[Index + sizeof(FHitProxyInfo)]);
-		AActor* HitActor = HitProxy->GetActor();
+		FHitProxyInfo* Info     = reinterpret_cast<FHitProxyInfo*>(&AllHitData[Index]);
+		HHitProxy*     HitProxy = reinterpret_cast<HHitProxy*>(&AllHitData[Index + sizeof(FHitProxyInfo)]);
+		AActor*        HitActor = HitProxy->GetActor();
 
 		*OutIndex = Index;
 
@@ -499,15 +560,19 @@ void FSelectionRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorS
 	CurrentTexture = NULL;
 	Impl->SetMaterial(Material, ErrorString, ErrorMaterial, NumPasses);
 
-	// Checking whether the current material has a texture with an alpha channel somewhere down the hierarchy.
+	// Check whether the current material has a texture with an alpha channel somewhere down the hierarchy.
 	// If it has, it is used to draw the selection buffer for more accuracy. If not, the polygons are completly filled.
+
+	bool            UseCombinerAlpha = false;
+	EOutputBlending OutputBlending   = OB_Masked; // Assume masked by default. If the material is a shader it will override this.
+
 	while(Material)
 	{
 		if(Material->IsA<UBitmapMaterial>())
 		{
-			UTexture* Tmp = Cast<UTexture>(Material);
+			UTexture* Texture = Cast<UTexture>(Material);
 
-			if(Tmp && Tmp->bAlphaTexture)
+			if(Texture && (Texture->bMasked || Texture->bAlphaTexture || (UseCombinerAlpha && OutputBlending != OB_Normal && OutputBlending != OB_Modulate)))
 				CurrentTexture = static_cast<UBitmapMaterial*>(Material);
 			else
 				CurrentTexture = NULL;
@@ -516,7 +581,42 @@ void FSelectionRenderInterface::SetMaterial(UMaterial* Material, FString* ErrorS
 		}
 		else if(Material->IsA<UShader>())
 		{
-			Material = static_cast<UShader*>(Material)->Diffuse;
+			UShader* Shader  = static_cast<UShader*>(Material);
+			Material         = Shader->Diffuse;
+			OutputBlending   = static_cast<EOutputBlending>(Shader->OutputBlending);
+			UseCombinerAlpha = false;
+		}
+		else if(Material->IsA<UCombiner>())
+		{
+			UCombiner* Combiner = static_cast<UCombiner*>(Material);
+
+			switch(Combiner->AlphaOperation)
+			{
+			case AO_Use_Mask:
+				UseCombinerAlpha = true;
+				Material         = Combiner->Mask;
+
+				if(!Material)
+					Material = Combiner->Material1;
+
+				break;
+			case AO_Use_Alpha_From_Material1:
+				UseCombinerAlpha = true;
+				Material         = Combiner->Material1;
+				break;
+			case AO_Use_Alpha_From_Material2:
+				UseCombinerAlpha = true;
+				Material         = Combiner->Material2;
+				break;
+			default:
+				UseCombinerAlpha = true;
+				Material         = Combiner->Material1;
+				break;
+			}
+		}
+		else if(Material->IsA<UModifier>())
+		{
+			Material = static_cast<UModifier*>(Material)->Material;
 		}
 		else
 		{
@@ -572,8 +672,27 @@ void FSelectionRenderInterface::DrawPrimitive(EPrimitiveType PrimitiveType, INT 
 		// Sprites are drawn with alpha regardless of whether UTexture::bAlphaTexture is set or not so we need to check for it
 		if(HitActor && (HitActor->DrawType == DT_Sprite || HitActor->DrawType == DT_Particle))
 		{
+			// Skip light coronas. They just get in the way but are mostly transparent.
+			if(HitActor->IsA<ALight>() && HitActor->Skins.Num() > 0)
+			{
+				if(!CurrentTexture)
+					return; // Corona texture was already filtered out earlier because it is not bMasked or bAlphaTexture
+
+				UMaterial* Material = HitActor->Skins[0];
+
+				while(Material && Material->IsA<UModifier>())
+					Material = static_cast<UModifier*>(Material)->Material;
+
+				if(CurrentTexture == Material)
+					return;
+			}
+			else if(!CurrentTexture)
+			{
+				CurrentTexture = Cast<UBitmapMaterial>(HitActor->Texture);
+			}
+
 			Shader = AlphaSelectionShader;
-			Shader->Textures[0] = Cast<UBitmapMaterial>(HitActor->Texture);
+			Shader->Textures[0] = CurrentTexture;
 		}
 		else
 		{
@@ -632,16 +751,14 @@ UBOOL UModRenderDevice::Exec(const TCHAR* Cmd, FOutputDevice& Ar)
 	{
 		if(ParseCommand(&Cmd, "DEBUGSELECT"))
 		{
-			bDebugSelectionBuffer = !bDebugSelectionBuffer;
-
+			bShowSelectionBuffer = !bShowSelectionBuffer;
+			debugf("Selection buffer display %s", bShowSelectionBuffer ? "enabled" : "disabled");
 			return 1;
 		}
 		else if(ParseCommand(&Cmd, "FIXSELECT"))
 		{
 			bEnableSelectionFix = !bEnableSelectionFix;
-
 			debugf("Selection fix %s", bEnableSelectionFix ? "enabled" : "disabled");
-
 			return 1;
 		}
 	}
@@ -656,9 +773,10 @@ FRenderInterface* UModRenderDevice::Lock(UViewport* Viewport, BYTE* HitData, INT
 
 	FRenderInterface* RI = Super::Lock(Viewport, HitData, HitSize);
 
-	if(bEnableSelectionFix && GIsEditor && RI && HitData && CastChecked<UEditorEngine>(GEngine)->Mode != EM_EyeDropper)
+	if(RI && GIsEditor && bEnableSelectionFix && ((HitData && CastChecked<UEditorEngine>(GEngine)->Mode != EM_EyeDropper) || bShowSelectionBuffer))
 	{
 		LockedViewport = Viewport;
+		Viewport->HitTesting = 1;
 		RI->EnableFog(0); // No fog in the selection buffer or else there will be wrong color values.
 		SelectionRI.Impl = RI;
 		SelectionRI.HitData = HitData;
@@ -675,92 +793,80 @@ FRenderInterface* UModRenderDevice::Lock(UViewport* Viewport, BYTE* HitData, INT
 
 void UModRenderDevice::Unlock(FRenderInterface* RI)
 {
-	if(RI == &SelectionRI)
+	if(RI != &SelectionRI || !static_cast<FSelectionRenderInterface*>(RI)->HitData)
 	{
-		checkSlow(LockedViewport);
-		checkSlow(SelectionRI.HitData);
-		checkSlow(SelectionRI.HitSize);
+		Super::Unlock(SelectionRI.Impl ? SelectionRI.Impl : RI);
+		LockedViewport   = NULL;
+		SelectionRI.Impl = NULL;
+		return;
+	}
 
-		IDirect3DSurface8* RenderTarget = NULL;
+	checkSlow(LockedViewport);
+	checkSlow(SelectionRI.HitData);
+	checkSlow(SelectionRI.HitSize);
 
-		D3DDeviceGetRenderTarget(Direct3DDevice8, &RenderTarget);
+	IDirect3DSurface8* RenderTarget = NULL;
+	D3DDeviceGetRenderTarget(Direct3DDevice8, &RenderTarget);
+	checkSlow(RenderTarget != NULL);
 
-		checkSlow(RenderTarget != NULL);
+	D3DLOCKED_RECT LockedRect;
+	D3DSurfaceLockRect(RenderTarget, &LockedRect, NULL, 0);
 
-		D3DSURFACE_DESC Desc;
+	// The actual hit test location is offset by two pixels so that it is at the center of the cross cursor.
+	const INT    HitX                   = LockedViewport->HitX + 2;
+	const INT    HitY                   = LockedViewport->HitY + 2;
+	INT          PreferredHitProxyIndex = INDEX_NONE;
+	INT          HitProxyIndex          = INDEX_NONE;
+	FLOAT        PreferredHitDist       = 999999.0f;
+	FLOAT        HitDist                = 999999.0f;
+	const BYTE*  PixelData              = (BYTE*)LockedRect.pBits + HitX * 4 + (HitY - LockedViewport->HitYL) * LockedRect.Pitch;
 
-		D3DSurfaceGetDesc(RenderTarget, &Desc);
-
-		D3DLOCKED_RECT LockedRect;
-
-		D3DSurfaceLockRect(RenderTarget, &LockedRect, NULL, 0);
-
-		INT HitProxyIndex = INDEX_NONE;
-
-		// The actual hit test location is offset by two pixels so that it is at the center of the cross cursor.
-		INT HitX = LockedViewport->HitX + 2;
-		INT HitY = LockedViewport->HitY + 2;
-		INT PreferredHitProxyIndex = INDEX_NONE;
-		FLOAT PreferredHitDist = 999999.0f;
-		FLOAT HitDist = 999999.0f;
-		DWORD* src = (DWORD*)LockedRect.pBits;
-		src = (DWORD*)((BYTE*)src + HitX * 4 + (HitY - LockedViewport->HitYL) * LockedRect.Pitch);
-
-		/*
-		 * Hits are checked in a square area to make it easier to select stuff that is only a few pixels in size.
-		 * Some hit types are preferred over others. E.g the gizmo axes or wireframe brushes. If there is more than one possible selection, the preferred ones will be used.
-		 * If there is no preferred selection type, anything at the exact cursor position is also considered a preferred selection.
-		 */
-		for(INT Y = -LockedViewport->HitYL; Y < LockedViewport->HitYL + 1; Y++, src = (DWORD*)((BYTE*)src + LockedRect.Pitch))
+	/*
+	 * Hits are checked in a square area to make it easier to select stuff that is only a few pixels in size.
+	 * Some hit types are preferred over others. E.g the gizmo axes or wireframe brushes. If there is more than one possible selection, the preferred ones will be used.
+	 * If there is no preferred selection type, anything at the exact cursor position is also considered a preferred selection.
+	 */
+	for(INT Y = -LockedViewport->HitYL; Y < LockedViewport->HitYL + 1; Y++, PixelData += LockedRect.Pitch)
+	{
+		for(INT X = -LockedViewport->HitXL; X < LockedViewport->HitXL + 1; X++)
 		{
-			for(INT X = -LockedViewport->HitXL; X < LockedViewport->HitXL + 1; X++)
-			{
-				if(src + X >= LockedRect.pBits)
-				{
-					FColor HitColor = FColor((src[X] >> 16) & 0xff, (src[X] >> 8) & 0xff, (src[X]) & 0xff);
-					INT Index = INDEX_NONE;
-					FLOAT Dist = FVector(X, Y, 0.0f).Size2D(); // Distance of the hit from the center of the hit area. The closer it is, the higher the priority over other hits.
+			const BYTE* Pixel = PixelData + X * 4;
 
-					if(SelectionRI.ProcessHitColor(HitColor, &Index))
-					{
-						if(Dist < PreferredHitDist)
-						{
-							PreferredHitDist = Dist;
-							PreferredHitProxyIndex = Index;
-						}
-					}
-					else if(Index >= 0)
-					{
-						if(Dist < HitDist)
-						{
-							HitDist = Dist;
-							HitProxyIndex = Index;
-						}
-					}
+			if(Pixel < LockedRect.pBits || Pixel >= (BYTE*)LockedRect.pBits + LockedViewport->SizeY * LockedRect.Pitch )
+				continue;
+
+			const FColor HitColor = FColor(Pixel[2], Pixel[1], Pixel[0]);
+			const FLOAT  Dist     = FVector(X, Y, 0.0f).Size2D(); // Distance of the hit from the center of the hit area. The closer it is, the higher the priority over other hits.
+			INT          Index    = INDEX_NONE;
+
+			if(SelectionRI.ProcessHitColor(HitColor, &Index))
+			{
+				if(Dist < PreferredHitDist)
+				{
+					PreferredHitDist = Dist;
+					PreferredHitProxyIndex = Index;
 				}
 			}
+			else if(Index >= 0)
+			{
+				if(Dist < HitDist)
+				{
+					HitDist = Dist;
+					HitProxyIndex = Index;
+				}
+			}
+		}
 
 		if(PreferredHitProxyIndex >= 0)
 			HitProxyIndex = PreferredHitProxyIndex;
-		}
-
-		D3DSurfaceUnlockRect(RenderTarget);
-		Super::Unlock(SelectionRI.Impl);
-		SelectionRI.ProcessHit(HitProxyIndex);
-
-		// Restoring color values
-		GEngine->C_ActorArrow = C_ActorArrow;
-
-		if(bDebugSelectionBuffer)
-		{
-			LockedViewport->Present();
-			appSleep(3.0f);
-		}
 	}
-	else
-	{
-		Super::Unlock(RI);
-	}
+
+	D3DSurfaceUnlockRect(RenderTarget);
+	Super::Unlock(SelectionRI.Impl);
+	SelectionRI.ProcessHit(HitProxyIndex);
+
+	// Restoring color values
+	GEngine->C_ActorArrow = C_ActorArrow;
 
 	LockedViewport = NULL;
 }

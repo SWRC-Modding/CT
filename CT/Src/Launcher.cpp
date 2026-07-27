@@ -11,25 +11,25 @@
 
 #pragma comment(lib, "Winmm.lib") // timeBeginPeriod, timeEndPeriod
 
-// Allow short form of known render devices.
-static FStringTemp GetFullRenderDeviceClassName(const FString& RenderDeviceClass)
-{
-	if(RenderDeviceClass == "D3D")
-		return "D3DDrv.D3DRenderDevice";
-	else if(RenderDeviceClass == "OpenGL")
-		return "OpenGLDrv.OpenGLRenderDevice";
-	else if(RenderDeviceClass == "Mod")
-		return "Mod.ModRenderDevice";
-	else if(RenderDeviceClass == "Rtx")
-		return "RtxDrv.RtxRenderDevice";
-
-	return RenderDeviceClass;
-}
-
 static void EndFullscreen()
 {
 	if(GEngine && GEngine->Client && GEngine->Client->Viewports.Num() > 0 && GEngine->Client->Viewports[0])
 		GEngine->Client->Viewports[0]->EndFullscreen();
+}
+
+// Allow short form of known render devices.
+static const TCHAR* GetFullRenderDeviceClassName(const TCHAR* RenderDeviceClass)
+{
+	if(appStricmp(RenderDeviceClass, "D3D") == 0)
+		return "D3DDrv.D3DRenderDevice";
+	else if(appStricmp(RenderDeviceClass, "OpenGL") == 0)
+		return "OpenGLDrv.OpenGLRenderDevice";
+	else if(appStricmp(RenderDeviceClass, "Mod") == 0)
+		return "Mod.ModRenderDevice";
+	else if(appStricmp(RenderDeviceClass, "Rtx") == 0)
+		return "RtxDrv.RtxRenderDevice";
+
+	return RenderDeviceClass;
 }
 
 static bool SwitchRenderDevice(UClass* Class)
@@ -408,19 +408,24 @@ static struct FExecHook : public FExec, FNotifyHook{
 			SetFocus(Preferences->hWnd);
 
 			return 1;
-		}else if(GIsClient && ParseCommand(&Cmd, "GETRES")){
+		}
+		else if(GIsClient && ParseCommand(&Cmd, "GETRES"))
+		{
 			Ar.Logf("%ix%i", GEngine->Client->Viewports[0]->SizeX, GEngine->Client->Viewports[0]->SizeY);
 			return 1;
-		}else if(ParseCommand(&Cmd, "GETRENDEV")){
+		}
+		else if(GIsClient && ParseCommand(&Cmd, "GETRENDEV"))
+		{
 			if(GEngine && GEngine->GRenDev)
 				Ar.Log(GEngine->GRenDev->GetClass()->GetPathName());
 			else
 				Ar.Logf("No render device in use");
 
 			return 1;
-		}else if(!GIsEditor && GIsClient && ParseCommand(&Cmd, "USERENDEV")){
-			FString RenderDeviceClass = GetFullRenderDeviceClassName(Cmd);
-			UClass* Class = LoadClass<URenderDevice>(NULL, *RenderDeviceClass, NULL, LOAD_NoWarn | LOAD_Quiet, NULL);
+		}
+		else if(!GIsEditor && GIsClient && ParseCommand(&Cmd, "USERENDEV"))
+		{
+			UClass* Class = LoadClass<URenderDevice>(NULL, GetFullRenderDeviceClassName(Cmd), NULL, LOAD_NoWarn | LOAD_Quiet, NULL);
 
 			if(Class)
 			{
@@ -429,7 +434,7 @@ static struct FExecHook : public FExec, FNotifyHook{
 			}
 			else
 			{
-				Ar.Logf("Failed to find render device '%s'", *RenderDeviceClass);
+				Ar.Logf("Failed to find render device '%s'", Cmd);
 			}
 
 			return 1;
@@ -472,12 +477,13 @@ static void InitEngine()
 
 	// Detect RenderDevice
 
-	FString RenderDeviceClass;
+	FString RenderDeviceName;
 
-	if(Parse(appCmdLine(), "RenDev=", RenderDeviceClass)){
-		RenderDeviceClass = GetFullRenderDeviceClassName(RenderDeviceClass);
-		debugf("RenderDevice set on command line: %s", *RenderDeviceClass);
-		GConfig->SetString("Engine.Engine", "RenderDevice", *RenderDeviceClass);
+	if(Parse(appCmdLine(), "RenDev=", RenderDeviceName))
+	{
+		const TCHAR* RenderDeviceFullName = GetFullRenderDeviceClassName(*RenderDeviceName);
+		debugf("RenderDevice set on command line: %s", RenderDeviceFullName);
+		GConfig->SetString("Engine.Engine", "RenderDevice", RenderDeviceFullName);
 		RenDevSetOnCommandLine = true;
 	}
 

@@ -79,5 +79,5 @@ public:
 
 private:
 	void UploadTextureData(ETextureFormat Format, void* Data, INT Width, INT Height, INT MipIndex, INT CubemapFace = -1);
-	void* ConvertTextureData(FTexture* Texture, INT Width, INT Height, INT MipIndex, ETextureFormat DestFormat);
+	void* GetTextureData(FTexture* Texture, INT Width, INT Height, INT MipIndex);
 };

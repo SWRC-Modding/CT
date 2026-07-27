@@ -60,6 +60,7 @@ public:
     BITFIELD AutoFOV:1;
     BITFIELD EnableCustomMenu:1;
     BITFIELD EnableEditorSelectionFix:1;
+    BITFIELD EditorLoadMRUOnStart:1;
     BITFIELD DisableWindowPositionVerification:1;
     class UFunctionOverride* CTPlayerEndZoomOverride GCC_PACK(4);
     class UFunctionOverride* CTPlayerResetFOVOverride;

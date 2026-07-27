@@ -260,6 +260,32 @@ void __fastcall VerifyWindowPosition(WWindow* Self, DWORD Edx)
 	}
 }
 
+static LRESULT CALLBACK ViewportMouseHookProc(int Code, WPARAM wParam, LPARAM lParam)
+{
+	static bool IgnoreNextMouseMove = false;
+
+	if(Code == HC_ACTION)
+	{
+		switch(wParam)
+		{
+		case WM_LBUTTONDOWN:
+		case WM_RBUTTONDOWN:
+		case WM_MBUTTONDOWN:
+			IgnoreNextMouseMove = true;
+			break;
+		case WM_MOUSEMOVE:
+			if(IgnoreNextMouseMove)
+			{
+				IgnoreNextMouseMove = false;
+				return 1;
+			}
+			break;
+		}
+	}
+
+	return CallNextHookEx(NULL, Code, wParam, lParam);
+}
+
 void ImportPropertyOverrides()
 {
 	guardFunc;
@@ -302,6 +328,106 @@ void ImportPropertyOverrides()
 
 	unguard;
 }
+
+static FStringTemp MakeRelativeGameDataPath(const FString& Path)
+{
+	const TCHAR* BaseDir    = appBaseDir();
+	INT          BaseDirLen = appStrlen(BaseDir);
+
+	// Remove the system directory from the path so the base dir points to GameData
+
+	while(BaseDirLen > 0 && (BaseDir[BaseDirLen - 1] == '\\' || BaseDir[BaseDirLen - 1] == '/'))
+		--BaseDirLen;
+
+	if(BaseDirLen > 6 && appStrnicmp(BaseDir + BaseDirLen - 6, "System", 6) == 0)
+	{
+		BaseDirLen -= 6;
+
+		// Make relative only if path starts with BaseDir
+		if(Path.Len() > BaseDirLen && appStrnicmp(*Path, BaseDir, BaseDirLen) == 0)
+			return FStringTemp("..") * Path.Right(Path.Len() - BaseDirLen);
+	}
+
+	return Path;
+}
+
+static void(__fastcall*OriginalFConfigCacheSetString)(FConfigCache*, DWORD, const TCHAR*, const TCHAR*, const TCHAR*, const TCHAR*) = NULL;
+
+static void __fastcall FConfigCacheSetStringOverride(FConfigCache* Self,
+                                          DWORD Edx,
+                                          const TCHAR* Section,
+                                          const TCHAR* Key,
+                                          const TCHAR* Value,
+                                          const TCHAR* Filename)
+{
+	FString TempPath;
+
+	if(Filename && appStricmp(Filename, "UnrealEd.ini") == 0 &&
+	   appStricmp(Section, "MRU") != 0 &&
+	   appStrnicmp(Key, "MRUItem", 7) == 0)
+	{
+		TempPath = MakeRelativeGameDataPath(Value);
+		Value    = *TempPath;
+	}
+
+	OriginalFConfigCacheSetString(Self, Edx, Section, Key, Value, Filename);
+}
+
+static void(__fastcall*OriginalFConfigCacheFlush)(FConfigCache*, DWORD, UBOOL, const TCHAR*, const TCHAR*) = NULL;
+
+static void __fastcall FConfigCacheFlushOverride(FConfigCache* Self, DWORD Edx, UBOOL Read, const TCHAR* Filename, const TCHAR* Section)
+{
+	for(INT i = 0; i < 8; ++i)
+	{
+		FString Key = FString::Printf("MRUItem%i", i);
+		FString MRUItem;
+
+		if(Self->GetFString("MRU", *Key, MRUItem, "UnrealEd.ini"))
+		{
+			if(MRUItem.Len() > 0)
+			{
+				MRUItem = MakeRelativeGameDataPath(MRUItem);
+				Self->SetString("MRU", *Key, *MRUItem, "UnrealEd.ini");
+			}
+		}
+	}
+
+	OriginalFConfigCacheFlush(Self, Edx, Read, Filename, Section);
+}
+
+static void(__fastcall*OriginalUUnrealEdEngineTick)(UEditorEngine*, DWORD, FLOAT) = NULL;
+
+/*
+ * Override for UEditorEngine::Tick used to do initial setup because the engine is fully loaded when it is called for the first time.
+ */
+static void __fastcall UnrealEdEngineTickOverride(UEditorEngine* Self, DWORD Edx, FLOAT DeltaTime)
+{
+	OriginalUUnrealEdEngineTick(Self, Edx, DeltaTime);
+
+	if(USWRCFix::Instance->EditorLoadMRUOnStart)
+	{
+		FString MapPath;
+
+		if(GConfig->GetFString("MRU", "MRUItem0", MapPath, "UnrealEd.ini") && GFileManager->FileSize(*MapPath) > 0)
+		{
+			/*
+			 * HACK:
+			 * Opening the map using the command MAP LOAD FILE=... works but it does not set the global map name.
+			 * The map will be treated as "Untitled" and you'll always have to manually select the file to save to.
+			 * This is circumvented by calling the command on the editor window itself.
+			 * 20001 is the id for the MRU1 command.
+			 */
+			(*reinterpret_cast<WWindow**>(0x10FE39D4))->OnCommand(20001);
+		}
+	}
+
+	// Restore original tick function now that the initial setup is done.
+	PatchVTable(Self, 32, OriginalUUnrealEdEngineTick);
+}
+
+/*
+ * USWRCFix::Init
+ */
 
 void USWRCFix::Init()
 {
@@ -354,7 +480,7 @@ void USWRCFix::Init()
 		 * However, this is always zero, meaning no limit.
 		 * This fix patches the vtable of UGameEngine so it returns a custom value specified in the config.
 		 */
-		OriginalUEngineGetMaxTickRate = static_cast<FLOAT(__fastcall*)(UEngine*, DWORD)>(PatchDllClassVTable("Engine.dll", "UGameEngine", "UObject", 49, EngineGetMaxTickRateOverride));
+		OriginalUEngineGetMaxTickRate = PatchDllClassVTable("Engine.dll", "UGameEngine", "UObject", 49, EngineGetMaxTickRateOverride);
 
 		/*
 		 * Fix 4:
@@ -367,7 +493,7 @@ void USWRCFix::Init()
 
 		TArray<DWORD> AvailableResolutions;
 
-		for(int i = 0; EnumDisplaySettings(NULL, i, &dm) != 0; ++i)
+		for(int i = 0; EnumDisplaySettingsA(NULL, i, &dm) != 0; ++i)
 			AvailableResolutions.AddUniqueItem(MAKELONG(dm.dmPelsWidth, dm.dmPelsHeight));
 
 		if(AvailableResolutions.Num() > 1)
@@ -394,7 +520,7 @@ void USWRCFix::Init()
 		 * To fix it, we hook the UEngine::Draw function and set the current weapon's reticle property to NULL if zoomed in which causes it to be hidden.
 		 * Here we also calculate the current FOV based on the aspect ratio.
 		 */
-		OriginalUEngineDraw = static_cast<void(__fastcall*)(UEngine*, DWORD, UViewport*, UBOOL, BYTE*, INT*)>(PatchDllClassVTable("Engine.dll", "UGameEngine", "UObject", 41, EngineDrawOverride));
+		OriginalUEngineDraw = PatchDllClassVTable("Engine.dll", "UGameEngine", "UObject", 41, EngineDrawOverride);
 
 		/*
 		 * Fix 6:
@@ -413,7 +539,35 @@ void USWRCFix::Init()
 		 * This is fixed by overriding the Exec function and checking for the command that intiializes the texture browser and providing a single package to be initially loaded.
 		 * Additionally, a new command is added that alluws manually flushing resources if memory usage gets too high.
 		 */
-		OriginalUUnrealEdEngineExec = static_cast<UBOOL(__fastcall*)(UEngine*, DWORD, const TCHAR*, FOutputDevice&)>(PatchDllClassVTable(*(FString(appPackage()) + ".exe"), "UUnrealEdEngine", "FExec", 0, UnrealEdEngineExecOverride));
+		OriginalUUnrealEdEngineExec = PatchDllClassVTable(*(FString(appPackage()) + ".exe"), "UUnrealEdEngine", "FExec", 0, UnrealEdEngineExecOverride);
+
+		/*
+		 * Fix 8:
+		 * When clicking the mouse button to move the camera or to select an object it can happen that the camera immediately moves or rotates.
+		 * This happens when the mouse was moved a bit before clicking a button and is very irritating especially when the camera moves a large amount.
+		 * The fix is to ignore the next mouse move event after a button was clicked.
+		 */
+		SetWindowsHookExA(WH_MOUSE, ViewportMouseHookProc, NULL, GetCurrentThreadId());
+
+		if(GConfig)
+		{
+			/*
+			 * Make MRU paths in the file menu item relative to the editor to make the entire directory relocatable without breaking the paths.
+			 */
+			OriginalFConfigCacheSetString = PatchVTable(GConfig, 12, FConfigCacheSetStringOverride);
+			OriginalFConfigCacheFlush     = PatchVTable(GConfig, 13, FConfigCacheFlushOverride);
+			OriginalUUnrealEdEngineTick   = PatchDllClassVTable(*(FString(appPackage()) + ".exe"), "UUnrealEdEngine", "UObject", 32, UnrealEdEngineTickOverride);
+
+			// Set render devices for the viewports
+
+			for(INT i = 0; i < 8; ++i)
+				GConfig->SetString(*FString::Printf("U2Viewport%i", i), "Device", "Mod.ModRenderDevice", "UnrealEd.ini");
+
+			GConfig->SetString("Texture Browser",         "Device",       "Mod.ModRenderDevice", "UnrealEd.ini");
+			GConfig->SetString("Static Mesh Browser",     "Device",       "Mod.ModRenderDevice", "UnrealEd.ini");
+			GConfig->SetString("Particle System Browser", "Device",       "Mod.ModRenderDevice", "UnrealEd.ini");
+			GConfig->SetString("Engine.Engine",           "RenderDevice", "Mod.ModRenderDevice", "System.ini");
+		}
 	}
 
 	// Initialize the UnrealScript part of the fix

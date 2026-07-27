@@ -7,19 +7,19 @@
  * NOTE: This changes the vtable for all objects of the same class.
  * Returns the function pointer that was at Index previously. NULL if there was an error.
  */
-inline void* PatchVTable(void* Object, INT Index, void* NewFunc)
+template<typename F>
+F PatchVTable(void* Object, INT Index, F NewFunc)
 {
-	DWORD OldProtect;
+	DWORD  OldProtect;
 	void** VTable = *reinterpret_cast<void***>(Object);
 
 	if(!VirtualProtect(VTable + Index, sizeof(void*), PAGE_READWRITE, &OldProtect))
 	{
 		debugf(NAME_Error, "Failed to patch vtable: VirtualProtect failed with error code %i", GetLastError());
-
 		return NULL;
 	}
 
-	void* OldFunc = VTable[Index];
+	F OldFunc = reinterpret_cast<F>(VTable[Index]);
 	VTable[Index] = NewFunc;
 
 	VirtualProtect(VTable + Index, sizeof(void*), OldProtect, &OldProtect);
@@ -31,28 +31,27 @@ inline void* PatchVTable(void* Object, INT Index, void* NewFunc)
  * Patches the vtable for a class that is exported from a dll.
  * VTableName is the name of the particular vtable to patch in case of multiple virtual inheritance.
  */
-inline void* PatchDllClassVTable(const TCHAR* DllName, const TCHAR* ClassName, const TCHAR* VTableName, INT Index, void* NewFunc)
+template<typename F>
+F PatchDllClassVTable(const TCHAR* DllName, const TCHAR* ClassName, const TCHAR* VTableName, INT Index, F NewFunc)
 {
-	void* Handle = appGetDllHandle(DllName);
+	const HMODULE Handle = LoadLibraryA(DllName);
 
 	if(!Handle)
 	{
 		debugf(NAME_Error, "Failed to patch vtable for class '%s': Failed to load library '%s'", ClassName, DllName);
-
 		return NULL;
 	}
 
 	FString DllExportName = (FStringTemp("??_7") + ClassName + "@@6B" + (VTableName ? FString(VTableName) + "@@@" : "@"));
-	void** VTable = static_cast<void**>(appGetDllExport(Handle, *DllExportName));
+	void**  VTable        = reinterpret_cast<void**>(GetProcAddress(Handle, *DllExportName));
 
 	if(!VTable)
 	{
 		debugf(NAME_Error, "Failed to patch vtable for class '%s': Dll export for vtable '%s' not found", ClassName, VTableName);
-
 		return NULL;
 	}
 
-	appFreeDllHandle(Handle); // Decrementing reference count just in case. This might cause a crash later if the dll wasn't already loaded which is required.
+	FreeLibrary(Handle); // Decrementing reference count just in case. This might cause a crash later if the dll wasn't already loaded which is required.
 
 	return PatchVTable(&VTable, Index, NewFunc);
 }
@@ -69,6 +68,7 @@ inline void RedirectFunction(void* Src, void* Target)
 		*(BYTE*)Src = 0xE9; // JMP
 		*((DWORD*)((BYTE*)Src + 1)) = (DWORD)Target - (DWORD)Src - 5;
 		VirtualProtect(Src, 5, OldProtect, &OldProtect);
+		FlushInstructionCache(GetCurrentProcess(), Src, 5);
 	}
 	else
 	{

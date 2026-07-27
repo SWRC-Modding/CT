@@ -135,58 +135,88 @@ public:
 -----------------------------------------------------------------------------*/
 
 // Information for rendering the viewport (detail level settings).
-enum ERenderType
-{
-	REN_None			= 0,	// Hide completely.
-	REN_Wire			= 1,	// Wireframe of EdPolys.
-	REN_Zones			= 2,	// Show zones and zone portals.
-	REN_Polys			= 3,	// Flat-shaded Bsp.
-	REN_PolyCuts		= 4,	// Flat-shaded Bsp with normals displayed.
-	REN_DynLight		= 5,	// Illuminated texture mapping.
-	REN_PlainTex		= 6,	// Plain texture mapping.
-	REN_OrthXY			= 13,	// Orthogonal overhead (XY) view.
-	REN_OrthXZ			= 14,	// Orthogonal XZ view.
-	REN_OrthYZ			= 15,	// Orthogonal YZ view.
-	REN_TexView			= 16,	// Viewing a texture (no actor).
-	REN_TexBrowser		= 17,	// Viewing a texture browser (no actor).
-	REN_MeshView		= 18,	// Viewing a mesh.
-	REN_MAX				= 20
+enum ERenderType{
+	REN_None              = 0,  // Hide completely.
+	REN_Wire              = 1,  // Wireframe of EdPolys.
+	REN_Zones             = 2,  // Show zones and zone portals.
+	REN_Polys             = 3,  // Flat-shaded Bsp.
+	REN_PolyCuts          = 4,  // Flat-shaded Bsp with normals displayed.
+	REN_DynLight          = 5,  // Illuminated texture mapping.
+	REN_PlainTex          = 6,  // Plain texture mapping.
+	REN_LightingOnly      = 7,  // Untextured, lit geometry
+	REN_DepthComplexity   = 8,  // Show per-pixel depth complexity.
+	REN_OrthXY            = 13, // Orthogonal overhead (XY) view.
+	REN_OrthXZ            = 14, // Orthogonal XZ view.
+	REN_OrthYZ            = 15, // Orthogonal YZ view.
+	REN_TexView           = 16, // Viewing a texture (no actor).
+	REN_TexBrowser        = 17, // Viewing a texture browser (no actor).
+	REN_StaticMeshBrowser = 18, // Viewing a static mesh browser (no actor).
+	REN_MeshView          = 19, // Viewing a mesh.
+	REN_Prefab            = 20, // Viewing a prefab.
+	REN_PrefabCompiled    = 21, // Viewing a prefab (after the prefab level has been compiled).
+	REN_TerrainHeightmap  = 22, // Terrain heightmap info
+	REN_TerrainLayers     = 23, // Terrain layers
+	REN_TerrainDecoLayers = 24, // Terrain decoration Layers
+	REN_Animation         = 26, // Animations
+	REN_MatineeScenes     = 27,
+	REN_MatineeActions    = 28,
+	REN_MatineeSubActions = 29,
+	REN_MatineePreview    = 30,
+	REN_MaterialEditor    = 31, // Material editor
+	REN_TexBrowserUsed    = 32, // Browses texture which are in use in the current level
+	REN_TexBrowserMRU     = 33, // Browses the most recently used textures
+	REN_MAX               = 34,
 };
 
 // ShowFlags for viewport.
-enum EViewportShowFlags
-{
-	SHOW_Frame     		= 0x00000001, 	// Show world bounding cube.
-	SHOW_ActorRadii		= 0x00000002, 	// Show actor collision radii.
-	SHOW_Backdrop  		= 0x00000004, 	// Show background scene.
-	SHOW_Actors    		= 0x00000008,	// Show actors.
-	SHOW_Coords    		= 0x00000010,	// Show brush/actor coords.
-	SHOW_ActorIcons		= 0x00000020,	// Show actors as icons.
-	SHOW_Brush			= 0x00000040,	// Show the active brush.
-	SHOW_StandardView	= 0x00000080,	// Viewport is a standard view.
-	SHOW_Menu			= 0x00000100,	// Show menu on viewport.
-	SHOW_ChildWindow	= 0x00000200,	// Show as true child window.
-	SHOW_MovingBrushes	= 0x00000400,	// Show moving brushes.
-	SHOW_PlayerCtrl		= 0x00000800,	// Player controls are on.
-	SHOW_Paths          = 0x00001000,   // Show paths.
-	SHOW_NoButtons		= 0x00002000,	// No menu/view buttons.
-	SHOW_RealTime		= 0x00004000,	// Update window in realtime.
+enum EViewportShowFlags{
+	SHOW_Frame               = 0x00000001, // Show world bounding cube.
+	SHOW_ActorRadii          = 0x00000002, // Show actor collision radii.
+	SHOW_Backdrop            = 0x00000004, // Show background scene.
+	SHOW_Actors              = 0x00000008, // Show actors.
+	SHOW_Coords              = 0x00000010, // Show brush/actor coords.
+	SHOW_ActorIcons          = 0x00000020, // Show actors as icons.
+	SHOW_Brush               = 0x00000040, // Show the active brush.
+	SHOW_StandardView        = 0x00000080, // Viewport is a standard view.
+	SHOW_EdViewport          = 0x00000100, // This is a special editor viewport and shouldn't have it's level reset by level loads
+	SHOW_ChildWindow         = 0x00000200, // Show as true child window.
+	SHOW_MovingBrushes       = 0x00000400, // Show moving brushes.
+	SHOW_PlayerCtrl          = 0x00000800, // Player controls are on.
+	SHOW_Paths               = 0x00001000, // Show paths.
+	SHOW_KarmaMassProps      = 0x00002000, // Show Karma mass properties (centre-of-mass, inertia tensor)
+	SHOW_RealTime            = 0x00004000, // Update window in realtime.
+	SHOW_StaticMeshes        = 0x00008000, // Show static meshes.
+	SHOW_EventLines          = 0x00010000, // Show event lines (from triggers, etc)
+	SHOW_SelectionHighlight  = 0x00020000, // Show green highlights on selections?
+	SHOW_Terrain             = 0x00040000, // Show terrain.
+	SHOW_DistanceFog         = 0x00080000, // Show distance fog.
+	SHOW_MatRotations        = 0x00100000, // Show rotation indicators (matinee preview windows)
+	SHOW_MatPaths            = 0x00200000, // Show the path itself (matinee preview windows)
+	SHOW_Coronas             = 0x00400000, // Show coronas.
+	SHOW_Volumes             = 0x00800000, // Show volume brushes.
+	SHOW_Particles           = 0x01000000, // Show pahticuls.
+	SHOW_BSP                 = 0x02000000, // Show BSP surfaces.
+	SHOW_ActorInfo           = 0x04000000, // Shows extended information about actors (class name, event, tag, etc)
+	SHOW_KarmaPrimitives     = 0x08000000, // Show Karma collision primitives.
+	SHOW_FluidSurfaces       = 0x10000000, // Show simulated fluid surfaces.
+	SHOW_Projectors          = 0x20000000, // Show projectors.
+	SHOW_NoFallbackMaterials = 0x40000000, // Don't evaluate fallback materials.
+	SHOW_Collision           = 0x80000000  // Show simple collision for static meshes etc.
 };
 
 // Mouse buttons and commands.
-enum EMouseButtons
-{
-	MOUSE_Left			= 0x0001,		// Left mouse button.
-	MOUSE_Right			= 0x0002,		// Right mouse button.
-	MOUSE_Middle 		= 0x0004,		// Middle mouse button.
-	MOUSE_FirstHit		= 0x0008,		// Sent when a mouse button is initially hit.
-	MOUSE_LastRelease	= 0x0010,		// Sent when last mouse button is released.
-	MOUSE_SetMode		= 0x0020,		// Called when a new viewport mode is first set.
-	MOUSE_ExitMode		= 0x0040,		// Called when the existing mode is changed.
-	MOUSE_Ctrl			= 0x0080,		// Ctrl is pressed.
-	MOUSE_Shift			= 0x0100,		// Shift is pressed.
-	MOUSE_Alt			= 0x0200,		// Alt is pressed.
-	MOUSE_LeftDouble	= 0x0200,		// Left double click.
+enum EMouseButtons{
+	MOUSE_Left        = 0x0001, // Left mouse button.
+	MOUSE_Right       = 0x0002, // Right mouse button.
+	MOUSE_Middle      = 0x0004, // Middle mouse button.
+	MOUSE_FirstHit    = 0x0008, // Sent when a mouse button is initially hit.
+	MOUSE_LastRelease = 0x0010, // Sent when last mouse button is released.
+	MOUSE_SetMode     = 0x0020, // Called when a new viewport mode is first set.
+	MOUSE_ExitMode    = 0x0040, // Called when the existing mode is changed.
+	MOUSE_Ctrl        = 0x0080, // Ctrl is pressed.
+	MOUSE_Shift       = 0x0100, // Shift is pressed.
+	MOUSE_Alt         = 0x0200, // Alt is pressed.
+	MOUSE_LeftDouble  = 0x0200, // Left double click.
 };
 
 //
@@ -241,20 +271,21 @@ public:
 	INT             DirtyViewport;  // Count how many times the viewport needs to be repainted.
 	INT             SizeX;          // Buffer X & Y resolutions.
 	INT             SizeY;
-	INT             Padding0;       //!PADDING Could be X and Y offset (always 0)
-	INT             Padding1;       //!PADDING
+	INT             OffsetX;
+	INT             OffsetY;
 	FLOAT           ScaleX;
 	FLOAT           ScaleY;
 	INT             ColorBytes;     // 1=256-color, 4=32-bit color.
 	INT             FrameCount;     // Frame count, incremented when locked.
 	DWORD           Caps;           // Capabilities (CC_).
 	UBOOL           Current;        // If this is the current input viewport.
-	INT             Padding2;       //! PADDING
 	UBOOL           Dragging;       // Dragging mouse.
+	INT             Padding1;       //! PADDING
 	FVector         OrigCursor;     // The position where the mouse was originally clicked in the viewport.
 	UBOOL           FullscreenOnly; // Engine requires desktop set to 32 bpp for windowed mode.
 	FVector         TerrainPointAtLocation; // The 3D location currently being pointed at on the terrain
-	char            Padding3[20];   //! PADDING
+	UBOOL           UseRefRast;     // Updated by the TOGGLEREFRAST command
+	char            Padding2[14];   //! PADDING
 
 	FViewportRenderTarget RenderTarget; // A dummy render target that exposes the viewport's size to interfaces that take a FRenderTarget.
 
@@ -266,7 +297,6 @@ public:
 	AActor*         LockedActor;           // The actor we're locked to
 
 	// Editor and debugging mode render effects, stat flags.
-	UBOOL           Padding4;             //! PADDING
 	UBOOL           bShowDescriptions;
 	UBOOL           bShowLargeVertices;   // Show large vertices on brushes/meshes/etc?
 	UBOOL           bShowHud;
@@ -280,7 +310,7 @@ public:
 	UBOOL           bShowLight;
 	UBOOL           bShowBlockingVolumes;
 	UBOOL           bShowPhysicsVolumes;
-	char            Padding5[12];         //! Padding
+	UBOOL           Padding3[3];         //! Padding
 	UBOOL           bShowHudArms;
 
 	// Cinematics.
@@ -530,7 +560,7 @@ inline FAuxRenderTarget::~FAuxRenderTarget()
 	if(UTexture::__Client &&
 	   UTexture::__Client->Engine &&
 	   UTexture::__Client->Engine->GRenDev)
-	   {
+	{
 		UTexture::__Client->Engine->GRenDev->FlushResource(GetCacheId());
 	}
 }

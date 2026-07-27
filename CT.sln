@@ -53,10 +53,6 @@ Global
 		{D7878929-5402-468A-811D-1591523609F3}.Debug.Build.0 = Debug|Win32
 		{D7878929-5402-468A-811D-1591523609F3}.Release.ActiveCfg = Release|Win32
 		{D7878929-5402-468A-811D-1591523609F3}.Release.Build.0 = Release|Win32
-		{D7878929-5402-468A-811D-1591523609F3}.Debug.ActiveCfg = Debug|Win32
-		{D7878929-5402-468A-811D-1591523609F3}.Debug.Build.0 = Debug|Win32
-		{D7878929-5402-468A-811D-1591523609F3}.Release.ActiveCfg = Release|Win32
-		{D7878929-5402-468A-811D-1591523609F3}.Release.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 	EndGlobalSection

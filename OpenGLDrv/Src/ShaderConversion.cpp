@@ -2,7 +2,6 @@
 
 UHardwareShaderMacros* UOpenGLRenderDevice::HardwareShaderMacros = NULL;
 TMap<FString, FString> UOpenGLRenderDevice::ShaderMacros;
-TArray<FString>        UOpenGLRenderDevice::ExpandedMacros;
 
 static void SkipWhitespaceSingleLine(const TCHAR** Text)
 {
@@ -178,9 +177,9 @@ void UOpenGLRenderDevice::SetHardwareShaderMacros(UHardwareShaderMacros* Macros)
 	}
 }
 
-void UOpenGLRenderDevice::ExpandShaderMacros(FString* Text)
+void UOpenGLRenderDevice::ExpandShaderMacros(FString& Text, TArray<FString>* ExpandedMacros)
 {
-	const TCHAR* Pos = **Text;
+	const TCHAR* Pos = *Text;
 
 	while(*Pos)
 	{
@@ -202,14 +201,18 @@ void UOpenGLRenderDevice::ExpandShaderMacros(FString* Text)
 			else
 				debugf(NAME_Error, "Unknown shader macro '%s'", *Name);
 
-			FString Tmp;
+			FString         Tmp;
+			TArray<FString> ExpandedMacrosList;
 
-			for(INT i = 0; i < ExpandedMacros.Num(); ++i)
+			if(!ExpandedMacros)
+				ExpandedMacros = &ExpandedMacrosList;
+
+			for(INT i = 0; i < ExpandedMacros->Num(); ++i)
 			{
-				if(ExpandedMacros[i] == Name)
+				if(ExpandedMacros->At(i) == Name)
 				{
-					for(INT j = 0; j < ExpandedMacros.Num(); ++j)
-						Tmp += ExpandedMacros[j] + "->";
+					for(INT j = 0; j < ExpandedMacros->Num(); ++j)
+						Tmp += ExpandedMacros->At(j) + "->";
 
 					Tmp += Name;
 
@@ -221,14 +224,14 @@ void UOpenGLRenderDevice::ExpandShaderMacros(FString* Text)
 
 			// Expand macros within macro
 			Tmp = MacroText;
-			ExpandedMacros.AddItem(Name);
-			ExpandShaderMacros(&Tmp);
-			ExpandedMacros.Pop();
+			ExpandedMacros->AddItem(Name);
+			ExpandShaderMacros(Tmp, ExpandedMacros);
+			ExpandedMacros->Pop();
 
-			INT MacroOffset = static_cast<INT>(First - **Text);
+			INT MacroOffset = static_cast<INT>(First - *Text);
 
-			*Text = FStringTemp(MacroOffset, **Text) + Tmp + Pos;
-			Pos = **Text + MacroOffset + Tmp.Len();
+			Text = FStringTemp(MacroOffset, *Text) + Tmp + Pos;
+			Pos = *Text + MacroOffset + Tmp.Len();
 		}
 		else
 		{

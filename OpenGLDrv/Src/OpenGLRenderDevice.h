@@ -26,7 +26,8 @@ public:
 	UBOOL          bBilinearFramebuffer;
 	UBOOL          bSaveShadersToDisk;
 	UBOOL          bAutoReloadShaders;
-	UBOOL          bShowDebugNotifications;
+	UBOOL          bUnloadTextureData;
+	UBOOL          bLogDebugMessages;
 	ETextureFilter TextureFilter;
 	INT            TextureAnisotropy;
 
@@ -47,7 +48,7 @@ public:
 	const FOpenGLShader* GetShaderForMaterial(UMaterial* Material);
 
 	static void SetHardwareShaderMacros(UHardwareShaderMacros* Macros);
-	static void ExpandShaderMacros(FString* Text);
+	static void ExpandShaderMacros(FString& Text, TArray<FString>* ExpandedMacros = NULL);
 
 	// Overrides
 	virtual UBOOL Exec(const TCHAR* Cmd, FOutputDevice& Ar);
@@ -136,7 +137,6 @@ private:
 
 	static UHardwareShaderMacros* HardwareShaderMacros;
 	static TMap<FString, FString> ShaderMacros;
-	static TArray<FString>        ExpandedMacros; // Used to check for circular references in macros
 
 	static void ParseGLSLMacros(const FString& Text);
 	static FStringTemp GLSLShaderFromD3DHardwareShader(UHardwareShader* Shader);
@@ -155,7 +155,6 @@ private:
 
 	void LoadWGLExtFuncs();
 	void LoadGLFuncs();
-	void LoadGLExtFuncs();
 
 	HMODULE OpenGL32Dll;
 
@@ -167,6 +166,5 @@ public:
 #define GL_FUNC(name, ret, args) ret(OPENGL_CALL*gl ## name)args;
 	GL_BASE_FUNCS
 	GL_FUNCS
-	GL_EXT_FUNCS
 #undef GL_FUNC
 };

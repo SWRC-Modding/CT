@@ -7,9 +7,12 @@
 IMPLEMENT_PACKAGE(OpenGLDrv)
 IMPLEMENT_CLASS(UOpenGLRenderDevice)
 
-UOpenGLRenderDevice::UOpenGLRenderDevice() : ErrorShader(this),
-                                             RenderInterface(this),
-                                             Backbuffer(0, 0, TEXF_RGBA8, false, false){}
+UOpenGLRenderDevice::UOpenGLRenderDevice()
+	: ErrorShader(this)
+	, RenderInterface(this)
+	, Backbuffer(0, 0, TEXF_RGBA8, false, false)
+{
+}
 
 void UOpenGLRenderDevice::StaticConstructor()
 {
@@ -17,26 +20,28 @@ void UOpenGLRenderDevice::StaticConstructor()
 	SupportsZBIAS          = 1;
 	CanDoDistortionEffects = 1;
 	bBilinearFramebuffer   = 1;
+	bUnloadTextureData     = 1;
 	TextureFilter          = TF_Trilinear;
 	TextureAnisotropy      = 16;
 	bFirstRun              = 1;
 	ShaderDir              = "OpenGLShaders";
 
-	new(GetClass(), "DistortionEffects",      RF_Public) UBoolProperty(CPP_PROPERTY(CanDoDistortionEffects),  "Options", CPF_Config);
-	new(GetClass(), "UseDesktopResolution",   RF_Public) UBoolProperty(CPP_PROPERTY(bUseDesktopResolution),   "Options", CPF_Config);
-	new(GetClass(), "KeepAspectRatio",        RF_Public) UBoolProperty(CPP_PROPERTY(bKeepAspectRatio),        "Options", CPF_Config);
-	new(GetClass(), "BilinearFramebuffer",    RF_Public) UBoolProperty(CPP_PROPERTY(bBilinearFramebuffer),    "Options", CPF_Config);
-	new(GetClass(), "SaveShadersToDisk",      RF_Public) UBoolProperty(CPP_PROPERTY(bSaveShadersToDisk),      "Options", CPF_Config);
-	new(GetClass(), "AutoReloadShaders",      RF_Public) UBoolProperty(CPP_PROPERTY(bAutoReloadShaders),      "Options", CPF_Config);
-	new(GetClass(), "UseTrilinear",           RF_Public) UBoolProperty(CPP_PROPERTY(bUseTrilinear),           "Options", CPF_Config);
-	new(GetClass(), "TextureFilter",          RF_Public) UByteProperty(CPP_PROPERTY(TextureFilter),           "Options", CPF_Config);
-	new(GetClass(), "TextureAnisotropy",      RF_Public) UIntProperty (CPP_PROPERTY(TextureAnisotropy),       "Options", CPF_Config);
-	new(GetClass(), "VSync",                  RF_Public) UBoolProperty(CPP_PROPERTY(bVSync),                  "Options", CPF_Config);
-	new(GetClass(), "AdaptiveVSync",          RF_Public) UBoolProperty(CPP_PROPERTY(bAdaptiveVSync),          "Options", CPF_Config);
-	new(GetClass(), "FirstRun",               RF_Public) UBoolProperty(CPP_PROPERTY(bFirstRun),               "",        CPF_Config);
-	new(GetClass(), "DebugOpenGL",            RF_Public) UBoolProperty(CPP_PROPERTY(bDebugOpenGL),            "",        CPF_Config);
-	new(GetClass(), "ShowDebugNotifications", RF_Public) UBoolProperty(CPP_PROPERTY(bShowDebugNotifications), "",        CPF_Config);
-	new(GetClass(), "ShaderDir",              RF_Public) UStrProperty (CPP_PROPERTY(ShaderDir),               "",        CPF_Config);
+	new(GetClass(), "DistortionEffects",    RF_Public) UBoolProperty(CPP_PROPERTY(CanDoDistortionEffects),  "Options", CPF_Config);
+	new(GetClass(), "UseDesktopResolution", RF_Public) UBoolProperty(CPP_PROPERTY(bUseDesktopResolution),   "Options", CPF_Config);
+	new(GetClass(), "KeepAspectRatio",      RF_Public) UBoolProperty(CPP_PROPERTY(bKeepAspectRatio),        "Options", CPF_Config);
+	new(GetClass(), "BilinearFramebuffer",  RF_Public) UBoolProperty(CPP_PROPERTY(bBilinearFramebuffer),    "Options", CPF_Config);
+	new(GetClass(), "SaveShadersToDisk",    RF_Public) UBoolProperty(CPP_PROPERTY(bSaveShadersToDisk),      "Options", CPF_Config);
+	new(GetClass(), "AutoReloadShaders",    RF_Public) UBoolProperty(CPP_PROPERTY(bAutoReloadShaders),      "Options", CPF_Config);
+	new(GetClass(), "UnloadTextureData",    RF_Public) UBoolProperty(CPP_PROPERTY(bUnloadTextureData),      "Options", CPF_Config);
+	new(GetClass(), "UseTrilinear",         RF_Public) UBoolProperty(CPP_PROPERTY(bUseTrilinear),           "Options", CPF_Config);
+	new(GetClass(), "TextureFilter",        RF_Public) UByteProperty(CPP_PROPERTY(TextureFilter),           "Options", CPF_Config);
+	new(GetClass(), "TextureAnisotropy",    RF_Public) UIntProperty (CPP_PROPERTY(TextureAnisotropy),       "Options", CPF_Config);
+	new(GetClass(), "VSync",                RF_Public) UBoolProperty(CPP_PROPERTY(bVSync),                  "Options", CPF_Config);
+	new(GetClass(), "AdaptiveVSync",        RF_Public) UBoolProperty(CPP_PROPERTY(bAdaptiveVSync),          "Options", CPF_Config);
+	new(GetClass(), "FirstRun",             RF_Public) UBoolProperty(CPP_PROPERTY(bFirstRun),               "",        CPF_Config);
+	new(GetClass(), "DebugOpenGL",          RF_Public) UBoolProperty(CPP_PROPERTY(bDebugOpenGL),            "",        CPF_Config);
+	new(GetClass(), "LogDebugMessages",     RF_Public) UBoolProperty(CPP_PROPERTY(bLogDebugMessages),       "",        CPF_Config);
+	new(GetClass(), "ShaderDir",            RF_Public) UStrProperty (CPP_PROPERTY(ShaderDir),               "",        CPF_Config);
 }
 
 bool UOpenGLRenderDevice::IsCurrent()
@@ -321,7 +326,7 @@ static OPENGL_MESSAGE_CALLBACK(OpenGLMessageCallback)
 		SeverityStr = "unknown";
 	}
 
-	if(Severity != GL_DEBUG_SEVERITY_NOTIFICATION || ((UOpenGLRenderDevice*)UserParam)->bShowDebugNotifications)
+	if(Severity != GL_DEBUG_SEVERITY_NOTIFICATION || ((UOpenGLRenderDevice*)UserParam)->bLogDebugMessages)
 		debugf("GL CALLBACK: source=%s, type=%s, severity=%s - %s", SourceStr, TypeStr, SeverityStr, Message);
 
 	if(Type == GL_DEBUG_TYPE_ERROR)
@@ -385,7 +390,7 @@ UBOOL UOpenGLRenderDevice::Init()
 	foreachobj(UMaterial, It)
 	{
 		It->UseFallback = 0;
-		It->Validated = 0;
+		It->Validated   = 0;
 		reinterpret_cast<INT*>(*It)[24] &= 0x3; // Clear 30 bit padding after UMaterial::Validated that is used by the OpenGL renderer
 	}
 
@@ -588,8 +593,6 @@ UBOOL UOpenGLRenderDevice::SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL
 		if(!SupportsDXTCompression)
 			appErrorf("OpenGL driver does not support required extension for DXT compression: GL_EXT_texture_compression_s3tc");
 
-		LoadGLExtFuncs();
-
 		// Initialize render interface
 
 		RenderInterface.Init(NewX, NewY);
@@ -616,11 +619,11 @@ UBOOL UOpenGLRenderDevice::SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL
 
 		ErrorShader.Compile("#ifdef VERTEX_SHADER\n"
 		                    "void main(void){\n"
-		                    "\tgl_Position = LocalToScreen * vec4(InPosition.xyz, 1.0);\n"
+		                    "  gl_Position = LocalToScreen * vec4(InPosition.xyz, 1.0);\n"
 		                    "}\n"
 		                    "#elif defined(FRAGMENT_SHADER)\n"
 		                    "void main(void){\n"
-		                    "\tFragColor = vec4(1.0, 0.0, 1.0, 1.0);\n"
+		                    "  FragColor = vec4(1.0, 0.0, 1.0, 1.0);\n"
 		                    "}\n"
 		                    "#else\n"
 		                    "#error Shader type not implemented\n"
@@ -674,7 +677,7 @@ UBOOL UOpenGLRenderDevice::SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL
 	// Resize screen render target if necessary
 	if(Backbuffer.Width != NewX || Backbuffer.Height != NewY)
 	{
-		Backbuffer.Width = NewX;
+		Backbuffer.Width  = NewX;
 		Backbuffer.Height = NewY;
 		++Backbuffer.Revision;
 	}
@@ -810,22 +813,22 @@ void UOpenGLRenderDevice::Present(UViewport* Viewport)
 		FPlane Black(0.0f, 0.0f, 0.0f, 1.0f);
 		glClearNamedFramebufferfv(GL_NONE, GL_COLOR, GL_NONE, reinterpret_cast<GLfloat*>(&Black));
 
-		INT FramebufferWidth = Viewport->SizeX;
-		INT FramebufferHeight = Viewport->SizeY;
-		INT ScreenWidth = SavedViewportWidth;
-		INT ScreenHeight = SavedViewportHeight;
+		const INT FramebufferWidth  = Viewport->SizeX;
+		const INT FramebufferHeight = Viewport->SizeY;
+		const INT ScreenWidth       = SavedViewportWidth;
+		const INT ScreenHeight      = SavedViewportHeight;
 
-		FLOAT ScreenAspectRatio = static_cast<FLOAT>(ScreenWidth) / ScreenHeight;
-		FLOAT FramebufferAspectRatio = static_cast<FLOAT>(FramebufferWidth) / FramebufferHeight;
+		const FLOAT ScreenAspectRatio      = static_cast<FLOAT>(ScreenWidth) / ScreenHeight;
+		const FLOAT FramebufferAspectRatio = static_cast<FLOAT>(FramebufferWidth) / FramebufferHeight;
 
 		if(FramebufferAspectRatio < ScreenAspectRatio) // Vertical black bars
 		{
-			ViewportWidth = FramebufferWidth * (static_cast<FLOAT>(ScreenHeight) / FramebufferHeight);
+			ViewportWidth  = FramebufferWidth * (static_cast<FLOAT>(ScreenHeight) / FramebufferHeight);
 			ViewportHeight = ScreenHeight;
 		}
 		else
 		{ // Horizontal black bars
-			ViewportWidth = ScreenWidth;
+			ViewportWidth  = ScreenWidth;
 			ViewportHeight = FramebufferHeight * (static_cast<FLOAT>(ScreenWidth) / FramebufferWidth);
 		}
 
@@ -839,12 +842,12 @@ void UOpenGLRenderDevice::Present(UViewport* Viewport)
 
 		if(bIsFullscreen)
 		{
-			ViewportWidth = SavedViewportWidth;
+			ViewportWidth  = SavedViewportWidth;
 			ViewportHeight = SavedViewportHeight;
 		}
 		else
 		{
-			ViewportWidth = Viewport->SizeX;
+			ViewportWidth  = Viewport->SizeX;
 			ViewportHeight = Viewport->SizeY;
 		}
 	}
@@ -925,8 +928,8 @@ FStringTemp UOpenGLRenderDevice::MakeShaderFilename(const FString& ShaderName, c
 
 bool UOpenGLRenderDevice::ShaderFileNeedsReload(const char* Filename)
 {
-	SQWORD CurrentFileTime = GFileManager->GetGlobalTime(Filename);
-	SQWORD PreviousFileTime = ShaderFileTimes[Filename];
+	const SQWORD CurrentFileTime  = GFileManager->GetGlobalTime(Filename);
+	const SQWORD PreviousFileTime = ShaderFileTimes[Filename];
 
 	return CurrentFileTime != PreviousFileTime;
 }
@@ -949,8 +952,8 @@ void UOpenGLRenderDevice::SaveShader(const FString& Name, const FString& Text)
 
 bool UOpenGLRenderDevice::LoadShaderMacroText()
 {
-	FFilename Filename = MakeShaderFilename("Macros", SHADER_MACROS_FILE_EXTENSION);
-	SQWORD CurrentFileTime = GFileManager->GetGlobalTime(*Filename);
+	const FFilename Filename        = MakeShaderFilename("Macros", SHADER_MACROS_FILE_EXTENSION);
+	const SQWORD    CurrentFileTime = GFileManager->GetGlobalTime(*Filename);
 
 	if(CurrentFileTime == ShaderMacroFileTime)
 		return false;
@@ -1150,19 +1153,11 @@ void UOpenGLRenderDevice::LoadGLFuncs()
 #undef GL_FUNC
 }
 
-void UOpenGLRenderDevice::LoadGLExtFuncs()
-{
-#define GL_FUNC(name, ret, args) \
-	gl ## name = reinterpret_cast<ret(OPENGL_CALL*)args>(wglGetProcAddress("gl" #name));
-	GL_EXT_FUNCS
-#undef GL_FUNC
-}
-
 // Default shader code
 
 #define UNIFORM_STRUCT_BEGIN(x) "struct " STRINGIFY(x) "{\n"
 #define UNIFORM_STRUCT_END "};\n\n"
-#define UNIFORM_STRUCT_MEMBER(type, name) "\t" STRINGIFY(type) " " STRINGIFY(name) ";\n"
+#define UNIFORM_STRUCT_MEMBER(type, name) "  " STRINGIFY(type) " " STRINGIFY(name) ";\n"
 #define SHADER_HEADER \
 	"#version 450 core\n\n" \
 	"// EShaderLight\n" \
@@ -1237,16 +1232,16 @@ SHADER_HEADER
 "layout(binding = 14) uniform samplerCube Cubemap6;\n"
 "layout(binding = 15) uniform samplerCube Cubemap7;\n\n"
 "#define SAMPLE_TEX_FUNC(n) \\\n"
-"\tvec4 sample_texture ## n(vec4 Coords){ \\\n"
-"\t\tvec4 Result; \\\n"
-"\t\tif(!TextureInfos[n].IsCubemap) \\\n"
-"\t\t\tResult = texture(Texture ## n, Coords.xy * TextureInfos[n].UVScale); \\\n"
-"\t\telse \\\n"
-"\t\t\tResult = texture(Cubemap ## n, Coords.xyz * TextureInfos[n].UVScale); \\\n"
-"\t\tif(TextureInfos[n].IsBumpmap) \\\n"
-"\t\t\tResult.rg = (Result.rg - 0.5) * 2; \\\n"
-"\t\treturn Result; \\\n"
-"\t}\n\n"
+"  vec4 sample_texture ## n(vec4 Coords){ \\\n"
+"    vec4 Result; \\\n"
+"    if(!TextureInfos[n].IsCubemap) \\\n"
+"      Result = texture(Texture ## n, Coords.xy * TextureInfos[n].UVScale); \\\n"
+"    else \\\n"
+"      Result = texture(Cubemap ## n, Coords.xyz * TextureInfos[n].UVScale); \\\n"
+"    if(TextureInfos[n].IsBumpmap) \\\n"
+"      Result.ba = Result.ba * 0.5 + 0.5; \\\n"
+"    return Result; \\\n"
+"  }\n\n"
 "SAMPLE_TEX_FUNC(0)\n"
 "SAMPLE_TEX_FUNC(1)\n"
 "SAMPLE_TEX_FUNC(2)\n"

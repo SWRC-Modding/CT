@@ -26,7 +26,7 @@ public:
 	UBOOL             UseHardwareTL;
 	UBOOL             UseHardwareVS;
 	UBOOL             UseCubemaps;
-	char              PADDING3[16]; // Padding
+	char              Padding3[16]; // Padding
 	UBOOL             UseTripleBuffering;
 	UBOOL             ReduceMouseLag;
 	UBOOL             UseXBoxFSAA;

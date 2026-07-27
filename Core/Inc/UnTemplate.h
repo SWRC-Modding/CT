@@ -18,7 +18,6 @@ struct TTypeInfoBase{
 	typedef const T& ConstInitType;
 
 	static UBOOL NeedsDestructor(){ return 1; }
-	static UBOOL DefinitelyNeedsDestructor(){ return 0; }
 	static const T& ToInit(const T& In){ return In; }
 };
 
@@ -141,7 +140,7 @@ protected:
 
 /*
  * Template dynamic array.
- * Should only be used with POD types.
+ * Should only be used with zero-initializable types.
  */
 template<typename T>
 class TArray : public FArray{
@@ -205,8 +204,9 @@ public:
 		// It is assumed that a type is not trivially copyable if it needs a destructor which should be true in pretty much any case
 		if(TTypeInfo<T>::NeedsDestructor())
 		{
-			const INT Idx = AddZeroed(Other.Num());
-			for(INT i = 0; i < Other.ArrayNum; ++i)
+			const INT AddNum = Other.Num();
+			const INT Idx = Add(AddNum, false);
+			for(INT i = 0; i < AddNum; ++i)
 				new(GetData() + Idx + i) T(Other[i]);
 		}
 		else
@@ -232,6 +232,7 @@ public:
 
 	TArray<T> Segment(INT Index, INT Count)
 	{
+		checkSlow(Index + Count <= Num());
 		TArray<T> Result;
 		Result.Data = &At(Index);
 		Result.ArrayNum = Count;
@@ -266,7 +267,7 @@ public:
 	bool FindItem(const T& Item, INT& Index) const{
 		for(Index = 0; Index < Num(); ++Index)
 		{
-			if(GetData()[Index] == Item)
+			if(At(Index) == Item)
 				return true;
 		}
 
@@ -288,8 +289,10 @@ public:
 
 	void Set(T* Src, INT Count)
 	{
+		Empty();
 		Data = Src;
 		ArrayNum = Count;
+		bIsReference = 1;
 	}
 
 	void Set(INT NewSize, INT Slack)
@@ -301,7 +304,9 @@ public:
 		}
 		else
 		{
-			Deinit(NewSize, Num() - NewSize);
+			if(IsAllocated())
+				Deinit(NewSize, Num() - NewSize);
+
 			Realloc(NewSize, Slack);
 		}
 	}
@@ -312,8 +317,16 @@ public:
 
 	void Empty(INT Slack = 0)
 	{
-		Deinit(0, ArrayNum);
-		Realloc(0, Slack);
+		if(IsAllocated())
+		{
+			Deinit(0, ArrayNum);
+			Realloc(0, Slack);
+		}
+		else
+		{
+			ArrayNum = 0;
+			Data = NULL;
+		}
 	}
 
 	void Reserve(INT Size)
@@ -398,6 +411,9 @@ public:
 
 	void Remove(INT Index, INT Count = 1)
 	{
+		checkSlow(IsAllocated());
+		checkSlow(Index + Count <= Num());
+
 		const INT MoveCount = Num() - Index - Count;
 		Deinit(Index, Count);
 		appMemmove(
@@ -410,8 +426,8 @@ public:
 
 	INT RemoveItem(const T& Item)
 	{
-		INT OldNum = Num();
-		INT Index = FindItemIndex(Item);
+		const INT OldNum = Num();
+		const INT Index  = FindItemIndex(Item);
 
 		if(Index != INDEX_NONE)
 			Remove(Index);
@@ -422,8 +438,9 @@ public:
 	T Pop()
 	{
 		checkSlow(ArrayNum > 0);
-		--ArrayNum;
-		return GetData()[ArrayNum];
+		T Result = At(ArrayNum - 1);
+		Remove(ArrayNum - 1);
+		return Result;
 	}
 
 	/*
@@ -464,7 +481,7 @@ public:
 			AddZeroed(TempNum);
 
 			for(INT i = 0; i < TempNum; ++i)
-				Ar << GetData()[i];
+				Ar << At(i);
 		}
 		else
 		{
@@ -472,7 +489,7 @@ public:
 			Ar << AR_INDEX(TempNum);
 
 			for(INT i = 0; i < Num(); ++i)
-				Ar << GetData()[i];
+				Ar << At(i);
 		}
 
 		unguard;
@@ -511,13 +528,13 @@ protected:
 
 	void Init(INT Index, INT Count)
 	{
-		// This assumes every type used with TArray can be zero initialized
+		// This assumes every type used with TArray can be zero-initialized
 		appMemzero(static_cast<BYTE*>(Data) + Index * sizeof(T), Count * sizeof(T));
 	}
 
 	void Deinit(INT Index, INT Count)
 	{
-		checkSlow(ArrayNum == 0 || IsAllocated());
+		checkSlow(IsAllocated());
 
 		if(TTypeInfo<T>::NeedsDestructor())
 		{
@@ -665,7 +682,7 @@ public:
 	// Functions dependent on Add, Remove.
 	TTransArray& operator=(const TArray<T>& Other)
 	{
-		TArray<T>::operator=(other);
+		TArray<T>::operator=(Other);
 		return *this;
 	}
 
@@ -969,7 +986,6 @@ template<>
 struct TTypeInfo<FString> : public TTypeInfoBase<FString>{
 	typedef const TCHAR* ConstInitType;
 	static const TCHAR* ToInit(const FString& In) {return *In;}
-	static UBOOL DefinitelyNeedsDestructor(){ return 0; }
 };
 
 template<>

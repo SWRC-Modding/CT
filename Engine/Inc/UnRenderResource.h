@@ -31,12 +31,25 @@ public:
 	const DWORD& DWColor(void) const {return *((DWORD*)this);}
 
 	// Constructors.
+
 	FColor(){}
-	FColor(BYTE InR, BYTE InG, BYTE InB, BYTE InA = 255) : R(InR), G(InG), B(InB), A(InA){}
-	FColor(const FPlane& P) : R(Clamp(appFloor(P.X * 255),  0,255)),
-	                          G(Clamp(appFloor(P.Y * 255), 0, 255)),
-	                          B(Clamp(appFloor(P.Z * 255), 0, 255)),
-	                          A(Clamp(appFloor(P.W * 255), 0, 255)){}
+
+	FColor(BYTE InR, BYTE InG, BYTE InB, BYTE InA = 255)
+		: R(InR)
+		, G(InG)
+		, B(InB)
+		, A(InA)
+	{
+	}
+
+	FColor(const FPlane& P)
+		: R(Clamp(appFloor(P.X * 255), 0, 255))
+		, G(Clamp(appFloor(P.Y * 255), 0, 255))
+		, B(Clamp(appFloor(P.Z * 255), 0, 255))
+		, A(Clamp(appFloor(P.W * 255), 0, 255))
+	{
+	}
+
 	FColor(DWORD InColor){ DWColor() = InColor; }
 
 	// Serializer.
@@ -119,7 +132,11 @@ public:
 	QWORD CacheId;
 	INT Revision;
 
-	FRenderResource() : CacheId(0), Revision(1){}
+	FRenderResource()
+		: CacheId(0)
+		, Revision(1)
+	{
+	}
 
 	virtual ~FRenderResource(){}
 	virtual INT GetRevision(){ return Revision; }
@@ -183,6 +200,11 @@ enum { MAX_VERTEX_COMPONENTS = 16 };
 //
 class FVertexStream : public FRenderResource{
 public:
+	FVertexStream()
+	{
+		CacheId = MakeCacheID(CID_RenderVertices);
+	}
+
 	virtual INT GetStride() = 0;
 	virtual INT GetSize() = 0;
 	virtual UBOOL HintDynamic(){ return 0; }
@@ -198,6 +220,11 @@ public:
 //
 class FIndexBuffer : public FRenderResource{
 public:
+	FIndexBuffer()
+	{
+		CacheId = MakeCacheID(CID_RenderIndices);
+	}
+
 	virtual INT GetSize() = 0;
 	virtual void GetContents(void* Data) = 0;
 	virtual INT GetIndexSize() = 0;
@@ -320,6 +347,11 @@ inline BYTE* CalculateTexelPointer(BYTE* Base, ETextureFormat Format, INT Stride
 //
 class FBaseTexture : public FRenderResource{
 public:
+	FBaseTexture()
+	{
+		CacheId = MakeCacheID(CID_RenderTexture);
+	}
+
 	virtual FBaseTexture* GetBaseTextureInterface(){ return this; }
 	virtual FCubemap* GetCubemapInterface(){ return NULL; }
 	virtual FTexture* GetTextureInterface(){ return NULL; }
@@ -374,6 +406,15 @@ public:
 //
 class FRenderTarget : public FBaseTexture{
 public:
+	bool bFSAA;
+	bool bMatchBackBuffer;
+
+	FRenderTarget(bool InFSAA = false, bool InMatchBackBuffer = false)
+		: bFSAA(InFSAA)
+		, bMatchBackBuffer(InMatchBackBuffer)
+	{
+	}
+
 	virtual FRenderTarget* GetRenderTargetInterface(){ return this; }
 };
 
@@ -383,9 +424,10 @@ public:
 
 class FShader : public FRenderResource{
 public:
-	FShader(class UHardwareShader* InShader, INT InPass) : Shader(InShader),
-	                                                       Pass(InPass)
-	                                                       {
+	FShader(class UHardwareShader* InShader, INT InPass)
+		: Shader(InShader)
+		, Pass(InPass)
+	{
 		CacheId = MakeCacheID(CID_RenderShader);
 	}
 
@@ -402,13 +444,19 @@ private:
 
 class FPixelShader : public FShader{
 public:
-	FPixelShader(class UHardwareShader* InHardwareShader, INT InPass) : FShader(InHardwareShader, InPass){}
+	FPixelShader(class UHardwareShader* InHardwareShader, INT InPass)
+		: FShader(InHardwareShader, InPass)
+	{
+	}
 };
 
 
 class FVertexShader : public FShader{
 public:
-	FVertexShader(class UHardwareShader* InHardwareShader, INT InPass) : FShader(InHardwareShader, InPass){}
+	FVertexShader(class UHardwareShader* InHardwareShader, INT InPass)
+		: FShader(InHardwareShader, InPass)
+	{
+	}
 };
 
 //

@@ -376,25 +376,18 @@ public:
 
 class FAuxRenderTarget : public FRenderTarget{
 public:
-	bool           bFSAA;
-	bool           bMatchBackBuffer;
 	INT            Width;
 	INT            Height;
 	ETextureFormat Format;
 
 	// Constructor.
 
-	FAuxRenderTarget(INT InWidth,
-	                 INT InHeight,
-	                 ETextureFormat InFormat,
-	                 bool InFSAA = false,
-	                 bool InMatchBackBuffer = false) : Width(InWidth),
-	                                                   Height(InHeight),
-	                                                   Format(InFormat),
-	                                                   bFSAA(InFSAA),
-	                                                   bMatchBackBuffer(InMatchBackBuffer)
-	                                                   {
-		CacheId = MakeCacheID(CID_RenderTexture);
+	FAuxRenderTarget(INT InWidth, INT InHeight, ETextureFormat InFormat, bool InFSAA = false, bool InMatchBackBuffer = false)
+		: FRenderTarget(InFSAA, InMatchBackBuffer)
+		, Width(InWidth)
+		, Height(InHeight)
+		, Format(InFormat)
+	{
 	}
 
 	virtual ~FAuxRenderTarget(); // Implemented in UnCamera.h since it needs UClient

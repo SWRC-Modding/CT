@@ -3,6 +3,8 @@
 #include "Engine.h"
 #include "Editor.h"
 
+static UBOOL GIsNVIDIA = 0;
+
 /*
  * D3D8 declarations to avoid including d3d8.h which is not available with newer SDKs
  */
@@ -53,19 +55,43 @@ struct D3DLOCKED_RECT{
 // Virtual table indices of different d3d functions that we are trying to hook
 enum{
 	// D3D8
-	D3DVTIdx_D3D8CreateDevice      = 15,
+	D3DVTIdx_D3D8GetAdapterIdentifier = 5,
+	D3DVTIdx_D3D8CreateDevice         = 15,
 	// D3DDevice
-	D3DVTIdx_DeviceCreateTexture   = 20,
-	D3DVTIdx_DeviceGetRenderTarget = 32,
+	D3DVTIdx_DeviceCreateTexture      = 20,
+	D3DVTIdx_DeviceGetRenderTarget    = 32,
 	// D3DSurface
-	D3DVTIdx_SurfaceGetDesc        = 8,
-	D3DVTIdx_SurfaceLockRect       = 9,
-	D3DVTIdx_SurfaceUnlockRect     = 10,
+	D3DVTIdx_SurfaceGetDesc           = 8,
+	D3DVTIdx_SurfaceLockRect          = 9,
+	D3DVTIdx_SurfaceUnlockRect        = 10,
 	// D3DTexture
-	D3DVTIdx_TextureGetLevelDesc   = 14,
-	D3DVTIdx_TextureLockRect       = 16,
-	D3DVTIdx_TextureUnlockRect     = 17
+	D3DVTIdx_TextureGetLevelDesc      = 14,
+	D3DVTIdx_TextureLockRect          = 16,
+	D3DVTIdx_TextureUnlockRect        = 17
 };
+
+/*
+ * GetAdapterIdentifier
+ */
+
+struct D3DADAPTER_IDENTIFIER8{
+	char          Driver[512];
+	char          Description[512];
+	LARGE_INTEGER DriverVersion;
+	DWORD         VendorId;
+	DWORD         DeviceId;
+	DWORD         SubSysId;
+	DWORD         Revision;
+	GUID          DeviceIdentifier;
+	DWORD         WHQLLevel;
+};
+
+static HRESULT D3D8GetAdapterIdentifier(IDirect3D8* Self, UINT Adapter, DWORD Flags, D3DADAPTER_IDENTIFIER8* pIdentifier)
+{
+	void** VTable = *reinterpret_cast<void***>(Self);
+	return reinterpret_cast<HRESULT(__stdcall*)(IDirect3D8*, UINT, DWORD, D3DADAPTER_IDENTIFIER8*)>(
+		VTable[D3DVTIdx_D3D8GetAdapterIdentifier])(Self, Adapter, Flags, pIdentifier);
+}
 
 static HRESULT D3DDeviceGetRenderTarget(IDirect3DDevice8* Self, IDirect3DSurface8** ppRenderTarget)
 {
@@ -397,6 +423,13 @@ static D3DDEVICE_CREATETEXTURE(D3DDeviceCreateTextureOverride)
 		if(i > 0 && ActualFormat == Format)
 			continue;
 
+		/*
+		 * The NVIDIA driver tries to 'fix' the bumpmapping for the L6V5U5 format to avoid crashes but it causes visual artifacts.
+		 * So we detect whether an NVIDIA gpu is used and in that case directly convert to X8L8V8U8 instead of trying the broken format.
+		 */
+		if(GIsNVIDIA && ActualFormat == D3DFMT_L6V5U5)
+			continue;
+
 		const HRESULT Result = D3DDeviceCreateTexture(D3DDevice,
 		                                              Width,
 		                                              Height,
@@ -450,7 +483,15 @@ static D3D_CREATEDEVICE(D3D8CreateDeviceOverride)
 	const HRESULT Result = D3D8CreateDevice(D3D8, Adapter, DeviceType, hFocusWindow, BehaviorFlags, pPresentationParameters, ppReturnedDeviceInterface);
 
 	if(SUCCEEDED(Result))
+	{
 		MaybePatchVTable(&D3DDeviceCreateTexture, *ppReturnedDeviceInterface, D3DVTIdx_DeviceCreateTexture, D3DDeviceCreateTextureOverride);
+
+		D3DADAPTER_IDENTIFIER8 AdapterIdentifier;
+
+		if(SUCCEEDED(D3D8GetAdapterIdentifier(D3D8, Adapter, 0, &AdapterIdentifier)))
+			GIsNVIDIA = AdapterIdentifier.VendorId == 0x10DE;
+	}
+
 
 	return Result;
 }

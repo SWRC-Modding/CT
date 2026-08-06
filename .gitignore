@@ -23,6 +23,9 @@
 # ctags
 tags
 
+# vim
+.vimrc
+
 # Native script packages
 /CTGame/Classes
 /CTMarkers/Classes

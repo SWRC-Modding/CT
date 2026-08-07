@@ -26,6 +26,8 @@ static const TCHAR* GetFullRenderDeviceClassName(const TCHAR* RenderDeviceClass)
 		return "OpenGLDrv.OpenGLRenderDevice";
 	else if(appStricmp(RenderDeviceClass, "Mod") == 0)
 		return "Mod.ModRenderDevice";
+	else if(appStricmp(RenderDeviceClass, "Rtx") == 0)
+		return "RtxDrv.RtxRenderDevice";
 
 	return RenderDeviceClass;
 }

@@ -90,6 +90,8 @@ inline void SetGameSpyMasterServerAddress(const TCHAR* Address)
 	if(Len >= BufferSize)
 		appErrorf("Master server address must not be longer than %d characters", BufferSize);
 
+	debugf("Setting GameSpy master server address to '%s'", Address);
+
 	const DWORD GameSpyMgrDllBase = (DWORD)GetModuleHandleA("GameSpyMgr.dll");
 	check(GameSpyMgrDllBase);
 

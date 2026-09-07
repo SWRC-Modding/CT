@@ -52,11 +52,16 @@ class IPDRV_API AMasterServerUplink : public AMasterServerLink{
 
 inline void SetDefaultMasterServerAddress()
 {
-	UClass* Class = LoadClass<AMasterServerLink>(NULL, "IpDrv.MasterServerUplink", NULL, LOAD_NoFail, NULL);
-	const AMasterServerLink* MSLink = static_cast<AMasterServerLink*>(Class->GetDefaultActor());
+	debugf("Getting default master server address from IpDrv.MasterServerLink");
 
-	if(MSLink->CurrentMasterServer >= 0 && MSLink->CurrentMasterServer < ARRAY_COUNT(MSLink->MasterServerAddress))
+	UClass*                  Class  = LoadClass<AMasterServerLink>(NULL, "IpDrv.MasterServerUplink", NULL, LOAD_NoFail, NULL);
+	const AMasterServerLink* MSLink = static_cast<AMasterServerLink*>(Class->GetDefaultActor());
+	const INT                Index  = MSLink->CurrentMasterServer;
+
+	if(Index >= 0 && Index < ARRAY_COUNT(MSLink->MasterServerAddress) && MSLink->MasterServerAddress[Index].Len() > 0)
 		SetGameSpyMasterServerAddress(*MSLink->MasterServerAddress[MSLink->CurrentMasterServer]);
+	else
+		debugf("No master server address set at IpDrv.MasterServerLink[%i]", MSLink->CurrentMasterServer);
 }
 
 inline GameSpyMgr* GetGameSpyMgr()

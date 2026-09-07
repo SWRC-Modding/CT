@@ -225,9 +225,12 @@ static UBOOL __fastcall UnrealEdEngineExecOverride(UEngine* Self, DWORD Edx, con
 
 void __fastcall VerifyWindowPosition(WWindow* Self, DWORD Edx)
 {
+	if(!Self->hWnd)
+		return;
+
 	RECT WindowRect;
 
-	if(Self->hWnd && GetWindowRect(Self->hWnd, &WindowRect))
+	if(GetWindowRect(Self->hWnd, &WindowRect))
 	{
 		HMONITOR    Monitor     = MonitorFromRect(&WindowRect, MONITOR_DEFAULTTONEAREST);
 		MONITORINFO MonitorInfo = {sizeof(MONITORINFO)};

@@ -6,18 +6,23 @@
 		* Created by Tim Sweeney
 =============================================================================*/
 
+#ifndef NO_CRASH_MESSAGEBOX
+#include "Window.h"
+#endif
+
 //
 //Handle a critical error.
 //
 class FOutputDeviceWindowsError : public FOutputDeviceError{
 public:
-	FOutputDeviceWindowsError() : ErrorPos(0),
-	                              ErrorType(NAME_None){}
+	FOutputDeviceWindowsError()
+		: ErrorPos(0)
+		, ErrorType(NAME_None)
+	{
+	}
 
 	void Serialize(const TCHAR* Msg, enum EName Event)
 	{
-		INT Error = GetLastError();
-
 		if(!GIsCriticalError)
 		{
 			//First appError.
@@ -27,6 +32,7 @@ public:
 			debugf(NAME_Critical, "%s", Msg);
 
 			//Windows error.
+			const INT Error = GetLastError();
 			debugf(NAME_Critical, "Windows GetLastError: %s (%i)", appGetSystemErrorMessage(Error), Error);
 
 			//Shut down.
@@ -37,7 +43,7 @@ public:
 
 			if(GIsGuarded)
 			{
-				appStrncat(GErrorHist, GIsGuarded ? LocalizeError("History", "Core") : "History: ", ARRAY_COUNT(GErrorHist));
+				appStrncat(GErrorHist, "History: ", ARRAY_COUNT(GErrorHist));
 				appStrncat(GErrorHist, ": ", ARRAY_COUNT(GErrorHist));
 			}
 			else
@@ -59,11 +65,12 @@ public:
 
 	void HandleError()
 	{
-		try{
-			GIsGuarded = 0;
-			GIsRunning = 0;
+		try
+		{
+			GIsGuarded       = 0;
+			GIsRunning       = 0;
 			GIsCriticalError = 1;
-			GLogHook = NULL;
+			GLogHook         = NULL;
 
 			UObject::StaticShutdownAfterError();
 
@@ -72,9 +79,37 @@ public:
 			GWarn->Log(NAME_Critical, GErrorHist);
 			GLog->Flush();
 
-			if(!GIsUCC && (GIsClient || GIsEditor))
-				MessageBoxA(NULL, GErrorHist, "Critical Error", MB_OK | MB_ICONERROR | MB_APPLMODAL);
-		}catch(...){}
+#ifndef NO_CRASH_MESSAGEBOX
+			if(GIsClient || GIsEditor)
+			{
+				try
+				{
+					if(GConfig)
+					{
+						FString ext = UObject::GetLanguage();
+
+						if(ext.Len() <= 0)
+							ext = "int";
+
+						GConfig->SetString("IDDIALOG_CrashBox", "BugReportURL", "https://github.com/SWRC-Modding/CT", *("Window." + ext));
+					}
+
+					WCrashBoxDialog CrashBox("Critical Error", GErrorHist);
+					// work around WndProc error handling
+					GIsCriticalError = 0;
+					CrashBox.DoModal();
+					GIsCriticalError = 1;
+				}
+				catch(...)
+				{
+					MessageBoxA(NULL, GErrorHist, "Critical Error", MB_OK | MB_ICONERROR | MB_APPLMODAL);
+				}
+			}
+#endif
+		}
+		catch(...)
+		{
+		}
 	}
 
 private:

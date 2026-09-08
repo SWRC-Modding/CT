@@ -1,5 +1,6 @@
 #include "Core.h"
 #include "FOutputDeviceFile.h"
+#define NO_CRASH_MESSAGEBOX
 #include "FOutputDeviceWindowsError.h"
 #include "FFeedbackContextCmd.h"
 #include "FConfigCacheIni.h"
@@ -61,7 +62,7 @@ static FString ResolveCommandletClassName(const FString& ClassName, const TArray
 
 		if(ClassName == FullName || ClassName + "Commandlet" == FullName ||  // Check against "PackageName.ClassName (+ Commandlet)"
 		   ClassName == ShortName || ClassName + "Commandlet" == ShortName) // Check against "ClassName (+ Commandlet)"
-		   {
+		{
 			return List[i].Object;
 		}
 	}

@@ -611,7 +611,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 	GIsStarted = 1;
 
-	try{
+	try
+	{
 		GameSpyCDKeyResponseInterface CDKeyInterface;
 
 		GIsGuarded = 1;

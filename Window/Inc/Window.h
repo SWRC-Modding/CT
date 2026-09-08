@@ -77,7 +77,7 @@ inline void MakeWindowClassName(TCHAR* Result, const TCHAR* Base)
 
 #define DECLARE_WINDOWCLASS(cls,parentcls,pkg) \
 	public: \
-		void GetWindowClassName(TCHAR* Result){ MakeWindowClassName(Result,#cls); } \
+		virtual void GetWindowClassName(TCHAR* Result){ MakeWindowClassName(Result,#cls); } \
 		~cls(){ MaybeDestroy(); } \
 		virtual const TCHAR* GetPackageName(){ return #pkg; }
 
@@ -103,8 +103,11 @@ struct FPoint{
 	INT X, Y;
 
 	FPoint(){}
-	FPoint(INT InX, INT InY) : X(InX),
-							   Y(InY){}
+	FPoint(INT InX, INT InY)
+		: X(InX)
+		, Y(InY)
+	{
+	}
 
 	operator POINT*() const{ return (POINT*)this; }
 	const INT& operator[](INT i) const{ return (&X)[i]; }
@@ -135,12 +138,21 @@ struct FRect{
 	FPoint Min, Max;
 
 	FRect(){}
-	FRect(INT X0, INT Y0, INT X1, INT Y1) : Min(X0, Y0),
-											Max(X1, Y1){}
-	FRect(FPoint InMin, FPoint InMax) : Min(InMin),
-										Max(InMax){}
-	FRect(RECT R) : Min(R.left, R.top),
-					Max(R.right, R.bottom){}
+	FRect(INT X0, INT Y0, INT X1, INT Y1)
+		: Min(X0, Y0)
+		, Max(X1, Y1)
+	{
+	}
+	FRect(FPoint InMin, FPoint InMax)
+		: Min(InMin)
+		, Max(InMax)
+	{
+	}
+	FRect(RECT R)
+		: Min(R.left, R.top)
+		, Max(R.right, R.bottom)
+	{
+	}
 	operator RECT*() const{ return (RECT*)this; }
 	const FPoint& operator[](INT i) const{ return (&Min)[i]; }
 	FPoint& operator[](INT i){ return (&Min)[i]; }
@@ -415,7 +427,7 @@ class WINDOW_API WControl : public WWindow{
 	WNDPROC WindowDefWndProc;
 
 	// Structors.
-	WControl(){}
+	WControl();
 	WControl(WWindow* InOwnerWindow, INT InId, WNDPROC InSuperProc);
 	~WControl();
 
@@ -435,8 +447,8 @@ class WINDOW_API WTabControl : public WControl{
 	FDelegate SelectionChangeDelegate;
 
 	// Constructor.
-	WTabControl(){}
-	WTabControl(WWindow* InOwner, INT InId=0, WNDPROC InSuperProc = NULL) : WControl(InOwner, InId, InSuperProc ? InSuperProc : SuperProc){}
+	WTabControl();
+	WTabControl(WWindow* InOwner, INT InId=0, WNDPROC InSuperProc = NULL);
 
 	void OpenWindow(UBOOL Visible, DWORD dwExtraStyle = 0);
 	void AddTab(FString InText, INT InlParam);
@@ -462,8 +474,8 @@ class WINDOW_API WLabel : public WControl{
 	DECLARE_WINDOWSUBCLASS(WLabel,WControl,Window)
 
 	// Constructor.
-	WLabel(){}
-	WLabel(WWindow* InOwner, INT InId = 0, WNDPROC InSuperProc = NULL) : WControl(InOwner, InId, InSuperProc ? InSuperProc : SuperProc){}
+	WLabel();
+	WLabel(WWindow* InOwner, INT InId = 0, WNDPROC InSuperProc = NULL);
 
 	void OpenWindow(UBOOL Visible, UBOOL ClientEdge = 1, DWORD dwExtraStyle = 0);
 };
@@ -477,8 +489,8 @@ class WINDOW_API WGroupBox : public WControl{
 	DECLARE_WINDOWSUBCLASS(WGroupBox,WControl,Window)
 
 	// Constructor.
-	WGroupBox(){}
-	WGroupBox(WWindow* InOwner, INT InId = 0, WNDPROC InSuperProc = NULL) : WControl(InOwner, InId, InSuperProc ? InSuperProc : SuperProc){}
+	WGroupBox();
+	WGroupBox(WWindow* InOwner, INT InId = 0, WNDPROC InSuperProc = NULL);
 
 	void OpenWindow(UBOOL Visible, DWORD dwExtraStyle = 0);
 };
@@ -514,7 +526,7 @@ class WINDOW_API WPropertyPage : public WWindow{
 	INT id;
 
 	// Structors.
-	WPropertyPage(WWindow* InOwnerWindow) : WWindow("WPropertyPage", InOwnerWindow){}
+	WPropertyPage(WWindow* InOwnerWindow);
 
 	virtual void OpenWindow(INT InDlgId, HMODULE InHMOD);
 	void PlaceControl(WControl* InControl);
@@ -564,8 +576,8 @@ class WINDOW_API WCustomLabel : public WLabel{
 	DECLARE_WINDOWSUBCLASS(WCustomLabel,WLabel,Window)
 
 	// Constructor.
-	WCustomLabel(){}
-	WCustomLabel(WWindow* InOwner, INT InId=0, WNDPROC InSuperProc = NULL) : WLabel(InOwner, InId, InSuperProc ? InSuperProc : SuperProc){}
+	WCustomLabel();
+	WCustomLabel(WWindow* InOwner, INT InId=0, WNDPROC InSuperProc = NULL);
 
 	void OnPaint();
 };
@@ -592,7 +604,7 @@ class WINDOW_API WButton : public WControl{
 	UBOOL bChecked, bOwnerDraw;
 
 	// Constructor.
-	WButton(){}
+	WButton();
 	WButton(WWindow* InOwner, INT InId = 0, FDelegate InClicked = FDelegate(), WNDPROC InSuperProc = NULL);
 
 	void OpenWindow(UBOOL Visible, INT X, INT Y, INT XL, INT YL, const TCHAR* Text, UBOOL bBitmap = 0, DWORD dwExtraStyle = 0);
@@ -621,7 +633,7 @@ class WINDOW_API WBitmapButton : public WButton{
 	UBOOL bIsAutoCheckBox;
 
 	// Constructor.
-	WBitmapButton(){}
+	WBitmapButton();
 	WBitmapButton(WWindow* InOwner, INT InId = 0, FDelegate InClicked = FDelegate(), WNDPROC InSuperProc = NULL);
 
 	void OpenWindow(UBOOL Visible, DWORD InType, DWORD dwExtraStyle, HBITMAP InhbmSource, FRect InEnabledRect, FRect InDownRect, FRect InDisabledRect);
@@ -641,7 +653,7 @@ class WINDOW_API WColorButton : public WButton{
 	INT R, G, B;
 
 	// Constructor.
-	WColorButton(){}
+	WColorButton();
 	WColorButton(WWindow* InOwner, INT InId = 0, FDelegate InClicked = FDelegate(), WNDPROC InSuperProc = NULL);
 
 	void OpenWindow(UBOOL Visible, DWORD dwExtraStyle);
@@ -662,7 +674,7 @@ class WINDOW_API WToolTip : public WControl{
 	DECLARE_WINDOWSUBCLASS(WToolTip,WControl,Window)
 
 	// Constructor.
-	WToolTip(){}
+	WToolTip();
 	WToolTip(WWindow* InOwner, INT InId = 900, WNDPROC InSuperProc = NULL);
 
 	void OpenWindow();
@@ -785,7 +797,7 @@ class WINDOW_API WUDNWindow : public WWindow{
 	DECLARE_WINDOWCLASS(WUDNWindow,WWindow,Window)
 
 	// Structors.
-	WUDNWindow(WWindow* InOwnerWindow) : WWindow("UDN", InOwnerWindow){}
+	WUDNWindow(WWindow* InOwnerWindow);
 
 	void OpenWindow();
 	void Capture();
@@ -810,8 +822,8 @@ class WINDOW_API WCheckBox : public WButton{
 	UBOOL bAutocheck;
 
 	// Constructor.
-	WCheckBox(){}
-	WCheckBox(WWindow* InOwner, INT InId = 0, FDelegate InClicked = FDelegate()) : WButton(InOwner, InId, InClicked){}
+	WCheckBox();
+	WCheckBox(WWindow* InOwner, INT InId = 0, FDelegate InClicked = FDelegate());
 
 	// WWindow interface.
 	void OpenWindow(UBOOL Visible, INT X, INT Y, INT XL, INT YL, const TCHAR* Text, UBOOL InbAutocheck = 1, UBOOL bBitmap = 0, DWORD dwExtraStyle = 0);
@@ -832,8 +844,8 @@ class WINDOW_API WScrollBar : public WControl{
 	DECLARE_WINDOWSUBCLASS(WScrollBar,WControl,Window)
 
 	// Constructor.
-	WScrollBar(){}
-	WScrollBar(WWindow* InOwner, INT InId = 0, WNDPROC InSuperProc = NULL) : WControl(InOwner, InId, InSuperProc ? InSuperProc : SuperProc){}
+	WScrollBar();
+	WScrollBar(WWindow* InOwner, INT InId = 0, WNDPROC InSuperProc = NULL);
 
 	void OpenWindow(UBOOL Visible, INT X, INT Y, INT XL, INT YL, UBOOL bVertical = 1);
 };
@@ -855,8 +867,8 @@ class WINDOW_API WTreeView : public WControl{
 	FDelegate DblClkDelegate;
 
 	// Constructor.
-	WTreeView(){}
-	WTreeView(WWindow* InOwner, INT InId = 0, WNDPROC InSuperProc = NULL) : WControl(InOwner, InId, InSuperProc ? InSuperProc : SuperProc){}
+	WTreeView();
+	WTreeView(WWindow* InOwner, INT InId = 0, WNDPROC InSuperProc = NULL);
 
 	void OpenWindow(UBOOL Visible, INT X, INT Y, INT XL, INT YL, DWORD dwExtraStyle = 0);
 	void Empty(void);
@@ -894,7 +906,7 @@ class WINDOW_API WCoolButton : public WButton{
 	DWORD FrameFlags;
 
 	// Constructor.
-	WCoolButton(){}
+	WCoolButton();
 	WCoolButton(WWindow* InOwner, INT InId = 0, FDelegate InClicked = FDelegate(), DWORD InFlags = CBFF_ShowOver | CBFF_DimAway);
 
 	void OpenWindow(UBOOL Visible, INT X, INT Y, INT XL, INT YL, const TCHAR* Text);
@@ -916,7 +928,7 @@ class WINDOW_API WUrlButton : public WCoolButton{
 	FString URL;
 
 	// Constructor.
-	WUrlButton(){}
+	WUrlButton();
 	WUrlButton(WWindow* InOwner, const TCHAR* InURL, INT InId = 0);
 
 	void OnClick();
@@ -946,8 +958,8 @@ class WINDOW_API WComboBox : public WControl{
 	FDelegate SelectionEndCancelDelegate;
 
 	// Constructor.
-	WComboBox(){}
-	WComboBox(WWindow* InOwner, INT InId = 0, WNDPROC InSuperProc = NULL) : WControl(InOwner, InId, InSuperProc ? InSuperProc : SuperProc){}
+	WComboBox();
+	WComboBox(WWindow* InOwner, INT InId = 0, WNDPROC InSuperProc = NULL);
 
 	void OpenWindow(UBOOL Visible, UBOOL Sort = FALSE, UINT InListType = CBS_DROPDOWNLIST);
 	virtual LONG WndProc(UINT Message, UINT wParam, LONG lParam);
@@ -979,7 +991,7 @@ class WINDOW_API WEdit : public WControl{
     FDelegate BlurDelegate;
 
 	// Constructor.
-	WEdit(){}
+	WEdit();
 	WEdit(WWindow* InOwner, INT InId = 0, WNDPROC InSuperProc = NULL);
 
 	void OpenWindow(UBOOL Visible, UBOOL Multiline, UBOOL ReadOnly, UBOOL HorizScroll = FALSE, UBOOL NoHideSel = FALSE);
@@ -1011,8 +1023,8 @@ class WINDOW_API WRichEdit : public WControl{
 	FDelegate ChangeDelegate;
 
 	// Constructor.
-	WRichEdit(){}
-	WRichEdit(WWindow* InOwner, INT InId = 0, WNDPROC InSuperProc = NULL) : WControl(InOwner, InId, InSuperProc?InSuperProc:SuperProc){}
+	WRichEdit();
+	WRichEdit(WWindow* InOwner, INT InId = 0, WNDPROC InSuperProc = NULL);
 
 	void StreamTextIn(char* _StreamSrc, INT _iSz);
 	void StreamTextOut(char* _StreamDst, INT _iSz);
@@ -1034,8 +1046,8 @@ class WINDOW_API WTerminalBase : public WWindow{
 	DECLARE_WINDOWCLASS(WTerminalBase,WWindow,Window)
 
 	// Constructor.
-	WTerminalBase(){}
-	WTerminalBase(FName InPersistentName, WWindow* InOwnerWindow) : WWindow(InPersistentName, InOwnerWindow){}
+	WTerminalBase();
+	WTerminalBase(FName InPersistentName, WWindow* InOwnerWindow);
 
 	// WTerminalBase interface.
 	virtual void TypeChar(TCHAR Ch) = 0;
@@ -1076,7 +1088,7 @@ class WINDOW_API WTerminal : public WTerminalBase, public FOutputDevice{
 	UBOOL Shown;
 
 	// Structors.
-	WTerminal(){}
+	WTerminal();
 	WTerminal(FName InPersistentName, WWindow* InOwnerWindow);
 
 	void Serialize(const TCHAR* Data, EName MsgType);
@@ -1131,12 +1143,13 @@ class WINDOW_API WDialog : public WWindow{
 	W_DECLARE_ABSTRACT_CLASS(WDialog,WWindow,CLASS_Transient);
 
 	// Constructors.
-	WDialog(){}
+	WDialog();
 	WDialog(FName InPersistentName, INT InDialogId, WWindow* InOwnerWindow = NULL);
 
 	// WWindow interface
-	virtual void OnInitDialog();
 	virtual void Show(UBOOL Show);
+	virtual INT CallDefaultProc(UINT Message, UINT wParam, LONG lParam);
+	virtual void OnInitDialog();
 
 	// WDialog interface
 	virtual void LocalizeText(const TCHAR* Section, const TCHAR* Package=GPackage);
@@ -1144,7 +1157,6 @@ class WINDOW_API WDialog : public WWindow{
 	void EndDialogTrue();
 	void EndDialogFalse();
 	void EndDialog(INT Result);
-	INT CallDefaultProc(UINT Message, UINT wParam, LONG lParam);
 	void OpenChildWindow(INT InControlId, UBOOL Visible);
 	void CenterInOwnerWindow();
 	INT DoModal(HINSTANCE hInst = hInstanceWindow);
@@ -1169,11 +1181,13 @@ class WINDOW_API WCrashBoxDialog : public WDialog{
 	FString Caption, Message;
 
 	// Constructor.
-	WCrashBoxDialog(){}
+	WCrashBoxDialog();
 	WCrashBoxDialog(const TCHAR* InCaption, const TCHAR* InMessage);
 
-	void OnInitDialog();
-	void OnCopy();
+	// WWindow interface
+	virtual void OnCopy();
+	virtual void OnInitDialog();
+
 	void OnBugReport();
 };
 
@@ -1192,7 +1206,7 @@ class WINDOW_API WTrackBar : public WControl{
 	FDelegate ThumbPositionDelegate;
 
 	// Constructor.
-	WTrackBar(){}
+	WTrackBar();
 	WTrackBar(WWindow* InOwner, INT InId = 0, WNDPROC InSuperProc = NULL);
 
 	void OpenWindow(UBOOL Visible, UBOOL InClientEdge = 1);
@@ -1219,7 +1233,7 @@ class WINDOW_API WProgressBar : public WControl{
 	INT Percent;
 
 	// Constructor.
-	WProgressBar(){}
+	WProgressBar();
 	WProgressBar(WWindow* InOwner, INT InId = 0, WNDPROC InSuperProc = NULL);
 
 	void OpenWindow(UBOOL Visible);
@@ -1245,7 +1259,7 @@ class WINDOW_API WListBox : public WControl{
 	UBOOL m_bMultiSel;
 
 	// Constructor.
-	WListBox(){}
+	WListBox();
 	WListBox(WWindow* InOwner, INT InId = 0, WNDPROC InSuperProc = NULL);
 
 	void OpenWindow(UBOOL Visible, UBOOL Integral, UBOOL MultiSel, UBOOL OwnerDrawVariable, UBOOL Sort = 0, DWORD dwExtraStyle = 0);
@@ -1297,7 +1311,7 @@ class WINDOW_API WCheckListBox : public WListBox{
 	INT bOn;
 
 	// Constructor.
-	WCheckListBox(){}
+	WCheckListBox();
 	WCheckListBox(WWindow* InOwner, INT InId = 0, WNDPROC InSuperProc = NULL);
 
 	void OpenWindow(UBOOL Visible, UBOOL Integral, UBOOL MultiSel, UBOOL Sort = FALSE, DWORD dwExtraStyle = 0);
@@ -1329,11 +1343,8 @@ class WINDOW_API WItemBox : public WListBox{
 	DECLARE_WINDOWCLASS(WItemBox,WListBox,Window)
 
 	// Constructors.
-	WItemBox(){}
-	WItemBox(WWindow* InOwner, INT InId = 0) : WListBox(InOwner, InId)
-	{
-		check(OwnerWindow);
-	}
+	WItemBox();
+	WItemBox(WWindow* InOwner, INT InId = 0);
 
 	void OnDrawItem(DRAWITEMSTRUCT* Info);
 	void OnMeasureItem(MEASUREITEMSTRUCT* Info);
@@ -1355,8 +1366,8 @@ class WINDOW_API WListView : public WControl{
 	FDelegate SelChangedDelegate;
 
 	// Constructor.
-	WListView(){}
-	WListView(WWindow* InOwner, INT InId = 0, WNDPROC InSuperProc = NULL) : WControl(InOwner, InId, InSuperProc ? InSuperProc : SuperProc){}
+	WListView();
+	WListView(WWindow* InOwner, INT InId = 0, WNDPROC InSuperProc = NULL);
 
 	void OpenWindow(UBOOL Visible, DWORD dwExtraStyle = 0);
 	void Empty();
@@ -1377,7 +1388,7 @@ class WINDOW_API WPropertiesBase : public WWindow, public FControlSnoop{
 	class FTreeItem* FocusItem;
 
 	// Structors.
-	WPropertiesBase(){}
+	WPropertiesBase();
 	WPropertiesBase(FName InPersistentName, WWindow* InOwnerWindow);
 
 	// Overrides
@@ -1415,7 +1426,7 @@ class WINDOW_API WDragInterceptor : public WWindow{
 	UBOOL		Success;
 
 	// Constructor.
-	WDragInterceptor(){}
+	WDragInterceptor();
 	WDragInterceptor(WWindow* InOwner, FPoint InDragIndices, FRect InDragClamp, FPoint InDrawWidth);
 
 	virtual void OpenWindow();
@@ -1447,7 +1458,7 @@ public:
 	TArray<FTreeItem*>		Children;
 
 	// Structors.
-	FTreeItem(){}
+	FTreeItem();
 	FTreeItem(WPropertiesBase* InOwnerProperties, FTreeItem* InParent, UBOOL InExpandable);
 	virtual ~FTreeItem();
 
@@ -1560,8 +1571,8 @@ public:
 class WINDOW_API FHeaderItem : public FTreeItem{
 public:
 	// Constructors.
-	FHeaderItem(){}
-	FHeaderItem(WPropertiesBase* InOwnerProperties, FTreeItem* InParent, UBOOL InExpandable) : FTreeItem(InOwnerProperties, InParent, InExpandable){}
+	FHeaderItem();
+	FHeaderItem(WPropertiesBase* InOwnerProperties, FTreeItem* InParent, UBOOL InExpandable);
 
 	void Draw(HDC hDC);
 	FVector ToHSL(FVector RGB);
@@ -1605,7 +1616,7 @@ public:
 	FString				NewClass;
 
 	// Constructors.
-	FNewObjectItem(){}
+	FNewObjectItem();
 	FNewObjectItem(WPropertiesBase* InOwnerProperties, FTreeItem* InParent, UObjectProperty* InProperty);
 
 	void OnItemSetFocus();
@@ -1638,7 +1649,7 @@ class WINDOW_API WProperties : public WPropertiesBase{
 	UBOOL bAllowForceRefresh;
 
 	// Structors.
-	WProperties(){}
+	WProperties();
 	WProperties(FName InPersistentName, WWindow* InOwnerWindow = NULL);
 
 	void OpenChildWindow(INT InControlId);
@@ -1681,7 +1692,7 @@ public:
 	UClass* BaseClass;
 
 	// Structors.
-	FPropertyItemBase(){}
+	FPropertyItemBase();
 	FPropertyItemBase(WPropertiesBase* InOwnerProperties, FTreeItem* InParent, DWORD InFlagMask, const TCHAR* InCaption);
 
 	void Serialize(FArchive& Ar);
@@ -1708,7 +1719,7 @@ public:
 	TArray<UObject*> _Objects;
 
 	// Structors.
-	FObjectsItem(){}
+	FObjectsItem();
 	FObjectsItem(WPropertiesBase* InOwnerProperties, FTreeItem* InParent, DWORD InFlagMask, const TCHAR* InCaption, UBOOL InByCategory, UBOOL InNotifyParent);
 
 	void Serialize(FArchive& Ar);
@@ -1744,7 +1755,7 @@ class WINDOW_API WObjectProperties : public WProperties{
 	FObjectsItem Root;
 
 	// Structors.
-	WObjectProperties(){}
+	WObjectProperties();
 	WObjectProperties(FName InPersistentName, DWORD InFlagMask, const TCHAR* InCaption, WWindow* InOwnerWindow, UBOOL InByCategory);
 
 	// Overrides
@@ -1763,7 +1774,7 @@ class WINDOW_API WObjectProperties : public WProperties{
 class WINDOW_API FClassItem : public FPropertyItemBase{
 public:
 	// Structors.
-	FClassItem(){}
+	FClassItem();
 	FClassItem(WPropertiesBase* InOwnerProperties, FTreeItem* InParent, DWORD InFlagMask, const TCHAR* InCaption, UClass* InBaseClass);
 
 	BYTE* GetBase(BYTE* Base);
@@ -1783,7 +1794,7 @@ class WINDOW_API WClassProperties : public WProperties{
 	FClassItem Root;
 
 	// Structors.
-	WClassProperties(){}
+	WClassProperties();
 	WClassProperties(FName InPersistentName, DWORD InFlagMask, const TCHAR* InCaption, UClass* InBaseClass);
 
 	FTreeItem* GetRoot();
@@ -1827,7 +1838,7 @@ public:
 	FPreferencesInfo Prefs;
 
 	// Constructors.
-	FConfigItem(){}
+	FConfigItem();
 	FConfigItem(const FPreferencesInfo& InPrefs, WPropertiesBase* InOwnerProperties, FTreeItem* InParent);
 
 	// FTreeItem interface.
@@ -1849,7 +1860,7 @@ class WINDOW_API WConfigProperties : public WProperties{
 	char        Padding[8]; // PADDING!
 
 	// Structors.
-	WConfigProperties(){}
+	WConfigProperties();
 	WConfigProperties(FName InPersistentName, const TCHAR* InTitle);
 
 	FTreeItem* GetRoot();
@@ -1870,7 +1881,7 @@ class WINDOW_API WWizardPage : public WDialog{
 	WWizardDialog* Owner;
 
 	// Constructor.
-	WWizardPage(){}
+	WWizardPage();
 	WWizardPage(const TCHAR* PageName, INT ControlId, WWizardDialog* InOwner);
 
 	virtual void OnCurrent();
@@ -1944,11 +1955,11 @@ enum EAnchorPos{
 
 class WINDOW_API FWindowAnchor{
 public:
-	FWindowAnchor(){}
+	FWindowAnchor();
 	FWindowAnchor(HWND InRefWindow, HWND InWindow,
 		INT InPosFlags, INT InXPos, INT InYPos,
 		INT InSzFlags, INT InXSz, INT InYSz);
-	~FWindowAnchor(){}
+	~FWindowAnchor();
 
 	FWindowAnchor operator=(const FWindowAnchor& Other);
 
@@ -1984,7 +1995,7 @@ class WINDOW_API WSplitterPane : public WWindow{
 	DECLARE_WINDOWCLASS(WSplitterPane,WWindow,Window)
 
 	// Constructor.
-	WSplitterPane(){}
+	WSplitterPane();
 	WSplitterPane(WWindow* InOwnerWindow);
 
 	// WWindow interface.
@@ -2060,9 +2071,9 @@ class WINDOW_API FUDNHelpTopic{
 public:
 	FString MenuDesc, URL;
 
-	FUDNHelpTopic(){}
+	FUDNHelpTopic();
 	FUDNHelpTopic(FString InMenuDesc, FString InURL);
-	~FUDNHelpTopic(){}
+	~FUDNHelpTopic();
 };
 
 /*-----------------------------------------------------------------------------

@@ -96,7 +96,7 @@ inline void SetGameSpyMasterServerAddress(const TCHAR* Address)
 	check(GameSpyMgrDllBase);
 
 	// char qr2_hostname[64]: Used by the server to register itself
-	char* Buffer = reinterpret_cast<char*>(GameSpyMgrDllBase + 0x0011F60);
+	char* Buffer = reinterpret_cast<char*>(GameSpyMgrDllBase + 0x00011F60);
 	appStrcpy(Buffer, Address);
 	// const char* SBOverrideMasterServer: Used by the client to fetch the server list
 	*reinterpret_cast<const char**>(GameSpyMgrDllBase + 0x00011F58) = Buffer;

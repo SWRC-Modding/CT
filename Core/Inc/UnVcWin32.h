@@ -287,6 +287,32 @@ inline FLOAT appSqrt(FLOAT F)
 }
 
 //
+// CPU id
+//
+
+inline void DoCPUID(int i, DWORD* A, DWORD* B, DWORD* C, DWORD* D)
+{
+	__asm
+	{
+		mov eax, [i]
+		_emit 0x0f
+		_emit 0xa2
+
+		mov edi, [A]
+		mov [edi], eax
+
+		mov edi, [B]
+		mov [edi], ebx
+
+		mov edi, [C]
+		mov [edi], ecx
+
+		mov edi, [D]
+		mov [edi], edx
+	}
+}
+
+//
 // CPU cycles, related to GSecondsPerCycle.
 //
 #pragma warning (push)

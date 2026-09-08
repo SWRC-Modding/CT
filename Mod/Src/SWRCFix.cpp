@@ -432,10 +432,41 @@ static void __fastcall UnrealEdEngineTickOverride(UEditorEngine* Self, DWORD Edx
  * USWRCFix::Init
  */
 
+static void SetPlatformInfo()
+{
+	GBuildLabel = "SWRCFix build date: " __DATE__ ", " __TIME__;
+
+	/*
+	 * appPlatformInit has a bug where it doesn't set the CPU name properly.
+	 * It only writes ' with xxxMB RAM' but strips the preceeding name.
+	 * Here, we use cpuid to get the actual name of the CPU.
+	 * This is only relevant for crash report info.
+	 */
+	if(GMachineCPU.Left(5) == " with")
+	{
+		DWORD ABCD[4]       = {0};
+		char  CPUString[49] = {0};
+
+		DoCPUID(0x80000000, &ABCD[0], &ABCD[1], &ABCD[2], &ABCD[3]);
+
+		if(ABCD[0] >= 0x80000004)
+		{
+			for(DWORD i = 0; i < 3; i++)
+			{
+				DoCPUID(0x80000002 + i, &ABCD[0], &ABCD[1], &ABCD[2], &ABCD[3]);
+				appMemcpy(CPUString + i * 16, ABCD, 16);
+			}
+
+			GMachineCPU = FString::Printf("%s @ %i MHz %s", *FStringTemp(CPUString).Trimmed(), appRound(0.000001 / GSecondsPerCycle), *GMachineCPU);
+		}
+	}
+}
+
 void USWRCFix::Init()
 {
 	guardFunc;
 
+	SetPlatformInfo();
 	ImportPropertyOverrides();
 	debugf("Applying common fixes");
 

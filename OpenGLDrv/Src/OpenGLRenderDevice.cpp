@@ -536,9 +536,15 @@ UBOOL UOpenGLRenderDevice::SetRes(UViewport* Viewport, INT NewX, INT NewY, UBOOL
 			OpenGLContext = TempContext;
 		}
 
-		debugf(NAME_Init, "GL_VENDOR      : %s", glGetString(GL_VENDOR));
-		debugf(NAME_Init, "GL_RENDERER    : %s", glGetString(GL_RENDERER));
-		debugf(NAME_Init, "GL_VERSION     : %s", glGetString(GL_VERSION));
+		const GLubyte* Vendor   = glGetString(GL_VENDOR);
+		const GLubyte* Renderer = glGetString(GL_RENDERER);
+		const GLubyte* Version  = glGetString(GL_VERSION);
+
+		debugf(NAME_Init, "GL_VENDOR      : %s", Vendor);
+		debugf(NAME_Init, "GL_RENDERER    : %s", Renderer);
+		debugf(NAME_Init, "GL_VERSION     : %s", Version);
+
+		GMachineVideo = FString::Printf("%s (%s)", Renderer, Version);
 
 		// Check for minimum required OpenGL version
 

@@ -183,19 +183,17 @@ public:
 
 // Memory allocator.
 class CORE_API FMalloc{
-private:
-	// To prevent using the second DWORD param to Realloc which should always be 0
-	struct FZero{
-		FZero() : Val(0){}
-		DWORD Val;
-	};
-
 public:
+	INT Watermark;
+	INT Padding;
+
+	FMalloc() : Watermark(0){}
+
 	void AddStat(FMemCount& Count, void* Ptr, DWORD Size, UBOOL IsUsed);
 
 	virtual void Init(){}
 	virtual void* Malloc(DWORD Size) = 0;
-	virtual void* Realloc(void* Ptr, DWORD Size, FZero Zero = FZero()) = 0;
+	virtual void* Realloc(void* Ptr, DWORD Size, DWORD Zero = 0) = 0;
 	virtual void Free(void* Ptr) = 0;
 	virtual DWORD GetAllocationSize(void* Ptr) = 0;
 	virtual void TrackMemory(bool){}
@@ -206,9 +204,9 @@ public:
 	virtual void DumpAllocProfile(){}
 	virtual void DumpFreeList(){}
 	virtual void HeapCheck(){}
-	virtual void SetWatermark(int){}
-	virtual void IncrementWatermark(){}
-	virtual void DecrementWatermark(){}
+	virtual void SetWatermark(int InWatermark){ Watermark = InWatermark; }
+	virtual void IncrementWatermark(){ ++Watermark; }
+	virtual void DecrementWatermark(){ --Watermark; }
 	virtual void SetAuxMalloc(FMalloc*){}
 	virtual void LockMem(void* Ptr, DWORD Size, bool bLock){}
 	virtual void vtpad1(void*) = 0;

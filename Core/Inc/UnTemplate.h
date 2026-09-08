@@ -850,70 +850,78 @@ class FStringTemp;
 /*
  * A dynamically sizeable string.
  */
-class CORE_API FString : protected TArray<TCHAR>{
+class FString : protected TArray<TCHAR>{
 public:
-	FString();
+	FString(){}
+	FString(ENoInit) : TArray<TCHAR>(E_NoInit){}
+	~FString(){}
+
 	// NOTE: There is a bug in Core.dll that causes a memory leak if IsReference is true. So do not use it!!!
-	FString(const TCHAR* In, bool IsReference = false);
-	FString(ENoInit);
-	FString(const FString& Other);
-	FString(const FStringTemp& Other);
-	~FString();
+	CORE_API FString(const TCHAR* In, bool IsReference = false);
+	CORE_API FString(const FString& Other);
+	CORE_API FString(const FStringTemp& Other);
 
-	TCHAR& operator[](INT Index);
-	const TCHAR& operator[](INT Index) const;
-	TArray<TCHAR>& GetCharArray();
-	const TCHAR* operator*() const;
-	FString& operator*=(const TCHAR* Str);
-	FString& operator*=(const FString& Str);
-	bool operator<=(const TCHAR* Other) const;
-	bool operator<=(const FString& Other) const;
-	bool operator<(const TCHAR* Other) const;
-	bool operator<(const FString& Other) const;
-	bool operator>=(const TCHAR* Other) const;
-	bool operator>=(const FString& Other) const;
-	bool operator>(const TCHAR* Other) const;
-	bool operator>(const FString& Other) const;
-	bool operator==(const TCHAR* Other) const;
-	bool operator==(const FString& Other) const;
-	bool operator!=(const TCHAR* Other) const;
-	bool operator!=(const FString& Other) const;
-	INT Len() const;
-	INT InStr(const TCHAR* SubStr, bool Right = false) const;
-	INT InStr(const FString& SubStr, bool Right = false) const;
-	TCHAR* MakeCharArray();
-	FStringTemp Right(INT Count) const;
-	void Empty();
-	void Shrink();
-	FString& operator+=(const TCHAR* Str);
-	FString& operator+=(const FString& Str);
-	FString& operator=(const TCHAR* Other);
-	FString& operator=(const FString& Other);
-	FString& operator=(const FStringTemp&);
-	FStringTemp Left(INT Count) const;
-	FStringTemp LeftChop(INT Count) const;
-	FStringTemp Mid(INT Start, INT Count = MAXINT) const;
-	FStringTemp operator+(const TCHAR* Other) const;
-	FStringTemp operator+(const FString& Other) const;
-	FStringTemp operator*(const TCHAR* Other) const;
-	FStringTemp operator*(const FString& Other) const;
-	INT InStr(TCHAR c, bool Right = false) const;
-	void Serialize(FArchive& Ar);
-	bool Split(const FString& InS, FString* LeftS, FString* RightS, bool Right = false) const;
-	FStringTemp LeftPad(INT ChCount);
-	FStringTemp RightPad(INT ChCount);
-	FStringTemp Caps() const;
-	FStringTemp Locs() const;
-	INT ParseIntoArray(const TCHAR* pchDelim, TArray<FString>* InArray);
-	FStringTemp Substitute(const FString&, const FString&) const;
-	FStringTemp Substitute(const FString&) const;
+	INT Len() const{ return ArrayNum > 0 ? ArrayNum - 1 : 0; }
+	TCHAR& operator[](INT Index){ return TArray<TCHAR>::operator[](Index); }
+	const TCHAR& operator[](INT Index) const{ return TArray<TCHAR>::operator[](Index); }
+	TArray<TCHAR>& GetCharArray(){ return *this; }
+	void Empty(){ TArray<TCHAR>::Empty(); }
+	void Shrink(){ TArray<TCHAR>::Shrink(); }
+	const TCHAR* operator*() const{ return ArrayNum > 0 ? GetData() : ""; }
 
-	static FStringTemp VARARGS Printf(const TCHAR* fmt, ...);
-	static FStringTemp Chr(TCHAR c);
+	CORE_API FString& operator*=(const TCHAR* Str);
+	CORE_API FString& operator*=(const FString& Str);
+	CORE_API bool operator<=(const TCHAR* Other) const;
+	CORE_API bool operator<=(const FString& Other) const;
+	CORE_API bool operator<(const TCHAR* Other) const;
+	CORE_API bool operator<(const FString& Other) const;
+	CORE_API bool operator>=(const TCHAR* Other) const;
+	CORE_API bool operator>=(const FString& Other) const;
+	CORE_API bool operator>(const TCHAR* Other) const;
+	CORE_API bool operator>(const FString& Other) const;
+	CORE_API bool operator==(const TCHAR* Other) const;
+	CORE_API bool operator==(const FString& Other) const;
+	CORE_API bool operator!=(const TCHAR* Other) const;
+	CORE_API bool operator!=(const FString& Other) const;
+	CORE_API INT InStr(const TCHAR* SubStr, bool Right = false) const;
+	CORE_API INT InStr(const FString& SubStr, bool Right = false) const;
+	CORE_API TCHAR* MakeCharArray();
+	CORE_API FStringTemp Right(INT Count) const;
+	CORE_API FString& operator+=(const TCHAR* Str);
+	CORE_API FString& operator+=(const FString& Str);
+	CORE_API FString& operator=(const TCHAR* Other);
+	CORE_API FString& operator=(const FString& Other);
+	CORE_API FString& operator=(const FStringTemp&);
+	CORE_API FStringTemp Left(INT Count) const;
+	CORE_API FStringTemp LeftChop(INT Count) const;
+	CORE_API FStringTemp Mid(INT Start, INT Count = MAXINT) const;
+	CORE_API FStringTemp operator+(const TCHAR* Other) const;
+	CORE_API FStringTemp operator+(const FString& Other) const;
+	CORE_API FStringTemp operator*(const TCHAR* Other) const;
+	CORE_API FStringTemp operator*(const FString& Other) const;
+	CORE_API INT InStr(TCHAR c, bool Right = false) const;
+	CORE_API void Serialize(FArchive& Ar);
+	CORE_API bool Split(const FString& InS, FString* LeftS, FString* RightS, bool Right = false) const;
+	CORE_API FStringTemp LeftPad(INT ChCount);
+	CORE_API FStringTemp RightPad(INT ChCount);
+	CORE_API FStringTemp Caps() const;
+	CORE_API FStringTemp Locs() const;
+	CORE_API INT ParseIntoArray(const TCHAR* pchDelim, TArray<FString>* InArray);
+	CORE_API FStringTemp Substitute(const FString&, const FString&) const;
+	CORE_API FStringTemp Substitute(const FString&) const;
+
+	CORE_API static FStringTemp VARARGS Printf(const TCHAR* fmt, ...);
+	CORE_API static FStringTemp Chr(TCHAR c);
+
+	/*
+	 * Extensions
+	 */
+
+	FStringTemp Trimmed();
 
 protected:
-	FString(INT Size);
-	FString(INT InCount, const TCHAR* InSrc);
+	CORE_API FString(INT Size);
+	CORE_API FString(INT InCount, const TCHAR* InSrc);
 
 	friend FArchive& operator<<(FArchive& Ar, FString& String)
 	{
@@ -955,6 +963,25 @@ public:
 	FStringNoInit& operator=(const FString&);
 	FStringNoInit& operator=(const TCHAR*);
 };
+
+/*
+ * FString inlines
+ */
+
+inline FStringTemp FString::Trimmed()
+{
+	INT Start = 0;
+
+	while(Start < Len() && appIsSpace(GetData()[Start]))
+		++Start;
+
+	INT End = Len();
+
+	while(End > 0 && appIsSpace(GetData()[End - 1]))
+		--End;
+
+	return Mid(Start, End - Start);
+}
 
 /*
  * String that contains the value of a configuration variable.

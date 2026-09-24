@@ -3,7 +3,17 @@
 
 // Variables for ServerCommandlet
 
-static const TCHAR* CurrentConsoleCommand;
+static const TCHAR* GCurrentCmd = NULL;
+
+static const TCHAR* GetCurrentCmd()
+{
+	return (const TCHAR*)InterlockedCompareExchangePointer((PVOID*)&GCurrentCmd, NULL, NULL);
+}
+
+static void SetCurrentCmd(const TCHAR* Cmd)
+{
+	InterlockedExchangePointer((PVOID*)&GCurrentCmd, (PVOID)Cmd);
+}
 
 /*
  * Allows user input in the console while running a server.
@@ -12,55 +22,79 @@ static const TCHAR* CurrentConsoleCommand;
  */
 static DWORD WINAPI UpdateServerConsoleInput(PVOID)
 {
-	HANDLE InputHandle = CreateFileA("CONIN$", GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ, 0, OPEN_EXISTING, 0, 0);
+	const HANDLE ConsoleInput = CreateFileA("CONIN$", GENERIC_READ, 0, 0, OPEN_EXISTING, 0, 0);
 
-	if(!InputHandle)
+	if(ConsoleInput == INVALID_HANDLE_VALUE)
 		return 1;
 
 	while(GIsRunning && !GIsRequestingExit)
 	{
-		TCHAR ConsoleCommandBuffer[512];
-
-		if(!CurrentConsoleCommand)
-		{
-			DWORD InputLen;
-			ReadConsoleA(InputHandle, ConsoleCommandBuffer, ARRAY_COUNT(ConsoleCommandBuffer) - 1, &InputLen, NULL);
-
-			if(InputLen > 0)
-			{
-				TCHAR* Cmd = ConsoleCommandBuffer;
-
-				// Trim spaces from command
-
-				while(InputLen > 0 && appIsSpace(Cmd[InputLen - 1]))
-					--InputLen;
-
-				Cmd[InputLen] = '\0';
-
-				while(InputLen > 0 && appIsSpace(*Cmd))
-				{
-					++Cmd;
-					--InputLen;
-				}
-
-				if(InputLen > 0)
-					CurrentConsoleCommand = Cmd;
-			}
-		}
-		else
+		if(GetCurrentCmd())
 		{
 			Sleep(100);
+			continue;
 		}
+
+		TCHAR InputBuffer[512];
+		DWORD InputLen;
+		ReadConsoleA(ConsoleInput, InputBuffer, ARRAY_COUNT(InputBuffer) - 1, &InputLen, NULL);
+
+		if(InputLen == 0)
+			continue;
+
+		TCHAR* Cmd = InputBuffer;
+
+		// Trim spaces from command
+
+		while(InputLen > 0 && appIsSpace(Cmd[InputLen - 1]))
+			--InputLen;
+
+		Cmd[InputLen] = '\0';
+
+		while(InputLen > 0 && appIsSpace(*Cmd))
+		{
+			++Cmd;
+			--InputLen;
+		}
+
+		if(InputLen > 0)
+			SetCurrentCmd(Cmd);
 	}
 
-	CloseHandle(InputHandle);
+	CloseHandle(ConsoleInput);
 
 	return 0;
+}
+
+static BOOL WINAPI SignalHandler(DWORD)
+{
+	GIsRequestingExit = 1;
+
+	// Send an input event to unblock the input thread
+	const HANDLE ConsoleInput = CreateFileA("CONIN$", GENERIC_WRITE, 0, 0, OPEN_EXISTING, 0, 0);
+
+	if(ConsoleInput != INVALID_HANDLE_VALUE)
+	{
+		INPUT_RECORD Record;
+		appMemzero(&Record, sizeof(Record));
+		Record.EventType                      = KEY_EVENT;
+		Record.Event.KeyEvent.bKeyDown        = TRUE;
+		Record.Event.KeyEvent.wRepeatCount    = 1;
+		Record.Event.KeyEvent.wVirtualKeyCode = VK_RETURN;
+		Record.Event.KeyEvent.uChar.AsciiChar = '\r';
+
+		DWORD Written;
+		WriteConsoleInputA(ConsoleInput, &Record, 1, &Written);
+		CloseHandle(ConsoleInput);
+	}
+
+	return TRUE;
 }
 
 // Replacement for UServerCommandlet::Main since the one from Engine.dll crashes because it doesn't assign a value to GEngine
 INT UServerCommandletMain()
 {
+	SetConsoleCtrlHandler(SignalHandler, TRUE);
 	SetDefaultMasterServerAddress();
 
 	FString Language;
@@ -72,29 +106,27 @@ INT UServerCommandletMain()
 
 	GEngine = ConstructObject<UEngine>(EngineClass);
 	GEngine->Init();
-
-	// Create input thread
-	HANDLE InputThread = CreateThread(NULL, 0, UpdateServerConsoleInput, NULL, 0, NULL);
-
-	DOUBLE OldTime = appSeconds();
-	DOUBLE SecondStartTime = OldTime;
-	INT TickCount = 0;
-
 	GIsRunning = 1;
+
+	HANDLE InputThread     = CreateThread(NULL, 0, UpdateServerConsoleInput, NULL, 0, NULL);
+	DOUBLE OldTime         = appSeconds();
+	DOUBLE SecondStartTime = OldTime;
+	DWORD  TickCount       = 0;
 
 	// Main loop
 	while(GIsRunning && !GIsRequestingExit)
 	{
-		DOUBLE NewTime = appSeconds();
+		DOUBLE       NewTime    = appSeconds();
+		const TCHAR* CurrentCmd = GetCurrentCmd();
 
-		if(CurrentConsoleCommand)
+		if(CurrentCmd)
 		{
-			if(appStricmp(CurrentConsoleCommand, "CLS") == 0) // In case user wants to clear screen. Can be useful for testing.
-				system("cls"); // Hate using system but it's ok here
-			else if(!GEngine->Exec(CurrentConsoleCommand, *GWarn))
+			if(appStricmp(CurrentCmd, "CLS") == 0)
+				system("cls");
+			else if(!GEngine->Exec(CurrentCmd, *GWarn))
 				GWarn->Log(LocalizeError("Exec", "Core"));
 
-			CurrentConsoleCommand = NULL;
+			SetCurrentCmd(NULL);
 		}
 
 		// Update the world
@@ -116,17 +148,17 @@ INT UServerCommandletMain()
 		}
 
 		// Enforce optional maximum tick rate
-		FLOAT MaxTickRate = GEngine->GetMaxTickRate();
+		const FLOAT MaxTickRate = GEngine->GetMaxTickRate();
 
 		if(MaxTickRate > 0.0f)
 		{
-			FLOAT Delta = (1.0f / MaxTickRate) - (appSeconds() - OldTime);
+			const FLOAT Delta = (1.0f / MaxTickRate) - (appSeconds() - OldTime);
 
 			appSleep(Delta > 0.0f ? Delta : 0.0f);
 		}
 	}
 
-	GIsRunning = 0;
+	GIsRunning = 1;
 
 	WaitForSingleObject(InputThread, INFINITE);
 	CloseHandle(InputThread);

@@ -142,7 +142,6 @@ function PostBeginPlay()
 		if(ServiceClass == None)
 		{
 			Warn("'" $ ServiceClasses[i] $ "' is not a subclass of AdminService");
-
 			continue;
 		}
 
@@ -155,7 +154,6 @@ function PostBeginPlay()
 		if(Service == None)
 		{
 			Warn("Unable to spawn admin service '" $ ServiceClass $ "'");
-
 			continue;
 		}
 

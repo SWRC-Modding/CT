@@ -34,6 +34,70 @@ event CommandFeedback(PlayerController PC, string Msg, optional bool DontWriteTo
 		EventLog(Msg);
 }
 
+function bool ResolveMapURL(out string MapURL)
+{
+	local string MapName;
+	local string FirstMap;
+	local string CurrentMap;
+	local int    Idx;
+
+	Idx = InStr(MapURL, "?");
+
+	if(Idx < 0)
+		MapName = MapURL;
+	else
+		MapName = Left(MapURL, Idx);
+
+	if(Len(MapName) == 0)
+	{
+		// Empty URL or URL without map name was provided so use the current map name
+		MapURL = MapURL $ AdminControl.GetMapFileName();
+		return true;
+	}
+
+	if(!(Right(MapName, 4) ~= ".ctm"))
+		MapName = MapName $ ".ctm";
+
+	FirstMap   = GetMapName("", "", 0);
+	CurrentMap = FirstMap;
+
+	if(Len(FirstMap) == 0)
+		return false;
+
+	do
+	{
+		if(CurrentMap ~= MapName || CurrentMap ~= (Level.Game.MapPrefix $ "_" $ MapName))
+		{
+			MapURL = CurrentMap $ Mid(MapURL, Idx);
+			return true;
+		}
+
+		CurrentMap = GetMapName("", CurrentMap, 1); // Get the next map after the current one
+	}
+	until(CurrentMap ~= FirstMap);
+
+	return false;
+}
+
+function PlayerController GetPlayer(string PlayerName, int PlayerID)
+{
+	local PlayerController PC;
+	local Controller       C;
+
+	if(PlayerID < 0 && Len(PlayerName) == 0)
+		return None;
+
+	for(C = Level.ControllerList; C != None; C = C.nextController)
+	{
+		PC = PlayerController(C);
+
+		if(PC != None && (PC.PlayerReplicationInfo.PlayerID == PlayerID || PC.PlayerReplicationInfo.PlayerName == PlayerName))
+			return PC;
+	}
+
+	return None;
+}
+
 cpptext
 {
 	// AAdminService interface

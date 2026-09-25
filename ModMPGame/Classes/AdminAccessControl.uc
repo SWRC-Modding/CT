@@ -16,7 +16,7 @@ function SetAdminPassword(string NewPassword)
 
 function bool AdminLogin(PlayerController PC, string Password)
 {
-	if(AdminPassword == "")
+	if(Len(AdminPassword) == 0)
 		return false;
 
 	if(Password == AdminPassword)
@@ -40,8 +40,8 @@ function KickPlayerController(PlayerController PC, optional string Reason)
 
 	Msg = PC.PlayerReplicationInfo.PlayerName $ " was kicked from the server";
 
-	if(Reason != "")
-		Msg = Msg $ " for " $ Reason;
+	if(Len(Reason) > 0)
+		Msg = Msg $ ". Reason: " $ Reason;
 
 	Log(Msg);
 	Level.Game.Broadcast(self, Msg);
@@ -77,8 +77,8 @@ function BanPlayerController(PlayerController PC, optional string Reason)
 
 	Msg = PC.PlayerReplicationInfo.PlayerName $ " was banned from the server";
 
-	if(Reason != "")
-		Msg = Msg $ " for " $ Reason;
+	if(Len(Reason) > 0)
+		Msg = Msg $ ". Reason: " $ Reason;
 
 	Log(Msg);
 	Level.Game.Broadcast(self, Msg);

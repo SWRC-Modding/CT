@@ -10,7 +10,7 @@ if %ERRORLEVEL% neq 0 (
 	set DEVENV="%VS71COMNTOOLS%\..\IDE\devenv.com"
 
 	if not exist !DEVENV! (
-		echo Failed to detect Visual Studio environment. Please run this inside of a x86 developer command prompt!
+		echo Failed to detect Visual Studio environment. Please run this inside of an x86 developer command prompt!
 		exit /B 1
 	)
 )
@@ -29,4 +29,23 @@ if /I %CONFIG% == "release" (
 	set CONFIG=debug
 )
 
-!DEVENV! /%CMD% %CONFIG% CT.sln
+pushd %CD%
+cd %~dp0
+
+if not exist ..\..\build\build.h (
+	rem If build.h is not available build the VS solution
+	!DEVENV! /%CMD% %CONFIG% CT.sln
+) else (
+	if %CMD% == clean (
+		if exist .build (
+			rmdir /S /Q .build
+		)
+	) else (
+		if not exist .build\build.exe (
+			mkdir .build
+			cl build.c /Fe.build\build.exe
+		)
+
+		.build\build.exe --%CONFIG% --install
+	)
+)

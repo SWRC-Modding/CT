@@ -18,8 +18,6 @@ The following projects are part of the Visual Studio solution and built by defau
 	This is a server only mod. The clients don't need to have anything installed.
 * __OpenGLDrv__  
 	An OpenGL 4.5 renderer.
-* __ModEd__  
-	A modified UnrealEd executable with some enhancements.
 
 ## Building
 First you need to clone this repository into the Republic Commando installation directory next to `GameData`. It should be called `Code` because that's where the game expects the UnrealScript files. But the name can be configured in `System.ini`.

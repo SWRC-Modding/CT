@@ -1,6 +1,6 @@
 #include "../../build/build.h"
 
-#if COMPILER != COMPILER_MSVC
+#ifndef COMPILER_MSVC
 	#error "Unsupported compiler"
 #endif
 
@@ -26,24 +26,24 @@ begin_project(CT) {
 		        "DO_CLOCK_SLOW=0");
 	}
 
-	compile_flags("/EHsc,"
+	compile_flags("/EHa,"
 	              "/MD,"
 	              "/W4,"
 	              "/Gr");
 
 	include_paths("CTGame/Inc,"
 	              "CTMarkers/Inc,"
-                "Core/Inc,"
-                "D3DDrv/Inc,"
-                "Editor/Inc,"
-                "Engine/Inc,"
-                "GameSpyMgr/Inc,"
-                "Gameplay/Inc,"
-                "IpDrv/Inc,"
-                "Mod/Inc,"
-                "ModMPGame/Inc,"
-                "Window/Inc/ XGame/Inc,"
-                "XInterface/Inc");
+	              "Core/Inc,"
+	              "D3DDrv/Inc,"
+	              "Editor/Inc,"
+	              "Engine/Inc,"
+	              "GameSpyMgr/Inc,"
+	              "Gameplay/Inc,"
+	              "IpDrv/Inc,"
+	              "Mod/Inc,"
+	              "ModMPGame/Inc,"
+	              "Window/Inc/ XGame/Inc,"
+	              "XInterface/Inc");
 
 	/*
 	 * Mod
